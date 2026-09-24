@@ -49,7 +49,7 @@ Tell the user the workspace and tab where the thinking runs, and stop: this sess
 
 ## Tab names
 
-An effort's tabs are labelled `<effort> · <role> · <harness>`, so the user can tell them apart at a glance: the role is `Thinking` or `Orchestrator`, and the harness is short: `CC` for Claude Code, `Codex`, `OpenCode`, `Cursor`, or the harness's own name. When a tab already has a label, append ` · <role> · <harness>` to it instead of replacing it.
+An effort's tabs are labelled `<effort> · <role> · <harness>`, so the user can tell them apart at a glance: the role is `Thinking` or `Orchestrator`, and the harness is short: `CC` for Claude Code, `Codex`, `OpenCode`, `Cursor`, or the harness's own name. When a tab already has a label, append ` · <role> · <harness>` to it instead of replacing it. A tab whose session has handed over (see **orchestrate-with-herdr**) gains ` [settled]` at the end.
 
 ## After the pull request merges
 

@@ -27,3 +27,4 @@ The decisions behind the effort skills (`init-effort`, `init-effort-with-herdr`,
 - **The final branch review and its fixes are delegated too**, like the tickets, so the orchestrator's context stays on coordination.
 - **Prompts use each harness's skill syntax.** Claude Code starts a skill with `/name`, Codex with `$name`; the skills that write prompts for another agent say so in one line rather than keeping two copies of each prompt.
 - **Decisions are recorded here, not as ADRs.** Most workflow decisions are easy to reverse, which fails the ADR bar, but the history still matters to whoever changes the workflow next.
+- **A tab that has handed over is marked ` [settled]`**, appended to its label, instead of being relabelled `Thinking` at handover. The user asked for it: the marker says the session is finished and the tab is only a record, which a role name doesn't. The `Thinking` role label from `init-effort-with-herdr` still names the tab while the session is live.

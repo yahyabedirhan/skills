@@ -21,7 +21,7 @@ Done when `git status` is clean and the branch matches its remote.
 
 ## 2. Start the orchestrator
 
-1. Label this tab as the thinking tab: append ` · Thinking · <harness>` to its current label, unless it already carries them. The harness is the one this session runs in, short: `CC` for Claude Code, `Codex`, `OpenCode`, `Cursor`, or the harness's own name.
+1. Mark this tab settled: append ` [settled]` to its current label, unless it already ends with it. The session's work is done, and the marker tells the user the tab is only a record now.
 2. Create a tab labelled `<effort> · Orchestrator · <harness>` in this workspace, with this worktree as its directory, without taking focus; the harness is the agent you start next.
 3. Start the user's preferred agent in it (from their instructions; default `claude`), named `<effort>-orchestrator`.
 4. Send it the **handover prompt**:
@@ -29,7 +29,7 @@ Done when `git status` is clean and the branch matches its remote.
    ```text
    /orchestrate-with-handoff <path to the handoff>
    Worktree: <path>   Branch: <branch>
-   Thinking session: Herdr tab "<its label>" in workspace <workspace>, <session name or id>
+   Thinking session: Herdr tab "<its settled label>" in workspace <workspace>, <session name or id>
    ```
 
    Codex starts skills with `$` instead of `/`: when the receiving agent is Codex, write `$orchestrate-with-handoff`.
