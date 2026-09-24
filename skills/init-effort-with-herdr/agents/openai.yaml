@@ -1,0 +1,5 @@
+interface:
+  display_name: "Init Effort With Herdr"
+  short_description: "Start an effort in a Treehouse worktree and Herdr workspace"
+policy:
+  allow_implicit_invocation: false

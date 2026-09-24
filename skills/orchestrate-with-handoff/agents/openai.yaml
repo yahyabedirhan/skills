@@ -1,0 +1,5 @@
+interface:
+  display_name: "Orchestrate With Handoff"
+  short_description: "Build an effort from a thinking session's handoff"
+policy:
+  allow_implicit_invocation: false
