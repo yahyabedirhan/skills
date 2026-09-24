@@ -43,6 +43,8 @@ grilling, a prototype if a question needs one, then /to-spec and /to-tickets.
 When the tickets are written, run /orchestrate-with-herdr to hand over.
 ```
 
+Codex starts skills with `$` instead of `/`: when the agent is Codex, write the prompt's skill commands as `$grill-with-docs`, `$to-spec`, and so on.
+
 Tell the user the workspace and tab where the thinking runs, and stop: this session's part is done.
 
 ## Tab names

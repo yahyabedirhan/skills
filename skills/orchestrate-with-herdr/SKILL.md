@@ -32,6 +32,8 @@ Done when `git status` is clean and the branch matches its remote.
    Thinking session: Herdr tab "<its label>" in workspace <workspace>, <session name or id>
    ```
 
+   Codex starts skills with `$` instead of `/`: when the receiving agent is Codex, write `$orchestrate-with-handoff`.
+
 5. Wait until Herdr reports it `working`, then tell the user where the orchestrator runs.
 
 Then stop. This tab stays open as the thinking session's record.

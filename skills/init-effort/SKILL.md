@@ -48,4 +48,6 @@ When the tickets are written, this session finishes clean:
    Thinking session: <name or id, and where it runs>
    ```
 
+   Codex starts skills with `$` instead of `/`: when the receiving agent is Codex, write `$orchestrate-with-handoff`.
+
 Then stop: this session's work is done, and it stays available for reference.

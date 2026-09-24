@@ -25,4 +25,5 @@ The decisions behind the effort skills (`init-effort`, `init-effort-with-herdr`,
 - **Tabs are labelled `<effort> · <role> · <harness>`**, appending to an existing label rather than replacing it, with the harness short (`CC` for Claude Code, `Codex`, `OpenCode`, `Cursor`), so the user can tell sessions and harnesses apart at a glance.
 - **The orchestrator reads `lifecycle.md` every time it orchestrates**, not only when asked: without it the orchestrator lacks the context of where its part sits.
 - **The final branch review and its fixes are delegated too**, like the tickets, so the orchestrator's context stays on coordination.
+- **Prompts use each harness's skill syntax.** Claude Code starts a skill with `/name`, Codex with `$name`; the skills that write prompts for another agent say so in one line rather than keeping two copies of each prompt.
 - **Decisions are recorded here, not as ADRs.** Most workflow decisions are easy to reverse, which fails the ADR bar, but the history still matters to whoever changes the workflow next.
