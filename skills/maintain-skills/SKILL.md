@@ -59,7 +59,7 @@ It stays a local skill until the user asks to publish it; then it becomes an ins
 
 **Remove.** `npx skills remove -s <name> -y`, with `-g` for global. Before removing, grep the other installed skills and the agent instructions files for the name; fix or report every pointer left behind. A skill that belongs to an installed bundle stays unless the user drops the whole bundle.
 
-**Change one of the user's own skills.** Edit it in `<path-to-skills-repo>/skills/<name>/`, commit, push, then `npx skills update <name>` in every scope that installs it.
+**Change one of the user's own skills.** Read the repo's decision records for it first (such as `docs/decisions/`), and add a dated entry for each new decision. Edit it in `<path-to-skills-repo>/skills/<name>/`, commit, push, then `npx skills update <name>` in every scope that installs it.
 
 **Add a new skill to the user's repo.** Only when the user names the skill for publishing. Write it under `<path-to-skills-repo>/skills/<name>/SKILL.md` with `name` and `description` frontmatter, add its row to the repo README, commit, push, then install it. The repo is public: nothing in a skill names the user, their accounts, their machine's paths, or any project of theirs; anything user-specific becomes a parameter like the two above.
 
