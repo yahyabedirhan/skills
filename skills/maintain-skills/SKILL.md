@@ -1,11 +1,16 @@
 ---
 name: maintain-skills
-description: Install, move, update, fork, publish, remove, or audit agent skills across global scope, project scope, and the user's own skills repo, using the `npx skills` CLI. Use when the user wants a skill added, removed, forked, changed, moved between scopes, or asks which skills they actually use.
+description: Create, install, move, update, fork, publish, remove, or audit agent skills across global scope, project scope, and the user's own skills repo, using the `npx skills` CLI. Use when the user wants a skill created, added, removed, forked, changed, moved between scopes, or published, or asks which skills they actually use.
 ---
 
 # Maintain Skills
 
-A skill has one **source** and any number of **installs**. The source is a GitHub repo: someone else's, or the user's own skills repo. An install is a copy the `npx skills` CLI placed in a scope and recorded in a lock file. Every change goes to the source first and reaches the installs through the CLI; an installed copy is overwritten by the next `npx skills update`, so it is never edited by hand.
+A skill is one of two kinds.
+
+- An **installed** skill has one **source**, a GitHub repo (someone else's, or the user's own skills repo), and any number of **installs**: copies the `npx skills` CLI placed in a scope and recorded in that scope's lock file. Every change goes to the source first and reaches the installs through the CLI; an installed copy is overwritten by the next `npx skills update`, so it is never edited by hand.
+- A **local** skill is written inside one project and lives only there. No lock file records it and the CLI never touches it; it is edited in place and committed with the project.
+
+Skills are **private by default**: a local skill stays local, and a skill reaches the user's public skills repo only when the user names that skill for publishing.
 
 ## Parameters
 
@@ -21,7 +26,8 @@ When the user supplies them by answer, offer to add one line naming both to thei
 | Scope | Folder | Lock file | What belongs there |
 |---|---|---|---|
 | Global | `~/.agents/skills/` | `~/.agents/.skill-lock.json` | Skills the user reaches for in most projects |
-| Project | `<project>/.agents/skills/` | `<project>/skills-lock.json`, committed | Skills written for that project, and niche or stack-specific skills only that project needs |
+| Project, installed | `<project>/.agents/skills/` | `<project>/skills-lock.json`, committed | Niche or stack-specific skills only that project needs |
+| Project, local | `<project>/.agents/skills/` | none; the project's git history | Skills written for that project's own work |
 | Skills repo | `<path-to-skills-repo>/skills/<name>/` | git history | The source of the user's own general-purpose skills and forks; installed into a scope like any other repo |
 
 A skill moves from project to global once the user wants it in a second project. A niche skill (one cloud vendor, one UI framework) stays in the projects that use it rather than loading in every session.
@@ -31,10 +37,19 @@ A skill moves from project to global once the user wants it in a second project.
 - `~/.claude/skills` is a symlink to `~/.agents/skills`: install globally with `-g -a codex`; Claude Code sees the same folder through the link, and adding `-a claude-code` would make the CLI link the folder into itself.
 - Otherwise: install globally with `-g -a codex -a claude-code`.
 - Project installs always take `-a claude-code -a codex`; the CLI links `.claude/skills/<name>` to the `.agents/skills/<name>` copy.
+- A local skill gets that link by hand (see Create a project skill).
 
 ## Operations
 
 Each operation ends with a check: list the scope's folder, confirm `SKILL.md` resolves through `~/.claude/skills` (global) or `.claude/skills` (project), and confirm the lock file names the expected source.
+
+**Create a project skill.** Write it under `<project>/.agents/skills/<name>/SKILL.md`, following the **writing-for-agents** skill when it is installed. Then link it for Claude Code from the project root, and commit the link with the project (the link itself, not a copy of the folder):
+
+```bash
+ln -s ../../.agents/skills/<name> .claude/skills/<name>
+```
+
+It stays a local skill until the user asks to publish it; then it becomes an installed skill through Add a new skill to the user's repo, and the local folder is replaced by the install.
 
 **Install.** `npx skills add <owner>/<repo> -s <name> -y` plus the scope and agent flags above. `npx skills add <owner>/<repo> -l` lists what a repo offers. For a cross-referencing bundle (skills that name each other, a setup skill others point at), install the whole bundle into one scope, so no pointer dangles.
 
@@ -46,7 +61,7 @@ Each operation ends with a check: list the scope's folder, confirm `SKILL.md` re
 
 **Change one of the user's own skills.** Edit it in `<path-to-skills-repo>/skills/<name>/`, commit, push, then `npx skills update <name>` in every scope that installs it.
 
-**Add a new skill to the user's repo.** Write it under `<path-to-skills-repo>/skills/<name>/SKILL.md` with `name` and `description` frontmatter, add its row to the repo README, commit, push, then install it. The repo is public: nothing in a skill names the user, their accounts, their machine's paths, or any project of theirs; anything user-specific becomes a parameter like the two above.
+**Add a new skill to the user's repo.** Only when the user names the skill for publishing. Write it under `<path-to-skills-repo>/skills/<name>/SKILL.md` with `name` and `description` frontmatter, add its row to the repo README, commit, push, then install it. The repo is public: nothing in a skill names the user, their accounts, their machine's paths, or any project of theirs; anything user-specific becomes a parameter like the two above.
 
 **Fork someone else's skill.** Copying a skill folder is not a GitHub fork: nothing links the copy to its origin, so the credit is written by hand.
 
