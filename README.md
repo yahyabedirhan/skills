@@ -26,6 +26,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | Picks up an effort from a thinking session's handoff and runs orchestrate-effort. | Original. |
 | [orchestrate-with-herdr](skills/orchestrate-with-herdr/SKILL.md) | Ends a thinking session and starts its orchestrator in a new Herdr tab in the same workspace. | Original. |
 | [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`697d4ce`](https://github.com/mattpocock/skills/tree/697d4ce9742d/skills/engineering/implement) (MIT, see `skills/implement/LICENSE.mattpocock`). Changes: agents can load it, so an orchestrator's sub-agents can use it, and it commits only when the delegating agent doesn't. |
+| [system-design](skills/system-design/SKILL.md) | Designs, explains or redesigns a system at the level of services, data stores, APIs and scale, through the system design delivery framework, with reference documents for the core concepts. | Original. Distils Hello Interview's system design lessons, cited at the end of each document. |
 
 ## The effort workflow
 
