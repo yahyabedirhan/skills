@@ -36,3 +36,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 ## Decision records
 
 `docs/decisions/` records why a skill or workflow is shaped the way it is, one dated entry per decision. Read it before changing the skills it covers. It is not installed.
+
+## Research
+
+`docs/research/` holds the fact-finding behind open issues: how the harnesses, Herdr, git and GitHub actually behave, with sources and test notes. Each issue links the notes it relies on. It is not installed.
