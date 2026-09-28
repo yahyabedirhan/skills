@@ -48,7 +48,7 @@ The thinking session owns the clean ending: it writes a **handoff** in the repos
 
 ## Build
 
-The orchestrator reads the handoff, shows the plan with `/show-me`, delegates each ticket to a sub-agent that builds it the way `/implement` does (`/tdd`, checks, `/code-review`), commits each one, and ends with `/to-pr`. It follows the `orchestrating` discipline throughout.
+The orchestrator reads the handoff, shows the plan with `/show-me`, delegates the unblocked tickets in parallel to sub-agents, each in its own worktree, building it the way `/implement` does (`/tdd`, checks, a review at the depth the orchestrator sets), integrates and commits each one, and ends with one branch review and `/to-pr`. It follows the `orchestrating` discipline throughout.
 
 ## Close
 
