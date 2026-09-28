@@ -37,16 +37,16 @@ Create or update the pull request for the current task with a concise descriptio
      - Call-tree, call-stack, control-flow, or data-flow changes.
    - Prefer `diff` blocks when showing changes to an existing shape. Show the complete target shape when most of it is new or diff notation would obscure ownership or order.
    - Keep each view focused on what a reviewer needs. Omit categories that did not change.
-   - optionaL: if you are aware of a ticket id/url, a humanlayer task url, or related plan/document urls, or other relevant links, include them in the header, otherwise omit the header
+   - optionaL: if you are aware of a ticket id/url, or related plan/document urls, or other relevant links, include them in the header, otherwise omit the header
 
 5. Save and publish the description:
-   - Use `.humanlayer/tasks/{task-slug}/pr-description.md` when the task directory exists; otherwise use `.humanlayer/tasks/pr-{number}/description.md`.
+   - Save it to `.scratch/pr-{number}/description.md`, following the project's folder standard (the **orchestrating** skill's `folders.md`): `.scratch/` is gitignored, and GitHub holds the published description.
    - Update the PR with `gh pr edit {number} --body-file {output-path}`.
    - Confirm the update succeeded.
 
 6. Report completion:
    - Read `{SKILLBASE}/references/describe_pr_final_answer.md`.
-   - Respond using that final answer template with the PR URL, saved description URL, and concise list of changed files.
+   - Respond using that final answer template with the PR URL, the saved description path, and a concise list of changed files.
 
 Always read and follow `{SKILLBASE}/references/pr_description_template.md`. Do not expand the PR body beyond that template.
 
