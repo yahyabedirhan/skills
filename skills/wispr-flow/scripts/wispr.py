@@ -150,10 +150,27 @@ def cmd_history(args):
         # An "edit" equal to the formatted text is not an edit; drop it so real edits stand out.
         if norm(item["edited"]) == norm(item["formatted"]):
             item["edited"] = None
-    if args.format in ("json", "jsonl"):
-        emit([{k: i[k] for k in ["id", "timestamp", "local_time", "app", "words"] + fields if k in i}
-              for i in items], args.format)
-        return
+    out = open(args.out, "w") if args.out else None
+    real_stdout = sys.stdout
+    if out:
+        sys.stdout = out
+    try:
+        if args.format in ("json", "jsonl"):
+            emit([{k: i[k] for k in ["id", "timestamp", "local_time", "app", "words"] + fields if k in i}
+                  for i in items], args.format)
+        else:
+            print_history(items, fields)
+    finally:
+        sys.stdout = real_stdout
+        if out:
+            out.close()
+    if out:
+        size = os.path.getsize(args.out)
+        print(f"wrote {len(items)} dictations, {size} bytes (~{size // 4} tokens) to {args.out}")
+    print(f"-- {len(items)} dictations", file=sys.stderr)
+
+
+def print_history(items, fields):
     for i in items:
         print(f"### {i['local_time']} | {i['app'] or '-'} | {i['words'] or 0} words")
         for field in fields:
@@ -161,7 +178,6 @@ def cmd_history(args):
             if value and not (field == "raw" and "formatted" in fields and norm(value) == norm(i["formatted"])):
                 print(f"{field.upper()}: {value}")
         print()
-    print(f"-- {len(items)} dictations", file=sys.stderr)
 
 
 def cmd_count(args):
@@ -190,6 +206,70 @@ def cmd_count(args):
     print("| Term | Dictations | Example |\n|---|---|---|")
     for r in result:
         print(f"| {r['term']} | {r['dictations']} | {r['example'].replace('|', '/')} |")
+
+
+# Capitalised runs (Jack Miller, Claude Code), tokens with inner dots or digits (AGENTS.md, GPT-5),
+# and anything in backticks. Plain lowercase words are left to reading the history.
+TERM = re.compile(r"`([^`]+)`|\b([A-Z][\w'.&/-]*(?:\s+(?:&\s+)?[A-Z][\w'.&/-]*)*)|\b([a-z][\w-]*\.[a-z]\w*|\w*\d\w*[a-zA-Z]\w*)\b")
+SENTENCE_START = re.compile(r"(^|[.!?:;]\s+|\n\s*|<li>|\(|\"\s*)$")
+COMMON = {"I", "I'm", "I'll", "I've", "I'd", "OK", "Okay", "So", "And", "But", "Yeah", "Yes", "No", "Also"}
+
+
+def terms_in(text):
+    found = set()
+    for m in TERM.finditer(text or ""):
+        term = (m.group(1) or m.group(2) or m.group(3)).strip().rstrip(".'")
+        if m.group(2) and SENTENCE_START.search(text[:m.start()]):
+            # A capitalised first word only says the sentence started; keep the rest of the run.
+            parts = term.split(None, 1)
+            if len(parts) == 1:
+                continue
+            term = parts[1]
+        term = re.split(r"[.!?]\s", term)[0]  # a run never crosses a sentence end ("PR. I")
+        words = term.split()
+        while words and words[0] in COMMON:  # raw text has no punctuation to mark sentence starts
+            words.pop(0)
+        while words and words[-1] in COMMON:
+            words.pop()
+        term = " ".join(words)
+        if term and len(term) > 1:
+            found.add(term)
+    return found
+
+
+def cmd_terms(args):
+    """Candidate names and commands: what a review starts from before reading whole dictations."""
+    con = connect(args)
+    args.include_empty = False
+    args.grep = None
+    args.newest_first = False
+    args.limit = None
+    items = history_query(con, args)
+    known = {i["phrase"].lower(): i for i in active_entries(con)}
+    seen = {}
+    for i in items:
+        raw, fmt = terms_in(i["raw"]), terms_in(i["formatted"])
+        for term in raw | fmt:
+            entry = seen.setdefault(term, {"term": term, "dictations": 0, "raw_only": 0, "example": ""})
+            entry["dictations"] += 1
+            if term not in fmt:
+                entry["raw_only"] += 1
+            src = i["formatted"] if term in fmt else i["raw"]
+            at = src.find(term)
+            entry["example"] = norm(src[max(0, at - 40):at + len(term) + 40])
+    result = [e for e in seen.values() if e["dictations"] >= args.min]
+    for e in result:
+        hit = known.get(e["term"].lower())
+        e["dictionary"] = ("rule -> " + hit["replacement"]) if hit and hit["replacement"] else ("word" if hit else "")
+    result.sort(key=lambda e: (-e["dictations"], e["term"].lower()))
+    if args.format == "json":
+        emit(result, "json")
+        return
+    print("| Term | Dictations | Raw only | In dictionary | Example |\n|---|---|---|---|---|")
+    for e in result:
+        ex = e["example"].replace("|", "/")
+        print(f"| {e['term']} | {e['dictations']} | {e['raw_only'] or ''} | {e['dictionary']} | {ex} |")
+    print(f"-- {len(result)} terms from {len(items)} dictations", file=sys.stderr)
 
 
 # ---------- dictionary ----------
@@ -350,12 +430,12 @@ def cmd_status(args):
             problems.append(f"{table} is missing {', '.join(miss)}")
     info = rows(con, "select count(*) as dictations, min(timestamp) as first, max(timestamp) as last "
                      "from History where coalesce(trim(formattedText), '') <> ''")[0]
-    d = rows(con, "select sum(isDeleted=0) as active, sum(isDeleted=0 and replacement is not null) as rules "
-                  "from Dictionary where teamDictionaryId=?", (PERSONAL_DICTIONARY,))[0]
+    d = rows(con, "select sum(isDeleted=0) as active, sum(isDeleted=0 and replacement is not null and isSnippet=0 "
+                  "and length(replacement) <= 60) as rules from Dictionary where teamDictionaryId=?", (PERSONAL_DICTIONARY,))[0]
     print(f"database:   {args.db}")
     print(f"app:        {'running' if app_running() else 'not running'}")
     print(f"history:    {info['dictations']} dictations, {local(info['first'])} to {local(info['last'])}")
-    print(f"dictionary: {d['active']} active entries, {d['rules']} with a replacement")
+    print(f"dictionary: {d['active']} active entries, {d['rules']} of them replacement rules")
     print(f"backups:    {args.backup_dir}")
     print("schema:     " + ("ok" if not problems else "CHANGED: " + "; ".join(problems)))
     if problems:
@@ -391,7 +471,14 @@ def main():
     h.add_argument("--newest-first", action="store_true")
     h.add_argument("--include-empty", action="store_true", help="keep empty dictations")
     h.add_argument("--format", choices=["text", "json", "jsonl"], default="text")
+    h.add_argument("--out", help="write to this file and print only its size")
     h.set_defaults(func=cmd_history)
+
+    t = sub.add_parser("terms", help="name-like and command-like words in a window, with counts")
+    window(t)
+    t.add_argument("--min", type=int, default=1, help="only terms in at least this many dictations")
+    t.add_argument("--format", choices=["table", "json"], default="table")
+    t.set_defaults(func=cmd_terms)
 
     c = sub.add_parser("count", help="how many dictations contain each term (whole word, any case)")
     window(c)
