@@ -1,17 +1,16 @@
 ---
 name: email
 description: >-
-  Read and tidy the user's email with the Spark CLI and the Gmail connector:
-  list, search and read mail, mark it done, label, pin, and draft replies,
-  never send. Use when the user asks what's in their inbox, wants emails
-  found, read, sorted, marked done, labelled or pinned, wants a reply drafted,
-  asks about their calendar, availability or contacts, or wants this email
-  setup configured or checked.
+  How to work the user's email through the Spark CLI and the Gmail connector:
+  which tool to pick, how to list, search and read mail, and how to mark it
+  done, label, pin and draft replies, never send. Use whenever a task reads or
+  changes the user's mail, calendar, availability or contacts, or when this
+  email setup needs configuring or checking.
 ---
 
 # Email
 
-Two tools, one job each: **Spark reads, Gmail acts.** Drafts are the furthest any agent goes; the user sends mail themselves. Use only the tools listed as allowed below, and ask the user before anything else that changes mail or the calendar. If a denied tool is available at all, the setup is incomplete: say so and use the connector only for reading until it is fixed.
+Two tools, one job each: **Spark reads, Gmail acts.** This skill says how to do things with them. What to do with an email, and when, comes from the user or the project's own instructions. Drafts are the furthest any agent goes; the user sends mail themselves. If a denied tool is available at all, the setup is incomplete: say so and use the connector only for reading until it is fixed.
 
 ## The two tools
 
@@ -41,26 +40,26 @@ Google's permission that allows archiving also allows sending, so those deny rul
 - **Spark's categories** are Spark's own, so no Gmail tool changes them.
 - **Date groups** (Today, Last week, a month) come from each email's date.
 
-## Daily workflows
+## How to
 
-**Start of day.**
+**Read**
 
 ```bash
-spark events --today
-spark emails Inbox --filter "category:priority is:unread"
-spark emails Inbox --filter "category:personal is:unread"
-spark emails Inbox --filter "category:invitation"
+spark emails Inbox --filter "category:priority is:unread"   # one Spark category
+spark emails --filter "is:pinned"                           # pinned mail
+spark search --filter 'from:<sender> newer_than:7d'         # any Gmail-style query
+spark thread <id>                                           # one email in full
+spark events --today                                        # also --tomorrow
+spark availability --help                                   # free slots across attendees
 ```
 
-Report the day's meetings, the people waiting on a reply, and open invitations.
+**Mark done.** Find the thread with `search_threads` (`in:inbox` plus `from:` or `subject:`, view `THREAD_VIEW_METADATA_ONLY`), then `unlabel_thread` with `["INBOX"]`. Done when the same search returns `{}`. `label_thread` with `["INBOX"]` puts it back.
 
-**Triage by category.** Work in this order: priority, personal, invitation, notification, then newsletters with `newer_than:7d`. Read what needs reading with `spark thread <id>`. Propose one action per email (done, label, pin, draft a reply, or leave it) as a single list, and apply it once the user approves.
+**Pin or unpin.** `label_thread` or `unlabel_thread` with `["STARRED"]`.
 
-**Mark done.** Find the thread with `search_threads` (`in:inbox` plus `from:` or `subject:`, view `THREAD_VIEW_METADATA_ONLY`), then `unlabel_thread` with `["INBOX"]`. Done when the same search returns `{}`.
+**Label.** `list_labels` for the label's ID, `create_label` when it does not exist yet, then `label_thread` with that ID.
 
-**Draft a reply.** Read the thread with `get_thread`, then `create_draft` with `replyToMessageId` set to the last message's `id`. Give the user the draft's `viewUrl` to review and send.
-
-**End of day.** `spark emails --filter "is:pinned"` for what is still open, and `spark events --tomorrow`.
+**Draft a reply.** Read the thread with `get_thread`, then `create_draft` with `replyToMessageId` set to the last message's `id`. The draft's `viewUrl` is where the user reviews and sends it.
 
 ## Keep it cheap
 
