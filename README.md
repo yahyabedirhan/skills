@@ -4,12 +4,13 @@
 
 Agent skills I use across projects: my own, and forks of other people's that I've changed. They work with Claude Code, Codex, and any agent the [`skills` CLI](https://github.com/vercel-labs/skills) supports.
 
-They come in five families, each explained under [How the skills work](#how-the-skills-work):
+They come in six families, each explained under [How the skills work](#how-the-skills-work):
 
 - **[Effort workflow](#effort-workflow)**: take a feature from an idea to a merged pull request.
 - **[Design frameworks](#design-frameworks)**: design or explain code and systems step by step.
 - **[Pull requests and explanations](#pull-requests-and-explanations)**: describe changes and show ideas visually.
 - **[Skill upkeep](#skill-upkeep)**: install, move, publish and audit skills.
+- **[Email](#email)**: read and tidy an inbox, and draft replies without sending.
 - **[Dictation](#dictation)**: keep a speech-to-text dictionary accurate.
 
 ## Install
@@ -56,6 +57,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | [to-pr](skills/to-pr/SKILL.md) | [Pull requests and explanations](#pull-requests-and-explanations) | Opens a pull request or rewrites its description: a one-sentence why, reviewer notes, and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr) (MIT, see `skills/to-pr/LICENSE.humanlayer`). Changes: renamed, a real trigger description, and no Mermaid views. |
 | [show-me](skills/show-me/SKILL.md) | [Pull requests and explanations](#pull-requests-and-explanations) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks, or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`6ab9013`](https://github.com/humanlayer/skills/tree/6ab9013a10c2/plugins/show-me/skills/show-me) (MIT, see `skills/show-me/LICENSE.humanlayer`). Changes: no Mermaid views, so every view renders as plain text. |
 | [maintain-skills](skills/maintain-skills/SKILL.md) | [Skill upkeep](#skill-upkeep) | Installs, moves, updates, forks, publishes, removes, and audits skills across global scope, project scope, and your own skills repo with `npx skills`; prompt-audits each new skill in a fresh sub-agent and measures a skill's run cost on request. | Original. |
+| [email](skills/email/SKILL.md) | [Email](#email) | Reads and tidies your email: Spark CLI for fast reading, the Gmail connector for marking done, labels, pins and drafts, with sending, trash and spam denied. Includes setup and checks. | Original. The daily workflows adapt the read-only recipes in [readdle/spark-cli-skills](https://github.com/readdle/spark-cli-skills) at [`507d26e`](https://github.com/readdle/spark-cli-skills/tree/507d26e/skills) (MIT); no text copied. |
 | [wispr-flow-dictionary](skills/wispr-flow-dictionary/SKILL.md) | [Dictation](#dictation) | Tunes the Wispr Flow dictionary from your real dictation history: finds the names, products and commands it mishears, fixes them with backups and undo, and shows whether each fix held. macOS. | Original. The snippet finder and quit-write-relaunch flow follow ideas from [glebis/claude-skills](https://github.com/glebis/claude-skills) (`wispr-analytics`, `wispr-fix`); no code copied. |
 
 ## How the skills work
@@ -111,6 +113,17 @@ source      your skills repo, or someone else's
 installs    global (~/.agents/skills) or one project (.agents/skills)
 operations  install, update, move, remove, fork, publish
 audits      which skills you use, a fresh prompt audit, a run's cost
+```
+
+### Email
+
+`email` splits the job between two tools: the Spark CLI reads mail fast from Spark Desktop's local copy, and the Gmail connector makes every change. Drafts are as far as it goes, because Claude Code permission rules deny sending, trash and spam.
+
+```text
+read     Spark CLI: inbox by category, threads, pins, calendar, contacts
+act      Gmail connector: mark done (archive), labels, pins (stars), drafts
+daily    start of day → triage by category → end of day
+setup    setup.md: both tools, the deny rules, and checks
 ```
 
 ### Dictation
