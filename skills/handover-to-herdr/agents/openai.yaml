@@ -1,0 +1,5 @@
+interface:
+  display_name: "Handover To Herdr"
+  short_description: "Start a session in a Herdr tab and send it its prompt"
+policy:
+  allow_implicit_invocation: true

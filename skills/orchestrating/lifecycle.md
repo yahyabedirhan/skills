@@ -7,24 +7,24 @@ An effort passes through five phases in one worktree on one branch:
 ```text
 START      decide the worktree once; everything after follows it
 THINKING   settle what to build; leave a spec, tickets, and a handoff
-HANDOVER   the thinking session commits everything and starts a fresh orchestrator
+HANDOVER   the session commits everything and starts a fresh orchestrator
 BUILD      orchestrate the tickets through delegates; open the pull request
 CLOSE      after the merge, remove the worktree and the branch
 ```
 
-There are two paths through it. The Herdr path automates every step between phases; the plain path runs anywhere, with the user carrying the handover.
+There are two paths through it. The Herdr path automates every step between phases; the plain path runs anywhere, with the user carrying the handover. The **handover** skill picks the path's mechanism itself: Herdr whenever `herdr status` reaches a server, else a prompt the user pastes.
 
 ```text
                 START                    HANDOVER                  BUILD
-Herdr path      init-effort-with-herdr   orchestrate-with-herdr    orchestrate-with-handoff
-                treehouse worktree,      new "Orchestrator" tab,     → orchestrate-effort
-                Herdr workspace,         agent started, prompted
-                thinking agent started
+Herdr path      init-effort-with-herdr   handover                  orchestrate-with-handoff
+                treehouse worktree,        → handover-to-herdr:      → orchestrate-effort
+                Herdr workspace,           new "Orchestrator" tab,
+                thinking agent started     agent started, prompted
 
-Plain path      init-effort              the thinking session      orchestrate-with-handoff
-                the environment's own    prints a handover prompt;   → orchestrate-effort
-                worktree, or git         the user pastes it into
-                worktree                 a new session
+Plain path      init-effort              handover                  orchestrate-with-handoff
+                the environment's own      prints the starting       → orchestrate-effort
+                worktree, or git           prompt; the user pastes
+                worktree                   it into a new session
 ```
 
 ## Start
@@ -44,7 +44,7 @@ Run it in one unbroken context window, so the spec and tickets build on the same
 
 ## Handover
 
-The thinking session owns the clean ending: it writes a **handoff** in the repository (by convention `.handoff/<date>-<effort>.md`) that points at the spec and tickets and names the thinking session, commits and pushes everything, and then hands over with a short **handover prompt** that starts the orchestrator on the handoff. The thinking session then stops, and stays open for reference.
+The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking. It checks the session is ready: the worktree exists, a **handoff** is written in the repository by the **handoff** skill (by convention `.handoff/<date>-<topic>.md`), everything is committed and pushed, and the tracker items exist. It then writes a short **starting prompt** that starts the new session on the handoff, starts that session through a mechanism (**handover-to-herdr** by default, else a pasted prompt), and confirms it started. The handing session then stops, and stays open for reference.
 
 ## Build
 
