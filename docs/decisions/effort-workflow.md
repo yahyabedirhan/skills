@@ -1,6 +1,6 @@
 # Decisions: effort workflow
 
-The decisions behind the effort skills (`init-effort`, `init-effort-with-herdr`, `orchestrating`, `orchestrate-effort`, `orchestrate-with-handoff`, `orchestrate-with-herdr`, and the `implement` fork they rely on). This file is for maintaining those skills and is never installed. Read it before changing any of them, and add an entry for each new decision: the date, what was decided, and why. When a decision is reversed, keep the old entry and add a new one that says so.
+The decisions behind the effort skills (`init-effort`, `init-effort-with-herdr`, `orchestrating`, `orchestrate-effort`, `orchestrate-with-handoff`, `orchestrate-with-herdr`, and the `implement`, `to-spec` and `to-tickets` forks they rely on). This file is for maintaining those skills and is never installed. Read it before changing any of them, and add an entry for each new decision: the date, what was decided, and why. When a decision is reversed, keep the old entry and add a new one that says so.
 
 ## 2026-09-24
 
@@ -28,3 +28,9 @@ The decisions behind the effort skills (`init-effort`, `init-effort-with-herdr`,
 - **Prompts use each harness's skill syntax.** Claude Code starts a skill with `/name`, Codex with `$name`; the skills that write prompts for another agent say so in one line rather than keeping two copies of each prompt.
 - **Decisions are recorded here, not as ADRs.** Most workflow decisions are easy to reverse, which fails the ADR bar, but the history still matters to whoever changes the workflow next.
 - **A tab that has handed over is marked ` [settled]`**, appended to its label, instead of being relabelled `Thinking` at handover. The user asked for it: the marker says the session is finished and the tab is only a record, which a role name doesn't. The `Thinking` role label from `init-effort-with-herdr` still names the tab while the session is live.
+
+## 2026-09-28
+
+- **`to-spec` and `to-tickets` are forked to be model-invoked**, the same way `implement` was. Upstream they are user-invoked, so a thinking session started with a pasted or sent prompt couldn't load them, and wrote the spec by hand or asked the user to type the commands. The forks drop `disable-model-invocation`, set `allow_implicit_invocation: true` for Codex, and gain a "Use when" clause so the model knows when to load them. Everything else stays as upstream, so a diff against upstream shows only these changes. The upstream installs are removed once the forks are installed.
+- **On a local-files tracker, an effort's spec and tickets live in `.efforts/<effort>/`** (`spec.md`, `issues/<NN>-<slug>.md`), tracked, per the folder standard; `.scratch/` is ignored and holds only temporary agent files. Upstream `to-tickets` wrote tickets to `.scratch/<feature-slug>/issues/`, which the folder standard makes ignored, so the forks write to `.efforts/` instead. Without an effort, `<effort>` is a short slug for the feature.
+- **`to-tickets` names a ticket by its title, never by its number alone** (`#12 Add login`, not `#12`), in the breakdown, in "Blocked by", and when talking to the user. A bare number means nothing to a reader without the tracker open.
