@@ -18,18 +18,28 @@ Done when you know each ticket's blockers, its acceptance criteria, and whether 
 
 ## 2. Show the plan
 
-Use the **show-me** skill to show the user the ticket order as a tree: blockers first, which tickets run in parallel (only those touching disjoint files), and which need the user and for what.
+Use the **show-me** skill to show the user the ticket order as a tree: blockers first, which tickets run in parallel, which need the user and for what, and each ticket's review depth.
+
+- **Parallel by default.** Unblocked tickets run at the same time, each in its own git worktree. Serialise only the step that uses a shared resource (an installed app, a single real UI, a port, a database), not the whole ticket. Overlapping files are no reason to serialise: conflicts are cheap to resolve at integration.
+- **Review depth.** A granular ticket skips **code-review** and relies on the one branch review at delivery; a large or risky ticket gets its own review. You choose per ticket and say so in its brief.
 
 ## 3. Run the tickets
 
-Delegate each unblocked ticket to a sub-agent with the **implement** skill. Point it at the ticket and the spec by path, and tell it that you commit, so it reports instead: the files it changed, the evidence for each acceptance criterion (a test name, a run count, a file and line, a command's output), and any open question.
+Delegate each unblocked ticket to a sub-agent with the **implement** skill, in its own git worktree (the harness's worktree isolation, else `git worktree add`), where it makes one commit and doesn't push. The brief points instead of restating:
+
+- **It contains:** the paths to the ticket, the spec and the handoff; the review depth; the shared resources it leaves to you; and the report you want back: its commit, the files it changed, the evidence for each acceptance criterion (a test name, a run count, a file and line, a command's output), proof that no temporary verification code is left (`git status`, a grep for its marker), anything left running, and any open question.
+- **It leaves out:** a paraphrase of the ticket or spec, recipes and conventions the repository already documents, and the repository's commit rules.
+
+Verification checks the real app where the machine allows it (real screenshots and clicks) rather than off-screen renders. When the real app is a shared resource, the delegate verifies what it can in its worktree, and the real-app check runs once per batch at integration.
+
+Note each delegate's duration as its report arrives, so a slow ticket shows up early.
 
 **Done** means every criterion ticked on evidence. Read each report against the ticket's acceptance criteria and tick a box only where the report shows evidence for it. A criterion shown only outside the checkout (on a copy of the branch, in another environment, after an install) stays unticked with a one-line note saying where it was shown and what confirms it; the ticket stays open until it is confirmed.
 
 - **Local tracker:** the ticked boxes and the done status go in the ticket's own commit, with its code.
 - **Hosted tracker** (GitHub, Linear): tick the issue's checklist the same way once the commit is pushed, and close the issue only when every box is ticked.
 
-Commit the ticket on its own following the repository's conventions, push, and tell the user in a line what landed.
+**Integrate** each batch of reports: cherry-pick each delegate's commit onto the effort branch with `--no-commit`, tick its criteria, and commit it as the ticket's own commit following the repository's conventions. Resolve conflicts as they come. Then run the tests, the install and the real-app check once for the batch, push, remove the delegates' worktrees, and tell the user in a line what landed.
 
 Done when every ticket is committed and pushed, with its criteria ticked or noted, or deferred by the user.
 
