@@ -378,9 +378,14 @@ def cmd_dict_add(args):
 def cmd_dict_remove(args):
     """Soft-delete (isDeleted=1), the way the app itself deletes an entry."""
     con = connect(args, write=not args.dry_run)
-    phrases = args.phrases
-    found = [i for i in active_entries(con) if i["phrase"].lower() in {p.lower() for p in phrases}]
-    missing = sorted({p.lower() for p in phrases} - {i["phrase"].lower() for i in found})
+    entries = active_entries(con)
+    found, missing = [], []
+    for p in args.phrases:
+        # Exact spelling first, so `remove claude` leaves `Claude` alone; any case only as a fallback.
+        hits = [i for i in entries if i["phrase"] == p] or [i for i in entries if i["phrase"].lower() == p.lower()]
+        found += [h for h in hits if h not in found]
+        if not hits:
+            missing.append(p)
     for i in found:
         print(f"remove: {i['phrase']}" + (f" -> {i['replacement']}" if i["replacement"] else ""))
     for p in missing:
