@@ -41,6 +41,12 @@ Reply "A" to go with my pick, or name another.
 
 Where a picture makes the options easier to weigh (the ticket tree, the result as a diff), draw it with **show-me**. Record the answer where later delegates and a successor orchestrator read it: the ticket, or the handoff.
 
+Whatever you tell the user, in the chat, a notification or the pull request:
+
+- **A decision comes with its facts, its options and your pick,** so the user can weigh it without opening a file.
+- **A visual report follows show-me:** the smallest view that makes the point, with real data.
+- **Name an issue or pull request by its title,** never by its number alone: `#12 Add login`, not `#12`.
+
 ## Where orchestrating sits
 
 Read [lifecycle.md](lifecycle.md) before orchestrating: it is the path of an effort from an idea to a merged pull request, and it places your part within it. [folders.md](folders.md) says where each record of the effort goes.
