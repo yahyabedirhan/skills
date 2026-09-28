@@ -22,11 +22,16 @@ Use the **show-me** skill to show the user the ticket order as a tree: blockers 
 
 ## 3. Run the tickets
 
-Delegate each unblocked ticket to a sub-agent with the **implement** skill. Point it at the ticket and the spec by path, and tell it that you commit, so it reports instead: the files it changed, the checks and their results, and any open question.
+Delegate each unblocked ticket to a sub-agent with the **implement** skill. Point it at the ticket and the spec by path, and tell it that you commit, so it reports instead: the files it changed, the evidence for each acceptance criterion (a test name, a run count, a file and line, a command's output), and any open question.
 
-Read each report against the ticket's acceptance criteria. Commit the ticket on its own following the repository's conventions, push, mark it done in the tracker, and tell the user in a line what landed.
+**Done** means every criterion ticked on evidence. Read each report against the ticket's acceptance criteria and tick a box only where the report shows evidence for it. A criterion shown only outside the checkout (on a copy of the branch, in another environment, after an install) stays unticked with a one-line note saying where it was shown and what confirms it; the ticket stays open until it is confirmed.
 
-Done when every ticket is committed and pushed, or deferred by the user.
+- **Local tracker:** the ticked boxes and the done status go in the ticket's own commit, with its code.
+- **Hosted tracker** (GitHub, Linear): tick the issue's checklist the same way once the commit is pushed, and close the issue only when every box is ticked.
+
+Commit the ticket on its own following the repository's conventions, push, and tell the user in a line what landed.
+
+Done when every ticket is committed and pushed, with its criteria ticked or noted, or deferred by the user.
 
 ## 4. Deliver
 
