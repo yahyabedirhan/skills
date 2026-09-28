@@ -10,7 +10,7 @@ Build one effort from its spec and tickets, as its orchestrator, following the *
 
 ## 1. Read the effort
 
-The argument points at the **effort folder** (such as `.scratch/<effort>/`, holding `spec.md` and `issues/`) or at the spec and tickets directly. With no argument, ask for one. Read the spec and every ticket in full, and treat the design as settled: bring a real gap to the user rather than redesigning. With no tickets, tell the user to run `/to-tickets` and stop.
+The argument points at the **effort folder** (`.efforts/<effort>/` on a local tracker, holding `spec.md` and `issues/`, per the folder standard in the **orchestrating** skill's `folders.md`) or at the spec and tickets directly. With no argument, ask for one. Read the spec and every ticket in full, and treat the design as settled: bring a real gap to the user rather than redesigning. With no tickets, tell the user to run `/to-tickets` and stop.
 
 Then check the worktree with `git status`. Uncommitted changes found there go into their own commit, with a message that describes them, before any ticket runs; commit them as their own command, then push. Tickets start from a clean worktree, so no delegate works around files it may not touch.
 

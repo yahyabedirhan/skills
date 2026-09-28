@@ -20,4 +20,4 @@ A delegate is a sub-agent unless the skill that started the orchestration says o
 
 ## Where orchestrating sits
 
-Read [lifecycle.md](lifecycle.md) before orchestrating: it is the path of an effort from an idea to a merged pull request, and it places your part within it.
+Read [lifecycle.md](lifecycle.md) before orchestrating: it is the path of an effort from an idea to a merged pull request, and it places your part within it. [folders.md](folders.md) says where each record of the effort goes.
