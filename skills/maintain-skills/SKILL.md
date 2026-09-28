@@ -81,6 +81,14 @@ When the user asks which skills they use, count invocations from local transcrip
 
 Write the counting script and its output under the project's scratch or temp folder, not the skills repo. Recommend removals from the counts, and leave each removal to the user's call.
 
+## Auditing a new skill
+
+After creating a skill (Create a project skill, Add a new skill to the user's repo, or a fork that changes behaviour), dispatch a fresh sub-agent as an objective auditor: the author's context is anchored on what it meant to write, and the auditor reads only what is on disk. Its prompt names the skill folder and tells it to invoke the bundled `claude-api` skill's `prompt-audit` subcommand on that folder (the audit `/doctor prompt-audit <path>` runs) and to report findings without editing. Review the report, apply the accepted fixes in the skill's home, and name what was left and why. Done when every finding is applied or answered.
+
+## Efficiency analysis
+
+Only when the user asks what a skill costs to run (tokens, minutes, plan usage) or how to make it cheaper, follow [efficiency-analysis.md](efficiency-analysis.md).
+
 ## Publishing
 
 Creating the repo and every push publish to the public. Confirm with the user before creating the repo; after that, pushing changes the user asked for is part of the operation. A new repo gets an MIT `LICENSE` in the user's name unless they choose another, and a README with an install line (`npx skills add <skills-repo>`) and a table of skills with an Origin column.
