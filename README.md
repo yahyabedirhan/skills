@@ -4,7 +4,7 @@
 
 Agent skills I use across projects: my own, and forks of other people's that I've changed. They work with Claude Code, Codex, and any agent the [`skills` CLI](https://github.com/vercel-labs/skills) supports.
 
-They come in six families, each explained under [How the skills work](#how-the-skills-work):
+They come in six families. Each family's skills are listed under [Skills](#skills) and explained under [How the skills work](#how-the-skills-work):
 
 - **[Effort workflow](#effort-workflow)**: take a feature from an idea to a merged pull request.
 - **[Design frameworks](#design-frameworks)**: design or explain code and systems step by step.
@@ -15,7 +15,7 @@ They come in six families, each explained under [How the skills work](#how-the-s
 
 ## Install
 
-Install any skill by its name from the [table](#skills):
+Install any skill by its name from [Skills](#skills):
 
 ```bash
 npx skills add yahyabedirhan/skills -s <skill-name>
@@ -43,22 +43,49 @@ Install a skill one way or the other, not both, or Claude Code loads it twice.
 
 The Origin column names the upstream commit each fork was copied from, so a later upstream change can be diffed against it.
 
-| Skill | Family | What it does | Origin |
-|---|---|---|---|
-| [init-effort](skills/init-effort/SKILL.md) | [Effort workflow](#effort-workflow) | Starts an effort on its own branch and worktree, runs its thinking session, and ends with a handover prompt for the orchestrator. | Original. |
-| [init-effort-with-herdr](skills/init-effort-with-herdr/SKILL.md) | [Effort workflow](#effort-workflow) | Starts an effort in a Treehouse worktree opened as a Herdr workspace, and launches its thinking agent there. | Original. |
-| [orchestrating](skills/orchestrating/SKILL.md) | [Effort workflow](#effort-workflow) | The orchestrator's discipline: delegate, trust delegates, be the user's one contact. Holds the effort lifecycle. | Original. |
-| [orchestrate-effort](skills/orchestrate-effort/SKILL.md) | [Effort workflow](#effort-workflow) | Builds an effort from its spec and tickets through sub-agents and opens the pull request. | Original. |
-| [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | [Effort workflow](#effort-workflow) | Picks up an effort from a thinking session's handoff and runs orchestrate-effort. | Original. |
-| [orchestrate-with-herdr](skills/orchestrate-with-herdr/SKILL.md) | [Effort workflow](#effort-workflow) | Ends a thinking session and starts its orchestrator in a new Herdr tab in the same workspace. | Original. |
-| [implement](skills/implement/SKILL.md) | [Effort workflow](#effort-workflow) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`697d4ce`](https://github.com/mattpocock/skills/tree/697d4ce9742d/skills/engineering/implement) (MIT, see `skills/implement/LICENSE.mattpocock`). Changes: agents can load it, so an orchestrator's sub-agents can use it, and it commits only when the delegating agent doesn't. |
-| [low-level-design](skills/low-level-design/SKILL.md) | [Design frameworks](#design-frameworks) | Designs, explains or redesigns code at the level of modules, classes, files and folders, with reference documents for the principles, OOP concepts and patterns. | Original. Distils Hello Interview's low-level design lessons, cited at the end of each document. |
-| [system-design](skills/system-design/SKILL.md) | [Design frameworks](#design-frameworks) | Designs, explains or redesigns a system at the level of services, data stores, APIs and scale, with reference documents for the core concepts. | Original. Distils Hello Interview's system design lessons, cited at the end of each document. |
-| [to-pr](skills/to-pr/SKILL.md) | [Pull requests and explanations](#pull-requests-and-explanations) | Opens a pull request or rewrites its description: a one-sentence why, reviewer notes, and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr) (MIT, see `skills/to-pr/LICENSE.humanlayer`). Changes: renamed, a real trigger description, and no Mermaid views. |
-| [show-me](skills/show-me/SKILL.md) | [Pull requests and explanations](#pull-requests-and-explanations) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks, or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`6ab9013`](https://github.com/humanlayer/skills/tree/6ab9013a10c2/plugins/show-me/skills/show-me) (MIT, see `skills/show-me/LICENSE.humanlayer`). Changes: no Mermaid views, so every view renders as plain text. |
-| [maintain-skills](skills/maintain-skills/SKILL.md) | [Skill upkeep](#skill-upkeep) | Installs, moves, updates, forks, publishes, removes, and audits skills across global scope, project scope, and your own skills repo with `npx skills`; prompt-audits each new skill in a fresh sub-agent and measures a skill's run cost on request. | Original. |
-| [email](skills/email/SKILL.md) | [Email](#email) | Reads and tidies your email: Spark CLI for fast reading, the Gmail connector for marking done, labels, pins and drafts, with sending, trash and spam denied. Includes setup and checks. | Original. The daily workflows adapt the read-only recipes in [readdle/spark-cli-skills](https://github.com/readdle/spark-cli-skills) at [`507d26e`](https://github.com/readdle/spark-cli-skills/tree/507d26e/skills) (MIT); no text copied. |
-| [wispr-flow-dictionary](skills/wispr-flow-dictionary/SKILL.md) | [Dictation](#dictation) | Tunes the Wispr Flow dictionary from your real dictation history: finds the names, products and commands it mishears, fixes them with backups and undo, and shows whether each fix held. macOS. | Original. The snippet finder and quit-write-relaunch flow follow ideas from [glebis/claude-skills](https://github.com/glebis/claude-skills) (`wispr-analytics`, `wispr-fix`); no code copied. |
+### Effort workflow
+
+| Skill | What it does | Origin |
+|---|---|---|
+| [init-effort](skills/init-effort/SKILL.md) | Starts an effort on its own branch and worktree, runs its thinking session, and ends with a handover prompt for the orchestrator. | Original. |
+| [init-effort-with-herdr](skills/init-effort-with-herdr/SKILL.md) | Starts an effort in a Treehouse worktree opened as a Herdr workspace, and launches its thinking agent there. | Original. |
+| [orchestrating](skills/orchestrating/SKILL.md) | The orchestrator's discipline: delegate, trust delegates, be the user's one contact. Holds the effort lifecycle. | Original. |
+| [orchestrate-effort](skills/orchestrate-effort/SKILL.md) | Builds an effort from its spec and tickets through sub-agents and opens the pull request. | Original. |
+| [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | Picks up an effort from a thinking session's handoff and runs orchestrate-effort. | Original. |
+| [orchestrate-with-herdr](skills/orchestrate-with-herdr/SKILL.md) | Ends a thinking session and starts its orchestrator in a new Herdr tab in the same workspace. | Original. |
+| [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`697d4ce`](https://github.com/mattpocock/skills/tree/697d4ce9742d/skills/engineering/implement) (MIT, see `skills/implement/LICENSE.mattpocock`). Changes: agents can load it, so an orchestrator's sub-agents can use it, and it commits only when the delegating agent doesn't. |
+
+### Design frameworks
+
+| Skill | What it does | Origin |
+|---|---|---|
+| [low-level-design](skills/low-level-design/SKILL.md) | Designs, explains or redesigns code at the level of modules, classes, files and folders, with reference documents for the principles, OOP concepts and patterns. | Original. Distils Hello Interview's low-level design lessons, cited at the end of each document. |
+| [system-design](skills/system-design/SKILL.md) | Designs, explains or redesigns a system at the level of services, data stores, APIs and scale, with reference documents for the core concepts. | Original. Distils Hello Interview's system design lessons, cited at the end of each document. |
+
+### Pull requests and explanations
+
+| Skill | What it does | Origin |
+|---|---|---|
+| [to-pr](skills/to-pr/SKILL.md) | Opens a pull request or rewrites its description: a one-sentence why, reviewer notes, and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr) (MIT, see `skills/to-pr/LICENSE.humanlayer`). Changes: renamed, a real trigger description, and no Mermaid views. |
+| [show-me](skills/show-me/SKILL.md) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks, or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`6ab9013`](https://github.com/humanlayer/skills/tree/6ab9013a10c2/plugins/show-me/skills/show-me) (MIT, see `skills/show-me/LICENSE.humanlayer`). Changes: no Mermaid views, so every view renders as plain text. |
+
+### Skill upkeep
+
+| Skill | What it does | Origin |
+|---|---|---|
+| [maintain-skills](skills/maintain-skills/SKILL.md) | Installs, moves, updates, forks, publishes, removes, and audits skills across global scope, project scope, and your own skills repo with `npx skills`; prompt-audits each new skill in a fresh sub-agent and measures a skill's run cost on request. | Original. |
+
+### Email
+
+| Skill | What it does | Origin |
+|---|---|---|
+| [email](skills/email/SKILL.md) | Reads and tidies your email: Spark CLI for fast reading, the Gmail connector for marking done, labels, pins and drafts, with sending, trash and spam denied. Includes setup and checks. | Original. The daily workflows adapt the read-only recipes in [readdle/spark-cli-skills](https://github.com/readdle/spark-cli-skills) at [`507d26e`](https://github.com/readdle/spark-cli-skills/tree/507d26e/skills) (MIT); no text copied. |
+
+### Dictation
+
+| Skill | What it does | Origin |
+|---|---|---|
+| [wispr-flow-dictionary](skills/wispr-flow-dictionary/SKILL.md) | Tunes the Wispr Flow dictionary from your real dictation history: finds the names, products and commands it mishears, fixes them with backups and undo, and shows whether each fix held. macOS. | Original. The snippet finder and quit-write-relaunch flow follow ideas from [glebis/claude-skills](https://github.com/glebis/claude-skills) (`wispr-analytics`, `wispr-fix`); no code copied. |
 
 ## How the skills work
 
@@ -141,7 +168,7 @@ It reads Wispr Flow's local database and writes only its `Dictionary` table. For
 
 ## Adding a skill
 
-Add its row to the [table](#skills) with its family. A skill that starts a new family also gets a line in the list at the top and a section under [How the skills work](#how-the-skills-work), in the same shape as the others: two sentences and one outline.
+Add its row to its family's table under [Skills](#skills). A skill that starts a new family also gets its own subsection and table under Skills, a line in the list at the top, and a section under [How the skills work](#how-the-skills-work), in the same shape as the others: two sentences and one outline.
 
 ## Decision records
 
