@@ -17,6 +17,7 @@ import re
 import sqlite3
 import subprocess
 import sys
+import time
 import uuid
 
 DEFAULT_DB = os.path.expanduser("~/Library/Application Support/Wispr Flow/flow.sqlite")
@@ -98,10 +99,34 @@ def rows(con, sql, params=()):
     return [dict(r) for r in con.execute(sql, params)]
 
 
+# The bundle nests a helper app with the same executable name; its path runs through Resources/.
+APP_BUNDLE_ID = "com.electron.wispr-flow"
+
+
 def app_running():
-    out = subprocess.run(["pgrep", "-f", "Wispr Flow.app/Contents/MacOS/Wispr Flow"],
-                         capture_output=True, text=True)
-    return out.returncode == 0
+    out = subprocess.run(["ps", "-axo", "command="], capture_output=True, text=True).stdout
+    return any("Wispr Flow.app/Contents/MacOS/Wispr Flow" in line and "/Resources/" not in line
+               for line in out.splitlines())
+
+
+def stop_app(args):
+    """Quit Wispr Flow before a write when --restart is set. Returns whether it was running."""
+    if not getattr(args, "restart", False) or not app_running():
+        return False
+    subprocess.run(["osascript", "-e", f'quit app id "{APP_BUNDLE_ID}"'], capture_output=True)
+    for _ in range(40):
+        if not app_running():
+            return True
+        time.sleep(0.5)
+    sys.exit("Wispr Flow did not quit within 20 s; nothing was written")
+
+
+def start_app(was_running):
+    if was_running:
+        subprocess.run(["open", "-b", APP_BUNDLE_ID], capture_output=True)
+        print("-- Wispr Flow restarted, so it loads the change", file=sys.stderr)
+    elif app_running():
+        print("-- Wispr Flow is running: restart it (or pass --restart) so it loads the change", file=sys.stderr)
 
 
 def emit(data, fmt):
@@ -341,6 +366,38 @@ def cmd_terms(args):
     print(f"-- {len(result)} terms from {len(items)} dictations", file=sys.stderr)
 
 
+URL_OR_EMAIL = re.compile(r"https?://\S+|www\.\S+|[\w.+-]+@[\w-]+\.[\w.]+")
+
+
+def cmd_snippets(args):
+    """Text dictated in full again and again: links, emails, and repeated sentences a snippet could expand."""
+    con = connect(args)
+    args.include_empty = False
+    args.grep = None
+    args.newest_first = False
+    args.limit = None
+    items = history_query(con, args)
+    expands_to = {norm(e["replacement"]).lower() for e in active_entries(con) if e["isSnippet"]}
+    seen = {}
+    for i in items:
+        text = re.sub(r"<[^>]+>", " ", i["formatted"] or "")
+        found = {m.group(0).rstrip(".,;)") for m in URL_OR_EMAIL.finditer(text)}
+        found |= {norm(s) for s in re.split(r"(?<=[.!?])\s+", text) if len(s.split()) >= args.min_words}
+        for f in found:
+            key = f.lower()
+            entry = seen.setdefault(key, {"text": f, "dictations": 0, "snippet_exists": key in expands_to})
+            entry["dictations"] += 1
+    result = sorted((e for e in seen.values() if e["dictations"] >= args.min),
+                    key=lambda e: (-e["dictations"], -len(e["text"])))
+    if args.format == "json":
+        emit(result, "json")
+        return
+    print("| Text | Dictations | Snippet exists |\n|---|---|---|")
+    for e in result:
+        print(f"| {e['text'].replace('|', '/')} | {e['dictations']} | {'yes' if e['snippet_exists'] else ''} |")
+    print(f"-- {len(result)} candidates from {len(items)} dictations", file=sys.stderr)
+
+
 # ---------- dictionary ----------
 
 def active_entries(con, include_deleted=False):
@@ -362,7 +419,7 @@ def cmd_dict_list(args):
     elif args.kind == "words":
         items = [i for i in items if not i["replacement"]]
     elif args.kind == "snippets":
-        items = [i for i in items if i["isSnippet"] or (i["replacement"] and len(i["replacement"]) > 60)]
+        items = [i for i in items if i["isSnippet"]]
     if args.format in ("json", "jsonl"):
         emit(items, args.format)
         return
@@ -379,25 +436,36 @@ def cmd_dict_list(args):
     print(f"-- {len(items)} entries", file=sys.stderr)
 
 
-def backup(con, backup_dir, label):
+def backup(con, backup_dir, label, keep=None):
+    """Save the Dictionary table as JSON, then keep only the newest `keep` backups this script made."""
     os.makedirs(backup_dir, exist_ok=True)
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     path = os.path.join(backup_dir, f"dictionary-{stamp}-{label}.json")
     data = rows(con, "select * from Dictionary")
     with open(path, "w") as fh:
         json.dump(data, fh, indent=2, ensure_ascii=False)
+    if keep:
+        ours = sorted(f for f in os.listdir(backup_dir) if f.startswith("dictionary-") and f.endswith(".json"))
+        for old in ours[:-keep]:
+            os.remove(os.path.join(backup_dir, old))
     return path, len(data)
 
 
 def load_entries(args):
-    """Entries from --file (JSON list of {phrase, replacement?}) or from the positional phrase."""
+    """Entries from --file (JSON list of {phrase, replacement?, snippet?}) or from the positional phrase."""
     if args.file:
         with open(args.file) as fh:
             data = json.load(fh)
-        return [{"phrase": e["phrase"].strip(), "replacement": (e.get("replacement") or None)} for e in data]
-    if not args.phrase:
+        entries = [{"phrase": e["phrase"].strip(), "replacement": (e.get("replacement") or None),
+                    "snippet": bool(e.get("snippet"))} for e in data]
+    elif args.phrase:
+        entries = [{"phrase": args.phrase.strip(), "replacement": args.replace, "snippet": args.snippet}]
+    else:
         sys.exit("give a PHRASE or --file")
-    return [{"phrase": args.phrase.strip(), "replacement": args.replace}]
+    for e in entries:
+        if e["snippet"] and not e["replacement"]:
+            sys.exit(f"snippet {e['phrase']!r} needs a replacement: the text it expands to")
+    return entries
 
 
 def cmd_dict_add(args):
@@ -418,30 +486,32 @@ def cmd_dict_add(args):
             plan.append((e, "add"))
     print("| Phrase | Replacement | Action |\n|---|---|---|")
     for e, action in plan:
-        print(f"| {e['phrase']} | {e['replacement'] or ''} | {action} |")
+        kind = " (snippet)" if e["snippet"] else ""
+        print(f"| {e['phrase']} | {(e['replacement'] or '')[:60]}{kind} | {action} |")
     todo = [(e, a) for e, a in plan if not a.startswith("skip")]
     if args.dry_run or not todo:
         print(f"-- {'dry run, ' if args.dry_run else ''}{len(todo)} to write", file=sys.stderr)
         return
-    path, n = backup(con, args.backup_dir, "before-add")
+    was_running = stop_app(args)
+    path, n = backup(con, args.backup_dir, "before-add", args.keep_backups)
     batch = now_db()
     with con:
         for e, action in todo:
             if action == "revive deleted entry":
-                con.execute("update Dictionary set isDeleted=0, replacement=?, modifiedAt=?, createdAt=?, "
-                            "source=?, manualEntry=1 where phrase=? and teamDictionaryId=?",
-                            (e["replacement"], batch, batch, BATCH_SOURCE, e["phrase"], PERSONAL_DICTIONARY))
+                con.execute("update Dictionary set isDeleted=0, replacement=?, isSnippet=?, modifiedAt=?, "
+                            "createdAt=?, source=?, manualEntry=1 where phrase=? and teamDictionaryId=?",
+                            (e["replacement"], int(e["snippet"]), batch, batch, BATCH_SOURCE, e["phrase"],
+                             PERSONAL_DICTIONARY))
             else:
                 con.execute(
                     "insert into Dictionary (id, phrase, replacement, teamDictionaryId, frequencyUsed, "
                     "remoteFrequencyUsed, manualEntry, createdAt, modifiedAt, isDeleted, source, isSnippet, "
-                    "isStarred) values (?, ?, ?, ?, 0, 0, 1, ?, ?, 0, ?, 0, 0)",
+                    "isStarred) values (?, ?, ?, ?, 0, 0, 1, ?, ?, 0, ?, ?, 0)",
                     (str(uuid.uuid4()), e["phrase"], e["replacement"], PERSONAL_DICTIONARY, batch, batch,
-                     BATCH_SOURCE))
+                     BATCH_SOURCE, int(e["snippet"])))
     print(f"-- wrote {len(todo)} entries; backup of {n} rows: {path}", file=sys.stderr)
     print(f"-- batch: {batch}  (revert with: dict undo --batch '{batch}')", file=sys.stderr)
-    if app_running():
-        print("-- Wispr Flow is running: restart it so it loads the new entries", file=sys.stderr)
+    start_app(was_running)
 
 
 def cmd_dict_remove(args):
@@ -461,12 +531,14 @@ def cmd_dict_remove(args):
         print(f"not found: {p}")
     if args.dry_run or not found:
         return
-    path, n = backup(con, args.backup_dir, "before-remove")
+    was_running = stop_app(args)
+    path, n = backup(con, args.backup_dir, "before-remove", args.keep_backups)
     stamp = now_db()
     with con:
         con.executemany("update Dictionary set isDeleted=1, modifiedAt=? where id=?",
                         [(stamp, i["id"]) for i in found])
     print(f"-- removed {len(found)}; backup of {n} rows: {path}", file=sys.stderr)
+    start_app(was_running)
 
 
 def cmd_dict_undo(args):
@@ -479,16 +551,18 @@ def cmd_dict_undo(args):
     if args.dry_run or not hits:
         print(f"-- {len(hits)} entries in batch", file=sys.stderr)
         return
-    path, n = backup(con, args.backup_dir, "before-undo")
+    was_running = stop_app(args)
+    path, n = backup(con, args.backup_dir, "before-undo", args.keep_backups)
     stamp = now_db()
     with con:
         con.executemany("update Dictionary set isDeleted=1, modifiedAt=? where id=?",
                         [(stamp, h["id"]) for h in hits])
     print(f"-- undid {len(hits)}; backup of {n} rows: {path}", file=sys.stderr)
+    start_app(was_running)
 
 
 def cmd_dict_backup(args):
-    path, n = backup(connect(args), args.backup_dir, "manual")
+    path, n = backup(connect(args), args.backup_dir, "manual", args.keep_backups)
     print(f"backed up {n} rows to {path}")
 
 
@@ -504,12 +578,12 @@ def cmd_status(args):
             problems.append(f"{table} is missing {', '.join(miss)}")
     info = rows(con, "select count(*) as dictations, min(timestamp) as first, max(timestamp) as last "
                      "from History where coalesce(trim(formattedText), '') <> ''")[0]
-    d = rows(con, "select sum(isDeleted=0) as active, sum(isDeleted=0 and replacement is not null and isSnippet=0 "
-                  "and length(replacement) <= 60) as rules from Dictionary where teamDictionaryId=?", (PERSONAL_DICTIONARY,))[0]
+    d = rows(con, "select sum(isDeleted=0) as active, sum(isDeleted=0 and replacement is not null and isSnippet=0) as rules, "
+                  "sum(isDeleted=0 and isSnippet=1) as snippets from Dictionary where teamDictionaryId=?", (PERSONAL_DICTIONARY,))[0]
     print(f"database:   {args.db}")
     print(f"app:        {'running' if app_running() else 'not running'}")
     print(f"history:    {info['dictations']} dictations, {local(info['first'])} to {local(info['last'])}")
-    print(f"dictionary: {d['active']} active entries, {d['rules']} of them replacement rules")
+    print(f"dictionary: {d['active']} active entries, {d['rules']} of them replacement rules, {d['snippets']} snippets")
     print(f"backups:    {args.backup_dir}")
     print("schema:     " + ("ok" if not problems else "CHANGED: " + "; ".join(problems)))
     if problems:
@@ -523,6 +597,8 @@ def main():
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--db", default=os.environ.get("WISPR_FLOW_DB", DEFAULT_DB),
                    help="database path (env WISPR_FLOW_DB)")
+    p.add_argument("--keep-backups", type=int, default=int(os.environ.get("WISPR_FLOW_KEEP_BACKUPS", "30")),
+                   help="backups to keep; older ones this script made are deleted (env WISPR_FLOW_KEEP_BACKUPS)")
     p.add_argument("--backup-dir", default=os.environ.get("WISPR_FLOW_BACKUP_DIR", DEFAULT_BACKUP_DIR),
                    help="where writes save a dictionary backup first (env WISPR_FLOW_BACKUP_DIR)")
     sub = p.add_subparsers(dest="command", required=True)
@@ -556,6 +632,13 @@ def main():
     t.add_argument("--format", choices=["table", "json"], default="table")
     t.set_defaults(func=cmd_terms)
 
+    sn = sub.add_parser("snippets", help="links, emails and sentences dictated in full again and again")
+    window(sn)
+    sn.add_argument("--min", type=int, default=2, help="only text in at least this many dictations")
+    sn.add_argument("--min-words", type=int, default=8, help="shortest sentence to consider")
+    sn.add_argument("--format", choices=["table", "json"], default="table")
+    sn.set_defaults(func=cmd_snippets)
+
     c = sub.add_parser("count", help="how many dictations contain each term (whole word, any case)")
     window(c)
     c.add_argument("terms", nargs="+")
@@ -577,18 +660,22 @@ def main():
     da = dsub.add_parser("add", help="add a word, or a rule with --replace; --file for a batch")
     da.add_argument("phrase", nargs="?", help="the word, or what Wispr mishears")
     da.add_argument("--replace", help="text to write instead of PHRASE")
-    da.add_argument("--file", help='JSON list of {"phrase": ..., "replacement": ...}')
+    da.add_argument("--file", help='JSON list of {"phrase": ..., "replacement": ..., "snippet": true}')
+    da.add_argument("--snippet", action="store_true", help="PHRASE is a trigger that expands to --replace")
     da.add_argument("--dry-run", action="store_true")
+    da.add_argument("--restart", action="store_true", help="quit Wispr Flow first and relaunch it after")
     da.set_defaults(func=cmd_dict_add)
 
     dr = dsub.add_parser("remove", help="delete entries by phrase (soft delete, like the app)")
     dr.add_argument("phrases", nargs="+")
     dr.add_argument("--dry-run", action="store_true")
+    dr.add_argument("--restart", action="store_true", help="quit Wispr Flow first and relaunch it after")
     dr.set_defaults(func=cmd_dict_remove)
 
     du = dsub.add_parser("undo", help="delete every entry one `dict add` batch created")
     du.add_argument("--batch", required=True, help="the batch timestamp `dict add` printed")
     du.add_argument("--dry-run", action="store_true")
+    du.add_argument("--restart", action="store_true", help="quit Wispr Flow first and relaunch it after")
     du.set_defaults(func=cmd_dict_undo)
 
     dsub.add_parser("backup", help="save the dictionary table as JSON").set_defaults(func=cmd_dict_backup)

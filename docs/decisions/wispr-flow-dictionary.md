@@ -1,6 +1,6 @@
-# Decisions: wispr-flow
+# Decisions: wispr-flow-dictionary
 
-The decisions behind the `wispr-flow` skill. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why.
+The decisions behind the `wispr-flow-dictionary` skill (named `wispr-flow` until 2026-09-28). This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why.
 
 ## 2026-09-28
 
@@ -14,3 +14,12 @@ The decisions behind the `wispr-flow` skill. This file is for maintaining it and
 - **Words first, rules only for mistakes that outlive their word.** The user prefers plain dictionary words; a rule is proposed when a mistake comes back after its word was added, which `count` and `terms` now show as hits since the entry was added. This reverses the first version's rule-heavy default, whose 26 rules were replaced by words the same day.
 - **`history --diff` shows only the formatter's vocabulary swaps.** Deleted fillers, inserted grammar words, list markup, digits, and hyphenation are dropped, which takes 48 hours from about 285 KB to 14 KB. It catches mishearings the formatter fixed or caused, not the ones it left alone, so the full read stays.
 - **`dict remove` matches the exact spelling first.** Matching any case would delete `Claude` along with a duplicate `claude`.
+
+## 2026-09-28 (rename)
+
+- **Renamed `wispr-flow` to `wispr-flow-dictionary`.** Two other published skills are named `wispr-flow` (artemxtech, cathrynlavery), so the old name clashed on skills.sh and in an installer's skills folder. The new name keeps "wispr flow" for search and says what the skill owns. `wispr-flow-analyzer` was rejected because it reads as glebis's `wispr-analytics`, which covers analytics.
+- **The skill owns the dictionary loop; analytics stay out.** Usage stats, recaps and wellbeing reflection are covered by other skills (glebis `wispr-analytics`, cathrynlavery and artemxtech `wispr-flow`). A recap of what the user worked on, if wanted, becomes a separate skill.
+- **Fixes the user reports mid-task are applied in the same turn**, after a whole-history count shows whether the wrong form is also meant literally. Idea from glebis `wispr-fix`, which queues them instead; with `--restart` a queue isn't needed.
+- **Writes can quit and relaunch the app (`--restart`).** glebis's skills refuse to write while the app runs; writing live worked here but the app only loads changes on launch, so restarting in the same command saves the user a step. The app bundle nests a helper app with the same executable name, so quitting targets the main bundle id `com.electron.wispr-flow`, and the running check skips paths under `Resources/`.
+- **Backups keep the newest 30** of those the script made.
+- **Snippet candidates are links, emails and sentences of 8+ words repeated in 2+ dictations.** Idea from glebis `wispr-analytics` `propose`.
