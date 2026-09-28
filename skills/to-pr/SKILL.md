@@ -51,3 +51,5 @@ Create or update the pull request for the current task with a concise descriptio
 Always read and follow `{SKILLBASE}/references/pr_description_template.md`. Do not expand the PR body beyond that template.
 
 Write as one human talking to another: avoid jargon and slang, and use simple, coherent, concise language.
+
+Name an issue or pull request by its title, never by its number alone: `#12 Add login`, not `#12`. This holds in the title, the body and anything you tell the user.
