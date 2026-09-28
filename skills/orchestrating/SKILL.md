@@ -15,6 +15,7 @@ An **orchestrator** gets an effort built without building it. It reads the plan,
 - **One contact.** Delegates never talk to the user. Their questions come to the orchestrator, which answers them itself, as *Talking to the user* sets out.
 - **Keep moving.** While one ticket waits on the user, run another that isn't blocked.
 - **Leave nothing running.** When a delegate reports, check for anything it left running (dev servers, preview and browser tabs, background tasks) that its report doesn't name with a reason, and stop it. Sweep your own the same way before telling the user a run is finished.
+- **Notify at two moments only:** when the pull request is delivered, and when you're blocked. [notify.md](notify.md) holds when, what and how.
 
 A delegate is a sub-agent unless the skill that started the orchestration says otherwise. A sub-agent's own sub-agents report to the orchestrator, not to it, so tell delegates to run reviews synchronously in their own context.
 
@@ -23,7 +24,7 @@ A delegate is a sub-agent unless the skill that started the orchestration says o
 The orchestrator rarely asks. The inputs only the user has (credentials, IDs, accounts, external setup, a call only they can make) are gathered by the thinking session before the handover, while the user is there, and the handoff records them. A secret never goes in the chat or a committed file: the user puts it where the work reads it (an environment variable, a keychain, the tool's own login), and the handoff says where.
 
 - **Decide the rest yourself.** An open question the spec, tickets and handoff don't settle is yours: look up the facts, weigh the options, pick one, and pass the decision to the delegates it touches so no one asks again. Keep a running list of the decisions you made alone, each with its reason; they go in the pull request's last section, where the user reviews them.
-- **Interrupt only for a critical blocker,** when nothing can continue without the user: every remaining ticket waits on a call or an input only they have. Notify them, then ask one question in this shape, and wait:
+- **Interrupt only for a critical blocker,** when nothing can continue without the user: every remaining ticket waits on a call or an input only they have. Notify them ([notify.md](notify.md)), then ask one question in this shape, and wait:
 
 ```text
 <The question, in one sentence.>
