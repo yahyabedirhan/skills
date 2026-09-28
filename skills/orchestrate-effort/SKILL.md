@@ -45,4 +45,4 @@ Done when every ticket is committed and pushed, with its criteria ticked or note
 
 ## 4. Deliver
 
-Delegate the final review to a sub-agent: the full checks and **code-review** over the whole branch against its base. Delegate the fixes for what it finds the same way you delegated tickets, then commit them. Open the pull request with the **to-pr** skill; the decisions you made alone go in its last section. Report the pull request, each ticket's commit, anything deferred, and what the user does next: review and merge, then close the effort's worktree the way it was created.
+Delegate the final review to a sub-agent: the full checks and **code-review** over the whole branch against its base. Delegate the fixes for what it finds the same way you delegated tickets, then commit them. Open the pull request with the **to-pr** skill; the decisions you made alone go in its last section. Report the pull request, each ticket's commit, anything deferred, and what the user does next: review and merge, then close the effort's worktree the way it was created. Last, send the "done" notification, following the **orchestrating** skill's `notify.md`.
