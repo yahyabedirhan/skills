@@ -1,0 +1,5 @@
+interface:
+  display_name: "Skill Recap"
+  short_description: "Recap how a session used its skills"
+policy:
+  allow_implicit_invocation: false

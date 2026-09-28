@@ -73,6 +73,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | Skill | What it does | Origin |
 |---|---|---|
 | [maintain-skills](skills/maintain-skills/SKILL.md) | Installs, moves, updates, forks, publishes, removes, and audits skills across global scope, project scope, and your own skills repo with `npx skills`; prompt-audits each new skill in a fresh sub-agent and measures a skill's run cost on request. | Original. |
+| [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings and a verdict. You file them with `/to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills). | Original. |
 
 ### Daily workflows
 
@@ -125,7 +126,7 @@ show-me   explains the current topic
 
 ### Agent setup
 
-What your agents run with, kept in order across Claude Code and Codex. Today that is skills: `maintain-skills` keeps every change flowing from a skill's source to its installs.
+What your agents run with, kept in order across Claude Code and Codex. Today that is skills: `maintain-skills` keeps every change flowing from a skill's source to its installs, and `skill-recap` looks back over a session for what its skills should change.
 
 ```text
 source      your skills repo, or someone else's
@@ -133,6 +134,7 @@ source      your skills repo, or someone else's
 installs    global (~/.agents/skills) or one project (.agents/skills)
 operations  install, update, move, remove, fork, publish
 audits      which skills you use, a fresh prompt audit, a run's cost
+recap       /skill-recap: how a session used its skills → findings → /to-tickets
 ```
 
 ### Daily workflows
