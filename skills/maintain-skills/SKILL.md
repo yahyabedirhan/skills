@@ -41,7 +41,7 @@ A skill moves from project to global once the user wants it in a second project.
 
 ## Operations
 
-Each operation ends with a check: list the scope's folder, confirm `SKILL.md` resolves through `~/.claude/skills` (global) or `.claude/skills` (project), and confirm the lock file names the expected source.
+Each operation that changes an install ends with a check: list the scope's folder, confirm `SKILL.md` resolves through `~/.claude/skills` (global) or `.claude/skills` (project), and confirm the lock file names the expected source.
 
 **Create a project skill.** Write it under `<project>/.agents/skills/<name>/SKILL.md`, following the **writing-for-agents** skill when it is installed. Then link it for Claude Code from the project root, and commit the link with the project (the link itself, not a copy of the folder):
 
@@ -59,9 +59,9 @@ It stays a local skill until the user asks to publish it; then it becomes an ins
 
 **Remove.** `npx skills remove -s <name> -y`, with `-g` for global. Before removing, grep the other installed skills and the agent instructions files for the name; fix or report every pointer left behind. A skill that belongs to an installed bundle stays unless the user drops the whole bundle.
 
-**Change one of the user's own skills.** Read the repo's decision records for it first (such as `docs/decisions/`), and add a dated entry for each new decision. Edit it in `<path-to-skills-repo>/skills/<name>/`, commit, push, then `npx skills update <name>` in every scope that installs it.
+**Change one of the user's own skills.** Read the repo's decision records for it first (such as `docs/decisions/`), and add a dated entry for each new decision. Edit it in `<path-to-skills-repo>/skills/<name>/` and ship it (see Shipping to the skills repo); after the merge, `npx skills update <name>` in every scope that installs it.
 
-**Add a new skill to the user's repo.** Only when the user names the skill for publishing. Write it under `<path-to-skills-repo>/skills/<name>/SKILL.md` with `name` and `description` frontmatter, add its row to the repo README, commit, push, then install it. The repo is public: nothing in a skill names the user, their accounts, their machine's paths, or any project of theirs; anything user-specific becomes a parameter like the two above.
+**Add a new skill to the user's repo.** Only when the user names the skill for publishing. Write it under `<path-to-skills-repo>/skills/<name>/SKILL.md` with `name` and `description` frontmatter, add its row to the repo README, and ship it (see Shipping to the skills repo); install it after the merge. The repo is public: nothing in a skill names the user, their accounts, their machine's paths, or any project of theirs; anything user-specific becomes a parameter like the two above.
 
 **Fork someone else's skill.** Copying a skill folder is not a GitHub fork: nothing links the copy to its origin, so the credit is written by hand.
 
@@ -70,7 +70,18 @@ It stays a local skill until the user asks to publish it; then it becomes an ins
 3. Copy the folder to `<path-to-skills-repo>/skills/<name>/`. Keep the upstream licence beside it as `LICENSE.<upstream>`. Rename the skill when its behaviour diverges, so the two can be installed side by side.
 4. Make the change, and nothing else, so a later diff against upstream shows only the user's intent.
 5. In the README row, name the upstream repo, link the commit, name the licence file, and list what changed.
-6. Commit, push, remove the upstream install, and install the fork into the same scope.
+6. Ship it (see Shipping to the skills repo). After the merge, remove the upstream install and install the fork into the same scope.
+
+## Shipping to the skills repo
+
+Every operation that changes `<path-to-skills-repo>` starts on a branch and ends with a pull request into `main`:
+
+1. Before the first edit, branch from an up-to-date `main`: `<skill>/<topic>` for one skill, `skills/<topic>` when the change spans skills.
+2. Make the change and commit it on the branch.
+3. For a new skill or a fork that changes behaviour, run Auditing a new skill and commit the applied fixes on the same branch.
+4. Push the branch and open the pull request through the **to-pr** skill. For an audited skill, the description lists the audit's findings, the fixes applied, and why any finding was left, so the reviewer sees what the audit changed.
+
+The operation ends with the pull request open. The merge happens when the user merges it or asks the agent to. `npx skills` installs from the default branch, so installs and updates run after the merge: the session told "merged" or "merge it" runs them, in every scope that installs the skill.
 
 ## Auditing usage
 
@@ -91,4 +102,4 @@ Only when the user asks what a skill costs to run (tokens, minutes, plan usage) 
 
 ## Publishing
 
-Creating the repo and every push publish to the public. Confirm with the user before creating the repo; after that, pushing changes the user asked for is part of the operation. A new repo gets an MIT `LICENSE` in the user's name unless they choose another, and a README with an install line (`npx skills add <skills-repo>`) and a table of skills with an Origin column.
+Creating the repo and every push publish to the public. Confirm with the user before creating the repo; after that, opening the pull request for a change the user asked for is part of the operation; the merge happens when the user merges it or asks the agent to. A new repo gets an MIT `LICENSE` in the user's name unless they choose another, and a README with an install line (`npx skills add <skills-repo>`) and a table of skills with an Origin column.
