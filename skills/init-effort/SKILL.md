@@ -36,18 +36,6 @@ The thinking runs here, in this one context window: the user drives it with `/gr
 
 ## 4. Hand over
 
-When the tickets are written, this session finishes clean:
-
-1. Write the **handoff** in the repository (the project's handoff folder, else `.handoff/<date>-<effort>.md`): the spec and tickets by path, what the builder should know that they don't, the skills to use, and this session's name or id and where it runs. Leave out secrets.
-2. Commit the spec, tickets, handoff, and every other change from this session, and push the branch.
-3. Print the **handover prompt** in a fenced block, for the user to paste into a new session in this worktree:
-
-   ```text
-   /orchestrate-with-handoff <path to the handoff>
-   Worktree: <path>   Branch: <branch>
-   Thinking session: <name or id, and where it runs>
-   ```
-
-   Codex starts skills with `$` instead of `/`: when the receiving agent is Codex, write `$orchestrate-with-handoff`.
+When the tickets are written, hand the effort to an orchestrator with the **handover** skill: it writes the handoff, commits and pushes, and starts the orchestrator with a one-line prompt.
 
 Then stop: this session's work is done, and it stays available for reference.

@@ -31,10 +31,14 @@ herdr agent start <name> --kind <kind> --pane <pane_id> -- <agent flags>
 
 ## 4. Send the starting prompt and confirm
 
+Send the starting prompt exactly as **handover** wrote it, one line, in single quotes so the shell leaves a Codex `$skill` alone:
+
 ```bash
 herdr agent prompt <name> '<starting prompt>'
 herdr agent wait <name> --until working --timeout 60000
 ```
+
+`agent prompt` delivers the text as a paste: one line runs as a command, while several lines arrive as pasted text and the skill never starts.
 
 Once it is `working`, tell the maintainer the workspace and tab where it runs.
 

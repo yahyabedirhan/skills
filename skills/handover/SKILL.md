@@ -15,6 +15,7 @@ A **handoff** is the document the new session starts from; the **handoff** skill
 Check each item, and fix what isn't true yet:
 
 - **The worktree exists.** The work gets its own worktree and branch at the latest now, made with the project's worktree tool (its instructions name it; Treehouse by default, else `git worktree add`). Uncommitted changes on the default branch that belong to the work move into it, and only those: the rest stay where they are.
+- **Every input only the maintainer has is collected** while they are here: answers, accounts, choices. Secrets stay out of chat and files; the handoff says where they live.
 - **The handoff is written**, with the **handoff** skill. Beyond what that skill asks, it names the worktree and branch, the spec and tickets, and whether the new session can reach this one.
 - **Everything is committed and pushed**: `git status` is clean in the worktree and its branch matches its remote.
 - **Tracker items exist** for the spec and tickets the handoff names.
@@ -23,14 +24,18 @@ Done when every item holds.
 
 ## 2. Write the starting prompt
 
-The prompt starts the new session on the handoff:
+The starting prompt is **one line**, and it starts the new session on the handoff:
 
 | New session | Starting prompt |
 |---|---|
 | Orchestrator for an effort | `/orchestrate-with-handoff <path to the handoff>` |
 | Anything else, such as more thinking | `Continue from the handoff at <path to the handoff>.` |
 
+Everything else the new session needs goes in the handoff: the worktree and branch, whether this session is reachable, changes since the handoff, rules. A prompt pasted in over several lines arrives as pasted text rather than a command, so its skill never starts.
+
 Codex starts skills with `$` instead of `/`: when the new session runs Codex, write `$orchestrate-with-handoff`.
+
+The new session takes the prompt as the maintainer's go-ahead and starts work without asking for one. So the handoff settles every decision this session can, and step 1's inputs only the maintainer has are already in it.
 
 ## 3. Start it through a mechanism
 
