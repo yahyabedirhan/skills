@@ -44,7 +44,7 @@ Run it in one unbroken context window, so the spec and tickets build on the same
 
 ## Handover
 
-The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking. It checks the session is ready: the worktree exists, a **handoff** is written in the repository by the **handoff** skill (by convention `.handoff/<date>-<topic>.md`), everything is committed and pushed, and the tracker items exist. It then writes a short **starting prompt** that starts the new session on the handoff, starts that session through a mechanism (**handover-to-herdr** by default, else a pasted prompt), and confirms it started. The handing session then stops, and stays open for reference.
+The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to a Herdr orchestrator without leaving its own checkout. It checks the session is ready: the worktree exists, a **handoff** is written in the repository by the **handoff** skill (by convention `.handoff/<date>-<topic>.md`), everything is committed and pushed, and the tracker items exist. It then writes a short **starting prompt** that starts the new session on the handoff, starts that session through a mechanism (**handover-to-herdr** by default, else a pasted prompt), and confirms it started. The handing session then stops, and stays open for reference.
 
 ## Build
 
