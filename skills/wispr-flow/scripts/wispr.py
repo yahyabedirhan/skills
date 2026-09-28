@@ -9,6 +9,7 @@ Run `wispr.py <command> --help` for each command's options.
 """
 
 import argparse
+import difflib
 import datetime as dt
 import json
 import os
@@ -155,7 +156,9 @@ def cmd_history(args):
     if out:
         sys.stdout = out
     try:
-        if args.format in ("json", "jsonl"):
+        if args.diff:
+            print_diff(items)
+        elif args.format in ("json", "jsonl"):
             emit([{k: i[k] for k in ["id", "timestamp", "local_time", "app", "words"] + fields if k in i}
                   for i in items], args.format)
         else:
@@ -170,6 +173,44 @@ def cmd_history(args):
     print(f"-- {len(items)} dictations", file=sys.stderr)
 
 
+WORD = re.compile(r"[\w][\w'.&/-]*[\w]|\w")
+
+
+def word_changes(raw, formatted):
+    """Words the formatter swapped for others: where it corrected, or introduced, a mishearing.
+
+    Deleted fillers, inserted grammar words, list markup, number digits, and hyphenation
+    are left out, so what remains is mostly vocabulary."""
+    a = [w.lower() for w in WORD.findall(raw or "")]
+    b = [w.lower() for w in WORD.findall(re.sub(r"<[^>]+>", " ", formatted or ""))]
+    changes = []
+    for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
+        if op != "replace":
+            continue
+        old, new = a[i1:i2], b[j1:j2]
+        if all(w.isdigit() for w in new):
+            continue  # "seven" -> "7"
+        if re.sub(r"\W", "", "".join(old)) == re.sub(r"\W", "", "".join(new)):
+            continue  # "user facing" -> "user-facing"
+        if not any(len(w) >= 4 and w not in old for w in new):
+            continue  # "that" -> "a"
+        changes.append((" ".join(old), " ".join(new)))
+    return changes
+
+
+def print_diff(items):
+    shown = 0
+    for i in items:
+        changes = word_changes(i["raw"], i["formatted"])
+        if not changes:
+            continue
+        shown += 1
+        print(f"### {i['local_time']} | {i['app'] or '-'}")
+        for old, new in changes:
+            print(f"  {old} -> {new}")
+    print(f"-- {shown} of {len(items)} dictations changed by formatting", file=sys.stderr)
+
+
 def print_history(items, fields):
     for i in items:
         print(f"### {i['local_time']} | {i['app'] or '-'} | {i['words'] or 0} words")
@@ -180,8 +221,20 @@ def print_history(items, fields):
         print()
 
 
+def texts(item, field):
+    return [item["raw"] or ""] * (field != "formatted") + [item["formatted"] or ""] * (field != "raw")
+
+
+def since_added(con, term, hits):
+    """(when the dictionary entry for term was added, hits at or after it); (None, None) if no entry."""
+    entry = next((e for e in active_entries(con) if e["phrase"].lower() == term.lower()), None)
+    if not entry:
+        return None, None
+    return local(entry["createdAt"]), sum(1 for h in hits if h["timestamp"] >= entry["createdAt"])
+
+
 def cmd_count(args):
-    """How many dictations contain each term, in the raw or formatted text."""
+    """How many dictations contain each term: whole word, any case, in the chosen text."""
     con = connect(args)
     args.include_empty = False
     args.grep = None
@@ -191,7 +244,7 @@ def cmd_count(args):
     result = []
     for term in args.terms:
         pattern = re.compile(r"(?<!\w)" + re.escape(term) + r"(?!\w)", re.IGNORECASE)
-        hits = [i for i in items if pattern.search(i["raw"] or "") or pattern.search(i["formatted"] or "")]
+        hits = [i for i in items if any(pattern.search(t) for t in texts(i, args.field))]
         example = ""
         if hits:
             text = hits[-1]["formatted"] or hits[-1]["raw"]
@@ -199,13 +252,17 @@ def cmd_count(args):
             src = text if pattern.search(text) else hits[-1]["raw"]
             start = max(0, m.start() - 40)
             example = norm(src[start:m.end() + 40])
-        result.append({"term": term, "dictations": len(hits), "example": example})
+        added, after = since_added(con, term, hits)
+        result.append({"term": term, "dictations": len(hits), "in_dictionary_since": added,
+                       "dictations_since_added": after, "example": example})
     if args.format == "json":
         emit(result, "json")
         return
-    print("| Term | Dictations | Example |\n|---|---|---|")
+    print("| Term | Dictations | In dictionary since | Since then | Example |\n|---|---|---|---|---|")
     for r in result:
-        print(f"| {r['term']} | {r['dictations']} | {r['example'].replace('|', '/')} |")
+        after = "" if r["dictations_since_added"] is None else r["dictations_since_added"]
+        print(f"| {r['term']} | {r['dictations']} | {r['in_dictionary_since'] or ''} | {after} | "
+              f"{r['example'].replace('|', '/')} |")
 
 
 # Capitalised runs (Jack Miller, Claude Code), tokens with inner dots or digits (AGENTS.md, GPT-5),
@@ -254,21 +311,33 @@ def cmd_terms(args):
             entry["dictations"] += 1
             if term not in fmt:
                 entry["raw_only"] += 1
+            entry.setdefault("times", []).append(i["timestamp"])
             src = i["formatted"] if term in fmt else i["raw"]
             at = src.find(term)
             entry["example"] = norm(src[max(0, at - 40):at + len(term) + 40])
-    result = [e for e in seen.values() if e["dictations"] >= args.min]
+    # A capitalised word that is mostly written lowercase is an ordinary word at a sentence start.
+    lower = {}
+    for i in items:
+        for w in WORD.findall((i["raw"] or "") + " " + (i["formatted"] or "")):
+            if w.islower():
+                lower[w] = lower.get(w, 0) + 1
+    result = [e for e in seen.values() if e["dictations"] >= args.min
+              and not (" " not in e["term"] and e["term"][1:].islower()
+                       and lower.get(e["term"].lower(), 0) >= 3 * e["dictations"])]
     for e in result:
         hit = known.get(e["term"].lower())
         e["dictionary"] = ("rule -> " + hit["replacement"]) if hit and hit["replacement"] else ("word" if hit else "")
+        e["since_added"] = sum(1 for t in e["times"] if t >= hit["createdAt"]) if hit else None
+        del e["times"]
     result.sort(key=lambda e: (-e["dictations"], e["term"].lower()))
     if args.format == "json":
         emit(result, "json")
         return
-    print("| Term | Dictations | Raw only | In dictionary | Example |\n|---|---|---|---|---|")
+    print("| Term | Dictations | Raw only | In dictionary | Since added | Example |\n|---|---|---|---|---|---|")
     for e in result:
         ex = e["example"].replace("|", "/")
-        print(f"| {e['term']} | {e['dictations']} | {e['raw_only'] or ''} | {e['dictionary']} | {ex} |")
+        after = "" if e["since_added"] is None else e["since_added"]
+        print(f"| {e['term']} | {e['dictations']} | {e['raw_only'] or ''} | {e['dictionary']} | {after} | {ex} |")
     print(f"-- {len(result)} terms from {len(items)} dictations", file=sys.stderr)
 
 
@@ -306,7 +375,7 @@ def cmd_dict_list(args):
             src += f" (heard: {i['observedSource']})"
         if i["isDeleted"]:
             src += ", deleted"
-        print(f"| {i['phrase']} | {repl} | {src} | {i['frequencyUsed']} | {local(i['createdAt'])[:10]} |")
+        print(f"| {i['phrase']} | {repl} | {src} | {i['frequencyUsed']} | {local(i['createdAt'])} |")
     print(f"-- {len(items)} entries", file=sys.stderr)
 
 
@@ -477,6 +546,8 @@ def main():
     h.add_argument("--include-empty", action="store_true", help="keep empty dictations")
     h.add_argument("--format", choices=["text", "json", "jsonl"], default="text")
     h.add_argument("--out", help="write to this file and print only its size")
+    h.add_argument("--diff", action="store_true",
+                   help="only the words formatting changed, raw -> formatted, per dictation")
     h.set_defaults(func=cmd_history)
 
     t = sub.add_parser("terms", help="name-like and command-like words in a window, with counts")
@@ -488,6 +559,8 @@ def main():
     c = sub.add_parser("count", help="how many dictations contain each term (whole word, any case)")
     window(c)
     c.add_argument("terms", nargs="+")
+    c.add_argument("--field", choices=["both", "raw", "formatted"], default="both",
+                   help="which text to search; formatted is what was pasted")
     c.add_argument("--format", choices=["table", "json"], default="table")
     c.set_defaults(func=cmd_count)
 
