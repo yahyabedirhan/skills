@@ -144,7 +144,7 @@ Everyday tasks outside the code that an agent can take over safely. Each skill r
 ```text
 read     Spark CLI: inbox by category, threads, pins, calendar, contacts
 act      Gmail connector: mark done (archive), labels, pins (stars), drafts
-daily    start of day → triage by category → end of day
+how      which tool for which job; what to do and when stays with you
 setup    setup.md: both tools, the deny rules, and checks
 ```
 
