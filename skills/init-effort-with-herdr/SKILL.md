@@ -40,7 +40,7 @@ In the new workspace's first tab: start the user's preferred agent (from their i
 
 This is effort <effort> on branch <branch>, in worktree <path>. Think it through here:
 grilling, a prototype if a question needs one, then /to-spec and /to-tickets.
-When the tickets are written, run /orchestrate-with-herdr to hand over.
+When the tickets are written, run /handover to hand over.
 ```
 
 Codex starts skills with `$` instead of `/`: when the agent is Codex, write the prompt's skill commands as `$grill-with-docs`, `$to-spec`, and so on.
@@ -49,7 +49,7 @@ Tell the user the workspace and tab where the thinking runs, and stop: this sess
 
 ## Tab names
 
-An effort's tabs are labelled `<effort> · <role> · <harness>`, so the user can tell them apart at a glance: the role is `Thinking` or `Orchestrator`, and the harness is short: `CC` for Claude Code, `Codex`, `OpenCode`, `Cursor`, or the harness's own name. When a tab already has a label, append ` · <role> · <harness>` to it instead of replacing it. A tab whose session has handed over (see **orchestrate-with-herdr**) gains ` [settled]` at the end.
+An effort's tabs are labelled `<effort> · <role> · <harness>`, so the user can tell them apart at a glance: the role is `Thinking` or `Orchestrator`, and the harness is short: `CC` for Claude Code, `Codex`, `OpenCode`, `Cursor`, or the harness's own name. When a tab already has a label, append ` · <role> · <harness>` to it instead of replacing it. A tab whose session has handed over (see **handover-to-herdr**) gains ` [settled]` at the end.
 
 ## After the pull request merges
 

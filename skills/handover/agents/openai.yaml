@@ -1,0 +1,5 @@
+interface:
+  display_name: "Handover"
+  short_description: "Start a new session on this work and confirm it started"
+policy:
+  allow_implicit_invocation: true
