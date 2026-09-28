@@ -23,7 +23,7 @@ Where Claude Code keeps transcripts, one JSON object per line (the layout it use
   <session-id>/subagents/agent-<id>.meta.json its type, task description and spawn depth
 ```
 
-The current session's id is in the `CLAUDE_CODE_SESSION_ID` environment variable. Skill loads appear as `tool_use` blocks named `Skill` (the skill is `input.skill`) and as `<command-name>/<name></command-name>` in user messages. For another harness, find where it stores its sessions (Codex: `~/.codex/sessions/`).
+The current session's id is in the `CLAUDE_CODE_SESSION_ID` environment variable. Skill loads appear as `tool_use` blocks named `Skill` (the skill is `input.skill`) and as `<command-name>/<name></command-name>` in user messages. For another harness, find where it stores its sessions and how a skill load shows there. Codex keeps them under `~/.codex/sessions/` and loads a skill by reading its `skills/<name>/SKILL.md`, so a read of that file is the load (a session that edits the skill reads it too).
 
 Transcripts run long: search them for what the audit needs (skill loads, errors, retries, long runs of tool calls on one problem, the user's corrections) and read around each hit, rather than reading them whole.
 
