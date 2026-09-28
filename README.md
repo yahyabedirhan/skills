@@ -14,6 +14,15 @@ npx skills add yahyabedirhan/skills -s wispr-flow-dictionary
 
 Swap in any name from the table below. Leave out `-s` to pick from the list, and add `-g` to install for your user rather than the current project.
 
+`wispr-flow-dictionary` is also a Claude Code plugin, from this repo's marketplace:
+
+```bash
+claude plugin marketplace add yahyabedirhan/skills
+claude plugin install wispr-flow-dictionary@yahyabedirhan-skills
+```
+
+Install it one way or the other, not both, or Claude Code loads the skill twice.
+
 ## Skills
 
 The Origin column names the upstream commit each fork was copied from, so a later upstream change can be diffed against it.

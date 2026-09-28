@@ -23,3 +23,8 @@ The decisions behind the `wispr-flow-dictionary` skill (named `wispr-flow` until
 - **Writes can quit and relaunch the app (`--restart`).** glebis's skills refuse to write while the app runs; writing live worked here but the app only loads changes on launch, so restarting in the same command saves the user a step. The app bundle nests a helper app with the same executable name, so quitting targets the main bundle id `com.electron.wispr-flow`, and the running check skips paths under `Resources/`.
 - **Backups keep the newest 30** of those the script made.
 - **Snippet candidates are links, emails and sentences of 8+ words repeated in 2+ dictations.** Idea from glebis `wispr-analytics` `propose`.
+
+## 2026-09-28 (plugin)
+
+- **Also a Claude Code plugin, from a marketplace in this repo.** `.claude-plugin/marketplace.json` lists one plugin whose `source` is the skill's own folder, so nothing is copied: a plugin root holding `SKILL.md`, with no `skills/` folder and no `skills` key, loads as a single skill, and an entry without `plugin.json` is the manifest itself. A `source` of `./` would have loaded every skill in the repo. No `version` is set, so each push reaches users as a new commit. The plugin name is permanent.
+- **Not submitted to Anthropic's directory.** The skill reads a database on the user's Mac, which a claude.ai sandbox can't reach.

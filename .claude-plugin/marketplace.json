@@ -1,0 +1,23 @@
+{
+  "name": "yahyabedirhan-skills",
+  "owner": {
+    "name": "Yahya Bedirhan Pak",
+    "url": "https://github.com/yahyabedirhan"
+  },
+  "metadata": {
+    "description": "Agent skills by Yahya Bedirhan Pak, packaged as Claude Code plugins"
+  },
+  "plugins": [
+    {
+      "name": "wispr-flow-dictionary",
+      "source": "./skills/wispr-flow-dictionary",
+      "description": "Tune the Wispr Flow dictionary from your real dictation history: find the names, products and commands it mishears, fix them with backups and undo, and check each fix held. macOS.",
+      "author": { "name": "Yahya Bedirhan Pak", "url": "https://github.com/yahyabedirhan" },
+      "homepage": "https://github.com/yahyabedirhan/skills/tree/main/skills/wispr-flow-dictionary",
+      "repository": "https://github.com/yahyabedirhan/skills",
+      "license": "MIT",
+      "keywords": ["wispr-flow", "dictation", "speech-to-text", "dictionary", "macos"],
+      "category": "productivity"
+    }
+  ]
+}
