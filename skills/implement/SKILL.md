@@ -11,4 +11,6 @@ Run typechecking regularly, single test files regularly, and the full test suite
 
 Once done, use /code-review to review the work.
 
+Before you report, stop everything you started: dev servers, preview and browser tabs, background commands and watchers. Name anything you leave running on purpose in your report, with the reason. In zsh, split a list with `${=VAR}` or an array, and run a formatter only on a file list you've checked isn't empty: with none, it waits on stdin forever.
+
 Commit your work to the current branch, unless the agent that delegated the work to you commits it.

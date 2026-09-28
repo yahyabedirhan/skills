@@ -14,6 +14,7 @@ An **orchestrator** gets an effort built without building it. It reads the plan,
 - **Trust the delegate.** A delegate builds, tests, and reviews its own ticket. Read its report against the ticket's acceptance criteria, and send back only what the report shows is missing or failing; don't redo its checks.
 - **One contact.** Delegates never talk to the user. Their questions come to the orchestrator, which answers what the documents settle and brings the rest to the user with exactly what they need to decide.
 - **Keep moving.** While one ticket waits on the user, run another that isn't blocked.
+- **Leave nothing running.** When a delegate reports, check for anything it left running (dev servers, preview and browser tabs, background tasks) that its report doesn't name with a reason, and stop it. Sweep your own the same way before telling the user a run is finished.
 
 A delegate is a sub-agent unless the skill that started the orchestration says otherwise. A sub-agent's own sub-agents report to the orchestrator, not to it, so tell delegates to run reviews synchronously in their own context.
 
