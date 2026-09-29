@@ -124,7 +124,7 @@ The **Linux container check** (`scripts/tests/linux/run.sh`) builds a Debian boo
 The steps, once #66 merges (not run: each writes):
 
 ```bash
-git -C ~/Developer/yahyabedirhan/skills pull --ff-only
+git -C <skills-clone> pull --ff-only
 npx skills add yahyabedirhan/skills -g --skill '*'          # or let set-up-machine's plan install it
 python3 ~/.agents/skills/set-up-machine/scripts/set_up_machine.py plan
 python3 ~/.agents/skills/set-up-machine/scripts/set_up_machine.py apply --plan-id <id>   # after the maintainer approves

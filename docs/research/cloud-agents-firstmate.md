@@ -76,7 +76,7 @@ What does **not** exist:
 - **No hosted cloud-agent backend** for the terminal distro. There is no backend for Claude Code on the web, Codex cloud, Cursor background agents or Copilot's agent; a search of the repository's `.md` and `.sh` files for "cloud" finds only `GROK_BOT.md` and two unrelated test lines. The Codex desktop app is explicitly "not a selectable Firstmate runtime backend" because Firstmate has "no supported shell-callable bridge" to its threads (`docs/codex-app-backend.md`).
 - **No phone channel.** The away mode (`/afk`) announces "hold-for-return only … there is no phone channel" (`.agents/skills/afk/SKILL.md`).
 
-Running the **primary itself** on a server (clone Firstmate on a Linux box, start the agent in Herdr or tmux there, attach over SSH) needs nothing special: the README lists macOS and Linux and "clone the repo, run your agent in it, and that is it" (`VISION.md` "Scope"). No document describes that setup as its own mode, so how well it works there is **unverified**.
+Running the **primary itself** on a server (clone Firstmate on a Linux box, start the agent in Herdr or tmux there, attach over SSH) needs nothing special: the README's platform badge lists macOS and Linux, and `VISION.md` "Scope" says setup is "clone the repo, run your agent in it, and that is it". No document describes that setup as its own mode, so how well it works there is **unverified**.
 
 ### Remote secondmates in depth
 
@@ -142,6 +142,20 @@ This repo's path today: a thinking session writes a spec and tickets; **handover
 | Model and quota choice | Dispatch profiles + `quota-axi` | Fixed default agent in the global instructions | **Leave for now** | Worth a look only if several subscriptions are in play |
 | Adopting Firstmate itself | — | — | **Leave**, trial optional | It would replace orchestrate-effort, handover and close-effort with its own contract, bypass-permission workers, AI-trailer stripping and one PR per task. A trial in a throwaway clone is the only way to judge it, and needs installs (proposed below) |
 
+The author's other tools, judged in [The author's other repositories](#the-authors-other-repositories):
+
+| Tool | Verdict | Why |
+|---|---|---|
+| [gnhf](#gnhf) | **Borrow the idea** | A one-command unattended loop with a commit trail suits overnight, measurable tasks on the VPS; installing it is a proposed experiment |
+| [grok-ship](#grok-ship) | **Borrow the pattern** | The direct template for delegating to a hosted agent and reviewing its pushed branch from elsewhere before a PR |
+| [no-mistakes](#no-mistakes) | **Leave** | This repo reviews with **code-review** at delivery; a second pipeline is a separate decision |
+| [treehouse](#treehouse) | **Adopt** on the VPS | Already this repo's worktree tool, supports Linux, and Firstmate requires it on a remote host; needed if an orchestrator runs on the VPS |
+| [kun](#kun) | **Leave** | A skill that fetches the author's opinions and tool list; nothing to run here |
+| [quota-axi](#the--axi-tools) | **Leave for now** | Useful to judge whether work fits the remaining quota, but it must run where the credentials are |
+| [chrome-devtools-axi](#the--axi-tools) | **Leave**, note for the VPS | A candidate for headless browser work on the VPS; whether it runs there is unverified |
+| [tasks-axi](#the--axi-tools) | **Leave** | Backlog on a Markdown file; this repo's tracker is GitHub issues |
+| [gh-axi](#the--axi-tools) | **Leave** | Compact `gh` output; plain `gh` works |
+
 ---
 
 ## GROK_BOT.md: Firstmate on a hosted bot
@@ -174,7 +188,7 @@ Only where they bear on agents off the local machine.
 
 ### kun
 
-[kun](https://github.com/kunchenguid/kun), read at `115447ec` (2026-09-29). A thin skill that fetches the author's distilled opinions and tool list; a Grok Bot automation refreshes those files daily, so it is itself an example of a scheduled hosted agent writing to a repository. The distilled opinions bear on this effort [post, distilled: `OPINIONS.md`]: he prefers "owning always-on personal hardware over renting equivalent VPS capacity" for sustained agent work and would "rather keep agents off publicly exposed servers", treating renting as the fit "for bursty or heavily fluctuating" load (line 88); remote development is "excellent for non-GUI work" (line 131); overnight agents suit "measurable optimization tasks where progress can be verified" (line 100); and he suggests "one firstmate that absorbs everything until it is overloaded, then spawning second mates" (line 63). **Leave** as a tool; the opinions go to the sizing ticket as one practitioner's view.
+[kun](https://github.com/kunchenguid/kun), read at `115447ec` (2026-09-29). A thin skill that fetches the author's distilled opinions and tool list; a Grok Bot automation refreshes those files daily, so it is itself an example of a scheduled hosted agent writing to a repository. The distilled opinions bear on this effort [post, distilled: `OPINIONS.md`]: he prefers "owning always-on personal hardware over renting equivalent VPS capacity" for sustained agent work and would "rather keep agents off publicly exposed servers", treating renting as the fit "for bursty or heavily fluctuating" load (line 88); remote development is "excellent for non-GUI work" (line 131); overnight agents suit "measurable optimization tasks where progress can be verified" (line 100); and he suggests "one firstmate that absorbs everything until it is overloaded, then spawning second mates" (line 63). **Leave** as a tool.
 
 ### The `*-axi` tools
 
