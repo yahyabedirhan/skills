@@ -1,6 +1,6 @@
 # How a long-running agent reaches the user
 
-> Moved from the job-search vault's `.scratch/skill-improvements/research/` on 2026-09-26. Paths under `tmp/`, `~/.claude/` and the vault point at the user's machine and are not in this repo. The VPS host, user and machine ID are redacted.
+> Moved from a private notes repo on 2026-09-26. Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo. The VPS host, user and machine ID are redacted.
 
 Purpose: the facts behind issues [#5](https://github.com/yahyabedirhan/skills/issues/5), [#9](https://github.com/yahyabedirhan/skills/issues/9) and [#18](https://github.com/yahyabedirhan/skills/issues/18): how an orchestrator (Claude Code, Codex where relevant) notifies the user, asks for decisions, and receives values only the user has. Researched on 2026-09-25 against Claude Code 2.1.282, Herdr 0.9.0 and Ghostty 1.3.1 on the user's Mac. Claims marked **unverified** were read in a source but not tested here.
 

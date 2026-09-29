@@ -1,6 +1,6 @@
 # Effort branches and pull requests
 
-> Moved from the job-search vault's `.scratch/skill-improvements/research/` on 2026-09-26. Paths under `tmp/`, `~/.claude/` and the vault point at the user's machine and are not in this repo. The VPS host, user and machine ID are redacted.
+> Moved from a private notes repo on 2026-09-26. Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo. The VPS host, user and machine ID are redacted.
 
 How an effort's branch and pull request are started, continued, stacked and delivered with git, GitHub, `gh` and treehouse, as input for skill-improvement issues [#3](https://github.com/yahyabedirhan/skills/issues/3), [#6](https://github.com/yahyabedirhan/skills/issues/6), [#14](https://github.com/yahyabedirhan/skills/issues/14) and [#15](https://github.com/yahyabedirhan/skills/issues/15). Researched 2026-09-25.
 
