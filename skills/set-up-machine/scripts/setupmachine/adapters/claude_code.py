@@ -80,6 +80,8 @@ def entries_for(rule, tools=()) -> list:
         return []  # Bash rules match text, not paths; Read rules and the hook cover these (see gaps_for)
     if rule.bare:
         return []  # an exact `Bash(env)` reads as a prefix in the Cursor CLI, which reads this file too: hook only
+    if rule.flags_only:
+        return []  # `Bash(declare -x *)` would refuse `declare -x NAME=1` too: hook only
     return [f"Bash({' '.join(prefix)} *)" for prefix in rule_table.command_prefixes(rule)]
 
 
@@ -93,6 +95,11 @@ HOOK_MISSES = (
     "an alias or function defined elsewhere, an abbreviated long option (`--recur`), "
     "or a force push by refspec (`git push origin +main`)"
 )
+
+
+# What a search tool can read past the hook's file checks.
+SEARCH_GAP = ("the hook checks a search's path and glob (`Grep` over `.env`, or with `*.env`), not each file a "
+              "search over a whole folder reads")
 
 
 def gaps_for(rule) -> list:
@@ -109,8 +116,8 @@ def _native_gaps(rule) -> list:
     if rule.kind == "file":
         gaps = [
             "Read and Edit rules cover Claude Code's file tools and the file commands it recognises in Bash "
-            "(`cat`, `sed`, redirects), and the pre-tool hook the file tools; a script or another program "
-            "opening the file gets through"
+            "(`cat`, `sed`, redirects), and the pre-tool hook the file tools and redirects; a script or another "
+            "program opening the file gets through, and " + SEARCH_GAP
         ]
         if rule.excepts:
             gaps.append(
@@ -133,6 +140,8 @@ def _native_gaps(rule) -> list:
         return [f"{names} on their own: the pre-tool hook alone refuses them, with no Bash entries, since the Cursor "
                 f"CLI reads this file and would match an exact `Bash({rule.programs[0]})` as a prefix, refusing "
                 f"`{rule.programs[0]} FOO=1 cmd` too; with the hook off they run"]
+    if rule.flags_only:
+        return [flags_only_gap(rule)]
     if rule.level in ("deny", "allow-and-report"):
         return []  # the pre-tool hook reads every spelling; what it can't see is one gap in its own section
     canonical = " ".join(rule_table.command_prefixes(rule)[0])
@@ -143,6 +152,13 @@ def _native_gaps(rule) -> list:
         through.append(f"options before the subcommand (`{rule.programs[0]} <option> {' '.join(rule.subcommands[0])}`)")
     through.append(f"the command inside another program's string (`bash -lc \"{canonical} …\"`, `eval`, a script)")
     return ["ask stays native, and Bash rules match the text as written, so these get through: " + "; ".join(through)]
+
+
+def flags_only_gap(rule) -> str:
+    """The gap of a row on a program with only flags (`declare -x`), which no text rule can express."""
+    p = rule.programs[0]
+    return (f"{', '.join(f'`{x}`' for x in rule.programs)} with only flags: the pre-tool hook alone refuses them, "
+            f"since a rule on `{p} -x` would also refuse `{p} -x NAME=value`; with the hook off they run")
 
 
 def discover_tools():
@@ -233,7 +249,9 @@ def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path,
     """
     tools_error = None
     if tools is None and any(r.kind == "mcp-tool" for r in rules):
-        tools, tools_error = discover_tools()
+        tools_error = shared.trial_home(home, os_home)
+        if tools_error is None:
+            tools, tools_error = discover_tools()
     path = config_dir(home) / "settings.json"
     old = read_text(path)
     try:
@@ -379,15 +397,29 @@ def _excepted_by(entry: str, rules: list):
     return None
 
 
-def hook_command(home: Path, os_home: Path, rules_path=None, harness: str = NAME) -> str:
-    """The command that runs the pre-tool hook for a harness. Outside the user's own home it
-    names that home's configuration, and with a table other than the skill's own it names that table."""
+def hook_argv(home: Path, os_home: Path, rules_path=None, harness: str = NAME) -> list:
+    """The pre-tool hook's argv for a harness. Outside the user's own home it names that home's
+    configuration, and with a table other than the skill's own it names that table."""
     parts = ["python3", str(HOOK_SCRIPT), "--harness", harness]
     if home.resolve() != os_home.resolve():
         parts += ["--config", str(shared.hook_config_path(home))]
     if rules_path is not None and Path(rules_path).resolve() != rule_table.DEFAULT_TABLE:
         parts += ["--rules", str(Path(rules_path).resolve())]
-    return shlex.join(parts)
+    return parts
+
+
+# What a wired command answers when the hook didn't: Cursor reads an empty answer as invalid JSON, which blocks.
+NO_ANSWER = {"cursor": "echo '{}'"}
+
+
+def hook_command(home: Path, os_home: Path, rules_path=None, harness: str = NAME) -> str:
+    """The shell command a harness runs for the pre-tool hook. It fails open: when the script is gone
+    (the skill moved or was removed) or exits with an error, the command still exits 0 with no
+    decision, since exit 2 blocks the call in Claude Code, Codex and Cursor. A deny is JSON on
+    stdout with exit 0, so it passes through unchanged."""
+    script = shlex.quote(str(HOOK_SCRIPT))
+    argv = shlex.join(hook_argv(home, os_home, rules_path, harness))
+    return f"[ -f {script} ] && {argv} || {NO_ANSWER.get(harness, 'true')}"
 
 
 def _plan_hook(path: Path, settings: dict, new_settings: dict, owned: list, wanted: str):
@@ -411,7 +443,7 @@ def _plan_hook(path: Path, settings: dict, new_settings: dict, owned: list, want
                 new_groups.append(g)
         for command in sorted(stale & present):
             section.changes.append(Change("removed", f"pre-tool hook: {command}",
-                                          note="written by set-up-machine; the hook script moved"))
+                                          note="written by set-up-machine; the hook command changed"))
         if not wired:
             new_groups.append({"matcher": "*", "hooks": [{"type": "command", "command": wanted, "timeout": HOOK_TIMEOUT}]})
             section.changes.append(Change(

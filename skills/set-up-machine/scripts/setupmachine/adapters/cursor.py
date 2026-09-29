@@ -72,8 +72,8 @@ def entries_for(rule, tools=()) -> list:
     if rule.kind == "mcp-tool":
         return [f"Mcp({server}:{tool})" for server, tool in
                 (rule_table.split_mcp_name(t) for t in rule_table.matching_tools(rule, tools))]
-    if rule.files:
-        return []  # Shell rules match text, not the paths in it: the hook covers these
+    if rule.files or rule.flags_only:
+        return []  # Shell rules match text, not the paths in it or "only flags": the hook covers these
     if rule.bare:
         # `Shell(x:)`: an empty argument pattern matches `x` with nothing after it, and nothing else.
         return [f"Shell({' '.join(prefix)}:)" for prefix in rule_table.command_prefixes(rule)]
@@ -120,7 +120,8 @@ def gaps_for(rule) -> list:
 def _native_gaps(rule) -> list:
     if rule.kind == "file":
         gaps = ["Read and Write rules bind the CLI's file tools, not a shell command (`cat .env`) or a script; "
-                "the pre-tool hook checks the file tools in the CLI and the IDE"]
+                "the pre-tool hook checks the file tools and shell redirects in the CLI and the IDE, and "
+                + claude_code.SEARCH_GAP]
         if rule.excepts:
             gaps.append(f"Cursor's globs know only `*`, so the CLI refuses the exception "
                         f"({', '.join(f'`{e}`' for e in rule.excepts)}) too; the hook leaves it open, and the IDE with it")
@@ -128,6 +129,8 @@ def _native_gaps(rule) -> list:
     if rule.files:
         return ["Shell rules match the command text, not the paths in it, so this row has no native entry, and the "
                 "CLI's Read rules don't bind shell commands: the pre-tool hook alone refuses it"]
+    if rule.flags_only:
+        return [claude_code.flags_only_gap(rule)]
     if rule.level == "ask":
         return ["Cursor has no ask level: the CLI prompts only for a command no allow entry covers, never under "
                 "`--force`/`--yolo`, and the IDE follows its run mode; the hook leaves ask rows alone"]
@@ -186,7 +189,9 @@ def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path,
 
     tools_error = None
     if tools is None and any(r.kind == "mcp-tool" for r in rules):
-        tools, tools_error = discover_tools(rules)
+        tools_error = shared.trial_home(home, os_home)
+        if tools_error is None:
+            tools, tools_error = discover_tools(rules)
     perm_section, perm_write, owned_perms = _plan_permissions(
         config_dir(home) / "cli-config.json", rules, owned.get("permissions", {}), tools or [], tools_error)
     hook_section, hook_write, owned_hooks = _plan_hook(
@@ -327,7 +332,7 @@ def _plan_hook(path: Path, owned: list, wanted: str):
             missing.append(event)
 
     for command in sorted(removed):
-        section.changes.append(Change("removed", f"pre-tool hook: {command}", note="written by set-up-machine; the hook script moved"))
+        section.changes.append(Change("removed", f"pre-tool hook: {command}", note="written by set-up-machine; the hook command changed"))
     if missing:
         section.changes.append(Change(
             "added", f"pre-tool hook on {', '.join(missing)}: {wanted}",

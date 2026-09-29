@@ -14,7 +14,9 @@ catches every spelling of the same command:
   `-lc`), `eval`, `sudo`, `find -exec`, a heredoc or a pipe into a shell is read
   as a command of its own;
 - flags are read anywhere after the program (`git push origin main --force`,
-  `rm x -rf`), clustered or not (`-rfv`), until `--`.
+  `rm x -rf`), clustered or not (`-rfv`), until `--`;
+- redirect targets are files the command reads (`< x`) or writes (`> x`, `>> x`,
+  `&> x`), and `tee`'s operands files it writes (tee_writes).
 
 Standard library only: it runs on macOS's Python 3.9.
 """
@@ -65,15 +67,17 @@ FEEDS_A_SHELL = re.compile(r"(^|[\s|;&(`])(\S*/)?(bash|sh|zsh|dash|ksh|eval|sour
 MAX_DEPTH = 8
 
 
-def simple_commands(text: str, depth: int = 0) -> list:
-    """Every simple command the text runs, as argv lists with the program as a basename."""
+def simple_commands(text: str, depth: int = 0, files=None) -> list:
+    """Every simple command the text runs, as argv lists with the program as a basename.
+
+    With a `files` list, the files its redirects name are appended to it as (path, access)."""
     if depth > MAX_DEPTH or not text.strip():
         return []
     text = text.replace("\\\n", "")
     text, shell_bodies = _heredocs(text)
     out = []
     for body in shell_bodies:
-        out += simple_commands(body, depth + 1)
+        out += simple_commands(body, depth + 1, files)
     segments = []  # (words, the separator before them)
     words, before, redirect = [], "", None
     for token in _tokens(text) + [";"]:
@@ -86,20 +90,37 @@ def simple_commands(text: str, depth: int = 0) -> list:
             words, before, redirect = [], token, None
             continue
         for inner in _substitutions(token):
-            out += simple_commands(inner, depth + 1)
+            out += simple_commands(inner, depth + 1, files)
         if redirect is not None:
             if redirect == "<<<" and any(os.path.basename(w) in SHELLS for w in words):
-                out += simple_commands(token, depth + 1)  # a here-string fed to a shell
+                out += simple_commands(token, depth + 1, files)  # a here-string fed to a shell
+            access = _redirect_access(redirect, token)
+            if access and files is not None:
+                files.append((token, access))
             redirect = None
             continue
         words.append(token)
     for i, (words, before) in enumerate(segments):
-        for argv in _unwrap(words, depth):
+        for argv in _unwrap(words, depth, files):
             out.append(argv)
             if before in ("|", "|&") and _reads_stdin_as_shell(argv) and i:
                 for word in segments[i - 1][0][1:]:  # `echo "rm -rf x" | sh`
-                    out += simple_commands(word, depth + 1)
+                    out += simple_commands(word, depth + 1, files)
     return out
+
+
+def tee_writes(argvs: list) -> list:
+    """The files `tee` writes among these simple commands, as (path, "write") pairs."""
+    return [(a, "write") for argv in argvs if argv[0] == "tee" for a in argv[1:] if a and not a.startswith("-")]
+
+
+def _redirect_access(redirect: str, target: str):
+    """`read` or `write` for a redirect to a file; None for a heredoc, a here-string or a descriptor (`>&2`)."""
+    if redirect.startswith("<<"):
+        return None
+    if redirect.endswith("&") and (target.isdigit() or target == "-"):
+        return None
+    return "write" if ">" in redirect else "read"
 
 
 def _tokens(text: str) -> list:
@@ -148,7 +169,7 @@ def _substitutions(word: str) -> list:
     return found
 
 
-def _unwrap(words: list, depth: int) -> list:
+def _unwrap(words: list, depth: int, files=None) -> list:
     """The command itself, then every command it runs inside it."""
     argv = _strip(words)
     if not argv:
@@ -167,9 +188,9 @@ def _unwrap(words: list, depth: int) -> list:
     if program in ("sudo", "doas"):
         inner_argv = _after_options(args, WRAPPERS[program])
     if inner_text:
-        out += simple_commands(inner_text, depth + 1)
+        out += simple_commands(inner_text, depth + 1, files)
     if inner_argv:
-        out += _unwrap(inner_argv, depth + 1)
+        out += _unwrap(inner_argv, depth + 1, files)
     return out
 
 
@@ -280,6 +301,8 @@ def covers(rule, argv: list) -> bool:
     """Whether a command row covers this normalised argv, whatever the flag order or position."""
     if not argv or not program_matches(rule, argv[0]):
         return False
+    if rule.flags_only:  # `declare -x`: only flags, which list what carries them
+        return len(argv) > 1 and all(a[:1] in ("-", "+") and len(a) > 1 for a in argv[1:])
     if rule.bare:
         return len(argv) == 1
     flags, words = _flags_and_words(argv)
@@ -290,7 +313,7 @@ def covers(rule, argv: list) -> bool:
             if tuple(words[start:start + len(sub)]) != sub:
                 continue
             after = words[start + len(sub):]
-            if tuple(after[:len(rule.operands)]) == rule.operands:
+            if any(tuple(after[:len(o)]) == o for o in rule.operands):
                 return True
     return False
 

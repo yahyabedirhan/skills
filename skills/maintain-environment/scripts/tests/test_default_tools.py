@@ -81,6 +81,16 @@ class DefaultToolsTest(unittest.TestCase):
                 code = default_tools.main(["--skills", d, "--global", str(Path(d) / "missing.md")])
         self.assertEqual(code, 0)
         self.assertIn("No default tool named", out.getvalue())
+        self.assertIn("missing.md doesn't exist", out.getvalue())
+        self.assertNotIn("has no tool in its Defaults table", out.getvalue())
+
+    def test_a_file_without_tools_says_so(self):
+        with tempfile.TemporaryDirectory() as d:
+            write(Path(d), "global.md", "| session-host | none |\n")
+            out = io.StringIO()
+            with redirect_stdout(out):
+                default_tools.main(["--skills", d, "--global", str(Path(d) / "global.md")])
+        self.assertIn("global.md has no tool in its Defaults table", out.getvalue())
 
     def test_flags_defaults_mentions_outside_the_parameters_section(self):
         with tempfile.TemporaryDirectory() as d:

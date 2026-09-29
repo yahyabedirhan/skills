@@ -9,6 +9,12 @@ disable-model-invocation: true
 
 A **recap** looks back over one or more sessions and asks how the agent and its sub-agents used their skills: where a skill carried the work, and where a skill, or the lack of one, cost the session. It ends with **findings**, each backed by **evidence** from the transcripts, and a **verdict**.
 
+## Parameters
+
+Each comes from the Defaults table in the environment's instructions, where a project's table overrides the global one for that project. Unset means no row, or `none`.
+
+- `<skills-repo>`: the user's own skills repo on GitHub, as `<owner>/<repo>`, where findings about their skills are filed. Unset: ask, since a guess would file them in the wrong repo.
+
 ## 1. Select the sessions
 
 - **By default**, the scope is the current session and every sub-agent it spawned, at any depth. The session itself is in your context; when part of it was compacted away, read its transcript for the missing stretch. Sub-agents ran in their own contexts, so read their transcripts from disk.
@@ -59,7 +65,7 @@ Give the findings, then the verdict:
 - **"No skill changes needed."** when nothing qualifies. This is a good outcome, not a failed recap.
 - Otherwise **"<n> opportunities"**, naming the skills they touch.
 
-When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in their skills repo. `to-tickets` works from the conversation, so the findings as written are its input. Resolve the skills repo the way the **maintain-environment** skill resolves `<skills-repo>`: the user's request, then the agent instructions files, then ask. For a finding about someone else's skill, the user decides whether to file it there, fork the skill, or take it upstream.
+When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in their skills repo. `to-tickets` works from the conversation, so the findings as written are its input, filed in `<skills-repo>` unless the user names another repo. For a finding about someone else's skill, the user decides whether to file it there, fork the skill, or take it upstream.
 
 When the skills repo is public, write each finding the way the user's own instructions say public repositories are written: that rule lives in their agent instructions, so follow it from there.
 

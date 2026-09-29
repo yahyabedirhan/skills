@@ -16,6 +16,7 @@ configuration file, `~/.config/agents/hook.json` by default.
 """
 from __future__ import annotations
 
+import fnmatch
 import json
 import os
 import re
@@ -39,6 +40,7 @@ class ToolCall:
     cwd: str = ""
     session: str = ""
     mcp_names: tuple = ()  # the tool's possible `mcp__<server>__<tool>` names, for a harness that names MCP tools otherwise
+    searches: tuple = ()  # (folder, glob) pairs a search tool reads the matching files of
     report: bool = True  # False when another hook, wired for the same harness, reports this call
 
 
@@ -58,11 +60,17 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
     verdict = Verdict()
     checked = [r for r in table if r.level in ("deny", "allow-and-report")]
     hits = []
+    files = list(call.files)
     if call.command:
-        for argv in commands.simple_commands(call.command):
+        argvs = commands.simple_commands(call.command, files=files)  # redirect targets join the files
+        for argv in argvs:
             hits += [Hit(r, shlex.join(argv)) for r in checked if r.kind == "command" and commands.covers(r, argv)
                      and (not r.files or any(path_matches(r, w, call.cwd, home) for w in operand_files(argv)))]
-    for path, access in call.files:
+        files += commands.tee_writes(argvs)
+    for folder, glob in call.searches:
+        files.append((os.path.join(folder, glob) if folder else glob, "read"))
+        hits += [Hit(r, f"search {glob}") for r in checked if r.kind == "file" and glob_targets(r, glob)]
+    for path, access in files:
         hits += [Hit(r, f"{access} {path}") for r in checked
                  if r.kind == "file" and (r.access == access or r.access == "read")
                  and path_matches(r, path, call.cwd, home)]
@@ -98,9 +106,30 @@ def path_matches(rule, path: str, cwd: str, home: Path) -> bool:
 
     def under(globs, as_folder):
         names = candidates | {c + "/_" for c in candidates} if as_folder else candidates
-        return any(rule_table.glob_regex(g, base, home).match(c) for g in globs for c in names)
+        return any(rule_table.glob_regex(g, base, home, commands.FOLD_CASE).match(c) for g in globs for c in names)
 
     return under(rule.paths or rule.files, True) and not under(rule.excepts, False)
+
+
+# Names no secret-file row covers: a search glob matching them too is a broad search, not one aimed at the row.
+ORDINARY_NAMES = ("README.md", "main.py", "notes.txt")
+
+
+def glob_targets(rule, glob: str) -> bool:
+    """Whether a search glob (`*.env`, `.env*`) picks out a file row's files by name.
+
+    A name the row covers is made from each of its globs' last part (`.env.*` -> `.env.local`);
+    a search glob matching one of those, but no ordinary file name, targets the row. A glob
+    matching everything (`*`) is a search over the folder, which the hook doesn't expand.
+    """
+    pattern = glob.rstrip("/").rsplit("/", 1)[-1]
+    if not set("*?[") & set(pattern) or any(fnmatch.fnmatchcase(n, pattern) for n in ORDINARY_NAMES):
+        return False  # a literal glob is checked as a path; one matching ordinary names too is a broad search
+    lasts = [g.rsplit("/", 1)[-1] for g in rule.paths]
+    samples = {n.replace("*", "local").replace("?", "x") for n in lasts if n.strip("*?")}
+    left_out = {g.rsplit("/", 1)[-1] for g in rule.excepts}
+    fold = (lambda t: t.lower()) if commands.FOLD_CASE else (lambda t: t)
+    return any(fnmatch.fnmatchcase(fold(n), fold(pattern)) for n in samples - left_out)
 
 
 def operand_files(argv: list) -> list:
@@ -199,14 +228,24 @@ def read_claude_code(payload: dict) -> ToolCall:
         value = tool_input.get(key)
         if isinstance(value, str) and value:
             files.append((value, access))
+    searches = _search(tool_input, "path", "glob") if tool == "Grep" else ()
     return ToolCall(
         tool=tool,
         command=command if isinstance(command, str) else None,
         files=tuple(files),
+        searches=searches,
         cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
         session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
         report="cursor_version" not in payload,
     )
+
+
+def _search(args: dict, folder_key: str, glob_key: str) -> tuple:
+    """A search tool's (folder, glob) pair, when it names a glob."""
+    glob, folder = args.get(glob_key), args.get(folder_key)
+    if not isinstance(glob, str) or not glob:
+        return ()
+    return ((folder if isinstance(folder, str) else "", glob),)
 
 
 def write_claude_code(denials: list) -> str:
@@ -275,6 +314,7 @@ def read_opencode(payload: dict) -> ToolCall:
     patch = args.get("patchText")
     if isinstance(patch, str):
         files += [(m.group(2), "write") for m in PATCH_FILE.finditer(patch)]
+    searches = _search(args, "path", "include") if tool == "grep" else ()
     mcp_names = ()
     if tool not in OPENCODE_BUILTINS:
         # Either part of `<server>_<tool>` may hold `_`, so every split is a candidate.
@@ -286,6 +326,7 @@ def read_opencode(payload: dict) -> ToolCall:
         cwd=os.path.join(directory, workdir) if isinstance(workdir, str) and workdir else directory,
         session=payload.get("sessionID") if isinstance(payload.get("sessionID"), str) else "",
         mcp_names=mcp_names,
+        searches=searches,
     )
 
 
@@ -323,7 +364,8 @@ def read_cursor(payload: dict) -> ToolCall:
         path = text("file_path", tool_input) or text("path", tool_input)
         files = ((path, CURSOR_FILE_TOOLS[tool]),) if path else ()
     command = text("command", tool_input) if tool == "Shell" else ""
-    return ToolCall(tool=tool, command=command or None, files=files, cwd=cwd, session=session)
+    searches = _search(tool_input, "path", "glob") if tool == "Grep" else ()
+    return ToolCall(tool=tool, command=command or None, files=files, cwd=cwd, session=session, searches=searches)
 
 
 def write_cursor(denials: list) -> str:

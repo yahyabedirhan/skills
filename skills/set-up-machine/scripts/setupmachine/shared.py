@@ -7,14 +7,24 @@ symlink to the file.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from pathlib import Path
 
 from . import hook
-from .plan import Change, FileWrite, Section
+from .plan import Change, FileWrite, Run, Section
 
 # How a harness's program is looked up on PATH; tests replace it.
 which = shutil.which
+
+
+def trial_home(home: Path, os_home: Path):
+    """Why plan won't start a harness to list its tools, when `home` isn't the user's own, else None.
+    A harness started there would read the real machine's configuration and login."""
+    if home.resolve() == os_home.resolve():
+        return None
+    return (f"plan doesn't start a harness under a --home other than your own ({home}), since it would read the real "
+            "machine; pass --tool-names to match a list instead")
 
 
 def harness_found(home: Path, os_home: Path, folder: Path, programs) -> bool:
@@ -181,11 +191,17 @@ def plan_instructions(home: Path, rules: list):
     return section, FileWrite(path, old, new)
 
 
-def plan_hook_config(home: Path, os_home: Path):
+# Where the skills CLI installs skills, relative to a home folder (maintain-environment's skill-operations).
+SKILL_FOLDERS = (".agents/skills", ".claude/skills")
+
+
+def plan_hook_config(home: Path, os_home: Path, script=None):
     """The pre-tool hook's configuration: created with the default report folder, then the user's.
 
     In another home than the user's own, the default report folder is inside
-    that home, so a trial run never reports into the real one.
+    that home, so a trial run never reports into the real one. A hook `script`
+    outside a skills install folder is named: every harness's wiring points at
+    it, and it goes when that folder does (the hook then fails open).
     """
     path = hook_config_path(home)
     old = read_text(path)
@@ -204,7 +220,85 @@ def plan_hook_config(home: Path, os_home: Path):
             raise ValueError(f"{path} must hold a JSON object; fix it by hand, then run the plan again")
         new = old
     section.changes.append(Change("wired", f"the hook's reports go to {hook.report_dir(config, path)}"))
+    if script is not None and not installed_skill(Path(script), home, os_home):
+        section.changes.append(Change(
+            "gap", f"the hook runs from {Path(script).parent.parent}, which isn't under a skills install folder "
+                   f"({', '.join('~/' + f for f in SKILL_FOLDERS)}): if that folder moves or goes, every harness's "
+                   "hook stops checking (it fails open) until the plan runs again from the installed skill"))
     return section, FileWrite(path, old, new)
+
+
+def installed_skill(script: Path, home: Path, os_home: Path) -> bool:
+    """Whether a skill's file sits in a skills install folder of either home, links resolved."""
+    folders = {(h / f).resolve() for h in (home, os_home) for f in SKILL_FOLDERS}
+    resolved = script.resolve()
+    return any(folder in resolved.parents for folder in folders)
+
+
+# --- shared skills ------------------------------------------------------------------
+
+SKILLS_REPO_ROLE = "skills-repo"
+_REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+
+
+def default_value(text: str, role: str):
+    """A role's value in the Defaults table, or None when the row is missing or `none`."""
+    for line in text.split("\n"):
+        if _role_row(line) == role:
+            cells = [c.strip().strip("`") for c in line.strip().strip("|").split("|")]
+            value = cells[1] if len(cells) > 1 else ""
+            return None if not value or value.lower() == NO_DEFAULT else value
+    return None
+
+
+def skills_lock_path(home: Path) -> Path:
+    """Where the skills CLI records each global install and its source."""
+    return home / ".agents" / ".skill-lock.json"
+
+
+def installed_sources(home: Path) -> set:
+    """The sources (`<owner>/<repo>`, lower case) the skills CLI installed global skills from."""
+    try:
+        data = json.loads(skills_lock_path(home).read_text())
+    except (OSError, json.JSONDecodeError):
+        return set()
+    skills = data.get("skills") if isinstance(data, dict) else None
+    return {s["source"].lower() for s in (skills or {}).values()
+            if isinstance(s, dict) and isinstance(s.get("source"), str)}
+
+
+def skills_add_argv(home: Path, source: str, *options) -> list:
+    """`npx skills add` for a global install, with maintain-environment's agent flags: `-a codex`,
+    plus `-a claude-code` unless `~/.claude/skills` links to `~/.agents/skills`."""
+    argv = ["npx", "--yes", "skills", "add", source, *options, "-g", "-a", "codex"]
+    claude_skills = home / ".claude" / "skills"
+    if not (claude_skills.is_symlink() and claude_skills.resolve() == (home / ".agents" / "skills").resolve()):
+        argv += ["-a", "claude-code"]
+    return argv + ["-y"]
+
+
+def plan_shared_skills(home: Path):
+    """The user's own skills repo (the `skills-repo` Defaults row), installed globally: a Run the plan
+    shows, then `present` once the skills CLI records a skill from it. No row, no install."""
+    path = instructions_path(home)
+    section = Section("Shared skills", home / ".agents" / "skills")
+    repo = default_value(read_text(path) or "", SKILLS_REPO_ROLE)
+    if repo is None:
+        section.changes.append(Change(
+            "none", f"no `{SKILLS_REPO_ROLE}` value in the Defaults table, so no shared skills to install; "
+                    f"set it to `<owner>/<repo>` in {path.name} and run the plan again"))
+        return section, []
+    if not _REPO.match(repo):
+        section.changes.append(Change(
+            "gap", f"the `{SKILLS_REPO_ROLE}` value `{repo}` isn't `<owner>/<repo>`, so nothing is installed; "
+                   "fix the row and run the plan again"))
+        return section, []
+    if repo.lower() in installed_sources(home):
+        section.changes.append(Change("present", f"shared skills from {repo}", note="installed globally"))
+        return section, []
+    argv = skills_add_argv(home, repo)
+    section.changes.append(Change("added", f"shared skills from {repo}", note=f"apply runs `{' '.join(argv)}`"))
+    return section, [Run(skills_lock_path(home), argv, {"HOME": str(home)})]
 
 
 def load_manifest(home: Path) -> dict:

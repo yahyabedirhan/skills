@@ -194,7 +194,8 @@ class CursorAdapterTest(unittest.TestCase):
             cursor.claude_code.HOOK_SCRIPT = original
         self.assertTrue(any("pre-tool hook" in r for r in kinds(plan, "removed")))
         for handlers in self.hooks()["hooks"].values():
-            self.assertEqual([h["command"].split()[1] for h in handlers], ["/moved/pre_tool_hook.py"])
+            self.assertEqual(len(handlers), 1)
+            self.assertIn("python3 /moved/pre_tool_hook.py --harness cursor", handlers[0]["command"])
 
     def test_the_shared_file_reaches_cursor_as_an_always_applied_copy(self):
         self.home.apply(self.table, MAIL_TOOLS)
@@ -279,6 +280,8 @@ class CoversTest(unittest.TestCase):
         self.assertIn("Shell(chmod -R 777)", cursor.entries_for(table["chmod-recursive-777"]))
         self.assertEqual(cursor.entries_for(table["env-files-commands"]), [])
         self.assertIn("Shell(export:)", cursor.entries_for(table["env-dump"]))
+        self.assertEqual(cursor.entries_for(table["env-dump-listed"]), [])
+        self.assertTrue(any("only flags" in g for g in cursor.gaps_for(table["env-dump-listed"])))
         self.assertEqual(cursor.entries_for(table["home-credentials-read"]), ["Read(~/.ssh/**)", "Read(~/.aws/**)"])
         self.assertEqual(cursor.entries_for(table["mail-send"], ["mcp__gmail__send_message", "mcp__gmail__search"]),
                          ["Mcp(gmail:send_message)"])

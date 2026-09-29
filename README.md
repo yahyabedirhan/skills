@@ -156,9 +156,12 @@ rules.json                      each global rule once: level, reason, instructio
   ↓ set_up_machine.py plan      per-harness diff: added, tightened, gaps, extra rules
   ↓ one approval → apply        writes the diff, backs up each file, records what it wrote
 ~/.config/agents/AGENTS.md      the shared global instructions: Defaults by role, rule lines, personal workflow
-~/.claude/settings.json         Claude Code's native deny and ask entries, auto memory off
-~/.codex/config.toml            Codex memories off
-~/.claude/CLAUDE.md             imports the shared file
+~/.config/agents/hook.json      the pre-tool hook's report folder; the hook refuses every spelling of a deny row
+Claude Code   ~/.claude/        settings.json: deny and ask entries, the hook, auto memory off; CLAUDE.md imports the shared file
+Codex         ~/.codex/         rules/set-up-machine.rules, hooks.json, AGENTS.md → shared file, memories off in config.toml
+opencode      ~/.config/opencode/  opencode.json permissions, plugins/set-up-machine.js runs the hook, AGENTS.md → shared file
+Cursor        ~/.cursor/        cli-config.json permissions, hooks.json, rules/global-instructions.mdc copies the shared file
+~/.agents/skills                your skills repo (the skills-repo Default), installed globally
 plan again                      the audit: "No changes."
 ```
 

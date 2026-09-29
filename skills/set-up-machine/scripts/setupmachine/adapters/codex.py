@@ -152,11 +152,7 @@ def _plan_external_skill(home: Path, skill: ExternalSkill, section: Section) -> 
         section.changes.append(Change(
             "present", f"external skill {skill.skill} from {skill.source}", note=f"replaces the {skill.label} block"))
         return []
-    argv = ["npx", "--yes", "skills", "add", skill.source, "-s", skill.skill, "-g", "-a", "codex"]
-    claude_skills = home / ".claude" / "skills"
-    if not (claude_skills.is_symlink() and claude_skills.resolve() == (home / ".agents" / "skills").resolve()):
-        argv += ["-a", "claude-code"]
-    argv.append("-y")
+    argv = shared.skills_add_argv(home, skill.source, "-s", skill.skill)
     section.changes.append(Change(
         "added", f"external skill {skill.skill} from {skill.source}",
         note=f"replaces the {skill.label} block; apply runs `{' '.join(argv)}`"))
@@ -178,7 +174,7 @@ def patterns_for(rule) -> list:
     """The prefix_rule patterns a command row expands to: an element is a word or a list of
     alternatives. Clustered short flags (`-rf`, `-fr`) share one pattern; separate flags
     get one pattern per order. Shell rows, bare rows and rows on files get none (see gaps_for)."""
-    if rule.kind != "command" or _is_shell_row(rule) or rule.bare or rule.files:
+    if rule.kind != "command" or _is_shell_row(rule) or rule.bare or rule.flags_only or rule.files:
         return []
     groups = [[_flag(s) for s in g] for g in rule.flags]
     flag_patterns = []
@@ -190,7 +186,11 @@ def patterns_for(rule) -> list:
             flag_patterns += [[_alts(groups[i]) for i in order] for order in itertools.permutations(range(len(groups)))]
     else:
         flag_patterns = [[]]
-    return [[p, *sub, *f, *rule.operands] for p in rule.programs for sub in rule.subcommands for f in flag_patterns]
+    operands = rule.operands
+    if len(operands) > 1 and all(len(o) == 1 for o in operands):
+        operands = [[_alts([o[0] for o in operands])]]  # one-word alternatives share one pattern
+    return [[p, *sub, *f, *o] for p in rule.programs for sub in rule.subcommands for f in flag_patterns
+            for o in operands]
 
 
 def _is_shell_row(rule) -> bool:
@@ -269,6 +269,10 @@ def _codex_gaps(rule) -> list:
     if rule.kind == "mcp-tool":
         return ["Codex's MCP tools aren't listed before a session, so no native entry: the pre-tool hook refuses "
                 "matching `mcp__<server>__<tool>` calls when they're made"]
+    if rule.flags_only:
+        return [f"no Codex rule: prefix rules can't say \"with only flags after it\", so a rule on "
+                f"`{rule.programs[0]} -x` would also refuse `{rule.programs[0]} -x NAME=value`; "
+                "only the pre-tool hook enforces this row"]
     if rule.bare:
         return [f"no Codex rule: prefix rules can't say \"with nothing after it\", so a rule on "
                 f"`{rule.programs[0]}` would also refuse `{rule.programs[0]} …` with arguments; "
@@ -399,7 +403,7 @@ def _plan_hook(home: Path, owned: dict, wanted: str, config_text: str):
             new_groups.append(g if len(handlers) == len(_handlers(g)) else {**g, "hooks": handlers})
     for command in sorted(stale & present):
         section.changes.append(Change("removed", f"pre-tool hook: {command}",
-                                      note="written by set-up-machine; the hook script moved"))
+                                      note="written by set-up-machine; the hook command changed"))
     at = next((i for i, g in enumerate(new_groups) if g.get("matcher") in ("*", "", None)
                and [h.get("command") for h in _handlers(g)] == [wanted]), None)
     if at is None:

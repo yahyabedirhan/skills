@@ -61,11 +61,12 @@ class PatternTest(unittest.TestCase):
 
     def test_subcommands_flags_and_operands(self):
         self.assertEqual(codex.patterns_for(BY_ID["git-push-force"]), [["git", "push", ["-f", "--force"]]])
-        self.assertEqual(codex.patterns_for(BY_ID["chmod-recursive-777"]), [["chmod", ["-R", "--recursive"], "777"]])
+        self.assertEqual(codex.patterns_for(BY_ID["chmod-recursive-777"]), [[
+            "chmod", ["-R", "--recursive"], ["777", "0777", "a+rwx", "a=rwx", "ugo+rwx", "ugo=rwx"]]])
         self.assertEqual(codex.patterns_for(BY_ID["disk-write"]), [["dd"], ["mkfs"]])
 
     def test_shell_file_and_mcp_rows_get_no_rule_but_a_gap(self):
-        for rule_id in ("shell-inline-command", "secret-files-read", "mail-send"):
+        for rule_id in ("shell-inline-command", "secret-files-read", "mail-send", "env-dump-listed"):
             self.assertEqual(codex.patterns_for(BY_ID[rule_id]), [], rule_id)
             self.assertTrue(codex.gaps_for(BY_ID[rule_id]), rule_id)
 

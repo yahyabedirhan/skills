@@ -230,6 +230,59 @@ class EnvironmentTest(unittest.TestCase):
             self.assertFalse(verdict(tool=tool).denials, tool)
 
 
+class ReviewFindingsTest(unittest.TestCase):
+    """The final branch review's findings on the hook."""
+
+    def test_bare_and_flag_only_declarations_list_every_variable(self):
+        for command in ("declare", "typeset", "declare -x", "typeset -x", "export -x", "declare -r -x",
+                        "typeset +x", "sh -c 'declare'"):
+            self.assertTrue(set(denied_by(command)) & {"env-dump", "env-dump-listed"}, command)
+        for command in ("declare -x FOO=1", "typeset -i n=3", "export FOO", "declare -a arr"):
+            self.assertEqual(denied_by(command), [], command)
+
+    def test_redirect_targets_are_checked_against_the_file_rows(self):
+        for command, rule in (("cat < .env", "env-files-read"), ("echo x > .env", "env-files-write"),
+                              ("tee .env", "env-files-write"), ("echo x >> sub/.env.local", "env-files-write"),
+                              ("echo x | tee -a app/.env", "env-files-write"), ("wc -l <sub/.env", "env-files-read"),
+                              ("bash -c 'echo x > .env'", "env-files-write"), ("echo x &> secrets/k", "secret-files-write")):
+            self.assertIn(rule, denied_by(command), command)
+        for command in ("echo x > out.txt", "cat < .env.example", "echo x 2>&1", "ls >&2", "echo x | tee log.txt",
+                        "cat <<EOF > notes.md\n.env\nEOF", "grep x <<< .env"):
+            self.assertEqual(denied_by(command), [], command)
+
+    def test_chmod_777_in_other_spellings(self):
+        for command in ("chmod -R 0777 .", "chmod -R a+rwx .", "chmod --recursive ugo+rwx x", "chmod -R a=rwx ."):
+            self.assertIn("chmod-recursive-777", denied_by(command), command)
+        for command in ("chmod -R 0755 .", "chmod -R u+rwx .", "chmod a+rwx file"):
+            self.assertEqual(denied_by(command), [], command)
+
+    def test_a_grep_path_or_glob_reaching_an_env_file(self):
+        def grep(**tool_input):
+            payload = {"tool_name": "Grep", "cwd": CWD, "tool_input": {"pattern": "TOKEN", **tool_input}}
+            return sorted({h.rule.id for h in hook.decide(hook.read_claude_code(payload), TABLE, HOME).denials})
+        for tool_input in ({"path": ".env"}, {"path": "sub", "glob": ".env"}, {"glob": "**/.env.*"},
+                           {"glob": "*.env"}, {"path": "app", "glob": ".env*"}):
+            self.assertIn("env-files-read", grep(**tool_input), tool_input)
+        for tool_input in ({"path": "src"}, {"glob": "*.py"}, {"glob": ".env.example"}, {"glob": "*"}):
+            self.assertEqual(grep(**tool_input), [], tool_input)
+
+    def test_opencode_and_cursor_searches_too(self):
+        call = hook.read_opencode({"tool": "grep", "args": {"pattern": "T", "path": "app", "include": "*.env"},
+                                   "directory": CWD})
+        self.assertTrue(hook.decide(call, TABLE, HOME).denials)
+        call = hook.read_cursor({"hook_event_name": "preToolUse", "tool_name": "Grep", "cwd": CWD,
+                                 "tool_input": {"pattern": "T", "glob": ".env.*"}})
+        self.assertTrue(hook.decide(call, TABLE, HOME).denials)
+
+    def test_path_case_is_folded_where_the_filesystem_folds_it(self):
+        with mock.patch.object(commands, "FOLD_CASE", True):
+            self.assertIn("env-files-read", sorted({h.rule.id for h in verdict(tool="Read", files=[(".ENV", "read")]).denials}))
+            self.assertIn("env-files-commands", denied_by("cat sub/.Env.Local"))
+            self.assertEqual(denied_by("cat .ENV.EXAMPLE"), [])
+        with mock.patch.object(commands, "FOLD_CASE", False):
+            self.assertFalse(verdict(tool="Read", files=[(".ENV", "read")]).denials)
+
+
 class ClaudeCodeHookTest(unittest.TestCase):
     """The script as Claude Code runs it: PreToolUse JSON in, a decision out."""
 

@@ -4,6 +4,7 @@ python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 """
 import fnmatch
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -14,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from setupmachine import reconcile, rules, shared  # noqa: E402
 from setupmachine.adapters import claude_code, codex  # noqa: E402
-from setupmachine.plan import render  # noqa: E402
+from setupmachine.plan import Run, render  # noqa: E402
 
 RM = rules.Rule(
     id="rm-recursive-force",
@@ -402,13 +403,11 @@ class FullTableReconcileTest(unittest.TestCase):
 
     def test_a_mail_tool_that_disappears_is_removed_only_when_the_list_was_read(self):
         self.home.apply(self.table, MAIL_TOOLS)
-        original = claude_code.discover_tools
-        claude_code.discover_tools = lambda: (None, "not logged in")
-        try:
-            plan = self.home.plan(self.table)
-        finally:
-            claude_code.discover_tools = original
-        self.assertEqual(kinds(plan, "removed"), [])
+        # In the user's own home Claude Code is asked (a trial home never asks); no other harness is found.
+        with mock.patch.object(claude_code, "discover_tools", lambda: (None, "not logged in")), \
+                mock.patch.object(shared, "which", lambda program: None):
+            plan = reconcile.build(self.home.path, self.table, self.home.path)
+        self.assertEqual([r for r in kinds(plan, "removed") if r.startswith("mcp__")], [])
         self.assertTrue(any("not logged in" in g for g in kinds(plan, "gap")))
         plan = self.home.apply(self.table, [])
         self.assertIn("mcp__claude_ai_Gmail__send_message", kinds(plan, "removed"))
@@ -458,6 +457,10 @@ class EnvironmentRowsTest(unittest.TestCase):
         self.assertIn("Bash(printenv *)", claude_code.entries_for(table_rule("env-print")))
         self.assertIn("Bash(export -p *)", claude_code.entries_for(table_rule("env-dump-declared")))
         self.assertEqual(claude_code.entries_for(table_rule("env-files-commands")), [])
+        # `declare -x` alone lists variables, `declare -x NAME=1` sets one: no Bash rule tells them apart.
+        self.assertEqual(claude_code.entries_for(table_rule("env-dump-listed")), [])
+        gaps = claude_code.gaps_for(table_rule("env-dump-listed"))
+        self.assertTrue(any("hook alone" in g and "only flags" in g for g in gaps), gaps)
 
     def test_the_var_expansion_gap_is_named(self):
         gaps = kinds(self.home.plan(self.table, []), "gap")
@@ -731,6 +734,133 @@ class HookWiringTest(unittest.TestCase):
         reconcile.apply(plan, plan.id)
         [group] = self.pre_tool_hooks()
         self.assertIn(f"--rules {other}", group["hooks"][0]["command"])
+
+
+class SharedSkillsTest(unittest.TestCase):
+    """The user's own skills repo, from the `skills-repo` Defaults row, installed globally."""
+
+    def setUp(self):
+        self.home = Home()
+        self.addCleanup(self.home.close)
+
+    def section(self, plan):
+        return next(s for s in plan.sections if s.title == "Shared skills")
+
+    def with_repo(self, value):
+        self.home.apply()
+        path = shared.instructions_path(self.home.path)
+        path.write_text(path.read_text().replace("| skills-repo | none |", f"| skills-repo | {value} |"))
+
+    def test_no_row_or_none_is_a_none_line_and_nothing_runs(self):
+        plan = self.home.plan()
+        [change] = self.section(plan).changes
+        self.assertEqual(change.kind, "none")
+        self.assertIn("skills-repo", change.text)
+        self.assertFalse([w for w in plan.writes if isinstance(w, Run)])
+        self.home.apply()
+        self.assertEqual(self.section(self.home.plan()).changes[0].kind, "none")
+
+    def test_the_repo_is_installed_globally_then_present(self):
+        self.with_repo("me/skills")
+        plan = self.home.plan()
+        [run] = [w for w in plan.writes if isinstance(w, Run)]
+        self.assertEqual(run.argv, ["npx", "--yes", "skills", "add", "me/skills", "-g", "-a", "codex", "-a", "claude-code", "-y"])
+        self.assertEqual(run.env, {"HOME": str(self.home.path)})
+        [added] = [c for c in self.section(plan).changes if c.kind == "added"]
+        self.assertIn("me/skills", added.text)
+        self.assertIn("npx --yes skills add me/skills -g", added.note)
+        self.assertIn("npx --yes skills add me/skills", render(plan))
+        # Once the skills CLI records a skill from it, the audit shows it present and runs nothing.
+        self.home.write(".agents/.skill-lock.json", json.dumps({"version": 3, "skills": {
+            "implement": {"source": "Me/Skills", "sourceType": "github"}}}))
+        plan = self.home.plan()
+        self.assertEqual([c.kind for c in self.section(plan).changes], ["present"])
+        self.assertFalse(plan.has_changes)
+
+    def test_a_value_that_isnt_owner_repo_is_a_gap_not_a_guess(self):
+        self.with_repo("my skills")
+        plan = self.home.plan()
+        self.assertEqual([c.kind for c in self.section(plan).changes], ["gap"])
+        self.assertFalse([w for w in plan.writes if isinstance(w, Run)])
+
+
+class TrialHomeDiscoveryTest(unittest.TestCase):
+    """Under a --home that isn't the user's own, plan never starts a real harness to list its tools."""
+
+    def setUp(self):
+        self.home = Home()
+        self.addCleanup(self.home.close)
+        (self.home.path / ".cursor").mkdir()
+
+    def test_discovery_is_skipped_and_named(self):
+        from setupmachine.adapters import cursor
+        refuse = mock.Mock(side_effect=AssertionError("started a real harness"))
+        with mock.patch.object(claude_code, "discover_tools", refuse), mock.patch.object(cursor, "discover_tools", refuse):
+            plan = self.home.plan(rules.load())
+        gaps = kinds(plan, "gap")
+        for harness in ("Claude Code", "Cursor"):
+            self.assertTrue(any(f"couldn't list {harness}'s MCP tools" in g and "--tool-names" in g for g in gaps),
+                            (harness, gaps))
+        refuse.assert_not_called()
+
+    def test_tool_names_still_apply(self):
+        plan = self.home.plan(rules.load(), MAIL_TOOLS)
+        self.assertIn("mcp__claude_ai_Gmail__send_message", kinds(plan, "added"))
+
+
+class FailOpenWiringTest(unittest.TestCase):
+    """A hook command whose script is gone lets every call through, in every harness; a deny still refuses."""
+
+    def setUp(self):
+        self.home = Home()
+        self.addCleanup(self.home.close)
+        self.config = self.home.path / "hook.json"
+
+    def run_wired(self, command, payload):
+        return subprocess.run(["/bin/sh", "-c", command], input=json.dumps(payload), capture_output=True,
+                              text=True, timeout=30)
+
+    def test_a_missing_script_exits_0_and_says_nothing(self):
+        deny = {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}, "cwd": str(self.home.path)}
+        with mock.patch.object(claude_code, "HOOK_SCRIPT", self.home.path / "gone" / "pre_tool_hook.py"):
+            for harness in ("claude-code", "codex"):
+                proc = self.run_wired(claude_code.hook_command(self.home.path, self.home.os_home, None, harness), deny)
+                self.assertEqual((proc.returncode, proc.stdout), (0, ""), harness)
+            # Cursor reads an empty answer as invalid JSON, which blocks: it gets `{}`.
+            proc = self.run_wired(claude_code.hook_command(self.home.path, self.home.os_home, None, "cursor"), deny)
+            self.assertEqual((proc.returncode, proc.stdout.strip()), (0, "{}"))
+
+    def test_a_present_script_still_refuses(self):
+        deny = {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}, "cwd": str(self.home.path)}
+        proc = self.run_wired(claude_code.hook_command(self.home.path, self.home.os_home), deny)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(json.loads(proc.stdout)["hookSpecificOutput"]["permissionDecision"], "deny")
+        cursor_deny = {"hook_event_name": "beforeShellExecution", "command": "rm -rf x", "cwd": str(self.home.path)}
+        proc = self.run_wired(claude_code.hook_command(self.home.path, self.home.os_home, None, "cursor"), cursor_deny)
+        self.assertEqual(json.loads(proc.stdout)["permission"], "deny")
+
+    def test_a_broken_table_fails_open_too(self):
+        bad = self.home.path / "bad.json"
+        bad.write_text("{nope")
+        payload = {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}}
+        proc = self.run_wired(claude_code.hook_command(self.home.path, self.home.os_home, bad), payload)
+        self.assertEqual((proc.returncode, proc.stdout), (0, ""))
+
+    def test_the_opencode_plugin_skips_a_missing_script(self):
+        from setupmachine.adapters import opencode
+        argv = claude_code.hook_argv(self.home.path, self.home.os_home, None, "opencode")
+        source = opencode.plugin_source(argv)
+        self.assertIn("existsSync(SCRIPT)", source)
+        self.assertIn(json.dumps(str(claude_code.HOOK_SCRIPT)), source)
+
+    def test_a_script_outside_a_skills_install_folder_is_named(self):
+        with mock.patch.object(claude_code, "HOOK_SCRIPT", Path("/repo/skills/set-up-machine/scripts/pre_tool_hook.py")):
+            gaps = kinds(self.home.plan(), "gap")
+        self.assertTrue(any("isn't under a skills install folder" in g for g in gaps), gaps)
+        installed = self.home.path / ".agents/skills/set-up-machine/scripts/pre_tool_hook.py"
+        with mock.patch.object(claude_code, "HOOK_SCRIPT", installed):
+            gaps = kinds(self.home.plan(), "gap")
+        self.assertFalse(any("skills install folder" in g for g in gaps), gaps)
 
 
 class FreshInstallTest(unittest.TestCase):

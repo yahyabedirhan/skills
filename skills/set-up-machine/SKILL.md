@@ -18,10 +18,10 @@ Harnesses it covers, each with an adapter reference: [Claude Code](references/cl
 
 ## Steps
 
-1. **Plan.** Run `python3 <this skill>/scripts/set_up_machine.py plan`. It writes nothing, but it starts each harness briefly to list the MCP tools it exposes (see *Mail tools* below). Done when you hold its whole output, which ends in either `No changes.` or a plan id.
+1. **Plan.** Run `python3 <this skill>/scripts/set_up_machine.py plan`. It writes nothing, but in the user's own home it starts each harness briefly to list the MCP tools it exposes (see *Mail tools* below). Done when you hold its whole output, which ends in either `No changes.` or a plan id.
 2. **Nothing to do?** On `No changes.`, report the audit: memory per harness, what's wired, the gaps, the stricter and extra rules, and the mail tools it found. Stop here.
 3. **Ask once.** Show the user the plan output unedited, then ask for one approval of the whole diff. Its lines, per harness:
-   - `added`: a rule the harness lacks, a link or hook it wires, or an external skill it installs (the line shows the command).
+   - `added`: a rule the harness lacks, a link or hook it wires, or skills it installs: an external skill, or the user's own skills repo from the `skills-repo` Defaults row (the line shows the command).
    - `tightened`: a rule the harness has at a looser level; the stricter entry is added where it wins (beside it, or after it where the last match wins).
    - `removed`: an entry this skill wrote earlier that the table no longer has, a harness memory file, or a harness's own global file whose every line is already in the shared file, as it becomes a link. Only these are ever removed.
    - `present`: already in place, as the table's entry or a broader one that covers it.
@@ -34,7 +34,7 @@ Harnesses it covers, each with an adapter reference: [Claude Code](references/cl
 4. **Apply** the approved plan: `python3 <this skill>/scripts/set_up_machine.py apply --plan-id <id>`, the command the plan printed. If apply refuses because the machine changed since the plan, go back to step 1 and ask again.
 5. **Audit.** Run the plan again. Done when it ends `No changes.` and every harness with a hook shows a `wired` line. Report the backup folder apply printed, what's wired, the gaps, the stricter and extra rules, and the mail tools found.
 
-`--home <dir>` points every step at another home folder, such as a copy of this one in the project's `.scratch/`, to try a change without touching the real machine.
+`--home <dir>` points every step at another home folder, such as a copy of this one in the project's `.scratch/`, to try a change without touching the real machine. Under a `--home` other than the user's own, plan starts no harness: give `--tool-names` to match mail tools, or the plan names the gap.
 
 ## What reconcile promises
 
@@ -43,7 +43,8 @@ Harnesses it covers, each with an adapter reference: [Claude Code](references/cl
 - **The shared file is the user's outside the generated block.** The block between the `set-up-machine:rules` markers is regenerated from the table; elsewhere reconcile only adds what the file's shape lacks, and never rewrites a Defaults value or a workflow line.
 - **A semantic guard only gains the table's rules.** In a harness's guard settings (Claude Code's `autoMode`), the user's own entries stay, and only a rule this skill wrote is ever removed.
 - **Memory stays off.** Each harness's memory feature is turned off where it has one, and every memory file is listed as `removed`. Apply keeps a copy in the backup folder, so move a memory worth keeping into its layer before approving.
-- **Apply writes exactly the approved plan,** after copying each file it changes into `~/.config/agents/backups/<time>/`. It runs the plan's commands (an external skill's install) first, and writes nothing if one fails.
+- **Shared skills are installed, never guessed.** With a `skills-repo` value in the Defaults table (`<owner>/<repo>`), the plan installs that repo's skills globally and the audit shows them `present` once the skills CLI records a skill from it; with no value it prints a `none` line.
+- **Apply writes exactly the approved plan,** after copying each file it changes into `~/.config/agents/backups/<time>/`. It runs the plan's commands (an install) first, and writes nothing if one fails.
 
 ## Changing the rule table
 
@@ -62,7 +63,7 @@ Edit `rules.json`, then run the steps. Each row:
 
 `match` kinds, told apart by their keys:
 
-- **Command:** `program`, one bare name (`rm`) or a list of them; optional `subcommands`, alternative word lists after the program (`[["repo", "delete"], ["repo", "archive"]]`); optional `flags`, the flag groups the command carries, all of them, each listing one flag's names without dashes, a one-letter name being the short flag (`["r", "R", "recursive"]`); optional `operands`, words after the flags (`["777"]`); optional `arguments: "none"`, the program with nothing after it (`env`, a bare `set`); optional `files`, globs one of its operands must match (`cat .env`), with an optional `except`.
+- **Command:** `program`, one bare name (`rm`) or a list of them; optional `subcommands`, alternative word lists after the program (`[["repo", "delete"], ["repo", "archive"]]`); optional `flags`, the flag groups the command carries, all of them, each listing one flag's names without dashes, a one-letter name being the short flag (`["r", "R", "recursive"]`); optional `operands`, words after the flags (`["777"]`), or a list of alternative word lists (`[["777"], ["a+rwx"]]`); optional `arguments: "none"`, the program with nothing after it (`env`, a bare `set`), or `arguments: "flags"`, the program with flags and nothing else (`declare -x`), which only the hook can tell apart; optional `files`, globs one of its operands must match (`cat .env`), with an optional `except`.
 - **File:** `paths`, globs relative to the project (`**/.env`) or starting `~/`, `access`, `read` or `write`, and an optional `except`, globs the row leaves out (`**/.env.example`).
 - **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of an MCP tool name (`mcp__<server>__<tool>`). Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID.
 
@@ -72,15 +73,15 @@ Adapters expand a row into every native entry it needs (each flag order and spel
 
 One script, `scripts/pre_tool_hook.py`, reads the same `rules.json` and checks each tool call before it runs:
 
-- **deny** rows: it reads the command the way the shell runs it (any flag order or grouping, flags after the operands, `/bin/rm`, `RM` where the filesystem ignores case as macOS's does, `mkfs.ext4`, the inside of `bash -lc '…'`, `eval`, `sudo`, `xargs`, `find -exec`, every part of `a && b; c | d`), and refuses the call naming each refused part with its rule's reason and instruction. A wrapper that runs no command is read as itself (`env -u X` is `env`). It also checks file tools against file rows, a command's operands against its row's `files` (`source .env`), and MCP tools against mail-tool rows, including tools connected after the last plan.
+- **deny** rows: it reads the command the way the shell runs it (any flag order or grouping, flags after the operands, `/bin/rm`, `RM` where the filesystem ignores case as macOS's does, `mkfs.ext4`, the inside of `bash -lc '…'`, `eval`, `sudo`, `xargs`, `find -exec`, every part of `a && b; c | d`), and refuses the call naming each refused part with its rule's reason and instruction. A wrapper that runs no command is read as itself (`env -u X` is `env`). It also checks file tools against file rows (a search's path and glob too: `Grep` with `*.env`), a command's redirect targets (`< .env` a read, `> .env` a write) and `tee`'s operands against them, a command's operands against its row's `files` (`source .env`), and MCP tools against mail-tool rows, including tools connected after the last plan. Paths fold case where the filesystem does (`.ENV` on macOS).
 - **allow-and-report** rows: it appends one JSON line per call to `<report folder>/<date>.jsonl`, readable by the user alone since a command can carry a secret, and lets the harness's own permissions decide.
 - **ask** rows stay native.
 
-The native entries stay underneath, so a hook that fails or is switched off leaves them in force. The report folder is `report_dir` in `~/.config/agents/hook.json`, which the plan creates with `~/.local/state/agents/reports` and then leaves to the user. The script takes `--harness` (which payload and answer format), `--config` and `--rules`; each adapter's reference says how it's wired.
+The native entries stay underneath, so a hook that fails or is switched off leaves them in force. Every harness's wiring fails open: a script that's gone lets calls through rather than blocking every one, and the plan names a hook script outside a skills install folder (`~/.agents/skills`, `~/.claude/skills`), such as a repo checkout, as a gap. The report folder is `report_dir` in `~/.config/agents/hook.json`, which the plan creates with `~/.local/state/agents/reports` and then leaves to the user. The script takes `--harness` (which payload and answer format), `--config` and `--rules`; each adapter's reference says how it's wired.
 
 ## Mail tools
 
-Only the running harness knows which MCP tools it exposes, and their names differ by harness and by how a connector is attached. So plan asks each harness for its tool list, matches the table's MCP-tool rows against it, and prints a `found` line per row. If a harness can't be asked (not installed, not logged in), the plan says so as a gap and keeps the entries it wrote before. `--tool-names <file>`, one name per line, supplies the list instead. opencode lists its tools only inside a session, so its plan matches the configured MCP servers instead and leaves their tools to the hook.
+Only the running harness knows which MCP tools it exposes, and their names differ by harness and by how a connector is attached. So plan asks each harness for its tool list, matches the table's MCP-tool rows against it, and prints a `found` line per row. If a harness can't be asked (not installed, not logged in, or a `--home` other than the user's own), the plan says so as a gap and keeps the entries it wrote before. `--tool-names <file>`, one name per line, supplies the list instead. opencode lists its tools only inside a session, so its plan matches the configured MCP servers instead and leaves their tools to the hook.
 
 ## Checking a fresh Linux machine
 
