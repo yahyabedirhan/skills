@@ -8,7 +8,7 @@ Evidence tags:
 
 - **[probe]** a command run for this file; exact command given, output shortened.
 - **[harness]** a file the harness itself put in the VM: `/root/.ccr/README.md`, `/tmp/claude-append-system-prompt.txt` (text appended to Claude's system prompt), the hook scripts under `~/.claude/`, or the `claude` process's command line.
-- **[doc <page>, "<section>"]** Claude Code's docs at `https://code.claude.com/docs/en/<page>`, as cited in [cloud-agents-claude-code.md](cloud-agents-claude-code.md).
+- **[doc `<page>`, "`<section>`"]** Claude Code's docs at `https://code.claude.com/docs/en/<page>`, as cited in [cloud-agents-claude-code.md](cloud-agents-claude-code.md).
 - **Unverified** marks an inference.
 
 Verdicts against the old doc: **confirmed**, **contradicted**, or **new**.
@@ -24,7 +24,7 @@ Verdicts against the old doc: **confirmed**, **contradicted**, or **new**.
 - **The three missing skills** carry `disable-model-invocation: true`, so they're hidden from the model but meant for the user to type.
 - **The Stop hook** refuses to end a turn while the checkout has uncommitted, untracked, unpushed or unsigned commits.
 - **Disk:** `df` shows 252G, but only about 30G is writable; the rest is ext4 reserved blocks. `/tmp` is on the same disk. `/mnt/user-data` exists with empty `uploads`, `working` and `outputs`.
-- **The session bills to a promotional pool** (`rateLimitType: ccr_promotional`) that resets 2026-11-05 00:00 PST, which matches the announced 4 November promo credit expiry.
+- **The session bills to a promotional pool** (`rateLimitType: ccr_promotional`) whose rate-limit window resets (`resetsAt`) 2026-11-05 00:00 PST: a window reset, not a refill. Inferred: that matches the announced 4 November promo credit expiry.
 
 ## 1. Headless browser
 
@@ -37,7 +37,7 @@ Results:
 - `goto https://example.com` → `net::ERR_TUNNEL_CONNECTION_FAILED` (the proxy's 403 to CONNECT).
 - Cause: the proxy re-signs TLS with its own CA, `CCR Upstream Proxy CA (staging)`, and Chromium's NSS store at `~/.pki/nssdb` holds no such CA; the store was created by this first Chromium run, not pre-seeded. The proxy README says "the browser NSS store" is set up; it wasn't for Playwright's Chromium. `certutil` isn't installed and `apt-get download libnss3-tools` got a 404 (stale package index), so the store couldn't be filled without an `apt-get update`.
 - Fix that keeps verification on: compute the proxy CA's SPKI hash (`openssl x509 -in /root/.ccr/agent-proxy-ca.crt -noout -pubkey | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64`) and launch with `args: ['--ignore-certificate-errors-spki-list=<hash>']`. That trusts only chains through the proxy's key. Then `code.claude.com/docs/llms.txt` → 200 (`# Claude Code Docs`), `github.com` → 200 (its asset host `github.githubassets.com` is blocked, so pages render unstyled), `example.com` → tunnel refused.
-- Memory: used 537 MB before, 611 MB during (plus about 400 MB page cache), unchanged after. A headless browser is cheap on the 16 GB VM.
+- Memory: used 537 MB before, 611 MB during (plus about 400 MB page cache), unchanged after. A headless browser is cheap on the 15.7 GiB VM.
 - The harness prompt says: "Chromium is pre-installed and Playwright is configured to find it (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`; `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` …). Do not run `playwright install`", and to use `executablePath: '/opt/pw-browsers/chromium'` if a project pins another Playwright version [harness]. `/opt/pw-browsers` holds `chromium-1194`, `chromium_headless_shell-1194`, `ffmpeg-1011` and a `chromium` symlink.
 
 Verdict: **contradicted** ("no browser named … needs at least a setup script, and likely Custom/Full network"). The browser is there and the Trusted network is enough for allowlisted hosts. **New:** the CA trust step.
@@ -62,7 +62,7 @@ Commands [probe]: `curl -sS -D - https://example.com`; `curl -sv https://example
 
 Results:
 
-- Blocked host: `HTTP/1.1 403 Forbidden`, headers `Content-Type: text/plain`, `X-Content-Type-Options: nosniff`, `Content-Length: 69`, `Connection: close`. Body: `request blocked: no rule or allowlist entry allows host "example.com"`. **No `x-deny-reason` header.**
+- Blocked host: `HTTP/1.1 403 Forbidden`, headers `Content-Type: text/plain; charset=utf-8`, `X-Content-Type-Options: nosniff`, `Content-Length: 69`, `Connection: close`. Body: `request blocked: no rule or allowlist entry allows host "example.com"`. **No `x-deny-reason` header.**
 - Plain HTTP through the relay: `405 Method Not Allowed`, "this proxy only accepts HTTPS CONNECT tunnels".
 - Status endpoint: `enabled`, `gitConfigInjection` and `gitSshRewrite` true, `javaTrustStorePath` set, a `noProxy` list (Anthropic API and MCP proxy hosts, npm, jsr, PyPI, crates, Go proxy, private ranges), and a ring of the last 20 relay failures (host, time, "gateway answered 403 to CONNECT").
 - `apt-get` reached `security.ubuntu.com` over plain HTTP (it returned 404 for a stale package), so apt has its own route.
@@ -73,7 +73,7 @@ Verdict: security proxy **confirmed** [doc env, "Security proxy"]; `403` **confi
 
 ## 4. GitHub proxy
 
-Commands [probe]: `git ls-remote origin`; `git fetch origin main`; `curl -X POST https://api.github.com/graphql` with the placeholder token and four queries (`{ viewer { login } }`, an issue title, `projectsV2(first:1){totalCount}`, `subIssues(first:1){totalCount}`); REST `GET /user`, `GET /repos/yahyabedirhan/skills/issues/45/sub_issues`, `GET /repos/anthropics/claude-code` with and without the token; `git ls-remote https://github.com/anthropics/claude-code HEAD`; `raw.githubusercontent.com`. Only status codes and error text recorded.
+Commands [probe]: `git ls-remote origin`; `git fetch origin main`; `curl -X POST https://api.github.com/graphql` with the placeholder token and four queries (`{ viewer { login } }`, an issue title, `projectsV2(first:1){totalCount}`, `subIssues(first:1){totalCount}`), and, in the review pass, a read-only PR query `repository(owner,name){pullRequest(number:76){title state}}`; REST `GET /user`, `GET /repos/yahyabedirhan/skills/issues/45/sub_issues`, `GET /repos/anthropics/claude-code` with and without the token; `git ls-remote https://github.com/anthropics/claude-code HEAD`; `raw.githubusercontent.com`. Only status codes and error text recorded.
 
 Results:
 
@@ -81,7 +81,7 @@ Results:
 |---|---|
 | `git ls-remote origin` | Works: 19 refs, all branches, PR refs |
 | `git fetch origin main` | Works; the shallow single-branch clone gained `origin/main` |
-| GraphQL, any query (viewer, issue, Projects v2, sub-issues) | `403`: "GitHub GraphQL is not available from Claude Code sessions; use the REST API … For review threads, auto-merge, and draft/ready-for-review use the CCR routes on api.github.com: `GET /repos/{owner}/{repo}/pulls/{n}/ccr/review_threads`, `POST …/pulls/{n}/ccr/comments/{comment_id}/resolve` (or `/unresolve`), `PUT` or `DELETE …/pulls/{n}/ccr/auto_merge`, `POST …/pulls/{n}/ccr/ready_for_review`, `POST …/pulls/{n}/ccr/convert_to_draft`" |
+| GraphQL, any query (viewer, issue, Projects v2, sub-issues, a read-only PR query on #76) | `403`: "GitHub GraphQL is not available from Claude Code sessions; use the REST API … For review threads, auto-merge, and draft/ready-for-review use the CCR routes on api.github.com: `GET /repos/{owner}/{repo}/pulls/{n}/ccr/review_threads`, `POST …/pulls/{n}/ccr/comments/{comment_id}/resolve` (or `/unresolve`), `PUT` or `DELETE …/pulls/{n}/ccr/auto_merge`, `POST …/pulls/{n}/ccr/ready_for_review`, `POST …/pulls/{n}/ccr/convert_to_draft`" |
 | REST `GET /user` (token) | `200` (so the proxy does inject a real credential) |
 | REST sub-issues of #45 | `200` |
 | REST `anthropics/claude-code`, with or without token | `403`: "GitHub access to this repository is not enabled for this session. Use add_repo to request access …" |
@@ -92,7 +92,7 @@ The harness prompt repeats the scope: "GitHub access for this session is current
 
 Pushing: the remote-tracking reflog shows `claude/<slug>` "update by push" at session start and `skills/cloud-agents-session-probe` "update by push" at 20:07 UTC, a new branch outside `claude/` pushed by the orchestrating session [probe, `git reflog show refs/remotes/origin/<branch>`]. `get_session` lists that branch under the session's `outcomes` [probe]. The harness prompt names one "designated branch" (`claude/<slug>`) and says "NEVER push to a different branch without explicit permission" [harness], which is an instruction, not a proxy rule.
 
-Verdict: GraphQL scope **contradicted** ("a pinned set of GraphQL operations for pull-request workflows" [doc env, "GitHub proxy"]: none pass here). REST sub-issues **confirmed** working, now with evidence of authenticated access (`/user` 200). Repository scope **confirmed** and stricter than expected (public repos too, REST only). Push to "the session's current working branch" only **contradicted** for a new branch name.
+Verdict: GraphQL scope **contradicted** ("a pinned set of GraphQL operations for pull-request workflows" [doc env, "GitHub proxy"]: none pass here). REST sub-issues **confirmed** working, now with evidence of authenticated access (`/user` 200). Repository scope **confirmed** and stricter than expected (public repos too, REST only). Push to "the session's current working branch" only **confirmed**, read as the checked-out branch; a new branch name works.
 
 ## 5. Sub-agent tools
 
@@ -213,7 +213,7 @@ Put together from probes 3, 5, 7, 9 and 10 [probe; harness]:
 | Can a plain cloud session push to a branch named in the prompt? | Yes: a new `skills/…` branch was pushed; the harness prompt asks for "explicit permission" first | Probe 4 |
 | Does a plain cloud session send phone push notifications? | Not testable from inside, and not from a sub-agent: `PushNotification` is a deferred tool of the main session only; whether it reaches the phone needs the maintainer to watch | Probe 5 |
 | Can a cloud session start another cloud session? | Likely: the VM's `claude` is OAuth-signed-in and has `--cloud`, and the Remote MCP `create_session` tool is present. Not run, by the rules | Probes 5 and 7 |
-| Promo credit terms and remaining balance | The session draws on a `ccr_promotional` rate-limit pool resetting 2026-11-05 00:00 PST, consistent with the 4 November expiry. Balance not visible from inside | Probe 5 (`get_session`) |
+| Promo credit terms and remaining balance | The session draws on a `ccr_promotional` rate-limit pool whose window resets (`resetsAt`) 2026-11-05 00:00 PST, a reset rather than a refill; Inferred: consistent with the 4 November expiry. Balance not visible from inside | Probe 5 (`get_session`) |
 | Does the GitHub proxy allow the REST sub-issue calls? | Yes, `200`, with authenticated access shown by `/user` `200`; GraphQL is fully blocked | Probe 4 |
 
 And the "#69's cloud sessions" TODO in [cloud-agents-delegation.md](cloud-agents-delegation.md): the create form prints a session URL and `--teleport` ID a skill can record (brief); `/orchestrate-with-handoff` doesn't come from the claude.ai account (only Anthropic's nine skills do), and once installed with `npx skills add` it is hidden from the model by `disable-model-invocation` but should be typeable (probe 8); a non-`claude/` branch push works (probe 4); phone push is not testable from inside (probe 5).
@@ -239,3 +239,4 @@ All on 2026-09-29, inside the cloud session's VM, as a sub-agent. No commits.
 | 13 | VM | Frontmatter of the 20 installed skills | Nothing |
 | 14 | VM | Wrote this file | This file |
 | 15 | VM (integration) | Reworded the permission-prompt lines (they waited for approval; who approved isn't recorded); filled the probe 1 row from the orchestrator's `list_sessions` | This file only |
+| 16 | VM → GitHub (review) | GraphQL `curl -X POST https://api.github.com/graphql` with a read-only PR query (`repository(owner,name){pullRequest(number:76){title state}}`), status code only | Nothing; `403` with the same "GitHub GraphQL is not available…" message |
