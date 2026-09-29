@@ -9,6 +9,8 @@ Facts it relies on (see references/claude-code.md):
 - MCP tools are named `mcp__<server>__<tool>`, and only the running harness knows
   which ones exist, so the adapter asks it at plan time.
 - `~/.claude/CLAUDE.md` loads in every session and follows `@path` imports.
+- Auto memory is on by default and writes `~/.claude/projects/<project>/memory/`;
+  `"autoMemoryEnabled": false` in settings.json turns it off.
 """
 from __future__ import annotations
 
@@ -21,6 +23,7 @@ import tempfile
 import threading
 from pathlib import Path
 
+from .. import memory
 from .. import rules as rule_table
 from ..plan import Change, FileWrite, Section
 from ..shared import read_text
@@ -34,6 +37,7 @@ NATIVE_LIST = {"deny": "deny", "ask": "ask", "allow-and-report": "allow"}
 LISTS = ("deny", "ask", "allow")
 # File access -> the rule kind Claude Code checks for it.
 FILE_RULE = {"read": "Read", "write": "Edit"}
+MEMORY_KEY = "autoMemoryEnabled"
 
 DISCOVERY_TIMEOUT = 90
 
@@ -155,13 +159,14 @@ def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path,
     perm_section, perm_write, owned_perms = _plan_permissions(
         home, rules, owned.get("permissions", {}), tools or [], tools_error
     )
+    mem_section, perm_write, mem_writes = _plan_memory(home, perm_write)
     md_section, md_write, owned_imports = _plan_instructions(home, owned.get("imports", []), shared_file, os_home)
     owned_after = {}
     if any(owned_perms.values()):
         owned_after["permissions"] = owned_perms
     if owned_imports:
         owned_after["imports"] = owned_imports
-    return [perm_section, md_section], [perm_write, md_write], owned_after
+    return [perm_section, mem_section, md_section], [perm_write, md_write, *mem_writes], owned_after
 
 
 def _plan_permissions(home: Path, rules: list, owned: dict, tools: list, tools_error):
@@ -258,6 +263,27 @@ def _found(rule, tools: list, tools_error) -> Change:
     return Change("found", text, rule.level, rule.id)
 
 
+def _plan_memory(home: Path, settings_write: FileWrite):
+    """Auto memory off in the same settings.json write as the permissions, and every memory file removed."""
+    section = Section(f"{LABEL}: memory", settings_write.path)
+    current = settings_write.new if settings_write.new is not None else settings_write.old
+    settings = json.loads(current) if current else {}
+    value = settings.get(MEMORY_KEY)
+    if value is False:
+        section.changes.append(Change("present", f"{MEMORY_KEY}: false"))
+    else:
+        kind, note = ("added", "auto memory off") if value is None else ("tightened", f"was {json.dumps(value)}")
+        section.changes.append(Change(kind, f"{MEMORY_KEY}: false", note=note))
+        settings[MEMORY_KEY] = False
+        settings_write = FileWrite(settings_write.path, settings_write.old,
+                                   json.dumps(settings, indent=2, ensure_ascii=False) + "\n")
+    section.changes.append(Change(
+        "gap", f"a project's .claude/settings.json can set {MEMORY_KEY}: true and win over this; the project audit checks it",
+    ))
+    folders = sorted((config_dir(home) / "projects").glob("*/memory"))
+    return section, settings_write, memory.remove_files(home, folders, section)
+
+
 def _plan_instructions(home: Path, owned_imports: list, shared_file: Path, os_home: Path):
     path = config_dir(home) / "CLAUDE.md"
     old = read_text(path)
@@ -265,6 +291,12 @@ def _plan_instructions(home: Path, owned_imports: list, shared_file: Path, os_ho
     accepted = {line, "@" + str(shared_file.resolve()), "@" + str(shared_file)}
     section = Section(f"{LABEL}: global instructions", path)
     present = old is not None and any(l.strip() in accepted for l in old.splitlines())
+    others = [l for l in (old or "").splitlines() if l.strip() and l.strip() not in accepted]
+    if others:
+        section.changes.append(Change(
+            "extra", f"{len(others)} line(s) besides the import", note="kept; move them into the shared file, "
+            "which every harness reads: references/global-instructions.md",
+        ))
     if present:
         section.changes.append(Change("present", f"import of {shared_file.name}"))
         return section, FileWrite(path, old, old), [i for i in owned_imports if i in (old or "")]

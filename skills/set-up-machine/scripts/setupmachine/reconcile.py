@@ -5,7 +5,7 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import shared
+from . import memory, shared
 from .adapters import ADAPTERS
 from .plan import Plan
 
@@ -35,6 +35,7 @@ def build(home: Path, rules: list, os_home: Path, tools=None) -> Plan:
         if owned:
             owned_after[adapter.NAME] = owned
 
+    sections.extend(memory.report_without_memory(home))
     plan = Plan(home, sections, writes)
     if plan.has_changes or owned_after != manifest["harnesses"]:
         writes.append(shared.manifest_write(home, manifest_old, owned_after))
@@ -56,6 +57,9 @@ def apply(plan: Plan, approved_id: str) -> Path:
             target = backup_dir / w.path.relative_to(plan.home)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(w.path, target)
+        if w.new is None:
+            w.path.unlink()  # its copy is in the backup folder
+            continue
         # Write through a symlink to its target, so a linked file stays linked.
         target = w.path.resolve()
         target.parent.mkdir(parents=True, exist_ok=True)

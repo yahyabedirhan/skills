@@ -24,4 +24,4 @@ Name tickets and pull requests by title, not by a number alone.
 
 ## How
 
-The user's own agent instructions say how notifications reach them (for example, a line saying to run `osascript` on macOS because the harness's tool doesn't reach their terminal); follow them. With nothing there, use the harness's built-in notification tool. With neither, skip the notification and say it in the chat.
+The **Notifications** row of the Defaults table in the user's global instructions says how notifications reach them (for example, an `osascript` command on macOS because the harness's tool doesn't reach their terminal); follow it. With no row, or `none`, use the harness's built-in notification tool. With neither, skip the notification and say it in the chat.

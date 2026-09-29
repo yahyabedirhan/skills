@@ -38,7 +38,7 @@ The worktree comes from the project's worktree tool, never from `herdr worktree 
 
 ## 3. Start the agent
 
-Start the maintainer's preferred agent (from their instructions, with the flags they give; default `claude`) in the tab's root pane, named `<topic>-<role>` in lowercase:
+Start the maintainer's preferred agent (the **Agent to start** row of the Defaults table in their global instructions, with its flags; default `claude`) in the tab's root pane, named `<topic>-<role>` in lowercase:
 
 ```bash
 herdr agent start <name> --kind <kind> --pane <pane_id> -- <agent flags>

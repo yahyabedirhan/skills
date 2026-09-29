@@ -8,6 +8,13 @@ What set-up-machine writes for Claude Code, and why. The code is `scripts/setupm
 - The adapter adds one line to that file: `@~/.config/agents/AGENTS.md`, importing the shared file. Imports in user-scope files load without an approval dialog. The rest of `CLAUDE.md` is left as it is.
 - Against a `--home` other than the user's own, the line holds the absolute path instead, since `~` would name the real home.
 
+- The plan lists any other line in `CLAUDE.md` as `extra`: global instructions belong in the shared file, where every harness reads them.
+
+## Memory
+
+- Auto memory is on by default and writes `~/.claude/projects/<project>/memory/`. The adapter sets `"autoMemoryEnabled": false` in `~/.claude/settings.json`, in the same write as the permissions, and lists every file under a `projects/*/memory/` folder as `removed`.
+- **Gap:** a project's `.claude/settings.json` can set `autoMemoryEnabled: true` and win, and `CLAUDE_CODE_DISABLE_AUTO_MEMORY` outranks the key for one session. The project audit checks the first.
+
 ## Permissions
 
 - **File:** `~/.claude/settings.json`, key `permissions` with the lists `deny`, `ask` and `allow`. Everything else in the file is kept as it is.

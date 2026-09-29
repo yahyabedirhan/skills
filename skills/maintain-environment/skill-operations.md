@@ -11,12 +11,12 @@ Skills are **private by default**: a local skill stays local, and a skill reache
 
 ## Parameters
 
-Resolve these before acting, in this order: the user's request, the agent instructions files (the project's `AGENTS.md` or `CLAUDE.md`, then the user-level ones), then ask.
+Resolve these before acting, in this order: the user's request, the project's `AGENTS.md` or `CLAUDE.md`, the **Skills repo** row of the Defaults table in the user's global instructions, then ask.
 
 - `<skills-repo>`: the user's own skills repo on GitHub, as `<owner>/<repo>`.
 - `<path-to-skills-repo>`: its local clone.
 
-When the user supplies them by answer, offer to add one line naming both to their user-level agent instructions file, so the next run finds them there.
+When the user supplies them by answer, offer to fill that Defaults row, so the next run finds them there.
 
 ## Scopes
 
