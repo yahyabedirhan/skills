@@ -74,6 +74,7 @@ class MatchingTest(unittest.TestCase):
         self.assertIn(("bash", "/bin/rm -rf *"), opencode.entries_for(RM))
         self.assertEqual(opencode.entries_for(BY_ID["env-dump"])[0], ("bash", "env"))  # bare: the program alone
         self.assertEqual(opencode.entries_for(BY_ID["env-files-commands"]), [])  # paths inside a command: the hook's
+        self.assertEqual(opencode.entries_for(BY_ID["env-dump-listed"]), [])  # only flags: the hook's
         self.assertEqual(opencode.entries_for(ENV_READ)[:2], [("read", ".env"), ("read", "*/.env")])
         self.assertEqual(opencode.exceptions_for(ENV_READ), [("read", ".env.example"), ("read", "*/.env.example")])
         self.assertEqual(opencode.entries_for(BY_ID["home-credentials-read"]),

@@ -47,7 +47,7 @@ def command_samples(rule) -> list:
     """Command lines the row covers: every spelling it expands to, with an operand after it."""
     if rule.files:
         return [f"{p} {f}" for p in rule.programs for f in file_samples(rule.files)]
-    tail = "" if rule.bare else " x"
+    tail = "" if rule.bare else " -x" if rule.flags_only else " x"
     return [" ".join(prefix) + tail for prefix in rule_table.command_prefixes(rule)]
 
 

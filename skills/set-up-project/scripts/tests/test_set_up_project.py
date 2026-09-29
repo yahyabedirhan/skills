@@ -180,6 +180,10 @@ class AuditTest(Fixture):
         weak = audit.audit_claude(self.project, self.root / "bare-home", TABLE)
         self.assertEqual([(c.kind, c.rule) for s in weak for c in s.changes], [("weakens", "env-print")])
 
+    def test_an_allow_over_a_flags_only_row_is_found(self):
+        self.write(".claude/settings.json", json.dumps({"permissions": {"allow": ["Bash(declare *)"]}}))
+        self.assertIn(("Bash(declare *)", "env-dump-listed"), self.found("overlaps") + self.found("weakens"))
+
     def test_claude_allow_over_an_ask_rule_weakens_it_in_cursor(self):
         self.write(".claude/settings.json", json.dumps({"permissions": {"allow": ["Bash(git push *)"]}}))
         self.assertIn(("Bash(git push *)", "git-push-force-with-lease"), self.found("weakens"))

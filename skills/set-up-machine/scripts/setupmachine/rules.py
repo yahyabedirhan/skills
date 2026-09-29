@@ -4,9 +4,11 @@ Every harness adapter and the pre-tool hook read the table through this module,
 so a row means the same thing everywhere. A row's `match` takes one of three
 kinds, told apart by its keys:
 
-- command: `program` (one name or a list), optional `subcommands`, `flags`, `operands`,
-  `arguments: "none"` (the program run with nothing after it) and `files` (globs one
-  of its operands matches, read as a file row's paths, with an optional `except`);
+- command: `program` (one name or a list), optional `subcommands`, `flags`, `operands`
+  (words after the flags, or a list of alternative word lists), `arguments: "none"` (the
+  program run with nothing after it) or `arguments: "flags"` (with flags and nothing else
+  after it), and `files` (globs one of its operands matches, read as a file row's paths, with an
+  optional `except`);
 - file: `paths` (globs, relative to the project or `~/`), `access` (`read` or `write`)
   and an optional `except` (globs the row leaves out, such as `**/.env.example`);
 - mcp-tool: `server` and `tool`, two case-insensitive regular expressions matched
@@ -54,8 +56,9 @@ class Rule:
     program: object = ""  # command: a name, or a tuple of names
     flags: tuple = ()  # command: flag groups; each group is a tuple of spellings
     subcommands: tuple = ((),)  # command: alternative word sequences after the program
-    operands: tuple = ()  # command: words after the flags
+    operands: tuple = ((),)  # command: alternative word sequences after the flags
     bare: bool = False  # command: the program with nothing after it (`arguments: "none"`)
+    flags_only: bool = False  # command: the program with one or more flags and nothing else (`arguments: "flags"`)
     files: tuple = ()  # command: globs one of its operands matches
     paths: tuple = ()  # file: globs, relative to the project or starting `~/`
     access: str = ""  # file: read or write
@@ -145,21 +148,29 @@ def _parse_command(match: dict, where: str) -> dict:
     if not isinstance(subs, list) or not subs:
         raise RuleTableError(f"{where}: match.subcommands must be a non-empty list of word lists")
     arguments = match.get("arguments")
-    if arguments not in (None, "none"):
-        raise RuleTableError(f'{where}: match.arguments can only be "none"')
+    if arguments not in (None, "none", "flags"):
+        raise RuleTableError(f'{where}: match.arguments can only be "none" or "flags"')
     if arguments and (groups or subs != [[]] or match.get("operands") or "files" in match):
-        raise RuleTableError(f'{where}: match.arguments "none" takes no flags, subcommands, operands or files')
+        raise RuleTableError(f'{where}: match.arguments takes no flags, subcommands, operands or files')
     if "except" in match and "files" not in match:
         raise RuleTableError(f"{where}: match.except needs match.files")
     return {
         "program": program if isinstance(program, str) else tuple(program),
         "flags": tuple(tuple(g) for g in groups),
         "subcommands": tuple(_words(s, where, "each of match.subcommands") for s in subs),
-        "operands": _words(match.get("operands", []), where, "match.operands"),
+        "operands": _operands(match.get("operands", []), where),
         "bare": arguments == "none",
+        "flags_only": arguments == "flags",
         "files": _globs(match["files"], where, "match.files") if "files" in match else (),
         "excepts": _globs(match["except"], where, "match.except") if "except" in match else (),
     }
+
+
+def _operands(value, where: str) -> tuple:
+    """A list of words is one sequence; a list of word lists is alternative sequences (`777`, `a+rwx`)."""
+    if isinstance(value, list) and value and all(isinstance(v, list) for v in value):
+        return tuple(_words(v, where, "each of match.operands") for v in value)
+    return (_words(value, where, "match.operands"),)
 
 
 def _globs(paths, where: str, what: str) -> tuple:
@@ -225,9 +236,10 @@ def flag_forms(rule: Rule) -> list:
 
 
 def command_prefixes(rule: Rule) -> list:
-    """Every argv prefix the rule covers: program spelling x subcommand x flag form, then the operands."""
+    """Every argv prefix the rule covers: program spelling x subcommand x flag form x operands."""
     return _dedupe(
-        [[p, *s, *f, *rule.operands] for p in program_spellings(rule) for s in rule.subcommands for f in flag_forms(rule)]
+        [[p, *s, *f, *o] for p in program_spellings(rule) for s in rule.subcommands for f in flag_forms(rule)
+         for o in rule.operands]
     )
 
 
@@ -248,11 +260,12 @@ def _dedupe(forms: list) -> list:
 # --- globs --------------------------------------------------------------------
 
 
-def glob_regex(glob: str, cwd: str, home):
+def glob_regex(glob: str, cwd: str, home, fold_case: bool = False):
     """A path glob as a regex over absolute paths.
 
     `**/x` matches at any depth, even outside the project; other relative globs
     are anchored at the working directory, and `~/` globs at the home folder.
+    With `fold_case`, as where the filesystem ignores case, `.ENV` matches `.env`.
     """
     if glob.startswith("~/"):
         anchor, glob = re.escape(str(home).rstrip("/")) + "/", glob[2:]
@@ -277,7 +290,7 @@ def glob_regex(glob: str, cwd: str, home):
         else:
             out.append(re.escape(glob[i]))
             i += 1
-    return re.compile("^" + anchor + "".join(out) + "$")
+    return re.compile("^" + anchor + "".join(out) + "$", re.I if fold_case else 0)
 
 
 def without(glob: str, excepts) -> list:

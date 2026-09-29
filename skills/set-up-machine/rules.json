@@ -40,8 +40,9 @@
       "match": {
         "program": "chmod",
         "flags": [["R", "recursive"]],
-        "operands": ["777"]
+        "operands": [["777"], ["0777"], ["a+rwx"], ["a=rwx"], ["ugo+rwx"], ["ugo=rwx"]]
       },
+      "gap": "the same mode in another spelling (`u=rwx,g=rwx,o=rwx`, `a+rwx` given in parts, `00777`) isn't listed; the rule line asks the agent not to",
       "reason": "It makes a whole tree writable by every user, and the old modes can't be recovered.",
       "instruction": "Give the one file or folder that needs it the narrowest mode that works (`chmod u+x script.sh`)."
     },
@@ -196,9 +197,9 @@
     {
       "id": "env-dump",
       "level": "deny",
-      "summary": "`env`, `export` and `set` on their own, which list the environment",
+      "summary": "`env`, `export`, `set`, `declare` and `typeset` on their own, which list the environment",
       "match": {
-        "program": ["env", "export", "set"],
+        "program": ["env", "export", "set", "declare", "typeset"],
         "arguments": "none"
       },
       "reason": "The environment holds tokens and keys, which must stay out of the agent's context.",
@@ -229,6 +230,17 @@
       },
       "reason": "They list the shell's variables with their values, the environment's tokens and keys among them.",
       "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "env-dump-listed",
+      "level": "deny",
+      "summary": "`declare`, `typeset` and `export` with only flags (`declare -x`), which list the variables carrying them",
+      "match": {
+        "program": ["export", "declare", "typeset"],
+        "arguments": "flags"
+      },
+      "reason": "They list the shell's variables with their values, the environment's tokens and keys among them.",
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it. Declaring a variable (`declare -x NAME=value`) is fine."
     },
     {
       "id": "secret-files-read",

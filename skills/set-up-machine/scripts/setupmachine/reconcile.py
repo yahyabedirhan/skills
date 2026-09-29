@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import memory, shared
-from .adapters import ADAPTERS
+from .adapters import ADAPTERS, claude_code
 from .plan import Plan, Run
 
 
@@ -27,9 +27,13 @@ def build(home: Path, rules: list, os_home: Path, tools=None, rules_path=None) -
     manifest_old = shared.read_text(shared.manifest_path(home))
     sections, writes = [], []
 
-    for section, write in (shared.plan_instructions(home, rules), shared.plan_hook_config(home, os_home)):
+    for section, write in (shared.plan_instructions(home, rules), shared.plan_hook_config(home, os_home, claude_code.HOOK_SCRIPT)):
         sections.append(section)
         writes.append(write)
+
+    skills_section, skills_runs = shared.plan_shared_skills(home)
+    sections.append(skills_section)
+    writes.extend(skills_runs)
 
     owned_after = {}
     for adapter in ADAPTERS:

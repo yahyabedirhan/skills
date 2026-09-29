@@ -115,6 +115,8 @@ def main(argv=None) -> int:
         tools = tools_from_defaults(args.global_file.read_text())
     if tools:
         report(f"Skills naming a default tool ({', '.join(tools)}) outside its how-to skill:", scan(args.skills, tools))
+    elif not args.global_file.is_file():
+        print(f"No default tool named: {args.global_file} doesn't exist. Pass --global FILE or --tool NAME.")
     else:
         print(f"No default tool named: {args.global_file} has no tool in its Defaults table. Pass --tool NAME.")
     print()
