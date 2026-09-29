@@ -1,0 +1,17 @@
+# Decisions: set-up-machine
+
+The decisions behind the `set-up-machine` skill. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why. The spec is "Spec: every harness and project is set up and audited from the skills" (#49).
+
+## 2026-09-29
+
+- **The rule table is JSON.** The reconcile script and the later pre-tool hook read it with Python 3's standard library, and macOS ships Python 3.9, which has no TOML reader (`tomllib` is 3.11+).
+- **A row describes a command by its meaning, not by native patterns.** `match` names the program and the flag groups it carries; each adapter expands that into its own native form (Claude Code: one `Bash(<prefix>:*)` per flag order, spelling and `/bin/`, `/usr/bin/` path). One row then serves Claude Code's text matching, Codex's token prefixes and the hook's normalised matching, and none of them is the source.
+- **The shared global instructions file is `~/.config/agents/AGENTS.md`.** It sits in no harness's own folder, so no harness update or reinstall overwrites it, and `~/.config` is the usual place for user config on Linux, the VPS's system. `AGENTS.md` is the name Codex and opencode read, so their adapters can link to it directly. `~/.agents/` was the other candidate; it belongs to the `skills` CLI, which owns what's in it.
+- **Claude Code reaches it by an `@` import line in `~/.claude/CLAUDE.md`.** Claude Code has no global `AGENTS.md`, and imports in user-scope files load without approval. The adapter adds only that line, since the rest of that file is rewritten under its own ticket.
+- **The skill owns a marked block in the shared file, and nothing outside it.** The rule lines are regenerated between `set-up-machine:rules` markers, so the file can also hold the person's own workflow without the skill ever touching it.
+- **What the skill wrote is recorded in a manifest beside the shared file** (`~/.config/agents/set-up-machine.json`). That's what makes "never remove or loosen an entry it didn't write" checkable: an entry is the skill's only if the manifest names it, and only those are removed when the table drops them. An entry that was already on the machine when the skill arrived stays the user's, even when it matches the table.
+- **Tightening adds, never moves.** Claude Code checks deny before ask before allow, so adding the stricter entry is enough; removing the looser one would remove an entry the skill didn't write.
+- **Apply takes the plan's id.** The id is a hash of every write the plan would make, so apply writes exactly the diff the user approved, and refuses if anything changed in between. That keeps "one approval" honest when time passes between plan and apply.
+- **Every step takes `--home`.** Tests, and any trial of a table change, run against a copy of the home folder; the real machine changes only through a plan the user approved.
+- **Extras and gaps are reported, not changed.** A rule on the machine that the table lacks is listed as `extra` so the table can grow from it; what a harness can't express is listed as a `gap` so no one reads it as enforced.
+- **Checking a live session needs the real login.** A session pointed at a copied config folder (`CLAUDE_CONFIG_DIR`, or `HOME`) isn't logged in, so the end-to-end check of the rule line reaching a session runs after the real apply. Before it, `claude -p --setting-sources project,local --settings <copied settings.json>` proves the generated deny entries refuse `rm -rf` and its variants.
