@@ -16,17 +16,19 @@ Harnesses it covers, each with an adapter reference: [Claude Code](references/cl
 
 ## Steps
 
-1. **Plan.** Run `python3 <this skill>/scripts/set_up_machine.py plan`. It writes nothing. Done when you hold its whole output, which ends in either `No changes.` or a plan id.
-2. **Nothing to do?** On `No changes.`, report the audit: the gaps and the extra rules it lists. Stop here.
+1. **Plan.** Run `python3 <this skill>/scripts/set_up_machine.py plan`. It writes nothing, but it starts each harness briefly to list the MCP tools it exposes (see *Mail tools* below). Done when you hold its whole output, which ends in either `No changes.` or a plan id.
+2. **Nothing to do?** On `No changes.`, report the audit: the gaps, the stricter and extra rules, and the mail tools it found. Stop here.
 3. **Ask once.** Show the user the plan output unedited, then ask for one approval of the whole diff. Its lines, per harness:
    - `added`: a rule the harness lacks.
    - `tightened`: a rule the harness has at a looser level; the stricter entry is added beside it.
    - `removed`: an entry this skill wrote earlier that the table no longer has. Only these are ever removed.
-   - `present`: already in place.
+   - `present`: already in place, as the table's entry or a broader one that covers it.
+   - `stricter`: the machine holds the rule at a stricter level than the table. It's kept; to get the table's level, the user removes that entry by hand.
+   - `found`: the tools a mail-tool rule matched on this machine. Name them in your report.
    - `gap`: what the harness can't express, named so it isn't mistaken for enforced.
    - `extra`: a rule on the machine the table doesn't have. It's kept. One worth having everywhere is a candidate row for the table.
 4. **Apply** the approved plan: `python3 <this skill>/scripts/set_up_machine.py apply --plan-id <id>`, the command the plan printed. If apply refuses because the machine changed since the plan, go back to step 1 and ask again.
-5. **Audit.** Run the plan again. Done when it ends `No changes.`. Report the backup folder apply printed, the gaps and the extra rules.
+5. **Audit.** Run the plan again. Done when it ends `No changes.`. Report the backup folder apply printed, the gaps, the stricter and extra rules, and the mail tools found.
 
 `--home <dir>` points every step at another home folder, such as a copy of this one in the project's `.scratch/`, to try a change without touching the real machine.
 
@@ -45,13 +47,22 @@ Edit `rules.json`, then run the steps. Each row:
 |---|---|
 | `id` | a stable kebab-case name |
 | `level` | `deny`, `ask` or `allow-and-report` |
-| `summary` | the command family, as it reads in the rule line |
-| `match.program` | the bare program name (`rm`) |
-| `match.flags` | flag groups the command carries, all of them: each group lists one flag's names without dashes, a one-letter name being the short flag (`["r", "R", "recursive"]`) |
+| `summary` | what the rule covers, as it reads in the rule line |
+| `match` | what it covers, by meaning, in one of the three kinds below |
 | `reason` | why the rule exists |
-| `instruction` | what the agent does instead |
+| `instruction` | for `deny`, what the agent does instead: an alternative, or "Stop, say why, and give the user the exact command; never work around it."; for `ask` and `allow-and-report`, how to go ahead |
 
-Adapters expand a row into every native entry it needs (each flag order and spelling, and the `/bin/` and `/usr/bin/` paths), and the shared file gets one rule line per row.
+`match` kinds, told apart by their keys:
+
+- **Command:** `program`, one bare name (`rm`) or a list of them; optional `subcommands`, alternative word lists after the program (`[["repo", "delete"], ["repo", "archive"]]`); optional `flags`, the flag groups the command carries, all of them, each listing one flag's names without dashes, a one-letter name being the short flag (`["r", "R", "recursive"]`); optional `operands`, words after the flags (`["777"]`).
+- **File:** `paths`, globs relative to the project (`**/.env`) or starting `~/`, and `access`, `read` or `write`.
+- **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of an MCP tool name (`mcp__<server>__<tool>`). Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID.
+
+Adapters expand a row into every native entry it needs (each flag order and spelling, the `/bin/` and `/usr/bin/` paths, the harness's own file-rule kind), and the shared file gets one rule line per row.
+
+## Mail tools
+
+Only the running harness knows which MCP tools it exposes, and their names differ by harness and by how a connector is attached. So plan asks each harness for its tool list, matches the table's MCP-tool rows against it, and prints a `found` line per row. If a harness can't be asked (not installed, not logged in), the plan says so as a gap and keeps the entries it wrote before. `--tool-names <file>`, one name per line, supplies the list instead.
 
 ## Adding a harness
 

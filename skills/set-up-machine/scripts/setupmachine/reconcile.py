@@ -14,7 +14,8 @@ class PlanMismatch(RuntimeError):
     pass
 
 
-def build(home: Path, rules: list, os_home: Path) -> Plan:
+def build(home: Path, rules: list, os_home: Path, tools=None) -> Plan:
+    """`tools` maps a harness name to the MCP tool names to match; a harness left out is asked."""
     manifest = shared.load_manifest(home)
     manifest_old = shared.read_text(shared.manifest_path(home))
     sections, writes = [], []
@@ -26,7 +27,8 @@ def build(home: Path, rules: list, os_home: Path) -> Plan:
     owned_after = {}
     for adapter in ADAPTERS:
         a_sections, a_writes, owned = adapter.plan(
-            home, rules, manifest["harnesses"].get(adapter.NAME, {}), shared.instructions_path(home), os_home
+            home, rules, manifest["harnesses"].get(adapter.NAME, {}), shared.instructions_path(home), os_home,
+            (tools or {}).get(adapter.NAME),
         )
         sections.extend(a_sections)
         writes.extend(a_writes)
