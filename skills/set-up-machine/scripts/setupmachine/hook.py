@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shlex
 import sys
 from dataclasses import dataclass, field
@@ -214,7 +215,36 @@ def write_claude_code(denials: list) -> str:
     }) + "\n"
 
 
-HARNESSES = {"claude-code": (read_claude_code, write_claude_code)}
+# apply_patch's file headers; each names a file the patch writes.
+PATCH_FILE = re.compile(r"^\*\*\* (Add File|Update File|Delete File|Move to): (.+?)\s*$", re.M)
+
+
+def read_codex(payload: dict) -> ToolCall:
+    """Codex's PreToolUse input: `tool_name` is `Bash` for the shell tools (the command as
+    the model wrote it, before Codex wraps it in `<shell> -lc`), `apply_patch` for file
+    edits (`tool_input.command` holds the patch), or `mcp__<server>__<tool>`."""
+    tool = payload.get("tool_name") if isinstance(payload.get("tool_name"), str) else ""
+    tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
+    command = tool_input.get("command")
+    command = command if isinstance(command, str) else None
+    files = ()
+    if tool == "apply_patch":
+        files = tuple((m.group(2), "write") for m in PATCH_FILE.finditer(command or ""))
+        command = None
+    return ToolCall(
+        tool=tool,
+        command=command,
+        files=files,
+        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
+        session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
+    )
+
+
+# Codex reads the same deny answer as Claude Code (hookSpecificOutput.permissionDecision).
+HARNESSES = {
+    "claude-code": (read_claude_code, write_claude_code),
+    "codex": (read_codex, write_claude_code),
+}
 
 
 def main(argv=None, stdin=None, stdout=None, now=None) -> int:

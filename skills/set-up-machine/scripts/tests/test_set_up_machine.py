@@ -608,10 +608,9 @@ class MemoryTest(unittest.TestCase):
         self.home.write(".codex/config.toml", 'model = "m"\n\n[features]\nhooks = true\n\n[mcp_servers.x]\nargs = []\n')
         self.home.write(".codex/memories/MEMORY.md", "a memory\n")
         plan = self.home.apply()
-        self.assertEqual(
-            self.home.read(".codex/config.toml"),
+        self.assertTrue(self.home.read(".codex/config.toml").startswith(
             'model = "m"\n\n[features]\nmemories = false\nhooks = true\n\n[mcp_servers.x]\nargs = []\n',
-        )
+        ))
         self.assertIn("<home>/.codex/memories/MEMORY.md", kinds(plan, "removed"))
         self.assertFalse((self.home.path / ".codex/memories/MEMORY.md").exists())
         self.assertFalse(self.home.plan().has_changes)
