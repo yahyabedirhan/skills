@@ -76,7 +76,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 
 | Skill | What it does | Origin |
 |---|---|---|
-| [maintain-skills](skills/maintain-skills/SKILL.md) | Installs, moves, updates, forks, publishes, removes, and audits skills across global scope, project scope, and your own skills repo with `npx skills`; prompt-audits each new skill in a fresh sub-agent and measures a skill's run cost on request. | Original. |
+| [maintain-environment](skills/maintain-environment/SKILL.md) | Changes what your agents run with: decides whether a change is a permission, a global instruction, a project instruction or a skill, and carries it to every harness, machine and install. Its skill operations install, move, update, fork, publish, remove and audit skills with `npx skills`, prompt-audit each new skill in a fresh sub-agent, and measure a skill's run cost on request. | Original. Replaces `maintain-skills`. |
 | [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings and a verdict. You start it with `/skill-recap` (Codex: `$skill-recap`) and file them with [to-tickets](skills/to-tickets/SKILL.md). | Original. |
 
 ### Daily workflows
@@ -133,9 +133,11 @@ show-me   explains the current topic
 
 ### Agent setup
 
-What your agents run with, kept in order across Claude Code and Codex. Today that is skills: `maintain-skills` keeps every change flowing from a skill's source to its installs, and `skill-recap` looks back over a session for what its skills should change.
+What your agents run with (permissions, instructions and skills), kept in order across every harness and machine. `maintain-environment` decides where a change belongs and carries it from its source to every harness and install, and `skill-recap` looks back over a session for what its skills should change.
 
 ```text
+where       permission · global instruction · project AGENTS.md · skill · skill reference (no memory)
+carry       rerun set-up-machine or set-up-project where the change applies
 source      your skills repo, or someone else's
   ↓ npx skills add / update / remove
 installs    global (~/.agents/skills) or one project (.agents/skills)

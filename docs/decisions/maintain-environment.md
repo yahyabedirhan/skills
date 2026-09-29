@@ -1,6 +1,6 @@
-# Decisions: maintain-skills
+# Decisions: maintain-environment
 
-The decisions behind the `maintain-skills` skill. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why.
+The decisions behind the `maintain-environment` skill, named `maintain-skills` until 2026-09-29. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why.
 
 ## 2026-09-28
 
@@ -12,3 +12,10 @@ The decisions behind the `maintain-skills` skill. This file is for maintaining i
 - **The merge is the user's, or the agent's when the user asks.** Opening the pull request is part of the operation; the agent merges only on request.
 - **Installs and updates run after the merge, with no trial install from a branch.** `npx skills` installs from the default branch, so the session told "merged" or "merge it" runs `npx skills update` (or the install) in every scope that holds the skill.
 - **An audited skill's pull request summarises the audit; the skill's decision record keeps it in full.** The findings, the fixes applied, and why any finding was left go in the skill's `docs/decisions/` entry; the description summarises them under *Special things to note* and links that entry. `to-pr` limits the body to its template, with 1-3 bullets for *Special things to note*, so the full findings can't live there, and the decision record keeps them with the skill's other decisions.
+
+## 2026-09-29
+
+- **`maintain-skills` becomes `maintain-environment`, and owns change across the whole environment.** Permissions, global instructions, project instructions and skills all need a home and a way to reach every harness and machine; skills were only one of them. The skill folder and this record were renamed so their history follows, and the entries above keep the old name as history.
+- **`SKILL.md` is a short router over three references.** "Where things go" (the layering model and the team test), "carrying a change" (how a change reaches every harness, machine and install, and naming what to rerun), and "skill operations". A change loads only the reference it needs, so a rule change never loads the `npx skills` detail and a skill install never loads the layering model.
+- **Skill operations carry the old `SKILL.md` body unchanged.** Only the frontmatter and title gave way to the router; the operations, scopes, shipping steps and audits read as before, and `efficiency-analysis.md` and its script stay beside them.
+- **Setting up belongs to set-up-machine and set-up-project; this skill names them.** The rule table, harness adapters and project templates live in those skills; "carrying a change" says which to rerun and where, rather than repeating how.
