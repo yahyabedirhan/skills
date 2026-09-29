@@ -38,6 +38,7 @@ Create or update the pull request for the current task with a concise descriptio
    - Prefer `diff` blocks when showing changes to an existing shape. Show the complete target shape when most of it is new or diff notation would obscure ownership or order.
    - Keep each view focused on what a reviewer needs. Omit categories that did not change.
    - End with **Things to be aware of**, the last section, for what lies outside "what changed": decisions you made alone, surprises, what's not in the PR, and follow-ups, each marked as a ticket, a todo for the maintainer, or nothing needed. Keep its four lines, writing `None.` after an empty one, so the reader knows it was considered. A session that closes the effort later reads this section first. **Special things to note** stays about the change itself.
+   - Link a ticket the PR finishes with `Closes #n`, but a ticket still waiting for the maintainer to try it (QA) with `Refs #n`, so the merge doesn't close it first.
    - optionaL: if you are aware of a ticket id/url, or related plan/document urls, or other relevant links, include them in the header, otherwise omit the header
 
 5. Save and publish the description:

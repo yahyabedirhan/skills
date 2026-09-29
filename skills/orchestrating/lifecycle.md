@@ -55,7 +55,7 @@ The session handing over owns the clean ending, through the **handover** skill. 
 
 ## Build
 
-The orchestrator reads the handoff, shows the plan with `/show-me`, delegates the unblocked tickets in parallel to sub-agents, each in its own worktree, building it the way `/implement` does (`/tdd`, checks, a review at the depth the orchestrator sets), integrates and commits each one, and ends with one branch review and `/to-pr`. It follows the `orchestrating` discipline throughout.
+The orchestrator reads the handoff, shows the plan with `/show-me`, delegates the unblocked tickets in parallel to sub-agents, each in its own worktree, building it the way `/implement` does (`/tdd`, checks, a review at the depth the orchestrator sets), integrates and commits each one, and ends with one branch review and `/to-pr`. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking". It follows the `orchestrating` discipline throughout.
 
 ## Close
 
