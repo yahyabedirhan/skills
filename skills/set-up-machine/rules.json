@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "rm-recursive-force",
+      "level": "deny",
+      "summary": "`rm -rf` and its variants",
+      "match": {
+        "program": "rm",
+        "flags": [["r", "R", "recursive"], ["f", "force"]]
+      },
+      "reason": "A recursive forced delete can't be undone, and one wrong path loses work outside the task.",
+      "instruction": "Move what's no longer needed into the project's gitignored temp folder (`.scratch/` by default) with `mv`."
+    }
+  ]
+}
