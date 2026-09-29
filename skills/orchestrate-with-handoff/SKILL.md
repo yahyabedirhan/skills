@@ -13,4 +13,4 @@ Receiving the handover is the maintainer's go-ahead: start work without asking f
 
 1. Read the handoff in full. Confirm you are in the worktree and on the branch it names; if not, say so and stop, because the effort's work lives there.
 2. Note whether the handing session is reachable; the handoff says. When a question comes up that the spec, tickets, and handoff don't answer, look in that session if you can read it; otherwise decide it yourself and record the decision for the pull request.
-3. Run the **orchestrate-effort** skill on the effort the handoff names, carrying the handoff's notes into the plan.
+3. Run the **orchestrate-effort** skill on the spec and tickets the handoff names, carrying the handoff's notes into the plan.
