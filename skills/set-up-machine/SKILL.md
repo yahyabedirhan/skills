@@ -14,16 +14,16 @@ Two sources declare the machine:
 
 It also wires the **pre-tool hook**, `scripts/pre_tool_hook.py`, into each harness that has one; see *Pre-tool hook* below. Where a harness has a semantic guard (Claude Code's auto mode), it writes each row's `guard` there too, as a second net for what patterns can't list.
 
-Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md). Codex so far for memory only. opencode and Cursor have no memory feature, and the plan says so.
+Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md), [Codex](references/codex.md). opencode and Cursor have no memory feature, and the plan says so.
 
 ## Steps
 
 1. **Plan.** Run `python3 <this skill>/scripts/set_up_machine.py plan`. It writes nothing, but it starts each harness briefly to list the MCP tools it exposes (see *Mail tools* below). Done when you hold its whole output, which ends in either `No changes.` or a plan id.
 2. **Nothing to do?** On `No changes.`, report the audit: memory per harness, what's wired, the gaps, the stricter and extra rules, and the mail tools it found. Stop here.
 3. **Ask once.** Show the user the plan output unedited, then ask for one approval of the whole diff. Its lines, per harness:
-   - `added`: a rule the harness lacks.
+   - `added`: a rule the harness lacks, a link or hook it wires, or an external skill it installs (the line shows the command).
    - `tightened`: a rule the harness has at a looser level; the stricter entry is added beside it.
-   - `removed`: an entry this skill wrote earlier that the table no longer has, or a harness memory file. Only these are ever removed.
+   - `removed`: an entry this skill wrote earlier that the table no longer has, a harness memory file, or a harness's own global file whose every line is already in the shared file, as it becomes a link. Only these are ever removed.
    - `present`: already in place, as the table's entry or a broader one that covers it.
    - `wired`: the pre-tool hook in place for that harness, and the folder its reports go to.
    - `stricter`: the machine holds the rule at a stricter level than the table. It's kept; to get the table's level, the user removes that entry by hand.
@@ -43,7 +43,7 @@ Harnesses it covers, each with an adapter reference: [Claude Code](references/cl
 - **The shared file is the user's outside the generated block.** The block between the `set-up-machine:rules` markers is regenerated from the table; elsewhere reconcile only adds what the file's shape lacks, and never rewrites a Defaults value or a workflow line.
 - **A semantic guard only gains the table's rules.** In a harness's guard settings (Claude Code's `autoMode`), the user's own entries stay, and only a rule this skill wrote is ever removed.
 - **Memory stays off.** Each harness's memory feature is turned off where it has one, and every memory file is listed as `removed`. Apply keeps a copy in the backup folder, so move a memory worth keeping into its layer before approving.
-- **Apply writes exactly the approved plan,** after copying each file it changes into `~/.config/agents/backups/<time>/`.
+- **Apply writes exactly the approved plan,** after copying each file it changes into `~/.config/agents/backups/<time>/`. It runs the plan's commands (an external skill's install) first, and writes nothing if one fails.
 
 ## Changing the rule table
 

@@ -33,10 +33,36 @@ class FileWrite:
     path: Path
     old: object  # str, or None when the file doesn't exist yet
     new: object  # str, or None to delete the file (apply keeps it in the backup)
+    link_to: object = None  # a Path: apply makes `path` a symlink to it instead of writing `new`
 
     @property
     def changed(self) -> bool:
         return self.old != self.new
+
+
+def link_text(target: Path) -> str:
+    """What a symlink stands as in a plan, so a plan that makes one has its own id."""
+    return f"symlink -> {target}"
+
+
+@dataclass
+class Run:
+    """A command apply runs before it writes any file, such as installing an external skill.
+
+    `path` is the file the command creates; the plan asks for the run only while it's missing.
+    """
+    path: Path
+    argv: list
+    env: dict = field(default_factory=dict)  # variables set for the command, on top of the environment
+    old: object = None
+
+    @property
+    def new(self) -> str:
+        return "run: " + " ".join(self.argv) + "".join(f" {k}={v}" for k, v in sorted(self.env.items()))
+
+    @property
+    def changed(self) -> bool:
+        return True
 
 
 @dataclass

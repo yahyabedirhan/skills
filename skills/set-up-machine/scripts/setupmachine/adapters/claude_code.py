@@ -358,10 +358,10 @@ def _excepted_by(entry: str, rules: list):
     return None
 
 
-def hook_command(home: Path, os_home: Path, rules_path=None) -> str:
-    """The command that runs the pre-tool hook. Outside the user's own home it names that
-    home's configuration, and with a table other than the skill's own it names that table."""
-    parts = ["python3", str(HOOK_SCRIPT), "--harness", "claude-code"]
+def hook_command(home: Path, os_home: Path, rules_path=None, harness: str = NAME) -> str:
+    """The command that runs the pre-tool hook for a harness. Outside the user's own home it
+    names that home's configuration, and with a table other than the skill's own it names that table."""
+    parts = ["python3", str(HOOK_SCRIPT), "--harness", harness]
     if home.resolve() != os_home.resolve():
         parts += ["--config", str(shared.hook_config_path(home))]
     if rules_path is not None and Path(rules_path).resolve() != rule_table.DEFAULT_TABLE:

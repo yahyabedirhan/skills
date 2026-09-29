@@ -28,7 +28,7 @@ from pathlib import Path
 
 from setupmachine import reconcile, rules
 from setupmachine.adapters import ADAPTERS
-from setupmachine.plan import render
+from setupmachine.plan import Run, render
 
 
 def main(argv=None) -> int:
@@ -67,12 +67,14 @@ def main(argv=None) -> int:
         return 0
     try:
         backup = reconcile.apply(plan, args.plan_id)
-    except reconcile.PlanMismatch as exc:
+    except (reconcile.PlanMismatch, reconcile.RunFailed) as exc:
         print(f"set-up-machine: {exc}", file=sys.stderr)
         return 1
     for w in plan.writes:
-        if w.changed:
-            print(f"wrote {w.path}")
+        if isinstance(w, Run):
+            print(f"ran {' '.join(w.argv)}")
+        elif w.changed:
+            print(f"{'linked' if w.link_to is not None else 'wrote'} {w.path}")
     if backup.exists():
         print(f"backups of the previous files: {backup}")
     print("Run the plan again: it should report no changes.")

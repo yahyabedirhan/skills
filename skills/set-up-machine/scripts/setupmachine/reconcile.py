@@ -1,16 +1,22 @@
 """Reconcile: what the skill wants against what's on the machine, then apply it."""
 from __future__ import annotations
 
+import os
 import shutil
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
 from . import memory, shared
 from .adapters import ADAPTERS
-from .plan import Plan
+from .plan import Plan, Run
 
 
 class PlanMismatch(RuntimeError):
+    pass
+
+
+class RunFailed(RuntimeError):
     pass
 
 
@@ -49,17 +55,28 @@ def apply(plan: Plan, approved_id: str) -> Path:
         raise PlanMismatch(
             f"the machine changed since plan {approved_id} (it's now {plan.id}); run the plan again and approve the new diff"
         )
+    # Commands first: if one fails, no file has been written yet.
+    for run in (w for w in plan.writes if isinstance(w, Run)):
+        done = subprocess.run(run.argv, env={**os.environ, **run.env}, cwd=plan.home)
+        if done.returncode != 0 or not run.path.exists():
+            raise RunFailed(f"`{' '.join(run.argv)}` failed (exit {done.returncode}); nothing was written")
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     backup_dir = shared.backups_path(plan.home) / stamp
     for w in plan.writes:
-        if not w.changed:
+        if not w.changed or isinstance(w, Run):
             continue
         if w.old is not None:
             target = backup_dir / w.path.relative_to(plan.home)
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(w.path, target)
+            shutil.copy2(w.path, target, follow_symlinks=w.link_to is None)
         if w.new is None:
             w.path.unlink()  # its copy is in the backup folder
+            continue
+        if w.link_to is not None:
+            if w.path.is_symlink() or w.path.exists():
+                w.path.unlink()  # its copy is in the backup folder
+            w.path.parent.mkdir(parents=True, exist_ok=True)
+            w.path.symlink_to(w.link_to)
             continue
         # Write through a symlink to its target, so a linked file stays linked.
         target = w.path.resolve()
