@@ -311,13 +311,70 @@ pre .c { color: var(--muted); }
   .card .body, .card .links { grid-column: auto; }
 }
 
+/* Vision: the pitch. The one loud place on the page is the circle line, a 24-hour dial where each ring is a
+   place (Mac inside, cloud outside) drawn in the landscape slide's line styles: solid, dashed, dotted. */
+.pitch-tag { justify-self: start; font-family: var(--font-display); font-weight: 800; font-size: 0.82rem; padding: 4px 12px 2px; border-radius: 999px; border: 1.5px dashed var(--accent); color: var(--accent); }
+.vision h2 { font-size: var(--step-4); font-weight: 900; letter-spacing: -0.02em; line-height: 1.02; max-width: 15ch; }
+.vision-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 36px; align-items: start; }
+@media (max-width: 860px) { .vision-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
+.dial-wrap { display: grid; gap: 12px; justify-items: center; min-width: 0; }
+@media (min-width: 861px) { .dial-wrap { position: sticky; top: 72px; } }
+.dial { width: 100%; max-width: 440px; height: auto; display: block; overflow: visible; }
+.dial .track { fill: none; stroke: var(--line); stroke-width: 2; }
+.dial .run { fill: none; stroke: var(--accent); stroke-linecap: round; }
+.dial .run-mac { stroke-width: 9; }
+.dial .run-vps { stroke-width: 7; stroke-linecap: butt; stroke-dasharray: 12 7; }
+.dial .run-cloud { stroke-width: 7; stroke-dasharray: 0.1 11; }
+.dial .hour { font-family: var(--font-display); font-weight: 700; font-size: 13px; fill: var(--muted); text-anchor: middle; dominant-baseline: middle; font-variant-numeric: tabular-nums; }
+.dial .stn circle { fill: var(--accent); stroke: var(--bg); stroke-width: 3; }
+.dial .stn text { font-family: var(--font-display); font-weight: 900; font-size: 12px; fill: var(--on-accent); text-anchor: middle; dominant-baseline: central; }
+.dial .phone rect { fill: var(--bg); stroke: var(--accent); stroke-width: 3; }
+.dial .phone text { fill: var(--accent); }
+.dial .ping { fill: none; stroke: var(--accent); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: ping 2.4s ease-out 1s 3 both; opacity: 0; }
+@keyframes ping { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .dial .ping { animation: none; } }
+.dial .c-big { font-family: var(--font-display); font-weight: 900; font-size: 30px; fill: var(--ink); text-anchor: middle; }
+.dial .c-small { font-family: var(--font-display); font-weight: 700; font-size: 11.5px; fill: var(--muted); text-anchor: middle; }
+.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; list-style: none; margin: 0; padding: 0; font-family: var(--font-display); font-size: var(--step--1); color: var(--muted); }
+.legend li { display: flex; align-items: center; gap: 8px; }
+.legend i { width: 30px; height: 0; border-top: 5px solid var(--accent); }
+.legend .l-vps { border-top-style: dashed; }
+.legend .l-cloud { border-top-style: dotted; }
+.day { list-style: none; margin: 0; padding: 0; display: grid; }
+.day li { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 2px 12px; padding-block: 12px; border-top: 1px solid var(--line); }
+.day .n { grid-row: 1 / span 3; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-family: var(--font-display); font-weight: 900; font-size: 0.8rem; margin-top: 2px; }
+.day .when { font-family: var(--font-display); font-weight: 700; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.day h3 { font-size: 1.08rem; font-weight: 800; }
+.day p { font-size: 0.95rem; line-height: 1.5; }
+.hedge { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+.edge { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 32px; margin: 0; }
+.edge div { padding-block: 12px; border-top: 2px solid var(--ink); min-width: 0; }
+.edge dt { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; }
+.edge dd { margin: 4px 0 0; font-size: 0.95rem; line-height: 1.5; }
+.sub-h { font-size: var(--step-1); font-weight: 800; }
+.gates { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 20px; }
+.gate { position: relative; padding-top: 40px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.gate::before { content: ""; position: absolute; top: 12px; left: 0; right: -20px; border-top: 3px dashed var(--line); }
+.gate:last-child::before { right: 0; }
+.gate::after { content: ""; position: absolute; top: 2px; left: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--bg); border: 5px solid var(--muted); box-sizing: border-box; }
+.gate a { font-family: var(--font-display); font-weight: 800; font-size: 1rem; line-height: 1.3; }
+.gate p { font-size: 0.92rem; line-height: 1.45; color: var(--muted); }
+@media (max-width: 820px) {
+  .gates { grid-template-columns: minmax(0, 1fr); gap: 18px; padding-left: 40px; }
+  .gate { padding-top: 0; }
+  .gate::before { top: 26px; left: -29px; right: auto; bottom: -20px; border-top: 0; border-left: 3px dashed var(--line); }
+  .gate:last-child::before { display: none; }
+  .gate::after { left: -40px; }
+}
+.closing { font-family: var(--font-body); font-style: italic; font-size: var(--step-1); line-height: 1.45; max-width: 52ch; padding-left: 20px; border-left: 4px solid var(--accent); }
+
 footer { padding-inline: var(--gutter); padding-block: 40px 64px; font-family: var(--font-display); font-size: var(--step--1); color: var(--muted); }
 footer .slide-inner { gap: 10px; }
 @media (min-width: 1180px) { footer { margin-left: 200px; } }
 </style>
 </head>
 <body>
-<a class="skip" href="#why">Skip to the first section</a>
+<a class="skip" href="#vision">Skip to the first section</a>
 
 <div class="progress" aria-hidden="false">
   <div class="progress-inner">
@@ -330,6 +387,7 @@ footer .slide-inner { gap: 10px; }
 
 <nav class="rail" aria-label="Sections">
   <ol>
+    <li><a href="#vision">The vision</a></li>
     <li><a href="#why">Why this research</a></li>
     <li><a href="#words">Eight words</a></li>
     <li><a href="#landscape">Where agents can run</a></li>
@@ -347,17 +405,18 @@ footer .slide-inner { gap: 10px; }
   <div class="slide-inner">
     <p class="stop"><span class="stop-dot" aria-hidden="true">0</span>Research effort, finished 29 September 2026</p>
     <h1>Where can your agents work when the laptop is closed?</h1>
-    <p class="lede">Six research files and one synthesis map every place an agent could run for you: your Mac, your VPS, Claude Code's cloud and the other hosted agents. This page is the way in. It explains the words, shows the landscape, gives you the result in a few lines, and then guides you through the files in the order worth reading them.</p>
+    <p class="lede">Six research files and one synthesis map every place an agent could run for you: your Mac, your VPS, Claude Code's cloud and the other hosted agents. This page is the way in. It opens with where this could lead, explains the words, shows the landscape, gives you the result in a few lines, and then guides you through the files in the order worth reading them.</p>
     <p class="hero-meta">
       <span>Spec <a href="https://github.com/yahyabedirhan/skills/issues/45">#45</a></span>
       <span>Pull request <a id="pr-link" href="https://github.com/yahyabedirhan/skills/pull/76" title="Research: what agents on a server or in the cloud can do, and how to delegate to them">#76</a></span>
       <span>About 10 minutes here, then as deep as you like</span>
     </p>
     <div class="hero-start">
-      <a class="btn" href="#why">Start the tour</a>
+      <a class="btn" href="#vision">Start the tour</a>
       <a class="btn btn-quiet" href="#read">Skip to the reading path</a>
     </div>
     <ol class="minimap" aria-label="The route through this page">
+      <li><a href="#vision">Vision</a></li>
       <li><a href="#why">Why</a></li>
       <li><a href="#words">Words</a></li>
       <li><a href="#landscape">Landscape</a></li>
@@ -370,9 +429,88 @@ footer .slide-inner { gap: 10px; }
   </div>
 </header>
 
+<section class="slide vision" id="vision" aria-labelledby="vision-h" data-name="The vision">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">1</span>The vision</p>
+    <span class="pitch-tag">The pitch, not the findings</span>
+    <h2 id="vision-h">Close the laptop. The work keeps shipping.</h2>
+    <p class="lede">Picture one day with a fleet: you think in the morning, a crew builds while you're out, and your phone only buzzes when a decision is yours. None of it is built yet. Every piece of it is documented or proposed in the research.</p>
+
+    <div class="vision-grid">
+      <figure class="dial-wrap" style="margin:0">
+        <svg class="dial" viewBox="-20 -20 440 440" role="img" aria-labelledby="dial-t dial-d">
+          <title id="dial-t">A day on the circle line</title>
+          <desc id="dial-d">A 24-hour dial with midnight at the top. The inner ring is the Mac, busy from 8:00 to 9:15 and again from 18:30. The middle ring is the VPS, busy from 9:15 through the night to 7:00. The outer ring is the cloud, busy in bursts: 10:00 to 13:00, around 16:00, and 2:00 to 3:30. A phone marker sits at 13:30. The numbered stops match the list beside it.</desc>
+          <circle class="track" cx="200" cy="200" r="92"/>
+          <circle class="track" cx="200" cy="200" r="124"/>
+          <circle class="track" cx="200" cy="200" r="156"/>
+          <path class="run run-mac" d="M279.7 246.0A92 92 0 0 1 260.7 269.2"/>
+          <path class="run run-mac" d="M108.8 188.0A92 92 0 0 1 115.0 164.8"/>
+          <path class="run run-vps" d="M281.8 293.2A124 124 0 1 1 319.8 232.1"/>
+          <path class="run run-cloud" d="M278.0 335.1A156 156 0 0 1 159.6 350.7"/>
+          <path class="run run-cloud" d="M70.3 286.7A156 156 0 0 1 52.3 250.1"/>
+          <path class="run run-cloud" d="M278.0 64.9A156 156 0 0 1 323.8 105.0"/>
+          <text class="hour" x="200" y="18">00</text>
+          <text class="hour" x="382" y="200">06</text>
+          <text class="hour" x="200" y="382">12</text>
+          <text class="hour" x="18" y="200">18</text>
+          <text class="c-big" x="200" y="200">24 h</text>
+          <text class="c-small" x="200" y="222">your fleet's day</text>
+          <text class="c-small" x="200" y="238">about 2 h of it yours</text>
+          <g class="stn"><circle cx="273.0" cy="256.0" r="12"/><text x="273.0" y="256.0">1</text></g>
+          <g class="stn"><circle cx="281.8" cy="293.2" r="12"/><text x="281.8" y="293.2">2</text></g>
+          <g class="stn"><circle cx="278.0" cy="335.1" r="12"/><text x="278.0" y="335.1">3</text></g>
+          <g class="phone">
+            <circle class="ping" cx="129.6" cy="370.0" r="16"/>
+            <rect x="119.6" y="355.0" width="20" height="30" rx="5"/>
+            <text class="hour" x="129.6" y="371.0" style="fill:var(--accent); font-weight:900">4</text>
+          </g>
+          <g class="stn"><circle cx="64.9" cy="278.0" r="12"/><text x="64.9" y="278.0">5</text></g>
+          <g class="stn"><circle cx="108.8" cy="188.0" r="12"/><text x="108.8" y="188.0">6</text></g>
+          <g class="stn"><circle cx="278.0" cy="64.9" r="12"/><text x="278.0" y="64.9">7</text></g>
+        </svg>
+        <ul class="legend" aria-label="Rings, from inside out">
+          <li><i aria-hidden="true"></i>Mac</li>
+          <li><i class="l-vps" aria-hidden="true"></i>VPS</li>
+          <li><i class="l-cloud" aria-hidden="true"></i>Cloud</li>
+        </ul>
+      </figure>
+
+      <ol class="day" aria-label="The day, stop by stop">
+        <li><span class="n" aria-hidden="true">1</span><span class="when">08:30, on the Mac</span><h3>Think it through with one agent</h3><p>Coffee, one thinking session, a spec and its tickets. Then a single line hands the whole effort over. <a class="src" href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="66">How</a></p></li>
+        <li><span class="n" aria-hidden="true">2</span><span class="when">09:15, on the VPS</span><h3>An orchestrator takes the wheel</h3><p>It starts in a Herdr tab on your server, after a quick <code>machine status</code> check, and runs its crew in the tabs beside it. <a class="src" href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="62">How</a></p></li>
+        <li><span class="n" aria-hidden="true">3</span><span class="when">10:00, in the cloud</span><h3>The crew fans out</h3><p>Self-contained tickets go to cloud sessions, each on its own fresh 16 GB machine, all at once. Codex, Cursor or Copilot can take a ticket too. <span class="hedge">An agent starts cloud work through a routine: untested (E11)</span> <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="125">How</a></p></li>
+        <li><span class="n" aria-hidden="true">4</span><span class="when">13:30, on your phone</span><h3>A decision needs you</h3><p>Your phone buzzes over lunch. You read the question in the Claude app, answer in one line, and the crew carries on. <span class="hedge">Remote Control push: untested (E5)</span> <a class="src" href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="85">How</a></p></li>
+        <li><span class="n" aria-hidden="true">5</span><span class="when">16:00, in the cloud</span><h3>GitHub wakes a routine</h3><p>A pull request opens and a routine fires on the event. Auto-fix watches the pull request and pushes fixes for failing checks and review comments. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="36">How</a></p></li>
+        <li><span class="n" aria-hidden="true">6</span><span class="when">18:30, back on the Mac</span><h3>A reviewed pull request is waiting</h3><p>Your Herdr window has shown every VPS agent's state all day. Each commit links back to the session that wrote it, and <code>--teleport</code> pulls a cloud session to your terminal if you want to take over. <a class="src" href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="79">How</a></p></li>
+        <li><span class="n" aria-hidden="true">7</span><span class="when">02:00, while you sleep</span><h3>The night shift</h3><p>A scheduled routine runs its nightly job while the VPS orchestrator keeps going. Breakfast comes with a queue of pull requests. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="150">How</a></p></li>
+      </ol>
+    </div>
+
+    <h3 class="sub-h">The edge of the possible</h3>
+    <dl class="edge">
+      <div><dt>Parallel crews</dt><dd>A Claude Code project runs a coordinator with threads side by side, each on its own branch, each opening and auto-fixing its own pull request. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="125">Cloud file</a></dd></div>
+      <div><dt>Overnight runs</dt><dd>The VPS and the cloud don't sleep when the laptop does. A project thread that hits a usage limit waits and picks up again in the next window. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="150">Cloud file</a></dd></div>
+      <div><dt>Work that starts itself</dt><dd>A routine is a saved prompt that fires on a schedule, an API call or a GitHub event, with nobody at the keyboard. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="108">Cloud file</a></dd></div>
+      <div><dt>Agents that talk across machines</dt><dd>With Remote Control on, a Mac session and a VPS or cloud session can message each other both ways, with no tunnel into your Mac. <code>claude -p … --cloud &lt;id&gt;</code> nudges a cloud session from any machine. <span class="hedge">Untested (E5)</span> <a class="src" href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="79">Delegation file</a></dd></div>
+      <div><dt>A fleet at a glance</dt><dd>Herdr on the Mac keeps every VPS agent's state live, and a project's overview sorts threads into Working, Waiting on you and Ready for review. Firstmate adds a status file per worker, so nothing is lost when an agent restarts. <a class="src" href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="16">Firstmate file</a></dd></div>
+    </dl>
+
+    <h3 class="sub-h">What stands between us and this</h3>
+    <ol class="gates" aria-label="Four gates, each still closed">
+      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="133">Herdr 0.9.2 on both machines</a><p>So the Mac can drive the VPS with <code>herdr --machine</code>. Minutes; the VPS's Herdr server restarts. (D2)</p></li>
+      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="138">The VPS set up with set-up-machine</a><p>Your current skills and instructions on the VPS, once #66 merges. (D3)</p></li>
+      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="208">Your skills loading in the cloud</a><p>Today they don't. One probe you run tests two ways to carry them. (E1)</p></li>
+      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="212">A way for the VPS to reach your phone</a><p>Remote Control push is the candidate; nobody has tried it yet. (E5)</p></li>
+    </ol>
+    <p class="closing">Two gates are minutes of work once #66 merges; two are one experiment each. Until they pass, this slide is the destination, not the timetable. The rest of this page is how to get there.</p>
+    <a class="next" href="#why">Next: why this research</a>
+  </div>
+</section>
+
 <section class="slide" id="why" aria-labelledby="why-h" data-name="Why this research">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">1</span>Why this research</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">2</span>Why this research</p>
     <h2 id="why-h">Your setup works on the Mac. Beyond it, almost nothing was mapped.</h2>
     <p class="pull">“Each time work has moved between machines so far, it worked only because the maintainer relayed state by hand.”</p>
     <p class="muted small">From the problem statement of spec #45.</p>
@@ -390,7 +528,7 @@ footer .slide-inner { gap: 10px; }
 
 <section class="slide" id="words" aria-labelledby="words-h" data-name="Eight words">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">2</span>Eight words</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">3</span>Eight words</p>
     <h2 id="words-h">The few terms the research leans on</h2>
     <p class="lede">You'll meet these in every file. Each one in plain language, with where it shows up here.</p>
     <dl class="glossary">
@@ -409,7 +547,7 @@ footer .slide-inner { gap: 10px; }
 
 <section class="slide" id="landscape" aria-labelledby="land-h" data-name="Where agents can run">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">3</span>Where agents can run</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">4</span>Where agents can run</p>
     <h2 id="land-h">The further from the Mac, the less of your setup travels with the work</h2>
     <p class="lede">Four places, left to right. The line breaks up as your skills, instructions and tools stop coming along.</p>
     <ol class="route" aria-label="Places an agent can run, from nearest to furthest">
@@ -469,7 +607,7 @@ footer .slide-inner { gap: 10px; }
 
 <section class="slide" id="findings" aria-labelledby="find-h" data-name="What we found">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">4</span>What we found</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">5</span>What we found</p>
     <h2 id="find-h">Six findings, one line each</h2>
     <ol class="findings">
       <li><p><strong>The Mac stays home.</strong> It's the only place with every harness, current skills, Treehouse, a browser and a working notification. Nothing researched beats it for an orchestrated effort today. <a class="src" href="cloud-agents.md" data-md="cloud-agents.md" data-line="17">Synthesis</a></p></li>
@@ -486,7 +624,7 @@ footer .slide-inner { gap: 10px; }
 
 <section class="slide" id="direction" aria-labelledby="dir-h" data-name="Recommended direction">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">5</span>Recommended direction</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">6</span>Recommended direction</p>
     <h2 id="dir-h">Make the VPS a second Mac first, then test the cloud</h2>
     <p class="lede">The synthesis recommends four moves, in this order.</p>
     <ol class="path">
@@ -508,7 +646,7 @@ footer .slide-inner { gap: 10px; }
 
 <section class="slide" id="decisions" aria-labelledby="dec-h" data-name="Your decisions">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">6</span>Your decisions</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">7</span>Your decisions</p>
     <h2 id="dec-h">Thirteen decisions, each with a recommendation</h2>
     <p class="lede">Each links to its entry in the synthesis, where you'll find the options and the reasoning. Grouped here by what they're about.</p>
     <div class="dgroups">
@@ -548,7 +686,7 @@ footer .slide-inner { gap: 10px; }
 
 <section class="slide" id="try" aria-labelledby="try-h" data-name="Try it yourself">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">7</span>Try it yourself</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">8</span>Try it yourself</p>
     <h2 id="try-h">Experiment E1: the one cloud probe only you can run</h2>
     <div class="try">
       <div class="prose">
@@ -591,7 +729,7 @@ git branch -D probe/cloud-agents-e1</pre>
 
 <section class="slide" id="read" aria-labelledby="read-h" data-name="Reading path">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">8</span>Reading path</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">9</span>Reading path</p>
     <h2 id="read-h">Read the files in this order</h2>
     <p class="lede">The title of each card opens the file in VS Code. Times are for a full read; the top section of each file gives you the gist in a few minutes.</p>
     <ol class="cards">
@@ -705,7 +843,7 @@ git branch -D probe/cloud-agents-e1</pre>
 
 <footer>
   <div class="slide-inner">
-    <p>Spec <a href="https://github.com/yahyabedirhan/skills/issues/45">#45</a>. Build tickets <a href="https://github.com/yahyabedirhan/skills/issues/13">#13</a>, <a href="https://github.com/yahyabedirhan/skills/issues/15">#15</a>, <a href="https://github.com/yahyabedirhan/skills/issues/16">#16</a>. Every fact on this page comes from the research files; where they mark something unverified, so does this page.</p>
+    <p>Spec <a href="https://github.com/yahyabedirhan/skills/issues/45">#45</a>. Build tickets <a href="https://github.com/yahyabedirhan/skills/issues/13">#13</a>, <a href="https://github.com/yahyabedirhan/skills/issues/15">#15</a>, <a href="https://github.com/yahyabedirhan/skills/issues/16">#16</a>. Every fact on this page comes from the research files; where they mark something unverified, so does this page. The vision slide is a pitch built from those facts, not a finding.</p>
     <p><a href="#top">Back to the start</a></p>
   </div>
 </footer>
