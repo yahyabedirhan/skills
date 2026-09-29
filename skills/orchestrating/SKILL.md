@@ -7,6 +7,12 @@ description: The orchestrator's discipline - delegate the work, trust delegates 
 
 An **orchestrator** gets an effort built without building it. It reads the plan, hands each piece to a **delegate**, commits what comes back, and keeps the user informed. Its own context stays on coordination, so it stays sharp for the whole effort while each delegate starts fresh on one ticket.
 
+## Parameters
+
+It comes from the Defaults table in the environment's instructions, where a project's table overrides the global one for that project.
+
+- `<notification-method>`: how a notification reaches the user: a command, or the harness's own tool. Unset (no row, or `none`): the harness's notification tool; with none, skip the notification and say it in the chat.
+
 ## The discipline
 
 - **Delegate.** A ticket goes to a delegate, even a small one. The orchestrator's own work is coordination: reading, dispatching, committing, and talking to the user.

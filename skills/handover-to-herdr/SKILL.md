@@ -1,6 +1,6 @@
 ---
 name: handover-to-herdr
-description: Start a new session in its own Herdr tab and send it a starting prompt - open the worktree as a workspace, label the tab, start the agent, confirm it's working. Use when handing over through Herdr, or when another skill says to.
+description: Start a new session in its own Herdr tab and send it a starting prompt - open the worktree as a workspace, label the tab, start the agent, confirm it's working - and close an effort's Herdr workspaces. Use when handing over through Herdr, when closing an effort whose session host is Herdr, or when another skill says to.
 argument-hint: "Worktree path, topic, role, and the starting prompt"
 ---
 
@@ -8,11 +8,19 @@ argument-hint: "Worktree path, topic, role, and the starting prompt"
 
 The Herdr mechanism of a **handover** (the **handover** skill owns the flow and has already written the handoff and the starting prompt). It takes four inputs: the **worktree** path, the **topic** (the effort's name, or what the work is), the new session's **role** (`Orchestrator`, `Thinking`, or another one-word role), and the **starting prompt**.
 
+It is the how-to skill for `<session-host>` = Herdr. When **close-effort** runs with it, read [closing-an-effort.md](closing-an-effort.md) for its commands.
+
+## Parameters
+
+It comes from the Defaults table in the environment's instructions, where a project's table overrides the global one for that project.
+
+- `<agent-to-start>`: the command and flags that start the new agent. Unset (no row, or `none`): `claude`.
+
 ## Herdr from anywhere
 
 This skill runs from inside a Herdr pane and from outside one, such as a desktop-app session: the `herdr` CLI reaches the server either way.
 
-- Check that `herdr status` reaches a server; `HERDR_ENV` only says whether this session runs in a pane. If it doesn't reach one, say so and hand back to **handover**, whose fallback is a pasted prompt.
+- Check that `herdr status` reaches a server; `HERDR_ENV` only says whether this session runs in a pane. If it doesn't reach one, say so and hand back to **handover**, whose fallback is the same session.
 - Target explicit IDs read from Herdr's JSON (`w1` workspace, `w1:t1` tab, `w1:p1` pane), pass `--no-focus` wherever a command takes it, and never use `--current`. That keeps every command off the pane the maintainer is using.
 
 The **herdr** skill has the full CLI contract but stops outside a pane; these rules replace its `HERDR_ENV` check for the commands below.
@@ -38,7 +46,7 @@ The worktree comes from the project's worktree tool, never from `herdr worktree 
 
 ## 3. Start the agent
 
-Start the maintainer's preferred agent (the **Agent to start** row of the Defaults table in their global instructions, with its flags; default `claude`) in the tab's root pane, named `<topic>-<role>` in lowercase:
+Start `<agent-to-start>`, with its flags, in the tab's root pane, named `<topic>-<role>` in lowercase:
 
 ```bash
 herdr agent start <name> --kind <kind> --pane <pane_id> -- <agent flags>

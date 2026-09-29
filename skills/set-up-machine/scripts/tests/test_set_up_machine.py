@@ -403,12 +403,12 @@ class SharedFileShapeTest(unittest.TestCase):
     def test_missing_pieces_are_added_and_the_users_values_kept(self):
         self.home.write(".config/agents/AGENTS.md", "\n".join([
             "# Mine", "", shared.RULE_LINE, "", "## Defaults", "", "| Role | Default |", "|---|---|",
-            "| Session host | tmux |", "", "## Personal workflow", "", "- I like short reports.", "",
+            "| session-host | tmux |", "", "## Personal workflow", "", "- I like short reports.", "",
         ]))
         plan = self.home.apply()
         text = self.home.read(".config/agents/AGENTS.md")
-        self.assertIn("| Session host | tmux |\n| Worktree tool | none |", text)
-        self.assertIn("the Defaults row Skills repo, `none`", kinds(plan, "added"))
+        self.assertIn("| session-host | tmux |\n| worktree-tool | none |", text)
+        self.assertIn("the Defaults row skills-repo, `none`", kinds(plan, "added"))
         # The rules block goes before the workflow section, which keeps its lines.
         self.assertLess(text.index(shared.BEGIN), text.index(shared.WORKFLOW_HEADING))
         self.assertTrue(text.endswith("## Personal workflow\n\n- I like short reports.\n"))

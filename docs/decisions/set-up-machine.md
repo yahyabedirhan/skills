@@ -40,3 +40,8 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 - **The hook is wired for every tool (`*`).** It checks commands, files and MCP tools, and a new tool is covered without a new plan. Python's start-up is the cost, a few tens of milliseconds per call.
 - **The hook's gaps are listed once, in its plan section,** not repeated on each command row; deny and allow-and-report command rows no longer carry a per-row gap.
 - **The hook reads the table the plan used.** A plan run with `--rules <file>` wires the hook with `--rules <file>`; with the skill's own table the command stays short.
+
+## 2026-09-29: role names are the placeholders (#59)
+
+- **The Defaults rows are named in kebab-case, the same as the placeholders skills use.** `session-host`, `worktree-tool`, `notification-method`, `agent-to-start`, `skills-repo` and `path-to-skills-repo` (the old "Skills repo" row, which held both the repo and its clone, split in two, as `maintain-environment` already used two placeholders). A skill's `<session-host>` then reads its value from the row of the same name, with nothing to translate. A file written before the rename keeps its old rows; the next apply adds the new ones as `none`, and the user moves the values across.
+- **A project's own Defaults table overrides the global one for that project.** Both are in the agent's context, so the reference and the table's intro say so, and a skill's Parameters section repeats it once.

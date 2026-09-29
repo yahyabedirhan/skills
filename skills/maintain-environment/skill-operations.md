@@ -9,15 +9,6 @@ A skill is one of two kinds.
 
 Skills are **private by default**: a local skill stays local, and a skill reaches the user's public skills repo only when the user names that skill for publishing.
 
-## Parameters
-
-Resolve these before acting, in this order: the user's request, the project's `AGENTS.md` or `CLAUDE.md`, the **Skills repo** row of the Defaults table in the user's global instructions, then ask.
-
-- `<skills-repo>`: the user's own skills repo on GitHub, as `<owner>/<repo>`.
-- `<path-to-skills-repo>`: its local clone.
-
-When the user supplies them by answer, offer to fill that Defaults row, so the next run finds them there.
-
 ## Scopes
 
 | Scope | Folder | Lock file | What belongs there |
@@ -58,7 +49,7 @@ It stays a local skill until the user asks to publish it; then it becomes an ins
 
 **Change one of the user's own skills.** On a branch (see Shipping to the skills repo), read the repo's decision records for it first (such as `docs/decisions/`), edit it in `<path-to-skills-repo>/skills/<name>/`, add a dated decision entry for each new decision, and ship it; after the merge, `npx skills update <name>` in every scope that installs it.
 
-**Add a new skill to the user's repo.** Only when the user names the skill for publishing. On a branch (see Shipping to the skills repo), write it under `<path-to-skills-repo>/skills/<name>/SKILL.md` with `name` and `description` frontmatter, add its row to the repo README, and ship it; install it after the merge. The repo is public: nothing in a skill names the user, their accounts, their machine's paths, or any project of theirs; anything user-specific becomes a parameter like the two above.
+**Add a new skill to the user's repo.** Only when the user names the skill for publishing. On a branch (see Shipping to the skills repo), write it under `<path-to-skills-repo>/skills/<name>/SKILL.md` with `name` and `description` frontmatter, add its row to the repo README, and ship it; install it after the merge. The repo is public: nothing in a skill names the user, their accounts, their machine's paths, or any project of theirs; anything user-specific becomes a parameter, as `where-things-go.md` sets out.
 
 **Fork someone else's skill.** Copying a skill folder is not a GitHub fork: nothing links the copy to its origin, so the credit is written by hand.
 

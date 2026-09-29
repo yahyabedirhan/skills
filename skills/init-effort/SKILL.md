@@ -11,6 +11,14 @@ An **effort** is work big enough for its own branch and pull request: a feature,
 
 The effort's whole life happens in the worktree this skill creates: the thinking now, the build later. This skill writes only into that worktree and, for a new project, the new repo: the repository this session was started in stays untouched.
 
+## Parameters
+
+Each comes from the Defaults table in the environment's instructions, where a project's table overrides the global one for that project. Unset means no row, or `none`.
+
+- `<worktree-tool>`: how a new worktree is made, used through its how-to skill (named for the tool). Unset, or that skill not installed: `git worktree add`.
+- `<session-host>`: where new agent sessions open, used through its how-to skill `handover-to-<session-host>`. Unset, that skill not installed, or the host out of reach: this session.
+- `<agent-to-start>`: the command and flags that start a new agent session. Unset: the command of this session's harness.
+
 ## 1. Decide where it lives
 
 From the idea, tell which it is:
@@ -44,16 +52,10 @@ Done when the repo has one commit on `main` and it is pushed to `origin`. The fi
 
 ## 4. Create the worktree
 
-Create a new worktree on the new branch, based on the latest default branch, with the worktree tool the project's instructions name. Without one:
+Create a new worktree on the new branch, based on the latest default branch, with `<worktree-tool>`:
 
-- **Treehouse**, when it's installed ([treehouse.md](treehouse.md) has its commands):
-
-  ```bash
-  treehouse get --lease --lease-holder <effort>                      # prints the worktree path
-  git -C <path> switch --no-track -c <branch> origin/<default-branch>
-  ```
-
-- **Otherwise**, your environment's own worktree feature, or git:
+- **Set**: make it through the **`<worktree-tool>`** skill, leased to the effort when the tool leases.
+- **Unset**: git.
 
   ```bash
   git fetch origin
@@ -76,9 +78,9 @@ Think through the effort in <handoff path>: grill me on it with the grilling ski
 
 Start the session in the worktree, and suggest the first way that works:
 
-- **A Herdr tab**, the default: when `herdr status` reaches a server, start it with the **handover-to-herdr** skill, passing the worktree, the effort as the topic, `Thinking` as the role, and the starting prompt. For a new project it creates the project's own workspace.
-- **This session**: when it can move into the worktree, it runs the starting prompt here.
-- **Paste**: print the starting prompt in a fenced block, and ask the maintainer to start their preferred agent in the worktree and paste it.
+- **`<session-host>`**, when set: start it with the **handover-to-`<session-host>`** skill, passing the worktree, the effort as the topic, `Thinking` as the role, and the starting prompt. For a new project it opens the project's own place in the host.
+- **This session**, when `<session-host>` is unset: when it can move into the worktree, it runs the starting prompt here.
+- **Paste**: print the starting prompt in a fenced block, and ask the maintainer to start `<agent-to-start>` in the worktree and paste it.
 
 Done when the thinking session is working on the prompt. When it runs elsewhere, tell the maintainer where, and stop: this session's part is done.
 
