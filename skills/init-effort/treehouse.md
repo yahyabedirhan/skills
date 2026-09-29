@@ -12,6 +12,6 @@
 ## Gotchas
 
 - `destroy` treats any shell or agent running in the worktree as a live process and skips the worktree. Close whatever runs there (such as its Herdr workspace) first.
-- Ignored folders (`tmp/`, build output) don't count as unfinished work, so `destroy` removes them with the worktree without warning. Copy out anything worth keeping first.
+- Ignored folders (`.scratch/`, build output) don't count as unfinished work, so `destroy` removes them with the worktree without warning. Copy out anything worth keeping first.
 - A leased worktree is removed only when its exact path is named with `--include-leased`; `--all` never touches it.
 - `get --lease` fetches origin, so a branch started from `origin/<default-branch>` right after it is current.

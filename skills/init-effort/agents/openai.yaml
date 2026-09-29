@@ -1,5 +1,5 @@
 interface:
   display_name: "Init Effort"
-  short_description: "Start an effort on its own branch and worktree"
+  short_description: "Start an effort in its own worktree, or a new project"
 policy:
   allow_implicit_invocation: false

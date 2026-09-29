@@ -1,58 +1,65 @@
 # Effort Lifecycle
 
-How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. It builds on Matt Pocock's skills ([mattpocock/skills](https://github.com/mattpocock/skills)) for the thinking, and on the orchestrate skills for the building. Routine upkeep (data edits, small fixes) doesn't need any of this: it runs in the current checkout.
+How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. The thinking builds on Matt Pocock's skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, `prototype`, `tdd`, `code-review`, `setup-matt-pocock-skills`) and on this family's forks of his `handoff`, `to-spec` and `to-tickets`, which replace the upstream three; the building runs on the orchestrate skills. Routine upkeep (data edits, small fixes) doesn't need any of this: it runs in the current checkout.
 
 An effort passes through five phases in one worktree on one branch:
 
 ```text
 START      decide the worktree once; everything after follows it
 THINKING   settle what to build; leave a spec, tickets, and a handoff
-HANDOVER   the thinking session commits everything and starts a fresh orchestrator
+HANDOVER   the session commits everything and starts a fresh orchestrator
 BUILD      orchestrate the tickets through delegates; open the pull request
-CLOSE      after the merge, remove the worktree and the branch
+CLOSE      the user says "go"; the agent merges, follows up, and cleans up
 ```
 
-There are two paths through it. The Herdr path automates every step between phases; the plain path runs anywhere, with the user carrying the handover.
+There are two paths through it. The Herdr path automates every step between phases; the plain path runs anywhere, with the user carrying each new session. The **handover** skill picks the mechanism itself: Herdr whenever `herdr status` reaches a server, else a prompt the user pastes. `init-effort` suggests the first way that works: a Herdr tab, this session when it can move into the worktree, or a pasted prompt.
 
 ```text
                 START                    HANDOVER                  BUILD
-Herdr path      init-effort-with-herdr   orchestrate-with-herdr    orchestrate-with-handoff
-                treehouse worktree,      new "Orchestrator" tab,     → orchestrate-effort
-                Herdr workspace,         agent started, prompted
-                thinking agent started
+Herdr path      init-effort              handover                  orchestrate-with-handoff
+                worktree (Treehouse),      → handover-to-herdr:      → orchestrate-effort
+                  → handover-to-herdr:     new "Orchestrator" tab,
+                  "Thinking" tab,          agent started, prompted
+                  agent started, prompted
 
-Plain path      init-effort              the thinking session      orchestrate-with-handoff
-                the environment's own    prints a handover prompt;   → orchestrate-effort
-                worktree, or git         the user pastes it into
-                worktree                 a new session
+Plain path      init-effort              handover                  orchestrate-with-handoff
+                the project's worktree     prints the starting       → orchestrate-effort
+                tool, or git worktree;     prompt; the user pastes
+                thinks here, or prints     it into a new session
+                the starting prompt
 ```
 
 ## Start
 
-The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
+**init-effort** names the effort and creates its branch and worktree, with the project's worktree tool (Treehouse by default). The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
+
+For a brand-new project it first creates the repo: a folder under the maintainer's projects folder, a README and licence, the [folder standard](folders.md)'s setup, a first commit, and a GitHub repo (public or private, asked each time). The project's first effort then starts like any other.
+
+It writes the idea into a handoff in the worktree and starts the thinking session on it with a one-line prompt: in a `Thinking` Herdr tab through **handover-to-herdr** by default, else in its own session or a pasted prompt.
 
 ## Thinking
 
 ```text
-/grill-with-docs <idea>   sharpen it; terms land in CONTEXT.md, decisions in ADRs
-  /prototype              when a question needs a runnable answer; the user reviews it
-/to-spec                  the thread becomes a spec
-/to-tickets               tracer-bullet tickets, each naming what blocks it
+grilling     sharpen the idea, one round of questions at a time
+  prototype  when a question needs a runnable answer; the user reviews it
+to-spec      the thread becomes a spec
+to-tickets   tracer-bullet tickets, each naming what blocks it
+handover     hand over to an orchestrator
 ```
 
-Run it in one unbroken context window, so the spec and tickets build on the same reasoning. On a local tracker the artifacts land in an **effort folder**, `.scratch/<effort>/` with `spec.md` and `issues/`.
+The starting prompt names these skills and the agent loads each one itself: the user types no slash command. Run it in one unbroken context window, so the spec and tickets build on the same reasoning. On a local tracker the artifacts land in an **effort folder**, `.efforts/<effort>/` with `spec.md` and `issues/`, per the [folder standard](folders.md).
 
 ## Handover
 
-The thinking session owns the clean ending: it writes a **handoff** in the repository (by convention `.handoff/<date>-<effort>.md`) that points at the spec and tickets and names the thinking session, commits and pushes everything, and then hands over with a short **handover prompt** that starts the orchestrator on the handoff. The thinking session then stops, and stays open for reference.
+The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to a Herdr orchestrator without leaving its own checkout. It checks the session is ready: the worktree exists, a **handoff** is written in the repository by the **handoff** skill (`.handoff/<date>-<topic>.md`, per the [folder standard](folders.md)), everything is committed and pushed, and the tracker items exist. It then writes a short **starting prompt** that starts the new session on the handoff, starts that session through a mechanism (**handover-to-herdr** by default, else a pasted prompt), and confirms it started. The handing session then stops, and stays open for reference.
 
 ## Build
 
-The orchestrator reads the handoff, shows the plan with `/show-me`, delegates each ticket to a sub-agent that builds it the way `/implement` does (`/tdd`, checks, `/code-review`), commits each one, and ends with `/to-pr`. It follows the `orchestrating` discipline throughout.
+The orchestrator reads the handoff, shows the plan with `/show-me`, delegates the unblocked tickets in parallel to sub-agents, each in its own worktree, building it the way `/implement` does (`/tdd`, checks, a review at the depth the orchestrator sets), integrates and commits each one, and ends with one branch review and `/to-pr`. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking". It follows the `orchestrating` discipline throughout.
 
 ## Close
 
-After the user merges the pull request, the effort's worktree and branch go, in the way they were created: on the Herdr path, `init-effort-with-herdr` holds the steps.
+The user reviews the pull request and says "go": that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. It reads the pull request's *Things to be aware of* first, runs the post-merge follow-ups, carries unfinished work into the next effort's tickets, leaves QA tickets open for the user, closes the tracker, removes only branches and worktrees proven merged, and closes the Herdr workspace. It returns its own worktree last, from a Herdr tab outside it; without Herdr, that one step is the user's.
 
 ## Why two sessions
 

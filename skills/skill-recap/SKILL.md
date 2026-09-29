@@ -59,7 +59,7 @@ Give the findings, then the verdict:
 - **"No skill changes needed."** when nothing qualifies. This is a good outcome, not a failed recap.
 - Otherwise **"<n> opportunities"**, naming the skills they touch.
 
-When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in their skills repo. `to-tickets` starts only when the user types it, and it works from the conversation, so the findings as written are its input. Resolve the skills repo the way the **maintain-skills** skill resolves `<skills-repo>`: the user's request, then the agent instructions files, then ask. For a finding about someone else's skill, the user decides whether to file it there, fork the skill, or take it upstream.
+When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in their skills repo. `to-tickets` works from the conversation, so the findings as written are its input. Resolve the skills repo the way the **maintain-skills** skill resolves `<skills-repo>`: the user's request, then the agent instructions files, then ask. For a finding about someone else's skill, the user decides whether to file it there, fork the skill, or take it upstream.
 
 When the skills repo is public, write each finding the way the user's own instructions say public repositories are written: that rule lives in their agent instructions, so follow it from there.
 
