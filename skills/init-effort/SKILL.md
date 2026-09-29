@@ -84,9 +84,4 @@ Done when the thinking session is working on the prompt. When it runs elsewhere,
 
 ## After the pull request merges
 
-When the maintainer says the pull request merged, close the effort:
-
-1. Close the effort's Herdr workspace, if it has one (`herdr workspace close <workspace_id>`).
-2. Copy anything worth keeping out of the worktree's `.scratch/`, per the folder standard.
-3. Remove the worktree the way it was made: `treehouse destroy <path> --include-leased --yes`, or `git worktree remove <path>`.
-4. In the main checkout: `git switch <default-branch> && git pull --prune`, then `git branch -d <branch>`. After a squash merge `-d` refuses; confirm with the maintainer before `-D`.
+When the maintainer says the pull request is good, that it merged, or to merge it, the **close-effort** skill merges it and closes the effort.
