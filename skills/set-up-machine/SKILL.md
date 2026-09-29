@@ -14,7 +14,7 @@ Two sources declare the machine:
 
 It also wires the **pre-tool hook**, `scripts/pre_tool_hook.py`, into each harness that has one; see *Pre-tool hook* below. Where a harness has a semantic guard (Claude Code's auto mode), it writes each row's `guard` there too, as a second net for what patterns can't list.
 
-Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md), [Codex](references/codex.md), [opencode](references/opencode.md) and [Cursor](references/cursor.md), its IDE agent and CLI.
+Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md), [Codex](references/codex.md), [opencode](references/opencode.md) and [Cursor](references/cursor.md), its IDE agent and CLI. A harness is found by its config folder, or, since a fresh install makes that folder only on first start, by its program on `PATH`. It runs on macOS and Linux.
 
 ## Steps
 
@@ -72,7 +72,7 @@ Adapters expand a row into every native entry it needs (each flag order and spel
 
 One script, `scripts/pre_tool_hook.py`, reads the same `rules.json` and checks each tool call before it runs:
 
-- **deny** rows: it reads the command the way the shell runs it (any flag order or grouping, flags after the operands, `/bin/rm`, `mkfs.ext4`, the inside of `bash -lc '…'`, `eval`, `sudo`, `xargs`, `find -exec`, every part of `a && b; c | d`), and refuses the call naming each refused part with its rule's reason and instruction. A wrapper that runs no command is read as itself (`env -u X` is `env`). It also checks file tools against file rows, a command's operands against its row's `files` (`source .env`), and MCP tools against mail-tool rows, including tools connected after the last plan.
+- **deny** rows: it reads the command the way the shell runs it (any flag order or grouping, flags after the operands, `/bin/rm`, `RM` where the filesystem ignores case as macOS's does, `mkfs.ext4`, the inside of `bash -lc '…'`, `eval`, `sudo`, `xargs`, `find -exec`, every part of `a && b; c | d`), and refuses the call naming each refused part with its rule's reason and instruction. A wrapper that runs no command is read as itself (`env -u X` is `env`). It also checks file tools against file rows, a command's operands against its row's `files` (`source .env`), and MCP tools against mail-tool rows, including tools connected after the last plan.
 - **allow-and-report** rows: it appends one JSON line per call to `<report folder>/<date>.jsonl`, readable by the user alone since a command can carry a secret, and lets the harness's own permissions decide.
 - **ask** rows stay native.
 
@@ -81,6 +81,10 @@ The native entries stay underneath, so a hook that fails or is switched off leav
 ## Mail tools
 
 Only the running harness knows which MCP tools it exposes, and their names differ by harness and by how a connector is attached. So plan asks each harness for its tool list, matches the table's MCP-tool rows against it, and prints a `found` line per row. If a harness can't be asked (not installed, not logged in), the plan says so as a gap and keeps the entries it wrote before. `--tool-names <file>`, one name per line, supplies the list instead. opencode lists its tools only inside a session, so its plan matches the configured MCP servers instead and leaves their tools to the hook.
+
+## Checking a fresh Linux machine
+
+`scripts/tests/linux/run.sh <repo> <output folder>` builds a Debian image with every harness installed and never logged in, installs the skills from the repo, runs plan, apply and plan in a throwaway container, and removes it. `probes.txt` in the output folder diffs against `scripts/tests/linux/probe.py` run on another machine: the hook fed each harness's sample calls, and `codex execpolicy check` samples. `sessions.sh`, run in a container kept after `in-container.sh`, adds real Codex turns against a local stand-in model; Claude Code and the Cursor CLI need a login for any session. No credentials go into the container.
 
 ## Adding a harness
 

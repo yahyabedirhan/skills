@@ -8,13 +8,14 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from datetime import datetime, timezone
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
 
-from setupmachine import hook, rules  # noqa: E402
+from setupmachine import commands, hook, rules  # noqa: E402
 
 TABLE = rules.load()
 HOME = Path("/Users/someone")
@@ -72,8 +73,21 @@ class CommandDenyTest(unittest.TestCase):
                         "env FOO=1 rm -rf x", "FOO=1 rm -rf x", "/usr/bin/env rm -rf x", "command rm -rf x",
                         "exec rm -rf x", "time rm -rf x", "find . -name y | xargs rm -rf", "xargs -n 1 rm -rf < list",
                         "find . -type d -exec rm -rf {} +", "find . -exec rm -rf {} \\;", "sudo rm -rf x",
-                        "sudo -u me rm -rf x", "env -S 'rm -rf x'", "RM -rf x", "/BIN/RM -rf x"):
+                        "sudo -u me rm -rf x", "env -S 'rm -rf x'"):
             self.assertDenied(command)
+
+    def test_program_case_follows_the_filesystem(self):
+        # macOS's default filesystem runs /bin/rm for `RM`; Linux's finds no such program.
+        with mock.patch.object(commands, "FOLD_CASE", True):
+            for command in ("RM -rf x", "/BIN/RM -rf x", "Sudo ls"):
+                self.assertTrue(denied_by(command), command)
+        with mock.patch.object(commands, "FOLD_CASE", False):
+            for command in ("RM -rf x", "/BIN/RM -rf x", "Sudo ls"):
+                self.assertNotDenied(command)
+            self.assertDenied("rm -rf x")
+
+    def test_case_is_folded_where_the_filesystem_folds_it(self):
+        self.assertEqual(commands.FOLD_CASE, sys.platform in ("darwin", "win32"))
 
     def test_input_fed_to_a_shell(self):
         for command in ("bash <<EOF\nrm -rf x\nEOF", "cat <<'EOF' | sh\nrm -rf x\nEOF",

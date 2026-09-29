@@ -27,11 +27,13 @@ from pathlib import Path
 
 from .. import rules as rule_table
 from ..plan import Change, FileWrite, Section, link_text
+from .. import shared
 from ..shared import read_text
 from . import claude_code
 
 NAME = "opencode"
 LABEL = "opencode"
+PROGRAMS = ("opencode",)  # on PATH, they mark a fresh install whose folder isn't made yet
 
 # Global config files, in the order opencode loads them.
 CONFIG_FILES = ("config.json", "opencode.json", "opencode.jsonc")
@@ -179,7 +181,7 @@ def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path,
     configured MCP servers and left to the pre-tool hook."""
     mem_section = Section(f"{LABEL}: memory", config_dir(home))
     mem_section.changes.append(Change("none", "no memory feature; nothing to turn off"))
-    if not config_dir(home).is_dir():
+    if not shared.harness_found(home, os_home, config_dir(home), PROGRAMS):
         section = Section(LABEL, config_dir(home))
         section.changes.append(Change("none", "opencode isn't set up here (no ~/.config/opencode); nothing to set"))
         return [section, mem_section], [], {}

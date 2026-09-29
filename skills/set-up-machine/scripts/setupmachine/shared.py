@@ -7,10 +7,23 @@ symlink to the file.
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 from . import hook
 from .plan import Change, FileWrite, Section
+
+# How a harness's program is looked up on PATH; tests replace it.
+which = shutil.which
+
+
+def harness_found(home: Path, os_home: Path, folder: Path, programs) -> bool:
+    """Whether a harness is on this machine: its config folder exists, or, in the user's own
+    home, one of its programs is on PATH. A fresh install that has never run has no folder yet
+    (Codex, opencode and the Cursor CLI make theirs on first start); a trial `--home` goes by
+    folders alone, since PATH describes the real machine."""
+    return folder.is_dir() or (home.resolve() == os_home.resolve() and any(which(p) for p in programs))
+
 
 BEGIN = "<!-- set-up-machine:rules start. Generated from set-up-machine's rule table: change the table, not these lines. -->"
 END = "<!-- set-up-machine:rules end -->"
