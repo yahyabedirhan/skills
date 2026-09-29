@@ -47,6 +47,10 @@ Create or update the pull request for the current task with a concise descriptio
 6. Report completion:
    - Read `{SKILLBASE}/references/describe_pr_final_answer.md`.
    - Respond using that final answer template with the PR URL, saved description URL, and concise list of changed files.
+   - Give each changed file two review links, built from the PR's head commit as it stands after your push (`gh pr view {number} --json url,headRefOid,files`), so an updated PR links its new head. Take `{owner}/{repo}` from the PR `url`:
+     - **Final version:** `https://github.com/{owner}/{repo}/blob/{headRefOid}/{path}`, where GitHub renders Markdown.
+     - **Diff:** `{pr_url}/files#diff-{hash}`, where `{hash}` is the SHA-256 of the path (`printf %s '{path}' | shasum -a 256`, or `sha256sum` on Linux).
+   - When many files changed, link the key ones and list the rest by path.
 
 Always read and follow `{SKILLBASE}/references/pr_description_template.md`. Do not expand the PR body beyond that template.
 

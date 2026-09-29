@@ -1,0 +1,66 @@
+---
+name: skill-recap
+description: Recap how a session used its skills, and end with findings and a verdict on whether any skill needs changing.
+argument-hint: "Optional scope, such as \"all sessions from the last 5 hours\"; defaults to this session and its sub-agents"
+disable-model-invocation: true
+---
+
+# Skill Recap
+
+A **recap** looks back over one or more sessions and asks how the agent and its sub-agents used their skills: where a skill carried the work, and where a skill, or the lack of one, cost the session. It ends with **findings**, each backed by **evidence** from the transcripts, and a **verdict**.
+
+## 1. Select the sessions
+
+- **By default**, the scope is the current session and every sub-agent it spawned, at any depth. The session itself is in your context; when part of it was compacted away, read its transcript for the missing stretch. Sub-agents ran in their own contexts, so read their transcripts from disk.
+- **When the user names a scope** (a time window, a project, a list of sessions), use exactly that scope, sub-agents included. When it leaves a real choice open, such as which projects a time window covers, ask before reading.
+
+Where Claude Code keeps transcripts, one JSON object per line (the layout it uses today; when a path doesn't resolve, search `~/.claude/projects/` for the session id):
+
+```text
+~/.claude/projects/<project>/                 <project>: the session's working directory, with / and . turned into -
+  <session-id>.jsonl                          the main session
+  <session-id>/subagents/agent-<id>.jsonl     each sub-agent, nested ones included
+  <session-id>/subagents/agent-<id>.meta.json its type, task description and spawn depth
+```
+
+The current session's id is in the `CLAUDE_CODE_SESSION_ID` environment variable. Skill loads appear as `tool_use` blocks named `Skill` (the skill is `input.skill`) and as `<command-name>/<name></command-name>` in user messages. For another harness, find where it stores its sessions and how a skill load shows there. Codex keeps them under `~/.codex/sessions/` and loads a skill by reading its `skills/<name>/SKILL.md`, so a read of that file is the load (a session that edits the skill reads it too).
+
+Transcripts run long: search them for what the audit needs (skill loads, errors, retries, long runs of tool calls on one problem, the user's corrections) and read around each hit, rather than reading them whole.
+
+Done when every session in the scope is listed, with its sub-agents, and each has been searched.
+
+## 2. Audit
+
+Work out how each skill in play was used and how it went. Anything where a skill helped or hurt the work belongs in the recap, for example:
+
+- tokens or time spent that a skill could have saved, or that a skill caused
+- a rabbit hole a skill led into, or failed to prevent
+- information in a skill that was wrong, or stale
+- a surprise: something a skill assumed that turned out different in reality
+- a skill that should have triggered and didn't, or triggered when it shouldn't have
+- a rule the user stated in chat that no skill carries
+- a workaround an agent invented for something a skill should cover
+
+These are examples, not a checklist; follow whatever fits the purpose. Skills from other people's repos are audited like the user's own.
+
+Each finding carries:
+
+- **Skill**: its name and source repo, or "no skill" when one is missing
+- **Evidence**: which session or sub-agent, and what happened there, quoted or closely paraphrased
+- **Cost**: what it cost or risked, in tokens, time, wrong output or the user's attention
+- **Opportunity**: the change to the skill that would fix it
+
+Something that went wrong for reasons no skill could address is not a finding. Done when every skill loaded in the scope, and every stretch where a skill was missing, has been weighed.
+
+## 3. Report
+
+Give the findings, then the verdict:
+
+- **"No skill changes needed."** when nothing qualifies. This is a good outcome, not a failed recap.
+- Otherwise **"<n> opportunities"**, naming the skills they touch.
+
+When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in their skills repo. `to-tickets` starts only when the user types it, and it works from the conversation, so the findings as written are its input. Resolve the skills repo the way the **maintain-skills** skill resolves `<skills-repo>`: the user's request, then the agent instructions files, then ask. For a finding about someone else's skill, the user decides whether to file it there, fork the skill, or take it upstream.
+
+When the skills repo is public, write each finding the way the user's own instructions say public repositories are written: that rule lives in their agent instructions, so follow it from there.
+
+The recap ends with the report. Creating issues, commenting and editing skills are left to the user.
