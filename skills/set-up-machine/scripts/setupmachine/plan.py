@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Kinds that change a file, then kinds that are only reported.
 CHANGE_KINDS = ("added", "tightened", "removed")
-REPORT_KINDS = ("present", "stricter", "found", "gap", "extra")
+REPORT_KINDS = ("present", "stricter", "found", "gap", "none", "extra")
 
 
 @dataclass
@@ -32,7 +32,7 @@ class Section:
 class FileWrite:
     path: Path
     old: object  # str, or None when the file doesn't exist yet
-    new: str
+    new: object  # str, or None to delete the file (apply keeps it in the backup)
 
     @property
     def changed(self) -> bool:
@@ -55,7 +55,8 @@ class Plan:
         h = hashlib.sha256()
         for w in sorted(self.writes, key=lambda w: str(w.path)):
             if w.changed:
-                for part in (str(w.path), "\0", w.old if w.old is not None else "\1", "\0", w.new, "\0"):
+                for part in (str(w.path), "\0", w.old if w.old is not None else "\1", "\0",
+                             w.new if w.new is not None else "\1", "\0"):
                     h.update(part.encode())
         return h.hexdigest()[:12]
 
@@ -78,7 +79,7 @@ def render(plan: Plan) -> str:
             out.extend(_line(c) for c in s.changes if c.kind == kind)
         if present:
             out.append(f"  present     {present} entr{'y' if present == 1 else 'ies'} already in place")
-        for kind in ("stricter", "found", "gap", "extra"):
+        for kind in ("stricter", "found", "gap", "none", "extra"):
             out.extend(_line(c) for c in s.changes if c.kind == kind)
         if not s.changes and not (s.show_diff and writes.get(s.path) and writes[s.path].changed):
             out.append("  up to date")
@@ -109,8 +110,9 @@ def _shown(path: Path, home: Path) -> str:
 
 def _diff(w: FileWrite) -> list:
     old = [] if w.old is None else w.old.splitlines()
+    new = [] if w.new is None else w.new.splitlines()
     return [
         line
-        for line in difflib.unified_diff(old, w.new.splitlines(), lineterm="", n=1)
+        for line in difflib.unified_diff(old, new, lineterm="", n=1)
         if not line.startswith(("---", "+++"))
     ]

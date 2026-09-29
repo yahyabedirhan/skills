@@ -77,7 +77,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | Skill | What it does | Origin |
 |---|---|---|
 | [maintain-environment](skills/maintain-environment/SKILL.md) | Changes what your agents run with: decides whether a change is a permission, a global instruction, a project instruction or a skill, and carries it to every harness, machine and install. Its skill operations install, move, update, fork, publish, remove and audit skills with `npx skills`, prompt-audit each new skill in a fresh sub-agent, and measure a skill's run cost on request. | Original. Replaces `maintain-skills`. |
-| [set-up-machine](skills/set-up-machine/SKILL.md) | Sets up and audits a machine's agent harnesses from one rule table: one shared global instructions file every harness reads, and the global rules each harness enforces. Shows a per-harness diff (added, tightened, gaps, extra rules found), applies it on one approval, and never removes or loosens a rule it didn't write. Covers Claude Code today. | Original. |
+| [set-up-machine](skills/set-up-machine/SKILL.md) | Sets up and audits a machine's agent harnesses from one rule table: one shared global instructions file every harness reads, and the global rules each harness enforces. Shows a per-harness diff (added, tightened, gaps, extra rules found), applies it on one approval, and never removes or loosens a rule it didn't write. Keeps harness memory off. Covers Claude Code today. | Original. |
 | [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings and a verdict. You start it with `/skill-recap` (Codex: `$skill-recap`) and file them with [to-tickets](skills/to-tickets/SKILL.md). | Original. |
 
 ### Daily workflows
@@ -153,8 +153,9 @@ recap       /skill-recap: how a session used its skills → findings → /to-tic
 rules.json                      each global rule once: level, reason, instruction
   ↓ set_up_machine.py plan      per-harness diff: added, tightened, gaps, extra rules
   ↓ one approval → apply        writes the diff, backs up each file, records what it wrote
-~/.config/agents/AGENTS.md      the shared global instructions, with the rule lines
-~/.claude/settings.json         Claude Code's native deny and ask entries
+~/.config/agents/AGENTS.md      the shared global instructions: Defaults by role, rule lines, personal workflow
+~/.claude/settings.json         Claude Code's native deny and ask entries, auto memory off
+~/.codex/config.toml            Codex memories off
 ~/.claude/CLAUDE.md             imports the shared file
 plan again                      the audit: "No changes."
 ```

@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from setupmachine import reconcile, rules, shared  # noqa: E402
-from setupmachine.adapters import claude_code  # noqa: E402
+from setupmachine.adapters import claude_code, codex  # noqa: E402
 from setupmachine.plan import render  # noqa: E402
 
 RM = rules.Rule(
@@ -111,7 +111,8 @@ class ReconcileTest(unittest.TestCase):
 
     def test_empty_home_gets_everything_then_a_second_run_has_no_changes(self):
         first = self.home.apply()
-        self.assertEqual(len(kinds(first, "added")), len(rules.command_prefixes(RM)) + 1)
+        # Every rm spelling, the CLAUDE.md import, and auto memory off.
+        self.assertEqual(len(kinds(first, "added")), len(rules.command_prefixes(RM)) + 2)
         self.assertIn("Bash(rm -rf:*)", self.home.perms()["deny"])
         self.assertIn("rm -rf", self.home.read(".config/agents/AGENTS.md"))
         self.assertIn("Move it into `.scratch/`.", self.home.read(".config/agents/AGENTS.md"))
@@ -173,7 +174,7 @@ class ReconcileTest(unittest.TestCase):
         )
         self.home.apply(table=(ask_rule(summary="changed"),))
         agents = self.home.read(".config/agents/AGENTS.md")
-        self.assertTrue(agents.startswith("# Mine\n\nMy workflow.\n"))
+        self.assertTrue(agents.startswith("# Mine\n\n" + shared.RULE_LINE + "\n\nMy workflow.\n"))
         self.assertIn("Added after the block.", agents)
         self.assertIn("**Asks first:** changed.", agents)
         self.assertEqual(agents.count(shared.BEGIN), 1)
@@ -382,6 +383,124 @@ class FullTableReconcileTest(unittest.TestCase):
         plan = self.home.apply(self.table, [])
         self.assertIn("mcp__claude_ai_Gmail__send_message", kinds(plan, "removed"))
         self.assertNotIn("mcp__claude_ai_Gmail__send_message", self.home.perms()["deny"])
+
+
+class SharedFileShapeTest(unittest.TestCase):
+    def setUp(self):
+        self.home = Home()
+
+    def tearDown(self):
+        self.home.close()
+
+    def test_a_new_file_has_the_rule_line_defaults_rules_and_workflow_in_order(self):
+        self.home.apply()
+        text = self.home.read(".config/agents/AGENTS.md")
+        order = [shared.RULE_LINE, shared.DEFAULTS_HEADING, shared.BEGIN, shared.WORKFLOW_HEADING]
+        self.assertEqual([text.index(x) for x in order], sorted(text.index(x) for x in order))
+        for role in shared.ROLES:
+            self.assertIn(f"| {role} | none |", text)
+
+    def test_missing_pieces_are_added_and_the_users_values_kept(self):
+        self.home.write(".config/agents/AGENTS.md", "\n".join([
+            "# Mine", "", shared.RULE_LINE, "", "## Defaults", "", "| Role | Default |", "|---|---|",
+            "| Session host | tmux |", "", "## Personal workflow", "", "- I like short reports.", "",
+        ]))
+        plan = self.home.apply()
+        text = self.home.read(".config/agents/AGENTS.md")
+        self.assertIn("| Session host | tmux |\n| Worktree tool | none |", text)
+        self.assertIn("the Defaults row Skills repo, `none`", kinds(plan, "added"))
+        # The rules block goes before the workflow section, which keeps its lines.
+        self.assertLess(text.index(shared.BEGIN), text.index(shared.WORKFLOW_HEADING))
+        self.assertTrue(text.endswith("## Personal workflow\n\n- I like short reports.\n"))
+        self.assertFalse(self.home.plan().has_changes)
+
+    def test_a_file_without_any_shape_gets_every_piece(self):
+        self.home.write(".config/agents/AGENTS.md", "Old notes.\n")
+        plan = self.home.apply()
+        text = self.home.read(".config/agents/AGENTS.md")
+        self.assertTrue(text.startswith(shared.RULE_LINE + "\n\nOld notes.\n"))
+        self.assertIn(shared.WORKFLOW_HEADING, text)
+        self.assertIn("the personal workflow section", kinds(plan, "added"))
+        self.assertFalse(self.home.plan().has_changes)
+
+    def test_lines_besides_the_import_in_claude_md_are_reported(self):
+        self.home.write(".claude/CLAUDE.md", "# Personal\n\nKeep me.\n")
+        self.assertIn("2 line(s) besides the import", kinds(self.home.plan(), "extra"))
+
+
+class MemoryTest(unittest.TestCase):
+    def setUp(self):
+        self.home = Home()
+
+    def tearDown(self):
+        self.home.close()
+
+    def test_claude_code_memory_is_turned_off_and_its_files_removed_with_a_backup(self):
+        self.home.write(".claude/projects/-a-project/memory/MEMORY.md", "- a note\n")
+        self.home.write(".claude/projects/-a-project/memory/note.md", "the note\n")
+        plan = self.home.plan()
+        self.assertIn("<home>/.claude/projects/-a-project/memory/note.md", kinds(plan, "removed"))
+        self.assertIn("<home>/.claude/projects/-a-project/memory/note.md", render(plan))
+        backup = reconcile.apply(plan, plan.id)
+        self.assertIs(json.loads(self.home.read(".claude/settings.json"))["autoMemoryEnabled"], False)
+        self.assertFalse((self.home.path / ".claude/projects/-a-project/memory/note.md").exists())
+        self.assertEqual((backup / ".claude/projects/-a-project/memory/note.md").read_text(), "the note\n")
+        second = self.home.plan()
+        self.assertFalse(second.has_changes)
+        self.assertIn("autoMemoryEnabled: false", kinds(second, "present"))
+
+    def test_claude_code_memory_on_is_tightened_and_other_settings_kept(self):
+        self.home.write(".claude/settings.json", json.dumps({"model": "x", "autoMemoryEnabled": True}))
+        plan = self.home.apply()
+        self.assertIn("autoMemoryEnabled: false", kinds(plan, "tightened"))
+        settings = json.loads(self.home.read(".claude/settings.json"))
+        self.assertEqual((settings["model"], settings["autoMemoryEnabled"]), ("x", False))
+
+    def test_a_memory_file_changed_after_the_plan_stops_apply(self):
+        self.home.write(".claude/projects/p/memory/note.md", "one\n")
+        plan = self.home.plan()
+        self.home.write(".claude/projects/p/memory/note.md", "two\n")
+        with self.assertRaises(reconcile.PlanMismatch):
+            reconcile.apply(self.home.plan(), plan.id)
+        self.assertEqual(self.home.read(".claude/projects/p/memory/note.md"), "two\n")
+
+    def test_codex_without_a_config_folder_is_skipped(self):
+        plan = self.home.apply()
+        self.assertIn("Codex isn't set up here (no ~/.codex); nothing to turn off", kinds(plan, "none"))
+        self.assertFalse((self.home.path / ".codex").exists())
+
+    def test_codex_memories_are_turned_off_and_their_files_removed(self):
+        self.home.write(".codex/config.toml", 'model = "m"\n\n[features]\nhooks = true\n\n[mcp_servers.x]\nargs = []\n')
+        self.home.write(".codex/memories/MEMORY.md", "a memory\n")
+        plan = self.home.apply()
+        self.assertEqual(
+            self.home.read(".codex/config.toml"),
+            'model = "m"\n\n[features]\nmemories = false\nhooks = true\n\n[mcp_servers.x]\nargs = []\n',
+        )
+        self.assertIn("<home>/.codex/memories/MEMORY.md", kinds(plan, "removed"))
+        self.assertFalse((self.home.path / ".codex/memories/MEMORY.md").exists())
+        self.assertFalse(self.home.plan().has_changes)
+
+    def test_codex_config_forms(self):
+        cases = {
+            "": ("[features]\nmemories = false\n", "added"),
+            'model = "m"\n': ('model = "m"\n\n[features]\nmemories = false\n', "added"),
+            "[features]\nmemories = true # on\n": ("[features]\nmemories = false\n", "tightened"),
+            "[features]\nmemories = false\n": ("[features]\nmemories = false\n", "present"),
+            "features.memories = true\n[x]\n": ("features.memories = false\n[x]\n", "tightened"),
+            "[[a]]\nmemories = true\n": ("[[a]]\nmemories = true\n\n[features]\nmemories = false\n", "added"),
+        }
+        for text, (want, kind) in cases.items():
+            got, change = codex.set_memories_off(text)
+            self.assertEqual((got, change.kind), (want, kind), text)
+        with self.assertRaises(ValueError):
+            codex.set_memories_off("features = { memories = true }\n")
+
+    def test_harnesses_without_memory_say_so(self):
+        texts = {s.title: s.changes[0].text for s in self.home.plan().sections if s.title.endswith(": memory")}
+        self.assertIn("nothing to turn off", texts["opencode: memory"])
+        self.assertIn("nothing to turn off", texts["Cursor: memory"])
+
 
 if __name__ == "__main__":
     unittest.main()
