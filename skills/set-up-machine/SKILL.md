@@ -14,7 +14,7 @@ Two sources declare the machine:
 
 It also wires the **pre-tool hook**, `scripts/pre_tool_hook.py`, into each harness that has one; see *Pre-tool hook* below. Where a harness has a semantic guard (Claude Code's auto mode), it writes each row's `guard` there too, as a second net for what patterns can't list.
 
-Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md), [Codex](references/codex.md), [opencode](references/opencode.md). Cursor has no memory feature, and the plan says so.
+Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md), [Codex](references/codex.md), [opencode](references/opencode.md) and [Cursor](references/cursor.md), its IDE agent and CLI.
 
 ## Steps
 

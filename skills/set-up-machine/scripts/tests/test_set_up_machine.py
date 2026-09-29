@@ -54,7 +54,8 @@ class Home:
         return json.loads(self.read(".claude/settings.json"))["permissions"]
 
     def plan(self, table=(RM,), tools=None):
-        return reconcile.build(self.path, list(table), self.os_home, {"claude-code": tools} if tools is not None else None)
+        by_harness = {"claude-code": tools, "cursor": tools} if tools is not None else None
+        return reconcile.build(self.path, list(table), self.os_home, by_harness)
 
     def apply(self, table=(RM,), tools=None):
         plan = self.plan(table, tools)
@@ -112,9 +113,11 @@ class ReconcileTest(unittest.TestCase):
 
     def test_empty_home_gets_everything_then_a_second_run_has_no_changes(self):
         first = self.home.apply()
-        # Every rm spelling, the CLAUDE.md import, auto memory off, and the hook.
-        self.assertEqual(len(kinds(first, "added")), len(rules.command_prefixes(RM)) + 3)
-        self.assertIn("Bash(rm -rf:*)", self.home.perms()["deny"])
+        # Every rm spelling, the CLAUDE.md import, auto memory off, the hook, and the empty allow
+        # list the Cursor CLI needs before it reads the deny list.
+        self.assertEqual(len(kinds(first, "added")), len(rules.command_prefixes(RM)) + 4)
+        self.assertEqual(self.home.perms()["allow"], [])
+        self.assertIn("Bash(rm -rf *)", self.home.perms()["deny"])
         self.assertIn("rm -rf", self.home.read(".config/agents/AGENTS.md"))
         self.assertIn("Move it into `.scratch/`.", self.home.read(".config/agents/AGENTS.md"))
         self.assertIn("@" + str(self.home.path / ".config/agents/AGENTS.md"), self.home.read(".claude/CLAUDE.md"))
@@ -125,44 +128,44 @@ class ReconcileTest(unittest.TestCase):
         self.assertTrue(render(second).rstrip().endswith("No changes."))
 
     def test_existing_entries_are_kept_in_order_and_listed_as_extra(self):
-        self.home.settings(deny=["Bash(dd:*)", "Bash(rm -rf:*)"], allow=["Bash(ls:*)"])
+        self.home.settings(deny=["Bash(dd *)", "Bash(rm -rf *)"], allow=["Bash(ls *)"])
         plan = self.home.apply()
         deny = self.home.perms()["deny"]
-        self.assertEqual(deny[:2], ["Bash(dd:*)", "Bash(rm -rf:*)"])
-        self.assertEqual(self.home.perms()["allow"], ["Bash(ls:*)"])
-        self.assertEqual(sorted(kinds(plan, "extra")), ["Bash(dd:*)", "Bash(ls:*)"])
-        self.assertIn("Bash(rm -rf:*)", kinds(plan, "present"))
+        self.assertEqual(deny[:2], ["Bash(dd *)", "Bash(rm -rf *)"])
+        self.assertEqual(self.home.perms()["allow"], ["Bash(ls *)"])
+        self.assertEqual(sorted(kinds(plan, "extra")), ["Bash(dd *)", "Bash(ls *)"])
+        self.assertIn("Bash(rm -rf *)", kinds(plan, "present"))
         self.assertEqual(json.loads(self.home.read(".claude/settings.json"))["model"], "x")
         # An entry that was already there isn't the skill's, so the manifest doesn't claim it.
         owned = json.loads(self.home.read(".config/agents/set-up-machine.json"))["harnesses"]["claude-code"]
-        self.assertNotIn("Bash(rm -rf:*)", owned["permissions"]["deny"])
+        self.assertNotIn("Bash(rm -rf *)", owned["permissions"]["deny"])
 
     def test_a_looser_entry_is_tightened_by_adding_the_stricter_one(self):
-        self.home.settings(allow=["Bash(rm -fr:*)"], ask=["Bash(rm -rf:*)"])
+        self.home.settings(allow=["Bash(rm -fr *)"], ask=["Bash(rm -rf *)"])
         plan = self.home.apply()
         perms = self.home.perms()
-        self.assertEqual(sorted(kinds(plan, "tightened")), ["Bash(rm -fr:*)", "Bash(rm -rf:*)"])
-        self.assertIn("Bash(rm -rf:*)", perms["deny"])
-        self.assertEqual(perms["ask"], ["Bash(rm -rf:*)"])
-        self.assertEqual(perms["allow"], ["Bash(rm -fr:*)"])
+        self.assertEqual(sorted(kinds(plan, "tightened")), ["Bash(rm -fr *)", "Bash(rm -rf *)"])
+        self.assertIn("Bash(rm -rf *)", perms["deny"])
+        self.assertEqual(perms["ask"], ["Bash(rm -rf *)"])
+        self.assertEqual(perms["allow"], ["Bash(rm -fr *)"])
 
     def test_a_stricter_existing_entry_is_never_loosened(self):
-        self.home.settings(deny=["Bash(rm -rf:*)"])
+        self.home.settings(deny=["Bash(rm -rf *)"])
         plan = self.home.apply(table=(ask_rule(),))
-        self.assertIn("Bash(rm -rf:*)", kinds(plan, "stricter"))
-        self.assertEqual(self.home.perms()["deny"], ["Bash(rm -rf:*)"])
-        self.assertNotIn("Bash(rm -rf:*)", self.home.perms()["ask"])
+        self.assertIn("Bash(rm -rf *)", kinds(plan, "stricter"))
+        self.assertEqual(self.home.perms()["deny"], ["Bash(rm -rf *)"])
+        self.assertNotIn("Bash(rm -rf *)", self.home.perms()["ask"])
 
     def test_overlapping_rules_keep_the_stricter_level(self):
         self.home.apply(table=(ask_rule(), RM))
-        self.assertIn("Bash(rm -rf:*)", self.home.perms()["deny"])
+        self.assertIn("Bash(rm -rf *)", self.home.perms()["deny"])
         self.assertNotIn("ask", self.home.perms())
 
     def test_only_its_own_entries_are_removed_when_the_table_drops_a_rule(self):
-        self.home.settings(deny=["Bash(dd:*)"])
+        self.home.settings(deny=["Bash(dd *)"])
         self.home.apply()
         plan = self.home.apply(table=())
-        self.assertEqual(self.home.perms()["deny"], ["Bash(dd:*)"])
+        self.assertEqual(self.home.perms()["deny"], ["Bash(dd *)"])
         self.assertEqual(len(kinds(plan, "removed")), len(rules.command_prefixes(RM)))
         self.assertFalse(self.home.plan(table=()).has_changes)
 
@@ -191,13 +194,13 @@ class ReconcileTest(unittest.TestCase):
 
     def test_apply_refuses_a_plan_that_no_longer_matches(self):
         plan = self.home.plan()
-        self.home.settings(deny=["Bash(dd:*)"])
+        self.home.settings(deny=["Bash(dd *)"])
         with self.assertRaises(reconcile.PlanMismatch):
             reconcile.apply(self.home.plan(), plan.id)
         self.assertFalse((self.home.path / ".config/agents/AGENTS.md").exists())
 
     def test_apply_backs_up_what_it_changes(self):
-        self.home.settings(deny=["Bash(dd:*)"])
+        self.home.settings(deny=["Bash(dd *)"])
         before = self.home.read(".claude/settings.json")
         plan = self.home.plan()
         backup = reconcile.apply(plan, plan.id)
@@ -260,15 +263,15 @@ class FullTableTest(unittest.TestCase):
 
     def test_subcommands_and_operands_sit_around_the_flags(self):
         entries = claude_code.entries_for(table_rule("git-push-force"))
-        for want in ("Bash(git push --force:*)", "Bash(git push -f:*)", "Bash(/usr/bin/git push --force:*)"):
+        for want in ("Bash(git push --force *)", "Bash(git push -f *)", "Bash(/usr/bin/git push --force *)"):
             self.assertIn(want, entries)
-        self.assertIn("Bash(chmod -R 777:*)", claude_code.entries_for(table_rule("chmod-recursive-777")))
+        self.assertIn("Bash(chmod -R 777 *)", claude_code.entries_for(table_rule("chmod-recursive-777")))
         shells = claude_code.entries_for(table_rule("shell-inline-command"))
-        for want in ("Bash(bash -c:*)", "Bash(sh -c:*)", "Bash(zsh -c:*)", "Bash(/bin/zsh -c:*)"):
+        for want in ("Bash(bash -c *)", "Bash(sh -c *)", "Bash(zsh -c *)", "Bash(/bin/zsh -c *)"):
             self.assertIn(want, shells)
         gh = claude_code.entries_for(table_rule("gh-repo-destructive"))
-        self.assertIn("Bash(gh repo delete:*)", gh)
-        self.assertIn("Bash(gh repo archive:*)", gh)
+        self.assertIn("Bash(gh repo delete *)", gh)
+        self.assertIn("Bash(gh repo archive *)", gh)
 
     def test_file_rules_use_the_kinds_claude_code_checks(self):
         self.assertEqual(
@@ -315,15 +318,31 @@ class FullTableTest(unittest.TestCase):
 
 class CoversTest(unittest.TestCase):
     def test_bash_coverage_respects_word_boundaries(self):
-        self.assertTrue(claude_code.covers("Bash(gh repo delete*)", "Bash(gh repo delete:*)"))
-        self.assertTrue(claude_code.covers("Bash(git push --force *)", "Bash(git push --force:*)"))
-        self.assertTrue(claude_code.covers("Bash(git push:*)", "Bash(git push --force:*)"))
-        self.assertFalse(claude_code.covers("Bash(git push --force:*)", "Bash(git push --force-with-lease:*)"))
-        self.assertFalse(claude_code.covers("Bash(su:*)", "Bash(sudo:*)"))
-        self.assertFalse(claude_code.covers("Bash(rm -rf)", "Bash(rm -rf:*)"))
-        self.assertTrue(claude_code.covers("Bash(env:*)", "Bash(env)"))
+        self.assertTrue(claude_code.covers("Bash(gh repo delete*)", "Bash(gh repo delete *)"))
+        self.assertTrue(claude_code.covers("Bash(git push --force *)", "Bash(git push --force *)"))
+        self.assertTrue(claude_code.covers("Bash(git push *)", "Bash(git push --force *)"))
+        self.assertFalse(claude_code.covers("Bash(git push --force *)", "Bash(git push --force-with-lease *)"))
+        self.assertFalse(claude_code.covers("Bash(su *)", "Bash(sudo *)"))
+        self.assertFalse(claude_code.covers("Bash(rm -rf)", "Bash(rm -rf *)"))
+        self.assertTrue(claude_code.covers("Bash(env *)", "Bash(env)"))
         self.assertTrue(claude_code.covers("Bash(env)", "Bash(env)"))
-        self.assertFalse(claude_code.covers("Bash(envsubst:*)", "Bash(env)"))
+        self.assertFalse(claude_code.covers("Bash(envsubst *)", "Bash(env)"))
+
+    def test_a_colon_star_entry_with_a_space_doesnt_count_since_cursor_matches_it_only_bare(self):
+        self.assertFalse(claude_code.covers("Bash(git push --force:*)", "Bash(git push --force *)"))
+        self.assertTrue(claude_code.covers("Bash(sudo:*)", "Bash(sudo *)"))
+        self.assertTrue(claude_code.covers("Bash(env:*)", "Bash(env)"))
+
+    def test_an_old_colon_star_entry_gets_the_space_form_beside_it(self):
+        home = Home()
+        try:
+            home.settings(deny=["Bash(rm -rf:*)"])
+            plan = home.apply()
+            self.assertIn("Bash(rm -rf *)", home.perms()["deny"])
+            [extra] = [c for s in plan.sections for c in s.changes if c.kind == "extra" and c.text == "Bash(rm -rf:*)"]
+            self.assertIn("Cursor CLI", extra.note)
+        finally:
+            home.close()
 
     def test_mcp_coverage_by_server_or_glob(self):
         tool = "mcp__claude_ai_Gmail__send_message"
@@ -343,8 +362,8 @@ class FullTableReconcileTest(unittest.TestCase):
     def test_the_full_table_applies_then_a_second_run_has_no_changes(self):
         first = self.home.apply(self.table, MAIL_TOOLS)
         perms = self.home.perms()
-        self.assertIn("Bash(git push --force-with-lease:*)", perms["ask"])
-        self.assertIn("Bash(gh api:*)", perms["allow"])
+        self.assertIn("Bash(git push --force-with-lease *)", perms["ask"])
+        self.assertIn("Bash(gh api *)", perms["allow"])
         self.assertIn("Edit(./**/.env)", perms["deny"])
         self.assertIn("mcp__claude_ai_Gmail__send_message", perms["deny"])
         self.assertNotIn("mcp__game__send_message", perms["deny"])
@@ -364,14 +383,14 @@ class FullTableReconcileTest(unittest.TestCase):
     def test_a_covering_entry_counts_as_present_and_isnt_extra(self):
         self.home.settings(deny=["Bash(gh repo delete*)"])
         plan = self.home.plan(self.table, [])
-        self.assertNotIn("Bash(gh repo delete:*)", kinds(plan, "added"))
+        self.assertNotIn("Bash(gh repo delete *)", kinds(plan, "added"))
         self.assertNotIn("Bash(gh repo delete*)", kinds(plan, "extra"))
 
     def test_an_ask_rule_already_denied_is_reported_stricter_and_left(self):
         self.home.settings(deny=["Bash(gh repo edit*)"])
         plan = self.home.apply(self.table, [])
-        self.assertIn("Bash(gh repo edit:*)", kinds(plan, "stricter"))
-        self.assertNotIn("Bash(gh repo edit:*)", self.home.perms().get("ask", []))
+        self.assertIn("Bash(gh repo edit *)", kinds(plan, "stricter"))
+        self.assertNotIn("Bash(gh repo edit *)", self.home.perms().get("ask", []))
 
     def test_an_inert_write_rule_is_named_as_such(self):
         self.home.settings(deny=["Write(./.env)"])
@@ -426,16 +445,17 @@ class EnvironmentRowsTest(unittest.TestCase):
         write = claude_code.entries_for(table_rule("env-files-write"))
         self.assertIn("Edit(./**/.env)", write)
         self.assertIn("Edit(./**/.env.[0-9A-DF-Za-df-z_.]*)", write)
+        # Cursor's globs know only `*`, so its entries can't leave .env.example out.
         self.assertEqual([e for e in write if e.startswith("Write(")], ["Write(**/.env)", "Write(**/.env.*)"])
 
     def test_commands_that_list_the_environment(self):
-        dump = claude_code.entries_for(table_rule("env-dump"))
-        for want in ("Bash(env)", "Bash(/usr/bin/env)", "Bash(export)", "Bash(set)"):
-            self.assertIn(want, dump)
-        self.assertNotIn("Bash(env:*)", dump)
-        self.assertNotIn("Bash(/bin/set)", dump)
-        self.assertIn("Bash(printenv:*)", claude_code.entries_for(table_rule("env-print")))
-        self.assertIn("Bash(export -p:*)", claude_code.entries_for(table_rule("env-dump-declared")))
+        # No exact `Bash(env)`: the Cursor CLI reads this file and would match it as a prefix,
+        # refusing `env FOO=1 cmd` too, so the hook alone refuses the bare commands.
+        self.assertEqual(claude_code.entries_for(table_rule("env-dump")), [])
+        gaps = claude_code.gaps_for(table_rule("env-dump"))
+        self.assertTrue(any("hook alone" in g and "Cursor" in g for g in gaps), gaps)
+        self.assertIn("Bash(printenv *)", claude_code.entries_for(table_rule("env-print")))
+        self.assertIn("Bash(export -p *)", claude_code.entries_for(table_rule("env-dump-declared")))
         self.assertEqual(claude_code.entries_for(table_rule("env-files-commands")), [])
 
     def test_the_var_expansion_gap_is_named(self):
@@ -451,7 +471,7 @@ class EnvironmentRowsTest(unittest.TestCase):
         deny = self.home.perms()["deny"]
         self.assertEqual(deny[:len(mine)], mine)
         self.assertIn("Write(**/.env)", deny)
-        self.assertIn("Bash(printenv:*)", deny)
+        self.assertIn("Bash(printenv *)", deny)
         notes = {c.text: c.note for s in plan.sections for c in s.changes if c.kind == "extra"}
         self.assertIn("also refuses `.env.example`", notes["Read(./.env.*)"])
         self.assertNotIn("also refuses", notes["Read(./.env)"])

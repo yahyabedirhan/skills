@@ -3,13 +3,16 @@
 Facts it relies on (see references/claude-code.md):
 - `~/.claude/settings.json` holds `permissions.{allow, ask, deny}`; deny is checked
   first, then ask, then allow, so adding a stricter entry wins without removing a looser one.
-- A `Bash(<prefix>:*)` rule matches the command text as written, so each spelling
-  of a command needs its own entry.
+- A `Bash(<prefix> *)` rule matches the command text as written, so each spelling
+  of a command needs its own entry. It's the same rule as `Bash(<prefix>:*)` here, but the
+  Cursor CLI, which reads this file too, matches only the ` *` form past the bare command.
 - File rules are `Read(path)` and `Edit(path)`; `Write(path)` rules are accepted and never checked
-  (the Cursor CLI reads this file and checks them, so write rows get plain `Write(**/…)` entries too).
+  (the Cursor CLI reads this file and checks them, so write rows get plain `Write(**/…)` entries too:
+  Cursor's globs know only `*`, so they keep no exception).
 - Path globs have positive character classes only (`[!x]` and `[^x]` list `!`/`^` and `x`),
   matched case-insensitively on macOS, so an `except` becomes the globs around it (rules.without).
-- A `Bash(x)` rule without `:*` matches the command `x` exactly.
+- A `Bash(x)` rule without ` *` matches the command `x` exactly here, but the Cursor CLI reads it as a
+  prefix (`x` with any arguments), so rows for a bare command get no Bash entry: the hook covers them.
 - `autoMode.hard_deny` holds prose rules the auto-mode classifier blocks whatever the user
   says; `"$defaults"` in the array keeps the built-in ones, and `classifyAllShell: true`
   sends every shell command to it, past narrow allow rules. Only user settings hold it.
@@ -68,7 +71,7 @@ def entries_for(rule, tools=()) -> list:
         entries = [f"{FILE_RULE[rule.access]}({_project_path(g)})" for g in globs]
         if rule.access == "write":
             # For the Cursor CLI, which reads this file and checks Write on its file tools against
-            # absolute paths: `./` never matches there, and its classes are unconfirmed, so plain globs.
+            # absolute paths (`./` never matches there). Its globs have only `*`, so plain globs.
             entries += [f"Write({p})" for p in rule.paths]
         return entries
     if rule.kind == "mcp-tool":
@@ -76,8 +79,8 @@ def entries_for(rule, tools=()) -> list:
     if rule.files:
         return []  # Bash rules match text, not paths; Read rules and the hook cover these (see gaps_for)
     if rule.bare:
-        return [f"Bash({' '.join(prefix)})" for prefix in rule_table.command_prefixes(rule)]
-    return [f"Bash({' '.join(prefix)}:*)" for prefix in rule_table.command_prefixes(rule)]
+        return []  # an exact `Bash(env)` reads as a prefix in the Cursor CLI, which reads this file too: hook only
+    return [f"Bash({' '.join(prefix)} *)" for prefix in rule_table.command_prefixes(rule)]
 
 
 def _project_path(glob: str) -> str:
@@ -125,6 +128,11 @@ def _native_gaps(rule) -> list:
             "the rest; with the hook off, `less`, `source` and `.` on the file run, and so does any other "
             "program that reads it (`sed`, `awk`, a script)"
         ]
+    if rule.bare:
+        names = ", ".join(f"`{p}`" for p in rule.programs)
+        return [f"{names} on their own: the pre-tool hook alone refuses them, with no Bash entries, since the Cursor "
+                f"CLI reads this file and would match an exact `Bash({rule.programs[0]})` as a prefix, refusing "
+                f"`{rule.programs[0]} FOO=1 cmd` too; with the hook off they run"]
     if rule.level in ("deny", "allow-and-report"):
         return []  # the pre-tool hook reads every spelling; what it can't see is one gap in its own section
     canonical = " ".join(rule_table.command_prefixes(rule)[0])
@@ -171,7 +179,9 @@ def discover_tools():
 
 
 def covers(existing: str, wanted: str) -> bool:
-    """Whether an entry already on the machine matches everything a wanted entry does."""
+    """Whether an entry already on the machine matches everything a wanted entry does, in Claude
+    Code and in the Cursor CLI, which reads this file too. `Bash(git push --force:*)` doesn't count
+    for `Bash(git push --force *)`: Cursor matches it only against the bare command."""
     if existing == wanted:
         return True
     if wanted.startswith("Bash(") and existing.startswith("Bash(") and existing.endswith(")"):
@@ -182,6 +192,8 @@ def covers(existing: str, wanted: str) -> bool:
         for suffix in (":*", " *"):
             if pattern.endswith(suffix) and "*" not in pattern[: -len(suffix)]:
                 lit = pattern[: -len(suffix)]
+                if suffix == ":*" and " " in lit:
+                    return False
                 return want == lit or want.startswith(lit + " ")
         if pattern.endswith("*") and "*" not in pattern[:-1]:
             return want.startswith(pattern[:-1])
@@ -195,9 +207,9 @@ def covers(existing: str, wanted: str) -> bool:
 
 
 def _bash_literal(entry: str):
-    """`Bash(rm -rf:*)` -> `rm -rf`, and `Bash(env)` -> `env`, for the entries this adapter writes."""
+    """`Bash(rm -rf *)` (or `:*`) -> `rm -rf`, and `Bash(env)` -> `env`, for the entries this adapter writes."""
     inner = entry[len("Bash("):-1]
-    if inner.endswith(":*"):
+    if inner.endswith((" *", ":*")):
         inner = inner[:-2]
     return inner if "*" not in inner else None
 
@@ -317,6 +329,9 @@ def _plan_permissions(path: Path, settings: dict, new_settings: dict, rules: lis
         for entry in existing[name]:
             if entry not in desired and entry not in owned_all and entry not in covering:
                 note = "not in the table; kept"
+                if entry.startswith("Bash(") and entry.endswith(":*)") and " " in entry[len("Bash("):-3]:
+                    note = ("the same rule as its ` *` form in Claude Code, but the Cursor CLI, which reads this "
+                            "file too, matches it only against the bare command; kept")
                 if entry.startswith("Write("):
                     note = ("Claude Code never checks Write rules, and the Cursor CLI, which does, never matches "
                             "a `./` path; the table's Edit and Write entries cover it; kept")
@@ -332,6 +347,12 @@ def _plan_permissions(path: Path, settings: dict, new_settings: dict, rules: lis
             if add[name] or remove[name]:
                 kept = [e for e in new_perms.get(name, []) if e not in remove[name]]
                 new_perms[name] = kept + add[name]
+    # The Cursor CLI reads these lists only when both `allow` and `deny` are there; otherwise it skips the file.
+    new_perms = new_settings.get("permissions")
+    if isinstance(new_perms, dict) and new_perms.get("deny") and "allow" not in new_perms:
+        new_perms["allow"] = []
+        section.changes.append(Change("added", "permissions.allow: []",
+                                      note="the Cursor CLI ignores this file's deny list without an allow list"))
     return section, {k: v for k, v in owned_after.items() if v}
 
 

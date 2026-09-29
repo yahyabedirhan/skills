@@ -234,7 +234,7 @@ Main sources:
 - **CLI: no dedicated global file; it walks up the directory tree.** From the working directory up to the filesystem root, in every directory, the CLI loads `.cursor/rules/**/*.mdc`, `AGENTS.md`, and `CLAUDE.md` and `CLAUDE.local.md`. A project under the home folder therefore gets `~/.cursor/rules/*.mdc`, `~/AGENTS.md` and `~/CLAUDE.md`. `AGENTS.md`/`CLAUDE.md` load as always-applied; `.mdc` files follow their frontmatter. `~/.claude/CLAUDE.md` isn't read (it isn't in an ancestor directory). [bin: `LocalCursorRulesService.loadRulesFromDirAndAncestors`]
 - The CLAUDE files are gated by a "third-party extensibility" switch, hard-wired on in the CLI. [bin: the rules service is constructed with `()=>!0`]
 - The CLI's `/rule` command offers "User Rule — Applies to all your projects" and writes it to `~/.cursor/rules/<name>.mdc`. [bin]
-- **Account User Rules** (Settings, synced with the account) are documented for the IDE's Agent. The CLI bundle has no code that fetches them. **To confirm** whether Cursor's server adds them to CLI sessions: add a User Rule with a marker word in the IDE, then ask `cursor-agent` to repeat its instructions.
+- **Account User Rules** (Settings, synced with the account) are documented for the IDE's Agent. The CLI bundle has no code that fetches them. Still unconfirmed whether Cursor's server adds them to CLI sessions (check: add a User Rule with a marker word in the IDE, then ask `cursor-agent` to repeat its instructions). Moot for set-up-machine, which reaches both through `~/.cursor/rules/` instead (#57); a `.mdc` file there with `alwaysApply: true` reached a CLI session under the home folder [check].
 - **IDE:** account User Rules and local user rule files in `~/.cursor/rules`; conflicts resolve Team, then Project, then User. [doc rules help]
 - **Imports:** `@file` in a rule is a context reference, not an include. [doc rules]
 - **Symlinks:** rule folders are walked with `followSymlinks: true`; `AGENTS.md`/`CLAUDE.md` are read with a plain stat and read. [bin]
@@ -248,7 +248,7 @@ Main sources:
 **CLI**
 
 - **Files:** `~/.cursor/cli-config.json` and `<project>/.cursor/cli.json`, key `permissions.{allow, deny}`. Under `approvalMode: "allowlist"` anything not allowed prompts, so the levels are allow, prompt and deny. [doc cli configuration, permissions]
-- **Also read: Claude Code's settings.** The CLI loads `permissions` from `<git root>/.claude/settings.json` and `~/.claude/settings.json` and unions their `allow` and `deny` lists with its own. [bin: `cli/willLoadClaudePermissions`, `MergedPermissionsProvider`]
+- **Also read: Claude Code's settings.** The CLI loads `permissions` from `<git root>/.claude/settings.json` and `~/.claude/settings.json` and unions their `allow` and `deny` lists with its own. A file whose `permissions` lacks either list fails the CLI's schema and is skipped whole. [bin: `cli/willLoadClaudePermissions`, `MergedPermissionsProvider`, the `cursor-config` schema; check: a project `.claude/settings.json` with only `deny` refused nothing, with both lists it refused]
 - **Tokens:** `Shell(cmd)` or `Shell(cmd:argsGlob)` (and `Bash(…)`, parsed the same way), `Read(glob)`, `Write(glob)`, `WebFetch(domain)`, `Mcp(server:tool)`. Deny beats allow. [doc cli permissions; bin: the token parser matches `^(Shell|Bash)\(`]
 - `--force` / `--yolo` runs every command "unless explicitly denied": deny still applies, prompts don't. [bin: `cursor-agent --help`]
 - File-deletion protection defaults to on in the CLI bundle: while it's on, a command containing `rm` isn't auto-run from the allowlist. [bin: the default team-settings stub returns `true` from `getDeleteFileProtection`, and the auto-run check returns false when any parsed command is `rm`]
@@ -262,7 +262,7 @@ Main sources:
 ### 4.4 How commands are matched (CLI)
 
 - The command is parsed into its executable commands; a deny applies when any of them matches. [bin: `hasHardDeny`]
-- `Shell(x)` matches the base command or the whole text as a glob; `Shell(cmd:args)` globs the command part and the text after the first space. `*` spans spaces. [bin: `matchesShell`, glob `ut`]
+- `Shell(x)` matches the base command or the whole text as a glob; `Shell(cmd:args)` globs the command part and the text after the first space. The glob `ut` escapes every character but `*`, which becomes `.*`: it spans spaces and `/`, and there are no `?`, classes or `**` of its own; path rules use the same function. `Shell(x:)` (empty argument pattern) matches `x` with nothing after it only. [bin: `matchesShell`, glob `ut`, `matchesPathEntry`; check: a deny of `Shell(pwd:)` refused `pwd` and ran `pwd -P`; `Write(**/.env.[0-9A-Za-z]*)` didn't refuse `.env.local`]
 - Probes, running the bundle's own matcher functions [check: copied `Pd`, `ut`, `matchesShell` run under the bundled Node]:
 
   | Rule | Matches | Misses |
@@ -276,7 +276,7 @@ Main sources:
   | `Bash(bash -c:*)` | nothing | `bash -c "rm -rf x"` |
 
   So Claude-form rules whose command part has a space (`Bash(rm -rf:*)`) are read but only match the bare command, while one-word ones (`Bash(sudo:*)`) and colon-free globs work.
-- `bash -c "…"`: no unwrapping of shell `-c` strings was found in the bundle. **To confirm** with a throwaway project whose `.cursor/cli.json` denies `Shell(rm)`: ask `cursor-agent` to run `bash -c 'rm x'` and see whether it's blocked.
+- `bash -c "…"`: not unwrapped. With `Shell(rm)` denied, `rm victim` was refused but `bash -c 'rm victim'` and `sh -c "rm victim"` ran. [check]
 
 ### 4.5 Can a project override the global rules?
 
@@ -306,7 +306,7 @@ Main sources:
 
 - **CLI deny rule:** `permissionDenied` with "Command blocked by permissions configuration", or `rejected` with "Command is not allowed". No rule or subcommand named. [bin]
 - **Team admin denylist:** "Denied: this command was blocked by administrator policy (denylist rule: <pattern>) and was not executed…". [bin]
-- **Hook deny:** the hook's `agent_message`. A Claude-format hook's reason lands in `user_message`, so the agent may not see it. [doc hooks, third-party hooks]
+- **Hook deny:** in the CLI the agent sees `user_message`, as `Rejected: Command execution was blocked by a hook: <user_message>` ("File read was blocked by a hook" for reads), and not `agent_message`; a Claude-format hook's reason becomes `user_message`, so it reaches the agent there. [check] The IDE is unchecked.
 
 ---
 
@@ -320,7 +320,7 @@ Main sources:
 | Matching | text glob, literal prefix | argv prefix, alternatives, abs paths resolved | text glob per command node, last match wins | base command or `cmd:args` glob |
 | `rm -fr` caught by an `rm -rf` rule | no | only with an alternatives list | no | only with `Shell(rm)` |
 | `/bin/rm -rf` | no | yes | no | no |
-| `bash -c "rm -rf x"` | only by a `bash -c` rule | yes if plain; no with `$()`, redirects | only by a `bash -c*` rule | not found (to confirm) |
+| `bash -c "rm -rf x"` | only by a `bash -c` rule | yes if plain; no with `$()`, redirects | only by a `bash -c*` rule | no (checked) |
 | Project loosens a global deny | no | no (rules); yes (sandbox, approvals) | yes | yes for `cli-config.json`; no for Claude-settings denies |
 | Project turns hooks off | yes (`disableAllHooks`) | yes (`features.hooks = false`, trusted) | yes in effect (a later plugin rewrites args) | no |
 | Pre-tool hook | `PreToolUse` | `PreToolUse` | plugin `tool.execute.before` (throw) | `preToolUse`, `beforeShellExecution`, … |
@@ -382,7 +382,7 @@ A gap is a rule the harness's native permissions can't enforce as meant. The bas
 
 - **`rm -rf` variants:** only `Shell(rm)`, which blocks every `rm`, catches all flag orders; `/bin/rm` isn't caught by it. The Claude-form rules it reads from `~/.claude/settings.json` (`Bash(rm -rf:*)`, `Bash(git push --force:*)`) match only the bare command. (4.4)
 - **Flags after arguments:** `Shell(git:push *--force*)` style globs reach them, with over-match risk. (4.4)
-- **`bash -c` inner commands:** no unwrapping found (to confirm, 4.4); `Shell(bash)` blocks all of `bash`.
+- **`bash -c` inner commands:** not unwrapped (checked, 4.4); `Shell(bash)` blocks all of `bash`.
 - **Reads and writes:** `Read(...)`/`Write(...)` bind the file tools only, not shell commands. Claude's relative `./.env` patterns never match; they must be written `**/.env`. (4.6)
 - **Mail tools:** only if the server is in Cursor's `mcp.json` (`Mcp(server:tool)`). (4.6)
 - **Precedence gap:** a project `cli.json` can empty the `cli-config.json` deny list; rules kept in `~/.claude/settings.json` survive. (4.5)
@@ -401,7 +401,7 @@ A gap is a rule the harness's native permissions can't enforce as meant. The bas
 
 | Open point | Answer |
 |---|---|
-| Which global rules the Cursor CLI reads | No single global file: it loads `.cursor/rules/**/*.mdc`, `AGENTS.md`, `CLAUDE.md` and `CLAUDE.local.md` from every directory from the working directory up to `/`, so `~/.cursor/rules/*.mdc` and `~/AGENTS.md` apply to projects under the home folder. Account User Rules: to confirm (4.1). |
+| Which global rules the Cursor CLI reads | No single global file: it loads `.cursor/rules/**/*.mdc`, `AGENTS.md`, `CLAUDE.md` and `CLAUDE.local.md` from every directory from the working directory up to `/`, so `~/.cursor/rules/*.mdc` and `~/AGENTS.md` apply to projects under the home folder. Account User Rules: unconfirmed, and not relied on (4.1). |
 | Claude Code memory setting | `"autoMemoryEnabled": false`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`, which outranks settings (1.8). |
 | Codex, opencode, Cursor memory | Codex: local memories, off by default, `[features] memories = false` (2.8). opencode: none (3.8). Cursor: removed in 2.1 (4.8). |
 | Codex pre-tool hook | Yes: `PreToolUse` in `hooks.json` or `[hooks]`, deny by JSON or exit 2, hooks trusted per hash (2.7). |

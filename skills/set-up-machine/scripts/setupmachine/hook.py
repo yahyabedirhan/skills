@@ -39,6 +39,7 @@ class ToolCall:
     cwd: str = ""
     session: str = ""
     mcp_names: tuple = ()  # the tool's possible `mcp__<server>__<tool>` names, for a harness that names MCP tools otherwise
+    report: bool = True  # False when another hook, wired for the same harness, reports this call
 
 
 @dataclass
@@ -184,9 +185,11 @@ CLAUDE_CODE_FILE_TOOLS = {
 
 
 def read_claude_code(payload: dict) -> ToolCall:
-    """Claude Code's PreToolUse input. Other shapes that reach the same hook (the Cursor
-    CLI runs Claude Code's hooks too) are read as far as they fit: any `command`
-    string, top level or in `tool_input`, is checked as a shell command."""
+    """Claude Code's PreToolUse input. Other shapes that reach the same hook (Cursor runs
+    Claude Code's hooks too) are read as far as they fit: any `command` string, top level
+    or in `tool_input`, is checked as a shell command. Under Cursor (its payload carries
+    `cursor_version`) a call is still refused, but reporting it is left to the hook wired
+    in Cursor's own hooks.json, so no call is reported twice."""
     tool = payload.get("tool_name") if isinstance(payload.get("tool_name"), str) else ""
     tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
     command = tool_input.get("command", payload.get("command"))
@@ -202,6 +205,7 @@ def read_claude_code(payload: dict) -> ToolCall:
         files=tuple(files),
         cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
         session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
+        report="cursor_version" not in payload,
     )
 
 
@@ -290,10 +294,52 @@ def write_opencode(denials: list) -> str:
     return refusal(denials) + "\n" if denials else ""
 
 
+# Cursor sends each hook event its own payload (references/cursor.md). preToolUse is wired
+# only for the tools the other events don't cover: writes, deletes and searches.
+CURSOR_FILE_TOOLS = {"Read": "read", "Grep": "read", "Write": "write", "Delete": "write"}
+
+
+def read_cursor(payload: dict) -> ToolCall:
+    def text(key, source=payload):
+        value = source.get(key)
+        return value if isinstance(value, str) else ""
+
+    event = text("hook_event_name")
+    roots = payload.get("workspace_roots")
+    cwd = text("cwd") or (roots[0] if isinstance(roots, list) and roots and isinstance(roots[0], str) else "")
+    session = text("conversation_id") or text("session_id")
+    if event == "beforeShellExecution":
+        return ToolCall(tool="Shell", command=text("command") or None, cwd=cwd, session=session)
+    if event == "beforeMCPExecution":
+        server, tool = text("mcp_server_name"), text("tool_name")
+        return ToolCall(tool=f"mcp__{server}__{tool}" if server and tool else tool, cwd=cwd, session=session)
+    if event == "beforeReadFile":
+        path = text("file_path")
+        return ToolCall(tool="Read", files=((path, "read"),) if path else (), cwd=cwd, session=session)
+    tool = text("tool_name")
+    tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
+    files = ()
+    if tool in CURSOR_FILE_TOOLS:
+        path = text("file_path", tool_input) or text("path", tool_input)
+        files = ((path, CURSOR_FILE_TOOLS[tool]),) if path else ()
+    command = text("command", tool_input) if tool == "Shell" else ""
+    return ToolCall(tool=tool, command=command or None, files=files, cwd=cwd, session=session)
+
+
+def write_cursor(denials: list) -> str:
+    """Cursor always gets a JSON answer: a deny, or `{}`, which leaves the call to its own
+    permissions. The CLI shows the agent `user_message`; `agent_message` carries the same text."""
+    if not denials:
+        return "{}\n"
+    reason = refusal(denials)
+    return json.dumps({"permission": "deny", "user_message": reason, "agent_message": reason}) + "\n"
+
+
 HARNESSES = {
     "claude-code": (read_claude_code, write_claude_code),
     "codex": (read_codex, write_claude_code),  # Codex reads the same deny answer as Claude Code
     "opencode": (read_opencode, write_opencode),
+    "cursor": (read_cursor, write_cursor),
 }
 
 
@@ -321,7 +367,7 @@ def main(argv=None, stdin=None, stdout=None, now=None) -> int:
     if verdict.denials:
         stdout.write(write(verdict.denials))
         return 0
-    if verdict.reports:
+    if verdict.reports and call.report:
         try:
             config = load_config(args.config)
             write_report(report_dir(config, args.config), call, verdict.reports, args.harness,
@@ -329,4 +375,5 @@ def main(argv=None, stdin=None, stdout=None, now=None) -> int:
         except (ValueError, OSError) as exc:
             print(f"set-up-machine hook: couldn't write the report: {exc}", file=sys.stderr)
             return 1
+    stdout.write(write([]))
     return 0
