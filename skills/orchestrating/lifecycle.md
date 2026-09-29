@@ -9,7 +9,7 @@ START      decide the worktree once; everything after follows it
 THINKING   settle what to build; leave a spec, tickets, and a handoff
 HANDOVER   the session commits everything and starts a fresh orchestrator
 BUILD      orchestrate the tickets through delegates; open the pull request
-CLOSE      after the merge, remove the worktree and the branch
+CLOSE      the user says "go"; the agent merges, follows up, and cleans up
 ```
 
 There are two paths through it. The Herdr path automates every step between phases; the plain path runs anywhere, with the user carrying each new session. `init-effort` and the **handover** skill pick the mechanism themselves: Herdr whenever `herdr status` reaches a server, else a prompt the user pastes.
@@ -59,7 +59,7 @@ The orchestrator reads the handoff, shows the plan with `/show-me`, delegates th
 
 ## Close
 
-After the user merges the pull request, the effort's worktree and branch go, in the way they were created: `init-effort` holds the steps.
+The user reviews the pull request and says "go": that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. It reads the pull request's *Things to be aware of* first, runs the post-merge follow-ups, carries unfinished work into the next effort's tickets, leaves QA tickets open for the user, closes the tracker, removes only branches and worktrees proven merged, and closes the Herdr workspace. It returns its own worktree last, from a Herdr tab outside it; without Herdr, that one step is the user's.
 
 ## Why two sessions
 

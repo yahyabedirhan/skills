@@ -1,0 +1,5 @@
+interface:
+  display_name: "Close Effort"
+  short_description: "Merge an approved effort, carry over what's left, and clean up"
+policy:
+  allow_implicit_invocation: true
