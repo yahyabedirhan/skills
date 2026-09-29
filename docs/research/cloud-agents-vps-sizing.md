@@ -35,7 +35,7 @@ Currency: Hetzner in EUR, **excluding VAT** (its site shows net prices and adds 
 | CPU load | load average 0.06 / 0.16 / 0.17; cumulative `/proc/stat` since boot (six weeks): about 3.3% busy, 0% steal |
 | Memory pressure | `/proc/pressure/memory` all averages 0.00 now; a small cumulative stall total since boot shows it has been short of memory at some point |
 | Processes | one `claude` (Claude Code 2.1.283) at **369 MB RSS, 511 MB peak** (`VmHWM`); Herdr 22 MB; everything else on the box (system services and a few containers and web services) about 0.5 GB; sum of all RSS 0.9 GB |
-| Browser | Playwright's `chromium_headless_shell` is already downloaded in the user's cache, so a headless browser needs no install to try |
+| Browser | Playwright's `chromium_headless_shell` is already downloaded in the user's cache, but it can't start: 15 system libraries are missing, so trying it needs an install as root or the Playwright Docker image (see [the VPS research](cloud-agents-vps.md)) |
 
 The server type is not printed by the machine, but 2 x86 vCPU, 4 GB and a 40 GB disk on a Hetzner vServer is exactly CX23 [api].
 
