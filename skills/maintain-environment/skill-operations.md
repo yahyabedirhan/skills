@@ -1,9 +1,6 @@
----
-name: maintain-skills
-description: Create, install, move, update, fork, publish, remove, or audit agent skills across global scope, project scope, and the user's own skills repo, using the `npx skills` CLI. Use when the user wants a skill created, added, removed, forked, changed, moved between scopes, or published, or asks which skills they actually use.
----
+# Skill operations
 
-# Maintain Skills
+How a skill is created, installed, updated, moved, forked, published, removed and audited, with the `npx skills` CLI. Part of the **maintain-environment** skill.
 
 A skill is one of two kinds.
 
