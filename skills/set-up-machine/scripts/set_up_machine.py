@@ -14,7 +14,8 @@ apply  writes exactly the plan with that id, after backing up each file it
 
 Mail-tool rules match the MCP tool names each harness exposes, which plan asks
 the harness for (Claude Code: a `claude -p` session stopped once it lists its
-tools). --tool-names FILE gives them instead, one per line.
+tools; opencode: the MCP servers in its config, the tools left to the hook).
+--tool-names FILE gives them instead, one per line.
 
 --home defaults to $HOME. Point it at a copy to try the skill without touching
 the real machine. Python 3.9+, standard library only.

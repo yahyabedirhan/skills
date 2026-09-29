@@ -12,6 +12,7 @@ Evidence tags:
 - **[src]** the harness's official source: `openai/codex` at commit `0462dcc`, `anomalyco/opencode` (formerly `sst/opencode`) branch `dev` at commit `7945de2`.
 - **[bin]** the installed release, read-only: the Claude Code binary, or the `cursor-agent` JavaScript bundle (`index.js` and its chunks).
 - **[check]** a read-only command run for this research against a throwaway config in a scratch folder, never a real one: `codex execpolicy check`, `codex features list`, `codex debug prompt-input`, `opencode debug config` and `opencode debug agent`, and a copy of Cursor's matcher functions run under the bundled Node.
+- **[probe]** a real session run against a throwaway config in a scratch folder, with fake data, by the harness's adapter ticket (opencode: `opencode run --format json`, the tool result read from its JSON events).
 - **To confirm** says what is still open and the exact check that would settle it.
 
 Main sources:
@@ -177,13 +178,15 @@ Main sources:
 
 - **File:** `~/.config/opencode/opencode.json(c)` globally, `opencode.json` and `.opencode/` per project; key `permission`, levels `allow`, `ask`, `deny`. [doc permissions, config]
 - **Keys:** `read`, `edit` (edit, write and patch), `glob`, `grep`, `bash`, `task`, `skill`, `lsp`, `question`, `webfetch`, `websearch`, `external_directory`, `doom_loop`, plus tool names including MCP tools. [doc permissions]
-- **Defaults:** most are `allow`; `external_directory` and `doom_loop` are `ask`; `read` denies `*.env` and `*.env.*` but allows `*.env.example`. [doc permissions]
+- **Defaults:** most are `allow`; `external_directory` and `doom_loop` are `ask`; `read` has `*.env` and `*.env.*` at `ask` and `*.env.example` at `allow`. [doc permissions; check: `opencode debug agent build` lists them at those levels, where the docs say deny]
 
 ### 3.4 How commands are matched
 
 - **Last matching rule wins.** `*` matches anything (spaces and `/` included), `?` one character; patterns compile to anchored regexes, and a trailing `" *"` also matches the bare command. The ruleset is flattened in config order and evaluated with `findLast`. [doc permissions; src util/wildcard.ts, permission/index.ts]
 - **Every command node is checked:** the command is parsed with tree-sitter-bash, and each `command` node (inside `&&` chains, pipes, `$(…)`, subshells) is matched separately by its source text. The string inside `bash -c "…"` isn't re-parsed, so only a rule on `bash -c*` itself catches it. [src tool/shell.ts]
-- A `"rm -rf*": "deny"` rule therefore misses `rm -fr`, `rm -r -f` and `/bin/rm -rf`; it catches `a && rm -rf x`. [src, from the matching rules above]
+- A `"rm -rf*": "deny"` rule therefore misses `rm -fr`, `rm -r -f` and `/bin/rm -rf`; it catches `a && rm -rf x`. [src, from the matching rules above; probe: `"rm -rf *": "deny"` refuses `echo a && rm -rf x`, and nothing in the call runs]
+- **Declarations aren't checked:** `export -p` runs under `"export -p *": "deny"`; tree-sitter-bash parses `export`, `declare` and `typeset` as declarations, not `command` nodes. [probe]
+- **Global config files:** `config.json`, `opencode.json` and `opencode.jsonc` in the global folder all load, in that order. [check: the log's `loading path=` lines]
 
 ### 3.5 Can a project override the global rules?
 
@@ -191,7 +194,7 @@ Main sources:
   - A project that sets an existing pattern key changes its level in place. A project key that's new is appended after the global keys and, by last-match-wins, beats them. [check: `opencode debug agent build` shows global `"git push --force*": "deny"` followed by the project's `"git push*": "allow"`, and a project's `"rm -rf*": "allow"` replacing the global deny]
   - A project's `"*": "allow"` keeps the position of the global `"*"` key, so it doesn't defeat global rules listed after it. [check: same]
   - Agent definitions can override permissions too ("agent rules take precedence"). [doc permissions]
-- **Hooks (plugins): yes, in effect.** Global and project plugins all load (global config, project config, global plugin folder, project plugin folder, in that order) and all hooks run in sequence; plugin arrays concatenate, so a project can't remove a global plugin by config. But a project plugin runs after the global one and can rewrite `output.args` after the global check has passed. [doc plugins, "Load order"; src plugin/index.ts `trigger`, config/config.ts `mergeConfigConcatArrays`] `--pure` / `OPENCODE_PURE` runs without external plugins. [src]
+- **Hooks (plugins): yes, in effect.** Global and project plugins all load (global config, project config, global plugin folder, project plugin folder, in that order) and all hooks run in sequence; plugin arrays concatenate, so a project can't remove a global plugin by config. But a project plugin runs after the global one and can rewrite `output.args` after the global check has passed. [doc plugins, "Load order"; src plugin/index.ts `trigger`, config/config.ts `mergeConfigConcatArrays`] `--pure` / `OPENCODE_PURE` runs without external plugins, the global plugin folder's files included. [src; probe: with `--pure`, a command the global plugin refuses runs]
 - **What holds against a project:** managed config (`/Library/Application Support/opencode/` on macOS, or MDM). [doc config]
 
 ### 3.6 File, MCP and network rules
@@ -206,7 +209,8 @@ Main sources:
 ### 3.7 Hooks
 
 - **The pre-tool hook is a plugin hook, `tool.execute.before`,** signature `(input: {tool, sessionID, callID}, output: {args})`. It runs for built-in tools and MCP tools, before the permission check. [src packages/plugin/src/index.ts, session/tools.ts]
-- **It can block:** a thrown error stops the call. The docs' `.env`-protection example throws `new Error("Do not read .env files")`. It can also rewrite `output.args`. [doc plugins, ".env protection"; src session/tools.ts]
+- **It can block:** a thrown error stops the call. The docs' `.env`-protection example throws `new Error("Do not read .env files")`. It can also rewrite `output.args`. [doc plugins, ".env protection"; src session/tools.ts; probe: a global plugin that throws refuses `rm -rf x`, and `x` stays]
+- MCP tools don't appear in `opencode debug agent` or the server's `/experimental/tool/ids` list, even with the server connected; only a session lists them. [probe]
 - Plugins are JavaScript or TypeScript files in `~/.config/opencode/plugins/` or `.opencode/plugins/`, or npm packages in `plugin`. [doc plugins]
 - A `permission.ask` hook is declared in the plugin types but nothing in the opencode package triggers it. [src packages/plugin/src/index.ts; no trigger in packages/opencode/src]
 
@@ -217,8 +221,9 @@ Main sources:
 ### 3.9 What the agent sees when refused
 
 - A deny rule: "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules <JSON of the ruleset for that permission>". The agent sees the rules, not which subcommand or rule matched. [src packages/core/src/v1/permission.ts]
-- A user rejection: "The user rejected permission to use this specific tool call." (plus the feedback, if any). [src same file]
-- A plugin throw: the tool part is marked as an error with the error's message. **To confirm** the exact text the model receives (whether the message is wrapped): run opencode with a throwaway plugin that throws and read the tool result in the session export.
+- A user rejection: "The user rejected permission to use this specific tool call." (plus the feedback, if any). [src same file] `opencode run` has no one to ask, so it auto-rejects an `ask` rule with this message and prints `permission requested: bash (<command>); auto-rejecting` on stderr. [probe]
+- A plugin throw: the tool part is marked as an error whose text is the error's message, unwrapped and with its line breaks, and that is the tool result the model reads. [probe: a plugin throwing `new Error("…line one.\nLine two…")` on `echo BLOCKME`; the tool part's `state.error` and the model's quote of its tool result both hold exactly the two lines]
+- `opencode run` takes the session's folder from `PWD`, not the process's working directory. [probe]
 
 ---
 

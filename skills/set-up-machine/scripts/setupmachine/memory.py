@@ -14,7 +14,6 @@ from .plan import Change, FileWrite, Section
 
 # Harnesses without a memory feature (docs/research/harness-capabilities.md, "Memory").
 WITHOUT_MEMORY = {
-    "opencode": (".config/opencode", "no memory feature; nothing to turn off"),
     "Cursor": (".cursor", "no memory feature in the IDE (removed) or the CLI; nothing to turn off"),
 }
 

@@ -14,7 +14,7 @@ Two sources declare the machine:
 
 It also wires the **pre-tool hook**, `scripts/pre_tool_hook.py`, into each harness that has one; see *Pre-tool hook* below. Where a harness has a semantic guard (Claude Code's auto mode), it writes each row's `guard` there too, as a second net for what patterns can't list.
 
-Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md), [Codex](references/codex.md). opencode and Cursor have no memory feature, and the plan says so.
+Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md), [Codex](references/codex.md), [opencode](references/opencode.md). Cursor has no memory feature, and the plan says so.
 
 ## Steps
 
@@ -22,7 +22,7 @@ Harnesses it covers, each with an adapter reference: [Claude Code](references/cl
 2. **Nothing to do?** On `No changes.`, report the audit: memory per harness, what's wired, the gaps, the stricter and extra rules, and the mail tools it found. Stop here.
 3. **Ask once.** Show the user the plan output unedited, then ask for one approval of the whole diff. Its lines, per harness:
    - `added`: a rule the harness lacks, a link or hook it wires, or an external skill it installs (the line shows the command).
-   - `tightened`: a rule the harness has at a looser level; the stricter entry is added beside it.
+   - `tightened`: a rule the harness has at a looser level; the stricter entry is added where it wins (beside it, or after it where the last match wins).
    - `removed`: an entry this skill wrote earlier that the table no longer has, a harness memory file, or a harness's own global file whose every line is already in the shared file, as it becomes a link. Only these are ever removed.
    - `present`: already in place, as the table's entry or a broader one that covers it.
    - `wired`: the pre-tool hook in place for that harness, and the folder its reports go to.
@@ -66,7 +66,7 @@ Edit `rules.json`, then run the steps. Each row:
 - **File:** `paths`, globs relative to the project (`**/.env`) or starting `~/`, `access`, `read` or `write`, and an optional `except`, globs the row leaves out (`**/.env.example`).
 - **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of an MCP tool name (`mcp__<server>__<tool>`). Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID.
 
-Adapters expand a row into every native entry it needs (each flag order and spelling, the `/bin/` and `/usr/bin/` paths, the harness's own file-rule kind, an `except` as the globs around it where the harness has no negation), and the shared file gets one rule line per row.
+Adapters expand a row into every native entry it needs (each flag order and spelling, the `/bin/` and `/usr/bin/` paths, the harness's own file-rule kind, an `except` as the globs around it where the harness has no negation, or as an `allow` after the deny where its last match wins), and the shared file gets one rule line per row.
 
 ## Pre-tool hook
 
@@ -80,7 +80,7 @@ The native entries stay underneath, so a hook that fails or is switched off leav
 
 ## Mail tools
 
-Only the running harness knows which MCP tools it exposes, and their names differ by harness and by how a connector is attached. So plan asks each harness for its tool list, matches the table's MCP-tool rows against it, and prints a `found` line per row. If a harness can't be asked (not installed, not logged in), the plan says so as a gap and keeps the entries it wrote before. `--tool-names <file>`, one name per line, supplies the list instead.
+Only the running harness knows which MCP tools it exposes, and their names differ by harness and by how a connector is attached. So plan asks each harness for its tool list, matches the table's MCP-tool rows against it, and prints a `found` line per row. If a harness can't be asked (not installed, not logged in), the plan says so as a gap and keeps the entries it wrote before. `--tool-names <file>`, one name per line, supplies the list instead. opencode lists its tools only inside a session, so its plan matches the configured MCP servers instead and leaves their tools to the hook.
 
 ## Adding a harness
 
