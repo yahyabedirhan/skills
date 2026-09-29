@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """set-up-machine's pre-tool hook. A harness runs it before each tool call, with the call on stdin.
 
-usage: pre_tool_hook.py [--harness claude-code] [--config FILE] [--rules FILE]
+usage: pre_tool_hook.py [--harness claude-code|codex|opencode] [--config FILE] [--rules FILE]
 
 It refuses a call that any deny row of the rule table covers, naming each
 refused part with the rule's instruction, and appends a line to the report
