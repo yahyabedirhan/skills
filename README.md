@@ -106,7 +106,7 @@ BUILD      orchestrate-with-handoff → orchestrate-effort
 CLOSE      close-effort                                  after your "go": merge, follow up, carry over, clean up
 ```
 
-Install the family together with `show-me` and [mattpocock/skills](https://github.com/mattpocock/skills). The full path is in [lifecycle.md](skills/orchestrating/lifecycle.md), and where each record goes (spec, tickets, handoff, notes) in the [folder standard](skills/orchestrating/folders.md).
+Install the family together with `show-me` and these skills from [mattpocock/skills](https://github.com/mattpocock/skills): `grilling`, `prototype`, `tdd`, `code-review` and `setup-matt-pocock-skills`. Leave out that repo's `handoff`, `to-spec` and `to-tickets`: the forks here replace them. The full path is in [lifecycle.md](skills/orchestrating/lifecycle.md), and where each record goes (spec, tickets, handoff, notes) in the [folder standard](skills/orchestrating/folders.md).
 
 ### Design frameworks
 

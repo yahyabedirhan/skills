@@ -1,6 +1,6 @@
 # Effort Lifecycle
 
-How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. It builds on Matt Pocock's skills ([mattpocock/skills](https://github.com/mattpocock/skills)) for the thinking, and on the orchestrate skills for the building. Routine upkeep (data edits, small fixes) doesn't need any of this: it runs in the current checkout.
+How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. The thinking builds on Matt Pocock's skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, `prototype`, `tdd`, `code-review`, `setup-matt-pocock-skills`) and on this family's forks of his `handoff`, `to-spec` and `to-tickets`, which replace the upstream three; the building runs on the orchestrate skills. Routine upkeep (data edits, small fixes) doesn't need any of this: it runs in the current checkout.
 
 An effort passes through five phases in one worktree on one branch:
 
@@ -12,7 +12,7 @@ BUILD      orchestrate the tickets through delegates; open the pull request
 CLOSE      the user says "go"; the agent merges, follows up, and cleans up
 ```
 
-There are two paths through it. The Herdr path automates every step between phases; the plain path runs anywhere, with the user carrying each new session. `init-effort` and the **handover** skill pick the mechanism themselves: Herdr whenever `herdr status` reaches a server, else a prompt the user pastes.
+There are two paths through it. The Herdr path automates every step between phases; the plain path runs anywhere, with the user carrying each new session. The **handover** skill picks the mechanism itself: Herdr whenever `herdr status` reaches a server, else a prompt the user pastes. `init-effort` suggests the first way that works: a Herdr tab, this session when it can move into the worktree, or a pasted prompt.
 
 ```text
                 START                    HANDOVER                  BUILD
