@@ -7,6 +7,7 @@ catches every spelling of the same command:
   parentheses, and command substitutions (`$(…)`, backticks) are read too;
 - leading `VAR=value` words, shell keywords (`then`, `do`, `{`, `!`) and
   wrappers (`timeout`, `nice`, `nohup`, `env`, `xargs`, `command`, …) are dropped;
+  a wrapper that runs no command is read as itself alone (`env -u X` -> `env`);
 - a program named by path (`/bin/rm`) is read by its basename;
 - the command inside `bash|sh|zsh -c '…'` (any flag cluster holding `c`, such as
   `-lc`), `eval`, `sudo`, `find -exec`, a heredoc or a pipe into a shell is read
@@ -187,6 +188,8 @@ def _strip(words: list) -> list:
                 return []
             rest = _after_options(rest, WRAPPERS[name])
             rest = rest[WRAPPER_POSITIONALS.get(name, 0):]
+            if not rest:
+                return [name]  # a wrapper that runs nothing does its own job: `env -u X` prints the environment
             i = len(words) - len(rest)
         else:
             break
@@ -273,6 +276,8 @@ def covers(rule, argv: list) -> bool:
     """Whether a command row covers this normalised argv, whatever the flag order or position."""
     if not argv or not program_matches(rule, argv[0]):
         return False
+    if rule.bare:
+        return len(argv) == 1
     flags, words = _flags_and_words(argv)
     if not all(any(name in flags for name in group) for group in rule.flags):
         return False

@@ -158,26 +158,99 @@
       "instruction": "Go ahead; each call is logged for the user to review."
     },
     {
-      "id": "secret-files-read",
+      "id": "env-files-read",
       "level": "deny",
-      "summary": "reading `.env` files and `secrets/` folders",
+      "summary": "reading `.env` and `.env.*` files in any folder, except `.env.example`",
       "match": {
-        "paths": ["**/.env", "**/.env.*", "**/secrets/**"],
+        "paths": ["**/.env", "**/.env.*"],
+        "except": ["**/.env.example"],
         "access": "read"
       },
       "reason": "They hold credentials, which must stay out of the agent's context.",
-      "instruction": "Read the variable names from a checked-in example (`.env.example`) or ask the user; never print a secret."
+      "instruction": "Read the variable names from `.env.example`; if you need a value, stop, say why, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "env-files-write",
+      "level": "deny",
+      "summary": "writing `.env` and `.env.*` files in any folder, except `.env.example`",
+      "match": {
+        "paths": ["**/.env", "**/.env.*"],
+        "except": ["**/.env.example"],
+        "access": "write"
+      },
+      "reason": "A write can overwrite a credential, or leak one into a file that gets committed.",
+      "instruction": "Add the variable's name to `.env.example`; for its value, stop, say why, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "env-files-commands",
+      "level": "deny",
+      "summary": "`cat`, `less`, `head`, `tail`, `grep`, `source` and `.` on a `.env` file",
+      "match": {
+        "program": ["cat", "less", "head", "tail", "grep", "source", "."],
+        "files": ["**/.env", "**/.env.*"],
+        "except": ["**/.env.example"]
+      },
+      "reason": "They print a `.env` file's credentials, or load them into the shell, where the next command can print them.",
+      "instruction": "Read the variable names from `.env.example`; if you need a value, stop, say why, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "env-dump",
+      "level": "deny",
+      "summary": "`env`, `export` and `set` on their own, which list the environment",
+      "match": {
+        "program": ["env", "export", "set"],
+        "arguments": "none"
+      },
+      "reason": "The environment holds tokens and keys, which must stay out of the agent's context.",
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it. Setting a variable for one command (`env NAME=value command`) is fine."
+    },
+    {
+      "id": "env-print",
+      "level": "deny",
+      "summary": "`printenv`, on its own or with a name",
+      "match": {
+        "program": "printenv"
+      },
+      "reason": "It prints the environment's tokens and keys, or one of them, into the agent's context.",
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`), and never print one another way (`echo $NAME`); if you need a value, stop, say why, and give the user the exact command; never work around it.",
+      "gap": "a variable expanded inside another command (`echo $TOKEN`) prints its value, and no rule can tell that from ordinary use; the rule line asks the agent not to",
+      "guard": {
+        "label": "Environment Variable Access",
+        "rule": "Reading or revealing environment variables or env files: printing, echoing, dumping or listing the environment or any variable in it (e.g. `echo $VAR`, `printenv`, `env`, `export -p`, a bare `set`, `os.environ`, `process.env`), or reading `.env` / `.env.*` files by any route (shell, script, interpreter, file tool). The user reads these themselves: stop, say why, and give the user the exact command. Passing a variable into a command without printing it (e.g. `curl -H \"Authorization: Bearer $TOKEN\"`) and setting one for a single command (`FOO=1 cmd`, `env FOO=1 cmd`) are not this rule. `.env.example` holds names only and is not an env file for this rule."
+      }
+    },
+    {
+      "id": "env-dump-declared",
+      "level": "deny",
+      "summary": "`export -p`, `declare -p` and `typeset -p`",
+      "match": {
+        "program": ["export", "declare", "typeset"],
+        "flags": [["p"]]
+      },
+      "reason": "They list the shell's variables with their values, the environment's tokens and keys among them.",
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "secret-files-read",
+      "level": "deny",
+      "summary": "reading `secrets/` folders",
+      "match": {
+        "paths": ["**/secrets/**"],
+        "access": "read"
+      },
+      "reason": "They hold credentials, which must stay out of the agent's context.",
+      "instruction": "Ask the user what you need from them; never print a secret."
     },
     {
       "id": "secret-files-write",
       "level": "deny",
-      "summary": "writing `.env` files and `secrets/` folders",
+      "summary": "writing `secrets/` folders",
       "match": {
-        "paths": ["**/.env", "**/.env.*", "**/secrets/**"],
+        "paths": ["**/secrets/**"],
         "access": "write"
       },
       "reason": "A write can overwrite a credential, or leak one into a file that gets committed.",
-      "instruction": "Tell the user the variable to set and where; they write the value."
+      "instruction": "Tell the user what to set and where; they write the value."
     },
     {
       "id": "home-credentials-read",
