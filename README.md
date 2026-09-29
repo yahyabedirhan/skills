@@ -79,6 +79,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 |---|---|---|
 | [maintain-environment](skills/maintain-environment/SKILL.md) | Changes what your agents run with: decides whether a change is a permission, a global instruction, a project instruction or a skill, and carries it to every harness, machine and install. Its skill operations install, move, update, fork, publish, remove and audit skills with `npx skills`, prompt-audit each new skill in a fresh sub-agent, and measure a skill's run cost on request. | Original. Replaces `maintain-skills`. |
 | [set-up-machine](skills/set-up-machine/SKILL.md) | Sets up and audits a machine's agent harnesses from one rule table: one shared global instructions file every harness reads, and the global rules each harness enforces. Shows a per-harness diff (added, tightened, gaps, extra rules found), applies it on one approval, and never removes or loosens a rule it didn't write. Keeps harness memory off. Covers Claude Code today. | Original. |
+| [set-up-project](skills/set-up-project/SKILL.md) | Sets up and audits a project for your agents, after checking the machine with set-up-machine (and running it, on one approval, when the machine differs): `AGENTS.md` as the one rules file with `CLAUDE.md` importing it, the issue tracker, triage labels and domain docs, the folder standard's `.gitignore`, and an audit that flags any project harness file (Claude Code, Codex, opencode, Cursor) weakening a global rule. | Fork of `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d80fa0f`](https://github.com/mattpocock/skills/tree/d80fa0f4ebe0/skills/engineering/setup-matt-pocock-skills) (MIT, see `skills/set-up-project/LICENSE.mattpocock`). Changes: agents can load it; it checks the machine first; `AGENTS.md` is always the rules file, with `CLAUDE.md` as `@AGENTS.md`, instead of editing whichever exists; an optional project Defaults table; the folder standard's `.gitignore` lines; a local tracker keeps issues in `.efforts/<effort>/` instead of `.scratch/`; the GitHub template adds effort labels and names issues by title; and a script that writes the deterministic files on one approval and audits each harness's project files against set-up-machine's rule table. |
 | [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings and a verdict. You start it with `/skill-recap` (Codex: `$skill-recap`) and file them with [to-tickets](skills/to-tickets/SKILL.md). | Original. |
 
 ### Daily workflows
@@ -109,7 +110,7 @@ BUILD      orchestrate-with-handoff → orchestrate-effort
 CLOSE      close-effort                                  after your "go": merge, follow up, carry over, clean up
 ```
 
-Install the family together with `show-me` and these skills from [mattpocock/skills](https://github.com/mattpocock/skills): `grilling`, `prototype`, `tdd`, `code-review` and `setup-matt-pocock-skills`. Leave out that repo's `handoff`, `to-spec` and `to-tickets`: the forks here replace them. The full path is in [lifecycle.md](skills/orchestrating/lifecycle.md), and where each record goes (spec, tickets, handoff, notes) in the [folder standard](skills/orchestrating/folders.md).
+Install the family together with `show-me` and these skills from [mattpocock/skills](https://github.com/mattpocock/skills): `grilling`, `prototype`, `tdd` and `code-review`, with `set-up-project` and `set-up-machine` from [Agent setup](#agent-setup) to set each project up. Leave out that repo's `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills`: the forks here replace them. The full path is in [lifecycle.md](skills/orchestrating/lifecycle.md), and where each record goes (spec, tickets, handoff, notes) in the [folder standard](skills/orchestrating/folders.md).
 
 ### Design frameworks
 
@@ -135,7 +136,7 @@ show-me   explains the current topic
 
 ### Agent setup
 
-What your agents run with (permissions, instructions and skills), kept in order across every harness and machine. `set-up-machine` sets up and audits each machine's harnesses from one rule table, `maintain-environment` decides where a change belongs and carries it from its source to every harness and install, and `skill-recap` looks back over a session for what its skills should change.
+What your agents run with (permissions, instructions and skills), kept in order across every harness and machine. `set-up-machine` sets up and audits each machine's harnesses from one rule table, `set-up-project` each project on top of it, `maintain-environment` decides where a change belongs and carries it from its source to every harness and install, and `skill-recap` looks back over a session for what its skills should change.
 
 ```text
 where       permission · global instruction · project AGENTS.md · skill · skill reference (no memory)
@@ -159,6 +160,15 @@ rules.json                      each global rule once: level, reason, instructio
 ~/.codex/config.toml            Codex memories off
 ~/.claude/CLAUDE.md             imports the shared file
 plan again                      the audit: "No changes."
+```
+
+`set-up-project` does it for one project, on top of the machine. Global rules are the safety rails; a project's own harness files only add allows:
+
+```text
+set_up_project.py plan          set-up-machine's plan first; a machine that differs is set up on one approval
+  explore, ask, one approval    tracker, triage labels, domain docs, optional project Defaults
+  apply + write                 AGENTS.md, CLAUDE.md as @AGENTS.md, .gitignore, docs/agents/
+plan again                      "No changes." and the audit: any project file that weakens a global rule
 ```
 
 ### Daily workflows

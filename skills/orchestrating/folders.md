@@ -24,14 +24,14 @@ There is no `tmp/`, no `.prs/` and no vendor-named folder: one ignored folder ho
 
 ## Setting up a project
 
-Add both ignored paths to `.gitignore`:
+**set-up-project** applies this section. It adds both ignored paths to `.gitignore`:
 
 ```gitignore
 .scratch/
 .claude/worktrees/
 ```
 
-Write `docs/agents/issue-tracker.md` when the project has none.
+and writes `docs/agents/issue-tracker.md` when the project has none.
 
 ## Migrating an existing project
 

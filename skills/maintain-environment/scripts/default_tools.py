@@ -25,7 +25,7 @@ from pathlib import Path
 TOOL_ROLES = ("session-host", "worktree-tool", "notification-method")
 MENTIONS = ("Defaults table", "global instructions")
 # These skills describe the global instructions file and the layers themselves.
-MENTION_EXEMPT = ("set-up-machine", "maintain-environment")
+MENTION_EXEMPT = ("set-up-machine", "set-up-project", "maintain-environment")
 PARAMETERS = "## Parameters"
 GLOBAL_FILE = Path.home() / ".config" / "agents" / "AGENTS.md"
 SKILLS_DIR = Path(__file__).resolve().parents[2]

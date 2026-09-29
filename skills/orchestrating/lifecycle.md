@@ -1,6 +1,6 @@
 # Effort Lifecycle
 
-How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. The thinking builds on Matt Pocock's skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, `prototype`, `tdd`, `code-review`, `setup-matt-pocock-skills`) and on this family's forks of his `handoff`, `to-spec` and `to-tickets`, which replace the upstream three; the building runs on the orchestrate skills. Routine upkeep (data edits, small fixes) doesn't need any of this: it runs in the current checkout.
+How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. The thinking builds on Matt Pocock's skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, `prototype`, `tdd`, `code-review`) and on forks of his `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills` (as **set-up-project**), which replace the upstream four; the building runs on the orchestrate skills. Routine upkeep (data edits, small fixes) doesn't need any of this: it runs in the current checkout.
 
 An effort passes through five phases in one worktree on one branch:
 

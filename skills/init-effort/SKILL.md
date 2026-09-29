@@ -44,7 +44,7 @@ Ask, every time, whether the GitHub repo is **public or private**, and which lic
 
 1. `mkdir <projects folder>/<name>` and `git -C <path> init -b main`.
 2. Write a `README.md` (the name as a heading and the idea in a paragraph) and the `LICENSE`.
-3. Set it up per the folder standard ([orchestrating/folders.md](../orchestrating/folders.md), *Setting up a project*): the `.gitignore` lines, and `docs/agents/issue-tracker.md` from [issue-tracker-github.md](issue-tracker-github.md) with the repo filled in.
+3. Set it up with the **set-up-project** skill, in the new folder, with GitHub as its tracker and `<owner>/<name>` as the repo: `AGENTS.md`, the folder standard's `.gitignore` lines, and `docs/agents/`. It commits nothing; the next step does.
 4. Commit it all as the first commit, in its own call: `git -C <path> add -A`, then `git -C <path> commit -m "chore: start <name>"`.
 5. `gh repo create <name> --public|--private --source <path> --remote origin --push`.
 
