@@ -11,19 +11,23 @@ Facts it relies on (see references/claude-code.md):
 - `~/.claude/CLAUDE.md` loads in every session and follows `@path` imports.
 - Auto memory is on by default and writes `~/.claude/projects/<project>/memory/`;
   `"autoMemoryEnabled": false` in settings.json turns it off.
+- `hooks.PreToolUse` runs before every tool call; a `deny` answer with a reason
+  refuses it and shows the agent the reason, and an `allow` answer would skip the
+  permission check, so the hook answers only `deny`.
 """
 from __future__ import annotations
 
 import copy
 import fnmatch
 import json
+import shlex
 import shutil
 import subprocess
 import tempfile
 import threading
 from pathlib import Path
 
-from .. import memory
+from .. import memory, shared
 from .. import rules as rule_table
 from ..plan import Change, FileWrite, Section
 from ..shared import read_text
@@ -41,6 +45,10 @@ MEMORY_KEY = "autoMemoryEnabled"
 
 DISCOVERY_TIMEOUT = 90
 
+# The pre-tool hook this skill ships, and how long Claude Code gives it, in seconds.
+HOOK_SCRIPT = Path(__file__).resolve().parents[2] / "pre_tool_hook.py"
+HOOK_TIMEOUT = 10
+
 
 def config_dir(home: Path) -> Path:
     return home / ".claude"
@@ -54,16 +62,26 @@ def entries_for(rule, tools=()) -> list:
     return [f"Bash({' '.join(prefix)}:*)" for prefix in rule_table.command_prefixes(rule)]
 
 
+# What still gets past the pre-tool hook's reading of a command.
+HOOK_MISSES = (
+    "a command inside a script file or another interpreter (`python -c`), one built from variables (`$cmd`), "
+    "an alias or function defined elsewhere, an abbreviated long option (`--recur`), "
+    "or a force push by refspec (`git push origin +main`)"
+)
+
+
 def gaps_for(rule) -> list:
-    if rule.level == "allow-and-report":
-        return ["allowed natively; the report needs the pre-tool hook"]
+    """What gets through once this adapter's entries and the pre-tool hook are in place."""
     if rule.kind == "file":
         return [
             "Read and Edit rules cover Claude Code's file tools and the file commands it recognises in Bash "
-            "(`cat`, `sed`, redirects); a script or another program opening the file gets through"
+            "(`cat`, `sed`, redirects), and the pre-tool hook the file tools; a script or another program "
+            "opening the file gets through"
         ]
     if rule.kind == "mcp-tool":
-        return ["covers the tools found at this run; a tool connected later is covered after the next run"]
+        return []  # the native entries cover the tools found now, and the hook matches tools connected later
+    if rule.level in ("deny", "allow-and-report"):
+        return []  # the pre-tool hook reads every spelling; what it can't see is one gap in its own section
     canonical = " ".join(rule_table.command_prefixes(rule)[0])
     through = []
     if rule.flags:
@@ -71,7 +89,7 @@ def gaps_for(rule) -> list:
     if any(rule.subcommands):
         through.append(f"options before the subcommand (`{rule.programs[0]} <option> {' '.join(rule.subcommands[0])}`)")
     through.append(f"the command inside another program's string (`bash -lc \"{canonical} …\"`, `eval`, a script)")
-    return ["Bash rules match the text as written, so these get through: " + "; ".join(through)]
+    return ["ask stays native, and Bash rules match the text as written, so these get through: " + "; ".join(through)]
 
 
 def discover_tools():
@@ -147,35 +165,46 @@ def import_line(home: Path, os_home: Path, shared_file: Path) -> str:
     return "@" + str(shared_file.resolve())
 
 
-def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path, tools=None):
+def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path, tools=None, rules_path=None):
     """Returns (sections, writes, owned_after) for Claude Code.
 
     `tools` is the list of MCP tool names to match mcp-tool rules against; when
-    None and the table has such rules, Claude Code is asked for them.
+    None and the table has such rules, Claude Code is asked for them. `rules_path`
+    is the table the hook reads, when it isn't the skill's own.
     """
     tools_error = None
     if tools is None and any(r.kind == "mcp-tool" for r in rules):
         tools, tools_error = discover_tools()
-    perm_section, perm_write, owned_perms = _plan_permissions(
-        home, rules, owned.get("permissions", {}), tools or [], tools_error
-    )
-    mem_section, perm_write, mem_writes = _plan_memory(home, perm_write)
-    md_section, md_write, owned_imports = _plan_instructions(home, owned.get("imports", []), shared_file, os_home)
-    owned_after = {}
-    if any(owned_perms.values()):
-        owned_after["permissions"] = owned_perms
-    if owned_imports:
-        owned_after["imports"] = owned_imports
-    return [perm_section, mem_section, md_section], [perm_write, md_write, *mem_writes], owned_after
-
-
-def _plan_permissions(home: Path, rules: list, owned: dict, tools: list, tools_error):
     path = config_dir(home) / "settings.json"
     old = read_text(path)
     try:
         settings = json.loads(old) if old is not None else {}
     except json.JSONDecodeError as exc:
         raise ValueError(f"{path} isn't valid JSON ({exc}); fix it by hand, then run the plan again") from exc
+    if not isinstance(settings, dict):
+        raise ValueError(f"{path} must hold a JSON object; fix it by hand, then run the plan again")
+    new_settings = copy.deepcopy(settings)
+    perm_section, owned_perms = _plan_permissions(
+        path, settings, new_settings, rules, owned.get("permissions", {}), tools or [], tools_error
+    )
+    hook_section, owned_hooks = _plan_hook(
+        path, settings, new_settings, owned.get("hooks", []), hook_command(home, os_home, rules_path)
+    )
+    mem_section, mem_writes = _plan_memory(home, path, new_settings)
+    new = old if new_settings == settings else json.dumps(new_settings, indent=2, ensure_ascii=False) + "\n"
+    md_section, md_write, owned_imports = _plan_instructions(home, owned.get("imports", []), shared_file, os_home)
+    owned_after = {}
+    if any(owned_perms.values()):
+        owned_after["permissions"] = owned_perms
+    if owned_hooks:
+        owned_after["hooks"] = owned_hooks
+    if owned_imports:
+        owned_after["imports"] = owned_imports
+    return ([perm_section, hook_section, mem_section, md_section],
+            [FileWrite(path, old, new), md_write, *mem_writes], owned_after)
+
+
+def _plan_permissions(path: Path, settings: dict, new_settings: dict, rules: list, owned: dict, tools: list, tools_error):
     perms = settings.get("permissions", {})
     existing = {name: list(perms.get(name, [])) for name in LISTS}
     section = Section(f"{LABEL}: permissions", path)
@@ -242,16 +271,80 @@ def _plan_permissions(home: Path, rules: list, owned: dict, tools: list, tools_e
                     note = "Claude Code never checks Write rules, so this does nothing; the table's Edit rules do; kept"
                 section.changes.append(Change("extra", entry, name, note=note))
 
-    new = old
     if any(add.values()) or any(remove.values()):
-        new_settings = copy.deepcopy(settings)
         new_perms = new_settings.setdefault("permissions", {})
         for name in LISTS:
             if add[name] or remove[name]:
                 kept = [e for e in new_perms.get(name, []) if e not in remove[name]]
                 new_perms[name] = kept + add[name]
-        new = json.dumps(new_settings, indent=2, ensure_ascii=False) + "\n"
-    return section, FileWrite(path, old, new), {k: v for k, v in owned_after.items() if v}
+    return section, {k: v for k, v in owned_after.items() if v}
+
+
+def hook_command(home: Path, os_home: Path, rules_path=None) -> str:
+    """The command that runs the pre-tool hook. Outside the user's own home it names that
+    home's configuration, and with a table other than the skill's own it names that table."""
+    parts = ["python3", str(HOOK_SCRIPT), "--harness", "claude-code"]
+    if home.resolve() != os_home.resolve():
+        parts += ["--config", str(shared.hook_config_path(home))]
+    if rules_path is not None and Path(rules_path).resolve() != rule_table.DEFAULT_TABLE:
+        parts += ["--rules", str(Path(rules_path).resolve())]
+    return shlex.join(parts)
+
+
+def _plan_hook(path: Path, settings: dict, new_settings: dict, owned: list, wanted: str):
+    """Wire the pre-tool hook for every tool; replace only a hook command this skill wrote before."""
+    section = Section(f"{LABEL}: pre-tool hook", path)
+    if not isinstance(settings.get("hooks", {}), dict):
+        raise ValueError(f"{path}: `hooks` must be a JSON object; fix it by hand, then run the plan again")
+    groups = _pre_tool_groups(settings)
+    wired = any(
+        g.get("matcher") in ("*", "", None) and any(h.get("command") == wanted for h in _handlers(g)) for g in groups
+    )
+    stale = {c for c in owned if c != wanted}
+    present = {h.get("command") for g in groups for h in _handlers(g)}
+    if (stale & present) or not wired:
+        new_groups = []
+        for g in _pre_tool_groups(new_settings):
+            handlers = [h for h in _handlers(g) if h.get("command") not in stale]
+            if len(handlers) != len(_handlers(g)):
+                g = {**g, "hooks": handlers}
+            if handlers:
+                new_groups.append(g)
+        for command in sorted(stale & present):
+            section.changes.append(Change("removed", f"pre-tool hook: {command}",
+                                          note="written by set-up-machine; the hook script moved"))
+        if not wired:
+            new_groups.append({"matcher": "*", "hooks": [{"type": "command", "command": wanted, "timeout": HOOK_TIMEOUT}]})
+            section.changes.append(Change(
+                "added", f"pre-tool hook: {wanted}",
+                note="refuses the table's deny rules however a command is spelled, and reports allow-and-report calls",
+            ))
+        new_settings.setdefault("hooks", {})["PreToolUse"] = new_groups
+    else:
+        section.changes.append(Change("wired", f"pre-tool hook wired for every tool: {wanted}"))
+    if settings.get("disableAllHooks") is True:
+        section.changes.append(Change(
+            "gap", "`disableAllHooks` is true in this file, so no hook runs, this one included; set-up-machine leaves it to you"
+        ))
+    section.changes.append(Change("gap", f"the hook reads every spelling of a command, but can't see {HOOK_MISSES}"))
+    section.changes.append(Change(
+        "gap", "a project's `.claude/settings.json` can set `disableAllHooks: true`, which turns the hook off there; "
+               "the native permissions still hold"
+    ))
+    return section, [wanted]
+
+
+def _pre_tool_groups(settings: dict) -> list:
+    hooks = settings.get("hooks")
+    groups = hooks.get("PreToolUse") if isinstance(hooks, dict) else None
+    return [g for g in groups if isinstance(g, dict)] if isinstance(groups, list) else []
+
+
+def _handlers(group: dict) -> list:
+    handlers = group.get("hooks")
+    return [h for h in handlers if isinstance(h, dict)] if isinstance(handlers, list) else []
+
+
 
 
 def _found(rule, tools: list, tools_error) -> Change:
@@ -263,25 +356,21 @@ def _found(rule, tools: list, tools_error) -> Change:
     return Change("found", text, rule.level, rule.id)
 
 
-def _plan_memory(home: Path, settings_write: FileWrite):
-    """Auto memory off in the same settings.json write as the permissions, and every memory file removed."""
-    section = Section(f"{LABEL}: memory", settings_write.path)
-    current = settings_write.new if settings_write.new is not None else settings_write.old
-    settings = json.loads(current) if current else {}
-    value = settings.get(MEMORY_KEY)
+def _plan_memory(home: Path, path: Path, new_settings: dict):
+    """Auto memory off in the same settings.json write as the permissions and the hook, and every memory file removed."""
+    section = Section(f"{LABEL}: memory", path)
+    value = new_settings.get(MEMORY_KEY)
     if value is False:
         section.changes.append(Change("present", f"{MEMORY_KEY}: false"))
     else:
         kind, note = ("added", "auto memory off") if value is None else ("tightened", f"was {json.dumps(value)}")
         section.changes.append(Change(kind, f"{MEMORY_KEY}: false", note=note))
-        settings[MEMORY_KEY] = False
-        settings_write = FileWrite(settings_write.path, settings_write.old,
-                                   json.dumps(settings, indent=2, ensure_ascii=False) + "\n")
+        new_settings[MEMORY_KEY] = False
     section.changes.append(Change(
         "gap", f"a project's .claude/settings.json can set {MEMORY_KEY}: true and win over this; the project audit checks it",
     ))
     folders = sorted((config_dir(home) / "projects").glob("*/memory"))
-    return section, settings_write, memory.remove_files(home, folders, section)
+    return section, memory.remove_files(home, folders, section)
 
 
 def _plan_instructions(home: Path, owned_imports: list, shared_file: Path, os_home: Path):

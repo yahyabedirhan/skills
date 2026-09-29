@@ -111,8 +111,8 @@ class ReconcileTest(unittest.TestCase):
 
     def test_empty_home_gets_everything_then_a_second_run_has_no_changes(self):
         first = self.home.apply()
-        # Every rm spelling, the CLAUDE.md import, and auto memory off.
-        self.assertEqual(len(kinds(first, "added")), len(rules.command_prefixes(RM)) + 2)
+        # Every rm spelling, the CLAUDE.md import, auto memory off, and the hook.
+        self.assertEqual(len(kinds(first, "added")), len(rules.command_prefixes(RM)) + 3)
         self.assertIn("Bash(rm -rf:*)", self.home.perms()["deny"])
         self.assertIn("rm -rf", self.home.read(".config/agents/AGENTS.md"))
         self.assertIn("Move it into `.scratch/`.", self.home.read(".config/agents/AGENTS.md"))
@@ -500,6 +500,82 @@ class MemoryTest(unittest.TestCase):
         texts = {s.title: s.changes[0].text for s in self.home.plan().sections if s.title.endswith(": memory")}
         self.assertIn("nothing to turn off", texts["opencode: memory"])
         self.assertIn("nothing to turn off", texts["Cursor: memory"])
+
+
+class HookWiringTest(unittest.TestCase):
+    def setUp(self):
+        self.home = Home()
+
+    def tearDown(self):
+        self.home.close()
+
+    def pre_tool_hooks(self):
+        return json.loads(self.home.read(".claude/settings.json"))["hooks"]["PreToolUse"]
+
+    def test_the_hook_is_wired_with_its_configuration_then_reported_as_wired(self):
+        self.home.apply()
+        [group] = self.pre_tool_hooks()
+        self.assertEqual(group["matcher"], "*")
+        [handler] = group["hooks"]
+        command = handler["command"]
+        self.assertIn("pre_tool_hook.py", command)
+        self.assertIn("--harness claude-code", command)
+        self.assertIn(str(self.home.path / ".config/agents/hook.json"), command)
+        config = json.loads(self.home.read(".config/agents/hook.json"))
+        self.assertEqual(config["report_dir"], str(self.home.path / ".local/state/agents/reports"))
+
+        second = self.home.plan()
+        self.assertFalse(second.has_changes)
+        self.assertTrue(any("hook wired" in w for w in kinds(second, "wired")), render(second))
+        self.assertIn("wired", render(second))
+
+    def test_in_the_users_own_home_the_hook_reads_the_default_configuration(self):
+        plan = reconcile.build(self.home.path, [RM], self.home.path)
+        reconcile.apply(plan, plan.id)
+        [group] = self.pre_tool_hooks()
+        self.assertNotIn("--config", group["hooks"][0]["command"])
+        self.assertEqual(json.loads(self.home.read(".config/agents/hook.json"))["report_dir"], "~/.local/state/agents/reports")
+
+    def test_the_users_hooks_and_configuration_are_kept(self):
+        self.home.write(".claude/settings.json", json.dumps({"hooks": {"PreToolUse": [
+            {"matcher": "Bash", "hooks": [{"type": "command", "command": "my-hook"}]}]}}))
+        self.home.write(".config/agents/hook.json", json.dumps({"report_dir": "/elsewhere"}))
+        plan = self.home.apply()
+        groups = self.pre_tool_hooks()
+        self.assertEqual(groups[0], {"matcher": "Bash", "hooks": [{"type": "command", "command": "my-hook"}]})
+        self.assertEqual(len(groups), 2)
+        self.assertEqual(json.loads(self.home.read(".config/agents/hook.json")), {"report_dir": "/elsewhere"})
+        self.assertTrue(any("/elsewhere" in w for w in kinds(self.home.plan(), "wired")))
+
+    def test_a_moved_hook_is_rewired_and_only_its_own_entry_removed(self):
+        self.home.apply()
+        original = claude_code.HOOK_SCRIPT
+        claude_code.HOOK_SCRIPT = Path("/moved/scripts/pre_tool_hook.py")
+        try:
+            plan = self.home.apply()
+        finally:
+            claude_code.HOOK_SCRIPT = original
+        self.assertEqual(len(kinds(plan, "removed")), 1)
+        [group] = self.pre_tool_hooks()
+        self.assertIn("/moved/scripts/pre_tool_hook.py", group["hooks"][0]["command"])
+
+    def test_hooks_turned_off_in_the_file_are_a_gap(self):
+        self.home.write(".claude/settings.json", json.dumps({"disableAllHooks": True}))
+        plan = self.home.plan()
+        self.assertTrue(any("disableAllHooks" in g and "this file" in g for g in kinds(plan, "gap")))
+
+    def test_invalid_hook_configuration_stops_the_plan(self):
+        self.home.write(".config/agents/hook.json", "{nope")
+        with self.assertRaises(ValueError):
+            self.home.plan()
+
+    def test_a_table_other_than_the_skills_own_is_passed_to_the_hook(self):
+        other = self.home.path / "rules.json"
+        other.write_text(rules.DEFAULT_TABLE.read_text())
+        plan = reconcile.build(self.home.path, [RM], self.home.os_home, None, other)
+        reconcile.apply(plan, plan.id)
+        [group] = self.pre_tool_hooks()
+        self.assertIn(f"--rules {other}", group["hooks"][0]["command"])
 
 
 if __name__ == "__main__":

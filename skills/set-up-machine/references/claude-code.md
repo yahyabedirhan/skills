@@ -43,16 +43,31 @@ What set-up-machine writes for Claude Code, and why. The code is `scripts/setupm
 
 ## Gaps
 
-The plan lists these as gaps, per row:
+Native entries alone let these through:
 
 - **Commands:** more flags in the same token (`rm -rfv`) or after the operands (`rm x -rf`), options before a subcommand (`git -C dir push --force`), and a command inside another program's string (`bash -lc "…"`, `eval`, a script).
 - **Files:** a script or another program that opens the file itself.
 - **MCP tools:** a tool connected after the run, until the next run.
-- **allow-and-report:** the report, until the pre-tool hook is wired.
+
+The pre-tool hook closes the command and MCP-tool gaps for deny and allow-and-report rows, so the plan lists, per row, only the command gaps of `ask` rows and the file gap. The hook's own gaps, listed once in its plan section:
+
+- a command inside a script file or another interpreter (`python -c`), built from variables (`$cmd -rf x`), or behind an alias or function defined elsewhere; an abbreviated long option (`--recur`); a force push by refspec (`git push origin +main`);
+- a project's `.claude/settings.json` with `"disableAllHooks": true`, which turns every non-managed hook off there.
+
+## Pre-tool hook
+
+- **Wiring:** one `hooks.PreToolUse` group in `~/.claude/settings.json` with matcher `*` (every tool) and one command handler, `python3 <skill>/scripts/pre_tool_hook.py --harness claude-code`, timeout 10 seconds. Against a `--home` other than the user's own, it adds `--config <home>/.config/agents/hook.json`, so a trial reports into that home, and a plan run with `--rules <table>` adds `--rules <table>`, so the hook reads the table the plan used. Settings.json gets one write carrying the permissions, the hook and `autoMemoryEnabled`.
+- **Audit:** `wired` when a match-all group runs exactly that command. The manifest records the command; when the skill moves, the old command is removed and the new one added. Other hooks are the user's and stay.
+- **Input:** Claude Code's PreToolUse JSON: `tool_name`, `tool_input` (`command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` for Grep), `cwd`, `session_id`.
+- **Answer:** a deny is `hookSpecificOutput.permissionDecision: "deny"` with the refusal in `permissionDecisionReason`, which Claude Code shows the agent. Otherwise it prints nothing and exits 0, so the native permissions decide: it never answers `allow`, which would skip them. It exits 1, which Claude Code treats as a non-blocking error, when the input or the table can't be read.
+- **Reports** are written when the call is submitted, before any permission prompt, so a report means the agent asked to run it.
+- **The Cursor CLI runs this hook too** (it reads hooks from `~/.claude/settings.json`). Its payload is read as far as it fits, so the hook doesn't crash on it, but Cursor passes `permissionDecisionReason` to the user, not the agent. The Cursor adapter decides how to wire the hook for Cursor itself.
 
 ## What the agent sees
 
-A refused command returns `Permission to use Bash with command <command> has been denied.`, and a refused file `File is in a directory that is denied by your permission settings.` Neither names the rule, so the instruction reaches the agent through the shared file's rule line, loaded at the start of every session.
+A command the native rules refuse returns `Permission to use Bash with command <command> has been denied.`, and a refused file `File is in a directory that is denied by your permission settings.` Neither names the rule, so the instruction also reaches the agent through the shared file's rule line, loaded at the start of every session.
+
+The hook runs first, and its refusal names each refused part, its rule, reason and instruction, and says nothing else in the call ran.
 
 ## Read by other harnesses
 
@@ -62,7 +77,8 @@ The Cursor CLI also reads the `allow` and `deny` lists in `~/.claude/settings.js
 
 After an apply, in a throwaway folder, with `--setting-sources project,local --settings <the settings.json>` so only the generated entries apply:
 
-- **Commands:** `claude -p "Run exactly: rm -fr x" --allowedTools Bash` leaves `x` in place and reports the command denied. Allowing `Bash` proves the deny rule refused it, not the lack of an allow.
+- **Commands:** `claude -p "Run exactly: rm -fr x" --allowedTools Bash` leaves `x` in place and quotes the hook's refusal. Allowing `Bash` proves a rule refused it, not the lack of an allow. With a settings file holding only the `hooks` key, `bash -lc "rm -rf x"` is refused too, which proves the hook, not a native entry.
+- **Reports:** `gh api rate_limit` runs, and its line appears in the report folder.
 - **Files:** asking for a Write to `.env`, `sub/.env.local` and `secrets/k` with `--allowedTools Write` leaves them unchanged.
 - **Mail tools:** a found tool, such as a trash tool, is absent from the session.
 

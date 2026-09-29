@@ -12,24 +12,27 @@ Two sources declare the machine:
 
 `scripts/set_up_machine.py` **reconciles** each harness against them: it compares what the table wants with what's on the machine, shows the diff, and applies it on one approval. Running it again is the **audit**. It needs only Python 3.9+.
 
+It also wires the **pre-tool hook**, `scripts/pre_tool_hook.py`, into each harness that has one; see *Pre-tool hook* below.
+
 Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md). Codex so far for memory only. opencode and Cursor have no memory feature, and the plan says so.
 
 ## Steps
 
 1. **Plan.** Run `python3 <this skill>/scripts/set_up_machine.py plan`. It writes nothing, but it starts each harness briefly to list the MCP tools it exposes (see *Mail tools* below). Done when you hold its whole output, which ends in either `No changes.` or a plan id.
-2. **Nothing to do?** On `No changes.`, report the audit: memory per harness, the gaps, the stricter and extra rules, and the mail tools it found. Stop here.
+2. **Nothing to do?** On `No changes.`, report the audit: memory per harness, what's wired, the gaps, the stricter and extra rules, and the mail tools it found. Stop here.
 3. **Ask once.** Show the user the plan output unedited, then ask for one approval of the whole diff. Its lines, per harness:
    - `added`: a rule the harness lacks.
    - `tightened`: a rule the harness has at a looser level; the stricter entry is added beside it.
    - `removed`: an entry this skill wrote earlier that the table no longer has, or a harness memory file. Only these are ever removed.
    - `present`: already in place, as the table's entry or a broader one that covers it.
+   - `wired`: the pre-tool hook in place for that harness, and the folder its reports go to.
    - `stricter`: the machine holds the rule at a stricter level than the table. It's kept; to get the table's level, the user removes that entry by hand.
    - `found`: the tools a mail-tool rule matched on this machine. Name them in your report.
    - `gap`: what the harness can't express, named so it isn't mistaken for enforced.
    - `none`: the harness has no such feature (memory), so there's nothing to set.
    - `extra`: a rule on the machine the table doesn't have, or a line in a harness's own global file besides its link to the shared file. It's kept. A rule worth having everywhere is a candidate row for the table; a line moves into the shared file (references/global-instructions.md, *Moving a harness's file*).
 4. **Apply** the approved plan: `python3 <this skill>/scripts/set_up_machine.py apply --plan-id <id>`, the command the plan printed. If apply refuses because the machine changed since the plan, go back to step 1 and ask again.
-5. **Audit.** Run the plan again. Done when it ends `No changes.`. Report the backup folder apply printed, the gaps, the stricter and extra rules, and the mail tools found.
+5. **Audit.** Run the plan again. Done when it ends `No changes.` and every harness with a hook shows a `wired` line. Report the backup folder apply printed, what's wired, the gaps, the stricter and extra rules, and the mail tools found.
 
 `--home <dir>` points every step at another home folder, such as a copy of this one in the project's `.scratch/`, to try a change without touching the real machine.
 
@@ -61,6 +64,16 @@ Edit `rules.json`, then run the steps. Each row:
 - **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of an MCP tool name (`mcp__<server>__<tool>`). Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID.
 
 Adapters expand a row into every native entry it needs (each flag order and spelling, the `/bin/` and `/usr/bin/` paths, the harness's own file-rule kind), and the shared file gets one rule line per row.
+
+## Pre-tool hook
+
+One script, `scripts/pre_tool_hook.py`, reads the same `rules.json` and checks each tool call before it runs:
+
+- **deny** rows: it reads the command the way the shell runs it (any flag order or grouping, flags after the operands, `/bin/rm`, `mkfs.ext4`, the inside of `bash -lc '…'`, `eval`, `sudo`, `xargs`, `find -exec`, every part of `a && b; c | d`), and refuses the call naming each refused part with its rule's reason and instruction. It also checks file tools against file rows and MCP tools against mail-tool rows, including tools connected after the last plan.
+- **allow-and-report** rows: it appends one JSON line per call to `<report folder>/<date>.jsonl`, readable by the user alone since a command can carry a secret, and lets the harness's own permissions decide.
+- **ask** rows stay native.
+
+The native entries stay underneath, so a hook that fails or is switched off leaves them in force. The report folder is `report_dir` in `~/.config/agents/hook.json`, which the plan creates with `~/.local/state/agents/reports` and then leaves to the user. The script takes `--harness` (which payload and answer format), `--config` and `--rules`; each adapter's reference says how it's wired.
 
 ## Mail tools
 

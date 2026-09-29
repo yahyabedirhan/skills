@@ -14,21 +14,22 @@ class PlanMismatch(RuntimeError):
     pass
 
 
-def build(home: Path, rules: list, os_home: Path, tools=None) -> Plan:
-    """`tools` maps a harness name to the MCP tool names to match; a harness left out is asked."""
+def build(home: Path, rules: list, os_home: Path, tools=None, rules_path=None) -> Plan:
+    """`tools` maps a harness name to the MCP tool names to match; a harness left out is asked.
+    `rules_path` is the table the pre-tool hook reads, when it isn't the skill's own."""
     manifest = shared.load_manifest(home)
     manifest_old = shared.read_text(shared.manifest_path(home))
     sections, writes = [], []
 
-    section, write = shared.plan_instructions(home, rules)
-    sections.append(section)
-    writes.append(write)
+    for section, write in (shared.plan_instructions(home, rules), shared.plan_hook_config(home, os_home)):
+        sections.append(section)
+        writes.append(write)
 
     owned_after = {}
     for adapter in ADAPTERS:
         a_sections, a_writes, owned = adapter.plan(
             home, rules, manifest["harnesses"].get(adapter.NAME, {}), shared.instructions_path(home), os_home,
-            (tools or {}).get(adapter.NAME),
+            (tools or {}).get(adapter.NAME), rules_path,
         )
         sections.extend(a_sections)
         writes.extend(a_writes)

@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from . import hook
 from .plan import Change, FileWrite, Section
 
 BEGIN = "<!-- set-up-machine:rules start. Generated from set-up-machine's rule table: change the table, not these lines. -->"
@@ -51,6 +52,10 @@ def instructions_path(home: Path) -> Path:
 
 def manifest_path(home: Path) -> Path:
     return folder(home) / "set-up-machine.json"
+
+
+def hook_config_path(home: Path) -> Path:
+    return folder(home) / "hook.json"
 
 
 def backups_path(home: Path) -> Path:
@@ -157,6 +162,32 @@ def plan_instructions(home: Path, rules: list):
         new = before.rstrip("\n") + "\n\n" + block + "\n\n" + WORKFLOW_HEADING + after
     if not new.endswith("\n"):
         new += "\n"
+    return section, FileWrite(path, old, new)
+
+
+def plan_hook_config(home: Path, os_home: Path):
+    """The pre-tool hook's configuration: created with the default report folder, then the user's.
+
+    In another home than the user's own, the default report folder is inside
+    that home, so a trial run never reports into the real one.
+    """
+    path = hook_config_path(home)
+    old = read_text(path)
+    section = Section("Pre-tool hook configuration", path, show_diff=True)
+    if old is None:
+        own = home.resolve() == os_home.resolve()
+        default = hook.DEFAULT_REPORT_DIR if own else str(home / hook.DEFAULT_REPORT_DIR[2:])
+        config = {"report_dir": default}
+        new = json.dumps(config, indent=2) + "\n"
+    else:
+        try:
+            config = json.loads(old)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{path} isn't valid JSON ({exc}); fix it by hand, then run the plan again") from exc
+        if not isinstance(config, dict):
+            raise ValueError(f"{path} must hold a JSON object; fix it by hand, then run the plan again")
+        new = old
+    section.changes.append(Change("wired", f"the hook's reports go to {hook.report_dir(config, path)}"))
     return section, FileWrite(path, old, new)
 
 
