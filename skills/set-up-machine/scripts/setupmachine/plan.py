@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Kinds that change a file, then kinds that are only reported.
 CHANGE_KINDS = ("added", "tightened", "removed")
-REPORT_KINDS = ("present", "stricter", "found", "gap", "none", "extra")
+REPORT_KINDS = ("present", "wired", "stricter", "found", "gap", "none", "extra")
 
 
 @dataclass
@@ -79,7 +79,7 @@ def render(plan: Plan) -> str:
             out.extend(_line(c) for c in s.changes if c.kind == kind)
         if present:
             out.append(f"  present     {present} entr{'y' if present == 1 else 'ies'} already in place")
-        for kind in ("stricter", "found", "gap", "none", "extra"):
+        for kind in ("wired", "stricter", "found", "gap", "none", "extra"):
             out.extend(_line(c) for c in s.changes if c.kind == kind)
         if not s.changes and not (s.show_diff and writes.get(s.path) and writes[s.path].changed):
             out.append("  up to date")

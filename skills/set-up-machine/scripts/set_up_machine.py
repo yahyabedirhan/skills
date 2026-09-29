@@ -49,7 +49,7 @@ def main(argv=None) -> int:
         if args.tool_names:
             names = [l.strip() for l in args.tool_names.read_text().splitlines() if l.strip()]
             tools = {adapter.NAME: names for adapter in ADAPTERS}
-        plan = reconcile.build(home, table, Path.home(), tools)
+        plan = reconcile.build(home, table, Path.home(), tools, args.rules.resolve())
     except (rules.RuleTableError, ValueError, OSError) as exc:
         print(f"set-up-machine: {exc}", file=sys.stderr)
         return 1

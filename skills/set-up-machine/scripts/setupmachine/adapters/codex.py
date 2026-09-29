@@ -29,7 +29,7 @@ def config_dir(home: Path) -> Path:
     return home / ".codex"
 
 
-def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path, tools=None):
+def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path, tools=None, rules_path=None):
     path = config_dir(home) / "config.toml"
     section = Section(f"{LABEL}: memory", path)
     if not config_dir(home).is_dir():
