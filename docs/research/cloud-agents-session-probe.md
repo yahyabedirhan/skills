@@ -90,7 +90,7 @@ Results:
 
 The harness prompt repeats the scope: "GitHub access for this session is currently scoped to `yahyabedirhan/skills`" [harness]. The only MCP server in the VM's own `--mcp-config` is `github`, reached through `api.anthropic.com` [probe]; the Remote, Gmail and Docs connectors arrive another way (Unverified: through the session's SDK connection).
 
-Pushing: the remote-tracking reflog shows `claude/say-hi-sqwcct` "update by push" at session start and `skills/cloud-agents-session-probe` "update by push" at 20:07 UTC, a new branch outside `claude/` pushed by the orchestrating session [probe, `git reflog show refs/remotes/origin/<branch>`]. `get_session` lists that branch under the session's `outcomes` [probe]. The harness prompt names one "designated branch" (`claude/<slug>`) and says "NEVER push to a different branch without explicit permission" [harness], which is an instruction, not a proxy rule.
+Pushing: the remote-tracking reflog shows `claude/<slug>` "update by push" at session start and `skills/cloud-agents-session-probe` "update by push" at 20:07 UTC, a new branch outside `claude/` pushed by the orchestrating session [probe, `git reflog show refs/remotes/origin/<branch>`]. `get_session` lists that branch under the session's `outcomes` [probe]. The harness prompt names one "designated branch" (`claude/<slug>`) and says "NEVER push to a different branch without explicit permission" [harness], which is an instruction, not a proxy rule.
 
 Verdict: GraphQL scope **contradicted** ("a pinned set of GraphQL operations for pull-request workflows" [doc env, "GitHub proxy"]: none pass here). REST sub-issues **confirmed** working, now with evidence of authenticated access (`/user` 200). Repository scope **confirmed** and stricter than expected (public repos too, REST only). Push to "the session's current working branch" only **contradicted** for a new branch name.
 
@@ -112,7 +112,7 @@ Commands [probe]: read this sub-agent's own tool list; `ToolSearch` with `select
 | `mcp__github__*` | Yes | Yes (deferred) |
 | Gmail, Claude Docs, Artifact | Yes | Yes |
 
-The Remote tools work from a sub-agent but go through the user's permission prompt: `get_session` showed the session blocked on "Waiting on permission: `mcp__Claude_Code_Remote__read_documentation`" while that call waited, and it ran once approved. `get_session` also showed `environment_kind: anthropic_cloud`, `origin: claude_code_cli`, a tag `config:auto-create-pr:off`, `cross_session_inbound: available`, context use against a 1M-token window, and `rate_limit_info.rateLimitType: ccr_promotional` [probe].
+The Remote tools work from a sub-agent but go through a permission prompt: `get_session` showed the session blocked on "Waiting on permission: `mcp__Claude_Code_Remote__read_documentation`" while that call waited for approval, and it ran afterwards. Who or what approved isn't recorded; the session was in auto mode at the time. `get_session` also showed `environment_kind: anthropic_cloud`, `origin: claude_code_cli`, a tag `config:auto-create-pr:off`, `cross_session_inbound: available`, context use against a 1M-token window, and `rate_limit_info.rateLimitType: ccr_promotional` [probe].
 
 The `claude` process's command line shows how tools are chosen: `--tools preset:default,Task,Bash,…,WebFetch,WebSearch,…,Monitor,SendUserFile,REPL,…,ToolSearch`, `--allowed-tools` the same plus `mcp__github__*`, `--settings ~/.claude/launcher-settings.json`, `--mcp-config /tmp/mcp-config-<session>.json`, `--append-system-prompt-file /tmp/claude-append-system-prompt.txt`, `--input-format stream-json --output-format stream-json`, and an `--sdk-url` / `--resume` pair on `api.anthropic.com/v1/code/sessions/<id>` [probe, `/proc/<pid>/cmdline`, IDs redacted].
 
@@ -205,7 +205,7 @@ Put together from probes 3, 5, 7, 9 and 10 [probe; harness]:
 |---|---|---|
 | What does the VM actually report (`uname`, `nproc`, `free`, user, `check-tools`)? | Firecracker microVM, Ubuntu 24.04.4, kernel 6.18, 4 vCPU Xeon, 15.7 GiB RAM, no swap, root; 30G writable of a 252G disk; toolchains as documented except `gh` is missing; Playwright and Chromium present | Brief; probes 7 and 10 |
 | Does the create form print the session ID or URL, and how? | Yes, at once and non-interactively in effect: `Created cloud session: <title>`, `View: https://claude.ai/code/session_<id>?from=cli&m=0`, `Resume with: claude --teleport session_<id>`; no live checklist was shown | Brief (maintainer's terminal) |
-| Did probe 1 create a session? | Not testable from inside; the maintainer checks the session list at claude.ai/code | None |
+| Did probe 1 create a session? | No. Not testable from this sub-agent; the orchestrating session's `list_sessions` covered every 2026-09-29 session and none came from probe 1 | The orchestrator's own probe, recorded in [cloud-agents-claude-code.md](cloud-agents-claude-code.md#open-questions) |
 | Can a cloud session run a headless browser, and on which network level? | Yes, on Trusted, with the pre-installed Chromium; trust the proxy CA's SPKI first; only allowlisted hosts load | Probe 1 |
 | Do WebFetch and WebSearch work under Trusted? | WebSearch yes. WebFetch yes for allowlisted hosts, `EGRESS_BLOCKED` for others | Probe 2 |
 | Do skills enabled on the claude.ai account load, and does `CLAUDE.md` → `AGENTS.md` load? | Yes to both: nine account skills synced into `~/.claude/skills/synced/`; `AGENTS.md` reached the model through `CLAUDE.md` | Brief; this sub-agent's own context |
@@ -233,8 +233,9 @@ All on 2026-09-29, inside the cloud session's VM, as a sub-agent. No commits.
 | 7 | VM | `apt-get download libnss3-tools` into `/tmp/pwprobe` | 404, nothing installed; empty `/tmp/pwprobe` left |
 | 8 | VM | WebFetch of three URLs, one WebSearch; `grep -a` in the `claude` binary for `EGRESS_BLOCKED`; `/proc` and `/proc/net/tcp` to find the relay's owner | Nothing |
 | 9 | VM → GitHub | `git ls-remote origin`, `git fetch origin main`, `git reflog show refs/remotes/origin/<branch>`, GraphQL and REST reads with `curl` (status codes only), `git ls-remote` of a public repo | `origin/main` fetched locally; `/tmp/gql.out` |
-| 10 | VM → Anthropic | Remote MCP `get_session` (no ID) and `read_documentation` (index, `session.resources`, `environment.network`) | Nothing; `read_documentation` waited for the user's approval |
+| 10 | VM → Anthropic | Remote MCP `get_session` (no ID) and `read_documentation` (index, `session.resources`, `environment.network`) | Nothing; `read_documentation` waited for approval |
 | 11 | VM | `git worktree add -b probe/wt-probe …`, `list`, `remove`, `git branch -D probe/wt-probe` | Created and removed a worktree and local branch; nothing pushed |
 | 12 | VM | `claude --version`, `claude --help`, `claude auth status` | Nothing |
 | 13 | VM | Frontmatter of the 20 installed skills | Nothing |
 | 14 | VM | Wrote this file | This file |
+| 15 | VM (integration) | Reworded the permission-prompt lines (they waited for approval; who approved isn't recorded); filled the probe 1 row from the orchestrator's `list_sessions` | This file only |
