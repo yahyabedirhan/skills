@@ -6,12 +6,17 @@ argument-hint: "The pull request (optional: defaults to the current branch's)"
 
 # Close Effort
 
-The maintainer's only step after delivery is reviewing the pull request and saying "go". Everything after that is yours, whether you are the orchestrator that delivered it or any session told the pull request merged or to merge it: merge, follow up, carry over, clean up, report. Run every command yourself. The one step that can fall to the maintainer is returning the worktree this session runs in, and only when Herdr isn't there (step 9).
+The maintainer's only step after delivery is reviewing the pull request and saying "go". Everything after that is yours, whether you are the orchestrator that delivered it or any session told the pull request merged or to merge it: merge, follow up, carry over, clean up, report. Run every command yourself. Only two steps can fall to the maintainer: running the cleanup script, when a permission check refused a deletion, and returning the worktree this session runs in, when Herdr isn't there (step 9).
 
 Two rules hold for every destructive step (deleting a branch, removing a worktree):
 
-- **Proven merged, or kept.** Remove a branch or worktree only when its work is **proven merged**: every commit reachable from the default branch (`git merge-base --is-ancestor <branch> origin/<default>`), or, for work that was squashed or cherry-picked with fixes, matched by patch (`git cherry origin/<default> <branch>` prints no `+` line). A worktree must also be clean (`git -C <path> status --short` empty after step 6). Keep anything you can't prove, and name it in the report with what's unproven.
-- **A denial is final.** When a permission check refuses a destructive command, add it to the **cleanup script** and carry on; run no variant of the refused command. The script is `.scratch/close-<effort>.sh` in the main checkout: one line per command, each under a comment with its proof (the `git cherry` or ancestor check you ran). Run each commit, push and deletion as its own call, so one refusal stops only itself.
+- **Proven merged, or kept.** Remove a branch or worktree only when its work is **proven merged** by one of these:
+  - **Reachable**: `git merge-base --is-ancestor <branch> origin/<default>` succeeds (a merge commit, or a fast-forward).
+  - **Matched by patch**: `git cherry origin/<default> <branch>` prints no `+` line (commits rebased or cherry-picked unchanged). A squash merge, or a commit changed while it was integrated, leaves `+` lines, so a `+` proves nothing either way.
+  - **In the merged pull request's head**: `gh pr view <n> --json state,headRefOid` shows `MERGED`, and the branch's tip is `headRefOid` or its ancestor (`git merge-base --is-ancestor <branch> <headRefOid>`; when that commit is missing locally, `git fetch origin pull/<n>/head` first). This proves the effort branch after a squash merge. A delegate branch left over from the build is proven when its ticket's commit is in that head (`git log <headRefOid> --grep <ticket>` finds it) and the branch holds nothing else (`git log --oneline <headRefOid>..<branch>` shows only the one ticket commit the delegate made).
+
+  A worktree must also be clean (`git -C <path> status --short` empty after step 6). Keep anything you can't prove, and name it in the report with what's unproven.
+- **A denial is final.** When a permission check refuses a destructive command, add it to the **cleanup script** and carry on; run no variant of the refused command. The script is `.scratch/close-<effort>.sh` in the main checkout: one line per command, each under a comment with its proof (the check you ran and its result). Run each commit, push and deletion as its own call, so one refusal stops only itself.
 
 ## 1. Find the effort
 
@@ -46,13 +51,17 @@ Before any follow-up or cleanup, read the pull request description's last sectio
 - **a todo for the maintainer**, for the report;
 - **nothing needed**.
 
-When the description has no such section (an older effort) and the delivering orchestrator still runs in a Herdr tab, ask it once: `herdr agent prompt <name> 'Reply with the four lines of Things to be aware of for this pull request: Decided alone, Surprises, Not in this PR, Follow-ups.' --wait`. Otherwise take the items from the handoff and tickets yourself.
+When the description has no such section (an older effort) and the delivering orchestrator still runs in a Herdr tab, ask it once: `herdr agent prompt <name> 'Reply with the four lines of Things to be aware of for this pull request: Decided alone, Surprises, Not in this PR, Follow-ups.' --wait --timeout 600000`, then read its reply: `herdr agent read <name> --source recent-unwrapped --lines 80`. When no such session runs, the wait times out, or the reply lacks the four lines, take the items from the handoff and tickets yourself.
 
 Done when every item has a route and each skipped check has run.
 
 ## 4. Follow up and carry over
 
-In the main checkout, bring the default branch up to date (`git switch <default>`, `git pull --prune`). Then:
+Work from the updated default branch without moving the maintainer's main checkout: run git there as `git -C <main checkout>`, and never switch its branch. When it is clean and already on the default branch, `git -C <main checkout> pull --prune`; otherwise `git -C <main checkout> fetch --prune`, and work from `origin/<default>`.
+
+Nothing is committed or pushed straight to the default branch. Changes the close makes to tracked files (a local tracker's done marks in step 5, files kept in step 6) follow the project's instructions. By default they go on one small **follow-up branch** from `origin/<default>`, in its own worktree (the project's worktree tool, else `git worktree add --no-track -b <effort>-close <path> origin/<default>`), with a pull request opened through the **to-pr** skill for the maintainer to review. When they are too small to be worth a pull request, list them in the report instead. The follow-up branch and its worktree aren't the effort's: step 7 leaves them.
+
+Then:
 
 1. **Run the post-merge follow-ups**: what the handoff, the spec or the last section says happens after the merge, such as installing or updating what changed, removing a setting the change replaced, publishing a draft release (then check its tag is on the merge commit and its assets are attached), or trying what can only be tried once merged. Report each result.
 2. **Audit what's unfinished**: the effort's open tickets, the items routed to a ticket in step 3, review findings deferred at delivery, a red run or broken pin from step 2, stale docs or assets.
@@ -64,13 +73,13 @@ Done when every item is done, carried over as a linked next-effort ticket, or a 
 
 ## 5. Close the tracker
 
-Close the spec and every ticket the merge finished, including ones whose "closes" didn't fire (a ticket named only in a commit, or a base that isn't the default branch). A criterion that could only be shown after the merge gets checked and ticked now. Close each carried-over ticket too, with a comment linking the next-effort ticket that continues it. On a local tracker, mark them done in `.efforts/<effort>/` and commit that on the default branch, as its own call.
+Close the spec and every ticket the merge finished, including ones whose "closes" didn't fire (a ticket named only in a commit, or a base that isn't the default branch). A criterion that could only be shown after the merge gets checked and ticked now. Close each carried-over ticket too, with a comment linking the next-effort ticket that continues it. On a local tracker, mark them done in `.efforts/<effort>/` on the follow-up branch (step 4), committed as its own call.
 
 Done when the effort's only open tickets are QA tickets waiting on the maintainer.
 
 ## 6. Keep what's worth keeping
 
-`treehouse return` deletes a worktree's ignored and untracked files, and `git worktree remove` its ignored ones, without asking. For each worktree you are about to remove, list them (`git -C <path> status --short --ignored`) and copy out anything worth keeping, per the folder standard (the **orchestrating** skill's `folders.md`): screenshots to `docs/assets/<topic>/`, notes to a handoff or the tracker, a useful script to the main checkout's `.scratch/`. Untracked editor settings (`.vscode/`) the maintainer may care about count too: copy them to the main checkout. Commit what lands in tracked folders, as its own call, and push.
+`treehouse return` deletes a worktree's ignored and untracked files, and `git worktree remove` its ignored ones, without asking. For each worktree you are about to remove, list them (`git -C <path> status --short --ignored`) and copy out anything worth keeping, per the folder standard (the **orchestrating** skill's `folders.md`): screenshots to `docs/assets/<topic>/`, notes to a handoff or the tracker, a useful script to the main checkout's `.scratch/`. Untracked editor settings (`.vscode/`) the maintainer may care about count too: copy them to the main checkout. What lands in tracked folders goes on the follow-up branch (step 4): commit it as its own call, and push.
 
 Done when each worktree's untracked and ignored files are copied out or judged throwaway.
 
@@ -80,7 +89,7 @@ Done when each worktree's untracked and ignored files are copied out or judged t
 
 - sub-agent worktrees: `git worktree remove <path>`;
 - the effort's other worktrees, the project's way: `treehouse return <path>`, or `git worktree remove <path>`;
-- local branches: `git branch -d <branch>`, or `git branch -D <branch>` when only `git cherry` proves it (after a squash or cherry-pick);
+- local branches: `git branch -d <branch>`, or `git branch -D <branch>` when only the patch match or the merged pull request's head proves it (after a squash, or a cherry-pick);
 - remote branches: `git push origin --delete <branch>`.
 
 A worktree whose branch has an open pull request stays until its branch is pushed; after that, keep its local branch only when the remote doesn't hold it.
@@ -101,6 +110,7 @@ Report in the chat, short, with links:
 - what closed, and what carried over (each new ticket by title and link);
 - QA tickets waiting on the maintainer, and the maintainer's todos from step 3;
 - what was kept and anything not proven merged;
+- the follow-up pull request, or the changes listed in its place;
 - the cleanup script, when there is one, with the one command that runs it.
 
 Last, when this session runs inside one of the effort's worktrees, return it from outside it: returning it stops every process there, this session included, so it runs after the report. Skip this when this session runs elsewhere; step 7 returned every worktree.
