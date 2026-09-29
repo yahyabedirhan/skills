@@ -10,7 +10,7 @@
 
 ### Files Changed
 
-- `{file_path}` - [brief description]
+- `{file_path}` - [brief description] · [final version]({blob_url}) · [diff]({diff_url})
 - ...
 
 ### Next Steps
