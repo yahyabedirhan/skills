@@ -27,11 +27,13 @@ from pathlib import Path
 
 from .. import rules as rule_table
 from ..plan import Change, FileWrite, Section
+from .. import shared
 from ..shared import plan_instructions, read_text
 from . import claude_code
 
 NAME = "cursor"
 LABEL = "Cursor"
+PROGRAMS = ("cursor-agent", "cursor")  # on PATH, they mark a fresh install whose folder isn't made yet
 
 # Rule level -> the cli-config.json list that expresses it; ask has none.
 NATIVE_LIST = {"deny": "deny", "allow-and-report": "allow"}
@@ -177,7 +179,7 @@ def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path,
     """Returns (sections, writes, owned_after) for Cursor's IDE and CLI."""
     memory = Section(f"{LABEL}: memory", config_dir(home))
     memory.changes.append(Change("none", "no memory feature in the IDE (removed in 2.1) or the CLI; nothing to turn off"))
-    if not config_dir(home).is_dir():
+    if not shared.harness_found(home, os_home, config_dir(home), PROGRAMS):
         section = Section(LABEL, config_dir(home))
         section.changes.append(Change("none", "Cursor isn't set up here (no ~/.cursor); nothing to set"))
         return [section, memory], [], {}

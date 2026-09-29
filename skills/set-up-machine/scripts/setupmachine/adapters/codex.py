@@ -38,6 +38,7 @@ from .claude_code import HOOK_MISSES, hook_command
 
 NAME = "codex"
 LABEL = "Codex"
+PROGRAMS = ("codex",)  # on PATH, they mark a fresh install whose folder isn't made yet
 
 # Rule level -> the Codex decision that expresses it.
 DECISION = {"deny": "forbidden", "ask": "prompt", "allow-and-report": "allow"}
@@ -74,7 +75,7 @@ def config_dir(home: Path) -> Path:
 def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path, tools=None, rules_path=None):
     """Returns (sections, writes, owned_after) for Codex. MCP tools aren't listed: the
     pre-tool hook matches them by name when they're called."""
-    if not config_dir(home).is_dir():
+    if not shared.harness_found(home, os_home, config_dir(home), PROGRAMS):
         section = Section(f"{LABEL}: memory", config_dir(home) / "config.toml")
         section.changes.append(Change("none", "Codex isn't set up here (no ~/.codex); nothing to turn off"))
         return [section], [], {}

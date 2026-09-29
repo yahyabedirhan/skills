@@ -8,7 +8,8 @@ catches every spelling of the same command:
 - leading `VAR=value` words, shell keywords (`then`, `do`, `{`, `!`) and
   wrappers (`timeout`, `nice`, `nohup`, `env`, `xargs`, `command`, …) are dropped;
   a wrapper that runs no command is read as itself alone (`env -u X` -> `env`);
-- a program named by path (`/bin/rm`) is read by its basename;
+- a program named by path (`/bin/rm`) is read by its basename, in lower case where
+  the filesystem ignores case (macOS runs `/bin/rm` for `RM`; Linux finds no `RM`);
 - the command inside `bash|sh|zsh -c '…'` (any flag cluster holding `c`, such as
   `-lc`), `eval`, `sudo`, `find -exec`, a heredoc or a pipe into a shell is read
   as a command of its own;
@@ -22,7 +23,11 @@ from __future__ import annotations
 import os
 import re
 import shlex
+import sys
 
+# Whether program names are read case-insensitively: macOS's and Windows's default
+# filesystems find `/bin/rm` for `RM`, Linux's don't.
+FOLD_CASE = sys.platform in ("darwin", "win32")
 SHELLS = {"bash", "sh", "zsh", "dash", "ksh"}
 # Shell options that take the next word as their value.
 SHELL_VALUE_OPTIONS = {"-o", "+o", "-O", "+O", "--rcfile", "--init-file"}
@@ -169,10 +174,7 @@ def _unwrap(words: list, depth: int) -> list:
 
 
 def _strip(words: list) -> list:
-    """Drop assignments, keywords and wrappers; the program becomes its lower-case basename.
-
-    Lower case, because macOS's default filesystem runs `/bin/rm` for `RM` too.
-    """
+    """Drop assignments, keywords and wrappers; the program becomes its basename (see _program)."""
     i = 0
     while i < len(words):
         word = words[i]
@@ -200,7 +202,9 @@ def _strip(words: list) -> list:
 
 
 def _program(word: str) -> str:
-    return os.path.basename(word.lstrip("\\")).lower()
+    """A program's basename, in lower case where the filesystem ignores case (FOLD_CASE)."""
+    name = os.path.basename(word.lstrip("\\"))
+    return name.lower() if FOLD_CASE else name
 
 
 def _split_env_string(args: list) -> list:

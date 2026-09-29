@@ -7,6 +7,7 @@ import json
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -730,6 +731,45 @@ class HookWiringTest(unittest.TestCase):
         reconcile.apply(plan, plan.id)
         [group] = self.pre_tool_hooks()
         self.assertIn(f"--rules {other}", group["hooks"][0]["command"])
+
+
+class FreshInstallTest(unittest.TestCase):
+    """A harness installed but never started has no folder yet; its program on PATH finds it."""
+
+    def setUp(self):
+        self.home = Home()
+        self.home.os_home = self.home.path
+        self.addCleanup(self.home.close)
+
+    def build(self, on_path, os_home=None):
+        which = lambda program: f"/usr/bin/{program}" if program in on_path else None
+        with mock.patch.object(shared, "which", which):
+            return reconcile.build(self.home.path, [RM], os_home or self.home.path, {"claude-code": [], "cursor": []})
+
+    def titles(self, plan):
+        return [s.title for s in plan.sections]
+
+    def test_a_harness_on_path_is_set_up_without_its_folder(self):
+        plan = self.build({"codex", "opencode", "cursor-agent"})
+        titles = self.titles(plan)
+        for title in ("Codex: rules", "opencode: permissions", "Cursor: pre-tool hook"):
+            self.assertIn(title, titles, render(plan))
+        reconcile.apply(plan, plan.id)
+        for folder in (".codex", ".config/opencode", ".cursor"):
+            self.assertTrue((self.home.path / folder).is_dir(), folder)
+        self.assertFalse(self.build({"codex", "opencode", "cursor-agent"}).has_changes)
+
+    def test_the_cursor_ide_alone_is_found_by_its_program(self):
+        self.assertIn("Cursor: pre-tool hook", self.titles(self.build({"cursor"})))
+
+    def test_a_harness_neither_installed_nor_set_up_is_skipped(self):
+        plan = self.build(set())
+        self.assertIn("Codex isn't set up here (no ~/.codex); nothing to turn off", kinds(plan, "none"))
+        self.assertNotIn("Codex: rules", self.titles(plan))
+
+    def test_a_trial_home_ignores_path(self):
+        plan = self.build({"codex", "opencode", "cursor-agent"}, os_home=self.home.path / "not-this-home")
+        self.assertNotIn("Codex: rules", self.titles(plan))
 
 
 if __name__ == "__main__":
