@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cloud Agents Research Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Overpass:wght@500;700;800;900&family=Overpass+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a route map. The page is one line of stations (sections) you ride from "why" to "what to read";
+   a fixed rail on wide screens, a thin progress bar on narrow ones. The landscape slide is the one bold moment:
+   a track that runs solid near the Mac and breaks into dashes as less of your setup travels with the work. */
+:root {
+  --bg: #f1f3f8;
+  --surface: #ffffff;
+  --ink: #131a2d;
+  --muted: #535d78;
+  --line: #d3d9e6;
+  --accent: #2a3ccc;
+  --accent-soft: #e3e7fb;
+  --on-accent: #ffffff;
+  --code-bg: #e8ebf3;
+  --font-display: "Overpass", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Literata", Georgia, "Times New Roman", serif;
+  --font-mono: "Overpass Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3rem;
+  --step-2: 1.65rem;
+  --step-3: clamp(1.9rem, 1.4rem + 2vw, 2.6rem);
+  --step-4: clamp(2.4rem, 1.5rem + 4vw, 4.2rem);
+  --gutter: clamp(16px, 4vw, 48px);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1220;
+    --surface: #161c2e;
+    --ink: #e6e9f3;
+    --muted: #a0a8c0;
+    --line: #2b3350;
+    --accent: #9aa8ff;
+    --accent-soft: #232b4d;
+    --on-accent: #0e1220;
+    --code-bg: #1d2439;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1220;
+  --surface: #161c2e;
+  --ink: #e6e9f3;
+  --muted: #a0a8c0;
+  --line: #2b3350;
+  --accent: #9aa8ff;
+  --accent-soft: #232b4d;
+  --on-accent: #0e1220;
+  --code-bg: #1d2439;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+code, kbd {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.08em 0.35em;
+  border-radius: 3px;
+  overflow-wrap: anywhere;
+}
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+
+.skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: var(--on-accent); padding: 8px 12px; z-index: 50; }
+.skip:focus { left: 8px; }
+
+/* Progress: top bar on every width */
+.progress {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.progress-inner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px var(--gutter);
+  font-family: var(--font-display); font-size: var(--step--1); color: var(--muted);
+}
+.progress-count { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.progress-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.progress-keys { white-space: nowrap; }
+.progress-bar { height: 3px; background: var(--line); }
+.progress-fill { height: 100%; width: 0; background: var(--accent); }
+@media (max-width: 560px) { .progress-keys { display: none; } }
+
+/* Rail: the line of stations, wide screens only */
+.rail { display: none; }
+@media (min-width: 1180px) {
+  .rail {
+    display: block; position: fixed; left: 28px; top: 50%; transform: translateY(-50%); z-index: 20;
+    width: 200px;
+  }
+  .rail ol { list-style: none; margin: 0; padding: 0; position: relative; }
+  .rail ol::before { content: ""; position: absolute; left: 7px; top: 10px; bottom: 10px; width: 2px; background: var(--line); }
+  .rail li { position: relative; }
+  .rail a {
+    display: flex; align-items: center; gap: 12px; padding: 7px 0;
+    font-family: var(--font-display); font-size: 0.86rem; color: var(--muted); text-decoration: none;
+  }
+  .rail a::before {
+    content: ""; flex: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--line); position: relative; z-index: 1;
+  }
+  .rail a:hover { color: var(--ink); }
+  .rail a.is-past::before { border-color: var(--accent); }
+  .rail a.is-current { color: var(--ink); font-weight: 700; }
+  .rail a.is-current::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  main { margin-left: 200px; }
+}
+
+/* Slides */
+main { padding-top: 48px; }
+.slide {
+  min-height: 88vh;
+  padding-inline: var(--gutter);
+  padding-block: clamp(56px, 9vh, 104px);
+  border-bottom: 1px solid var(--line);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.slide-inner { width: 100%; max-width: 980px; margin-inline: auto; display: grid; gap: 28px; min-width: 0; }
+.stop {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display); font-weight: 700; font-size: var(--step--1); color: var(--accent);
+}
+.stop-dot { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.slide h2 { font-size: var(--step-3); font-weight: 800; letter-spacing: -0.01em; max-width: 24ch; }
+.lede { font-size: var(--step-1); line-height: 1.5; max-width: 62ch; color: var(--ink); }
+.prose { max-width: 66ch; display: grid; gap: 16px; }
+.muted { color: var(--muted); }
+.small { font-size: var(--step--1); }
+.next {
+  justify-self: start;
+  font-family: var(--font-display); font-weight: 700; font-size: var(--step--1);
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px 6px;
+  border: 1.5px solid var(--accent); border-radius: 999px; text-decoration: none;
+}
+.next:hover { background: var(--accent); color: var(--on-accent); }
+
+/* Hero */
+.hero { min-height: 92vh; }
+.hero h1 { font-size: var(--step-4); font-weight: 900; letter-spacing: -0.02em; max-width: 16ch; line-height: 1.02; }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: var(--font-display); font-size: var(--step--1); color: var(--muted); }
+.hero-meta a { font-weight: 700; }
+.hero-start { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn {
+  font-family: var(--font-display); font-weight: 800; font-size: 1rem;
+  background: var(--accent); color: var(--on-accent); text-decoration: none;
+  padding: 12px 20px 10px; border-radius: 999px;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn-quiet { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+.minimap { display: flex; flex-wrap: wrap; gap: 6px 0; list-style: none; margin: 0; padding: 0; font-family: var(--font-display); font-size: var(--step--1); }
+.minimap li { display: flex; align-items: center; }
+.minimap li + li::before { content: ""; width: 18px; height: 2px; background: var(--line); margin-inline: 6px; }
+.minimap a { color: var(--muted); text-decoration: none; }
+.minimap a:hover { color: var(--accent); }
+
+/* Why */
+.pull {
+  font-family: var(--font-body); font-style: italic; font-size: var(--step-2); line-height: 1.35;
+  max-width: 34ch; padding-left: 20px; border-left: 4px solid var(--accent);
+}
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.fact h3 { font-size: 1.05rem; font-weight: 800; }
+.fact p { font-size: 0.97rem; }
+
+/* Glossary */
+.glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0 40px; margin: 0; }
+.term { padding-block: 16px; border-top: 1px solid var(--line); min-width: 0; }
+.term dt { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; }
+.term dd { margin: 4px 0 0; }
+.term .eg { display: block; margin-top: 6px; font-size: 0.93rem; color: var(--muted); }
+
+/* Landscape route */
+.route { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 20px; position: relative; }
+.station { position: relative; padding-top: 44px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.station::before { /* the track segment leading out of this station */
+  content: ""; position: absolute; top: 12px; left: 12px; right: -32px; height: 0;
+  border-top: 5px solid var(--accent);
+  transform-origin: left center;
+  animation: draw 0.9s cubic-bezier(.2,.7,.2,1) both;
+}
+.station:nth-child(2)::before { border-top-style: solid; animation-delay: .25s; }
+.station:nth-child(3)::before { border-top-style: dashed; animation-delay: .5s; }
+.station:last-child::before { border-top-style: dotted; right: 20%; animation-delay: .75s; }
+.station::after { /* the station dot */
+  content: ""; position: absolute; top: 2px; left: 0; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--bg); border: 5px solid var(--accent); box-sizing: border-box;
+}
+.station:first-child::after { background: var(--accent); }
+@keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .station::before { animation: none; } }
+.station h3 { font-size: 1.3rem; font-weight: 900; }
+.station .where { font-size: 0.95rem; color: var(--muted); }
+.kv { display: grid; gap: 8px; margin: 0; }
+.kv div { display: grid; gap: 1px; }
+.kv dt { font-family: var(--font-display); font-weight: 700; font-size: 0.8rem; color: var(--muted); letter-spacing: 0.02em; }
+.kv dd { margin: 0; font-size: 0.95rem; line-height: 1.45; }
+.role { justify-self: start; font-family: var(--font-display); font-weight: 800; font-size: 0.82rem; padding: 4px 10px 2px; border-radius: 999px; border: 1.5px solid var(--accent); color: var(--accent); }
+.role.solid { background: var(--accent); color: var(--on-accent); }
+.axis { display: flex; justify-content: space-between; gap: 16px; font-family: var(--font-display); font-size: var(--step--1); color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.branch {
+  display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start;
+  border: 2px dashed var(--line); border-radius: 12px; padding: 18px 20px; max-width: 820px;
+}
+.branch-mark { width: 26px; height: 26px; border-radius: 50%; border: 5px solid var(--muted); margin-top: 3px; }
+.branch h3 { font-size: 1.15rem; font-weight: 900; margin-bottom: 4px; }
+@media (max-width: 820px) {
+  .route { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-left: 44px; }
+  .station { padding-top: 0; }
+  .station::before { top: 26px; left: -32px; right: auto; bottom: -30px; width: 0; height: auto; border-top: 0; border-left: 5px solid var(--accent); transform-origin: top center; animation-name: drawv; }
+  .station:nth-child(3)::before { border-left-style: dashed; }
+  .station:last-child::before { border-left-style: dotted; bottom: 30%; }
+  .station::after { left: -44px; }
+  .axis { flex-direction: column; gap: 2px; }
+}
+@keyframes drawv { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* Findings */
+.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: f; }
+.findings li { display: grid; grid-template-columns: 3rem 1fr; gap: 12px; padding-block: 16px; border-top: 1px solid var(--line); counter-increment: f; }
+.findings li::before { content: counter(f); font-family: var(--font-display); font-weight: 900; font-size: 1.9rem; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.findings strong { font-family: var(--font-display); font-weight: 800; font-size: 1.12rem; }
+.findings .src { font-size: var(--step--1); white-space: nowrap; }
+
+/* Path */
+.path { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; counter-reset: p; }
+.path li { counter-increment: p; position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.path li::before { content: counter(p); width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-family: var(--font-display); font-weight: 900; }
+.path h3 { font-size: 1.08rem; font-weight: 800; }
+.path p { font-size: 0.95rem; }
+@media (max-width: 900px) { .path { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .path { grid-template-columns: minmax(0, 1fr); } }
+.tickets { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; padding: 6px 12px 4px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); text-decoration: none; }
+.chip b { color: var(--accent); }
+a.chip:hover { outline: 1.5px solid var(--accent); }
+
+/* Decisions */
+.dgroups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+@media (max-width: 900px) { .dgroups { grid-template-columns: minmax(0, 1fr); } }
+.dgroup h3 { font-size: 1.1rem; font-weight: 800; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
+.dlist { list-style: none; margin: 0; padding: 0; }
+.dlist li { padding-block: 12px; border-bottom: 1px solid var(--line); display: grid; gap: 4px; }
+.dq { font-family: var(--font-display); font-weight: 700; font-size: 1rem; line-height: 1.3; text-decoration: none; color: var(--ink); display: flex; gap: 10px; }
+.dq:hover { color: var(--accent); }
+.did { flex: none; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 900; min-width: 2.4em; }
+.drec { font-size: 0.93rem; color: var(--muted); padding-left: calc(2.4em + 10px); }
+.flag { font-family: var(--font-display); font-size: 0.78rem; font-weight: 800; color: var(--accent); }
+
+/* Try it */
+.try { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (max-width: 860px) { .try { grid-template-columns: minmax(0, 1fr); } }
+.term-window { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; min-width: 0; }
+.term-bar { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 8px 14px; border-bottom: 1px solid var(--line); font-family: var(--font-display); font-size: 0.82rem; color: var(--muted); }
+.copy { font-family: var(--font-display); font-weight: 700; font-size: 0.8rem; background: transparent; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 999px; padding: 3px 10px 1px; cursor: pointer; }
+.copy:hover { background: var(--accent); color: var(--on-accent); }
+pre { margin: 0; padding: 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.86rem; line-height: 1.7; }
+pre .c { color: var(--muted); }
+.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 10px; }
+.steps li::marker { font-family: var(--font-display); font-weight: 800; color: var(--accent); }
+.note { background: var(--accent-soft); border-radius: 10px; padding: 14px 16px; font-size: 0.95rem; display: grid; gap: 6px; }
+
+/* Reading path */
+.cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: r; }
+.card {
+  counter-increment: r;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 20px 22px; display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; gap: 6px 18px; align-items: start;
+}
+.card::before { content: counter(r); grid-row: 1 / span 3; font-family: var(--font-display); font-weight: 900; font-size: 1.8rem; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.card.first { border: 2px solid var(--accent); }
+.card h3 { font-size: 1.2rem; font-weight: 800; }
+.card h3 a { color: var(--ink); text-decoration: none; }
+.card h3 a:hover { color: var(--accent); text-decoration: underline; }
+.time { font-family: var(--font-display); font-weight: 700; font-size: 0.85rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.card .body { grid-column: 2 / span 2; display: grid; gap: 6px; font-size: 0.97rem; }
+.card .when { color: var(--muted); }
+.card .links { grid-column: 2 / span 2; display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: var(--font-display); font-size: 0.88rem; margin-top: 4px; }
+.card .links .gh { color: var(--muted); }
+@media (max-width: 560px) {
+  .card { grid-template-columns: minmax(0, 1fr); padding: 18px; }
+  .card::before { grid-row: auto; font-size: 1.4rem; }
+  .card .body, .card .links { grid-column: auto; }
+}
+
+footer { padding-inline: var(--gutter); padding-block: 40px 64px; font-family: var(--font-display); font-size: var(--step--1); color: var(--muted); }
+footer .slide-inner { gap: 10px; }
+@media (min-width: 1180px) { footer { margin-left: 200px; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#why">Skip to the first section</a>
+
+<div class="progress" aria-hidden="false">
+  <div class="progress-inner">
+    <span class="progress-count" id="progress-count">Start</span>
+    <span class="progress-name" id="progress-name">Cloud agents research guide</span>
+    <span class="progress-keys">Press <kbd>n</kbd> / <kbd>p</kbd> to step</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<nav class="rail" aria-label="Sections">
+  <ol>
+    <li><a href="#why">Why this research</a></li>
+    <li><a href="#words">Eight words</a></li>
+    <li><a href="#landscape">Where agents can run</a></li>
+    <li><a href="#findings">What we found</a></li>
+    <li><a href="#direction">Recommended direction</a></li>
+    <li><a href="#decisions">Your decisions</a></li>
+    <li><a href="#try">Try it yourself</a></li>
+    <li><a href="#read">Reading path</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+
+<header class="slide hero" id="top">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">0</span>Research effort, finished 29 September 2026</p>
+    <h1>Where can your agents work when the laptop is closed?</h1>
+    <p class="lede">Six research files and one synthesis map every place an agent could run for you: your Mac, your VPS, Claude Code's cloud and the other hosted agents. This page is the way in. It explains the words, shows the landscape, gives you the result in a few lines, and then guides you through the files in the order worth reading them.</p>
+    <p class="hero-meta">
+      <span>Spec <a href="https://github.com/yahyabedirhan/skills/issues/45">#45</a></span>
+      <span>Pull request <a id="pr-link" href="https://github.com/yahyabedirhan/skills/pull/76" title="Research: what agents on a server or in the cloud can do, and how to delegate to them">#76</a></span>
+      <span>About 10 minutes here, then as deep as you like</span>
+    </p>
+    <div class="hero-start">
+      <a class="btn" href="#why">Start the tour</a>
+      <a class="btn btn-quiet" href="#read">Skip to the reading path</a>
+    </div>
+    <ol class="minimap" aria-label="The route through this page">
+      <li><a href="#why">Why</a></li>
+      <li><a href="#words">Words</a></li>
+      <li><a href="#landscape">Landscape</a></li>
+      <li><a href="#findings">Findings</a></li>
+      <li><a href="#direction">Direction</a></li>
+      <li><a href="#decisions">Decisions</a></li>
+      <li><a href="#try">Try it</a></li>
+      <li><a href="#read">Read</a></li>
+    </ol>
+  </div>
+</header>
+
+<section class="slide" id="why" aria-labelledby="why-h" data-name="Why this research">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">1</span>Why this research</p>
+    <h2 id="why-h">Your setup works on the Mac. Beyond it, almost nothing was mapped.</h2>
+    <p class="pull">“Each time work has moved between machines so far, it worked only because the maintainer relayed state by hand.”</p>
+    <p class="muted small">From the problem statement of spec #45.</p>
+    <div class="facts">
+      <div class="fact"><h3>A VPS set up by hand</h3><p>A small server already runs Claude Code in Herdr, but nobody had checked what an agent there can and can't do compared with the Mac.</p></div>
+      <div class="fact"><h3>Hosted agents, unmapped</h3><p>Claude Code, Codex, Cursor and GitHub all run agents in their own clouds. Their machines, tools and limits were unknown, and cloud credits sat unused.</p></div>
+      <div class="fact"><h3>Three build tickets waiting</h3><p>Handing work to the VPS (#13), continuing an unfinished effort (#15) and seeing each other's state (#16) were blocked until this map existed.</p></div>
+    </div>
+    <div class="prose">
+      <p>So the effort was <strong>research only</strong>: no skill, instruction or machine was changed. Each ticket answered one area from official documentation, plus a few safe, read-only probes. A final synthesis put everything side by side and turned it into decisions for you.</p>
+    </div>
+    <a class="next" href="#words">Next: the words you need</a>
+  </div>
+</section>
+
+<section class="slide" id="words" aria-labelledby="words-h" data-name="Eight words">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">2</span>Eight words</p>
+    <h2 id="words-h">The few terms the research leans on</h2>
+    <p class="lede">You'll meet these in every file. Each one in plain language, with where it shows up here.</p>
+    <dl class="glossary">
+      <div class="term"><dt>Effort</dt><dd>One piece of work described by a spec and split into tickets, delivered as one pull request.<span class="eg">This research is an effort: spec #45 and its tickets.</span></dd></div>
+      <div class="term"><dt>Orchestrator and delegate</dt><dd>The orchestrator runs an effort: it hands each ticket to a delegate, collects each delegate's commit, and opens the pull request. A delegate does one ticket and reports back.<span class="eg">Hosted agents like Codex fit the delegate role, not the orchestrator's.</span></dd></div>
+      <div class="term"><dt>Handover</dt><dd>One session passing work to a new session: it writes a handoff file, commits and pushes it, then starts the new session with a one-line prompt pointing at it.<span class="eg">The open question is how to start that new session somewhere other than the Mac.</span></dd></div>
+      <div class="term"><dt>Worktree</dt><dd>A second working copy of the same repository on its own branch, so several agents can work side by side without touching each other's files. Treehouse makes them on the Mac.<span class="eg">The VPS has plain git but no Treehouse yet.</span></dd></div>
+      <div class="term"><dt>Herdr</dt><dd>A terminal multiplexer built for coding agents: workspaces, tabs and panes, each able to hold an agent you can list, read and prompt. It can save another machine and drive it.<span class="eg">Version 0.9.2 adds <code>herdr --machine</code>, which the plan builds on.</span></dd></div>
+      <div class="term"><dt>VPS</dt><dd>A virtual private server: a small Linux machine rented by the month that stays on when your laptop is closed. Yours is Hetzner's smallest shared tier, 2 vCPU and 4 GB.<span class="eg">It already runs Claude Code in Herdr.</span></dd></div>
+      <div class="term"><dt>Cloud session</dt><dd>A Claude Code session that runs on Anthropic's machines instead of yours. Each one gets a fresh virtual machine, keeps running with the laptop closed, and is reclaimed when idle.<span class="eg">Started from claude.ai, the phone, the Desktop app or <code>claude --cloud</code>.</span></dd></div>
+      <div class="term"><dt>Routine</dt><dd>A saved Claude Code setup (a prompt, repositories, connectors) that runs as a cloud session on a schedule, an API call or a GitHub event. A research preview.<span class="eg">Its API trigger is the one documented way for an agent to start cloud work.</span></dd></div>
+    </dl>
+    <a class="next" href="#landscape">Next: where agents can run</a>
+  </div>
+</section>
+
+<section class="slide" id="landscape" aria-labelledby="land-h" data-name="Where agents can run">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">3</span>Where agents can run</p>
+    <h2 id="land-h">The further from the Mac, the less of your setup travels with the work</h2>
+    <p class="lede">Four places, left to right. The line breaks up as your skills, instructions and tools stop coming along.</p>
+    <ol class="route" aria-label="Places an agent can run, from nearest to furthest">
+      <li class="station">
+        <h3>Your Mac</h3>
+        <p class="where">Home. macOS, 18 GB, every harness, Treehouse, a browser.</p>
+        <dl class="kv">
+          <div><dt>Your setup</dt><dd>All of it: current skills and global instructions.</dd></div>
+          <div><dt>You reach it</dt><dd>You're here. Herdr tabs.</dd></div>
+          <div><dt>Missing</dt><dd>It sleeps when the laptop closes.</dd></div>
+        </dl>
+        <span class="role solid">Orchestrator</span>
+      </li>
+      <li class="station">
+        <h3>Your VPS</h3>
+        <p class="where">A small Hetzner server: 2 vCPU, 3.8 GB, no swap.</p>
+        <dl class="kv">
+          <div><dt>Your setup</dt><dd>An older skill set today; all of it after set-up (expected, not tried).</dd></div>
+          <div><dt>You reach it</dt><dd>SSH plus Herdr today; <code>herdr --machine</code> after 0.9.2.</dd></div>
+          <div><dt>Missing</dt><dd>Browser, notifications, Treehouse; RAM fits one or two agents.</dd></div>
+        </dl>
+        <span class="role solid">Orchestrator, after an upgrade</span>
+      </li>
+      <li class="station">
+        <h3>Claude Code cloud</h3>
+        <p class="where">A fresh Anthropic VM per session, about 4 vCPU and 16 GB.</p>
+        <dl class="kv">
+          <div><dt>Your setup</dt><dd>The repo's <code>CLAUDE.md</code> and account skills, not your home folder. This repo's <code>skills/</code> doesn't load.</dd></div>
+          <div><dt>You reach it</dt><dd>You run <code>claude --cloud</code> in a real terminal; an agent can only fire a routine.</dd></div>
+          <div><dt>Missing</dt><dd>Idle VMs are reclaimed, and background work with them.</dd></div>
+        </dl>
+        <span class="role">Tasks now; efforts after E1</span>
+      </li>
+      <li class="station">
+        <h3>Other hosted agents</h3>
+        <p class="where">Codex, Cursor and Copilot, each on its own provider's machines.</p>
+        <dl class="kv">
+          <div><dt>Your setup</dt><dd>The repo's <code>AGENTS.md</code>. Your skills as they are: nowhere. Cursor carries a little.</dd></div>
+          <div><dt>You reach it</dt><dd>From a shell: <code>codex cloud exec</code>, Cursor's API, <code>gh agent-task create</code>.</dd></div>
+          <div><dt>Missing</dt><dd>One prompt, one branch, one pull request.</dd></div>
+        </dl>
+        <span class="role">Delegate only</span>
+      </li>
+    </ol>
+    <p class="axis" aria-hidden="true"><span>Everything travels</span><span>Only the repository travels</span></p>
+    <div class="branch">
+      <span class="branch-mark" aria-hidden="true"></span>
+      <div>
+        <h3>Off the line: Firstmate</h3>
+        <p>Not a place, but a different way to run a crew. It's an open-source “agent distro” by the author of Treehouse: one agent you talk to (the first mate) starts visible terminal agents, each with its brief and status kept on disk, on your machine or on an SSH host. It runs wherever it's cloned. The research reads it for ideas to borrow.</p>
+      </div>
+    </div>
+    <p class="muted small">Summarised from the capability matrix in the synthesis. The full matrix, with a source behind every cell, is <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="27">here in VS Code</a>.</p>
+    <a class="next" href="#findings">Next: what we found</a>
+  </div>
+</section>
+
+<section class="slide" id="findings" aria-labelledby="find-h" data-name="What we found">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">4</span>What we found</p>
+    <h2 id="find-h">Six findings, one line each</h2>
+    <ol class="findings">
+      <li><p><strong>The Mac stays home.</strong> It's the only place with every harness, current skills, Treehouse, a browser and a working notification. Nothing researched beats it for an orchestrated effort today. <a class="src" href="cloud-agents.md" data-md="cloud-agents.md" data-line="17">Synthesis</a></p></li>
+      <li><p><strong>The VPS is one upgrade away.</strong> Web, GitHub and Claude Code already work there; it needs Herdr 0.9.2, your current skills, a worktree tool and a way to notify you. <a class="src" href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="15">VPS file</a></p></li>
+      <li><p><strong>Claude Code's cloud is good for tasks, not yet for efforts.</strong> Your skills don't load there as things stand, idle VMs lose background work, and a local agent can't start a session with <code>claude --cloud</code>. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="16">Cloud file</a></p></li>
+      <li><p><strong>Other hosted agents are delegates, not orchestrators.</strong> Codex, Cursor and Copilot each take one prompt on one branch and return a pull request; none is worth a sign-up before Claude Code's cloud is tried. <a class="src" href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">Providers file</a></p></li>
+      <li><p><strong>On the VPS, RAM is the limit, not CPU.</strong> With no swap, running out of memory kills processes; the next tier up costs €3 more a month, but Hetzner may refuse the rescale for now. <a class="src" href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="14">Sizing file</a></p></li>
+      <li><p><strong>Firstmate is worth borrowing from, not adopting.</strong> Take its status file per worker, its readiness check before handing work to another machine, and its rule that an unreachable machine is unknown, never a reason to fail over. <a class="src" href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="122">Firstmate file</a></p></li>
+    </ol>
+    <p class="note">One gap runs through all of it: there are <strong>no first-hand facts about the cloud VM</strong>. Of the two allowed cloud probes, the first exited without evidence of a session and the second was refused by the agent's own permission check. What the cloud files say comes from Anthropic's documentation.</p>
+    <a class="next" href="#direction">Next: the recommended direction</a>
+  </div>
+</section>
+
+<section class="slide" id="direction" aria-labelledby="dir-h" data-name="Recommended direction">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">5</span>Recommended direction</p>
+    <h2 id="dir-h">Make the VPS a second Mac first, then test the cloud</h2>
+    <p class="lede">The synthesis recommends four moves, in this order.</p>
+    <ol class="path">
+      <li><h3>Upgrade Herdr and set up the VPS</h3><p>Herdr 0.9.2 on both machines, then the same skills and instructions as the Mac. Decisions D1 to D3.</p></li>
+      <li><h3>Build #16, then #13</h3><p>First let the Mac and the VPS see each other's state, then hand an orchestrator to the VPS, both on <code>herdr --machine</code>.</p></li>
+      <li><h3>Run the one cloud probe</h3><p>You run E1 from a real terminal before anything is decided about orchestrating in the cloud.</p></li>
+      <li><h3>Fix the delegates' base branch</h3><p>Delegates' worktrees started from an old <code>main</code> during this effort. Pass the effort branch explicitly. Decision D8.</p></li>
+    </ol>
+    <div class="prose"><p>The three build tickets stay blocked, now on these decisions and experiments rather than on research. Each has a re-scoping comment from the synthesis.</p></div>
+    <div class="tickets">
+      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/16"><b>#16</b> See each other's state (lands first)</a>
+      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/13"><b>#13</b> Hand over to the VPS</a>
+      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/15"><b>#15</b> Continue an unfinished effort</a>
+    </div>
+    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="230">Read how each build ticket changed</a> <span class="muted">(synthesis, a two-minute section)</span></p>
+    <a class="next" href="#decisions">Next: the decisions waiting for you</a>
+  </div>
+</section>
+
+<section class="slide" id="decisions" aria-labelledby="dec-h" data-name="Your decisions">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">6</span>Your decisions</p>
+    <h2 id="dec-h">Thirteen decisions, each with a recommendation</h2>
+    <p class="lede">Each links to its entry in the synthesis, where you'll find the options and the reasoning. Grouped here by what they're about.</p>
+    <div class="dgroups">
+      <div class="dgroup">
+        <h3>How work is organised</h3>
+        <ul class="dlist">
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="128"><span class="did">D1</span>Where does an orchestrated effort run?</a><p class="drec">The VPS when the laptop will be closed, now; hosted agents for single tickets later.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="165"><span class="did">D8</span>What do orchestrators delegate to, from which base?</a><p class="drec">Pass the effort branch as the base now; Herdr tabs with a status file for VPS efforts.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="192"><span class="did">D13</span>Adopt Firstmate?</a><p class="drec">Borrow its ideas; don't adopt it.</p></li>
+        </ul>
+      </div>
+      <div class="dgroup">
+        <h3>The VPS</h3>
+        <ul class="dlist">
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="133"><span class="did">D2</span>Upgrade Herdr to 0.9.2 on both machines?</a><p class="drec">Yes, at a quiet moment: the VPS server restart ends its idle agent pane.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="138"><span class="did">D3</span>Set up the VPS the same way as the Mac?</a><p class="drec">Yes, once #66 merges, plus <code>jq</code> and Treehouse. Pick which memory folders to keep first.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="143"><span class="did">D4</span>Resize the VPS?</a><p class="drec">Add swap now; move to CX33 when a browser or a second agent runs there.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="148"><span class="did">D5</span>A headless browser on the VPS?</a><p class="drec">Not until a task needs one; then the Playwright Docker image.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="172"><span class="did">D9</span>How does done-or-blocked reach you from off the Mac?</a><p class="drec">Remote Control push once proven, a Mac-side watcher as the fallback.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="177"><span class="did">D10</span>Does the VPS need to reach the Mac?</a><p class="drec">No, the Mac always checks; Remote Control messaging where a VPS agent must ask.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="182"><span class="did">D11</span>Guard disruptive remote Herdr commands?</a><p class="drec">Yes, as rules that ask first, in a follow-up to #66.</p></li>
+        </ul>
+      </div>
+      <div class="dgroup">
+        <h3>The cloud</h3>
+        <ul class="dlist">
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="153"><span class="did">D6</span>How do your skills reach a cloud session?</a><p class="drec">Test two ways in E1 and keep the one that works; until then, self-contained briefs.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="160"><span class="did">D7</span>Which hosted agent, if any, for single tickets?</a><p class="drec">Claude Code's cloud first; Copilot if you want a second.</p></li>
+          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="187"><span class="did">D12</span>The promo credit and the unused cloud session</a><p class="drec">Claim the credit and spend part of it on E1. <span class="flag">Time-sensitive:</span> a 7 October claim deadline is reported only in search excerpts; check the terms on claude.ai.</p></li>
+        </ul>
+      </div>
+    </div>
+    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="124">Open the decisions section</a> <span class="muted">·</span> <a class="muted" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md#decisions-for-the-maintainer">on GitHub</a></p>
+    <a class="next" href="#try">Next: what you can try yourself</a>
+  </div>
+</section>
+
+<section class="slide" id="try" aria-labelledby="try-h" data-name="Try it yourself">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">7</span>Try it yourself</p>
+    <h2 id="try-h">Experiment E1: the one cloud probe only you can run</h2>
+    <div class="try">
+      <div class="prose">
+        <p>The research was allowed two small cloud sessions and got nothing out of them. Starting one with <code>claude --cloud</code> needs an interactive terminal, which an agent doesn't have. So the second allowed session is yours.</p>
+        <p>You start one read-only session against this public repository, on a throwaway branch. It reports what the cloud machine really is and pushes its report to that branch. Then you delete the branch.</p>
+        <ol class="steps">
+          <li>Before you start, you need a claude.ai sign-in, and the Claude GitHub App or a <code>/web-setup</code> connection so the session can push back.</li>
+          <li>Push a throwaway <code>probe/…</code> branch.</li>
+          <li>Run <code>claude --cloud</code> with the read-only probe prompt shown here.</li>
+          <li>Note what the CLI prints: whether it shows a session ID or URL is itself an open question.</li>
+          <li>Read the report on the probe branch, then delete the branch.</li>
+        </ol>
+      </div>
+      <div style="display:grid; gap:16px; min-width:0">
+        <div class="term-window">
+          <div class="term-bar"><span>Your terminal, in this repository</span><button class="copy" type="button" id="copy-e1">Copy</button></div>
+<pre id="e1-cmds"><span class="c"># a throwaway branch on GitHub</span>
+git switch -c probe/cloud-agents-e1
+git push -u origin probe/cloud-agents-e1
+
+<span class="c"># the probe itself, interactive</span>
+claude --cloud "Read-only probe. Report uname -a, nproc, free -h, df -h /, whoami; versions of git gh node python3 go docker and any chromium/chrome/playwright; which skills you can see and whether AGENTS.md loaded; whether WebFetch of https://code.claude.com works; whether you can spawn one sub-agent. Write the answers to probe.md, commit it and push it to probe/cloud-agents-e1. Change nothing else."
+
+<span class="c"># afterwards: remove the branch</span>
+git switch -
+git push origin --delete probe/cloud-agents-e1
+git branch -D probe/cloud-agents-e1</pre>
+        </div>
+        <div class="note">
+          <p><strong>What it settles:</strong> the VM's real size and user, whether a browser exists, whether web tools work on the default network setting, whether skills and <code>AGENTS.md</code> load, and whether it can push to another branch.</p>
+          <p><strong>Cost and risk:</strong> one small session of plan usage or promo credit. Low risk: public repo, throwaway branch, read-only prompt.</p>
+        </div>
+      </div>
+    </div>
+    <p class="small muted">Worth adding to the same run, from the synthesis: ask it to list its skills, try a push to a second branch, say “notify me when done”, and run <code>gh api …/issues/45/sub_issues</code>. To test one way of carrying skills (D6), give the cloud environment a setup script that installs them first. A zero-cost warm-up is E2: look on claude.ai for a session left by probe 1, and read the credit's balance and terms.</p>
+    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="208">E1 in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="159">The open questions it answers</a> <span class="muted">·</span> <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="199">The probe prompt, row 11</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="202">All fifteen experiments</a></p>
+    <a class="next" href="#read">Next: the reading path</a>
+  </div>
+</section>
+
+<section class="slide" id="read" aria-labelledby="read-h" data-name="Reading path">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">8</span>Reading path</p>
+    <h2 id="read-h">Read the files in this order</h2>
+    <p class="lede">The title of each card opens the file in VS Code. Times are for a full read; the top section of each file gives you the gist in a few minutes.</p>
+    <ol class="cards">
+      <li class="card first">
+        <h3><a href="cloud-agents.md" data-md="cloud-agents.md">The synthesis</a></h3>
+        <span class="time">about 25 min</span>
+        <div class="body">
+          <p>Answers: what each place can do side by side, what you need to decide, and which experiments are left.</p>
+          <p class="when">Read first. If you only read one file, read this one; its first section takes three minutes.</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="17">The short version</a>
+          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="27">Capability matrix</a>
+          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="124">Decisions</a>
+          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="202">Experiments</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md">Claude Code in the cloud</a></h3>
+        <span class="time">about 25 min</span>
+        <div class="body">
+          <p>Answers: what a cloud session runs on, what loads there, how it's started, watched and moved back, and what it costs. Also routines and projects.</p>
+          <p class="when">Read before E1 or before deciding D6, D7 and D12.</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="16">Short answer</a>
+          <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="77">What loads</a>
+          <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="108">Starting it</a>
+          <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="159">Open questions</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-claude-code.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md">Delegating and hearing back</a></h3>
+        <span class="time">about 30 min</span>
+        <div class="body">
+          <p>Answers: how a Mac session hands work to each place, how you watch and answer it, how done-or-blocked reaches you, and how an unfinished effort moves.</p>
+          <p class="when">Read before building #13, #15 or #16; section 6 is written for those tickets.</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="46">Options side by side</a>
+          <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="147">What it settles for the tickets</a>
+          <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="193">How this effort was handed over</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-delegation.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md">The VPS compared with the Mac</a></h3>
+        <span class="time">about 25 min</span>
+        <div class="body">
+          <p>Answers: what an agent on the VPS can do today, what Herdr 0.9.2 changes across machines, how your setup would get there, and what an agent may do on the other machine without asking.</p>
+          <p class="when">Read before the VPS decisions, D2 to D5 and D11.</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="15">At a glance</a>
+          <a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="62">Herdr across machines</a>
+          <a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="104">The environment</a>
+          <a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="136">Permissions</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-vps.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md">VPS sizing and other providers</a></h3>
+        <span class="time">about 25 min</span>
+        <div class="body">
+          <p>Answers: how much an agent actually uses, how many fit on each Hetzner tier, what other providers and on-demand machines would cost.</p>
+          <p class="when">Read when you're about to decide D4, or before spending money on a bigger machine.</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="14">Summary</a>
+          <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="140">What “not available” means</a>
+          <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="184">Recommendation per workload</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-vps-sizing.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md">Codex, Cursor, Copilot and more</a></h3>
+        <span class="time">about 35 min</span>
+        <div class="body">
+          <p>Answers: the same questions as the Claude Code file, for Codex, Cursor and Copilot, plus a short look at opencode, Grok, Jules, Devin, Amp, Factory and OpenHands.</p>
+          <p class="when">Read only if you consider a second hosted agent (D7). The comparison and the four findings under it are enough for most.</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="18">Comparison</a>
+          <a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">Findings that matter most</a>
+          <a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="150">Open questions</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-other-providers.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md">Firstmate and related tools</a></h3>
+        <span class="time">about 25 min</span>
+        <div class="body">
+          <p>Answers: how Firstmate delegates to agents on this machine and on others, and which of its ideas fit this repo's workflow.</p>
+          <p class="when">Read when building #15 or #16, or when you wonder whether a different workflow would suit you better (D13).</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="16">How it delegates</a>
+          <a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="122">Mapped against this repo</a>
+          <a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="207">The contract a delegate must meet</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-firstmate.md">GitHub</a>
+        </p>
+      </li>
+    </ol>
+    <p class="small muted">Background from before this effort, which these files build on: <a href="herdr-vps.md" data-md="herdr-vps.md">Herdr across the Mac and the VPS</a> and <a href="harness-capabilities.md" data-md="harness-capabilities.md">What each harness can and can't do</a>.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="slide-inner">
+    <p>Spec <a href="https://github.com/yahyabedirhan/skills/issues/45">#45</a>. Build tickets <a href="https://github.com/yahyabedirhan/skills/issues/13">#13</a>, <a href="https://github.com/yahyabedirhan/skills/issues/15">#15</a>, <a href="https://github.com/yahyabedirhan/skills/issues/16">#16</a>. Every fact on this page comes from the research files; where they mark something unverified, so does this page.</p>
+    <p><a href="#top">Back to the start</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('main > .slide'));
+  var sections = slides.filter(function (s) { return s.dataset.name; });
+  var railLinks = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+  var count = document.getElementById('progress-count');
+  var name = document.getElementById('progress-name');
+  var fill = document.getElementById('progress-fill');
+  var total = sections.length;
+
+  function currentIndex() {
+    var mid = window.innerHeight * 0.4;
+    var idx = -1;
+    sections.forEach(function (s, i) { if (s.getBoundingClientRect().top <= mid) idx = i; });
+    return idx;
+  }
+  function update() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    fill.style.width = (max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0) + '%';
+    var i = currentIndex();
+    if (i < 0) { count.textContent = 'Start'; name.textContent = 'Cloud agents research guide'; }
+    else { count.textContent = (i + 1) + ' / ' + total; name.textContent = sections[i].dataset.name; }
+    railLinks.forEach(function (a, j) {
+      a.classList.toggle('is-current', j === i);
+      a.classList.toggle('is-past', j < i);
+      if (j === i) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+    });
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(function () { update(); ticking = false; }); }
+  }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+
+  function go(delta) {
+    var i = currentIndex();
+    var target = Math.max(-1, Math.min(total - 1, i + delta));
+    var el = target < 0 ? document.getElementById('top') : sections[target];
+    el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    var h = el.querySelector('h1, h2');
+    if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target.tagName;
+    if (t === 'INPUT' || t === 'TEXTAREA') return;
+    if (e.key === 'n' || e.key === 'j') { e.preventDefault(); go(1); }
+    else if (e.key === 'p' || e.key === 'k') { e.preventDefault(); go(-1); }
+  });
+
+
+  // Markdown links: open in VS Code when viewed as a local file, else on GitHub.
+  (function () {
+    var GH = 'https://github.com/yahyabedirhan/skills/blob/main/docs/research/';
+    var dir = null;
+    if (location.protocol === 'file:') {
+      var parts = decodeURIComponent(location.pathname).split('/');
+      parts.pop();
+      // Next to the Markdown files already; otherwise assume a folder at the repo root (such as .scratch).
+      if (parts.slice(-2).join('/') !== 'docs/research') { parts.pop(); parts.push('docs', 'research'); }
+      dir = parts.join('/');
+    }
+    var out = [];
+    document.querySelectorAll('a[data-md]').forEach(function (a) {
+      var f = a.getAttribute('data-md'), line = a.getAttribute('data-line');
+      a.href = dir ? 'vscode://file' + dir + '/' + f + (line ? ':' + line : '') : GH + f;
+      out.push(a.href);
+    });
+    if (window.console) console.log('[guide] markdown links', out.length, out);
+  })();
+
+  var copyBtn = document.getElementById('copy-e1');
+  var cmds = document.getElementById('e1-cmds');
+  copyBtn.addEventListener('click', function () {
+    var text = cmds.innerText;
+    function done(label) { copyBtn.textContent = label; setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1600); }
+    function fallback() {
+      var r = document.createRange(); r.selectNodeContents(cmds);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      done('Selected');
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () { done('Copied'); }, fallback);
+    } catch (err) { fallback(); }
+  });
+})();
+</script>
+</body>
+</html>
