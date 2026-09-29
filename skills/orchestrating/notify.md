@@ -24,4 +24,4 @@ Name tickets and pull requests by title, not by a number alone.
 
 ## How
 
-The **Notifications** row of the Defaults table in the user's global instructions says how notifications reach them (for example, an `osascript` command on macOS because the harness's tool doesn't reach their terminal); follow it. With no row, or `none`, use the harness's built-in notification tool. With neither, skip the notification and say it in the chat.
+Send it with `<notification-method>` (the **orchestrating** skill's Parameters), which falls back to the harness's notification tool, else a line in the chat.

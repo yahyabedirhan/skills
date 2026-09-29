@@ -24,8 +24,11 @@ RULE_LINE = (
 # The Defaults table: one row per role a skill may name. Values are the user's;
 # set-up-machine only adds a missing row, with NO_DEFAULT as its value.
 DEFAULTS_HEADING = "## Defaults"
-DEFAULTS_INTRO = "Skills name a role; this table names this person's tool for it. `none` means the skill's own fallback."
-ROLES = ("Session host", "Worktree tool", "Notifications", "Agent to start", "Skills repo")
+DEFAULTS_INTRO = (
+    "Skills name each role as a placeholder (`<session-host>`); this table gives its value. "
+    "`none` means the skill's own fallback. A project's own Defaults table overrides a row for that project."
+)
+ROLES = ("session-host", "worktree-tool", "notification-method", "agent-to-start", "skills-repo", "path-to-skills-repo")
 NO_DEFAULT = "none"
 
 # The personal-workflow section: the user's, never rewritten.
