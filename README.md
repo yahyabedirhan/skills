@@ -56,7 +56,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`697d4ce`](https://github.com/mattpocock/skills/tree/697d4ce9742d/skills/engineering/implement) (MIT, see `skills/implement/LICENSE.mattpocock`). Changes: agents can load it, so an orchestrator's sub-agents can use it, it commits only when the delegating agent doesn't, it reviews at the depth the delegating agent sets, and it stops what it started before reporting. |
 | [to-spec](skills/to-spec/SKILL.md) | Turns the current conversation into a spec and publishes it to the project's tracker, or to `.efforts/<effort>/spec.md` on a local one. | Fork of `to-spec` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`5c89081`](https://github.com/mattpocock/skills/tree/5c89081d4bbe/skills/engineering/to-spec) (MIT, see `skills/to-spec/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself, and a local tracker keeps the spec in `.efforts/<effort>/` instead of `.scratch/`. |
 | [to-tickets](skills/to-tickets/SKILL.md) | Breaks a plan, spec or conversation into tracer-bullet tickets, each naming what blocks it, and publishes them to the project's tracker, or to `.efforts/<effort>/issues/` on a local one. | Fork of `to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`5c89081`](https://github.com/mattpocock/skills/tree/5c89081d4bbe/skills/engineering/to-tickets) (MIT, see `skills/to-tickets/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself; a local tracker keeps the tickets in `.efforts/<effort>/issues/` instead of `.scratch/`; and tickets are named by title, never by a number alone. |
-| [to-pr](skills/to-pr/SKILL.md) | Opens a pull request or rewrites its description: a one-sentence why, reviewer notes, and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr) (MIT, see `skills/to-pr/LICENSE.humanlayer`). Changes: renamed, a real trigger description, no Mermaid views, the description source saved to `.scratch/` per the folder standard instead of `.humanlayer/`, issues named by title, never by a number alone, and a last section, *Things to be aware of*, for decisions made alone, surprises, what's left out and follow-ups, and "Refs", not "Closes", for a ticket waiting for the maintainer's QA. |
+| [to-pr](skills/to-pr/SKILL.md) | Opens a pull request or rewrites its description: a one-sentence why, reviewer notes, and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr) (MIT, see `skills/to-pr/LICENSE.humanlayer`). Changes: renamed, a real trigger description, no Mermaid views, the description source saved to `.scratch/` per the folder standard instead of `.humanlayer/`, issues named by title, never by a number alone, review links per changed file in the final report, and a last section, *Things to be aware of*, for decisions made alone, surprises, what's left out and follow-ups, and "Refs", not "Closes", for a ticket waiting for the maintainer's QA. |
 | [close-effort](skills/close-effort/SKILL.md) | Closes an effort once you say its pull request is good, or that it merged: merges it, runs the post-merge follow-ups, carries unfinished work into next-effort tickets, closes the tracker, and removes only branches and worktrees proven merged, then its own worktree from a Herdr tab. | Original. |
 
 ### Design frameworks
@@ -77,6 +77,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | Skill | What it does | Origin |
 |---|---|---|
 | [maintain-skills](skills/maintain-skills/SKILL.md) | Installs, moves, updates, forks, publishes, removes, and audits skills across global scope, project scope, and your own skills repo with `npx skills`; prompt-audits each new skill in a fresh sub-agent and measures a skill's run cost on request. | Original. |
+| [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings and a verdict. You start it with `/skill-recap` (Codex: `$skill-recap`) and file them with [to-tickets](skills/to-tickets/SKILL.md). | Original. |
 
 ### Daily workflows
 
@@ -132,7 +133,7 @@ show-me   explains the current topic
 
 ### Agent setup
 
-What your agents run with, kept in order across Claude Code and Codex. Today that is skills: `maintain-skills` keeps every change flowing from a skill's source to its installs.
+What your agents run with, kept in order across Claude Code and Codex. Today that is skills: `maintain-skills` keeps every change flowing from a skill's source to its installs, and `skill-recap` looks back over a session for what its skills should change.
 
 ```text
 source      your skills repo, or someone else's
@@ -140,6 +141,7 @@ source      your skills repo, or someone else's
 installs    global (~/.agents/skills) or one project (.agents/skills)
 operations  install, update, move, remove, fork, publish
 audits      which skills you use, a fresh prompt audit, a run's cost
+recap       /skill-recap: how a session used its skills → findings → /to-tickets
 ```
 
 ### Daily workflows
