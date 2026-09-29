@@ -5,7 +5,14 @@ Facts it relies on (see references/claude-code.md):
   first, then ask, then allow, so adding a stricter entry wins without removing a looser one.
 - A `Bash(<prefix>:*)` rule matches the command text as written, so each spelling
   of a command needs its own entry.
-- File rules are `Read(path)` and `Edit(path)`; `Write(path)` rules are accepted and never checked.
+- File rules are `Read(path)` and `Edit(path)`; `Write(path)` rules are accepted and never checked
+  (the Cursor CLI reads this file and checks them, so write rows get plain `Write(**/…)` entries too).
+- Path globs have positive character classes only (`[!x]` and `[^x]` list `!`/`^` and `x`),
+  matched case-insensitively on macOS, so an `except` becomes the globs around it (rules.without).
+- A `Bash(x)` rule without `:*` matches the command `x` exactly.
+- `autoMode.hard_deny` holds prose rules the auto-mode classifier blocks whatever the user
+  says; `"$defaults"` in the array keeps the built-in ones, and `classifyAllShell: true`
+  sends every shell command to it, past narrow allow rules. Only user settings hold it.
 - MCP tools are named `mcp__<server>__<tool>`, and only the running harness knows
   which ones exist, so the adapter asks it at plan time.
 - `~/.claude/CLAUDE.md` loads in every session and follows `@path` imports.
@@ -56,10 +63,25 @@ def config_dir(home: Path) -> Path:
 
 def entries_for(rule, tools=()) -> list:
     if rule.kind == "file":
-        return [f"{FILE_RULE[rule.access]}({p if p.startswith('~/') else './' + p})" for p in rule.paths]
+        # Rules have no negation, so an `except` becomes the positive globs around it.
+        globs = [g for p in rule.paths for g in rule_table.without(p, rule.excepts)]
+        entries = [f"{FILE_RULE[rule.access]}({_project_path(g)})" for g in globs]
+        if rule.access == "write":
+            # For the Cursor CLI, which reads this file and checks Write on its file tools against
+            # absolute paths: `./` never matches there, and its classes are unconfirmed, so plain globs.
+            entries += [f"Write({p})" for p in rule.paths]
+        return entries
     if rule.kind == "mcp-tool":
         return rule_table.matching_tools(rule, tools)
+    if rule.files:
+        return []  # Bash rules match text, not paths; Read rules and the hook cover these (see gaps_for)
+    if rule.bare:
+        return [f"Bash({' '.join(prefix)})" for prefix in rule_table.command_prefixes(rule)]
     return [f"Bash({' '.join(prefix)}:*)" for prefix in rule_table.command_prefixes(rule)]
+
+
+def _project_path(glob: str) -> str:
+    return glob if glob.startswith("~/") else "./" + glob
 
 
 # What still gets past the pre-tool hook's reading of a command.
@@ -72,14 +94,37 @@ HOOK_MISSES = (
 
 def gaps_for(rule) -> list:
     """What gets through once this adapter's entries and the pre-tool hook are in place."""
+    gap = rule.gap
+    if gap and rule.guard:
+        gap += (f"; the auto-mode guard ({rule.guard.split(':', 1)[0]}) covers it in part here: interpreters and "
+                "scripts (`python3 -c`, `node -e`), not `echo $TOKEN` or `cat`, which skip the classifier as "
+                "read-only commands in a `-p` or SDK session")
+    return _native_gaps(rule) + ([gap] if gap else [])
+
+
+def _native_gaps(rule) -> list:
     if rule.kind == "file":
-        return [
+        gaps = [
             "Read and Edit rules cover Claude Code's file tools and the file commands it recognises in Bash "
             "(`cat`, `sed`, redirects), and the pre-tool hook the file tools; a script or another program "
             "opening the file gets through"
         ]
+        if rule.excepts:
+            gaps.append(
+                f"Claude Code's rules have no negation, so the exception ({', '.join(f'`{e}`' for e in rule.excepts)}) is left out "
+                "through positive character classes; a name that leaves it through a character other than a "
+                "letter, digit, `_` or `.` isn't covered natively, only by the hook"
+            )
+        return gaps
     if rule.kind == "mcp-tool":
         return []  # the native entries cover the tools found now, and the hook matches tools connected later
+    if rule.files:
+        return [
+            "Bash rules match the command text, not the paths in it, so this row has no Bash entries: Claude "
+            "Code's own Read rules refuse `cat`, `head`, `tail` and `grep` on the file, and the pre-tool hook "
+            "the rest; with the hook off, `less`, `source` and `.` on the file run, and so does any other "
+            "program that reads it (`sed`, `awk`, a script)"
+        ]
     if rule.level in ("deny", "allow-and-report"):
         return []  # the pre-tool hook reads every spelling; what it can't see is one gap in its own section
     canonical = " ".join(rule_table.command_prefixes(rule)[0])
@@ -150,9 +195,11 @@ def covers(existing: str, wanted: str) -> bool:
 
 
 def _bash_literal(entry: str):
-    """`Bash(rm -rf:*)` -> `rm -rf`, for the entries this adapter writes."""
+    """`Bash(rm -rf:*)` -> `rm -rf`, and `Bash(env)` -> `env`, for the entries this adapter writes."""
     inner = entry[len("Bash("):-1]
-    return inner[:-2] if inner.endswith(":*") and "*" not in inner[:-2] else None
+    if inner.endswith(":*"):
+        inner = inner[:-2]
+    return inner if "*" not in inner else None
 
 
 def import_line(home: Path, os_home: Path, shared_file: Path) -> str:
@@ -190,6 +237,7 @@ def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path,
     hook_section, owned_hooks = _plan_hook(
         path, settings, new_settings, owned.get("hooks", []), hook_command(home, os_home, rules_path)
     )
+    auto_section, owned_auto = _plan_auto_mode(path, settings, new_settings, rules, owned.get("auto_mode", []))
     mem_section, mem_writes = _plan_memory(home, path, new_settings)
     new = old if new_settings == settings else json.dumps(new_settings, indent=2, ensure_ascii=False) + "\n"
     md_section, md_write, owned_imports = _plan_instructions(home, owned.get("imports", []), shared_file, os_home)
@@ -198,9 +246,11 @@ def plan(home: Path, rules: list, owned: dict, shared_file: Path, os_home: Path,
         owned_after["permissions"] = owned_perms
     if owned_hooks:
         owned_after["hooks"] = owned_hooks
+    if owned_auto:
+        owned_after["auto_mode"] = owned_auto
     if owned_imports:
         owned_after["imports"] = owned_imports
-    return ([perm_section, hook_section, mem_section, md_section],
+    return ([perm_section, hook_section, auto_section, mem_section, md_section],
             [FileWrite(path, old, new), md_write, *mem_writes], owned_after)
 
 
@@ -268,7 +318,12 @@ def _plan_permissions(path: Path, settings: dict, new_settings: dict, rules: lis
             if entry not in desired and entry not in owned_all and entry not in covering:
                 note = "not in the table; kept"
                 if entry.startswith("Write("):
-                    note = "Claude Code never checks Write rules, so this does nothing; the table's Edit rules do; kept"
+                    note = ("Claude Code never checks Write rules, and the Cursor CLI, which does, never matches "
+                            "a `./` path; the table's Edit and Write entries cover it; kept")
+                excepted = _excepted_by(entry, rules) if name == "deny" else None
+                if excepted:
+                    note += (f"; it also refuses {excepted}, which the table leaves open for agents to read; "
+                             "remove it by hand to open it")
                 section.changes.append(Change("extra", entry, name, note=note))
 
     if any(add.values()) or any(remove.values()):
@@ -278,6 +333,29 @@ def _plan_permissions(path: Path, settings: dict, new_settings: dict, rules: lis
                 kept = [e for e in new_perms.get(name, []) if e not in remove[name]]
                 new_perms[name] = kept + add[name]
     return section, {k: v for k, v in owned_after.items() if v}
+
+
+def _excepted_by(entry: str, rules: list):
+    """The exception of a file row that a file entry on the machine refuses too, as a name, or None.
+
+    Tried at the project root and one folder down: `Read(./.env.*)` refuses `.env.example`.
+    """
+    kind, _, rest = entry.partition("(")
+    if kind not in ("Read", "Edit", "Write") or not rest.endswith(")"):
+        return None
+    glob = rest[:-1]
+    glob = glob[2:] if glob.startswith("./") else glob
+    if glob.startswith(("/", "~")):
+        return None
+    rx = rule_table.glob_regex(glob, "/project", "/home")
+    for rule in rules:
+        if rule.kind != "file" or not (kind == "Read" or rule.access == "write"):
+            continue
+        for ex in rule.excepts:
+            name = ex[3:] if ex.startswith("**/") else ex
+            if any(rx.match(f"/project/{p}{name}") for p in ("", "sub/")):
+                return f"`{name}`"
+    return None
 
 
 def hook_command(home: Path, os_home: Path, rules_path=None) -> str:
@@ -354,6 +432,67 @@ def _found(rule, tools: list, tools_error) -> Change:
     names = rule_table.matching_tools(rule, tools)
     text = ", ".join(names) if names else f"none among the {len(tools)} MCP tools Claude Code exposes"
     return Change("found", text, rule.level, rule.id)
+
+
+def _plan_auto_mode(path: Path, settings: dict, new_settings: dict, rules: list, owned: list):
+    """Each deny row's guard as an `autoMode.hard_deny` rule, and `classifyAllShell: true`.
+
+    A new `hard_deny` array starts with `$defaults`, so the built-in rules stay; an
+    existing one is the user's and only gains the table's rules. Only a guard this
+    skill wrote before is ever removed. Returns (section, owned_after).
+    """
+    section = Section(f"{LABEL}: auto mode", path)
+    wanted = [r.guard for r in rules if r.guard]
+    old = settings.get("autoMode", {})
+    if not isinstance(old, dict) or not isinstance(old.get("hard_deny", []), list):
+        raise ValueError(f"{path}: `autoMode` must be an object and its `hard_deny` a list; "
+                         "fix it by hand, then run the plan again")
+    if not wanted and not set(owned) & set(old.get("hard_deny", [])):
+        return section, []
+    auto = new_settings.setdefault("autoMode", {})
+    existed = "hard_deny" in auto
+    hard = list(auto.get("hard_deny", []))
+    rule_of = {r.guard: r.id for r in rules if r.guard}
+    for text in owned:
+        if text not in wanted and text in hard:
+            hard.remove(text)
+            section.changes.append(Change("removed", _label(text), "deny",
+                                          note="written by set-up-machine, no longer in the table"))
+    if not existed:
+        hard.append("$defaults")
+        section.changes.append(Change("added", "hard_deny: $defaults", "deny", note="keeps the built-in hard-deny rules"))
+    elif "$defaults" not in hard:
+        section.changes.append(Change(
+            "gap", "your `autoMode.hard_deny` has no `$defaults`, so it replaces the built-in hard-deny rules; "
+                   "set-up-machine leaves it to you", "deny"))
+    for text in wanted:
+        if text in hard:
+            section.changes.append(Change("present", _label(text), "deny", rule_of[text]))
+        else:
+            hard.append(text)
+            section.changes.append(Change("added", _label(text), "deny", rule_of[text],
+                                          "a semantic guard for what the rule's patterns can't list"))
+    if hard != auto.get("hard_deny"):
+        auto["hard_deny"] = hard
+    if not wanted:
+        return section, []
+    value = auto.get("classifyAllShell")
+    if value is True:
+        section.changes.append(Change("present", "classifyAllShell: true"))
+    else:
+        kind, note = ("added", "every shell command goes to the classifier, past a project's narrow allow rules") \
+            if value is None else ("tightened", f"was {json.dumps(value)}")
+        section.changes.append(Change(kind, "classifyAllShell: true", note=note))
+        auto["classifyAllShell"] = True
+    section.changes.append(Change(
+        "gap", "auto mode checks these only when it's the session's mode, and a project's settings can set "
+               "`disableAutoMode`; read-only commands (`echo`, `cat`) and file reads skip the classifier in a "
+               "`-p` or SDK session; the deny rules and the hook stay the primary guard"))
+    return section, wanted
+
+
+def _label(guard: str) -> str:
+    return f"hard_deny: {guard.split(':', 1)[0]}: …"
 
 
 def _plan_memory(home: Path, path: Path, new_settings: dict):

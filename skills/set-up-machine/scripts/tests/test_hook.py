@@ -146,8 +146,9 @@ class FileAndMcpTest(unittest.TestCase):
         return sorted({h.rule.id for h in verdict(tool=tool, files=[(path, access)]).denials})
 
     def test_secret_files(self):
-        self.assertEqual(self.ids("Read", ".env", "read"), ["secret-files-read"])
-        self.assertEqual(self.ids("Read", "/Users/someone/project/sub/.env.local", "read"), ["secret-files-read"])
+        self.assertEqual(self.ids("Read", ".env", "read"), ["env-files-read"])
+        self.assertEqual(self.ids("Read", "/Users/someone/project/sub/.env.local", "read"), ["env-files-read"])
+        self.assertEqual(self.ids("Write", "sub/.env", "write"), ["env-files-read", "env-files-write"])
         self.assertEqual(self.ids("Grep", "secrets", "read"), ["secret-files-read"])
         self.assertEqual(self.ids("Edit", "secrets/key", "write"), ["secret-files-read", "secret-files-write"])
         self.assertEqual(self.ids("Read", "~/.ssh/id_ed25519", "read"), ["home-credentials-read"])
@@ -156,6 +157,56 @@ class FileAndMcpTest(unittest.TestCase):
     def test_ordinary_files(self):
         for path in (".envrc", "README.md", "src/environment.py", "/Users/someone/.sshx/y", "my-secrets.txt"):
             self.assertEqual(self.ids("Read", path, "read"), [], path)
+
+    def test_env_example_stays_readable_and_writable(self):
+        for path in (".env.example", "sub/.env.example", "/Users/someone/project/app/.env.example"):
+            self.assertEqual(self.ids("Read", path, "read"), [], path)
+            self.assertEqual(self.ids("Edit", path, "write"), [], path)
+        for path in (".env.examples", ".env.e2e", ".env.", "sub/.env.example.local"):
+            self.assertEqual(self.ids("Read", path, "read"), ["env-files-read"], path)
+
+
+class EnvironmentTest(unittest.TestCase):
+    """The env-var family: the environment and `.env` files stay out of the agent's context."""
+
+    def test_commands_that_list_the_environment_are_denied(self):
+        for command, rule in (
+            ("env", "env-dump"), ("/usr/bin/env", "env-dump"), ("env -0", "env-dump"), ("env -u HOME", "env-dump"),
+            ("env FOO=1", "env-dump"), ("env | grep TOKEN", "env-dump"), ("command env", "env-dump"),
+            ("export", "env-dump"), ("set", "env-dump"), ("set | less", "env-dump"),
+            ("printenv", "env-print"), ("printenv TOKEN", "env-print"), ("/usr/bin/printenv HOME", "env-print"),
+            ("export -p", "env-dump-declared"), ("declare -p", "env-dump-declared"),
+            ("typeset -p TOKEN", "env-dump-declared"), ("declare -px", "env-dump-declared"),
+        ):
+            self.assertIn(rule, denied_by(command), command)
+
+    def test_the_hook_reads_them_inside_other_commands(self):
+        self.assertIn("env-print", denied_by('bash -c "printenv"'))
+        self.assertIn("env-dump", denied_by("sh -c 'env'"))
+        self.assertIn("env-dump", denied_by("echo $(env)"))
+        self.assertIn("env-print", denied_by("true && printenv TOKEN"))
+
+    def test_setting_a_variable_is_fine(self):
+        for command in ("env FOO=1 true", "env -u HOME ls", "/usr/bin/env python3 x.py", "FOO=1 make",
+                        "export FOO=1", "set -e", "set -euo pipefail", "declare -x FOO=1", "test -n \"$TOKEN\"",
+                        "echo $HOME"):
+            self.assertEqual(denied_by(command), [], command)
+
+    def test_reading_a_env_file_through_a_command_is_denied(self):
+        for command in ("cat .env", "cat sub/.env.local", "less -R .env.production", "head -1 .env",
+                        "tail -f app/.env", "grep TOKEN .env", "source .env", ". ./.env", "set -a; . .env",
+                        "cat /Users/someone/project/.env"):
+            self.assertIn("env-files-commands", denied_by(command), command)
+
+    def test_the_example_and_other_files_stay_readable(self):
+        for command in ("cat .env.example", "grep TOKEN sub/.env.example", "source venv/bin/activate",
+                        "cat .envrc", "grep -r TOKEN src", "head README.md"):
+            self.assertEqual(denied_by(command), [], command)
+
+    def test_the_refusal_names_the_rules_instruction(self):
+        text = hook.refusal(verdict("/usr/bin/env").denials)
+        self.assertIn("env-dump", text)
+        self.assertIn("give the user the exact command; never work around it", text)
 
     def test_mail_tools_by_meaning(self):
         for tool in ("mcp__claude_ai_Gmail__send_message", "mcp__gmail__trash_thread",

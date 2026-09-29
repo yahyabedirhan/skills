@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import shlex
 import sys
 from dataclasses import dataclass, field
@@ -58,7 +57,8 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
     hits = []
     if call.command:
         for argv in commands.simple_commands(call.command):
-            hits += [Hit(r, shlex.join(argv)) for r in checked if r.kind == "command" and commands.covers(r, argv)]
+            hits += [Hit(r, shlex.join(argv)) for r in checked if r.kind == "command" and commands.covers(r, argv)
+                     and (not r.files or any(path_matches(r, w, call.cwd, home) for w in operand_files(argv)))]
     for path, access in call.files:
         hits += [Hit(r, f"{access} {path}") for r in checked
                  if r.kind == "file" and (r.access == access or r.access == "read")
@@ -80,51 +80,28 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
 
 
 def path_matches(rule, path: str, cwd: str, home: Path) -> bool:
-    """Whether a file path falls under one of the row's globs.
+    """Whether a file path falls under one of the row's globs (`paths`, or a command row's
+    `files`) and none of its `except` globs.
 
-    `**/x` matches at any depth, even outside the project; other relative globs
-    are anchored at the working directory, and `~/` globs at the home folder. The
-    path is checked as written and with symlinks resolved, and as a folder too
-    (`secrets` counts as inside `secrets/**`).
+    Globs read as rules.glob_regex says. The path is checked as written and with
+    symlinks resolved, and as a folder too (`secrets` counts as inside `secrets/**`).
     """
-    base = cwd or os.getcwd()
+    base = os.path.normpath(cwd or os.getcwd())
     if path == "~" or path.startswith("~/"):
         path = str(home) + path[1:]
     full = os.path.normpath(os.path.join(base, path))
     candidates = {full, os.path.realpath(full)}
-    candidates |= {c + "/_" for c in candidates}
-    for glob in rule.paths:
-        rx = _glob_regex(glob, base, home)
-        if any(rx.match(c) for c in candidates):
-            return True
-    return False
+
+    def under(globs, as_folder):
+        names = candidates | {c + "/_" for c in candidates} if as_folder else candidates
+        return any(rule_table.glob_regex(g, base, home).match(c) for g in globs for c in names)
+
+    return under(rule.paths or rule.files, True) and not under(rule.excepts, False)
 
 
-def _glob_regex(glob: str, cwd: str, home: Path):
-    if glob.startswith("~/"):
-        anchor, glob = re.escape(str(home).rstrip("/")) + "/", glob[2:]
-    elif glob.startswith("**/"):
-        anchor = ""
-    else:
-        anchor = re.escape(os.path.normpath(cwd).rstrip("/")) + "/"
-    out, i = [], 0
-    while i < len(glob):
-        if glob.startswith("**/", i):
-            out.append("(?:.*/)?")
-            i += 3
-        elif glob.startswith("**", i):
-            out.append(".*")
-            i += 2
-        elif glob[i] == "*":
-            out.append("[^/]*")
-            i += 1
-        elif glob[i] == "?":
-            out.append("[^/]")
-            i += 1
-        else:
-            out.append(re.escape(glob[i]))
-            i += 1
-    return re.compile("^" + anchor + "".join(out) + "$")
+def operand_files(argv: list) -> list:
+    """The words of a command that could name a file: every word after the program but its flags."""
+    return [a for a in argv[1:] if a and not a.startswith("-")]
 
 
 # --- what the agent reads -------------------------------------------------------

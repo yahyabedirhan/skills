@@ -2,6 +2,7 @@
 
 python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 """
+import fnmatch
 import json
 import sys
 import tempfile
@@ -249,7 +250,8 @@ class FullTableTest(unittest.TestCase):
             "rm-recursive-force", "rm-no-preserve-root", "disk-write", "chmod-recursive-777", "privilege-escalation",
             "shell-inline-command", "git-push-force", "git-reset-hard", "gh-repo-destructive", "gh-access-keys",
             "calendar-mail-cli-send", "secret-files-read", "secret-files-write", "home-credentials-read",
-            "mail-send", "mail-destructive",
+            "mail-send", "mail-destructive", "env-files-read", "env-files-write", "env-files-commands",
+            "env-dump", "env-print", "env-dump-declared",
         ):
             self.assertEqual(levels.get(rule_id), "deny", rule_id)
         self.assertEqual(levels["git-push-force-with-lease"], "ask")
@@ -271,9 +273,9 @@ class FullTableTest(unittest.TestCase):
     def test_file_rules_use_the_kinds_claude_code_checks(self):
         self.assertEqual(
             claude_code.entries_for(table_rule("secret-files-write")),
-            ["Edit(./**/.env)", "Edit(./**/.env.*)", "Edit(./**/secrets/**)"],
+            ["Edit(./**/secrets/**)", "Write(**/secrets/**)"],
         )
-        self.assertIn("Read(./**/.env)", claude_code.entries_for(table_rule("secret-files-read")))
+        self.assertEqual(claude_code.entries_for(table_rule("secret-files-read")), ["Read(./**/secrets/**)"])
         self.assertEqual(claude_code.entries_for(table_rule("home-credentials-read")), ["Read(~/.ssh/**)", "Read(~/.aws/**)"])
 
     def test_mail_rules_match_mail_tools_by_meaning(self):
@@ -300,6 +302,11 @@ class FullTableTest(unittest.TestCase):
                 {"server": "mail"},
                 {"program": "gh", "subcommands": [["repo delete"]]},
                 {"program": "rm", "paths": [".env"], "access": "read"},
+                {"program": "env", "arguments": "some"},
+                {"program": "env", "arguments": "none", "flags": [["p"]]},
+                {"program": "cat", "except": ["**/.env.example"]},
+                {"program": "cat", "files": ["/etc/passwd"]},
+                {"paths": [".env"], "access": "read", "except": ["/x"]},
             ):
                 path.write_text(json.dumps({"version": 1, "rules": [{**base, "match": match}]}))
                 with self.assertRaises(rules.RuleTableError, msg=match):
@@ -314,6 +321,9 @@ class CoversTest(unittest.TestCase):
         self.assertFalse(claude_code.covers("Bash(git push --force:*)", "Bash(git push --force-with-lease:*)"))
         self.assertFalse(claude_code.covers("Bash(su:*)", "Bash(sudo:*)"))
         self.assertFalse(claude_code.covers("Bash(rm -rf)", "Bash(rm -rf:*)"))
+        self.assertTrue(claude_code.covers("Bash(env:*)", "Bash(env)"))
+        self.assertTrue(claude_code.covers("Bash(env)", "Bash(env)"))
+        self.assertFalse(claude_code.covers("Bash(envsubst:*)", "Bash(env)"))
 
     def test_mcp_coverage_by_server_or_glob(self):
         tool = "mcp__claude_ai_Gmail__send_message"
@@ -383,6 +393,131 @@ class FullTableReconcileTest(unittest.TestCase):
         plan = self.home.apply(self.table, [])
         self.assertIn("mcp__claude_ai_Gmail__send_message", kinds(plan, "removed"))
         self.assertNotIn("mcp__claude_ai_Gmail__send_message", self.home.perms()["deny"])
+
+
+class EnvironmentRowsTest(unittest.TestCase):
+    """The env-var family on Claude Code."""
+
+    def setUp(self):
+        self.home = Home()
+        self.table = rules.load()
+
+    def tearDown(self):
+        self.home.close()
+
+    def test_env_files_leave_the_example_out_through_positive_classes(self):
+        read = claude_code.entries_for(table_rule("env-files-read"))
+        self.assertIn("Read(./**/.env)", read)
+        self.assertIn("Read(./**/.env.)", read)
+        self.assertIn("Read(./**/.env.exampl)", read)
+        self.assertIn("Read(./**/.env.[0-9A-DF-Za-df-z_.]*)", read)
+        self.assertIn("Read(./**/.env.exampl[0-9A-DF-Za-df-z_.]*)", read)
+        self.assertIn("Read(./**/.env.example?*)", read)
+        self.assertNotIn("Read(./**/.env.*)", read)
+        self.assertFalse(any("!" in e or "^" in e for e in read))
+        names = [e[len("Read(./**/"):-1] for e in read]
+        match = lambda name: any(fnmatch.fnmatchcase(name, n) for n in names)  # noqa: E731
+        for name in (".env", ".env.local", ".env.e2e", ".env.exa", ".env.examples", ".env.example.local", ".env."):
+            self.assertTrue(match(name), name)
+        self.assertFalse(match(".env.example"))
+        self.assertFalse(match(".envrc"))
+
+    def test_write_rows_also_write_plain_write_entries_for_the_cursor_cli(self):
+        write = claude_code.entries_for(table_rule("env-files-write"))
+        self.assertIn("Edit(./**/.env)", write)
+        self.assertIn("Edit(./**/.env.[0-9A-DF-Za-df-z_.]*)", write)
+        self.assertEqual([e for e in write if e.startswith("Write(")], ["Write(**/.env)", "Write(**/.env.*)"])
+
+    def test_commands_that_list_the_environment(self):
+        dump = claude_code.entries_for(table_rule("env-dump"))
+        for want in ("Bash(env)", "Bash(/usr/bin/env)", "Bash(export)", "Bash(set)"):
+            self.assertIn(want, dump)
+        self.assertNotIn("Bash(env:*)", dump)
+        self.assertNotIn("Bash(/bin/set)", dump)
+        self.assertIn("Bash(printenv:*)", claude_code.entries_for(table_rule("env-print")))
+        self.assertIn("Bash(export -p:*)", claude_code.entries_for(table_rule("env-dump-declared")))
+        self.assertEqual(claude_code.entries_for(table_rule("env-files-commands")), [])
+
+    def test_the_var_expansion_gap_is_named(self):
+        gaps = kinds(self.home.plan(self.table, []), "gap")
+        self.assertTrue(any("echo $TOKEN" in g for g in gaps), gaps)
+        self.assertTrue(any("`less`, `source` and `.` on the file run" in g for g in gaps), gaps)
+
+    def test_the_maintainers_entries_are_kept_and_a_second_run_has_no_changes(self):
+        mine = ["Read(./.env)", "Read(./.env.*)", "Read(./secrets/**)", "Write(./.env)", "Write(./.env.local)",
+                "Write(./secrets/**)"]
+        self.home.settings(deny=list(mine))
+        plan = self.home.apply(self.table, [])
+        deny = self.home.perms()["deny"]
+        self.assertEqual(deny[:len(mine)], mine)
+        self.assertIn("Write(**/.env)", deny)
+        self.assertIn("Bash(printenv:*)", deny)
+        notes = {c.text: c.note for s in plan.sections for c in s.changes if c.kind == "extra"}
+        self.assertIn("also refuses `.env.example`", notes["Read(./.env.*)"])
+        self.assertNotIn("also refuses", notes["Read(./.env)"])
+        self.assertIn("never matches a `./` path", notes["Write(./.env)"])
+        self.assertFalse(self.home.plan(self.table, []).has_changes)
+
+    def guard(self):
+        return next(r.guard for r in self.table if r.guard)
+
+    def auto(self):
+        return json.loads(self.home.read(".claude/settings.json"))["autoMode"]
+
+    def test_the_guard_goes_into_auto_mode_with_the_defaults(self):
+        self.assertTrue(self.guard().startswith("Environment Variable Access: Reading or revealing"))
+        plan = self.home.apply(self.table, [])
+        self.assertEqual(self.auto(), {"hard_deny": ["$defaults", self.guard()], "classifyAllShell": True})
+        added = kinds(plan, "added")
+        self.assertIn("hard_deny: $defaults", added)
+        self.assertIn("hard_deny: Environment Variable Access: …", added)
+        self.assertIn("classifyAllShell: true", added)
+        again = self.home.plan(self.table, [])
+        self.assertFalse(again.has_changes)
+        self.assertIn("hard_deny: Environment Variable Access: …", kinds(again, "present"))
+        self.assertIn("classifyAllShell: true", kinds(again, "present"))
+        gaps = kinds(again, "gap")
+        self.assertTrue(any("covers it in part here: interpreters and scripts" in g for g in gaps), gaps)
+
+    def test_the_users_auto_mode_entries_are_kept(self):
+        self.home.write(".claude/settings.json", json.dumps({"autoMode": {
+            "hard_deny": ["Never touch prod"], "soft_deny": ["$defaults", "x"], "environment": ["e"],
+            "classifyAllShell": False}}))
+        plan = self.home.apply(self.table, [])
+        self.assertEqual(self.auto(), {"hard_deny": ["Never touch prod", self.guard()], "soft_deny": ["$defaults", "x"],
+                                       "environment": ["e"], "classifyAllShell": True})
+        self.assertIn("classifyAllShell: true", kinds(plan, "tightened"))
+        self.assertTrue(any("has no `$defaults`" in g for g in kinds(plan, "gap")))
+        self.assertFalse(self.home.plan(self.table, []).has_changes)
+
+    def test_only_its_own_guard_is_removed_when_the_table_drops_it(self):
+        self.home.apply(self.table, [])
+        auto = self.auto()
+        auto["hard_deny"].append("Mine: keep this")
+        settings = json.loads(self.home.read(".claude/settings.json"))
+        settings["autoMode"] = auto
+        self.home.write(".claude/settings.json", json.dumps(settings))
+        table = [r for r in self.table if not r.guard]
+        plan = self.home.apply(table, [])
+        self.assertIn("hard_deny: Environment Variable Access: …", kinds(plan, "removed"))
+        self.assertEqual(self.auto()["hard_deny"], ["$defaults", "Mine: keep this"])
+        self.assertTrue(self.auto()["classifyAllShell"])
+
+    def test_a_guard_needs_a_label_and_rule_on_a_deny_row(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "rules.json"
+            for extra in ({"guard": "text"}, {"guard": {"label": "L"}}, {"guard": {"label": "L", "rule": "R"},
+                                                                         "level": "ask"}):
+                path.write_text(json.dumps({"version": 1, "rules": [{**_row(), **extra}]}))
+                with self.assertRaises(rules.RuleTableError, msg=extra):
+                    rules.load(path)
+
+    def test_rule_lines_explain_the_family(self):
+        self.home.apply(self.table, [])
+        agents = self.home.read(".config/agents/AGENTS.md")
+        self.assertIn("**Denied:** `printenv`, on its own or with a name.", agents)
+        self.assertIn("never print one another way (`echo $NAME`)", agents)
+        self.assertIn("except `.env.example`", agents)
 
 
 class SharedFileShapeTest(unittest.TestCase):

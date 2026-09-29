@@ -12,7 +12,7 @@ Two sources declare the machine:
 
 `scripts/set_up_machine.py` **reconciles** each harness against them: it compares what the table wants with what's on the machine, shows the diff, and applies it on one approval. Running it again is the **audit**. It needs only Python 3.9+.
 
-It also wires the **pre-tool hook**, `scripts/pre_tool_hook.py`, into each harness that has one; see *Pre-tool hook* below.
+It also wires the **pre-tool hook**, `scripts/pre_tool_hook.py`, into each harness that has one; see *Pre-tool hook* below. Where a harness has a semantic guard (Claude Code's auto mode), it writes each row's `guard` there too, as a second net for what patterns can't list.
 
 Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md). Codex so far for memory only. opencode and Cursor have no memory feature, and the plan says so.
 
@@ -41,6 +41,7 @@ Harnesses it covers, each with an adapter reference: [Claude Code](references/cl
 - **It never removes or loosens an entry it didn't write.** The manifest `~/.config/agents/set-up-machine.json` lists every entry it wrote, per harness; everything else is the user's.
 - **The stricter rule wins** where two overlap, in the table or on the machine.
 - **The shared file is the user's outside the generated block.** The block between the `set-up-machine:rules` markers is regenerated from the table; elsewhere reconcile only adds what the file's shape lacks, and never rewrites a Defaults value or a workflow line.
+- **A semantic guard only gains the table's rules.** In a harness's guard settings (Claude Code's `autoMode`), the user's own entries stay, and only a rule this skill wrote is ever removed.
 - **Memory stays off.** Each harness's memory feature is turned off where it has one, and every memory file is listed as `removed`. Apply keeps a copy in the backup folder, so move a memory worth keeping into its layer before approving.
 - **Apply writes exactly the approved plan,** after copying each file it changes into `~/.config/agents/backups/<time>/`.
 
@@ -56,20 +57,22 @@ Edit `rules.json`, then run the steps. Each row:
 | `match` | what it covers, by meaning, in one of the three kinds below |
 | `reason` | why the rule exists |
 | `instruction` | for `deny`, what the agent does instead: an alternative, or "Stop, say why, and give the user the exact command; never work around it."; for `ask` and `allow-and-report`, how to go ahead |
+| `gap` | optional: what no harness can catch for the row (`echo $TOKEN`); every harness's audit names it |
+| `guard` | optional, `deny` rows: `label` and `rule`, a prose rule for a harness's semantic guard (Claude Code's auto mode), covering what the row's family can't list as patterns |
 
 `match` kinds, told apart by their keys:
 
-- **Command:** `program`, one bare name (`rm`) or a list of them; optional `subcommands`, alternative word lists after the program (`[["repo", "delete"], ["repo", "archive"]]`); optional `flags`, the flag groups the command carries, all of them, each listing one flag's names without dashes, a one-letter name being the short flag (`["r", "R", "recursive"]`); optional `operands`, words after the flags (`["777"]`).
-- **File:** `paths`, globs relative to the project (`**/.env`) or starting `~/`, and `access`, `read` or `write`.
+- **Command:** `program`, one bare name (`rm`) or a list of them; optional `subcommands`, alternative word lists after the program (`[["repo", "delete"], ["repo", "archive"]]`); optional `flags`, the flag groups the command carries, all of them, each listing one flag's names without dashes, a one-letter name being the short flag (`["r", "R", "recursive"]`); optional `operands`, words after the flags (`["777"]`); optional `arguments: "none"`, the program with nothing after it (`env`, a bare `set`); optional `files`, globs one of its operands must match (`cat .env`), with an optional `except`.
+- **File:** `paths`, globs relative to the project (`**/.env`) or starting `~/`, `access`, `read` or `write`, and an optional `except`, globs the row leaves out (`**/.env.example`).
 - **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of an MCP tool name (`mcp__<server>__<tool>`). Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID.
 
-Adapters expand a row into every native entry it needs (each flag order and spelling, the `/bin/` and `/usr/bin/` paths, the harness's own file-rule kind), and the shared file gets one rule line per row.
+Adapters expand a row into every native entry it needs (each flag order and spelling, the `/bin/` and `/usr/bin/` paths, the harness's own file-rule kind, an `except` as the globs around it where the harness has no negation), and the shared file gets one rule line per row.
 
 ## Pre-tool hook
 
 One script, `scripts/pre_tool_hook.py`, reads the same `rules.json` and checks each tool call before it runs:
 
-- **deny** rows: it reads the command the way the shell runs it (any flag order or grouping, flags after the operands, `/bin/rm`, `mkfs.ext4`, the inside of `bash -lc '…'`, `eval`, `sudo`, `xargs`, `find -exec`, every part of `a && b; c | d`), and refuses the call naming each refused part with its rule's reason and instruction. It also checks file tools against file rows and MCP tools against mail-tool rows, including tools connected after the last plan.
+- **deny** rows: it reads the command the way the shell runs it (any flag order or grouping, flags after the operands, `/bin/rm`, `mkfs.ext4`, the inside of `bash -lc '…'`, `eval`, `sudo`, `xargs`, `find -exec`, every part of `a && b; c | d`), and refuses the call naming each refused part with its rule's reason and instruction. A wrapper that runs no command is read as itself (`env -u X` is `env`). It also checks file tools against file rows, a command's operands against its row's `files` (`source .env`), and MCP tools against mail-tool rows, including tools connected after the last plan.
 - **allow-and-report** rows: it appends one JSON line per call to `<report folder>/<date>.jsonl`, readable by the user alone since a command can carry a secret, and lets the harness's own permissions decide.
 - **ask** rows stay native.
 
