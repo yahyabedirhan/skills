@@ -128,7 +128,7 @@ Transport: on 0.9.0 every command is `ssh <target> "bash -lc '…'"`, with remot
 ### 4.4 Continuing, and keeping two orchestrators off one branch
 
 - **Cloud to terminal:** `claude --teleport <session-id>` (or `/teleport`, or `t` in `/tasks`) checks the repository, "fetches and checks out the branch from the cloud session, and loads the full conversation history". It needs a clean tree, the same repository (not a fork), a pushed branch and the same account ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#from-cloud-to-terminal)).
-- **Teleport forks:** "The terminal gets its own copy of the session: new work there stays local and doesn't appear in the cloud session". The cloud session keeps running unless someone stops or archives it, so after a teleport **two orchestrators can push to one branch**. The continuation has to archive the cloud session, or at least confirm it is idle, before the local copy commits.
+- **Teleport forks:** "The terminal gets its own copy of the session: new work there stays local and doesn't appear in the cloud session". Unverified: the docs don't say the cloud session stops; assume it may still be running until experiment E12 in [cloud-agents.md](cloud-agents.md#proposed-experiments) settles it. If it does keep running, after a teleport **two orchestrators can push to one branch**, so the continuation has to archive the cloud session, or at least confirm it is idle, before the local copy commits.
 - **Terminal to cloud** is a new session, not a move: `claude --cloud`, run in an interactive terminal (section 4.1), starts fresh from the pushed branch and the handoff, like any handover. The local orchestrator must be stopped first.
 - **Lifetime:** a cloud session stops after inactivity and its VM is reclaimed; reopening restores the conversation, but "background work that was still running … such as subagents and shell commands, isn't restored" ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#environment-expired)). A project thread's sandbox can restart "from a fresh clone, so uncommitted changes can be lost. On long tasks, ask Claude to commit and push work in progress" ([claude-projects](https://code.claude.com/docs/en/claude-projects#limitations)). The orchestrating skills already commit each ticket, which fits.
 - **Same branch or stacked:** a `--cloud` session starts on the branch the local checkout is on. Whether a plain cloud session may push to an existing non-`claude/` branch (the effort branch, for "same branch") is only documented for routines (above); unverified for sessions.
@@ -142,7 +142,7 @@ Details belong to #70; these are the facts delegation needs.
 - **GitHub Copilot coding agent**: `gh agent-task create "<prompt>" [--base <branch>] [--custom-agent <name>] [--follow]`; `gh agent-task view <session-id|pr> [--log] [--follow] [--json …]`, with fields including `state`, `pullRequestNumber`, `pullRequestUrl` and `completedAt` [help]. Stopping a session "ends the GitHub Actions run and preserves any commits already pushed"; a follow-up typed into the session "Copilot implements … after it finishes its current tool call" ([track sessions](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/track-copilot-sessions)). It "can only work on one branch at a time and can open exactly one pull request to address each task" ([about](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent)).
 - **Jules**: `jules remote new --repo <repo> --session "<prompt>"`, `jules remote list --session`, `jules remote pull --session <id>` ([CLI reference](https://jules.google/docs/cli/reference)).
 
-The effort workflow could use these as delegates: the orchestrator stays local (or on the VPS) and hands one ticket to a hosted agent through its CLI or API, reading its pull request or diff back. None of them loads this repo's skills, the user's global instructions or its deny rules, so the delegate brief has to carry the rules. That's for #74 to weigh.
+The effort workflow could use these as delegates: the orchestrator stays local (or on the VPS) and hands one ticket to a hosted agent through its CLI or API, reading its pull request or diff back. None of them loads this repo's skills as they are, the user's global instructions or its deny rules; only Cursor carries anything personal, the account User Rules and a `~/.cursor/skills` sync ([cloud-agents-other-providers.md §2](cloud-agents-other-providers.md#2-cursor-cloud-agents-and-the-agent-cli)). So the delegate brief has to carry the rules. That's for #74 to weigh.
 
 ## 6. What this settles for the three blocked tickets
 
@@ -173,7 +173,7 @@ The effort workflow could use these as delegates: the orchestrator stays local (
   - on claude.ai: the cloud session is archived or idle;
   - on either: `git ls-remote` matches the old side's `HEAD`.
 
-  Teleport is the risky path, because it leaves the cloud original running.
+  Teleport is the risky path: the docs don't say the cloud session stops; assume it may still be running until E12 settles it ([cloud-agents.md](cloud-agents.md#proposed-experiments)).
 
 **Still open:**
 
@@ -246,7 +246,6 @@ Every command run for this research. "Mac" is the maintainer's Mac; "VPS" comman
 | 18 | VPS | `herdr agent list` again: 1 agent, `claude`, `idle`, as before | Nothing |
 | 19 | VPS | Test for `orchestrate-with-handoff`, `orchestrate-effort`, `orchestrating`, `handover`, `handover-to-herdr`, `herdr`, `close-effort`, `init-effort`, `treehouse` under `~/.claude/skills` and `~/.agents/skills` | Nothing |
 | 20 | Mac | Privacy scan of this file: `grep` for home paths, private repository names and IP addresses, and a check that no part of the saved machine's ID, label or target appears (only the generic word "VPS" does) | Nothing |
-
 | 21 | Mac (synthesis, #74) | Corrected the cloud-session start in section 2 and 4.1 (the create form of `claude --cloud` needs an interactive terminal; a local agent's scriptable start is a routine's API trigger), citing [cloud-agents-claude-code.md §7](cloud-agents-claude-code.md#7-starting-it) and the headless page; corrected section 3.3's reading of Herdr's toast default after reading `config-reference.json` at `v0.9.2` (default `off` for 0.9.0 and current) | This file only |
 
 No cloud agent session was started, nothing was installed, and no configuration was changed on either machine. The only VPS writes were the throwaway workspace in rows 13–16, now closed, and the notification in row 15.
