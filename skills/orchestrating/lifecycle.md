@@ -12,35 +12,42 @@ BUILD      orchestrate the tickets through delegates; open the pull request
 CLOSE      after the merge, remove the worktree and the branch
 ```
 
-There are two paths through it. The Herdr path automates every step between phases; the plain path runs anywhere, with the user carrying the handover. The **handover** skill picks the path's mechanism itself: Herdr whenever `herdr status` reaches a server, else a prompt the user pastes.
+There are two paths through it. The Herdr path automates every step between phases; the plain path runs anywhere, with the user carrying each new session. `init-effort` and the **handover** skill pick the mechanism themselves: Herdr whenever `herdr status` reaches a server, else a prompt the user pastes.
 
 ```text
                 START                    HANDOVER                  BUILD
-Herdr path      init-effort-with-herdr   handover                  orchestrate-with-handoff
-                treehouse worktree,        → handover-to-herdr:      → orchestrate-effort
-                Herdr workspace,           new "Orchestrator" tab,
-                thinking agent started     agent started, prompted
+Herdr path      init-effort              handover                  orchestrate-with-handoff
+                worktree (Treehouse),      → handover-to-herdr:      → orchestrate-effort
+                  → handover-to-herdr:     new "Orchestrator" tab,
+                  "Thinking" tab,          agent started, prompted
+                  agent started, prompted
 
 Plain path      init-effort              handover                  orchestrate-with-handoff
-                the environment's own      prints the starting       → orchestrate-effort
-                worktree, or git           prompt; the user pastes
-                worktree                   it into a new session
+                the project's worktree     prints the starting       → orchestrate-effort
+                tool, or git worktree;     prompt; the user pastes
+                thinks here, or prints     it into a new session
+                the starting prompt
 ```
 
 ## Start
 
-The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
+**init-effort** names the effort and creates its branch and worktree, with the project's worktree tool (Treehouse by default). The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
+
+For a brand-new project it first creates the repo: a folder under the maintainer's projects folder, a README and licence, the [folder standard](folders.md)'s setup, a first commit, and a GitHub repo (public or private, asked each time). The project's first effort then starts like any other.
+
+It writes the idea into a handoff in the worktree and starts the thinking session on it with a one-line prompt: in a `Thinking` Herdr tab through **handover-to-herdr** by default, else in its own session or a pasted prompt.
 
 ## Thinking
 
 ```text
-/grill-with-docs <idea>   sharpen it; terms land in CONTEXT.md, decisions in ADRs
-  /prototype              when a question needs a runnable answer; the user reviews it
-/to-spec                  the thread becomes a spec
-/to-tickets               tracer-bullet tickets, each naming what blocks it
+grilling     sharpen the idea, one round of questions at a time
+  prototype  when a question needs a runnable answer; the user reviews it
+to-spec      the thread becomes a spec
+to-tickets   tracer-bullet tickets, each naming what blocks it
+handover     hand over to an orchestrator
 ```
 
-Run it in one unbroken context window, so the spec and tickets build on the same reasoning. On a local tracker the artifacts land in an **effort folder**, `.efforts/<effort>/` with `spec.md` and `issues/`, per the [folder standard](folders.md).
+The starting prompt names these skills and the agent loads each one itself: the user types no slash command. Run it in one unbroken context window, so the spec and tickets build on the same reasoning. On a local tracker the artifacts land in an **effort folder**, `.efforts/<effort>/` with `spec.md` and `issues/`, per the [folder standard](folders.md).
 
 ## Handover
 
@@ -52,7 +59,7 @@ The orchestrator reads the handoff, shows the plan with `/show-me`, delegates th
 
 ## Close
 
-After the user merges the pull request, the effort's worktree and branch go, in the way they were created: on the Herdr path, `init-effort-with-herdr` holds the steps.
+After the user merges the pull request, the effort's worktree and branch go, in the way they were created: `init-effort` holds the steps.
 
 ## Why two sessions
 

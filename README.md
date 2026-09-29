@@ -46,8 +46,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 
 | Skill | What it does | Origin |
 |---|---|---|
-| [init-effort](skills/init-effort/SKILL.md) | Starts an effort on its own branch and worktree, runs its thinking session, and ends with a handover prompt for the orchestrator. | Original. |
-| [init-effort-with-herdr](skills/init-effort-with-herdr/SKILL.md) | Starts an effort in a Treehouse worktree opened as a Herdr workspace, and launches its thinking agent there. | Original. |
+| [init-effort](skills/init-effort/SKILL.md) | Starts an effort on its own branch and worktree (Treehouse by default, or the project's own tool), or a brand-new project in its own GitHub repo, and starts its thinking session, in a Herdr tab by default. | Original. |
 | [orchestrating](skills/orchestrating/SKILL.md) | The orchestrator's discipline: delegate, trust delegates, be the user's one contact, deciding what it can and asking only for a critical blocker. Holds the effort lifecycle and when to notify. | Original. |
 | [orchestrate-effort](skills/orchestrate-effort/SKILL.md) | Builds an effort from its spec and tickets through sub-agents and opens the pull request. | Original. |
 | [handoff](skills/handoff/SKILL.md) | Writes a handoff document in the repository for another session to pick up, and leaves it for the caller to commit. | Fork of `handoff` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d28dfdc`](https://github.com/mattpocock/skills/tree/d28dfdc39bea/skills/productivity/handoff) (MIT, see `skills/handoff/LICENSE.mattpocock`). Changes: agents can load it, and it saves to the repository's handoff folder (`.handoff/<date>-<topic>.md`) instead of a temp folder. |
@@ -92,7 +91,8 @@ The Origin column names the upstream commit each fork was copied from, so a late
 An **effort** (a feature, a new app, a refactor) goes from an idea to a merged pull request in one worktree on one branch. A thinking session decides what to build, and a fresh orchestrator builds it, so the builder starts from conclusions instead of debate.
 
 ```text
-START      init-effort, or init-effort-with-herdr        worktree and branch, decided once
+START      init-effort                                   worktree and branch (or a new repo), decided once
+             handover-to-herdr, or a pasted prompt       starts the thinking session
 THINKING   grilling, to-spec, to-tickets                 leaves a spec, tickets and a handoff
 HANDOVER   handover                                      ready, prompt, mechanism, started
              handoff                                     writes the handoff in the repo
