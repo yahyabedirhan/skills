@@ -46,14 +46,18 @@ The Origin column names the upstream commit each fork was copied from, so a late
 
 | Skill | What it does | Origin |
 |---|---|---|
-| [init-effort](skills/init-effort/SKILL.md) | Starts an effort on its own branch and worktree, runs its thinking session, and ends with a handover prompt for the orchestrator. | Original. |
-| [init-effort-with-herdr](skills/init-effort-with-herdr/SKILL.md) | Starts an effort in a Treehouse worktree opened as a Herdr workspace, and launches its thinking agent there. | Original. |
-| [orchestrating](skills/orchestrating/SKILL.md) | The orchestrator's discipline: delegate, trust delegates, be the user's one contact. Holds the effort lifecycle. | Original. |
+| [init-effort](skills/init-effort/SKILL.md) | Starts an effort on its own branch and worktree (Treehouse by default, or the project's own tool), or a brand-new project in its own GitHub repo, and starts its thinking session, in a Herdr tab by default. | Original. |
+| [orchestrating](skills/orchestrating/SKILL.md) | The orchestrator's discipline: delegate, trust delegates, be the user's one contact, deciding what it can and asking only for a critical blocker. Holds the effort lifecycle and when to notify. | Original. |
 | [orchestrate-effort](skills/orchestrate-effort/SKILL.md) | Builds an effort from its spec and tickets through sub-agents and opens the pull request. | Original. |
-| [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | Picks up an effort from a thinking session's handoff and runs orchestrate-effort. | Original. |
-| [orchestrate-with-herdr](skills/orchestrate-with-herdr/SKILL.md) | Ends a thinking session and starts its orchestrator in a new Herdr tab in the same workspace. | Original. |
-| [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`697d4ce`](https://github.com/mattpocock/skills/tree/697d4ce9742d/skills/engineering/implement) (MIT, see `skills/implement/LICENSE.mattpocock`). Changes: agents can load it, so an orchestrator's sub-agents can use it, and it commits only when the delegating agent doesn't. |
-| [to-pr](skills/to-pr/SKILL.md) | Opens a pull request or rewrites its description: a one-sentence why, reviewer notes, and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr) (MIT, see `skills/to-pr/LICENSE.humanlayer`). Changes: renamed, a real trigger description, no Mermaid views, and review links per changed file in the final report. |
+| [handoff](skills/handoff/SKILL.md) | Writes a handoff document in the repository for another session to pick up, and leaves it for the caller to commit. | Fork of `handoff` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d28dfdc`](https://github.com/mattpocock/skills/tree/d28dfdc39bea/skills/productivity/handoff) (MIT, see `skills/handoff/LICENSE.mattpocock`). Changes: agents can load it, and it saves to the repository's handoff folder (`.handoff/<date>-<topic>.md`) instead of a temp folder. |
+| [handover](skills/handover/SKILL.md) | Hands work over to a new session outside this one: a readiness checklist, the starting prompt, a mechanism to start it, and a check that it started. | Original. |
+| [handover-to-herdr](skills/handover-to-herdr/SKILL.md) | The Herdr mechanism of a handover, from inside or outside a Herdr pane (such as a desktop-app session): opens the worktree as a workspace, starts the agent in a labelled tab, sends the prompt, and confirms it's working. | Original. |
+| [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | Picks up an effort from a handoff and runs orchestrate-effort. | Original. |
+| [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`697d4ce`](https://github.com/mattpocock/skills/tree/697d4ce9742d/skills/engineering/implement) (MIT, see `skills/implement/LICENSE.mattpocock`). Changes: agents can load it, so an orchestrator's sub-agents can use it, it commits only when the delegating agent doesn't, it reviews at the depth the delegating agent sets, it stops what it started before reporting, and it moves what it no longer needs into `.scratch/` instead of running `rm -rf`. |
+| [to-spec](skills/to-spec/SKILL.md) | Turns the current conversation into a spec and publishes it to the project's tracker, or to `.efforts/<effort>/spec.md` on a local one. | Fork of `to-spec` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`5c89081`](https://github.com/mattpocock/skills/tree/5c89081d4bbe/skills/engineering/to-spec) (MIT, see `skills/to-spec/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself, and a local tracker keeps the spec in `.efforts/<effort>/` instead of `.scratch/`. |
+| [to-tickets](skills/to-tickets/SKILL.md) | Breaks a plan, spec or conversation into tracer-bullet tickets, each naming what blocks it, and publishes them to the project's tracker, or to `.efforts/<effort>/issues/` on a local one. | Fork of `to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`5c89081`](https://github.com/mattpocock/skills/tree/5c89081d4bbe/skills/engineering/to-tickets) (MIT, see `skills/to-tickets/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself; a local tracker keeps the tickets in `.efforts/<effort>/issues/` instead of `.scratch/`; and tickets are named by title, never by a number alone. |
+| [to-pr](skills/to-pr/SKILL.md) | Opens a pull request or rewrites its description: a one-sentence why, reviewer notes, and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr) (MIT, see `skills/to-pr/LICENSE.humanlayer`). Changes: renamed, a real trigger description, no Mermaid views, the description source saved to `.scratch/` per the folder standard instead of `.humanlayer/`, issues named by title, never by a number alone, review links per changed file in the final report, and a last section, *Things to be aware of*, for decisions made alone, surprises, what's left out and follow-ups, and "Refs", not "Closes", for a ticket waiting for the maintainer's QA. |
+| [close-effort](skills/close-effort/SKILL.md) | Closes an effort once you say its pull request is good, or that it merged: merges it, runs the post-merge follow-ups, carries unfinished work into next-effort tickets, closes the tracker, and removes only branches and worktrees proven merged, then its own worktree from a Herdr tab. | Original. |
 
 ### Design frameworks
 
@@ -73,7 +77,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | Skill | What it does | Origin |
 |---|---|---|
 | [maintain-skills](skills/maintain-skills/SKILL.md) | Installs, moves, updates, forks, publishes, removes, and audits skills across global scope, project scope, and your own skills repo with `npx skills`; prompt-audits each new skill in a fresh sub-agent and measures a skill's run cost on request. | Original. |
-| [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings and a verdict. You start it with `/skill-recap` (Codex: `$skill-recap`) and file them with `/to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills). | Original. |
+| [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings and a verdict. You start it with `/skill-recap` (Codex: `$skill-recap`) and file them with [to-tickets](skills/to-tickets/SKILL.md). | Original. |
 
 ### Daily workflows
 
@@ -89,18 +93,21 @@ The Origin column names the upstream commit each fork was copied from, so a late
 An **effort** (a feature, a new app, a refactor) goes from an idea to a merged pull request in one worktree on one branch. A thinking session decides what to build, and a fresh orchestrator builds it, so the builder starts from conclusions instead of debate.
 
 ```text
-START      init-effort, or init-effort-with-herdr        worktree and branch, decided once
-THINKING   mattpocock/skills: grill, spec, tickets       leaves a spec, tickets and a handoff
-HANDOVER   orchestrate-with-herdr, or a pasted prompt    starts a fresh orchestrator
+START      init-effort                                   worktree and branch (or a new repo), decided once
+             handover-to-herdr, or a pasted prompt       starts the thinking session
+THINKING   grilling, to-spec, to-tickets                 leaves a spec, tickets and a handoff
+HANDOVER   handover                                      ready, prompt, mechanism, started
+             handoff                                     writes the handoff in the repo
+             handover-to-herdr, or a pasted prompt       starts a fresh orchestrator
 BUILD      orchestrate-with-handoff → orchestrate-effort
              orchestrating                               the orchestrator's discipline
              implement                                   each ticket, built by a sub-agent
              show-me                                     shows the plan
              to-pr                                       last step: opens the pull request
-CLOSE      remove the worktree and branch after the merge
+CLOSE      close-effort                                  after your "go": merge, follow up, carry over, clean up
 ```
 
-Install the family together with `show-me` and [mattpocock/skills](https://github.com/mattpocock/skills). The full path is in [lifecycle.md](skills/orchestrating/lifecycle.md).
+Install the family together with `show-me` and these skills from [mattpocock/skills](https://github.com/mattpocock/skills): `grilling`, `prototype`, `tdd`, `code-review` and `setup-matt-pocock-skills`. Leave out that repo's `handoff`, `to-spec` and `to-tickets`: the forks here replace them. The full path is in [lifecycle.md](skills/orchestrating/lifecycle.md), and where each record goes (spec, tickets, handoff, notes) in the [folder standard](skills/orchestrating/folders.md).
 
 ### Design frameworks
 
