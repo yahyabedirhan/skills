@@ -13,4 +13,6 @@ Once done, review the work at the depth the delegating agent sets: none, one lig
 
 Before you report, stop everything you started: dev servers, preview and browser tabs, background commands and watchers. Name anything you leave running on purpose in your report, with the reason. In zsh, split a list with `${=VAR}` or an array, and run a formatter only on a file list you've checked isn't empty: with none, it waits on stdin forever.
 
+Never run `rm -rf`: move what's no longer needed (a temporary folder, a throwaway script) into the gitignored `.scratch/` with `mv`.
+
 Commit your work to the current branch, unless the agent that delegated the work to you commits it.
