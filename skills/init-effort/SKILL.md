@@ -66,7 +66,7 @@ Done when the worktree exists on the new branch.
 
 ## 5. Start the thinking session
 
-Write the idea into a handoff in the worktree (the `.handoff/` path in [orchestrating/folders.md](../orchestrating/folders.md), topic `<effort>`): the idea as the maintainer gave it, the effort, the branch, the worktree, and, for a new project, its repo. Leave it uncommitted; the thinking session's handover commits it with the spec.
+Write the idea into a handoff in the worktree (the `.handoff/` path in [orchestrating/folders.md](../orchestrating/folders.md), topic `<effort>`): the idea as the maintainer gave it, the effort, the branch, the worktree, and, for a new project, its repo. Leave it uncommitted; the thinking session's handover commits it with the spec. When that handover's handoff lands on the same path (same day, same topic), it updates this file in place.
 
 The **starting prompt** is one line, and names only skills an agent can load:
 
