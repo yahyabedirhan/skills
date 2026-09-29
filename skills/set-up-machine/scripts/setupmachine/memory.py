@@ -13,9 +13,7 @@ from pathlib import Path
 from .plan import Change, FileWrite, Section
 
 # Harnesses without a memory feature (docs/research/harness-capabilities.md, "Memory").
-WITHOUT_MEMORY = {
-    "Cursor": (".cursor", "no memory feature in the IDE (removed) or the CLI; nothing to turn off"),
-}
+WITHOUT_MEMORY = {}  # every covered harness now says so in its own adapter
 
 
 def fingerprint(path: Path) -> str:
