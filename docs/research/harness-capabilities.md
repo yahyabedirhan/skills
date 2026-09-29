@@ -2,6 +2,8 @@
 
 Facts for [Settle what each harness can and can't do (#50)](https://github.com/yahyabedirhan/skills/issues/50), under [Spec: every harness and project is set up and audited from the skills (#49)](https://github.com/yahyabedirhan/skills/issues/49). The harness adapters in set-up-machine and set-up-project are built on this page. Researched 2026-09-29.
 
+Whether each harness's auto mode can act as a semantic guard for rules patterns can't express is on a sibling page, [Can auto mode block what rules can't?](auto-mode-semantic-guard.md).
+
 Versions checked: Claude Code 2.1.284, codex-cli 0.157.1, opencode 1.18.33, cursor-agent 2026.09.18-9a7762b.
 
 Evidence tags:
