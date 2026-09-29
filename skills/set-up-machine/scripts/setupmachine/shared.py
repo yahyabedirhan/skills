@@ -53,7 +53,10 @@ def read_text(path: Path):
 
 
 def rule_lines(rules: list) -> list:
-    return [f"- **{LEVEL_LABEL[r.level]}:** {r.summary}. {r.reason} Instead: {r.instruction}" for r in rules]
+    return [
+        f"- **{LEVEL_LABEL[r.level]}:** {r.summary}. {r.reason} {'Instead: ' if r.level == 'deny' else ''}{r.instruction}"
+        for r in rules
+    ]
 
 
 def render_block(rules: list) -> str:

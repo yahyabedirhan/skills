@@ -11,6 +11,206 @@
       },
       "reason": "A recursive forced delete can't be undone, and one wrong path loses work outside the task.",
       "instruction": "Move what's no longer needed into the project's gitignored temp folder (`.scratch/` by default) with `mv`."
+    },
+    {
+      "id": "rm-no-preserve-root",
+      "level": "deny",
+      "summary": "`rm --no-preserve-root`",
+      "match": {
+        "program": "rm",
+        "flags": [["no-preserve-root"]]
+      },
+      "reason": "It exists only to delete the whole filesystem.",
+      "instruction": "Stop, say why you wanted it, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "disk-write",
+      "level": "deny",
+      "summary": "`dd` and `mkfs`",
+      "match": {
+        "program": ["dd", "mkfs"]
+      },
+      "reason": "They write raw disks and filesystems, where one wrong device name destroys a drive.",
+      "instruction": "Stop, say why you wanted it, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "chmod-recursive-777",
+      "level": "deny",
+      "summary": "`chmod -R 777`",
+      "match": {
+        "program": "chmod",
+        "flags": [["R", "recursive"]],
+        "operands": ["777"]
+      },
+      "reason": "It makes a whole tree writable by every user, and the old modes can't be recovered.",
+      "instruction": "Give the one file or folder that needs it the narrowest mode that works (`chmod u+x script.sh`)."
+    },
+    {
+      "id": "privilege-escalation",
+      "level": "deny",
+      "summary": "`sudo` and `su`",
+      "match": {
+        "program": ["sudo", "su"]
+      },
+      "reason": "A command run as another user, or as root, escapes every other rule on this list.",
+      "instruction": "Stop, say why it needs elevated rights, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "shell-inline-command",
+      "level": "deny",
+      "summary": "`bash -c`, `sh -c` and `zsh -c`",
+      "match": {
+        "program": ["bash", "sh", "zsh"],
+        "flags": [["c"]]
+      },
+      "reason": "A command inside a quoted string hides from the other rules.",
+      "instruction": "Run the command directly, one step per command; for a longer script, write it to a file in `.scratch/` and run that file."
+    },
+    {
+      "id": "git-push-force",
+      "level": "deny",
+      "summary": "`git push --force`",
+      "match": {
+        "program": "git",
+        "subcommands": [["push"]],
+        "flags": [["f", "force"]]
+      },
+      "reason": "It overwrites the remote's history, including commits someone else pushed.",
+      "instruction": "Push normally; if the remote has moved, rebase onto it or use `git push --force-with-lease`, which asks the user first."
+    },
+    {
+      "id": "git-reset-hard",
+      "level": "deny",
+      "summary": "`git reset --hard`",
+      "match": {
+        "program": "git",
+        "subcommands": [["reset"]],
+        "flags": [["hard"]]
+      },
+      "reason": "It discards uncommitted work with no way back.",
+      "instruction": "Set work aside with a temporary WIP commit or a named stash (`git stash push -u -m <tag>`), then check out or reset without `--hard`."
+    },
+    {
+      "id": "gh-repo-destructive",
+      "level": "deny",
+      "summary": "`gh repo delete`, `archive`, `unarchive` and `rename`",
+      "match": {
+        "program": "gh",
+        "subcommands": [["repo", "delete"], ["repo", "archive"], ["repo", "unarchive"], ["repo", "rename"]]
+      },
+      "reason": "They delete a repository or change how everyone else reaches it.",
+      "instruction": "Stop, say why, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "gh-access-keys",
+      "level": "deny",
+      "summary": "`gh repo deploy-key`, `gh repo autolink`, `gh ssh-key` and `gh gpg-key`",
+      "match": {
+        "program": "gh",
+        "subcommands": [["repo", "deploy-key"], ["repo", "autolink"], ["ssh-key"], ["gpg-key"]]
+      },
+      "reason": "They change who and what can reach the user's account and repositories.",
+      "instruction": "Stop, say why, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "calendar-mail-cli-send",
+      "level": "deny",
+      "summary": "`spark event` and `spark comment`",
+      "match": {
+        "program": "spark",
+        "subcommands": [["event"], ["comment"]]
+      },
+      "reason": "They send invitations, cancellations or comments to other people in the user's name.",
+      "instruction": "Read with `spark events`; for a change, stop and give the user the exact command."
+    },
+    {
+      "id": "git-push-force-with-lease",
+      "level": "ask",
+      "summary": "`git push --force-with-lease`",
+      "match": {
+        "program": "git",
+        "subcommands": [["push"]],
+        "flags": [["force-with-lease"]]
+      },
+      "reason": "It rewrites the remote's history, though only if no one else pushed since you fetched.",
+      "instruction": "Say in one line why the history needs rewriting, run it as its own command, and let the user approve it."
+    },
+    {
+      "id": "gh-repo-edit",
+      "level": "ask",
+      "summary": "`gh repo edit`",
+      "match": {
+        "program": "gh",
+        "subcommands": [["repo", "edit"]]
+      },
+      "reason": "It changes a repository's settings, such as its visibility, for everyone.",
+      "instruction": "Say in one line what changes and why, run it as its own command, and let the user approve it."
+    },
+    {
+      "id": "gh-api-secrets",
+      "level": "allow-and-report",
+      "summary": "`gh api`, `gh secret` and `gh variable`",
+      "match": {
+        "program": "gh",
+        "subcommands": [["api"], ["secret"], ["variable"]]
+      },
+      "reason": "They reach anything the account can, including secrets, so each use is worth knowing about.",
+      "instruction": "Go ahead; each call is logged for the user to review."
+    },
+    {
+      "id": "secret-files-read",
+      "level": "deny",
+      "summary": "reading `.env` files and `secrets/` folders",
+      "match": {
+        "paths": ["**/.env", "**/.env.*", "**/secrets/**"],
+        "access": "read"
+      },
+      "reason": "They hold credentials, which must stay out of the agent's context.",
+      "instruction": "Read the variable names from a checked-in example (`.env.example`) or ask the user; never print a secret."
+    },
+    {
+      "id": "secret-files-write",
+      "level": "deny",
+      "summary": "writing `.env` files and `secrets/` folders",
+      "match": {
+        "paths": ["**/.env", "**/.env.*", "**/secrets/**"],
+        "access": "write"
+      },
+      "reason": "A write can overwrite a credential, or leak one into a file that gets committed.",
+      "instruction": "Tell the user the variable to set and where; they write the value."
+    },
+    {
+      "id": "home-credentials-read",
+      "level": "deny",
+      "summary": "reading `~/.ssh` and `~/.aws`",
+      "match": {
+        "paths": ["~/.ssh/**", "~/.aws/**"],
+        "access": "read"
+      },
+      "reason": "They hold the keys to the user's machines and cloud accounts.",
+      "instruction": "Stop, say what you needed from them, and let the user run the command."
+    },
+    {
+      "id": "mail-send",
+      "level": "deny",
+      "summary": "mail tools that send, reply or forward",
+      "match": {
+        "server": "mail",
+        "tool": "^(send|reply|forward)"
+      },
+      "reason": "A sent message can't be recalled, and it speaks for the user.",
+      "instruction": "Write a draft for the user to review and send."
+    },
+    {
+      "id": "mail-destructive",
+      "level": "deny",
+      "summary": "mail tools that trash, mark spam or apply sensitive labels",
+      "match": {
+        "server": "mail",
+        "tool": "^(trash|mark_\\w*spam|(batch_)?apply_sensitive)"
+      },
+      "reason": "They hide or remove the user's mail, where a mistake goes unnoticed.",
+      "instruction": "Label or archive the messages, or list them and let the user decide."
     }
   ]
 }

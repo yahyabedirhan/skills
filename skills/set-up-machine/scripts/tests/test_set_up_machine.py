@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from setupmachine import reconcile, rules, shared  # noqa: E402
+from setupmachine.adapters import claude_code  # noqa: E402
 from setupmachine.plan import render  # noqa: E402
 
 RM = rules.Rule(
@@ -51,11 +52,11 @@ class Home:
     def perms(self):
         return json.loads(self.read(".claude/settings.json"))["permissions"]
 
-    def plan(self, table=(RM,)):
-        return reconcile.build(self.path, list(table), self.os_home)
+    def plan(self, table=(RM,), tools=None):
+        return reconcile.build(self.path, list(table), self.os_home, {"claude-code": tools} if tools is not None else None)
 
-    def apply(self, table=(RM,)):
-        plan = self.plan(table)
+    def apply(self, table=(RM,), tools=None):
+        plan = self.plan(table, tools)
         reconcile.apply(plan, plan.id)
         return plan
 
@@ -146,7 +147,7 @@ class ReconcileTest(unittest.TestCase):
     def test_a_stricter_existing_entry_is_never_loosened(self):
         self.home.settings(deny=["Bash(rm -rf:*)"])
         plan = self.home.apply(table=(ask_rule(),))
-        self.assertIn("Bash(rm -rf:*)", kinds(plan, "present"))
+        self.assertIn("Bash(rm -rf:*)", kinds(plan, "stricter"))
         self.assertEqual(self.home.perms()["deny"], ["Bash(rm -rf:*)"])
         self.assertNotIn("Bash(rm -rf:*)", self.home.perms()["ask"])
 
@@ -218,6 +219,169 @@ class ReconcileTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.home.plan()
 
+
+
+def table_rule(rule_id):
+    return next(r for r in rules.load() if r.id == rule_id)
+
+
+MAIL_TOOLS = [
+    "mcp__claude_ai_Gmail__send_message",
+    "mcp__claude_ai_Gmail__reply",
+    "mcp__claude_ai_Gmail__forward",
+    "mcp__claude_ai_Gmail__create_draft",
+    "mcp__claude_ai_Gmail__trash_thread",
+    "mcp__claude_ai_Gmail__untrash_thread",
+    "mcp__claude_ai_Gmail__mark_message_spam",
+    "mcp__claude_ai_Gmail__unmark_message_spam",
+    "mcp__claude_ai_Gmail__apply_sensitive_message_label",
+    "mcp__claude_ai_Gmail__batch_apply_sensitive_thread_labels",
+    "mcp__game__send_message",
+    "mcp__claude_ai_Claude_Docs__create",
+]
+
+
+class FullTableTest(unittest.TestCase):
+    def test_every_family_of_the_policy_has_a_row(self):
+        levels = {r.id: r.level for r in rules.load()}
+        for rule_id in (
+            "rm-recursive-force", "rm-no-preserve-root", "disk-write", "chmod-recursive-777", "privilege-escalation",
+            "shell-inline-command", "git-push-force", "git-reset-hard", "gh-repo-destructive", "gh-access-keys",
+            "calendar-mail-cli-send", "secret-files-read", "secret-files-write", "home-credentials-read",
+            "mail-send", "mail-destructive",
+        ):
+            self.assertEqual(levels.get(rule_id), "deny", rule_id)
+        self.assertEqual(levels["git-push-force-with-lease"], "ask")
+        self.assertEqual(levels["gh-repo-edit"], "ask")
+        self.assertEqual(levels["gh-api-secrets"], "allow-and-report")
+
+    def test_subcommands_and_operands_sit_around_the_flags(self):
+        entries = claude_code.entries_for(table_rule("git-push-force"))
+        for want in ("Bash(git push --force:*)", "Bash(git push -f:*)", "Bash(/usr/bin/git push --force:*)"):
+            self.assertIn(want, entries)
+        self.assertIn("Bash(chmod -R 777:*)", claude_code.entries_for(table_rule("chmod-recursive-777")))
+        shells = claude_code.entries_for(table_rule("shell-inline-command"))
+        for want in ("Bash(bash -c:*)", "Bash(sh -c:*)", "Bash(zsh -c:*)", "Bash(/bin/zsh -c:*)"):
+            self.assertIn(want, shells)
+        gh = claude_code.entries_for(table_rule("gh-repo-destructive"))
+        self.assertIn("Bash(gh repo delete:*)", gh)
+        self.assertIn("Bash(gh repo archive:*)", gh)
+
+    def test_file_rules_use_the_kinds_claude_code_checks(self):
+        self.assertEqual(
+            claude_code.entries_for(table_rule("secret-files-write")),
+            ["Edit(./**/.env)", "Edit(./**/.env.*)", "Edit(./**/secrets/**)"],
+        )
+        self.assertIn("Read(./**/.env)", claude_code.entries_for(table_rule("secret-files-read")))
+        self.assertEqual(claude_code.entries_for(table_rule("home-credentials-read")), ["Read(~/.ssh/**)", "Read(~/.aws/**)"])
+
+    def test_mail_rules_match_mail_tools_by_meaning(self):
+        send = claude_code.entries_for(table_rule("mail-send"), MAIL_TOOLS)
+        self.assertEqual(send, sorted([
+            "mcp__claude_ai_Gmail__send_message", "mcp__claude_ai_Gmail__reply", "mcp__claude_ai_Gmail__forward",
+        ]))
+        destructive = claude_code.entries_for(table_rule("mail-destructive"), MAIL_TOOLS)
+        self.assertEqual(destructive, sorted([
+            "mcp__claude_ai_Gmail__trash_thread", "mcp__claude_ai_Gmail__mark_message_spam",
+            "mcp__claude_ai_Gmail__apply_sensitive_message_label",
+            "mcp__claude_ai_Gmail__batch_apply_sensitive_thread_labels",
+        ]))
+
+    def test_bad_rows_of_the_new_kinds_are_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "rules.json"
+            base = {k: v for k, v in _row().items() if k != "match"}
+            for match in (
+                {"paths": ["/etc/x"], "access": "read"},
+                {"paths": ["./.env"], "access": "read"},
+                {"paths": [".env"], "access": "execute"},
+                {"server": "mail", "tool": "("},
+                {"server": "mail"},
+                {"program": "gh", "subcommands": [["repo delete"]]},
+                {"program": "rm", "paths": [".env"], "access": "read"},
+            ):
+                path.write_text(json.dumps({"version": 1, "rules": [{**base, "match": match}]}))
+                with self.assertRaises(rules.RuleTableError, msg=match):
+                    rules.load(path)
+
+
+class CoversTest(unittest.TestCase):
+    def test_bash_coverage_respects_word_boundaries(self):
+        self.assertTrue(claude_code.covers("Bash(gh repo delete*)", "Bash(gh repo delete:*)"))
+        self.assertTrue(claude_code.covers("Bash(git push --force *)", "Bash(git push --force:*)"))
+        self.assertTrue(claude_code.covers("Bash(git push:*)", "Bash(git push --force:*)"))
+        self.assertFalse(claude_code.covers("Bash(git push --force:*)", "Bash(git push --force-with-lease:*)"))
+        self.assertFalse(claude_code.covers("Bash(su:*)", "Bash(sudo:*)"))
+        self.assertFalse(claude_code.covers("Bash(rm -rf)", "Bash(rm -rf:*)"))
+
+    def test_mcp_coverage_by_server_or_glob(self):
+        tool = "mcp__claude_ai_Gmail__send_message"
+        self.assertTrue(claude_code.covers("mcp__claude_ai_Gmail", tool))
+        self.assertTrue(claude_code.covers("mcp__claude_ai_Gmail__*", tool))
+        self.assertFalse(claude_code.covers("mcp__other__send_message", tool))
+
+
+class FullTableReconcileTest(unittest.TestCase):
+    def setUp(self):
+        self.home = Home()
+        self.table = rules.load()
+
+    def tearDown(self):
+        self.home.close()
+
+    def test_the_full_table_applies_then_a_second_run_has_no_changes(self):
+        first = self.home.apply(self.table, MAIL_TOOLS)
+        perms = self.home.perms()
+        self.assertIn("Bash(git push --force-with-lease:*)", perms["ask"])
+        self.assertIn("Bash(gh api:*)", perms["allow"])
+        self.assertIn("Edit(./**/.env)", perms["deny"])
+        self.assertIn("mcp__claude_ai_Gmail__send_message", perms["deny"])
+        self.assertNotIn("mcp__game__send_message", perms["deny"])
+        found = kinds(first, "found")
+        self.assertIn("mcp__claude_ai_Gmail__forward, mcp__claude_ai_Gmail__reply, mcp__claude_ai_Gmail__send_message", found)
+        self.assertFalse(self.home.plan(self.table, MAIL_TOOLS).has_changes)
+
+    def test_rule_lines_cover_deny_and_ask_and_say_instead_only_for_deny(self):
+        self.home.apply(self.table, [])
+        agents = self.home.read(".config/agents/AGENTS.md")
+        for rule in self.table:
+            self.assertEqual(agents.count(f"{rule.summary}. {rule.reason}"), 1, rule.id)
+        self.assertIn("**Denied:** `git push --force`.", agents)
+        self.assertIn("Instead: Push normally", agents)
+        self.assertIn("**Asks first:** `gh repo edit`. It changes a repository's settings, such as its visibility, for everyone. Say", agents)
+
+    def test_a_covering_entry_counts_as_present_and_isnt_extra(self):
+        self.home.settings(deny=["Bash(gh repo delete*)"])
+        plan = self.home.plan(self.table, [])
+        self.assertNotIn("Bash(gh repo delete:*)", kinds(plan, "added"))
+        self.assertNotIn("Bash(gh repo delete*)", kinds(plan, "extra"))
+
+    def test_an_ask_rule_already_denied_is_reported_stricter_and_left(self):
+        self.home.settings(deny=["Bash(gh repo edit*)"])
+        plan = self.home.apply(self.table, [])
+        self.assertIn("Bash(gh repo edit:*)", kinds(plan, "stricter"))
+        self.assertNotIn("Bash(gh repo edit:*)", self.home.perms().get("ask", []))
+
+    def test_an_inert_write_rule_is_named_as_such(self):
+        self.home.settings(deny=["Write(./.env)"])
+        plan = self.home.plan(self.table, [])
+        notes = [c.note for s in plan.sections for c in s.changes if c.kind == "extra" and c.text == "Write(./.env)"]
+        self.assertEqual(len(notes), 1)
+        self.assertIn("never checks Write rules", notes[0])
+
+    def test_a_mail_tool_that_disappears_is_removed_only_when_the_list_was_read(self):
+        self.home.apply(self.table, MAIL_TOOLS)
+        original = claude_code.discover_tools
+        claude_code.discover_tools = lambda: (None, "not logged in")
+        try:
+            plan = self.home.plan(self.table)
+        finally:
+            claude_code.discover_tools = original
+        self.assertEqual(kinds(plan, "removed"), [])
+        self.assertTrue(any("not logged in" in g for g in kinds(plan, "gap")))
+        plan = self.home.apply(self.table, [])
+        self.assertIn("mcp__claude_ai_Gmail__send_message", kinds(plan, "removed"))
+        self.assertNotIn("mcp__claude_ai_Gmail__send_message", self.home.perms()["deny"])
 
 if __name__ == "__main__":
     unittest.main()
