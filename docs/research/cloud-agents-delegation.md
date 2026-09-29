@@ -1,0 +1,249 @@
+# Delegating to, watching and hearing back from agents off the Mac
+
+Facts for [Research: delegating to, watching and hearing back from agents off the Mac (#73)](https://github.com/yahyabedirhan/skills/issues/73), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45). They feed the three blocked build tickets: [A thinking session on the Mac can hand over to an orchestrator on the VPS (#13)](https://github.com/yahyabedirhan/skills/issues/13), [An unfinished effort can be handed to a new orchestrator (#15)](https://github.com/yahyabedirhan/skills/issues/15) and [Agents on the Mac and the VPS can see each other's state (#16)](https://github.com/yahyabedirhan/skills/issues/16). Researched 2026-09-29.
+
+The question: how a local session (a Mac terminal, a Herdr pane, the desktop app) hands an effort to an agent somewhere else, from a handoff committed and pushed to GitHub with a one-line starting prompt, the way the **handover** skill does locally; how the maintainer and a local agent watch it and answer it; how done-or-blocked reaches the maintainer; and how an unfinished effort moves between places.
+
+This page builds on, and doesn't repeat:
+
+- [herdr-vps.md](herdr-vps.md): the Herdr machine model, the Mac-to-VPS command reference, the safe-handover checks, VPS-to-Mac options.
+- [agent-user-communication.md](agent-user-communication.md): notification mechanisms in Claude Code and Herdr, why the built-in notification is lost under Herdr.
+- [effort-branches-and-prs.md](effort-branches-and-prs.md): taking over a branch safely, same branch versus stacked branch, what merging does to a stacked pull request.
+- [harness-capabilities.md](harness-capabilities.md): what each harness's rules, hooks and instructions can express locally.
+
+Facts owned by the sibling tickets (Claude Code's cloud #69, other providers #70, the VPS #71) are cited here straight from the primary docs, only as far as delegation needs them.
+
+Versions: Claude Code 2.1.284 (Mac) and 2.1.283 (VPS), codex-cli 0.157.1, gh 2.101.0, cursor-agent 2026.09.28, Herdr 0.9.0 on both machines (0.9.2 was released today; see [the release](https://github.com/herdrdev/herdr/releases/tag/v0.9.2)).
+
+Evidence tags:
+
+- **[doc]** the provider's official documentation, linked inline.
+- **[help]** the installed CLI's own `--help` output on the Mac.
+- **[probe]** a command run for this research; each is in the exploration log.
+- **[prior]** a finding of an earlier research file in `docs/research/`, linked.
+- **Unverified** marks a claim with no primary source or probe behind it.
+
+Herdr docs are cited at the `v0.9.2` tag under `https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/`.
+
+---
+
+## 1. Today's flow, and the steps that depend on where the agent runs
+
+The local flow, as the skills on this branch describe it:
+
+| Step | Skill | What it assumes about place |
+|---|---|---|
+| Worktree and branch exist | [handover](../../skills/handover/SKILL.md) step 1 | Made with `<worktree-tool>` (Treehouse on the Mac), else `git worktree add`, on the machine that runs the new session |
+| Handoff written, committed, **pushed** | handover step 1 | Nothing: the new session reads the repository. Already place-independent |
+| One-line starting prompt, `/orchestrate-with-handoff <path>` | handover step 2 | The skill is installed where the new session runs |
+| Start it in `<session-host>` | handover step 3, [handover-to-herdr](../../skills/handover-to-herdr/SKILL.md) steps 1–4 | `herdr` reaches **this** machine's server; the worktree is on this machine; the maintainer can accept a trust prompt in the tab |
+| Confirm it started | handover step 4, `herdr agent wait --until working` | Same server |
+| Notify done or blocked | [orchestrating/notify.md](../../skills/orchestrating/notify.md), `<notification-method>` | `osascript` on macOS (the user's global instructions) |
+| Ask the delivering orchestrator, close its workspaces | [close-effort](../../skills/close-effort/SKILL.md) steps 3 and 8, [closing-an-effort.md](../../skills/handover-to-herdr/closing-an-effort.md) | Same server |
+
+Everything up to "pushed" already works for any destination. What changes per option is the rest: **where the worktree comes from, whether the starting prompt's skill exists there, how the session is started and confirmed, how its state is read, and how it notifies.**
+
+## 2. The options, side by side
+
+"Local agent" means a Claude Code session on the Mac acting for the maintainer. "Maintainer" means the person, by hand.
+
+| Option | Hand over | Watch | Answer | Notify | Continue |
+|---|---|---|---|---|---|
+| **Mac, Herdr tab** (baseline) | handover-to-herdr: `worktree open`, `agent start`, `agent prompt` ([skill](../../skills/handover-to-herdr/SKILL.md)) | Herdr sidebar; `herdr agent list/read` ([prior](herdr-vps.md)) | Type in the tab; `herdr agent prompt` | `osascript` from the model ([prior](agent-user-communication.md)) | Same branch or stacked ([prior](effort-branches-and-prs.md)) |
+| **VPS, Herdr tab** | Same commands run on the VPS server: `ssh <vps> herdr …` on 0.9.0, `herdr --machine <label> …` from 0.9.1 ([cli-reference.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/cli-reference.mdx), "Saved SSH machines"); worktree by `git worktree add` (no Treehouse there) [probe] | Mac Herdr window shows the VPS's agent states while another machine is selected ([connecting-machines.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/connecting-machines.mdx), "Switch between machines"); agent: `herdr agent list/read` over SSH [probe] | Maintainer selects the VPS in the Herdr window; agent: `herdr agent prompt` over SSH or `--machine` | `osascript` can't run there (Linux); `herdr notification show` on the VPS server returned `shown` [probe], where it appeared is unverified; a Mac-side `herdr agent wait --until done --until blocked` watcher is possible ([cli-reference.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/cli-reference.mdx), "Agents") | Git as locally; the old side checked over SSH first ([prior](herdr-vps.md), "Safe-handover checks") |
+| **VPS, Claude Code Remote Control** | Start `claude remote-control` (server mode) or `claude --remote-control` in a VPS pane; send the prompt from the phone, web or another session ([remote-control](https://code.claude.com/docs/en/remote-control#start-a-remote-control-session)) | claude.ai/code and the Claude app list the session; a local session connected to Remote Control lists it with `ListAgents` ([cross-session-messaging](https://code.claude.com/docs/en/cross-session-messaging#see-which-sessions-claude-can-reach)) | Web or phone; `SendMessage` from a local session, through Anthropic's servers ([cross-session-messaging](https://code.claude.com/docs/en/cross-session-messaging#message-sessions-on-other-machines)) | Mobile push, "Push when Claude decides" / "Push when actions required" ([remote-control](https://code.claude.com/docs/en/remote-control#mobile-push-notifications)) | `claude remote-control --continue` brings the session back within about four hours ([remote-control](https://code.claude.com/docs/en/remote-control#resume-sessions-after-stopping-the-server)) |
+| **VPS, Claude desktop SSH session** | Desktop app: environment dropdown, **+ Add SSH connection**; Claude runs on the remote machine ([desktop](https://code.claude.com/docs/en/desktop#ssh-sessions)) | Desktop sidebar; other desktop sessions can list and read it ([desktop](https://code.claude.com/docs/en/desktop#work-across-sessions)) | In the desktop app | Desktop OS notification when a session finishes and isn't being viewed ([desktop](https://code.claude.com/docs/en/desktop)) | "Continue in" isn't available for SSH sessions ([desktop](https://code.claude.com/docs/en/desktop#continue-in-another-surface)) |
+| **Claude Code cloud session** | `claude --cloud "<one-line prompt>"` from the worktree: clones the GitHub remote at the current branch, so push first ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#from-terminal-to-cloud)); desktop **Continue in > Claude Code on the Web** pushes and moves a local session ([desktop](https://code.claude.com/docs/en/desktop#continue-in-another-surface)) | claude.ai/code, the app, `/tasks` in the CLI; `ListAgents` from a session connected to Remote Control ([cross-session-messaging](https://code.claude.com/docs/en/cross-session-messaging#see-which-sessions-claude-can-reach)) | Web or phone; `claude -p "<msg>" --cloud <session-id>` from any logged-in machine ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#send-follow-ups-from-the-cli)) | Desktop and project notifications ([claude-projects](https://code.claude.com/docs/en/claude-projects#see-what-needs-you-in-overview)); phone push for a plain cloud session is not documented | `claude --teleport <id>` pulls the branch and conversation into the terminal as a copy ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#from-cloud-to-terminal)) |
+| **Codex cloud** | `codex cloud exec --env <env-id> --branch <branch> "<prompt>"` [help] | `codex cloud list --json`, `codex cloud status <task-id>` [help]; the Codex web UI ([cloud](https://learn.chatgpt.com/docs/cloud)) | Follow-ups in the web UI ([cloud](https://learn.chatgpt.com/docs/cloud)); no CLI follow-up command [help] | Unverified: not on the [cloud](https://learn.chatgpt.com/docs/cloud) page | Open a pull request from the task, or `codex cloud apply <task-id>` locally [help] |
+| **Cursor Cloud Agent** | `&` before a message in the Cursor CLI ([cli/using](https://cursor.com/docs/cli/using.md)); API `POST /v1/agents` with `repos[].startingRef` and `workOnCurrentBranch` ([api/endpoints](https://cursor.com/docs/cloud-agent/api/endpoints.md)) | cursor.com/agents, the iOS app; API `GET` run and stream endpoints ([api/endpoints](https://cursor.com/docs/cloud-agent/api/endpoints.md)) | Follow-up run, `POST /v1/agents/{id}/runs` (one active run per agent) ([api/endpoints](https://cursor.com/docs/cloud-agent/api/endpoints.md)) | iOS push when an agent finishes a turn ([mobile](https://cursor.com/docs/cloud-agent/mobile.md)); API webhooks only on the legacy v0 API | Pushes to a `cursor/…` branch, or to `startingRef` itself with `workOnCurrentBranch: true` ([api/endpoints](https://cursor.com/docs/cloud-agent/api/endpoints.md)) |
+| **GitHub Copilot coding agent** | `gh agent-task create "<prompt>" --base <branch>` [help] | `gh agent-task list`, `gh agent-task view <id> --log --follow`, `--json state,pullRequestUrl` [help] | Follow-up in the agents page, or `@copilot` in a pull request comment ([track sessions](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/track-copilot-sessions), [about](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent)) | Unverified: not on the [track sessions](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/track-copilot-sessions) page | One branch and one pull request per task ([about](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent)); stack with `--base` [help] |
+| **Google Jules** | `jules remote new --repo <repo> --session "<prompt>"` ([CLI reference](https://jules.google/docs/cli/reference)) | `jules remote list --session`; the `jules` TUI ([CLI reference](https://jules.google/docs/cli/reference)) | Unverified: not in the CLI reference | Unverified: not in the CLI reference | `jules remote pull --session <id>` ([CLI reference](https://jules.google/docs/cli/reference)) |
+
+Only three rows can run **this repo's skills** as they are: the Mac, the VPS (either way), and a Claude Code cloud session given the skills (section 4). The other hosted agents take a task, not an effort: each runs one prompt on one branch and returns a pull request or a diff. They fit a **delegate** role (one ticket), not an orchestrator's.
+
+## 3. The VPS
+
+### 3.1 Handing over through Herdr (#13's path)
+
+What each handover step becomes, from a Mac session to the VPS server:
+
+1. **Worktree.** The VPS has no Treehouse [prior](herdr-vps.md), so `<worktree-tool>` falls back to `git worktree add` there, in the VPS's own clone, from the pushed branch: `git -C <vps repo> fetch origin <branch>` then `git -C <vps repo> worktree add <path> <branch>`. The VPS's `<worktree-tool>` has to come from the VPS's own Defaults table, which set-up-machine writes (`skills/maintain-environment/where-things-go.md`); the Mac's value doesn't apply.
+2. **Workspace and tab.** `herdr worktree open --workspace <repo workspace> --path <worktree> --label <topic> --no-focus` on the VPS server, IDs read from the VPS's own JSON. Creating, renaming and closing a workspace over SSH works [probe]; `worktree open` needs a workspace on the VPS whose `repo_root` is the clone (handover-to-herdr, step 1).
+3. **Agent.** `claude` is on `PATH` inside a new VPS Herdr pane, and so is `herdr` [probe]; that settles herdr-vps.md's open question on whether `agent start --kind claude` would find it (the start itself wasn't run). Only `claude` exists there, so `<agent-to-start>` must name it [prior](herdr-vps.md).
+4. **Starting prompt.** `orchestrate-with-handoff`, `orchestrate-effort`, `orchestrating` and `init-effort` are installed on the VPS; `handover`, `handover-to-herdr`, `herdr`, `close-effort` and `treehouse` aren't [probe]. So the orchestrator starts, but it can't close its own effort or hand over again from there until the VPS gets this branch's skills.
+5. **Trust prompt.** A new worktree path shows Claude Code's "trust this folder?" screen (handover-to-herdr, step 3). The maintainer answers it in the VPS tab through the Mac's Herdr window, which forwards input to the selected machine ([connecting-machines.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/connecting-machines.mdx)).
+6. **Confirm.** `herdr agent wait <name> --until working` on the VPS server, as locally.
+
+Transport: on 0.9.0 every command is `ssh <target> "bash -lc '…'"`, with remote-shell quoting of the prompt [prior](herdr-vps.md). From 0.9.1, `herdr --machine <label-or-id> …` forwards `workspace`, `worktree`, `tab`, `pane`, `notification` and `agent` as JSON over non-interactive SSH, needs no open window, never interpolates payloads into the shell, and never falls back to Local; `--current` can't refer to a local pane ([cli-reference.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/cli-reference.mdx), "Saved SSH machines"). 0.9.2 adds `herdr machine status [<label-or-id>] [--json]`, a fresh non-interactive reachability check a skill can run before handing over, and opens fewer SSH connections for repeated `--machine` commands ([v0.9.2 release](https://github.com/herdrdev/herdr/releases/tag/v0.9.2)). The VPS target itself comes from `herdr machine list --json`, never from skill text [prior](herdr-vps.md).
+
+### 3.2 Watching and answering
+
+- **The maintainer** sees the VPS's agent states in the Mac's Herdr window without selecting the VPS: "Other connected machines keep updating their workspace information, agent states, and notifications without streaming their pane screens" ([connecting-machines.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/connecting-machines.mdx)). Answering means selecting the VPS workspace and typing.
+- **A local agent** reads with `herdr agent list`, `agent get`, `agent read --source recent-unwrapped` on the VPS server [prior](herdr-vps.md), and answers with `herdr agent prompt`. `agent prompt` returns `agent_blocked` without sending when the agent is blocked, so a permission prompt can't be answered this way ([cli-reference.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/cli-reference.mdx), "Agents"). Messaging a running remote agent stays behind an explicit ask (#13, #16).
+- **Claude Code's own channel, no SSH.** When a VPS session runs with Remote Control and a Mac session is connected to Remote Control too, the Mac session lists it (labelled `Remote Control`) and messages it with `SendMessage`; the message travels "through Anthropic servers, arriving over that machine's Remote Control connection", and the receiver can reply ([cross-session-messaging](https://code.claude.com/docs/en/cross-session-messaging#message-sessions-on-other-machines)). This works in **both directions**, VPS to Mac included, without Remote Login, Tailscale or a tunnel, which herdr-vps.md found missing. It carries text only; it doesn't read a transcript or run git. An incoming message "can't approve anything" and can't change configuration ([cross-session-messaging](https://code.claude.com/docs/en/cross-session-messaging#how-a-session-treats-an-incoming-message)). `isolatePeerMachines: true` makes each cross-machine send ask first. The VPS's Claude Code is signed in with a claude.ai account against the first-party API [probe], which Remote Control requires ([remote-control](https://code.claude.com/docs/en/remote-control#requirements)). Unverified in practice: no Remote Control session was started.
+
+### 3.3 Notifying
+
+- **`osascript`**, the user's `<notification-method>`, is macOS only; nothing replaces it on the Linux VPS, which also lacks `notify-send` [prior](herdr-vps.md).
+- **Herdr on the VPS.** `herdr notification show` run on the VPS server returned `{"reason":"shown","shown":true}` [probe], although the VPS has no Herdr config file [probe]. This contradicts herdr-vps.md's reading that delivery defaults to `off`: the 0.9.2 configuration page shows `delivery = "herdr"` in its example ([configuration.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/configuration.mdx), "Notifications"). Where it appeared is unverified: the maintainer was away, and the Mac's own config has `delivery = "off"` [probe]. Herdr's docs say sound "plays through the local Herdr client" and that terminal and system delivery go through the attached client [prior](herdr-vps.md), so the Mac client's settings probably decide. Herdr also notifies on its own when a background agent finishes or needs input, once delivery is on ([configuration.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/configuration.mdx)).
+- **A Mac-side watcher.** A local agent can wait on the remote agent (`herdr agent wait <name> --until done --until blocked`, indefinite without `--timeout`) and raise `osascript` itself ([cli-reference.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/cli-reference.mdx)). It only lives as long as that local session and its SSH connection. Not tested.
+- **Remote Control push.** A VPS session with Remote Control on can push to the phone: "Push when Claude decides" for finished work, "Push when actions required" for permission prompts and questions ([remote-control](https://code.claude.com/docs/en/remote-control#mobile-push-notifications)). The session must keep running: "To keep a session running on a remote machine after you disconnect from SSH, start it inside `tmux` or `screen`" ([remote-control](https://code.claude.com/docs/en/remote-control#limitations)); a Herdr pane on the VPS server does the same job.
+
+### 3.4 Other ways onto the VPS
+
+- **Desktop SSH sessions** run Claude Code on a Linux or macOS host with the desktop app as the interface; the app installs Claude Code there on first connect ([desktop](https://code.claude.com/docs/en/desktop#ssh-sessions)). They suit a maintainer at the desk, not a Herdr-driven handover, and "Continue in" isn't available for them.
+- **Remote Control server mode**, `claude remote-control --spawn worktree`, serves many sessions from one process, each in its own git worktree ([remote-control](https://code.claude.com/docs/en/remote-control#start-a-remote-control-session)). In a directory it hasn't trusted, it asks `Trust <directory>? [y/N]`, and exits with `Workspace not trusted` when it can't ask ([remote-control](https://code.claude.com/docs/en/remote-control#requirements)).
+- **A Claude Code project's "thread on your computer"** runs a project thread through `claude remote-control` on the machine that has the folder ([claude-projects](https://code.claude.com/docs/en/claude-projects#run-a-thread-on-your-own-computer)). Projects are web, desktop and mobile only, not the CLI, and in a gradual beta on Pro and Max.
+- **Cursor's My Machines**: `agent worker start` on a machine makes it a Cloud Agent target; "the agent loop runs in Cursor's cloud, but terminal commands, file edits, browser actions, and other tool calls execute on your machine", over an outbound connection ([my-machines](https://cursor.com/docs/cloud-agent/self-hosted/my-machines.md)). It would need an install on the VPS, so it stays a proposed experiment.
+
+## 4. Claude Code cloud sessions
+
+### 4.1 Handing over
+
+- **Start.** `claude --cloud "<task>"` creates a cloud session; "the cloud VM clones your current directory's GitHub remote at your current branch, not your local checkout, so push first" ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#from-terminal-to-cloud)). The handover's "everything committed and pushed" already covers it. The docs' own pattern is the handover's: "save the plan to the repo, commit, and push so the cloud VM can clone it", then `claude --cloud "Execute the migration plan in docs/migration-plan.md"`. `--remote` is the deprecated spelling; `--environment <id>` picks a self-hosted environment; `/remote-env` sets the default environment [help] ([cloud-environments](https://code.claude.com/docs/en/cloud-environments#select-an-environment-from-the-cli)).
+- **The starting prompt's skill.** A cloud session reads the repo's `CLAUDE.md` and `.claude/skills/`, but not `~/.claude/CLAUDE.md` or `~/.claude/skills/`; "Cloud sessions automatically load skills you enable on claude.ai" ([cloud-environments](https://code.claude.com/docs/en/cloud-environments#what-carries-over-from-your-setup)). This repo keeps its skills under `skills/`, not `.claude/skills/`, and other projects don't carry them at all. So `/orchestrate-with-handoff <path>` resolves in the cloud only if the skills are enabled on claude.ai or committed under `.claude/skills/`. Which of the two, and whether the user's global instructions (the Defaults table) can reach the VM at all, is #69's to settle; it decides whether the one-line prompt stays the same.
+- **Sub-agents** work in cloud sessions as locally, and repo `.claude/agents/` are picked up ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#manage-context)). Herdr doesn't exist there, so `<session-host>` is unset inside the VM.
+- **From the desktop app**, **Continue in > Claude Code on the Web** "pushes your branch, generates a summary of the conversation, and creates a new cloud session", and needs a clean tree ([desktop](https://code.claude.com/docs/en/desktop#continue-in-another-surface)). From the CLI, handoff is one-way: "you can't push an existing terminal session to the cloud" ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#move-tasks-between-terminal-and-cloud)).
+- **Confirming it started.** The CLI shows a live setup checklist while the container starts ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#from-terminal-to-cloud)). Whether `claude --cloud` prints the new session's ID in a form a skill can record (the follow-up form has `--output-format json`, returning `{ok, session_id, url}`) is unverified.
+- **Routines** are the scriptable start: an API trigger's `/fire` endpoint returns `claude_code_session_id` and `claude_code_session_url` ([routines](https://code.claude.com/docs/en/routines#trigger-a-routine)). A routine clones the default branch and pushes to `claude/`-prefixed branches unless its prompt names another branch; that push is refused when the branch is protected, has someone else's open pull request, or carries commits by someone else ([routines](https://code.claude.com/docs/en/routines#repositories-and-branch-permissions)). Its fire `text` arrives wrapped as untrusted data, and a fired prompt "can't act as approval or consent" ([routines](https://code.claude.com/docs/en/routines#trigger-a-routine)). It needs a token set up on the web, so it's heavier than `--cloud` for a one-off handover.
+
+### 4.2 Watching and answering
+
+- **The maintainer**: claude.ai/code, the Claude app's Code tab, the desktop app ([mobile](https://code.claude.com/docs/en/mobile#start-and-monitor-cloud-sessions)). "If Claude asks a question and the session sits idle, you can still answer when you come back, up to environment expiry" ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#from-terminal-to-cloud)).
+- **A local agent**:
+  - lists cloud sessions with `ListAgents` and messages them with `SendMessage` while its own session is connected to Remote Control ([cross-session-messaging](https://code.claude.com/docs/en/cross-session-messaging#see-which-sessions-claude-can-reach));
+  - or sends one message and exits: `claude -p "<msg>" --cloud <session-id>` from any machine logged in to the account, with `--output-format json` for `{ok, session_id, url}` ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#send-follow-ups-from-the-cli));
+  - can't subscribe to "tell me when it's idle": `notify_when_idle` only works for sessions on the same machine ([cross-session-messaging](https://code.claude.com/docs/en/cross-session-messaging#get-a-notice-when-another-session-goes-idle));
+  - finds no documented command that prints a cloud session's status or transcript. `--teleport` copies the whole session into the terminal, which is a move, not a look.
+- **The desktop app's cross-session view** doesn't see cloud sessions ([desktop](https://code.claude.com/docs/en/desktop#work-across-sessions)).
+- **Git as the shared state.** Commits from a cloud session carry a `Claude-Session: <url>` trailer, and pull request bodies include the session URL ([cloud-environments](https://code.claude.com/docs/en/cloud-environments#link-output-back-to-the-session)); `git log` on the pushed branch shows progress and points back to the session.
+
+### 4.3 Notifying
+
+- **Documented:** the desktop app "sends an OS notification when a Code session finishes a task and you aren't currently viewing that session" ([desktop](https://code.claude.com/docs/en/desktop)); a project sends desktop notifications "when Claude posts in the conversation, a thread hits an error, or a thread needs your input", desktop only ([claude-projects](https://code.claude.com/docs/en/claude-projects#see-what-needs-you-in-overview)); Dispatch pushes to the phone ([desktop](https://code.claude.com/docs/en/desktop#sessions-from-dispatch)).
+- **Not documented:** a phone push for a plain cloud session. Mobile push is documented for Remote Control sessions only ([mobile](https://code.claude.com/docs/en/mobile#get-push-notifications)). Whether the model's push tool works inside a cloud VM is unverified.
+- **The skills' rule** (the model notifies at done and blocked, through `<notification-method>`) has no `osascript` in the VM. Until #69 finds a working route, the delivered pull request, and the maintainer's GitHub notifications on it, is the done signal; blocked means a question left in the session.
+
+### 4.4 Continuing, and keeping two orchestrators off one branch
+
+- **Cloud to terminal:** `claude --teleport <session-id>` (or `/teleport`, or `t` in `/tasks`) checks the repository, "fetches and checks out the branch from the cloud session, and loads the full conversation history". It needs a clean tree, the same repository (not a fork), a pushed branch and the same account ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#from-cloud-to-terminal)).
+- **Teleport forks:** "The terminal gets its own copy of the session: new work there stays local and doesn't appear in the cloud session". The cloud session keeps running unless someone stops or archives it, so after a teleport **two orchestrators can push to one branch**. The continuation has to archive the cloud session, or at least confirm it is idle, before the local copy commits.
+- **Terminal to cloud** is a new session, not a move: `claude --cloud` starts fresh from the pushed branch and the handoff, like any handover. The local orchestrator must be stopped first.
+- **Lifetime:** a cloud session stops after inactivity and its VM is reclaimed; reopening restores the conversation, but "background work that was still running … such as subagents and shell commands, isn't restored" ([claude-code-on-the-web](https://code.claude.com/docs/en/claude-code-on-the-web#environment-expired)). A project thread's sandbox can restart "from a fresh clone, so uncommitted changes can be lost. On long tasks, ask Claude to commit and push work in progress" ([claude-projects](https://code.claude.com/docs/en/claude-projects#limitations)). The orchestrating skills already commit each ticket, which fits.
+- **Same branch or stacked:** a `--cloud` session starts on the branch the local checkout is on. Whether a plain cloud session may push to an existing non-`claude/` branch (the effort branch, for "same branch") is only documented for routines (above); unverified for sessions.
+
+## 5. Other hosted agents, for delegation only
+
+Details belong to #70; these are the facts delegation needs.
+
+- **Codex cloud**: `codex cloud exec --env <ENV_ID> [--branch <BRANCH>] [--attempts N] "<prompt>"`, where the branch "defaults to current branch"; `codex cloud list [--env] [--json]`, `status <TASK_ID>`, `diff <TASK_ID>`, `apply <TASK_ID>` [help]. The CLI has no follow-up command; follow-ups and "open a pull request" are in the web UI ([cloud](https://learn.chatgpt.com/docs/cloud)). A local agent can poll `list --json`, and can apply a finished diff into a local worktree.
+- **Cursor Cloud Agents**: the CLI's `&` prefix pushes the conversation to a Cloud Agent ([cli/using](https://cursor.com/docs/cli/using.md)). The v1 API ("public beta") is the scriptable path: `POST /v1/agents` with `prompt.text`, `repos[0].url`, `repos[0].startingRef`, `workOnCurrentBranch` (default `false`: a new `cursor/…` branch; `true`: push straight to the starting branch) and `autoCreatePR`; follow-ups with `POST /v1/agents/{id}/runs`, which returns `409 agent_busy` while a run is active; `env.type: "machine"` routes to a My Machines worker ([api/endpoints](https://cursor.com/docs/cloud-agent/api/endpoints.md)). Cloud agents run the repo's `.cursor/hooks.json` but not `~/.cursor/hooks.json` ([cloud-agent](https://cursor.com/docs/cloud-agent.md)). Billing is at API pricing with a spend limit ([cloud-agent](https://cursor.com/docs/cloud-agent.md)), so it needs a sign-up decision before any trial.
+- **GitHub Copilot coding agent**: `gh agent-task create "<prompt>" [--base <branch>] [--custom-agent <name>] [--follow]`; `gh agent-task view <session-id|pr> [--log] [--follow] [--json …]`, with fields including `state`, `pullRequestNumber`, `pullRequestUrl` and `completedAt` [help]. Stopping a session "ends the GitHub Actions run and preserves any commits already pushed"; a follow-up typed into the session "Copilot implements … after it finishes its current tool call" ([track sessions](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/track-copilot-sessions)). It "can only work on one branch at a time and can open exactly one pull request to address each task" ([about](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent)).
+- **Jules**: `jules remote new --repo <repo> --session "<prompt>"`, `jules remote list --session`, `jules remote pull --session <id>` ([CLI reference](https://jules.google/docs/cli/reference)).
+
+The effort workflow could use these as delegates: the orchestrator stays local (or on the VPS) and hands one ticket to a hosted agent through its CLI or API, reading its pull request or diff back. None of them loads this repo's skills, the user's global instructions or its deny rules, so the delegate brief has to carry the rules. That's for #74 to weigh.
+
+## 6. What this settles for the three blocked tickets
+
+### A thinking session on the Mac can hand over to an orchestrator on the VPS (#13)
+
+**Settled.** The handover's first two steps don't change: the handoff is committed and pushed, and the prompt is one line. The VPS host comes from Herdr's saved machine (`herdr machine list --json`, with `herdr machine status` from 0.9.2), never from skill text. The Herdr steps work against the VPS server with explicit remote IDs: creating a workspace, renaming a tab and closing a workspace over SSH were probed, and `claude` is on a new pane's `PATH`. Using `herdr --machine` instead of `ssh … bash -lc` needs Herdr 0.9.1 or later on both ends. The shape falls out of the Parameters convention: handover-to-herdr gains a target machine (Local or a saved machine's label), while the VPS's own Defaults table names its worktree tool (`git worktree add` until Treehouse is installed) and agent (`claude`).
+
+**Still open:**
+
+- the VPS lacks `handover`, `handover-to-herdr`, `herdr` and `close-effort`, so a VPS orchestrator can't close its effort until the environment is set up there with set-up-machine;
+- the trust prompt needs the maintainer in the VPS tab;
+- notification: `osascript` is gone. The candidates are a Mac-side `agent wait` watcher, Herdr's delivery setting (the probe says the VPS server shows notifications, but not where), or Remote Control push. All need a test with the maintainer present;
+- the thinking session's tab can't be read from the VPS, so the handoff must carry everything (it already must, per the handover skill).
+
+### An unfinished effort can be handed to a new orchestrator (#15)
+
+**Settled.**
+
+- **Detection and the question.** Continuing is a handover whose worktree is the existing effort branch, or a new branch stacked on it, and whose handoff is refreshed first. The same-branch versus stacked question and its effect on the open pull request are already answered [prior](effort-branches-and-prs.md).
+- **Where it runs.** Per option, the move is:
+  - Mac or VPS through Herdr: the same steps on the other server;
+  - cloud to Mac: `claude --teleport`, which forks the session;
+  - Mac to cloud: a new `claude --cloud` session from the pushed branch, or the desktop app's **Continue in**;
+  - Codex cloud: `codex cloud apply` brings a diff back;
+  - Cursor: `workOnCurrentBranch` continues on the same branch.
+- **Keeping two orchestrators off one branch** takes a check on the old side before the new side commits:
+  - on a Herdr server: the old agent is `idle` or `done` or gone, and its tree is clean and pushed [prior](herdr-vps.md);
+  - on claude.ai: the cloud session is archived or idle;
+  - on either: `git ls-remote` matches the old side's `HEAD`.
+
+  Teleport is the risky path, because it leaves the cloud original running.
+
+**Still open:**
+
+- the cloud side has no documented "is it idle?" read from the CLI, only `ListAgents` through Remote Control, or looking at claude.ai;
+- whether a cloud session may push to an existing effort branch;
+- the run notes below.
+
+### Agents on the Mac and the VPS can see each other's state (#16)
+
+**Settled.** Mac to VPS: every read works today over SSH: Herdr lists, `agent read`, and `git status`, `git log` and `git ls-remote` in a VPS worktree [prior](herdr-vps.md). From 0.9.1 the same reads run through `herdr --machine`. The host stays in Herdr's machine catalog. The new finding is Claude Code's cross-session messaging: with Remote Control on both sessions, a Mac session and a VPS session (or a cloud session) can list and message each other, **in both directions**, through Anthropic's servers. That's the VPS-to-Mac path herdr-vps.md found missing, and it needs no inbound access to the Mac. It carries text, not state: "is anything unpushed?" still has to be answered by the agent on that machine, now asked by message instead of by the maintainer. Incoming messages can't approve anything or change configuration, and `isolatePeerMachines` can make each cross-machine send ask first, which matches the permission line #16 asks for.
+
+**Still open:**
+
+- a live test of Remote Control and `SendMessage` between the Mac and the VPS;
+- whether the Herdr sidebar's cross-machine agent states can be read by an agent, not only seen by the maintainer. `api snapshot` is forwarded by `--machine`, but event subscriptions aren't ([cli-reference.mdx](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.2/docs/next/website/src/content/docs/cli-reference.mdx)).
+
+## 7. How this effort itself was handed over (material for #15)
+
+Recorded from the effort's handoffs ([.handoff/2026-09-29-cloud-agents.md](../../.handoff/2026-09-29-cloud-agents.md), [.handoff/2026-09-29-cloud-agents-research.md](../../.handoff/2026-09-29-cloud-agents-research.md)) and from this ticket's own run:
+
+- **The flow.** The environment effort's orchestrator, busy with its own effort, handed a **new** effort to a **thinking session** in a **new Herdr workspace**. The new effort's branch, `skills/cloud-agents`, was stacked on the orchestrator's own unmerged branch, `skills/environment`, whose pull request (#66) was under review. The handoff named the handing session and told the new one not to message it or touch its branch. It said: rebase onto #66 if #66 changes, target `skills/environment` until #66 merges, then `main`.
+- **It worked.** The thinking session started from the handoff alone.
+- **The maintainer redirected it mid-start.** They stopped a research agent it had launched, cut the grilling to one round, and changed the effort from building to research. The handoff it had received described a build plan that the grilling then replaced. The thinking session wrote a second handoff that says the first one's plan is superseded, and linked back to it.
+- **A delegate's worktree started on the wrong base.** The worktree for this ticket's delegate was created from `main`, not from the stacked effort branch. The handoffs this ticket had to read weren't there. The delegate fast-forwarded its worktree onto `skills/cloud-agents` before starting (exploration log).
+
+What #15 can take from it:
+
+1. **A handover to a new effort stacked on an unmerged branch is a continuation in all but name.** It needs the same base-branch facts as continuing an unfinished effort: which branch, which pull request it targets now, and what happens when the lower one merges.
+2. **A handoff goes stale.** When the plan changes after a handover, the next session should find a newer handoff that supersedes the old one, not a plan that no longer holds. The second handoff did this by hand; a continuation skill should check for it.
+3. **Sub-agent worktrees in a stacked effort must branch from the effort branch.** The default base (the repository's default branch) gives a delegate a tree without the effort's commits. The orchestrator's delegation, or the worktree tool, needs to pass the base explicitly.
+4. **An unreachable handing session** (busy, or the maintainer away) means the new session decides open questions itself and lists them, as the handover skill already says.
+
+## Open questions
+
+Each needs a step outside this ticket's safe zone, so each is a proposed experiment.
+
+- TODO: **Upgrade both machines to Herdr 0.9.2** (it ships `--machine` from 0.9.1, `machine status`, and the `TERM_PROGRAM` fix for [herdr#4104](https://github.com/herdrdev/herdr/issues/4104)), then rerun section 3.1's steps through `herdr --machine`. Updating a server asks before stopping its panes, so the maintainer must be present.
+- TODO: **Where a VPS notification appears.** With the maintainer at the Mac, run `herdr notification show` on the VPS server with the Mac window on Local, then on the VPS, then with the Mac's `delivery` set to `system`, and record what shows. The probe got `shown` from a VPS with no config.
+- TODO: **Remote Control between the Mac and the VPS.** Start `claude --remote-control` in a throwaway VPS Herdr tab, connect a Mac session to Remote Control, and check that `/list-agents` lists the VPS session and that `SendMessage` works both ways. Then repeat with `isolatePeerMachines: true`. It needs the one-time Remote Control consent on the VPS, a config change.
+- TODO (#69's cloud sessions): does `claude --cloud` print a session ID a skill can record? Does `/orchestrate-with-handoff` resolve in a cloud session with the skills enabled on claude.ai? May a cloud session push to an existing non-`claude/` branch? Does a plain cloud session push to the phone when it finishes or asks?
+- TODO: **Teleport and the cloud original.** After `claude --teleport`, check whether the cloud session is left running, and archive it by hand. It decides whether the continuation must stop the cloud side itself.
+- TODO: **Set up the VPS environment with set-up-machine** (skills from this branch, Defaults table with `worktree-tool` and `agent-to-start`), so a VPS orchestrator can run close-effort and handovers. It's an install and config change.
+- TODO: **Cursor My Machines on the VPS** (`agent worker start`), if Cursor is adopted: it would make the VPS a Cloud Agent target driven from phone or API. Needs an install and a paid plan.
+- TODO: **Copilot and Codex cloud notifications.** Neither doc page read says how the user hears a task finished; check with an account, as #70's ticket allows.
+- TODO: **Delegate worktree base in stacked efforts.** Check how the orchestrating skill's sub-agent worktrees pick their base, and make it the effort branch.
+
+## Exploration log
+
+Every command run for this research. "Mac" is the maintainer's Mac; "VPS" commands ran as `ssh <vps> "bash -lc '…'"`, with the target read from `herdr machine list --json` into a scratch SSH config alias outside the repo and never printed. Output was reduced to counts and states before it was read, so no workspace labels, agent names or paths were captured.
+
+| # | Where | Command or action | Changed |
+|---|---|---|---|
+| 1 | Mac, this worktree | `git merge --ff-only skills/cloud-agents` (the worktree had started on `main`) | This worktree's branch only |
+| 2 | Mac | Read the ticket, spec, #13, #15, #16 (`gh issue view`), the two handoffs, the handover, handover-to-herdr, close-effort skills, and the research files above | Nothing |
+| 3 | Web | Fetched Claude Code docs: claude-code-on-the-web, remote-control, cloud-environments, settings, claude-projects, mobile, desktop, routines, cross-session-messaging | Nothing |
+| 4 | Web | Fetched the Codex cloud page, Cursor cloud-agent, my-machines, api/endpoints, mobile, cli/using (to a scratch folder outside the repo), the Copilot coding agent pages, the Jules CLI reference | Nothing |
+| 5 | Web | `gh release list/view -R herdrdev/herdr`; fetched Herdr docs at `v0.9.2` (connecting-machines, cli-reference, configuration, socket-api, persistence-remote, agents) | Nothing |
+| 6 | Mac | `herdr --version`, `herdr status --json`, `grep` of `~/.config/herdr/config.toml` for toast and sound | Nothing |
+| 7 | Mac | `claude --version`, `claude --help`, `claude auth status` (method fields only) | Nothing |
+| 8 | Mac | `codex --version`, `codex cloud --help` and its `exec/status/list/apply/diff --help`; `gh agent-task --help`, `create --help`, `view --help`; `cursor-agent --help`, `--version`; `which jules opencode copilot` | Nothing |
+| 9 | Mac | `herdr machine list --json`, reduced to a count; wrote a scratch SSH config alias with the target, outside the repo | A scratch file outside the repo |
+| 10 | VPS | `herdr --version`, `claude --version`, test for `~/.config/herdr/config.toml` (absent), `herdr machine list --json` (`[]`) | Nothing |
+| 11 | VPS | `herdr agent list`, `herdr workspace list`, reduced to counts and states (1 agent, `claude`, `idle`; 5 workspaces) | Nothing |
+| 12 | VPS | `herdr pane run --help`, `pane read --help`, `workspace close --help`, `notification show --help` | Nothing |
+| 13 | VPS | `herdr workspace create --cwd /tmp --label probe-73-handover --no-focus` | Created throwaway workspace `probe-73-handover` (its own tab and pane) |
+| 14 | VPS | `herdr tab rename <probe tab> "probe-73 · Orchestrator · CC"`; `herdr pane run <probe pane>` with `command -v claude`, `command -v herdr`, `echo $TERM_PROGRAM`; `herdr pane read <probe pane> --source recent --lines 20` | The probe tab's label; output in the probe pane only |
+| 15 | VPS | `herdr notification show probe-73-test --body "research probe, ignore"` → `{"reason":"shown","shown":true}` | One notification raised by the VPS server, if any client displayed it |
+| 16 | VPS | `herdr workspace close <probe workspace>` → `ok`; `herdr workspace list` again: 5 workspaces, none labelled `probe-73…` | Removed the probe workspace; back to the starting state |
+| 17 | VPS | `claude --help` (counted `--cloud`, `--teleport`, `--remote-control`: 3), `claude auth status --help`, `claude auth status` (method fields only: claude.ai, first-party) | Nothing |
+| 18 | VPS | `herdr agent list` again: 1 agent, `claude`, `idle`, as before | Nothing |
+| 19 | VPS | Test for `orchestrate-with-handoff`, `orchestrate-effort`, `orchestrating`, `handover`, `handover-to-herdr`, `herdr`, `close-effort`, `init-effort`, `treehouse` under `~/.claude/skills` and `~/.agents/skills` | Nothing |
+| 20 | Mac | Privacy scan of this file: `grep` for home paths, private repository names and IP addresses, and a check that no part of the saved machine's ID, label or target appears (only the generic word "VPS" does) | Nothing |
+
+No cloud agent session was started, nothing was installed, and no configuration was changed on either machine. The only VPS writes were the throwaway workspace in rows 13–16, now closed, and the notification in row 15.
