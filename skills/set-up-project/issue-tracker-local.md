@@ -5,10 +5,15 @@ Issues and specs for this repo live as markdown files in `.efforts/`, tracked in
 ## Conventions
 
 - One effort per directory: `.efforts/<effort>/` (`<effort>` is the effort's name, or a short slug for the feature when there is no effort)
-- The spec is `.efforts/<effort>/spec.md`
+- The spec is `.efforts/<effort>/spec.md`, when the work has one; a small ticket may have none, and is then its own spec
 - Implementation issues are one file per ticket at `.efforts/<effort>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
-- Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
+- Triage state is recorded as a `Status:` line near the top of each issue file: the role strings in `triage-labels.md` when the project has one, else the role names themselves (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`)
+- A finished ticket gets its criteria ticked and `Status: done`, in the same commit as its work
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
+
+## When a skill says "pick up the next ticket"
+
+Take the lowest-numbered ticket with `Status: ready-for-agent` whose "Blocked by" tickets are all `done`.
 
 ## When a skill says "publish to the issue tracker"
 

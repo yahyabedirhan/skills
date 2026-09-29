@@ -5,9 +5,9 @@ description: "Implement a piece of work based on a spec or set of tickets. Use w
 
 Implement the work described by the user in the spec or tickets.
 
-Use /tdd where possible, at pre-agreed seams.
+Use /tdd where possible, at pre-agreed seams. With no one to agree them with, choose the seams yourself and name them in your report.
 
-Run typechecking regularly, single test files regularly, and the full test suite once at the end.
+Run typechecking regularly (when the project has a typechecker), single test files regularly, and the full test suite once at the end.
 
 Once done, review the work at the depth the delegating agent sets: none, one light pass of your own, or /code-review. With no delegating agent, use /code-review.
 
