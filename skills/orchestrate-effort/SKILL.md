@@ -37,9 +37,15 @@ Note each delegate's duration as its report arrives, so a slow ticket shows up e
 **Done** means every criterion ticked on evidence. Read each report against the ticket's acceptance criteria and tick a box only where the report shows evidence for it. A criterion shown only outside the checkout (on a copy of the branch, in another environment, after an install) stays unticked with a one-line note saying where it was shown and what confirms it; the ticket stays open until it is confirmed.
 
 - **Local tracker:** the ticked boxes and the done status go in the ticket's own commit, with its code.
-- **Hosted tracker** (GitHub, Linear): tick the issue's checklist the same way once the commit is pushed, and close the issue only when every box is ticked.
+- **Hosted tracker** (GitHub, Linear): tick the issue's checklist the same way once the commit is pushed, and close the issue only when every box is ticked, unless it goes to the user for QA.
 
 **Integrate** each batch of reports: cherry-pick each delegate's commit onto the effort branch with `--no-commit`, tick its criteria, and commit it as the ticket's own commit following the repository's conventions. Resolve conflicts as they come. Then run the tests, the install and the real-app check once for the batch, push, remove the delegates' worktrees, and tell the user in a line what landed.
+
+**QA**, only in a project whose instructions opt in to it, naming how a build reaches the user (an install, a dev server, a preview link). A ticket that adds or changes something the user can use goes to them to try in the real app once its batch is integrated and the build reaches them:
+
+- The ticket stays open, assigned to the user (on a local tracker, its status says it waits for their QA), with a "Ready for you to try" comment: the build and how to reach it, how to use the feature, numbered try-this steps with known risks marked, and what to do when done (close the ticket if it's good, or comment with the step number and what they saw).
+- Commits and the pull request say "Refs #n" for it, never "Closes #n", so the merge doesn't close it before the user has tried it.
+- **Non-blocking by default:** the merge doesn't wait for QA. Only when the spec says "QA: blocking" does the pull request wait until the user closes each of these tickets; say so in the pull request.
 
 Done when every ticket is committed and pushed, with its criteria ticked or noted, or deferred by the user.
 
@@ -49,4 +55,4 @@ Delegate the final review to a sub-agent: the full checks and **code-review** ov
 
 Leave the worktree clean, and check it with `git status`. Delivery itself writes nothing to commit: **to-pr** saves the description's source in the ignored `.scratch/` (the **orchestrating** skill's `folders.md`), and so does a rerun that rewrites it. Anything `git status` still shows is effort work to commit and push, or a file you leave out on purpose.
 
-Report the pull request, each ticket's commit, anything deferred, and the `git status` result: clean, or each file left out with its reason. The user's only step is to review the pull request and say "go". List what you will do once told, as your own steps: merge the pull request, run the effort's post-merge follow-ups (such as installs or updates), try what can only be tried after the merge and report the result, and close the effort with the **close-effort** skill. Last, send the "done" notification, following the **orchestrating** skill's `notify.md`.
+Report the pull request, each ticket's commit, anything deferred, the tickets waiting for the user's QA (and whether the merge waits for them), and the `git status` result: clean, or each file left out with its reason. Besides any QA, the user's only step is to review the pull request and say "go". List what you will do once told, as your own steps: merge the pull request, run the effort's post-merge follow-ups (such as installs or updates), try what can only be tried after the merge and report the result, and close the effort with the **close-effort** skill. Last, send the "done" notification, following the **orchestrating** skill's `notify.md`.
