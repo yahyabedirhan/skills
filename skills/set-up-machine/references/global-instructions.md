@@ -32,7 +32,7 @@ A new file gets all five, every role `none` and the workflow section empty. On a
 
 ## The Defaults roles
 
-The one definition of each role. A skill lists the roles it uses as placeholders of the same name in its `## Parameters`, with a line on what each is; what to do when a role has no tool is written only here, and reaches every session through the Defaults section. A tool's own skill says in its description when to use it, such as `/treehouse` for a Treehouse worktree tool, so no other skill routes to it.
+The one definition of each role. A skill lists the roles it uses as placeholders of the same name in its `## Parameters`, with a line on what each is; what to do when a role has no tool is written only here, and reaches every session through the Defaults section. A tool's own skill says in its description when to use it, such as `/treehouse` for a `treehouse` worktree tool, so no other skill routes to it.
 
 | Role | What it is | When none |
 |---|---|---|

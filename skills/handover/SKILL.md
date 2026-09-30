@@ -12,7 +12,7 @@ A **handover** starts another session, usually outside this one, to carry on the
 
 ## Parameters
 
-- `<worktree-tool>`: the tool that makes and frees worktrees, e.g. Treehouse, or plain git worktrees.
+- `<worktree-tool>`: the tool that makes and frees worktrees, e.g. `treehouse`, or plain git worktrees.
 - `<session-host>`: where agent sessions run, e.g. Herdr, Claude Code Desktop, Codex Desktop.
 - `<agent-to-start>`: the command that starts a new agent session, e.g. `claude` or `codex`, with its flags.
 

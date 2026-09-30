@@ -1,6 +1,6 @@
 ---
 name: treehouse
-description: Lease, list, return and destroy git worktrees with Treehouse's pre-warmed pool. Use when the project's worktree tool is Treehouse, or when another skill says to make or remove a worktree with it.
+description: Lease, list, return and destroy git worktrees with `treehouse`'s pre-warmed pool. Use when the project's worktree tool is `treehouse`, or when another skill says to make or remove a worktree with it.
 ---
 
 # Treehouse

@@ -28,7 +28,7 @@ A skill that needs a value from the environment (a tool, a command, a repo) decl
 
 - **One `## Parameters` section, in `SKILL.md`,** added only to a skill that needs such a value, with one short line per parameter: the `<kebab-case>` placeholder named after its role, what it is, and a few examples after "e.g.". For instance: "`<session-host>`: where agent sessions run, e.g. Herdr, Claude Code Desktop, Codex Desktop."
 - **What to do when a role has no tool is written once,** in the roles table of `/set-up-machine`'s `global-instructions.md`, which that skill copies into the global Defaults on every machine. A skill never repeats it.
-- **A tool's own skill says when to use it,** in its description ("Use when the project's worktree tool is Treehouse"), along with anything specific to that tool. No other skill routes to it.
+- **A tool's own skill says when to use it,** in its description ("Use when the project's worktree tool is `treehouse`"), along with anything specific to that tool. No other skill routes to it.
 - **The body uses the placeholder as a noun** ("make the worktree with `<worktree-tool>`"). Anywhere else, plain words ("the session host").
 - **Another skill is named by its slash command,** such as `/to-tickets`, not in bold. A starting prompt is the exception: it names skills in words, so it works in every harness.
 
