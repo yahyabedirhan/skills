@@ -217,6 +217,24 @@ Two findings from running this effort: harness sub-agent worktrees were created 
 [del7]: cloud-agents-delegation.md#7-how-this-effort-itself-was-handed-over-material-for-15
 [del16]: cloud-agents-delegation.md#agents-on-the-mac-and-the-vps-can-see-each-others-state-16
 
+### The maintainer's answers (2026-09-30)
+
+| | Answer | Status |
+|---|---|---|
+| D1 | The Mac for now; test the VPS and cloud sessions **at the same time**, the cloud first while the promo credit lasts | Changed |
+| D2 | Yes | Agreed |
+| D3 | Yes; which memory folders to keep is still to pick | Agreed |
+| D4 | Hetzner won't rescale now; open to a pricier tier or another European provider. Needs its own research: providers, latency, shared against dedicated vCPU | Open |
+| D5 | A headless browser on the VPS from day zero, in the environment | Changed |
+| D6 | The setup script or SessionStart hook installs the global skills and instructions | Agreed |
+| D7 | Yes to hosted agents for single tickets; wants pros, cons and costs per agent before choosing which tickets | Open |
+| D8 | Needed a plain explanation; plan: keep effort #45 open, close the research tickets, open action items | Open |
+| D9 | Needed a plain explanation; phone push from a cloud session is re-tested in #80 | Open |
+| D10 | Fire and forget is the flow, but keep the channel two-way where it exists | Changed |
+| D11 | No guard rules; agents work freely across the Mac and the VPS | Changed |
+| D12 | Yes; the maintainer confirmed on the usage page that #78's session was paid from the promo credit | Agreed |
+| D13 | Don't adopt; understand its concepts and pick what to borrow | Open |
+
 ## Proposed experiments
 
 What the research couldn't settle inside the spec's safe zone. Each needs the maintainer, or their go-ahead.
