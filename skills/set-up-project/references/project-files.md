@@ -44,4 +44,4 @@ Named so nothing here reads as checked: opencode agents defined in `.opencode/ag
 
 ## Fixing a line
 
-A project harness file is the project's: change it only with the user's approval. For `weakens`, remove the entry or narrow it to the project's own commands (`Bash(npm test *)` rather than `Bash(npm *)`, never a pattern that reaches a rail's command). For a rail the project wants (a deny, or a stricter level), add it through **maintain-environment**'s rule table when every project needs it, else keep it as an `extra`.
+A project harness file is the project's: change it only with the user's approval. For `weakens`, remove the entry or narrow it to the project's own commands (`Bash(npm test *)` rather than `Bash(npm *)`, never a pattern that reaches a rail's command). For a rail the project wants (a deny, or a stricter level), add it through `/set-up-machine`'s rule table when every project needs it, else keep it as an `extra`.

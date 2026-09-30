@@ -46,7 +46,7 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 
 **Change one of the user's own skills.** Read the repo's decision records for it first. Edit it in the skills repo, add a dated decision entry for each new decision, and ship it.
 
-**Add a skill to the user's repo.** Only when the user names it for publishing. Write it in the skills repo, add its row to the README, and ship it. The repo is public, so keep the user's name, accounts, paths and projects out of it and make anything user-specific a parameter.
+**Add a skill to the user's repo.** Write it in the skills repo, add its row to the README, and ship it.
 
 **Fork someone else's skill.** Copying a folder keeps no link to its origin, so record the credit by hand:
 
@@ -59,13 +59,9 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 
 ## Shipping to the skills repo
 
-Every change to the skills repo goes on a branch and ends in a pull request into `main`:
-
 1. Branch from an up-to-date `main`: `<skill>/<topic>` for one skill, `skills/<topic>` for several.
 2. For a new skill or a fork that changes behaviour, audit it as below, and commit the fixes and the full findings to its decision record.
-3. Open the pull request through `/to-pr`; for an audited skill, summarise the audit in *Special things to note* and link the decision record.
-
-Stop once the pull request is open; the user merges it or asks the agent to. `npx skills` installs from the default branch, so the session told the pull request merged runs the installs and updates, in every scope that has the skill.
+3. In the pull request for an audited skill, summarise the audit in *Special things to note* and link the decision record.
 
 ## Auditing a new skill
 
@@ -79,10 +75,6 @@ When the user asks which skills they use, count invocations in local transcripts
 - **Codex**: `~/.codex/sessions/`. Codex loads a skill by reading its `SKILL.md`, so count sessions that read it, and say that editing sessions inflate the count.
 
 Keep the counting script and its output out of the skills repo. Recommend removals, and leave each one to the user.
-
-## Efficiency analysis
-
-Only when the user asks what a skill costs to run, or how to make it cheaper, follow [efficiency-analysis.md](efficiency-analysis.md).
 
 ## Publishing the skills repo
 

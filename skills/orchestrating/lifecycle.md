@@ -1,6 +1,6 @@
 # Effort Lifecycle
 
-How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. The thinking builds on Matt Pocock's skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, `prototype`, `tdd`, `code-review`) and on forks of his `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills` (as `/set-up-project`), which replace the upstream four; the building runs on the orchestrate skills. Run routine upkeep, such as data edits and small fixes, in the current checkout without any of this.
+How one **effort**, such as a feature, a new app, a refactor or a re-architecture, travels from an idea to a merged pull request. The thinking runs on `/grilling`, `/prototype`, `/tdd` and `/code-review` from Matt Pocock's [mattpocock/skills](https://github.com/mattpocock/skills), and on this repo's forks of his `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills`, which replace the upstream four; the last is forked as `/set-up-project`. The building runs on the orchestrate skills. Run routine upkeep, such as data edits and small fixes, in the current checkout without any of this.
 
 An effort passes through five phases in one worktree on one branch:
 
@@ -53,7 +53,7 @@ The session that hands over finishes its own work cleanly, through `/handover`. 
 
 ## Build
 
-`/orchestrate-with-handoff` picks up the handoff and runs `/orchestrate-effort`, which delegates the tickets to sub-agents in parallel, each building its ticket with `/implement` in its own worktree, integrates each ticket as its own commit, and opens the pull request with `/to-pr` after one branch review. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking". The orchestrator follows the `/orchestrating` discipline throughout.
+`/orchestrate-with-handoff` picks up the handoff and runs `/orchestrate-effort`, which delegates the tickets to sub-agents in parallel, each building its ticket with `/implement` in its own worktree, integrates each ticket as its own commit, and opens the pull request with `/to-pr` after one branch review. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking".
 
 ## Close
 

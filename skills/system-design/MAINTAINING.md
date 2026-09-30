@@ -2,7 +2,7 @@
 
 Read this only when extending the skill; a design session never needs it.
 
-`SKILL.md` is the Delivery Framework lesson, distilled, plus how to run it with the user. `references/` holds the other lessons' material, one file per lesson, in the skill's own words, each ending with a Source line that cites its lesson; `SKILL.md` ends with the same for the Delivery Framework. Write each body as the material itself, without naming the source.
+`SKILL.md` is the session's flow and the user's preferences. `delivery-framework.md` holds the Delivery Framework lesson's stage detail and `existing-systems.md` how to explain or redesign a system from evidence; both sit beside `SKILL.md`. `references/` holds the other lessons' material, one file per lesson, in the skill's own words, each ending with a Source line that cites its lesson; `SKILL.md` and `delivery-framework.md` both end with the same for the Delivery Framework. Write each body as the material itself, without naming the source.
 
 To add a newly transcribed lesson, add one reference:
 
