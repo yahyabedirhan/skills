@@ -54,7 +54,7 @@ With native entries alone these get through; the hook closes the command and MCP
 
 - more flags in the same word (`rm -rfv`) or after the operands (`git push origin main --force`, probed); options before a subcommand (`git -C dir push --force`); a command inside another program's string (`bash -lc "…"`, `eval`, a script);
 - a bash command (`sed`, `echo … > .env`), a script or another program opening a file; for `~/` paths, a session whose project is the home folder;
-- the rows with no pattern above, and each row's `guard` (no semantic guard: a `none` line).
+- the rows with no pattern above.
 
 The hook's own misses are in SKILL.md, *What it can't see*.
 

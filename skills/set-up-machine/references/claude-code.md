@@ -69,14 +69,9 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 - **Cursor runs this hook too:** it loads `~/.claude/settings.json` hooks (Claude's `PreToolUse` as `preToolUse`). The hook still refuses what it recognises there, and leaves reporting to Cursor's own hook when the payload carries `cursor_version`, so no call is reported twice.
 - **Gap:** `"disableAllHooks": true` in this file or a project's turns every hook off. In this file, name it and leave it to the user.
 
-## Auto mode (optional, off)
+## Auto mode
 
-A deny row's `guard` is prose for auto mode's classifier, for what patterns can't list (a variable read by `python3 -c`). **Leave it off** until the probes in `docs/research/auto-mode-semantic-guard.md`, section 7, have run (tracked in #65); list each guard as `none` meanwhile. When it's turned on:
-
-- `autoMode.hard_deny` in `~/.claude/settings.json` (Claude Code reads `autoMode` only from user, managed and `--settings` files) gets each guard as `"<label>: <rule>"`. A new array starts with `"$defaults"`, which keeps the built-in rules; an existing one is the user's, and one without `$defaults` is a `gap`, left alone.
-- `autoMode.classifyAllShell: true` sends every shell command to the classifier, past a project's narrow allow rule.
-- The agent sees the label (`[Environment Variable Access]`), not the rule, so the instruction reaches it through the shared file's rule line. `claude auto-mode config` prints the rules in effect.
-- **Gaps:** it applies only in a session running in auto mode, and a project can set `disableAutoMode`; in a `-p` or SDK session, read-only commands (`echo $TOKEN`, `cat .env`) and file reads skip the classifier.
+Leave auto mode's classifier as Claude Code ships it: write no `autoMode` rules. Probes in `docs/research/auto-mode-semantic-guard.md` found that a custom `hard_deny` rule for environment reads caught nothing the pre-tool hook doesn't refuse, and missed a script that prints `.env`. An `autoMode` block already in the file is the user's: list it as `extra`.
 
 ## Gaps
 
