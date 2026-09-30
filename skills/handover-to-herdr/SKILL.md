@@ -14,7 +14,7 @@ When **close-effort** runs with it, read [closing-an-effort.md](closing-an-effor
 
 From the Defaults table (a project's row overrides the global one). Unset: no row, or `none`.
 
-- `<agent-to-start>`: the command that starts the new agent. Unset: `claude`.
+- `<agent-to-start>`: the command that starts the new agent. Unset: this session's harness.
 
 ## Herdr from anywhere
 
