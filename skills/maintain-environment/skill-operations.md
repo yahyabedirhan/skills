@@ -4,10 +4,10 @@ How a skill is created, installed, updated, moved, forked, published, removed an
 
 A skill is one of two kinds.
 
-- An **installed** skill has one **source**, a GitHub repo (someone else's, or the user's own skills repo), and any number of **installs**: copies the `npx skills` CLI placed in a scope and recorded in that scope's lock file. Every change goes to the source first and reaches the installs through the CLI; an installed copy is overwritten by the next `npx skills update`, so it is never edited by hand.
+- An **installed** skill has one **source**, a GitHub repo, either someone else's or `<skills-repo>`, and any number of **installs**: copies the `npx skills` CLI placed in a scope and recorded in that scope's lock file. Every change goes to the source first and reaches the installs through the CLI; an installed copy is overwritten by the next `npx skills update`, so it is never edited by hand.
 - A **local** skill is written inside one project and lives only there. No lock file records it and the CLI never touches it; it is edited in place and committed with the project.
 
-Skills are **private by default**: a local skill stays local, and a skill reaches the user's public skills repo only when the user names that skill for publishing.
+Skills are **private by default**: a local skill stays local, and a skill reaches `<skills-repo>` only when the user names that skill for publishing.
 
 ## Scopes
 
