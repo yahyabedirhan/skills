@@ -50,7 +50,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | [orchestrating](skills/orchestrating/SKILL.md) | The orchestrator's discipline: delegate, trust delegates, be the user's one contact, deciding what it can and asking only for a critical blocker. Holds the effort lifecycle and when to notify. | Original. |
 | [orchestrate-effort](skills/orchestrate-effort/SKILL.md) | Builds an effort from its spec and tickets through sub-agents and opens the pull request. | Original. |
 | [handoff](skills/handoff/SKILL.md) | Writes a handoff document in the repository for another session to pick up, and leaves it for the caller to commit. | Fork of `handoff` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d28dfdc`](https://github.com/mattpocock/skills/tree/d28dfdc39bea/skills/productivity/handoff) (MIT, see `skills/handoff/LICENSE.mattpocock`). Changes: agents can load it, and it saves to the repository's handoff folder (`.handoff/<date>-<topic>.md`) instead of a temp folder. |
-| [handover](skills/handover/SKILL.md) | Hands work over to a new session outside this one: a readiness checklist, the starting prompt, a mechanism to start it, and a check that it started. | Original. |
+| [handover](skills/handover/SKILL.md) | Hands work over to a new session outside this one: gets the work and its handoff ready, writes a one-line starting prompt, starts the session and confirms it started. | Original. |
 | [handover-to-herdr](skills/handover-to-herdr/SKILL.md) | Starts a new agent session in a labelled `herdr` tab, sends it its starting prompt and confirms it's working, for handover and init-effort. It also finds the agents still working and frees a closing effort's own worktree from outside it, for close-effort. Works from inside or outside a `herdr` pane. | Original. |
 | [treehouse](skills/treehouse/SKILL.md) | Leases, lists, returns and destroys worktrees from `treehouse`'s pre-warmed pool, with the gotchas, for the skills that make or free worktrees when `treehouse` is your worktree tool. | Original. |
 | [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | Picks up an effort from a handoff and runs orchestrate-effort. | Original. |
@@ -58,7 +58,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | [to-spec](skills/to-spec/SKILL.md) | Turns the current conversation into a spec and publishes it to the project's tracker, or to `.efforts/<effort>/spec.md` on a local one. | Fork of `to-spec` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`5c89081`](https://github.com/mattpocock/skills/tree/5c89081d4bbe/skills/engineering/to-spec) (MIT, see `skills/to-spec/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself, and a local tracker keeps the spec in `.efforts/<effort>/` instead of `.scratch/`. |
 | [to-tickets](skills/to-tickets/SKILL.md) | Breaks a plan, spec or conversation into tracer-bullet tickets, each naming what blocks it, and publishes them to the project's tracker, or to `.efforts/<effort>/issues/` on a local one. | Fork of `to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`5c89081`](https://github.com/mattpocock/skills/tree/5c89081d4bbe/skills/engineering/to-tickets) (MIT, see `skills/to-tickets/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself; a local tracker keeps the tickets in `.efforts/<effort>/issues/` instead of `.scratch/`; and tickets are named by title, never by a number alone. |
 | [to-pr](skills/to-pr/SKILL.md) | Opens a pull request or rewrites its description: a one-sentence why, reviewer notes, and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr) (MIT, see `skills/to-pr/LICENSE.humanlayer`). Changes: renamed, a real trigger description, no Mermaid views, the description source saved to `.scratch/` per the folder standard instead of `.humanlayer/`, issues named by title, never by a number alone, review links per changed file in the final report, and a last section, *Things to be aware of*, for decisions made alone, surprises, what's left out and follow-ups, and "Refs", not "Closes", for a ticket waiting for the maintainer's QA. |
-| [close-effort](skills/close-effort/SKILL.md) | Closes an effort once you say its pull request is good, or that it merged: merges it, runs the post-merge follow-ups, carries unfinished work into next-effort tickets, closes the tracker, leaves nothing that exists only inside its session, and removes only branches and worktrees proven merged, then its own worktree from a shell your session host opens outside it. Workspaces stay open. | Original. |
+| [close-effort](skills/close-effort/SKILL.md) | Closes an effort once you say its pull request is good to merge, or merged: merges it, runs the post-merge follow-ups, carries unfinished work into next-effort tickets, closes the tracker, leaves nothing that exists only inside its session, and removes only branches and worktrees proven merged, then its own worktree from a shell your session host opens outside it. Workspaces stay open. | Original. |
 
 ### Design frameworks
 
@@ -162,8 +162,8 @@ Claude Code   ~/.claude/        settings.json: deny and ask entries, the hook, a
 Codex         ~/.codex/         rules/set-up-machine.rules, hooks.json, AGENTS.md → shared file, memories off in config.toml
 opencode      ~/.config/opencode/  opencode.json permissions, plugins/set-up-machine.js runs the hook, AGENTS.md → shared file
 Cursor        ~/.cursor/        cli-config.json permissions, hooks.json, rules/global-instructions.mdc copies the shared file
-~/.agents/skills                your skills repo (the skills-repo Default), installed globally
-run again                       the audit: an empty diff
+~/.agents/skills                your skills repo (the skills-repo environment default), installed globally
+run again                       the audit: a diff that changes nothing
 ```
 
 `set-up-project` does it for one project, on top of the machine. Global rules are the safety rails; a project's own harness files only add allows:
@@ -179,7 +179,7 @@ audit                           any project harness file that weakens a global r
 
 Everyday tasks outside the code that an agent can take over safely. Each skill reads freely and changes only what you approve, with sending, deleting and other risky actions left to you.
 
-`email` reads mail fast with the Spark CLI and makes every change through the Gmail connector. Drafts are as far as it goes: Claude Code permission rules deny sending, trash and spam.
+`email` reads mail fast with the Spark CLI and makes every change through the Gmail connector. It archives freely and makes any other change only when you ask; drafts are as far as it goes, and Claude Code permission rules deny sending, trash and spam.
 
 ```text
 read     Spark CLI: inbox by category, threads, pins, calendar, contacts
@@ -194,7 +194,7 @@ setup    setup.md: both tools, the deny rules, and checks
 find    terms, formatter swaps and counts over any window (30m, 3h, 2d)
 fix     a plain word first; a rule only when a mistake returns; snippets for text you repeat
         every write backs up first, can be undone, and can relaunch the app
-check   each count shows the mistakes made since the entry was added
+check   counts the misheard form since its word was added, to see whether a fix held
 ```
 
 ## Adding a skill
