@@ -32,6 +32,7 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 - **No entry, and a gap instead:**
   - `arguments: "none"` (`env`, `export`, `set` alone): an exact `Bash(env)` reads as a prefix in the Cursor CLI, refusing `env FOO=1 cmd` and `set -e` too. The hook refuses the bare commands.
   - `arguments: "flags"` (`declare -x`): a rule on `declare -x` would refuse `declare -x NAME=value` too.
+  - `variables` (`echo $API_TOKEN`): a prefix can't match a variable's name inside an argument; the hook refuses it.
   - `files` (`cat .env`): Bash rules match text, not paths. Claude Code's own Read rules refuse `cat`, `head`, `tail` and `grep` on a denied file; the hook refuses the rest (`less`, `source`, `.`).
 - Deny and ask rules apply to each part of `a && b`, `a; b`, pipes and subshells, and past `timeout`, `nice` and `nohup`.
 

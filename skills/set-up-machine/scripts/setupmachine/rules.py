@@ -9,8 +9,8 @@ kinds, told apart by its keys:
   (words right after the subcommand, or a list of alternative word lists), `any_operand`
   (words any one of which may appear anywhere after the subcommand), `arguments: "none"` (the
   program run with nothing after it) or `arguments: "flags"` (with flags and nothing else
-  after it), and `files` (globs one of its operands matches, read as a file row's paths, with an
-  optional `except`);
+  after it), `files` (globs one of its operands matches, read as a file row's paths, with an
+  optional `except`), and `variables` (globs over the names of variables an argument expands);
 - file: `paths` (globs, relative to the project, or starting `~/` or `/`), `access` (`read` or `write`)
   and an optional `except` (globs the row leaves out, such as `**/.env.example`);
 - mcp-tool: `server` and `tool`, two case-insensitive regular expressions matched
@@ -54,6 +54,7 @@ class Rule:
     bare: bool = False  # command: the program with nothing after it (`arguments: "none"`)
     flags_only: bool = False  # command: the program with one or more flags and nothing else (`arguments: "flags"`)
     files: tuple = ()  # command: globs one of its operands matches
+    variables: tuple = ()  # command: globs over the names of variables an argument expands (`*TOKEN*`)
     paths: tuple = ()  # file: globs, relative to the project or starting `~/`
     access: str = ""  # file: read or write
     excepts: tuple = ()  # file, or command with files: globs left out
@@ -146,6 +147,10 @@ def _parse_command(match: dict, where: str) -> dict:
         raise RuleTableError(f'{where}: match.arguments takes no flags, subcommands, operands or files')
     if "any_operand" in match and "operands" in match:
         raise RuleTableError(f"{where}: match.any_operand and match.operands can't be combined")
+    if "variables" in match and (arguments or not isinstance(match["variables"], list) or not match["variables"]
+                                 or not all(isinstance(v, str) and v and "$" not in v for v in match["variables"])):
+        raise RuleTableError(f"{where}: match.variables must be a non-empty list of variable-name globs without `$`, "
+                             "and takes no arguments key")
     if "except" in match and "files" not in match:
         raise RuleTableError(f"{where}: match.except needs match.files")
     return {
@@ -158,6 +163,7 @@ def _parse_command(match: dict, where: str) -> dict:
         "flags_only": arguments == "flags",
         "files": _globs(match["files"], where, "match.files") if "files" in match else (),
         "excepts": _globs(match["except"], where, "match.except") if "except" in match else (),
+        "variables": tuple(match.get("variables", ())),
     }
 
 

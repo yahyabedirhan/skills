@@ -28,6 +28,7 @@ Standard library only: it runs on macOS's Python 3.9.
 """
 from __future__ import annotations
 
+import fnmatch
 import os
 import re
 import shlex
@@ -455,6 +456,43 @@ def _reads_stdin_as_shell(argv: list) -> bool:
 # --- matching a command row ---------------------------------------------------
 
 
+# Marks a `$` the shell expands, so a word keeps whether it names a variable once quotes are gone.
+EXPANDS = "\x01"
+_EXPANSION = re.compile(EXPANDS + r"(?:\{(?!#)([A-Za-z_][A-Za-z0-9_]*)|([A-Za-z_][A-Za-z0-9_]*))")
+
+
+def mark_expansions(text: str) -> str:
+    """The text with each `$NAME` and `${NAME…}` the shell would expand marked by EXPANDS.
+
+    Single quotes, `$'…'` and a backslash keep a `$` literal; double quotes don't.
+    """
+    out, i, quoted = [], 0, False
+    while i < len(text):
+        c = text[i]
+        if c == "\\":
+            out.append(text[i:i + 2])
+            i += 2
+            continue
+        if not quoted and (c == "'" or text.startswith("$'", i)):
+            j = text.find("'", i + (2 if c == "$" else 1))
+            j = len(text) if j == -1 else j + 1
+            out.append(text[i:j])
+            i = j
+            continue
+        if c == '"':
+            quoted = not quoted
+        elif c == "$" and re.match(r"[A-Za-z_{]", text[i + 1:i + 2]):
+            c = EXPANDS
+        out.append(c)
+        i += 1
+    return "".join(out)
+
+
+def expanded_variables(argv: list) -> list:
+    """The variable names a marked argv expands in its arguments (not `${#NAME}`, which is a length)."""
+    return [a or b for word in argv[1:] for a, b in _EXPANSION.findall(word)]
+
+
 def program_matches(rule, program: str) -> bool:
     """`mkfs` covers `mkfs.ext4`: a program's dotted variants are the same program."""
     return any(program == p or program.startswith(p + ".") for p in rule.programs)
@@ -468,6 +506,9 @@ def covers(rule, argv: list) -> bool:
         return len(argv) > 1 and all(a[:1] in ("-", "+") and len(a) > 1 for a in argv[1:])
     if rule.bare:
         return len(argv) == 1
+    if rule.variables:  # a marked argv: see mark_expansions
+        return any(fnmatch.fnmatchcase(name.upper(), glob.upper())
+                   for name in expanded_variables(argv) for glob in rule.variables)
     flags, words = _flags_and_words(argv)
     if not all(any(name in flags for name in group) for group in rule.flags):
         return False

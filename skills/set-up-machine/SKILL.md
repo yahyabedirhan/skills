@@ -59,7 +59,8 @@ A `match` object's keys say which kind it is:
   - `operands`: words right after the subcommand and flags (`["777"]`), or alternative word lists (`[["777"], ["a+rwx"]]`);
   - `any_operand`: words any one of which may appear anywhere after the subcommand (`["main", "master"]`);
   - `arguments: "none"`: the program with nothing after it (`env`); `arguments: "flags"`: with flags and nothing else (`declare -x`);
-  - `files`: globs one of its operands must match (`cat .env`), with an optional `except`.
+  - `files`: globs one of its operands must match (`cat .env`), with an optional `except`;
+  - `variables`: globs over the names of the variables an argument expands (`*TOKEN*` covers `echo $API_TOKEN`, not `echo '$API_TOKEN'`).
 - **File:** `paths`, globs relative to the project (`**/.env`), or starting `~/` or `/`; `access`, `read` or `write`; an optional `except` (`**/.env.example`). A `read` row covers writes too.
 - **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of `mcp__<server>__<tool>`. Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID, so the row matches on every machine and account.
 

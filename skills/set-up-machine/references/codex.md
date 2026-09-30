@@ -46,6 +46,7 @@ Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. 
 - **No rule, and a gap instead:**
   - **Shell rows** (`bash -c`): Codex runs every command as `[<shell>, "-lc", <command>]` and checks rules against that wrapper whenever the command isn't a plain chain of words, so a rule on `bash -c`, `zsh -c` or `bash -lc` would refuse its own wrapper (`codex execpolicy check -- /bin/zsh -c "ls > out"` against `["zsh","-c"]` returns `forbidden`).
   - `arguments: "none"` or `"flags"` rows: a prefix rule on `env` would refuse `env FOO=1 cmd` too.
+  - `variables` rows (`echo $API_TOKEN`): a prefix rule can't match a variable's name inside an argument.
   - `files` rows (`cat .env`): a prefix rule names a literal word in one place, not a path glob. A machine rule that is one case of such a row (`["cat", ".env"]`) is covered, not `extra`.
 
 The hook enforces each of these, since it sees the command before Codex wraps it.
