@@ -104,7 +104,7 @@ class DefaultToolsTest(unittest.TestCase):
                 default_tools.main(["--skills", d, "--global", str(Path(d) / "global.md")])
         self.assertIn("global.md has no tool in its Defaults table", out.getvalue())
 
-    def test_flags_defaults_mentions_outside_the_parameters_section(self):
+    def test_flags_defaults_mentions_anywhere_in_a_skill(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             write(root, "a/SKILL.md", "\n".join([
@@ -120,7 +120,7 @@ class DefaultToolsTest(unittest.TestCase):
             hits = default_tools.scan_mentions(root)
         self.assertEqual(
             [(h.path, h.line, h.tool) for h in hits],
-            [("a/SKILL.md", 9, "Defaults table"), ("a/SKILL.md", 10, "global instructions"),
+            [("a/SKILL.md", 5, "Defaults table"), ("a/SKILL.md", 9, "Defaults table"), ("a/SKILL.md", 10, "global instructions"),
              ("a/reference.md", 1, "Defaults table")],
         )
 

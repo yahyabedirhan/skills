@@ -50,7 +50,7 @@ python3 <this skill>/scripts/default_tools.py --skills <skills folder>
 It lists two kinds of line, and always exits 0: each is tolerated, not blocking.
 
 - **A default tool named outside its how-to skill.** The tools come from the tool rows of the Defaults table (`session-host`, `worktree-tool`, `notification-method`) in the shared global file; pass `--tool <name>` once per tool to check others, or when there's no table. A skill folder whose name contains the tool's name is its how-to skill and is skipped, and so is a line that routes to that skill by name.
-- **"Defaults table" or "global instructions" outside a `## Parameters` section**, where a placeholder belongs. `/set-up-machine`, `/set-up-project` and this skill are exempt: those files are what they describe.
+- **"Defaults table" or "global instructions" anywhere in a skill.** The agent already has those files in context, and without them the mention points at nothing. `/set-up-machine`, `/set-up-project` and this skill are exempt: those files are what they describe.
 
 Report every hit, each judged one of:
 

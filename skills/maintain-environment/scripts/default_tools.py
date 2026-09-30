@@ -11,9 +11,9 @@ Two lists, both tolerated, never blocking (always exits 0):
   notification-method). A skill folder whose name contains the tool's name is
   its how-to skill and is skipped, and so is a line that names that skill
   (routing to it: "use the handover-to-herdr skill").
-- skill lines that mention "Defaults table" or "global instructions" outside a
-  SKILL.md's `## Parameters` section, where a placeholder belongs instead. The
-  skills that own the environment's instruction files are exempt.
+- skill lines that mention "Defaults table" or "global instructions". The agent
+  already has those files in context, and without them the mention means
+  nothing. The skills that own the environment's instruction files are exempt.
 
 Reads the Markdown and YAML an agent loads.
 """
@@ -27,7 +27,6 @@ TOOL_ROLES = ("session-host", "worktree-tool", "notification-method")
 MENTIONS = ("Defaults table", "global instructions")
 # These skills describe the global instructions file and the layers themselves.
 MENTION_EXEMPT = ("set-up-machine", "set-up-project", "maintain-environment")
-PARAMETERS = "## Parameters"
 GLOBAL_FILE = Path.home() / ".config" / "agents" / "AGENTS.md"
 SKILLS_DIR = Path(__file__).resolve().parents[2]
 READ = {".md", ".yaml", ".yml"}
@@ -85,12 +84,7 @@ def scan_mentions(skills: Path) -> list:
     for skill, rel, lines in _files(skills):
         if skill in MENTION_EXEMPT:
             continue
-        in_parameters = False
         for n, text in enumerate(lines, 1):
-            if text.startswith("#"):
-                in_parameters = rel.name == "SKILL.md" and text.strip() == PARAMETERS
-            if in_parameters:
-                continue
             for phrase in MENTIONS:
                 if phrase.lower() in text.lower():
                     hits.append(Hit(skill, rel.as_posix(), n, phrase, text.strip()))
@@ -127,7 +121,7 @@ def main(argv=None) -> int:
     else:
         print(f"No default tool named: {args.global_file} has no tool in its Defaults table. Pass --tool NAME.")
     print()
-    report("Skills mentioning the Defaults table or global instructions outside `## Parameters`:",
+    report("Skills mentioning the Defaults table or global instructions:",
            scan_mentions(args.skills))
     return 0
 
