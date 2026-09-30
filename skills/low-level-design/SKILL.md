@@ -11,12 +11,23 @@ The recurring failure is structure added before it is needed: factories with one
 
 ## The flow
 
-1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix. A new design is a complete first draft through every stage, from the user's spec. For any other purpose, read `session-purposes.md`.
+1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix.
    - **Invoked with no instructions inside a project:** write down that project's current design.
    - **When the purpose isn't clear:** ask what the user wants from the session: a new design, an explanation of the existing code, or a change to it. Check yourself whether the code exists.
 2. **Work through the delivery framework** below, stage by stage, reading a principles, concepts or patterns reference when a decision calls for it.
 3. **Present, take feedback and revise** until the user agrees.
 4. **Keep the design where the user wants it.**
+
+The purpose decides how the stages are walked. The cases below are common, not the only options: a session can mix them, move from one to another, such as an explanation turning into a redesign, or be something else, so fit the framework to what the user asked for.
+
+- **Designing something new:** a complete first draft through every stage, from the user's spec.
+- **Explaining existing code:** walk the code through the stages as it is, without changing it.
+  - Build each stage from the evidence. Start from an existing design document and check it against the code, then the code itself: entry points, types, folders and tests. The user's description is evidence too. Cite the file behind each claim.
+  - Mark requirements read from behaviour and tests **inferred**. Mark what the code can't show, such as why a choice was made or what is planned, **unknown**, and ask about it rather than filling it in.
+  - Show what each file owns and, where a file mixes several things, what it mixes. Report weaknesses as observations without proposing changes, since this session leaves the code as it is.
+  - Answer follow-up questions by tracing a call through the design.
+- **Redesigning existing code:** explain it first and get the user's agreement that it's right. Then redesign it through the same stages, changing only what the redesign needs: a small change runs only the stages it touches, a restructure runs them all. Show the before and after of every stage that changed, including the folder tree.
+- **Deciding one thing,** such as "should this be an interface?" or "where does this module go?": answer it with the part of the design it touches, the requirement behind it, the options with their trade-offs, and a recommendation.
 
 ## The delivery framework
 
@@ -85,8 +96,6 @@ Load `/show-me` and present every stage visually, with prose only for the reason
 The user decides what is kept and where. While the design is being refined, keep it in a draft in the project's temp or scratch folder, following the repository's conventions; when it has none, ask where. An explanation can stay in the conversation. Once the user agrees and wants the design kept, write it into the project's documentation, and update an existing design document rather than adding a second, so the project has one. Open it with what a newcomer needs first, then give each stage its own section.
 
 ## References
-
-- [session-purposes.md](references/session-purposes.md): how explaining existing code, redesigning it and deciding one thing run.
 
 ### Principles, concepts and patterns
 

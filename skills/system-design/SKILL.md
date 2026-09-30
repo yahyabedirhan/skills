@@ -11,7 +11,7 @@ To design inside one service's codebase, at the level of its modules, classes an
 
 ## Flow
 
-1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply. Read `existing-systems.md` when the system already exists.
+1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply.
    - **Invoked inside a project with no instructions:** explain that project's current design.
    - **When the purpose is unclear:** ask what the user wants to do with the design, whether the system exists, and whether they want only an explanation.
 2. **Work through the delivery framework** below, stage by stage, reading a concept reference when a stage reaches its concept.
@@ -20,8 +20,12 @@ To design inside one service's codebase, at the level of its modules, classes an
 The purpose decides how the stages are walked. The cases below are common, not a complete list; a session can mix them or move from one to another.
 
 - **Designing a new system:** write a complete first draft through every stage.
-- **Explaining an existing system:** walk it through the stages as it is, without changing it, and in place of the deep dives explain each concept the design relies on.
-- **Redesigning an existing system:** explain it as it is and get the user's agreement, redesign it through the same stages changing only what the redesign needs, and show the before and after of every stage that changed.
+- **Explaining an existing system:** walk it through the stages as it is, without changing it.
+  - Build each stage from the evidence. Start from an existing design document and check it against the code. In the code, read the routes and handlers, jobs and consumers, schemas and migrations, connection and deploy config, and calls to other services. The user's description is evidence too. Cite the file, section or message behind each claim.
+  - Mark requirements read from the code **inferred**. Mark what the evidence can't show, such as traffic, data sizes, incidents or why a choice was made, **unknown**, and ask about it rather than filling it in, so a guess never passes for a fact.
+  - In place of the deep dives, explain each concept the design relies on, such as its cache, its sharding or its consistency choice: what it is, why it matters here, and the trade-off the design made.
+  - Record weaknesses as observations, not proposals, because the session explains the system without changing it. Answer follow-up questions by walking a request or a failure through the design.
+- **Redesigning an existing system:** explain it first and get the user's agreement that the explanation is right. Then redesign through the same stages, keeping each existing component unless the problem lies in it. Present the new design's trade-offs as options, and show every changed stage as a before/after `diff`.
 - **Deciding one thing,** such as "Postgres or DynamoDB here?": answer it as one deep dive, naming the parts of the design it touches and the requirement behind it.
 
 ## The delivery framework
@@ -101,8 +105,6 @@ Load `/show-me` and present every stage visually, with prose only for the reason
 Ask only what the code, the existing design documents and the user's earlier answers can't settle, one question at a time; decide the rest and say what you decided.
 
 ## References
-
-- [existing-systems.md](existing-systems.md): building an explanation of an existing system from evidence, and running a redesign.
 
 ### Concepts and technologies
 
