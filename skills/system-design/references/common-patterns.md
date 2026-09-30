@@ -12,11 +12,11 @@ Work that takes more than a few seconds: video encoding, reports, bulk operation
 
 ## Dealing with contention
 
-Many users after the same resource at once: the last concert ticket, an auction item. Within one database: transactions, pessimistic locking, or optimistic concurrency control (a version check on write). Across databases: distributed locks, two-phase commit, or serializing through a queue. Databases are built to handle contention; splitting data across stores takes that problem on yourself, so keep contended data in one database as long as possible.
+Many users after the same resource at once: the last concert ticket, an auction item. Within one database: transactions, pessimistic locking, or optimistic concurrency control (a version check on write). Across databases: distributed locks, two-phase commit, or serializing through a queue. Keep contended data in one database as long as possible: databases are built to handle contention, and once the data is split across stores, you have to handle it yourself.
 
 ## Scaling reads
 
-Reads usually grow far faster than writes (read-to-write ratios of 10:1 to 100:1 and beyond). The progression: optimize inside the database (indexes, denormalization), then read replicas, then caching layers (Redis, CDNs) ([caching.md](caching.md)). Watch cache invalidation, replica lag, and hot keys.
+Reads usually grow far faster than writes (read-to-write ratios of 10:1 to 100:1 and beyond). Scale them in this order: optimize inside the database (indexes, denormalization), then read replicas, then caching layers (Redis, CDNs) ([caching.md](caching.md)). Watch cache invalidation, replica lag, and hot keys.
 
 ## Scaling writes
 

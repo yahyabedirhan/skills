@@ -1,6 +1,6 @@
 # Herdr across the Mac and the VPS
 
-> Moved from the job-search vault's `.scratch/skill-improvements/research/` on 2026-09-26. Paths under `tmp/`, `~/.claude/` and the vault point at the user's machine and are not in this repo. The VPS host, user and machine ID are redacted.
+> Moved from a private notes repo on 2026-09-26. Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo. The VPS host, user, label and machine ID, and the private repos' names, are redacted.
 
 Facts for issues [#13](https://github.com/yahyabedirhan/skills/issues/13), [#15](https://github.com/yahyabedirhan/skills/issues/15) and [#16](https://github.com/yahyabedirhan/skills/issues/16): how an agent on the Mac reaches Herdr, git and tools on the VPS, what the reverse direction looks like, and what can be checked before handing work from one machine to the other. Researched on 2026-09-25 against Herdr 0.9.0 on both machines. How a handover prompt gets into an agent tab is covered elsewhere.
 
@@ -9,7 +9,7 @@ Sources are cited inline. `[mac]` and `[vps]` mark command output captured on th
 ## The machine model
 
 - **One server per machine.** Each machine runs its own Herdr server with its own sessions, workspaces and pane processes. A saved machine is only a connection profile in the Mac client; it "targets one remote session" and is "not a cross-machine pane inventory" (`connecting-machines.mdx`; herdr skill).
-- **What is saved.** `herdr machine list --json` [mac] returns one profile: id `<machine-id>`, label `Yahya's VPS`, target `<vps-user>@<vps-host>`, session `default`, enabled. The VPS has no saved machines of its own (`herdr machine list --json` [vps] returns `[]`).
+- **What is saved.** `herdr machine list --json` [mac] returns one profile: id `<machine-id>`, label `<vps-label>`, target `<vps-user>@<vps-host>`, session `default`, enabled. The VPS has no saved machines of its own (`herdr machine list --json` [vps] returns `[]`).
 - **How the window attaches.** The Mac's Herdr window connects to the VPS server over SSH in the background. The selected machine gets keyboard input and streams its screens; other machines keep sending workspace info, agent states and notifications without screens. A lost connection shows dimmed cached state (`connecting-machines.mdx`). The Mac client log shows the endpoint as `ssh:<profile-id>` with frequent `connection was lost` / `health check timed out` reconnects (`~/.config/herdr/herdr-client.log` [mac]). `herdr --remote <target>` is the older single-machine attach, where the remote server owns the panes and the local client draws the UI (`persistence-remote.mdx`).
 - **What runs where.** Panes, agents, git checkouts and tools all live on the VPS. The Mac only draws. Herdr "does not copy local command plugins, configuration, executables, or secrets onto SSH hosts" (`connecting-machines.mdx`).
 - **The API is a local Unix socket only.** Mac: `~/.config/herdr/herdr.sock`; VPS: `~/.config/herdr/herdr.sock` (`herdr status --json` on each). There is no TCP listener; `HERDR_SOCKET_PATH` overrides the socket path (`cli-reference.mdx`, Environment variables). So in 0.9.0 the only way for a Mac agent to drive the VPS server is `ssh vps ~/.local/bin/herdr …`.
@@ -35,7 +35,7 @@ Read-only (run and verified):
 | An agent's recent output | `ssh vps '~/.local/bin/herdr agent read w6:p2 --source recent-unwrapped --lines 120'` |
 | Full live state | `ssh vps '~/.local/bin/herdr api snapshot'` (from `herdr api --help`; not run) |
 
-All list/get commands return JSON. `agent list` gives, per agent: `agent` (kind), `agent_status` (`idle`, `working`, `blocked`, `done`, `unknown`), `pane_id`, `tab_id`, `workspace_id`, `cwd`, `terminal_title` and the agent's native session id [vps]. On 2026-09-25 the VPS had workspaces `w5` "~ ROOT", `w7` "~ VPS MAINTAINER", `w6` "shipyard" (tabs `w6:t1` "CLI", `w6:t2` "Orchestrator"), `w4` "job-search", `w2` "tarmy-empire", and one agent: `claude` in `w6:p2`, `idle`, cwd `~/Developer/yahyabedirhan/shipyard`, unnamed [vps].
+All list/get commands return JSON. `agent list` gives, per agent: `agent` (kind), `agent_status` (`idle`, `working`, `blocked`, `done`, `unknown`), `pane_id`, `tab_id`, `workspace_id`, `cwd`, `terminal_title` and the agent's native session id [vps]. On 2026-09-25 the VPS had workspaces `w5` "~ ROOT", `w7` "~ VPS MAINTAINER", `w6` "shipyard" (tabs `w6:t1` "CLI", `w6:t2` "Orchestrator"), two workspaces for private repos, and one agent: `claude` in `w6:p2`, `idle`, cwd `~/Developer/yahyabedirhan/shipyard`, unnamed [vps].
 
 Writes (syntax from `herdr <cmd> --help` [mac]; **not run**, per the research rules):
 
@@ -72,7 +72,7 @@ What it would take (none set up):
 
 ## Finding the host
 
-- **Herdr's catalog.** `herdr machine list --json` [mac] returns `id`, `label`, `target`, `session`, `enabled`, `selected`. The file behind it is `~/.local/state/herdr/client/endpoints.json` (`{"version":1,"ssh":[…]}`) [mac]. Profiles hold only id, label, SSH target, remote session and enabled state; no credentials (`connecting-machines.mdx`). A skill can read the target with `herdr machine list --json | jq -r '.[] | select(.label=="Yahya'"'"'s VPS") | .target'` rather than hard-coding it. Prefer the CLI over the file; the file format is not documented as stable.
+- **Herdr's catalog.** `herdr machine list --json` [mac] returns `id`, `label`, `target`, `session`, `enabled`, `selected`. The file behind it is `~/.local/state/herdr/client/endpoints.json` (`{"version":1,"ssh":[…]}`) [mac]. Profiles hold only id, label, SSH target, remote session and enabled state; no credentials (`connecting-machines.mdx`). A skill can read the target with `herdr machine list --json | jq -r '.[] | select(.label=="<vps-label>") | .target'` rather than hard-coding it. Prefer the CLI over the file; the file format is not documented as stable.
 - **SSH config.** `~/.ssh/config` [mac] only contains OrbStack's `Include ~/.orbstack/ssh/config`. There is no alias for the VPS; the target is the raw `<vps-user>@<vps-host>`. Adding a `Host vps` alias is an option, but Herdr's profile would still hold whatever target it was added with.
 - **Herdr config.** `~/.config/herdr/config.toml` [mac] holds UI settings only, not machines.
 
@@ -82,12 +82,12 @@ Repos under `~/Developer/yahyabedirhan/` [vps], all cloned over SSH from `git@gi
 
 | Repo | VPS path | Branch on 2026-09-25 | Worktrees |
 | --- | --- | --- | --- |
-| job-search (this vault) | `~/Developer/yahyabedirhan/job-search` | `master` | main checkout only |
+| a private notes repo | `~/Developer/yahyabedirhan/<notes-repo>` | `master` | main checkout only |
 | shipyard | `~/Developer/yahyabedirhan/shipyard` | `build/shipyard-core-0.0.x` | main checkout only |
 | skills | `~/Developer/yahyabedirhan/skills` | `main` | main checkout only |
 | steal | `~/Developer/yahyabedirhan/steal` | `main` | main checkout only |
 
-Also `~/Developer/open-source/ghbar` [vps]. Paths differ from the Mac: the vault is at `~/Documents/Vault/job-search` on the Mac and `~/Developer/yahyabedirhan/job-search` on the VPS; `tarmy-empire`, `sand` and `workstation` exist on the Mac but not in the VPS's `~/Developer/yahyabedirhan` [mac, vps]. Map repos by their `origin` URL, not by path.
+Also `~/Developer/open-source/ghbar` [vps]. Paths differ from the Mac: the notes repo sits under `~/Documents/` on the Mac and under `~/Developer/yahyabedirhan/` on the VPS, and three other repos exist on the Mac but not in the VPS's `~/Developer/yahyabedirhan` [mac, vps]. Map repos by their `origin` URL, not by path.
 
 Tools (`command -v` over plain SSH, then `bash -lc` [vps]):
 
@@ -120,7 +120,7 @@ Read-only checks to run from the Mac before starting a second orchestrator on th
 
 1. **Find the agent in that checkout.** `ssh vps '~/.local/bin/herdr agent list'` and match `cwd` against the worktree path. Agent names may be unset (the shipyard orchestrator had none [vps]), so match on `cwd` and `workspace_id`, not on a name.
 2. **Its state.** `agent_status` of `idle` or `done` means ready for input, `working` means busy, `blocked` means waiting on an approval or question (herdr skill). `unknown` does not prove it stopped. No agent in the pane list for that cwd means none is running there.
-3. **What it last said.** `ssh vps '~/.local/bin/herdr agent read <pane> --source recent-unwrapped --lines 60'`. On 2026-09-25 this showed the shipyard orchestrator reporting commit `0646a5a` pushed and a clean tree [vps].
+3. **What it last said.** `ssh vps '~/.local/bin/herdr agent read <pane> --source recent-unwrapped --lines 60'`. On 2026-09-25 this showed an orchestrator reporting its commit pushed and a clean tree [vps].
 4. **Clean tree.** `ssh vps 'git -C <worktree> status --porcelain'` is empty.
 5. **Nothing unpushed.** Compare local `HEAD` with the live remote, not the cached tracking ref:
 
@@ -143,11 +143,11 @@ Stopping the old agent, closing its workspace, or removing its worktree are writ
 
 ## Open questions
 
-- TODO: Upgrade both machines to Herdr 0.9.1 so skills can use `herdr --machine "Yahya's VPS" …` instead of `ssh` plus a full path and remote-shell quoting. Needs the user's go-ahead; updating a server asks before stopping its panes.
+- TODO: Upgrade both machines to Herdr 0.9.1 so skills can use `herdr --machine "<vps-label>" …` instead of `ssh` plus a full path and remote-shell quoting. Needs the user's go-ahead; updating a server asks before stopping its panes.
 - TODO: Decide the worktree tool on the VPS: install treehouse there, or allow `git worktree add` on the VPS only, and pick the worktree root folder.
 - TODO: Decide whether to add a `Host vps` alias in `~/.ssh/config` on the Mac, or read the target from `herdr machine list --json` every time.
 - TODO: Run the notification test above to learn whether a VPS-side notification can reach the Mac, and which `delivery` value issue [#9](https://github.com/yahyabedirhan/skills/issues/9) should use.
 - TODO: Confirm `herdr agent start --kind claude` finds `claude` in a new VPS pane (it is only on the login-shell `PATH`).
 - TODO: Decide whether VPS to Mac is needed at all; if so, pick Remote Login plus Tailscale, or a reverse tunnel.
 - TODO: Install the `herdr` skill on the VPS if VPS agents are to drive Herdr (it is missing from `~/.claude/skills` and `~/.agents/skills` there).
-- TODO: Pull the vault on the VPS before an effort starts there: its `master` was at `bca4a0cc` while the Mac's was at `17fd65e8` [vps, mac].
+- TODO: Pull the notes repo on the VPS before an effort starts there: the VPS copy was behind the Mac's [vps, mac].

@@ -1,6 +1,6 @@
 # Data modeling
 
-How the data is structured, stored and related: which kind of database, the schema inside it, and how it holds up as it grows. Core entities are named in their stage of the delivery framework; the schema is sketched beside each store in the high-level design.
+How the data is structured, stored and related: which kind of database, the schema inside it, and how it holds up as it grows.
 
 ## Database models
 
@@ -33,7 +33,7 @@ Tie each schema choice back to one of them.
 
 ## In a design
 
-When a store enters the high-level design: its type, the fields each entity needs for the functional requirements, primary and foreign keys, indexes, any denormalization, and whether sharding is needed and on which key.
+When a store enters the high-level design, give its type, the fields each entity needs for the functional requirements, primary and foreign keys, indexes, any denormalization, and whether sharding is needed and on which key.
 
 ---
 

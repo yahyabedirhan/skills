@@ -1,0 +1,5 @@
+interface:
+  display_name: "Treehouse"
+  short_description: "Lease, return and destroy worktrees from a pre-warmed pool"
+policy:
+  allow_implicit_invocation: true

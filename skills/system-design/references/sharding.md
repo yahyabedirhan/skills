@@ -43,7 +43,7 @@ Most distributed databases shard automatically: Cassandra, DynamoDB and MongoDB 
 
 ## In a design
 
-The shard key and why it matches the main access pattern; the distribution strategy; the trade-off (which queries now fan out, and how they're served); how it grows (start with more shards than needed; consistent hashing to add more).
+Give the shard key and why it matches the main access pattern, the distribution strategy, the trade-off (which queries now fan out, and how they're served), and how it grows (start with more shards than needed; consistent hashing to add more).
 
 ---
 
