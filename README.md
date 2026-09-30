@@ -51,7 +51,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | [orchestrate-effort](skills/orchestrate-effort/SKILL.md) | Builds an effort from its spec and tickets through sub-agents and opens the pull request. | Original. |
 | [handoff](skills/handoff/SKILL.md) | Writes a handoff document in the repository for another session to pick up, and leaves it for the caller to commit. | Fork of `handoff` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d28dfdc`](https://github.com/mattpocock/skills/tree/d28dfdc39bea/skills/productivity/handoff) (MIT, see `skills/handoff/LICENSE.mattpocock`). Changes: agents can load it, and it saves to the repository's handoff folder (`.handoff/<date>-<topic>.md`) instead of a temp folder. |
 | [handover](skills/handover/SKILL.md) | Hands work over to a new session outside this one: a readiness checklist, the starting prompt, a mechanism to start it, and a check that it started. | Original. |
-| [handover-to-herdr](skills/handover-to-herdr/SKILL.md) | Starts a new agent session in a labelled Herdr tab, sends it its starting prompt and confirms it's working, for handover and init-effort. It also finds the agents still working and frees a closing effort's own worktree from outside it, for close-effort. Works from inside or outside a Herdr pane. | Original. |
+| [handover-to-herdr](skills/handover-to-herdr/SKILL.md) | Starts a new agent session in a labelled `herdr` tab, sends it its starting prompt and confirms it's working, for handover and init-effort. It also finds the agents still working and frees a closing effort's own worktree from outside it, for close-effort. Works from inside or outside a `herdr` pane. | Original. |
 | [treehouse](skills/treehouse/SKILL.md) | Leases, lists, returns and destroys worktrees from `treehouse`'s pre-warmed pool, with the gotchas, for the skills that make or free worktrees when `treehouse` is your worktree tool. | Original. |
 | [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | Picks up an effort from a handoff and runs orchestrate-effort. | Original. |
 | [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`697d4ce`](https://github.com/mattpocock/skills/tree/697d4ce9742d/skills/engineering/implement) (MIT, see `skills/implement/LICENSE.mattpocock`). Changes: agents can load it, so an orchestrator's sub-agents can use it, it commits only when the delegating agent doesn't, it reviews at the depth the delegating agent sets, it runs typechecking only where the project has a typechecker, with no one to agree tdd seams with it chooses them and names them in its report, it stops what it started before reporting, and it moves what it no longer needs into `.scratch/` instead of running `rm -rf`. |
@@ -203,8 +203,8 @@ Add its row to its family's table under [Skills](#skills), and fold it into that
 
 ## Decision records
 
-`docs/decisions/` records why a skill or workflow is shaped the way it is, one dated entry per decision. Read it before changing the skills it covers. It is not installed.
+`docs/decisions/` records why a skill or workflow is shaped the way it is, one dated entry per decision. Read it before changing the skills it covers. It is not installed. `docs/decisions/skill-writing.md` holds the rules for writing any skill here.
 
 ## Research
 
-`docs/research/` holds the fact-finding behind open issues: how the harnesses, Herdr, git and GitHub actually behave, with sources and test notes. Each issue links the notes it relies on. It is not installed.
+`docs/research/` holds the fact-finding behind open issues: how the harnesses, `herdr`, git and GitHub actually behave, with sources and test notes. Each issue links the notes it relies on. It is not installed.
