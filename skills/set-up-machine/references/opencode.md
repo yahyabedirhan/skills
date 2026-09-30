@@ -6,7 +6,7 @@ How to set up and audit opencode from the rule table. Docs: [rules](https://open
 
 ## Global instructions
 
-- opencode reads the first that exists of `~/.config/opencode/AGENTS.md` and `~/.claude/CLAUDE.md`. It doesn't follow `@` imports, so the fallback would load Claude Code's import line unexpanded.
+- opencode reads the first that exists of `~/.config/opencode/AGENTS.md` and `~/.claude/CLAUDE.md`. It doesn't follow `@` imports; its own link below makes the order not matter.
 - `~/.config/opencode/AGENTS.md` becomes a **relative symlink**, `../agents/AGENTS.md`, to the shared file.
 - An existing `AGENTS.md` there (a file, or a link elsewhere) is kept and `extra`, with a `gap`: opencode reads it instead until its lines move into the shared file (global-instructions.md, *Moving a harness's file*) and the user deletes it.
 

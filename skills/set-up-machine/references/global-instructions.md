@@ -58,7 +58,7 @@ A line belongs here only when it's about this person, not the work: how they lik
 
 ## Moving a harness's file
 
-When a harness still keeps its own global file (`~/.claude/CLAUDE.md` with more than the import line, an old `~/.codex/AGENTS.md`), move it line by line before the harness's file becomes a link or a single import:
+When a harness still keeps its own global file (a `~/.claude/CLAUDE.md` that isn't a link, an old `~/.codex/AGENTS.md`), move it line by line before the harness's file becomes a link:
 
 1. Choose where each line goes, using the list above: a role's row, a personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
 2. Write each role's value and the workflow lines into the shared file; make each skill edit at its source, as `/maintain-environment` says.
