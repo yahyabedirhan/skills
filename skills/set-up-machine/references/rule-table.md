@@ -14,7 +14,7 @@
 | `instruction` | for `deny`, what the agent does instead: an alternative, or "Stop, say why, and give the user the exact command; never work around it."; for `ask` and `allow-and-report`, how to go ahead |
 | `samples` | `covers`: calls the row must catch; `leaves`: near misses it must let through. A shell command for a command row, a path for a file row, a tool name for an MCP row. `verify.py` checks them against the hook |
 | `gap` | optional: what no harness can catch for the row (`echo $TOKEN`); every audit names it |
-| `guard` | optional, `deny` rows: `label` and `rule`, prose for a semantic guard (Claude Code's auto mode, off for now) |
+| `guard` | optional, `deny` rows: `label` and `rule`, prose for a semantic guard (Claude Code's auto mode; claude-code.md says when it's on) |
 
 ## `match` kinds
 

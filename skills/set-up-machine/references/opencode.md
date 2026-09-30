@@ -1,6 +1,6 @@
 # opencode
 
-How to set up and audit opencode from the rule table. **Check the current docs first**, since the formats change: [rules](https://opencode.ai/docs/rules/), [permissions](https://opencode.ai/docs/permissions/), [config](https://opencode.ai/docs/config/), [plugins](https://opencode.ai/docs/plugins/). Where they differ from this file, follow them and name the difference in your report. Background: the repo's `docs/research/harness-capabilities.md`, section 3.
+How to set up and audit opencode from the rule table. Docs: [rules](https://opencode.ai/docs/rules/), [permissions](https://opencode.ai/docs/permissions/), [config](https://opencode.ai/docs/config/), [plugins](https://opencode.ai/docs/plugins/). Background: the repo's `docs/research/harness-capabilities.md`, section 3.
 
 **Found** when `~/.config/opencode/` exists or `opencode` is on `PATH`.
 

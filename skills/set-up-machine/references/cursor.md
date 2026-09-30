@@ -1,6 +1,6 @@
 # Cursor
 
-How to set up and audit Cursor, its IDE agent and the `cursor-agent` CLI, from the rule table. **Check the current docs first**, since the formats change: [rules](https://cursor.com/help/customization/rules.md), [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [hooks](https://cursor.com/docs/hooks.md). Where they differ from this file, follow them and name the difference in your report. Background: the repo's `docs/research/harness-capabilities.md`, section 4, and probes of `cursor-agent` 2026.09.18.
+How to set up and audit Cursor, its IDE agent and the `cursor-agent` CLI, from the rule table. Docs: [rules](https://cursor.com/help/customization/rules.md), [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [hooks](https://cursor.com/docs/hooks.md). Background: the repo's `docs/research/harness-capabilities.md`, section 4, and probes of `cursor-agent` 2026.09.18.
 
 **Found** when `~/.cursor/` exists or `cursor-agent` or `cursor` is on `PATH`.
 
@@ -23,7 +23,7 @@ How to set up and audit Cursor, its IDE agent and the `cursor-agent` CLI, from t
 
 ## Memory
 
-None (Memories were removed in 2.1; the CLI never had them): a `none` line.
+No memory feature: a `none` line.
 
 ## Permissions (CLI only)
 
