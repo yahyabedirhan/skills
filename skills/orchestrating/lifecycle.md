@@ -33,9 +33,7 @@ Plain path      init-effort                    handover                        o
 
 **init-effort** names the effort and creates its branch and worktree. The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
 
-For a brand-new project it first creates the repo: a folder under the maintainer's projects folder, a README and licence, the [folder standard](folders.md)'s setup, a first commit, and a GitHub repo (public or private, asked each time). The project's first effort then starts like any other.
-
-It writes the idea into a handoff in the worktree and starts the thinking session on it with a one-line prompt: in a `Thinking` tab of the session host, else in its own session or a pasted prompt.
+For a brand-new project it first creates the repository, and the project's first effort then starts like any other. It writes the idea into a handoff in the worktree and starts the thinking session on it.
 
 ## Thinking
 
@@ -47,7 +45,7 @@ to-tickets   tracer-bullet tickets, each naming what blocks it
 handover     hand over to an orchestrator
 ```
 
-The starting prompt names these skills and the agent loads each one itself: the user types no slash command. Run it in one unbroken context window, so the spec and tickets build on the same reasoning. On a local tracker the artifacts land in an **effort folder**, `.efforts/<effort>/` with `spec.md` and `issues/`.
+The starting prompt names these skills and the agent loads each one itself: the user types no slash command. Run it in one unbroken context window, so the spec and tickets build on the same reasoning. [folders.md](folders.md) says where the spec and tickets land.
 
 ## Handover
 
@@ -55,11 +53,11 @@ The session handing over owns the clean ending, through the **handover** skill. 
 
 ## Build
 
-The orchestrator reads the handoff, shows the plan with `/show-me`, delegates the unblocked tickets in parallel to sub-agents, each in its own worktree, building it the way `/implement` does (`/tdd`, checks, a review at the depth the orchestrator sets), integrates and commits each one, and ends with one branch review and `/to-pr`. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking". It follows the `orchestrating` discipline throughout.
+**orchestrate-with-handoff** picks up the handoff and runs **orchestrate-effort**, which delegates the tickets to sub-agents in parallel, each building its ticket with **implement** in its own worktree, integrates each ticket as its own commit, and opens the pull request with **to-pr** after one branch review. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking". The orchestrator follows the **orchestrating** discipline throughout.
 
 ## Close
 
-The user reviews and approves the pull request: that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. It leaves the workspaces open and nothing that exists only inside its session.
+The user reviews and approves the pull request: that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. Workspaces and agent sessions stay open for the user to close.
 
 ## Why two sessions
 
