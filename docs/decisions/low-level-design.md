@@ -18,3 +18,4 @@ Problem walkthroughs (design a parking lot) are examples of the framework, not c
 
 - **The delivery framework stays in `SKILL.md`,** as the Hello Interview lesson lays it out; an audit had moved the stages' detail into `references/delivery-stages.md`, and the maintainer restored it. Only `references/session-purposes.md` holds how each kind of session runs.
 - **The maintainer's notes move out of the skill.** `MAINTAINING.md` sat in the skill's folder, where every install copied it; it is now the *Maintaining* section of this file.
+- **A new design is described in `SKILL.md` itself;** `references/session-purposes.md` covers only the other purposes. Its new-design section was never read, because the skill sent only the other purposes to it.

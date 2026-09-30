@@ -32,7 +32,7 @@ A new file gets all five, every role `none` and the workflow section empty. On a
 
 ## The Defaults roles
 
-The one definition of each role. A skill lists the roles it uses as placeholders of the same name in its `## Parameters`, with a line on what each is; what to do when a role has no tool is written only here, and reaches every session through the Defaults section. A tool's own skill says in its description when to use it, such as `/treehouse` for a `treehouse` worktree tool, so no other skill routes to it.
+The one definition of each role.
 
 | Role | What it is | When none |
 |---|---|---|
@@ -62,8 +62,6 @@ When a harness still keeps its own global file (`~/.claude/CLAUDE.md` with more 
 2. Write the Defaults values and workflow lines into the shared file; make each skill edit at its source, as `/maintain-environment` says.
 3. Leave the harness's file holding only its link to the shared file.
 
-Done when every line of the old file has a named destination.
-
 ## Memory
 
-Memory stays off in every harness: a memory is invisible to the other harnesses and lives outside any repository, so write what a memory would hold into the shared file, a project's `AGENTS.md` or a skill instead. Each harness reference says how to turn its memory off and where its memory files are; every file is `removed` in the diff and backed up first. Before the user approves the diff, move any memory worth keeping into one of those places.
+Memory stays off in every harness: a memory is invisible to the other harnesses and lives outside any repository, so write what a memory would hold into the shared file, a project's `AGENTS.md` or a skill instead. Each harness reference says how to turn its memory off and where its memory files are; every file is `removed` in the diff and backed up first. Put any memory worth keeping into the same diff, as lines for one of those places, so the user approves both together.

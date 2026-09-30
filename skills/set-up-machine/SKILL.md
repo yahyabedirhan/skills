@@ -5,7 +5,7 @@ description: Set up or audit a machine's coding-agent harnesses from one rule ta
 
 # Set up machine
 
-Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI) match two sources: the **rule table**, [`rules.json`](rules.json), which holds each global rule once as what it covers; and the **shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads. Each harness also runs the **pre-tool hook**, `scripts/pre_tool_hook.py`, before every tool call, and keeps its memory off. Never remove or loosen an entry the table didn't produce: it's the user's. Harness formats change, so check the docs a harness reference links before writing; where they differ, follow the docs and name the difference in your report. Running the skill again is the **audit**: the same steps, ending with an empty diff.
+Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI) match two sources: the **rule table**, [`rules.json`](rules.json), which holds each global rule once as what it covers; and the **shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads. Each harness also runs the **pre-tool hook**, `scripts/pre_tool_hook.py`, before every tool call, and keeps its memory off. Never remove or loosen an entry the table didn't produce: it's the user's. Harness formats change, so check the docs a harness reference links before writing; where they differ, follow the docs and name the difference in your report. Running the skill again is the **audit**: the same steps, ending with a diff that changes nothing.
 
 ## Parameters
 
@@ -28,7 +28,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 3. **Ask once** for one approval of the whole diff. A change after that needs a new approval.
 4. **Back up** every file the diff changes or removes. Before writing any file, copy each one into `~/.config/agents/backups/<UTC time as YYYYmmddTHHMMSSZ>/`, at its path relative to the home folder (`.claude/settings.json`). Copy a symlink as a link.
 5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In a JSON file, change only the keys the diff names and keep the rest. Write through a symlink to its target.
-6. **Verify** with `scripts/verify.py`, then inspect again until the diff is empty. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
+6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
 
    Run `python3 <this skill>/scripts/verify.py` (Python 3.9+, standard library only; it writes nothing). It passes when it prints `rules ok`, a `hook wired` line for every harness found, and every `codex differs` line is a row codex.md says gets no rule.
 
@@ -84,7 +84,7 @@ A harness that matches a command's text catches only the spellings it lists, so 
 
 Each harness reference shows its wiring with `<script>` in place of the script's path. Replace it with the absolute path of `scripts/pre_tool_hook.py` in the installed skill (under `~/.agents/skills` or `~/.claude/skills`), never in a checkout or worktree, which can be deleted. If there is no installed copy, name the gap.
 
-The wiring fails open (`[ -f <script> ] && … || true`): if the script is gone, each call goes on under the native entries, where an exit 2 would block every call.
+The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call.
 
 The report folder is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 
@@ -112,7 +112,6 @@ Name these once in every audit:
 
 ## Scripts
 
-
 - [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine: each row's samples through the hook, and through Codex's own policy check.
-- [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before a command.
+- [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.

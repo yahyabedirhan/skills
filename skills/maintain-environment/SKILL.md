@@ -18,7 +18,7 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 
 | Layer | Holds | Where to write it |
 |---|---|---|
-| **Permission** | A hard rule: deny, ask, or allow-and-report. | A row in `/set-up-machine`'s rule table, which set-up-machine turns into each harness's native entries and the global instructions' rule line. A project may only add allows. |
+| **Permission** | A hard rule: deny, ask, or allow-and-report. | A row in `/set-up-machine`'s rule table, which `/set-up-machine` turns into each harness's native entries and the global instructions' rule line. A project may only add allows. |
 | **Global instruction** | The user's personal workflow and Defaults table, and one line per global rule with what to do instead. | The shared global instructions file every harness on the machine reads. |
 | **Project `AGENTS.md`** | Anything a teammate needs to work on the project: its tracker, its commands, its conventions, its worktree tool. | The project's `AGENTS.md`, with a `CLAUDE.md` holding `@AGENTS.md` so Claude Code reads the same text. |
 | **Skill** | How to do a task, written for any team's tools and tracker: a value that differs between setups becomes a parameter. | A `SKILL.md` in the skills repo, or a local skill in one project. |
@@ -31,7 +31,7 @@ Before settling a change, picture a teammate or contributor with a different set
 A change passes when:
 
 - nothing a teammate needs sits in the global instructions;
-- the global instructions hold only personal workflow and explanations of global rules;
+- the global instructions hold only the user's personal workflow, their Defaults, and explanations of global rules;
 - no skill depends on the user's default tool. The user's choice of tool sits in the global Defaults, and how to use a tool sits in that tool's own skill.
 
 Flag every place a change fails the test, and move the failing part to the row of the table that fits it.
@@ -41,10 +41,10 @@ Flag every place a change fails the test, and move the failing part to the row o
 A skill that needs a value from the environment (a tool, a command, a repo) declares it as a **parameter**:
 
 - **One `## Parameters` section, in `SKILL.md`,** added only to a skill that needs such a value, with one short line per parameter: the `<kebab-case>` placeholder named after its role, what it is, and a few examples after "e.g.". For instance: "`<session-host>`: where agent sessions run, e.g. `herdr`, Claude Code Desktop, Codex Desktop."
-- **What to do when a role has no tool is written once,** in the roles table of `/set-up-machine`'s `global-instructions.md`, which that skill copies into the global Defaults on every machine. A skill never repeats it.
-- **A tool's own skill says when to use it,** in its description ("Use when the project's worktree tool is `treehouse`"), along with anything specific to that tool. No other skill routes to it.
-- **The body uses the placeholder as a noun** ("make the worktree with `<worktree-tool>`"). Anywhere else, plain words ("the session host").
-- **Another skill is named by its slash command,** such as `/to-tickets`, not in bold. A starting prompt is the exception: it names skills in words, so it works in every harness.
+- **Write what to do when a role has no tool once,** in `/set-up-machine`'s roles table, which `/set-up-machine` copies into the global Defaults on every machine. Never repeat it in a skill, since a copy drifts from the table.
+- **Say when to use a tool in the tool's own skill,** in its description ("Use when the project's worktree tool is `treehouse`"), along with anything specific to that tool. No other skill routes to it.
+- **In the body, use the placeholder as a noun** ("make the worktree with `<worktree-tool>`"). Anywhere else, use plain words ("the session host").
+- **Name another skill by its slash command,** such as `/to-tickets`, not in bold. A starting prompt is the exception: it names skills in words, so it works in every harness.
 
 Before any skill uses a new role, add it to `/set-up-machine`'s roles table, with what it is and what to do when it has no tool.
 
@@ -52,11 +52,12 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
 
 1. Choose the layer the change belongs to, and check it against the team test.
 2. Make the change at that layer's source. For any operation on a skill, read `skill-operations.md`.
-   - **For a skill:** that is its source repo, never an installed copy, which the next `npx skills update` overwrites.
+   - **For an installed skill:** that is its source repo, never an installed copy, which the next `npx skills update` overwrites.
    - **For a local skill:** that is the project.
 3. After any skill change, run the team-test audit: grep the skills for the name of each tool in the user's Defaults, and for "Defaults table". Skip each tool's own skill, and `/set-up-machine`, `/set-up-project` and this skill, which manage the instruction files. Judge each hit:
    - **When it is a default,** the skill picks the tool itself: make it a parameter, and move the tool's commands into the tool's own skill.
    - **When it is a mention,** an example such as a parameter's "e.g.", or data: keep it.
+   - **When it names the Defaults table:** remove the mention. An agent that has the table loaded already sees it, and one that doesn't is pointed at nothing.
 4. Ship a change to the skills repo on a branch, through a pull request opened with `/to-pr`, and stop once it is open. The user merges it or asks you to.
 5. Carry the change everywhere it applies, as the table below says. `npx skills` installs from the default branch, so the installs and updates run after the merge, in the session told the pull request merged.
 6. Report each step this session can't carry: which set-up skill or `npx skills update` still has to run, and whether it runs on this machine, on each other machine or in each project.

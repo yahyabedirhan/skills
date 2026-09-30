@@ -3,8 +3,8 @@ name: email
 description: >-
   How to work the user's email through the Spark CLI and the Gmail connector:
   which tool to pick, how to list, search and read mail, and how to mark it
-  done, label, pin and draft replies: archiving freely, any other change only
-  when asked, never sending. Use whenever a task reads or
+  done, label, pin and draft replies. It archives freely, makes any other
+  change only when asked, and never sends. Use whenever a task reads or
   changes the user's mail, calendar, availability or contacts, or when this
   email setup needs configuring or checking.
 ---
@@ -25,9 +25,9 @@ Archive an email when the task calls for it. Make any other change only after th
 |---|---|
 | `search_threads`, `get_thread`, `get_message`, `list_labels`, `get_draft`, `list_drafts` | Read freely. |
 | `unlabel_thread` or `update_message_labels` removing `INBOX` | Archive freely. |
-| `label_*` and `unlabel_*` for any other label, `create_label`, `update_label` | After the user asks. |
-| `create_draft`, `update_draft`, `delete_draft` | After the user asks. |
-| `untrash_*`, `unmark_*_spam` | After the user asks. |
+| `label_*`, `unlabel_*` and `update_message_labels` for any other label, `create_label`, `update_label` | After the user asks, or agrees when you name it. Never add `TRASH` or `SPAM`, since that trashes or spams the email around the deny rules. |
+| `create_draft`, `update_draft`, `delete_draft` | After the user asks, or agrees when you name it. |
+| `untrash_*`, `unmark_*_spam` | After the user asks, or agrees when you name it. |
 | `delete_label` | Only when the user names that label to delete, since it removes the label from every email. |
 
 Claude Code's permission rules deny the rest, and a denied tool doesn't show up to be called:

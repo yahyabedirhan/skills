@@ -24,14 +24,15 @@ python3 <skill-dir>/scripts/wispr.py <command> --help
 | `count TERM...` | Dictations containing each term, whole word, any case, with hits since its dictionary entry was added. `--field formatted` counts only what was pasted. |
 | `dict list` / `add` / `remove` / `undo` / `backup` | The dictionary. Every write backs up first; `add` prints a batch id that `undo` reverts. `--restart` quits Wispr Flow before the write and relaunches it after, which is how the app loads a change. `add --snippet` makes a trigger phrase that expands to `--replace`. |
 
-Backups go to `~/.local/state/wispr-flow/backups/`; the newest 30 are kept. `--backup-dir`, `--keep-backups` or the `WISPR_FLOW_*` variables change that.
+Backups go to `~/.local/state/wispr-flow/backups/`; the newest 30 are kept. Change that with `--backup-dir` and `--keep-backups` or the `WISPR_FLOW_*` variables. Put the two options before the command, since the script rejects them after it.
 
 Entries the app learned from the user's edits have `source: user_edits`, and `observedSource` holds what it had heard.
 
 ## The dictionary
 
 - A **word** (phrase, no replacement) teaches Wispr the term. Fix with a word first, for a mishearing as much as a misspelling: add `Herdr`, not `Herder` → `Herdr`.
-- A **rule** (phrase plus replacement) rewrites a phrase every time it is heard. Propose one only when the mistake keeps coming after its word was added, that is `Since added` above zero in formatted text, or when the intended word is an ordinary one a word entry can't teach, such as `work tree` → `worktree`. The user decides.
+- A **rule** (phrase plus replacement) rewrites a phrase every time it is heard. Propose one only when the mistake keeps coming after its word was added, or when the intended word is an ordinary one a word entry can't teach, such as `work tree` → `worktree`. The user decides.
+- To see whether a mistake came back, count the wrong form in pasted text from the day its word was added: `count <wrong form> --field formatted --from <date>`, with the date from `In dictionary since` in the intended word's `count` row. The since-added columns of `count` and `terms` count the entry's own phrase, so they show the word in use, not its mishearings.
 - A rule's phrase matches whole words, so a plural needs its own rule (`cloud sessions`).
 - Matching ignores case. Add each entry once, spelled exactly as it should appear: brand casing for names (`GitHub`, `WebMCP`), lowercase for commands (`npx`, `to-pr`). A second entry in another case does nothing.
 - A rule is safe only when its phrase is not something the user also means literally. `city` → `Citi` breaks the word city; add `Citi` as a word instead.
@@ -41,10 +42,10 @@ Entries the app learned from the user's edits have `source: user_edits`, and `ob
 
 When the user says a word came out wrong ("I said skill, it wrote SQL"), fix it in the same turn:
 
-1. `count` both forms over the full history (`--since 26w`), to see whether the wrong form is also a word the user means. SQL was: several dictations meant it.
+1. `count` both forms with no window, which covers the full history, to see whether the wrong form is also a word the user means. SQL was: several dictations meant it.
 2. Choose the fix:
    - **If the intended word is missing:** add it as a word with `--restart`.
-   - **If the word is there and `Since added` shows the mistake returning:** propose a rule instead.
+   - **If the word is there and the wrong form still turns up since it was added:** propose a rule instead.
    - **If the wrong form is also a word the user means:** propose no rule, and tell the user why a rule would do harm.
 3. Tell the user what was added, and that the next review will show whether it held.
 
@@ -54,7 +55,7 @@ Look for the words speech recognition gets wrong most, and more so with a non-na
 
 1. **Read** the dictionary, the `terms` table and the `--diff` history for the window, the last 24 hours by default. Then read every dictation in the window, raw and formatted: `terms` and `--diff` miss mishearings that came out as ordinary words the formatter left unchanged ("verb tree", "two PR").
    - **When the user names a window:** use that window instead.
-   - **When the window is longer than a few hours:** write `history --fields raw,formatted` with `--out` to a file in the project's temp folder and read that file in pages, since it costs about 30k tokens per day of dictation.
+   - **When the window is longer than a few hours:** write `history --fields raw,formatted` with `--out` to a file in a temporary directory outside any repository and read that file in pages, since it costs about 30k tokens per day of dictation and the dictations are private.
 2. **Find candidates:** words that are wrong in context, such as a real word where a name belongs ("Herder session", "cloud code"), a name spelled several ways, or a command turned into a word ("Sila" for CLI). Check the raw text too; formatting sometimes hides a mishearing and sometimes fixes it.
 3. **Confirm the intended word** from the surrounding text and the user's projects: the one open now, and any other the dictation was about, which the `app` column shows. Grep them for the name.
    - **Where the intended word can't be established:** list it under **Unclear** and ask.

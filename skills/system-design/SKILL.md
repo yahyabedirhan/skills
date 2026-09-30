@@ -91,7 +91,7 @@ When the design adopts a specific technology (Kafka, DynamoDB, Elasticsearch), r
 
 ## Working with the user
 
-Load `/show-me` and present every stage visually, with prose only for the reasons behind choices. Then loop: take the user's feedback, revise, and present again until the user is satisfied.
+Load `/show-me` and present every stage visually, with prose only for the reasons behind choices.
 
 - Keep one current version of the design and revise it.
 - When feedback changes one part, carry the change through every part it affects.

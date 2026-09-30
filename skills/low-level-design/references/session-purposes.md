@@ -1,10 +1,6 @@
 # Session purposes
 
-How each common purpose runs through the delivery framework. They are common cases, not the only options: a session can mix them, move from one to another (an explanation turning into a redesign), or be something else, so fit the framework to what the user asked for.
-
-## Designing something new
-
-Design it end to end from the user's spec: a complete first draft through every stage. Wherever the design has more than one reasonable option, let the user pick.
+How each common purpose other than a new design runs through the delivery framework. They are common cases, not the only options: a session can mix them, move from one to another (an explanation turning into a redesign), or be something else, so fit the framework to what the user asked for.
 
 ## Explaining existing code
 

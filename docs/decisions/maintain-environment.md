@@ -32,3 +32,7 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 - **A `## Parameters` line is one line:** the placeholder, what it is, and what happens when it's unset. No mechanism.
 - **The how-to skill naming convention is gone** (`handover-to-<session-host>`, a worktree tool's skill "named for the tool"). A skill routes to a tool's skill by name, and the default-tools audit treats a line that names the tool's skill as routing, not a default.
 - **A placeholder a skill doesn't declare is replaced with plain words.**
+
+## 2026-09-30 (later)
+
+- **A Parameters line says what the role is, with examples, and nothing else.** This supersedes the #83 entry above on two points: what to do when a role has no tool lives only in `/set-up-machine`'s roles table, and no skill routes to a tool's skill, since the tool's own skill says in its description when to use it. The environment layers, the team test and the parameter convention now sit in `SKILL.md`, because every change reads them, and the team-test audit is a grep.

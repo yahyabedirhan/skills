@@ -13,7 +13,7 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 ## Memory
 
 - Auto memory is on by default and writes `~/.claude/projects/<project>/memory/`. Set `"autoMemoryEnabled": false`, and list every file under `~/.claude/projects/*/memory/` as `removed` (backed up first).
-- **Gap:** a project's `.claude/settings.json` can set `autoMemoryEnabled: true` and win (set-up-project's audit checks it); `CLAUDE_CODE_DISABLE_AUTO_MEMORY` outranks the key for one session.
+- **Gap:** a project's `.claude/settings.json` can set `autoMemoryEnabled: true` and win (`/set-up-project`'s audit checks it); `CLAUDE_CODE_DISABLE_AUTO_MEMORY` outranks the key for one session.
 
 ## Permissions
 

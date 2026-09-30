@@ -7,6 +7,4 @@ Create a new project's repo only after the maintainer has confirmed its name, it
 3. Write a `README.md`, with the name as a heading and the idea in a paragraph, and the `LICENSE`.
 4. Set it up with `/set-up-project`, in the new folder, with GitHub as its tracker and `<owner>/<name>` as the repo.
 5. Commit it all as the first commit, `chore: start <name>`, in its own call, so a refused command stops only itself.
-6. Create the GitHub repo with the visibility the maintainer chose, as `origin`, and push `main`.
-
-The repo is ready when it has one commit on `main`, pushed to `origin`. A worktree tool needs both the first commit and `origin` before it can lease worktrees of the new repo.
+6. Create the GitHub repo with the visibility the maintainer chose, as `origin`, and push `main`. A worktree tool needs both the first commit and `origin` before it can make worktrees of the new repo.
