@@ -8,13 +8,13 @@ argument-hint: "Worktree path, topic, role, and the starting prompt"
 
 The Herdr mechanism of a **handover** (the **handover** skill owns the flow and has already written the handoff and the starting prompt). It takes four inputs: the **worktree** path, the **topic** (the effort's name, or what the work is), the new session's **role** (`Orchestrator`, `Thinking`, or another one-word role), and the **starting prompt**.
 
-It is the how-to skill for `<session-host>` = Herdr. When **close-effort** runs with it, read [closing-an-effort.md](closing-an-effort.md) for its commands.
+Other skills use it when the session host is Herdr. When **close-effort** runs with it, read [closing-an-effort.md](closing-an-effort.md) for its commands.
 
 ## Parameters
 
-It comes from the Defaults table in the environment's instructions, where a project's table overrides the global one for that project.
+From the Defaults table (a project's row overrides the global one). Unset: no row, or `none`.
 
-- `<agent-to-start>`: the command and flags that start the new agent. Unset (no row, or `none`): `claude`.
+- `<agent-to-start>`: the command that starts the new agent. Unset: `claude`.
 
 ## Herdr from anywhere
 

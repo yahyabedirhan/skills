@@ -12,18 +12,18 @@ BUILD      orchestrate the tickets through delegates; open the pull request
 CLOSE      the user says "go"; the agent merges, follows up, and cleans up
 ```
 
-There are two paths through it, chosen by `<session-host>`, where new agent sessions open (a parameter of **init-effort**, **handover** and **close-effort**). The host path, with it set, automates every step between phases through the **handover-to-`<session-host>`** skill; the plain path, with it unset, runs anywhere, with this session carrying on or the user pasting each starting prompt. The worktree comes from `<worktree-tool>`, else `git worktree add`.
+There are two paths through it, chosen by the session host, where new agent sessions open (a parameter of **init-effort**, **handover** and **close-effort**). The host path, when it's Herdr, automates every step between phases through the **handover-to-herdr** skill; the plain path runs anywhere, with this session carrying on or the user pasting each starting prompt. The worktree comes from the **treehouse** skill when the worktree tool is Treehouse, else `git worktree add`.
 
 ```text
                 START                          HANDOVER                        BUILD
 Host path       init-effort                    handover                        orchestrate-with-handoff
-                <worktree-tool>;               → handover-to-<session-host>:   → orchestrate-effort
-                  → handover-to-<session-host>:  new "Orchestrator" tab,
+                worktree tool;                 → handover-to-herdr:            → orchestrate-effort
+                  → handover-to-herdr:           new "Orchestrator" tab,
                   "Thinking" tab,                agent started, prompted
                   agent started, prompted
 
 Plain path      init-effort                    handover                        orchestrate-with-handoff
-                <worktree-tool>,               runs the prompt here,           → orchestrate-effort
+                worktree tool,                 runs the prompt here,           → orchestrate-effort
                 or git worktree;               or prints it; the user
                 thinks here, or prints         pastes it into a new
                 the starting prompt            session
@@ -31,11 +31,11 @@ Plain path      init-effort                    handover                        o
 
 ## Start
 
-**init-effort** names the effort and creates its branch and worktree, with `<worktree-tool>`. The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
+**init-effort** names the effort and creates its branch and worktree. The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
 
 For a brand-new project it first creates the repo: a folder under the maintainer's projects folder, a README and licence, the [folder standard](folders.md)'s setup, a first commit, and a GitHub repo (public or private, asked each time). The project's first effort then starts like any other.
 
-It writes the idea into a handoff in the worktree and starts the thinking session on it with a one-line prompt: in a `Thinking` tab of `<session-host>`, else in its own session or a pasted prompt.
+It writes the idea into a handoff in the worktree and starts the thinking session on it with a one-line prompt: in a `Thinking` tab of the session host, else in its own session or a pasted prompt.
 
 ## Thinking
 
@@ -51,7 +51,7 @@ The starting prompt names these skills and the agent loads each one itself: the 
 
 ## Handover
 
-The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in `<session-host>` without leaving its own checkout. It checks the session is ready: the worktree exists, a **handoff** is written in the repository by the **handoff** skill (`.handoff/<date>-<topic>.md`, per the [folder standard](folders.md)), everything is committed and pushed, and the tracker items exist. It then writes a short **starting prompt** that starts the new session on the handoff, starts that session in `<session-host>` (else here, or through a pasted prompt), and confirms it started. The handing session then stops, and stays open for reference.
+The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It checks the session is ready: the worktree exists, a **handoff** is written in the repository by the **handoff** skill (`.handoff/<date>-<topic>.md`, per the [folder standard](folders.md)), everything is committed and pushed, and the tracker items exist. It then writes a short **starting prompt** that starts the new session on the handoff, starts that session in the session host (else here, or through a pasted prompt), and confirms it started. The handing session then stops, and stays open for reference.
 
 ## Build
 
@@ -59,7 +59,7 @@ The orchestrator reads the handoff, shows the plan with `/show-me`, delegates th
 
 ## Close
 
-The user reviews the pull request and says "go": that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. It reads the pull request's *Things to be aware of* first, runs the post-merge follow-ups, carries unfinished work into the next effort's tickets, leaves QA tickets open for the user, closes the tracker, removes only branches and worktrees proven merged, and closes the effort's workspaces in `<session-host>`. It returns its own worktree last, from a shell the host opens outside it; with it unset, that one step is the user's.
+The user reviews the pull request and says "go": that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. It reads the pull request's *Things to be aware of* first, runs the post-merge follow-ups, carries unfinished work into the next effort's tickets, leaves QA tickets open for the user, closes the tracker, removes only branches and worktrees proven merged, and closes the effort's workspaces in the session host. It returns its own worktree last, from a shell the host opens outside it; with no session host, that one step is the user's.
 
 ## Why two sessions
 

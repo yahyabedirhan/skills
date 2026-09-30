@@ -30,11 +30,11 @@ Flag every place a change fails the test, and move the failing part to its layer
 
 A skill that needs a value from the environment (a tool, a command, a repo) declares it as a **parameter**:
 
-- **One `## Parameters` section, in `SKILL.md`**, never in a reference, and only in a skill that needs such a value. Its lead sentence says the values come from the Defaults table in the environment's instructions, where a project's table overrides the global one for that project.
-- **Each parameter is a `<kebab-case>` placeholder named after its Defaults role** (`<session-host>`, `<worktree-tool>`, `<notification-method>`, `<agent-to-start>`, `<skills-repo>`, `<path-to-skills-repo>`; **set-up-machine**'s `global-instructions.md` lists the roles), with a one-line meaning and its fallback when unset: the skill's own neutral way (this session, `git worktree add`, the harness's tool), or asking, only where a guess does harm.
-- **The body and the references use only the placeholder.** A tool's how to is reached through the resolved value: the **handover-to-`<session-host>`** skill, the **`<worktree-tool>`** skill. Other skills are named directly, in bold.
+- **One `## Parameters` section, in `SKILL.md`,** only in a skill that needs such a value: one line per parameter, a `<kebab-case>` placeholder named after its Defaults role (**set-up-machine**'s `global-instructions.md` lists them), what it is, and what happens when it's unset (the skill's neutral way, or asking where a guess does harm).
+- **A skill uses only placeholders its `## Parameters` declares;** anywhere else, plain words ("the session host").
+- **A tool's skill is named directly, in a line that routes to it:** "when `<session-host>` is Herdr, use the **handover-to-herdr** skill; otherwise …". A new tool gets its own line once its skill exists.
 
-A new role is a new row in that table, added through **set-up-machine**, before any skill uses it.
+A new role is a new row in the Defaults table, added through **set-up-machine**, before any skill uses it.
 
 ### Auditing the skills
 
@@ -46,7 +46,7 @@ python3 <this skill>/scripts/default_tools.py --skills <skills folder>
 
 It lists two kinds of line, and always exits 0: each is tolerated, not blocking.
 
-- **A default tool named outside its how-to skill.** The tools come from the tool rows of the Defaults table (`session-host`, `worktree-tool`, `notification-method`) in the shared global file; pass `--tool <name>` once per tool to check others, or when there's no table. A skill folder whose name contains the tool's name is its how-to skill and is skipped.
+- **A default tool named outside its how-to skill.** The tools come from the tool rows of the Defaults table (`session-host`, `worktree-tool`, `notification-method`) in the shared global file; pass `--tool <name>` once per tool to check others, or when there's no table. A skill folder whose name contains the tool's name is its how-to skill and is skipped, and so is a line that routes to that skill by name.
 - **"Defaults table" or "global instructions" outside a `## Parameters` section**, where a placeholder belongs. **set-up-machine**, **set-up-project** and this skill are exempt: those files are what they describe.
 
 Report every hit, each judged one of:

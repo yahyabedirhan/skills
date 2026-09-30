@@ -26,3 +26,9 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 - **A script lists the skill lines that name a default tool; it never blocks.** `scripts/default_tools.py` reads the tool roles (`session-host`, `worktree-tool`, `notification-method`) from the Defaults table, or takes `--tool`, and greps the Markdown and YAML an agent loads, skipping each tool's own how-to skill (a folder whose name contains the tool's name). Naming a default tool is tolerated by the team test, so it exits 0; the agent judges each hit a default to rewrite or a mention to keep. It lives with the team test in `where-things-go.md`, since that is the rule it checks.
 - **Agent to start and skills repo aren't scanned.** Harness names appear in skills for good reasons (the harness adapters, Codex's `$skill` syntax), so scanning the agent to start would report noise.
 - **The audit also flags "Defaults table" and "global instructions" outside `## Parameters`.** Those phrases in a skill's body mean it reads the table inline instead of through a placeholder. **set-up-machine** and **maintain-environment** are exempt, since the global file and the layers are what they describe.
+
+## 2026-09-30: simpler parameters (#83)
+
+- **A `## Parameters` line is one line:** the placeholder, what it is, and what happens when it's unset. No mechanism.
+- **The how-to skill naming convention is gone** (`handover-to-<session-host>`, a worktree tool's skill "named for the tool"). A skill routes to a tool's skill by name, and the default-tools audit treats a line that names the tool's skill as routing, not a default.
+- **A placeholder a skill doesn't declare is replaced with plain words.**

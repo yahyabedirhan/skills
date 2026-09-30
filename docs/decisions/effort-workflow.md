@@ -119,3 +119,8 @@ The decisions behind the effort skills (`init-effort`, `orchestrating`, `orchest
 
 - **Tabs are labelled `<harness> · <role> · <topic>`**, such as `CC · Orchestrator · environment`, and close-effort's shell `shell · Close · <effort>`. The maintainer asked for it while reviewing #66 ([#44](https://github.com/yahyabedirhan/skills/issues/44#issuecomment-5906231131)). This replaces the 2026-09-24 `<effort> · <role> · <harness>` order; the harness short names and the pane's agent name (`<topic>-<role>`) are unchanged.
 - **A settled tab gets `[settled] ` at the start of its label**, such as `[settled] CC · Thinking · environment`, instead of ` [settled]` at the end, also at the maintainer's request.
+
+## 2026-09-30: tools' skills named directly (#83)
+
+- **The effort skills name `handover-to-herdr` and `treehouse` directly,** in a line that routes to each ("when `<session-host>` is Herdr, use the **handover-to-herdr** skill; otherwise …"), instead of building a skill name from a placeholder (`handover-to-<session-host>`). There is one host and one worktree tool with a skill; a reader shouldn't resolve a variable to find a skill that can be named. A new tool gets its own line once its skill exists. With no session host or worktree tool set, the skills still work in the same session with `git worktree add`.
+- **`orchestrating/lifecycle.md` uses plain words** ("the session host") instead of placeholders it never declared.

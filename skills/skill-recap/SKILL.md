@@ -11,9 +11,9 @@ A **recap** looks back over one or more sessions and asks how the agent and its 
 
 ## Parameters
 
-Each comes from the Defaults table in the environment's instructions, where a project's table overrides the global one for that project. Unset means no row, or `none`.
+From the Defaults table (a project's row overrides the global one). Unset: no row, or `none`.
 
-- `<skills-repo>`: the user's own skills repo on GitHub, as `<owner>/<repo>`, where findings about their skills are filed. Unset: ask, since a guess would file them in the wrong repo.
+- `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`), where findings are filed. Unset: ask.
 
 ## 1. Select the sessions
 

@@ -56,6 +56,18 @@ class DefaultToolsTest(unittest.TestCase):
              ("init-effort", "init-effort/agents/openai.yaml", 1, "grove")],
         )
 
+    def test_a_line_routing_to_the_tools_skill_is_not_a_default(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            write(root, "handover-to-hive/SKILL.md", "hive tab create\n")
+            write(root, "grove/SKILL.md", "grove get\n")
+            write(root, "init-effort/SKILL.md",
+                  "- **Hive**: start it with the **handover-to-hive** skill.\n"
+                  "- **Grove**: through the **grove** skill.\n"
+                  "Then open a Hive tab.\n")
+            hits = default_tools.scan(root, ["hive", "grove"])
+        self.assertEqual([(h.path, h.line, h.tool) for h in hits], [("init-effort/SKILL.md", 3, "hive")])
+
     def test_matches_whole_words_only(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)

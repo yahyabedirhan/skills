@@ -9,7 +9,8 @@ Two lists, both tolerated, never blocking (always exits 0):
   tools are the --tool names, else the ones the Defaults table in the global
   file names for the tool roles (session-host, worktree-tool,
   notification-method). A skill folder whose name contains the tool's name is
-  its how-to skill and is skipped.
+  its how-to skill and is skipped, and so is a line that names that skill
+  (routing to it: "use the handover-to-herdr skill").
 - skill lines that mention "Defaults table" or "global instructions" outside a
   SKILL.md's `## Parameters` section, where a placeholder belongs instead. The
   skills that own the environment's instruction files are exempt.
@@ -63,13 +64,19 @@ def _files(skills: Path):
 
 
 def scan(skills: Path, tools: list) -> list:
+    """Lines naming a tool outside its how-to skill, unless the line names that skill: routing to it."""
+    folders = sorted(p.name for p in skills.iterdir() if p.is_dir())
+    how_to = {t: [f for f in folders if t in f.lower()] for t in tools}
     hits = []
     for skill, rel, lines in _files(skills):
         named = [t for t in tools if t not in skill.lower()]
         for n, text in enumerate(lines, 1):
             for tool in named:
-                if re.search(rf"\b{re.escape(tool)}\b", text, re.IGNORECASE):
-                    hits.append(Hit(skill, rel.as_posix(), n, tool, text.strip()))
+                if not re.search(rf"\b{re.escape(tool)}\b", text, re.IGNORECASE):
+                    continue
+                if any(re.search(rf"\b{re.escape(f)}\b", text) for f in how_to[tool]):
+                    continue
+                hits.append(Hit(skill, rel.as_posix(), n, tool, text.strip()))
     return hits
 
 
