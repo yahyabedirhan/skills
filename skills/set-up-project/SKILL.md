@@ -11,7 +11,7 @@ Scaffold and audit the per-repo configuration the skills assume:
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
-- **Folder standard**: the `.gitignore` lines of [orchestrating/folders.md](../orchestrating/folders.md)
+- **Folder standard**: the `.gitignore` lines of [orchestrating/folder-standard.md](../orchestrating/folder-standard.md)
 - **Allow-only project permissions**: the global rules are the machine's safety rails, and a project's own harness files only add convenience. The **audit** flags every project file that weakens a global rule.
 
 You explore, present what you found, confirm with the user, then write. Running it again is the **audit**.

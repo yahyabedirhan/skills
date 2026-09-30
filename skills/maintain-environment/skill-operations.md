@@ -49,7 +49,7 @@ Keep it local until the user asks to publish it. Then publish it through *Add a 
 
 **Change one of the user's own skills.** First read the repo's decision records for it, such as those in `docs/decisions/`. Then, on a branch (see *Shipping to the skills repo*), edit it in `<path-to-skills-repo>/skills/<name>/`, add a dated decision entry for each new decision, and ship it; after the merge, `npx skills update <name>` in every scope that installs it.
 
-**Add a new skill to the user's repo.** Only when the user names the skill for publishing. On a branch (see Shipping to the skills repo), write it under `<path-to-skills-repo>/skills/<name>/SKILL.md` with `name` and `description` frontmatter, add its row to the repo README, and ship it; install it after the merge. Because the repo is public, keep the user's name, accounts, machine paths and projects out of the skill, and make anything user-specific a parameter, as `where-things-go.md` sets out.
+**Add a new skill to the user's repo.** Only when the user names the skill for publishing. On a branch (see Shipping to the skills repo), write it under `<path-to-skills-repo>/skills/<name>/SKILL.md` with `name` and `description` frontmatter, add its row to the repo README, and ship it; install it after the merge. Because the repo is public, keep the user's name, accounts, machine paths and projects out of the skill, and make anything user-specific a parameter, as `environment-layers.md` sets out.
 
 **Fork someone else's skill.** Copying a skill folder is not a GitHub fork: nothing links the copy to its origin, so write the credit by hand.
 

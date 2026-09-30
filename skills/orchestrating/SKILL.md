@@ -20,7 +20,7 @@ As the **orchestrator**, you get an effort built without building it yourself: r
 - **Keep moving.** While one ticket waits on the user, run another that isn't blocked.
 - **Leave nothing running.** When a delegate reports, check for anything it left running (dev servers, preview and browser tabs, background tasks) that its report doesn't name with a reason, and stop it. Sweep your own the same way before telling the user a run is finished.
 - **Move, never `rm -rf`, and commit alone.** Move what a delegate leaves behind into `.scratch/`. Run each commit and each push as its own call, never chained with cleanup: a permission check that refuses one part refuses the whole chain, and the refusal then looks like a refused commit.
-- **Notify only at the two moments [notify.md](notify.md) names,** in the form it sets.
+- **Notify only at the two moments [notifications.md](notifications.md) names,** in the form it sets.
 
 A delegate is a sub-agent unless the skill that started the orchestration says otherwise. When a delegate starts a sub-agent of its own, that sub-agent reports to the orchestrator instead of back to the delegate, so tell delegates to run their reviews synchronously in their own context.
 
@@ -54,4 +54,4 @@ Whatever you tell the user, in the chat, a notification or the pull request:
 
 ## Where orchestrating sits
 
-Read [lifecycle.md](lifecycle.md) before orchestrating: it follows an effort from an idea to a merged pull request, and shows where your part falls in it. [folders.md](folders.md) says where each record of the effort goes.
+Read [lifecycle.md](lifecycle.md) before orchestrating: it follows an effort from an idea to a merged pull request, and shows where your part falls in it. [folder-standard.md](folder-standard.md) says where each record of the effort goes.

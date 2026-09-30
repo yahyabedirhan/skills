@@ -33,7 +33,7 @@ Remove a worktree only when it is also clean once step 6 is done and no agent is
 ## Parameters
 
 - `<worktree-tool>`: the tool that makes and frees worktrees. When it is Treehouse, use `/treehouse`, and return each worktree to the pool rather than destroying it, so the next effort finds a worktree ready; destroy only one the pool shouldn't keep. Default: `git worktree add` and `git worktree remove`.
-- `<session-host>`: where the effort's agent sessions run. When it is Herdr, use `/handover-to-herdr`'s `closing-an-effort.md` to find the agents still working and to free this session's worktree from a shell in the main checkout. That shell's output reports whether the worktree was freed, so name in your report where the shell runs. Default: end the report with the command that frees this session's own worktree, for the maintainer to run once this session is closed.
+- `<session-host>`: where the effort's agent sessions run. When it is Herdr, use `/handover-to-herdr`'s `close-effort-commands.md` to find the agents still working and to free this session's worktree from a shell in the main checkout. That shell's output reports whether the worktree was freed, so name in your report where the shell runs. Default: end the report with the command that frees this session's own worktree, for the maintainer to run once this session is closed.
 
 ## 1. Find the effort
 
@@ -93,7 +93,7 @@ Done when the effort's only open tickets are QA tickets waiting on the maintaine
 
 ## 6. Save what only a worktree or this session holds
 
-Removing a worktree deletes its ignored and untracked files without asking. For each worktree you are about to remove, list those files and copy out what's worth keeping, where `/orchestrating`'s `folders.md` puts it. Editor settings like `.vscode/` count too; copy them to the main checkout.
+Removing a worktree deletes its ignored and untracked files without asking. For each worktree you are about to remove, list those files and copy out what's worth keeping, where `/orchestrating`'s `folder-standard.md` puts it. Editor settings like `.vscode/` count too; copy them to the main checkout.
 
 Then turn to this session itself: its uncommitted or unpushed work, and what it knows that isn't written down, like a decision, a half-done follow-up or an open question for the maintainer. Commit and push the work, and put each open item in a ticket, or in a handoff through `/handoff`. Anything that lands in tracked folders goes on the follow-up branch, committed and pushed.
 

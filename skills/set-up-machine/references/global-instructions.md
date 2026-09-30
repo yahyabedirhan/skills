@@ -1,6 +1,6 @@
 # The shared global instructions file
 
-`~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. Put in it only this person's workflow and the explanation of each global rule. Anything a teammate would need goes in the project's `AGENTS.md` or a skill, because a teammate never reads this file. `/maintain-environment`'s `where-things-go.md` lists those places and the team test.
+`~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. Put in it only this person's workflow and the explanation of each global rule. Anything a teammate would need goes in the project's `AGENTS.md` or a skill, because a teammate never reads this file. `/maintain-environment`'s `environment-layers.md` lists those places and the team test.
 
 ## Its shape
 

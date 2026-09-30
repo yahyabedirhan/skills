@@ -1,6 +1,6 @@
 # Carrying a change
 
-A change is done when it has reached everywhere it applies: every harness on every machine, every install of a skill, every project it touches. Make it at its source, the place [where-things-go.md](where-things-go.md) chooses, then carry it from there as the table below says.
+A change is done when it has reached everywhere it applies: every harness on every machine, every install of a skill, every project it touches. Make it at its source, the place [environment-layers.md](environment-layers.md) chooses, then carry it from there as the table below says.
 
 | Change | Source | How it reaches everywhere |
 |---|---|---|
