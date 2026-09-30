@@ -181,3 +181,9 @@ The decisions behind the effort skills (`init-effort`, `orchestrating`, `orchest
   - close-effort's description says it runs once the pull request is good to merge or merged.
   - handover-to-herdr names `<worktree-tool>`.
   - The first commit of a new project is `init: start <name>`.
+
+## 2026-09-30: `treehouse` v3.1.0
+
+- **Retested on a throwaway pool after updating from v2.3.0 (#89).** `get --lease -b <branch>` now creates the effort's branch, with no upstream, so `/treehouse` drops the separate `git switch --no-track -c`. `return` with untracked files and no terminal still keeps the lease, but now exits 3 instead of 0. `--force` still deletes untracked files and keeps ignored ones. `destroy` on a named worktree it skips exits 1 and names the flag; `--include-in-use` ends the process and removes the worktree.
+- **Seen on v2.3.0 in the live run:** `return` on a worktree with a VS Code window open ended the editor's helpers, which came back, and failed with "worktree still has live processes after termination" while exiting 0. `/treehouse` now says to close the editor first.
+
