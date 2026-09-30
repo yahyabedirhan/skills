@@ -30,7 +30,7 @@ A new file gets all five, every role `none` and the workflow section empty. On a
 
 ## The Defaults roles
 
-A skill names a role as a placeholder of the same name (`<session-host>`) in its `## Parameters` section, with what it does when the role is unset; the row here says which tool this person uses. A session host's how-to skill is named `handover-to-<session-host>`; a worktree tool's is named for the tool.
+A skill declares a role it uses as a placeholder of the same name (`<session-host>`) in its `## Parameters`; the row here says which tool this person uses.
 
 | Role | Names | With `none` |
 |---|---|---|
@@ -41,7 +41,7 @@ A skill names a role as a placeholder of the same name (`<session-host>`) in its
 | `skills-repo` | this person's own skills repo, as `<owner>/<repo>` | the skill asks |
 | `path-to-skills-repo` | where that repo is cloned | the skill asks |
 
-A value is a tool name or the exact command, with a short why when the choice isn't obvious. A project's `AGENTS.md` may hold its own Defaults table, whose rows override these for that project.
+A value is a tool name or the exact command. A project's `AGENTS.md` may hold its own Defaults table, whose rows override these.
 
 ## Personal workflow
 

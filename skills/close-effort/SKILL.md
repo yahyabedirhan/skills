@@ -20,19 +20,19 @@ Two rules hold for every destructive step (deleting a branch, removing a worktre
 
 ## Parameters
 
-Each comes from the Defaults table in the environment's instructions, where a project's table overrides the global one for that project. Unset means no row, or `none`.
+From the Defaults table (a project's row overrides the global one). Unset: no row, or `none`.
 
-- `<worktree-tool>`: how worktrees are made and returned, used through its how-to skill (named for the tool). Unset, or that skill not installed: git (`git worktree list`, `git worktree remove`).
-- `<session-host>`: where the effort's agent sessions run, used through its how-to skill `handover-to-<session-host>`. Unset, that skill not installed, or the host out of reach: the host steps below are skipped or fall to the maintainer, as each says.
+- `<worktree-tool>`: how worktrees are made and returned. Unset: git (`git worktree list`, `git worktree remove`).
+- `<session-host>`: where the effort's agent sessions run. Unset: the host steps below are skipped or fall to the maintainer, as each says.
 
 ## 1. Find the effort
 
 From the argument, or the current branch: the pull request (`gh pr view [<n>] --json number,url,state,headRefName,baseRefName,mergeCommit,body`), its branch, and the effort's name (its label `effort:<effort>`, or the handoff). Then gather what the effort left behind:
 
 - its spec, its tickets (`gh issue list --label effort:<effort> --state all`, or `.efforts/<effort>/` on a local tracker) and its handoff in `.handoff/`;
-- its worktrees, from `<worktree-tool>` and `git worktree list`, including sub-agent worktrees under `.claude/worktrees/`;
+- its worktrees, from `git worktree list` (and the **treehouse** skill when `<worktree-tool>` is Treehouse), including sub-agent worktrees under `.claude/worktrees/`;
 - its branches: the effort branch, sub-agent branches, and any prototype branch the spec or handoff names;
-- its workspaces and agents in `<session-host>`, and which workspace this session runs in.
+- its workspaces and agents in the session host, and which workspace this session runs in.
 
 Done when you hold that list, and know whether this session runs inside one of the effort's worktrees.
 
@@ -58,7 +58,7 @@ Before any follow-up or cleanup, read the pull request description's last sectio
 - **a todo for the maintainer**, for the report;
 - **nothing needed**.
 
-When the description has no such section (an older effort) and the delivering orchestrator still runs in `<session-host>`, ask it once, through the **handover-to-`<session-host>`** skill: `Reply with the four lines of Things to be aware of for this pull request: Decided alone, Surprises, Not in this PR, Follow-ups.` When no such session runs, the wait times out, or the reply lacks the four lines, take the items from the handoff and tickets yourself.
+When the description has no such section (an older effort) and the delivering orchestrator still runs in Herdr, ask it once, through the **handover-to-herdr** skill: `Reply with the four lines of Things to be aware of for this pull request: Decided alone, Surprises, Not in this PR, Follow-ups.` When no such session runs, the wait times out, or the reply lacks the four lines, take the items from the handoff and tickets yourself.
 
 Done when every item has a route and each skipped check has run.
 
@@ -86,7 +86,7 @@ Done when the effort's only open tickets are QA tickets waiting on the maintaine
 
 ## 6. Keep what's worth keeping
 
-Removing a worktree deletes files without asking: `git worktree remove` its ignored ones, and `<worktree-tool>`'s own return what its how-to skill says, often the untracked ones too. For each worktree you are about to remove, list them (`git -C <path> status --short --ignored`) and copy out anything worth keeping, per the folder standard (the **orchestrating** skill's `folders.md`): screenshots to `docs/assets/<topic>/`, notes to a handoff or the tracker, a useful script to the main checkout's `.scratch/`. Untracked editor settings (`.vscode/`) the maintainer may care about count too: copy them to the main checkout. What lands in tracked folders goes on the follow-up branch (step 4): commit it as its own call, and push.
+Removing a worktree deletes files without asking: `git worktree remove` its ignored ones, and Treehouse's return what the **treehouse** skill says, often the untracked ones too. For each worktree you are about to remove, list them (`git -C <path> status --short --ignored`) and copy out anything worth keeping, per the folder standard (the **orchestrating** skill's `folders.md`): screenshots to `docs/assets/<topic>/`, notes to a handoff or the tracker, a useful script to the main checkout's `.scratch/`. Untracked editor settings (`.vscode/`) the maintainer may care about count too: copy them to the main checkout. What lands in tracked folders goes on the follow-up branch (step 4): commit it as its own call, and push.
 
 Done when each worktree's untracked and ignored files are copied out or judged throwaway.
 
@@ -95,7 +95,7 @@ Done when each worktree's untracked and ignored files are copied out or judged t
 `git fetch --prune`, then for each sub-agent worktree, each other worktree of the effort except this session's, and each branch, prove it merged, then remove it:
 
 - sub-agent worktrees: `git worktree remove <path>`;
-- the effort's other worktrees, with `<worktree-tool>`'s return command, or `git worktree remove <path>`;
+- the effort's other worktrees, with the **treehouse** skill's return command when `<worktree-tool>` is Treehouse, else `git worktree remove <path>`;
 - local branches: `git branch -d <branch>`, or `git branch -D <branch>` when only the patch match or the merged pull request's head proves it (after a squash, or a cherry-pick);
 - remote branches: `git push origin --delete <branch>`.
 
@@ -105,7 +105,7 @@ Done when every proven-merged branch and worktree is gone or in the cleanup scri
 
 ## 8. Close the effort's workspaces
 
-With `<session-host>` set: through the **handover-to-`<session-host>`** skill, close each of the effort's workspaces this session doesn't run in. An agent still working in one keeps its workspace open; name it in the report. Unset, skip this step.
+When `<session-host>` is Herdr: through the **handover-to-herdr** skill, close each of the effort's workspaces this session doesn't run in. An agent still working in one keeps its workspace open; name it in the report. Otherwise, skip this step.
 
 Done when only this session's workspace is left, or a working agent's, named.
 
@@ -122,7 +122,7 @@ Report in the chat, short, with links:
 
 Last, when this session runs inside one of the effort's worktrees, return it from outside it: returning it stops every process there, this session included, so it runs after the report. Skip this when this session runs elsewhere; step 7 returned every worktree.
 
-The return command is `<worktree-tool>`'s, or `git worktree remove <path>`.
+The return command is the **treehouse** skill's when `<worktree-tool>` is Treehouse, else `git worktree remove <path>`.
 
-- **With `<session-host>` set:** through the **handover-to-`<session-host>`** skill, open a shell outside the worktree, in the repository's main checkout, labelled `shell · Close · <effort>`, and, as your last action, run one command there: `sleep 30; <return command>; <close this session's workspace>; git worktree list`. The pause lets the report finish first. The shell's output is its report, and the report above names where it runs.
-- **Unset**, this one step is the maintainer's: end the report with the return command, to run once this session is closed.
+- **`<session-host>` is Herdr:** through the **handover-to-herdr** skill, open a shell outside the worktree, in the repository's main checkout, labelled `shell · Close · <effort>`, and, as your last action, run one command there: `sleep 30; <return command>; <close this session's workspace>; git worktree list`. The pause lets the report finish first. The shell's output is its report, and the report above names where it runs.
+- **Otherwise**, this one step is the maintainer's: end the report with the return command, to run once this session is closed.
