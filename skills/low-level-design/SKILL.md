@@ -14,33 +14,78 @@ The recurring failure is structure added before it is needed: factories with one
 1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix. For any purpose but a new design, read `session-purposes.md`.
    - **Invoked with no instructions inside a project:** write down that project's current design.
    - **When the purpose isn't clear:** ask what the user wants to do with the design, whether the code exists, and whether they want only an explanation.
-2. **Requirements**: numbered, checkable requirements, and an out-of-scope list with a reason for each exclusion.
-3. **Entities and relationships**: the entities, the orchestrator that drives the main workflow, and how they relate, as arrows.
-4. **Class design**: each module's state and operations, derived from the requirements, and the folder tree.
-5. **Implementation**: the methods that carry the logic, and one traced scenario plus one traced rejection.
-6. **Extensibility**: a "change → what you touch" table, and the changes refused for now with their reasons.
-7. **Present, take feedback and revise** until the user agrees.
-8. **Keep the design where the user wants it.**
+2. **Work through the delivery framework** below, stage by stage, reading a principles, concepts or patterns reference when a decision calls for it.
+3. **Present, take feedback and revise** until the user agrees.
+4. **Keep the design where the user wants it.**
 
-Steps 2 to 6 are the framework's stages, and each rests on the one before it. Go back to an earlier stage when a later one exposes a gap. Avoid two opposite failures: writing code before the structure is clear, and polishing details so long that the design never comes together. Read `delivery-stages.md` for how to work each one, and a principles, concepts or patterns reference when a decision calls for it.
+## The delivery framework
 
-### Presenting and revising
+```text
+Requirements → Entities and relationships → Class design → Implementation → Extensibility
+```
+
+Each stage rests on the one before it: the entities come from the requirements, the classes give the entities state and behaviour, the implementation proves the classes work, and extensibility tests them against what comes next. Move to the next stage once the current one has everything its product lists. Go back to an earlier stage when a later one exposes a gap. Avoid two opposite failures: writing code before the structure is clear, and polishing details so long that the design never comes together.
+
+### Requirements
+
+Turn the request or spec into something to design against, working down four themes:
+
+- **Capabilities**: the operations the system must support.
+- **Rules and completion**: what defines success and failure, and when the system stops or changes state.
+- **Error handling**: how it responds to invalid input and illegal actions.
+- **Scope**: what is in (core logic, business rules), and what is explicitly out (UI, storage, concurrency, whatever the user excludes). The exclusions keep the design from growing features nobody asked for.
+
+Show them as a short numbered list. A mapping from requirement to module fits as a small table once the modules exist.
+
+### Entities and relationships
+
+Take the nouns from the requirements. A noun that holds changing state or enforces rules is an entity; one that is only information attached to another is a field on it. This keeps the design from splitting into many tiny objects.
+
+Then settle how they relate: which entity is the orchestrator, which own durable state, which has, uses or contains which, and where each rule lives.
+
+Show the entities as a short list and the relationships as arrows (`Game -> Board`). Boxes and arrows are enough; skip formal UML.
+
+### Class design
+
+Turn each entity into a class or module, top-down from the orchestrator, and derive its state and behaviour from the requirements rather than from intuition:
+
+- **State**: what it must remember to enforce the requirements it owns.
+- **Behaviour**: what callers must be able to ask or tell it, each operation with what it returns and rejects, in a small API where each method matches a real action or question.
+
+Keep each rule with the module that owns its state (**tell, don't ask**): lifecycle rules ("can this run now?") belong to the orchestrator, data rules ("is this cell taken?") to the module holding the data, so when something breaks you know which module to open. Place the modules in folders following [layout.md](references/layout.md).
+
+Show the folder tree with one comment per line saying what each file or folder owns.
+
+### Implementation
+
+Sketch the methods that carry the logic, not every method: the happy path first (the steps, the calls into other modules, the state changed), then the edge cases (invalid input, illegal operations, calls in the wrong state). Write pseudocode unless the project needs real code.
+
+Then verify: trace one concrete scenario step by step, with the state after each step, plus one rejection, and fix what the trace reveals, such as a state never set or a rule checked too late.
+
+Show a traced flow as a call tree, with the owning file beside each call.
+
+### Extensibility
+
+List the changes likely to come next, and for each one name the part of the design that absorbs it and what changes. A design that routes every state change through one place takes a feature like undo without restructuring. A change that lands in one new file plus a registration is already absorbed; one that repeats the same edit across several files needs a seam. Refuse the changes the current requirements don't need, rather than designing for them.
+
+Show the changes as a small "change → what you touch" table.
+
+## Presenting and revising
 
 Load `/show-me` and present every stage visually, with prose only for the reasons behind choices.
 
 - Keep one current version of the design and revise it rather than starting over.
-- Open each revision with what changed and why, as a before/after of the parts that moved, and carry a change through every part it affects.
+- Open each revision with what changed and why, as a before/after `diff` of the tree or list that changed, and carry a change through every part it affects.
 - Leave a point the user settled as it is unless they reopen it.
 - When the design has more than one reasonable option, number the options side by side, each with its cost, and lead with your recommendation.
 - Ask only what the code, the spec and the project's docs can't settle, one question at a time. Decide the rest and say what you decided.
 
-### Keeping the design
+## Keeping the design
 
 The user decides what is kept and where. While the design is being refined, keep it in a draft in the project's temp or scratch folder, following the repository's conventions; when it has none, ask where. An explanation can stay in the conversation. Once the user agrees and wants the design kept, write it into the project's documentation, and update an existing design document rather than adding a second, so the project has one. Open it with what a newcomer needs first, then give each stage its own section.
 
 ## References
 
-- [delivery-stages.md](references/delivery-stages.md): how to work each stage, and how to show what it produces.
 - [session-purposes.md](references/session-purposes.md): how explaining existing code, redesigning it and deciding one thing run.
 
 ### Principles, concepts and patterns

@@ -1,6 +1,6 @@
 # Close-effort commands
 
-The Herdr commands `/close-effort` uses when the effort's sessions run in Herdr: finding the agents still working, and freeing the closing session's own worktree.
+The `herdr` commands `/close-effort` uses when the effort's sessions run in `herdr`: finding the agents still working, and freeing the closing session's own worktree.
 
 ## Active agents
 

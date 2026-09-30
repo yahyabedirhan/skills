@@ -12,7 +12,7 @@ BUILD      orchestrate the tickets through delegates; open the pull request
 CLOSE      the user approves; the agent merges, follows up, and cleans up
 ```
 
-The session host, the program where new agent sessions open, decides which of two paths an effort takes. When the host is Herdr, take the host path: `/handover-to-herdr` automates every step between phases. Otherwise take the plain path, which runs anywhere: this session carries on, or the user pastes each starting prompt.
+The session host, the program where new agent sessions open, decides which of two paths an effort takes. When the host is `herdr`, take the host path: `/handover-to-herdr` automates every step between phases. Otherwise take the plain path, which runs anywhere: this session carries on, or the user pastes each starting prompt.
 
 ```text
                 START                          HANDOVER                        BUILD

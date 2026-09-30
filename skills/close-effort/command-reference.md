@@ -12,7 +12,7 @@ Merge with `gh pr merge` and the project's usual method, and leave out `--delete
 
 ## The follow-up branch
 
-Pull in the main checkout only when it is clean and already on the default branch; otherwise work from the remote default branch. Make the follow-up worktree with `git worktree add --no-track -b` from the remote default branch: `--no-track` leaves the branch without an upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
+Pull in the main checkout only when it is clean and already on the default branch; otherwise work from the remote default branch. Make the follow-up worktree with `<worktree-tool>`, from the remote default branch.
 
 ## The next effort's label
 

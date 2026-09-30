@@ -42,5 +42,4 @@ When the user asks what a skill costs to run, or how to make it cheaper, follow 
 
 ## Scripts
 
-- [scripts/default_tools.py](scripts/default_tools.py): the team-test audit: skill lines that name a default tool outside its own skill, or mention the global instructions.
 - [scripts/session-usage.py](scripts/session-usage.py): token and time use of a session transcript, split at given moments, for the efficiency analysis.
