@@ -1,12 +1,12 @@
-# Closing an effort in Herdr
+# Close-effort commands
 
-Use these Herdr commands when closing an effort: to find the agents still working, and to free this session's own worktree.
+The Herdr commands `/close-effort` uses when the effort's sessions run in Herdr: finding the agents still working, and freeing the closing session's own worktree.
 
-## Find the agents still working
+## Active agents
 
 Run `herdr agent list` for each agent's state and pane, and `herdr workspace list` for the worktree behind each workspace; read the two together to see which worktree each agent works in. Leave this session out: its workspace is `$HERDR_WORKSPACE_ID`, or, from outside a pane, the workspace whose `checkout_path` is this session's worktree.
 
-## Free this session's worktree from outside it
+## Worktree release from outside the session
 
 Open a tab in the repository's own workspace, the one whose `repo_root` is the repository and whose `is_linked_worktree` is false. Label it, and run the command in its root pane:
 

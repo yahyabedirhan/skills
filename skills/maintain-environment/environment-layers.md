@@ -1,4 +1,4 @@
-# Where things go
+# Environment layers
 
 Write each instruction, rule or piece of know-how in one place only, so changing it later is a one-place edit. Two questions choose the place. Who needs it: only this user, anyone working on one project, or any agent doing a task? And must it be enforced, or is it guidance? The table runs from enforced to guidance; go down it and use the first row that fits. Elsewhere, point at it only where a reader wouldn't otherwise find it.
 
@@ -14,7 +14,7 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 
 **Public by default.** The skills repo and most projects are public, so write personal detail only in the global instructions: names, accounts, paths on the user's machine, other projects. In a skill or a public `AGENTS.md`, generalise it or turn it into a parameter.
 
-## The team test
+## Team test
 
 Before settling a change, picture a teammate or contributor with a different setup: another harness, tmux instead of the user's session host, and no global instructions at all. After the change they must still be able to work on any of the user's projects using only that project's instructions and the skills.
 
@@ -26,7 +26,7 @@ A change passes when:
 
 Flag every place a change fails the test, and move the failing part to the row of the table that fits it.
 
-### How a skill names an environment value
+### Skill parameters
 
 A skill that needs a value from the environment (a tool, a command, a repo) declares it as a **parameter**:
 
@@ -39,7 +39,7 @@ A skill that needs a value from the environment (a tool, a command, a repo) decl
 
 Before any skill uses a new role, add it as a row in the Defaults table through `/set-up-machine`.
 
-### Auditing the skills
+### Team-test audit
 
 After a skill change, and whenever the user asks whether the skills pass the team test, run:
 
