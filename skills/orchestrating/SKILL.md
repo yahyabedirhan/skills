@@ -44,12 +44,12 @@ and why, why you can't get or decide it yourself.>
 Reply "A" to go with my pick, or name another.
 ```
 
-Where a picture makes the options easier to weigh, such as the ticket tree or the result as a diff, draw it with **show-me**. Record the answer where later delegates and a successor orchestrator read it: the ticket, or the handoff.
+Where a picture makes the options easier to weigh, such as the ticket tree or the result as a diff, draw it with `/show-me`. Record the answer where later delegates and a successor orchestrator read it: the ticket, or the handoff.
 
 Whatever you tell the user, in the chat, a notification or the pull request:
 
 - **A decision comes with its facts, its options and your pick,** so the user can weigh it without opening a file.
-- **A visual report follows the show-me skill,** with real data.
+- **A visual report follows `/show-me`,** with real data.
 - **Name an issue or pull request by its title,** never by its number alone: `#12 Add login`, not `#12`.
 
 ## Where orchestrating sits

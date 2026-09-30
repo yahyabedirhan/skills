@@ -1,6 +1,6 @@
 # Commands for closing an effort
 
-The pitfalls behind the git and gh commands that **close-effort** runs to merge an effort's pull request and free its branches and worktrees. Run each commit, push and deletion as its own call, so a refused one stops only itself.
+The pitfalls behind the git and gh commands that `/close-effort` runs to merge an effort's pull request and free its branches and worktrees. Run each commit, push and deletion as its own call, so a refused one stops only itself.
 
 ## Find the pull request
 

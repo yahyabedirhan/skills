@@ -32,4 +32,4 @@ Told apart by their keys:
 
 ## Changing it
 
-Edit a row, or add one with its samples, then run `python3 <skill>/scripts/verify.py --no-codex` until `rules ok`, and the unit tests (`python3 -m unittest discover -s <skill>/scripts/tests`). The change reaches a machine when set-up-machine runs there again. A row the hook can't read the way the row means is a hook change first, test-first in `tests/test_hook.py`.
+Edit a row, or add one with its samples, then run `python3 <skill>/scripts/verify.py --no-codex` until `rules ok`, and the unit tests (`python3 -m unittest discover -s <skill>/scripts/tests`). The change reaches a machine when `/set-up-machine` runs there again. A row the hook can't read the way the row means is a hook change first, test-first in `tests/test_hook.py`.

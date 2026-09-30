@@ -32,8 +32,8 @@ A worktree also needs to be clean after step 6, with no agent still working in i
 
 ## Parameters
 
-- `<worktree-tool>`: the tool that makes and frees worktrees. When it is Treehouse, use the **treehouse** skill, and return each worktree to the pool rather than destroying it, so the pool stays warm for the next effort; destroy only one the pool shouldn't keep. Default: `git worktree add` and `git worktree remove`.
-- `<session-host>`: where the effort's agent sessions run. When it is Herdr, use the **handover-to-herdr** skill's `closing-an-effort.md` to find the agents still working and to free this session's worktree from a shell in the main checkout; that shell's output is its report, and your report names where it runs. Default: freeing this session's own worktree is the one command the close hands the maintainer. End the report with it, to run once this session is closed.
+- `<worktree-tool>`: the tool that makes and frees worktrees. When it is Treehouse, use `/treehouse`, and return each worktree to the pool rather than destroying it, so the pool stays warm for the next effort; destroy only one the pool shouldn't keep. Default: `git worktree add` and `git worktree remove`.
+- `<session-host>`: where the effort's agent sessions run. When it is Herdr, use `/handover-to-herdr`'s `closing-an-effort.md` to find the agents still working and to free this session's worktree from a shell in the main checkout; that shell's output is its report, and your report names where it runs. Default: freeing this session's own worktree is the one command the close hands the maintainer. End the report with it, to run once this session is closed.
 
 ## 1. Find the effort
 
@@ -73,13 +73,13 @@ Done when every item has a route and each skipped check has run.
 
 Work from the updated default branch, and leave the maintainer's main checkout on whatever branch it is on. Pull there only when it is clean and already on the default branch.
 
-Everything reaches the default branch through a pull request. The close's own changes to tracked files, such as a local tracker's done marks or files kept in step 6, follow the project's instructions. By default they go on one small **follow-up branch** from the default branch, in its own worktree, with a pull request opened through the **to-pr** skill for the maintainer to review. Changes too small to be worth a pull request are listed in the report instead. The follow-up branch belongs to the close, not the effort. Once it is pushed and its pull request is open, free its worktree to save disk space, and delete its local branch when the remote holds it.
+Everything reaches the default branch through a pull request. The close's own changes to tracked files, such as a local tracker's done marks or files kept in step 6, follow the project's instructions. By default they go on one small **follow-up branch** from the default branch, in its own worktree, with a pull request opened through `/to-pr` for the maintainer to review. Changes too small to be worth a pull request are listed in the report instead. The follow-up branch belongs to the close, not the effort. Once it is pushed and its pull request is open, free its worktree to save disk space, and delete its local branch when the remote holds it.
 
 Then:
 
 1. **Run the post-merge follow-ups** that the handoff, the spec or *Things to be aware of* name: installing or updating what changed, removing a setting the change replaced, trying what can only be tried once merged, or publishing a draft release and checking that its tag is on the merge commit and its assets are attached. Report each result.
 2. **Audit what's unfinished**: the effort's open tickets, the items step 3 routed to a ticket, review findings deferred at delivery, a red run or broken pin from step 2, and stale docs or assets.
-3. **Carry each unfinished item over** as a ticket in the **next effort**, labelled with the next effort's `effort:` label and linked back to where it came from. The next effort is the project's open spec or grilling ticket for its next round of work. When that isn't obvious, ask the maintainer which one, in the **orchestrating** skill's question shape.
+3. **Carry each unfinished item over** as a ticket in the **next effort**, labelled with the next effort's `effort:` label and linked back to where it came from. The next effort is the project's open spec or grilling ticket for its next round of work. When that isn't obvious, ask the maintainer which one, in `/orchestrating`'s question shape.
 
 **QA tickets** are the exception. With the default, non-blocking QA, the pull request said "Refs" rather than "Closes", so the merge left them open. They stay open and assigned to the maintainer, who closes them or gives feedback. Comment on each that the work is now on the default branch and how to reach the build, and list them in the report.
 
@@ -93,9 +93,9 @@ Done when the effort's only open tickets are QA tickets waiting on the maintaine
 
 ## 6. Leave nothing only here
 
-Removing a worktree deletes its ignored and untracked files without asking. For each worktree you are about to remove, list those files and copy out what's worth keeping, where the **orchestrating** skill's `folders.md` puts it. Editor settings like `.vscode/` count too; copy them to the main checkout.
+Removing a worktree deletes its ignored and untracked files without asking. For each worktree you are about to remove, list those files and copy out what's worth keeping, where `/orchestrating`'s `folders.md` puts it. Editor settings like `.vscode/` count too; copy them to the main checkout.
 
-Then turn to this session itself: its uncommitted or unpushed work, and what it knows that isn't written down, like a decision, a half-done follow-up or an open question for the maintainer. Commit and push the work, and put each open item in a ticket, or in a handoff through the **handoff** skill. Anything that lands in tracked folders goes on the follow-up branch, committed and pushed.
+Then turn to this session itself: its uncommitted or unpushed work, and what it knows that isn't written down, like a decision, a half-done follow-up or an open question for the maintainer. Commit and push the work, and put each open item in a ticket, or in a handoff through `/handoff`. Anything that lands in tracked folders goes on the follow-up branch, committed and pushed.
 
 Done when each worktree's untracked and ignored files are copied out or judged throwaway, and another session could continue from the repository and the tracker alone.
 

@@ -7,7 +7,7 @@ description: Design, explain or redesign a system at the level of services, data
 
 This skill is the **delivery framework**: the standard order for producing and presenting a system design. Every session follows it, whether the design is new, explained, or redesigned, so the user always finds the same things in the same places. The user decides what the session is for; the framework decides how the answer is laid out. The references hold the concepts each stage draws on.
 
-Inside one service's codebase (modules, classes, folders), the design is a low-level design: use the **low-level-design** skill.
+Inside one service's codebase (modules, classes, folders), the design is a low-level design: use `/low-level-design`.
 
 ## What the session is for
 
@@ -121,7 +121,7 @@ Ask only what the code, the existing design documents and the user's earlier ans
 
 ## Showing it
 
-Load the **show-me** skill and present every stage visually, with prose only for the reasons behind choices:
+Load `/show-me` and present every stage visually, with prose only for the reasons behind choices:
 
 - requirements, entities and endpoints as short lists or tables;
 - the high-level design as a component flow (`client -> LB -> API -> Postgres`);

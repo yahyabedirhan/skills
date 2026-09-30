@@ -12,8 +12,8 @@ A **handoff** is the document the new session starts from.
 
 ## Parameters
 
-- `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use the **treehouse** skill. Default: `git worktree add`, with no upstream on the new branch until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
-- `<session-host>`: where the new session opens. When it is Herdr, use the **handover-to-herdr** skill; when that skill can't reach Herdr, use the default. Default: offer the maintainer two ways and take the one they pick: move this session into the worktree and run the starting prompt here, or print the prompt in a fenced block to paste into a new `<agent-to-start>` session started in the worktree.
+- `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use `/treehouse`. Default: `git worktree add`, with no upstream on the new branch until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
+- `<session-host>`: where the new session opens. When it is Herdr, use `/handover-to-herdr`; when that skill can't reach Herdr, use the default. Default: offer the maintainer two ways and take the one they pick: move this session into the worktree and run the starting prompt here, or print the prompt in a fenced block to paste into a new `<agent-to-start>` session started in the worktree.
 - `<agent-to-start>`: the command that starts a new agent session. Default: this session's harness.
 
 ## 1. Get ready
@@ -22,7 +22,7 @@ Check each item, and fix what isn't true yet:
 
 - **The worktree exists.** The work gets its own worktree and branch at the latest now, made with `<worktree-tool>`. Branch from the remote default branch, or from the local default branch when the work builds on commits there that aren't pushed. Uncommitted changes on the default branch that belong to the work move into it, and only those; the rest stay where they are.
 - **Every input only the maintainer has is collected** while they are here, and goes in the handoff: answers, accounts, choices. Secrets stay out of chat and files; the handoff says where they live.
-- **The handoff is written** with the **handoff** skill. Beyond what that skill asks, it names the worktree and branch, the spec and tickets, and whether the new session can reach this one. This session is unreachable when it can't receive messages, as with a desktop-app session or any session `<session-host>` can't prompt, and then the handoff tells the new session to decide open questions itself and list them in the pull request.
+- **The handoff is written** with `/handoff`. Beyond what that skill asks, it names the worktree and branch, the spec and tickets, and whether the new session can reach this one. This session is unreachable when it can't receive messages, as with a desktop-app session or any session `<session-host>` can't prompt, and then the handoff tells the new session to decide open questions itself and list them in the pull request.
 - **Everything is committed and pushed**: the worktree is clean and its branch matches its remote. Run each commit and each push as its own call, because a deny rule that matches anything else in a chain blocks the whole chain. After an interrupted or rejected call, check the log before retrying, because the commit or push may have landed anyway.
 - **Tracker items exist** for the spec and tickets the handoff names: issues on a hosted tracker, or files in the effort's folder on a local one.
 - **QA is settled** for an effort in a project whose instructions opt in to QA by the maintainer. The spec says either "QA: blocking" or that QA is non-blocking, the default. When it doesn't, ask the maintainer while they are here, and write the answer into the spec.
