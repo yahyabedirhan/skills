@@ -7,7 +7,7 @@ When and what to notify, for every skill that notifies. The user steps away duri
 Exactly two moments:
 
 - **Done:** the pull request is delivered: every ticket committed and pushed, the final review fixed, the description written.
-- **Blocked:** nothing can continue without the user, and you are about to ask your one question (the **orchestrating** skill's *Talking to the user*).
+- **Blocked:** nothing can continue without the user, and you are about to ask your one question.
 
 Routine progress stays in the chat: a ticket landing, a delegate reporting, a wave starting.
 
@@ -24,4 +24,4 @@ Name tickets and pull requests by title, not by a number alone.
 
 ## How
 
-Send it with `<notification-method>`, which the **orchestrating** skill's Parameters section defines.
+Send it with `<notification-method>`.

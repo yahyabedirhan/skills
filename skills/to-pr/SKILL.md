@@ -42,7 +42,7 @@ Create or update the pull request for the current task with a concise descriptio
    - optionaL: if you are aware of a ticket id/url, or related plan/document urls, or other relevant links, include them in the header, otherwise omit the header
 
 5. Save and publish the description:
-   - Save it to `.scratch/pr-{number}/description.md`, following the project's folder standard (the **orchestrating** skill's `folders.md`): `.scratch/` is gitignored, and GitHub holds the published description, so saving or rewriting it leaves nothing to commit.
+   - Save it to `.scratch/pr-{number}/description.md`: `.scratch/` is gitignored, and GitHub holds the published description, so saving or rewriting it leaves nothing to commit.
    - Update the PR with `gh pr edit {number} --body-file {output-path}`.
    - Confirm the update succeeded.
 

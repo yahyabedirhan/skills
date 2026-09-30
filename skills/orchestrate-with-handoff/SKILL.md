@@ -7,8 +7,6 @@ disable-model-invocation: true
 
 # Orchestrate With Handoff
 
-Another session handed this effort over with a **handoff**: a document that names the effort's spec and tickets, the worktree and branch, and what the builder should know that they don't. Start from it.
-
 Receiving the handover is the maintainer's go-ahead: start work without asking for one, and ask the maintainer only for inputs only they have.
 
 1. Read the handoff in full. Confirm you are in the worktree and on the branch it names; if not, say so and stop, because the effort's work lives there.
