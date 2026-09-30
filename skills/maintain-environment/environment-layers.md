@@ -12,13 +12,13 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 
 ## Team test
 
-Before settling a change, picture a teammate or contributor with a different setup: another harness, tmux instead of the user's session host, and no global instructions at all. After the change they must still be able to work on any of the user's projects using only that project's instructions and the skills.
+Before settling a change, picture a teammate or contributor with a different setup: another harness, tmux instead of the user's session host, and a machine set up with `/set-up-machine` but none of the user's personal workflow. After the change they must still be able to work on any of the user's projects using only that project's instructions, the skills and the roles `/set-up-machine` writes.
 
 A change passes when:
 
 - nothing a teammate needs sits in the global instructions;
 - the global instructions hold only personal workflow and explanations of global rules;
-- no skill depends on the user's default tool. A skill may name a default tool, but write the default itself in the global instructions, and how to use a tool in that tool's own skill.
+- no skill depends on the user's default tool. The user's choice of tool sits in the global Defaults, and how to use a tool sits in that tool's own skill.
 
 Flag every place a change fails the test, and move the failing part to the row of the table that fits it.
 
@@ -26,14 +26,13 @@ Flag every place a change fails the test, and move the failing part to the row o
 
 A skill that needs a value from the environment (a tool, a command, a repo) declares it as a **parameter**:
 
-- **One `## Parameters` section, in `SKILL.md`,** added only to a skill that needs such a value. Give each parameter one entry: a `<kebab-case>` placeholder named after its role in the Defaults table, whose roles `/set-up-machine`'s `global-instructions.md` lists; what the value is; the skill each known value uses; and its **Default**, written as "Default: …". The Default is what the skill does when the value isn't set: its neutral way, or asking the user where a guess would do harm.
-- **The section holds only the entries.** The Defaults table itself says how its rows resolve, so the section doesn't repeat it.
-- **The body uses the placeholder as a noun** ("make the worktree with `<worktree-tool>`"), and never repeats what a value routes to or its Default: that lives only in `## Parameters`.
-- **A skill uses only placeholders its `## Parameters` declares;** anywhere else, plain words ("the session host").
-- **A tool's skill is named directly, in a line that routes to it:** "when `<session-host>` is Herdr, use `/handover-to-herdr`; otherwise …". A new tool gets its own line once its skill exists.
+- **One `## Parameters` section, in `SKILL.md`,** added only to a skill that needs such a value, with one short line per parameter: the `<kebab-case>` placeholder named after its role, what it is, and a few examples after "e.g.". For instance: "`<session-host>`: where agent sessions run, e.g. Herdr, Claude Code Desktop, Codex Desktop."
+- **What to do when a role has no tool is written once,** in the roles table of `/set-up-machine`'s `global-instructions.md`, which that skill copies into the global Defaults on every machine. A skill never repeats it.
+- **A tool's own skill says when to use it,** in its description ("Use when the project's worktree tool is Treehouse"), along with anything specific to that tool. No other skill routes to it.
+- **The body uses the placeholder as a noun** ("make the worktree with `<worktree-tool>`"). Anywhere else, plain words ("the session host").
 - **Another skill is named by its slash command,** such as `/to-tickets`, not in bold. A starting prompt is the exception: it names skills in words, so it works in every harness.
 
-Before any skill uses a new role, add it as a row in the Defaults table through `/set-up-machine`.
+Before any skill uses a new role, add it to `/set-up-machine`'s roles table, with what it is and what to do when it has no tool.
 
 ### Team-test audit
 

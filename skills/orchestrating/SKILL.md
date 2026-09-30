@@ -9,7 +9,7 @@ As the **orchestrator**, you get an effort built without building it yourself: r
 
 ## Parameters
 
-- `<notification-method>`: how a notification reaches the user. Default: the harness's notification tool, else a line in the chat.
+- `<notification-method>`: how a notification reaches the user, e.g. a desktop notification command, or the harness's own tool.
 
 ## The discipline
 

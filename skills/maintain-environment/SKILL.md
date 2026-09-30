@@ -9,8 +9,8 @@ The environment is what agents run with: permissions, global instructions, proje
 
 ## Parameters
 
-- `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`). Default: ask the user.
-- `<path-to-skills-repo>`: its local clone. Default: ask the user.
+- `<skills-repo>`: the user's own skills repo on GitHub, as `owner/repo`.
+- `<path-to-skills-repo>`: where that repo is cloned.
 
 ## Steps
 

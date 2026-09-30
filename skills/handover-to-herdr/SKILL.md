@@ -12,11 +12,11 @@ Run this skill from inside a Herdr pane or from outside one, such as a desktop-a
 
 ## Parameters
 
-- `<agent-to-start>`: the command that starts the new agent. Default: this session's harness.
+- `<agent-to-start>`: the command that starts a new agent session, e.g. `claude` or `codex`, with its flags.
 
 ## Steps
 
-1. Check that `herdr status` reaches a server. If it doesn't, say so and hand back to the calling skill.
+1. Check that `herdr status` reaches a server. If it doesn't, say so and hand back to the calling skill, which then works as if there were no session host.
 2. Open a tab in the workspace whose checkout is the worktree, or open the worktree as a new workspace from the repository's own workspace.
 3. Label the tab `<harness> · <role> · <topic>`, so the maintainer can tell what runs in it.
 4. Start `<agent-to-start>` in the tab's root pane as an agent named `<topic>-<role>` in lowercase. When a startup screen blocks it, such as the harness asking whether to trust the folder, show the screen to the maintainer and let them decide.

@@ -5,7 +5,7 @@ description: Lease, list, return and destroy git worktrees with Treehouse's pre-
 
 # Treehouse
 
-`treehouse` keeps a pool of pre-warmed git worktrees, with dependencies already installed, so a new worktree is ready in seconds. Create, return and remove the worktree with `treehouse`; create and switch the branch inside it with git.
+`treehouse` keeps a pool of pre-warmed git worktrees, with dependencies already installed, so a new worktree is ready in seconds. Create, return and remove the worktree with `treehouse`; create and switch the branch inside it with git. Return a worktree to the pool rather than destroying it, so the next effort finds one ready; destroy only one the pool shouldn't keep.
 
 | Need | Command | Notes |
 |---|---|---|

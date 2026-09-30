@@ -9,7 +9,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## Parameters
 
-- `<skills-repo>`: this person's own skills repo, as `<owner>/<repo>`, whose skills the setup installs globally for every harness. Default: no shared skills, listed as `none` in the diff.
+- `<skills-repo>`: the user's own skills repo on GitHub, as `owner/repo`.
 
 ## Steps
 
