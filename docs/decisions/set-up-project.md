@@ -17,3 +17,12 @@ The decisions behind the `set-up-project` skill. This file is for maintaining it
 - **`overlaps` doesn't fail the audit, `weakens` does.** A project allow covering a rail's command is against allow-only, but where the rail still holds everywhere it's a tidy-up, not a hole. Exit code 2 marks a failed audit, so a script or a rollout issue can tell.
 - **The audit never edits a project's harness files.** They're the project's; it names each entry and the fix, and the agent changes one only on the user's approval. A project deny or ask is `extra`, kept, and a candidate for the rule table.
 - **A project may hold its own `## Defaults` table**, overriding the global rows it names for that project. The template allows it, and Section D proposes a row only when the project itself requires a tool for a role.
+
+## 2026-09-30: no scripts (#81)
+
+- **The agent does what `set_up_project.py` did.** This reverses "a script for the deterministic part" and "the machine check runs set-up-machine's own reconcile" above, which stay as the record. `AGENTS.md`, `CLAUDE.md`'s single import and the `.gitignore` lines join the one draft the user approves, and the audit is the agent reading each project harness file against `references/project-files.md`.
+- **The machine check is set-up-machine's `verify.py`.** It's fast and writes nothing; when a line fails, the agent runs set-up-machine first. The full set-up-machine audit stays that skill's job.
+- **The audit matches project entries against each row's `samples.covers`,** the same samples verify checks, instead of spellings the adapters generated.
+- **The audit checks every harness's project files, whether or not that harness is set up on the machine.** A teammate may use a harness this machine doesn't have.
+- **With the auto-mode guard off, a project allow over a deny command row is `overlaps`:** the user deny still wins, and there's no classifier to route around.
+

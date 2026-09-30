@@ -1,6 +1,6 @@
 # Design patterns
 
-Names for structures good design produces on its own. A pattern follows from a decision; it doesn't drive one. Most good designs use none or one or two, and reaching for three usually means forcing them.
+A pattern is a name for a structure that good design produces on its own. Make the design decision first and name the pattern it produced, rather than starting from a pattern and fitting the design to it. Most good designs use none, one or two, and reaching for three usually means forcing them.
 
 ## Creational: how objects get made
 
@@ -14,7 +14,7 @@ Names for structures good design produces on its own. A pattern follows from a d
 
 **Decorator.** Wrap an object in another with the same interface to add behaviour, stacking as needed (compression on encryption on a file source) instead of a subclass per combination. Use it when optional behaviours combine at runtime; a fixed, design-time variation is a subclass or a function.
 
-**Facade.** A coordinator that hides several parts behind a simple entry point. The orchestrator of most designs already is one (a `Game` coordinating board, players and state); name it when that helps, especially when wrapping a messy existing subsystem.
+**Facade.** A coordinator that hides several parts behind a simple entry point. The orchestrator of most designs already is one (a `Game` coordinating board, players and state); call it a facade when the name helps explain the design, especially when it wraps a messy existing subsystem.
 
 **Adapter.** Wrap a dependency whose interface doesn't match yours, so its vocabulary stops at one file. Useful at a third-party boundary; pointless when the interfaces already match.
 

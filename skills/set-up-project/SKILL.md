@@ -11,28 +11,23 @@ Scaffold and audit the per-repo configuration the skills assume:
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
-- **Folder standard**: the `.gitignore` lines of [orchestrating/folders.md](../orchestrating/folders.md)
+- **Folder standard**: the `.gitignore` lines of [orchestrating/folder-standard.md](../orchestrating/folder-standard.md)
 - **Allow-only project permissions**: the global rules are the machine's safety rails, and a project's own harness files only add convenience. The **audit** flags every project file that weakens a global rule.
 
-`scripts/set_up_project.py` does the deterministic part: it checks the machine through **set-up-machine** (installed beside this skill; it reads that skill's rule table), writes `AGENTS.md`, `CLAUDE.md` and the `.gitignore` lines after one approval, and audits. The rest is prompt-driven: explore, present what you found, confirm with the user, then write.
+You explore, present what you found, confirm with the user, then write. Running it again is the **audit**.
 
 ## Process
 
-### 1. Plan
+### 1. Check the machine
 
-Run `python3 <this skill>/scripts/set_up_project.py plan --project <repo root>`. It writes nothing.
-
-- **Exit 3: the machine differs** from set-up-machine's table, and the output is set-up-machine's plan. Show it to the user unedited, ask for one approval of the whole diff (set-up-machine's SKILL.md, step 3, explains its lines), run the apply command printed under it, then run this step again.
-- Otherwise the output is the project plan: `added` and `updated` files, `todo` lines for the steps below, and the audit's lines per harness file.
-
-Done when you hold a project plan whose first section reads `Machine  set-up-machine reports no changes`.
+Run **set-up-machine**'s verify script, `python3 <set-up-machine skill>/scripts/verify.py` (the skill is installed beside this one). If any line fails, run the **set-up-machine** skill first, then come back. Done when verify passes.
 
 ### 2. Explore
 
 Look at the current repo to understand its starting state. Read whatever exists; don't assume:
 
 - `git remote -v` and `.git/config`: is this a GitHub repo? Which one?
-- `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` or `## Defaults` section in either?
+- `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` or `## Environment defaults` section in either?
 - `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root
 - `docs/adr/` and any `src/*/docs/adr/` directories
 - `docs/agents/`: does this skill's prior output already exist?
@@ -72,22 +67,22 @@ The defaults are the five canonical roles, each label string equal to its name: 
 
 Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSSARY.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
 
-**Section D: Project defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose a `## Defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md), *The Defaults table*, says what may go there.
+**Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md), *Environment defaults*, says what may go there.
 
 ### 4. Confirm and write
 
 Show the user a draft of:
 
-- The `## Agent skills` block to add to `AGENTS.md`, and any `## Defaults` rows
+- `AGENTS.md`: new from [agents-md.md](agents-md.md), or the existing one with the `## Agent skills` block and any `## Environment defaults` rows added, and each line of an existing `CLAUDE.md` moved into it
+- `CLAUDE.md`: the single line `@AGENTS.md` (Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and follows the import)
+- `.gitignore`: `.scratch/` and `.claude/worktrees/`, each only where it's missing
 - The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
-- The plan's `added` and `updated` lines, and each `CLAUDE.md` line the plan lists as `todo`, with where it goes in `AGENTS.md`
 
 Let them edit, then take one approval for all of it. Then write:
 
-1. Run the apply command the plan printed. It creates `AGENTS.md` (or moves a lone `CLAUDE.md`'s lines into it), makes `CLAUDE.md` import it, and adds the `.gitignore` lines.
-2. Edit `AGENTS.md`, never `CLAUDE.md`, starting from [agents-md.md](agents-md.md) when it's new. Move each `CLAUDE.md` line the plan listed into it, so `CLAUDE.md` is left holding `@AGENTS.md` alone.
-3. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate. Don't overwrite user edits to the surrounding sections. The block is in [agents-md.md](agents-md.md). Include the `### Triage labels` sub-block, and write `docs/agents/triage-labels.md`, only when `triage` is installed and Section B ran. When it isn't, both are omitted.
-4. Write the docs files using the seed templates in this skill folder as a starting point:
+1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran.
+2. Leave `CLAUDE.md` holding `@AGENTS.md` alone (a `CLAUDE.md` that is a symlink to `AGENTS.md` is fine as it is), and add the missing `.gitignore` lines.
+3. Write the docs files using the seed templates in this skill folder as a starting point:
    - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
    - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md): GitLab issue tracker
    - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
@@ -96,17 +91,17 @@ Let them edit, then take one approval for all of it. Then write:
 
    For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
-Done when every `todo` line of the plan is written.
+Done when every approved file is written.
 
 ### 5. Audit
 
-Run the plan again. Its `Audit:` line and harness sections judge each project file against the global rules; [references/project-files.md](references/project-files.md) has the facts behind every line and how to fix one. Read it before explaining a `weakens` or `gap` line.
+Read every harness file the project holds, from the root down, against **set-up-machine**'s `rules.json`, whether or not that harness is set up on this machine: `.claude/settings.json` and `settings.local.json`, `.cursor/cli.json`, `opencode.json(c)` and `.opencode/`, `.codex/config.toml`. [references/project-files.md](references/project-files.md) says what each harness lets a project file do to a global rule, and how to judge an entry. Report each finding as:
 
-- `weakens`: a global rule is weaker in some harness. Explain which and why, and propose the fix: remove the entry, or narrow it to the project's own commands. The file is the project's, so change it only on the user's approval.
+- `weakens`: a global rule no longer holds as the machine sets it, in some harness. Explain which and why, and propose the fix: remove the entry, or narrow it to the project's own commands. The file is the project's, so change it only on the user's approval.
 - `overlaps`: an allow that covers a rule's command while the rule still holds. Propose narrowing it.
-- `extra` and `gap`: name each in the report.
+- `extra` (a project deny or ask) and `gap` (what you can't judge): name each.
 
-Done when the plan ends `No changes.` and `Audit: passed.`, or the user has chosen to keep a `weakens` entry: then the audit stays failed, and the report names that entry.
+The audit passes with no `weakens`. Done when it passes, or the user has chosen to keep a `weakens` entry: then it stays failed, and the report names that entry.
 
 ### 6. Done
 

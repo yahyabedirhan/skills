@@ -5,43 +5,28 @@ description: Design, explain or redesign a system at the level of services, data
 
 # System design
 
-This skill is the **delivery framework**: the standard order for producing and presenting a system design. Every session follows it, whether the design is new, explained, or redesigned, so the user always finds the same things in the same places. The user decides what the session is for; the framework decides how the answer is laid out. The references hold the concepts each stage draws on.
+Follow the **delivery framework** in every session, whether the design is new, explained or redesigned, so the user always finds the same things in the same places. The user decides what the session is for; the framework sets how the answer is laid out. Keep the design in the conversation unless the user asks for it to be written somewhere, and then use the stages as its sections.
 
-Inside one service's codebase (modules, classes, folders), the design is a low-level design: use the **low-level-design** skill.
+To design inside one service's codebase, at the level of its modules, classes and folders, use `/low-level-design` instead.
 
-## What the session is for
+## Flow
 
-The user usually says what they want when they invoke the skill. Read the purpose from the request and its context, and restate it in one line before starting, so a misreading costs one reply.
+1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply.
+   - **Invoked inside a project with no instructions:** explain that project's current design.
+   - **When the purpose is unclear:** ask what the user wants to do with the design, whether the system exists, and whether they want only an explanation.
+2. **Work through the delivery framework** below, stage by stage, reading a concept reference when a stage reaches its concept.
+3. **Present every stage and revise it with the user** until they are satisfied.
 
-- Invoked with no instructions inside a project: write down that project's current design through the framework.
-- When the purpose isn't clear, ask the user what they want to do with the design, whether it's an existing system or a new one, and whether they want only an explanation.
+The purpose decides how the stages are walked. The cases below are common, not a complete list; a session can mix them or move from one to another.
 
-The purposes below are common shapes, not a menu. A session can mix them, move from one to another (an explanation turning into a redesign), or be something else; fit the framework to what the user asked for.
-
-### Designing a new system
-
-Design it end to end: a complete first draft through every stage, from the user's requirements. Deep dives present the design's trade-offs as options, each with what it gains and costs and a recommendation, so the user picks according to their preferences. When feedback changes one part, carry the change through every part it affects, and show what moved.
-
-### Explaining an existing system
-
-Walk the system through the stages as it is, without changing it:
-
-- Build each stage from the evidence at hand: an existing design document (start there and check it against the code), the code itself (routes and handlers, jobs and consumers, schemas and migrations, connection and deploy config, calls to other services), or the user's description. Cite the file, section or message behind each claim.
-- Requirements read from the code are marked **inferred**. What the evidence can't show (traffic, data sizes, incidents, why a choice was made) is marked **unknown** and asked about, never filled in.
-- The deep dives become a bonus section: for each concept the design relies on (its cache, its sharding, its consistency choice), what it is, why it matters for this design, and the trade-off the design made. Weaknesses are observations, not proposals.
-- Answer follow-up questions by walking a request or a failure through the design.
-
-### Redesigning an existing system
-
-1. **Explain it as it is now**, as above, and get the user's agreement that it's right.
-2. **Redesign it through the same stages**, changing only what the redesign needs. Existing components stand unless the problem is about them.
-3. **Show the before and after** of every stage that changed.
-
-Deep dives present the new design's trade-offs as options, as for a new system.
-
-### Deciding one thing
-
-A question like "Postgres or DynamoDB here?" is one deep dive: the parts of the design it touches, the requirement behind it, the options with their trade-offs, and a recommendation.
+- **Designing a new system:** write a complete first draft through every stage.
+- **Explaining an existing system:** walk it through the stages as it is, without changing it.
+  - Build each stage from the evidence. Start from an existing design document and check it against the code. In the code, read the routes and handlers, jobs and consumers, schemas and migrations, connection and deploy config, and calls to other services. The user's description is evidence too. Cite the file, section or message behind each claim.
+  - Mark requirements read from the code **inferred**. Mark what the evidence can't show, such as traffic, data sizes, incidents or why a choice was made, **unknown**, and ask about it rather than filling it in, so a guess never passes for a fact.
+  - In place of the deep dives, explain each concept the design relies on, such as its cache, its sharding or its consistency choice: what it is, why it matters here, and the trade-off the design made.
+  - Record weaknesses as observations, not proposals, because the session explains the system without changing it. Answer follow-up questions by walking a request or a failure through the design.
+- **Redesigning an existing system:** explain it first and get the user's agreement that the explanation is right. Then redesign through the same stages, keeping each existing component unless the problem lies in it. Present the new design's trade-offs as options, and show every changed stage as a before/after `diff`.
+- **Deciding one thing,** such as "Postgres or DynamoDB here?": answer it as one deep dive, naming the parts of the design it touches and the requirement behind it.
 
 ## The delivery framework
 
@@ -49,90 +34,81 @@ A question like "Postgres or DynamoDB here?" is one deep dive: the parts of the 
 Requirements → Core entities → API → [Data flow] → High-level design → Deep dives
 ```
 
-Each stage rests on the one before it: the API serves the requirements, the high-level design serves the API, the deep dives harden the high-level design against the non-functional requirements. Complexity arrives last, on purpose; a design that layers on caches and queues early rarely reaches a complete, working whole.
+The stages come in this order because each builds on the one before it: the API serves the requirements, the high-level design serves the API, and the deep dives make the high-level design meet the non-functional requirements. Go back to an earlier stage when a later one exposes a gap.
 
-### 1. Requirements
+### Requirements
 
-**Functional requirements** are the core features, as "users should be able to..." statements. A real system has hundreds of features; the design covers the few that matter most (about three), and the rest go to an out-of-scope list, each with its reason. A long list hurts: every item is something the design must then satisfy.
+**Functional requirements** are the core features, as "users should be able to..." statements. A real system has hundreds of features; keep the in-scope list to about three, because every item on it is something the design must then satisfy.
 
-**Non-functional requirements** are the qualities the system must have, as "the system should be..." statements, each placed in the system's context and quantified where possible: "search results under 500 ms", not "low latency". Pick the 3-5 that shape this system from this checklist:
+**Non-functional requirements** are the qualities the system must have, as "the system should be..." statements, each stated for this system and quantified where possible: "search results under 500 ms", not "low latency". Pick the 3-5 that most constrain this design from this checklist:
 
-- **Consistency or availability** under a network partition, decided per feature ([cap-theorem.md](references/cap-theorem.md)). Settle this first; it shapes the stores.
-- **Scalability**: bursty traffic, peak events, and the read/write ratio (which side must scale).
-- **Latency**, especially for requests that need real computation (search, feeds).
-- **Durability**: how bad is losing data (a social post versus a bank transfer)?
-- **Security**: data protection, access control.
-- **Fault tolerance**: redundancy, failover, recovery.
+- **Consistency or availability** under a network partition, decided per feature ([cap-theorem.md](references/cap-theorem.md)). Settle this first, because it decides which stores fit.
+- **Scalability**: bursty traffic, peak events, and the read/write ratio, which says which side must scale.
+- **Latency**, especially for requests that need real computation, such as search and feeds.
+- **Durability**: how bad losing data is, a social post against a bank transfer.
+- **Security**: data protection and access control.
+- **Fault tolerance**: redundancy, failover and recovery.
 - **Compliance**: legal and regulatory constraints.
-- **Environment**: device, memory or bandwidth limits (mobile, poor networks).
+- **Environment**: device, memory or bandwidth limits, such as mobile clients on poor networks.
 
-**Estimates** (users, QPS, storage) only where the number changes a decision, such as whether a top-K counter fits in one in-memory heap or must be sharded. Do the arithmetic during the design, when a choice depends on it ([numbers-to-know.md](references/numbers-to-know.md)).
+**Estimates:** work out users, QPS or storage only where the number changes a decision, such as whether a top-K counter fits in one in-memory heap or must be sharded. Do the arithmetic at the point in the design where a choice depends on it ([numbers-to-know.md](references/numbers-to-know.md)).
 
-### 2. Core entities
+Show requirements as short lists: functional, non-functional, and out of scope with reasons.
 
-The nouns and actors the functional requirements need: the things the API exchanges and the stores persist. A short first-draft list with good names (for Twitter: User, Tweet, Follow). Fields come later, in the high-level design, when a request shows which ones matter.
+### Core entities
 
-Useful questions: who are the actors, and do they overlap? Which resources does each functional requirement need?
+The things the API exchanges and the stores persist, as a short first draft with clear names (for Twitter: User, Tweet, Follow). Ask who the actors are and whether they overlap, and which resources each functional requirement needs. Leave fields for the high-level design, where a request shows which ones matter.
 
-### 3. API
+### API
 
-The contract between the system and its users, usually one endpoint per functional requirement, with the core entities as resources. REST by default; GraphQL for diverse clients with different data needs; RPC for internal, performance-critical calls. Real-time features (WebSockets, SSE) come after the core API. The current user comes from the auth token, never from the request body ([api-design.md](references/api-design.md)).
+The contract with the system's users, usually one endpoint per functional requirement. Use the core entities as resources. Use REST by default, GraphQL for diverse clients with different data needs, and RPC for internal, performance-critical calls. Design real-time features, such as WebSockets or SSE, after the core API. Take the current user from the auth token, never from the request body ([api-design.md](references/api-design.md)).
 
-### 4. Data flow (optional)
+Show entities and endpoints as short lists or tables.
 
-For data-processing systems, the sequence of steps from input to output as a numbered list (a web crawler: fetch seed URLs, parse HTML, extract URLs, store data, repeat). Skip it when the system isn't a pipeline.
+### Data flow
 
-### 5. High-level design
+For a data-processing system, a numbered list of steps from input to output (a web crawler: fetch seed URLs, parse HTML, extract URLs, store data, repeat).
 
-The components (clients, load balancers, services, databases, caches, queues) and how they interact, built to satisfy the API, endpoint by endpoint.
+### High-level design
+
+Lay out the components (clients, load balancers, services, databases, caches, queues) and how they interact, endpoint by endpoint, until the design satisfies the whole API. Include only what the functional requirements need.
 
 - Say how data flows through the system for each request, from the API call to the response, and what state changes where.
 - When a request reaches a store, write the fields that matter beside it: the ones the design depends on, not the obvious ones ([data-modeling.md](references/data-modeling.md), [database-indexing.md](references/database-indexing.md)).
-- Keep it simple enough to meet the functional requirements. When a spot calls for a cache or a queue, note it for the deep dives and move on.
+- When a part looks like it needs a cache or a queue, note it for the deep dives and move on.
 
-### 6. Deep dives
+Show the design as a component flow (`client -> LB -> API -> Postgres`), a request or a failure as a numbered walk through the components with the state it changes, and stores as a table of what each holds, who writes it, and its key or shard key.
 
-Harden the high-level design: meet each non-functional requirement, handle edge cases, remove bottlenecks and single points of failure, and answer the user's probes. For each, name the problem (with numbers when it's about scale), the options, and their trade-offs. Twitter's scale leads to horizontal scaling, caching and sharding; its fast feeds lead to fanout-on-read against fanout-on-write. Lead the deep dives, and leave room for the user to steer toward what they care about.
+### Deep dives
 
-### Defaults first, prove the need
+Meet each non-functional requirement, remove bottlenecks and single points of failure, and handle edge cases. Add caches, queues and other complexity here and not earlier, because a design that adds them early rarely reaches a complete, working whole. Name each problem, with numbers when it's about scale, then its options and their trade-offs. Twitter's scale leads to horizontal scaling, caching and sharding; its fast feeds lead to fanout-on-read against fanout-on-write. Choose the deep dives yourself, and let the user redirect them toward what they care about.
 
-The recurring failure in system design is complexity added before it is needed. Start from the default and move off it for a named requirement, with numbers when the case is about scale:
+Each default in *Defaults first* has a reference that says when to move off it: the store in [data-modeling.md](references/data-modeling.md), the API in [api-design.md](references/api-design.md), transport and real-time in [networking-essentials.md](references/networking-essentials.md), the cache in [caching.md](references/caching.md), scale in [sharding.md](references/sharding.md) and [numbers-to-know.md](references/numbers-to-know.md), and async work in [common-patterns.md](references/common-patterns.md).
 
-| Choice | Default | Move off it when |
-|---|---|---|
-| Store | PostgreSQL | [data-modeling.md](references/data-modeling.md) |
-| API | REST | [api-design.md](references/api-design.md) |
-| Transport, real-time | TCP; HTTP polling | [networking-essentials.md](references/networking-essentials.md) |
-| Cache | None; then Redis, cache-aside | [caching.md](references/caching.md) |
-| Scale | One bigger database plus replicas; then hash sharding | [sharding.md](references/sharding.md), [numbers-to-know.md](references/numbers-to-know.md) |
-| Async work | Synchronous | [common-patterns.md](references/common-patterns.md) |
+Show the options side by side, each with its gain and cost, and a redesign or revision as a before/after `diff` of the flow or the list that changed.
 
-Typical over-design: a queue at 5k writes per second, sharding at 100 GB, a WebSocket where polling would do, a cache in front of an indexed lookup.
+## Defaults first
+
+Start each choice from its default, because the most common failure in system design is complexity added before it is needed: PostgreSQL as the store, REST for the API, TCP and HTTP polling for transport and real-time, no cache and then Redis cache-aside, one bigger database with replicas and then hash sharding, and synchronous work. Move off a default only for a named requirement, with numbers when the case is about scale. Typical over-design: a queue at 5k writes per second, sharding at 100 GB, a WebSocket where polling would do, a cache in front of an indexed lookup.
+
+When the design adopts a specific technology (Kafka, DynamoDB, Elasticsearch), research it in its documentation before relying on its details: its limits, its guarantees, and how it fails.
 
 ## Working with the user
 
-A session is a loop: present, the user gives feedback, revise, present again, until the user is satisfied.
+Load `/show-me` and present every stage visually, with prose only for the reasons behind choices.
 
-- **Keep one current version** of the design and revise it; don't start over.
-- **Open each revision with what changed and why**, as a before/after of the parts that moved, including parts changed only because a change elsewhere reached them.
-- **A point the user settled stays settled** unless they reopen it.
+- Keep one current version of the design and revise it.
+- When feedback changes one part, carry the change through every part it affects.
+- Open each revision with what changed and why, as a before/after of the parts that moved, including parts that changed only because of a change elsewhere.
+- Leave a point the user settled as it is unless they reopen it.
 
 Ask only what the code, the existing design documents and the user's earlier answers can't settle, one question at a time; decide the rest and say what you decided.
 
-## Showing it
+## References
 
-Load the **show-me** skill and present every stage visually, with prose only for the reasons behind choices:
+### Concepts and technologies
 
-- requirements, entities and endpoints as short lists or tables;
-- the high-level design as a component flow (`client -> LB -> API -> Postgres`);
-- a request or a failure as a numbered walk through the components, with the state it changes;
-- stores as a table: what each holds, who writes it, its key or shard key;
-- a redesign or a revision as a before/after `diff` of the flow or the list that changed;
-- deep-dive options side by side, each with its gain and cost.
-
-## Concepts and technologies
-
-The references hold the concepts: each concept, why it matters, its trade-offs, and when to choose which kind of technology. Read the one a stage needs when it needs it:
+Each covers one concept: what it is, why it matters, its trade-offs, and when to choose which kind of technology.
 
 | Reference | Covers |
 |---|---|
@@ -146,19 +122,6 @@ The references hold the concepts: each concept, why it matters, its trade-offs, 
 | [cap-theorem.md](references/cap-theorem.md) | Consistency against availability, consistency levels |
 | [numbers-to-know.md](references/numbers-to-know.md) | Hardware and component capacities, over-design they prevent |
 | [common-patterns.md](references/common-patterns.md) | Real-time updates, long-running tasks, contention, scaling reads and writes, large blobs, multi-step processes, proximity |
-
-When the design adopts a specific technology (Kafka, DynamoDB, Elasticsearch), research how it works, from its documentation, before relying on its details: limits, guarantees, and how it fails.
-
-## What the session produces
-
-The user decides. The design lives in the conversation unless the user asks for it to be written somewhere. A written design follows the stages as sections:
-
-1. **Requirements**: functional, non-functional, out of scope.
-2. **Core entities**.
-3. **API**.
-4. **Data flow**, when the system is a pipeline.
-5. **High-level design**: the component flow, each request's path and the state it changes, the fields beside each store.
-6. **Deep dives**: each problem, its options and trade-offs, and the choice.
 
 ---
 

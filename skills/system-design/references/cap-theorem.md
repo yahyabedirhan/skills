@@ -16,7 +16,7 @@ An example: users in the USA and Europe, with a server in each and replication b
 
 ## Choosing
 
-The question: would it be a disaster if users briefly saw inconsistent data? Does every read need the latest write?
+Ask: would it be a disaster if users briefly saw inconsistent data? Does every read need the latest write?
 
 - **Consistency**: ticket and seat booking (no double booking), inventory (no overselling the last item), financial systems (order books, balances).
 - **Availability**: social media, content platforms, review sites. Most systems are here, with eventual consistency: replicas converge within seconds or minutes.
@@ -28,7 +28,7 @@ Real systems choose **per feature**: Ticketmaster is consistent for booking a se
 - **Consistency**: distributed transactions across stores that must agree, or a single database as the one source of truth; higher latency while nodes agree. PostgreSQL, MySQL, Spanner, DynamoDB in strong consistency mode.
 - **Availability**: read replicas with asynchronous replication; change data capture propagating changes to replicas, caches and other systems. Cassandra, multi-zone DynamoDB, Redis clusters.
 
-Most distributed databases are configurable either way; the design names the setting.
+Most distributed databases are configurable either way, so name the setting in the design.
 
 ## Levels of consistency
 
@@ -37,7 +37,7 @@ Most distributed databases are configurable either way; the design names the set
 - **Read-your-own-writes**: a user sees their own changes immediately; others may see older versions.
 - **Eventual**: replicas converge over time (DNS). The default of most distributed databases, and what choosing availability means.
 
-Naming the weakest level that meets the requirement is more precise than "strongly consistent".
+Name the weakest level that meets the requirement, which is more precise than "strongly consistent".
 
 ---
 

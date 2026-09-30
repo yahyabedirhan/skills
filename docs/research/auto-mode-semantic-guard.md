@@ -15,6 +15,9 @@ Evidence tags:
 
 ## Short answer
 
+> **Decision, 2026-09-30:** no guard. The Claude Code probes (results on #65) showed section 6.1's rule added nothing the pre-tool hook doesn't refuse, and missed a script that prints `.env`. See `docs/decisions/set-up-machine.md`.
+
+
 | | Has a judging auto mode | Does it see `echo $TOKEN`? | Customisable | Project can weaken it | Recommendation |
 |---|---|---|---|---|---|
 | Claude Code | yes, a classifier on every action that isn't read-only | only under server-side review; the client-side classifier skips read-only commands such as `echo` and `cat` | `autoMode` in user or managed settings | not the rules; a project allow rule can route a command around it, which `classifyAllShell` closes | **configure it**, as a second net behind the #64 rules and hook |

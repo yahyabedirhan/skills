@@ -1,102 +1,99 @@
-# Claude Code adapter
+# Claude Code
 
-What set-up-machine writes for Claude Code, and why. The code is `scripts/setupmachine/adapters/claude_code.py`. Sources: the Claude Code docs on [permissions](https://code.claude.com/docs/en/permissions), [memory](https://code.claude.com/docs/en/memory) and [settings](https://code.claude.com/docs/en/settings), and the repo's research, `docs/research/harness-capabilities.md`.
+How to set up and audit Claude Code from the rule table. Docs: [permissions](https://code.claude.com/docs/en/permissions), [hooks](https://code.claude.com/docs/en/hooks), [settings](https://code.claude.com/docs/en/settings), [memory](https://code.claude.com/docs/en/memory). Background: the repo's `docs/research/harness-capabilities.md` and `docs/research/auto-mode-semantic-guard.md`.
+
+**Found** when `~/.claude/` exists or `claude` is on `PATH`. Every setting below lives in one file, `~/.claude/settings.json`, except the instructions. Keep every key you don't change; a file that isn't valid JSON stops the run until the user fixes it.
 
 ## Global instructions
 
-- Claude Code reads `~/.claude/CLAUDE.md` in every session. It has no global `AGENTS.md`.
-- The adapter adds one line to that file: `@~/.config/agents/AGENTS.md`, importing the shared file. Imports in user-scope files load without an approval dialog. The rest of `CLAUDE.md` is left as it is.
-- Against a `--home` other than the user's own, the line holds the absolute path instead, since `~` would name the real home.
-
-- The plan lists any other line in `CLAUDE.md` as `extra`: global instructions belong in the shared file, where every harness reads them.
+- Claude Code reads `~/.claude/CLAUDE.md` in every session, and follows a symlink; it has no global `AGENTS.md`.
+- `~/.claude/CLAUDE.md` becomes a **symlink to the shared file**, `~/.config/agents/AGENTS.md`, so the shared file is the one source and Claude Code reads it as written. It's `present` once it's that link.
+- Link it only once nothing in the old file would be lost: every other line is `extra` until it moves into the shared file (global-instructions.md, *Moving a harness's file*). The old file is `removed` (backed up). A file holding only `@~/.config/agents/AGENTS.md`, this skill's earlier form, is `removed` and becomes the link.
 
 ## Memory
 
-- Auto memory is on by default and writes `~/.claude/projects/<project>/memory/`. The adapter sets `"autoMemoryEnabled": false` in `~/.claude/settings.json`, in the same write as the permissions, and lists every file under a `projects/*/memory/` folder as `removed`.
-- **Gap:** a project's `.claude/settings.json` can set `autoMemoryEnabled: true` and win, and `CLAUDE_CODE_DISABLE_AUTO_MEMORY` outranks the key for one session. The project audit checks the first.
+- Auto memory is on by default and writes `~/.claude/projects/<project>/memory/`. Set `"autoMemoryEnabled": false`, and list every file under `~/.claude/projects/*/memory/` as `removed` (backed up first).
+- **Gap:** a project's `.claude/settings.json` can set `autoMemoryEnabled: true` and win (`/set-up-project`'s audit checks it); `CLAUDE_CODE_DISABLE_AUTO_MEMORY` outranks the key for one session.
 
 ## Permissions
 
-- **File:** `~/.claude/settings.json`, key `permissions` with the lists `deny`, `ask` and `allow`. Everything else in the file is kept as it is.
-- **Levels:** `deny` rows go to `deny`, `ask` rows to `ask`, and `allow-and-report` rows to `allow`. The report half needs the pre-tool hook.
-- **Evaluation:** deny, then ask, then allow; the first match wins. So tightening adds the stricter entry and leaves the looser one in place: it no longer takes effect, and it isn't the skill's to remove. An entry already stricter than the table stays, and the plan lists it as `stricter`.
-- **Covered already:** a broader entry on the machine counts as the table's entry: `Bash(gh repo delete*)` covers `Bash(gh repo delete *)`, and `mcp__<server>` or a matching glob covers one tool. An old `Bash(<words>:*)` entry doesn't count when its prefix has a space: Claude Code reads it like the ` *` form, but the Cursor CLI matches it only against the bare command, so the ` *` entry is added beside it and the old one listed as an extra.
-- **Projects can't loosen it:** a user-level deny holds against any project `allow`.
+- `permissions` holds the lists `deny`, `ask` and `allow`. A `deny` row goes to `deny`, `ask` to `ask`, `allow-and-report` to `allow` (the hook does the reporting).
+- **Evaluation:** deny, then ask, then allow; the first match wins. So to tighten, add the stricter entry and leave the looser one in place: the looser one stops taking effect, and it's the user's to remove, not yours. An entry already stricter than the table is `stricter`, and kept.
+- **Always keep an `allow` list** beside `deny`, even an empty `[]`: the Cursor CLI reads this file too, and skips its whole deny list without one.
+- **Covered already:** an entry on the machine that matches everything the wanted one does counts as `present`. `Bash(gh repo delete*)` covers `Bash(gh repo delete *)`; `mcp__<server>` or a matching glob covers that server's tools. An old `Bash(<words>:*)` with a space in `<words>` doesn't count: Claude Code reads it like the ` *` form, but the Cursor CLI matches it only against the bare command. Add the ` *` entry beside it, and list the old one as `extra`.
+- **Projects can't loosen it:** a user deny holds against any project `allow`.
 
 ## Command rows
 
-- `Bash(<prefix> *)` matches the command text as written, not its parsed arguments. The adapter writes one entry per spelling the row expands to: `rm -rf`, `rm -fr`, `rm -R -f`, `rm --recursive --force`, `/bin/rm -rf`, `git push -f`, and the rest.
-- The space holds a word boundary: `Bash(git push --force *)` doesn't match `git push --force-with-lease`, which the ask row covers. A trailing ` *` that is the rule's only wildcard also matches the command with nothing after it (`printenv`).
-- ` *`, not the equivalent `:*`: the Cursor CLI reads this file too, and matches `Bash(rm -rf *)` against every `rm -rf …`, but `Bash(rm -rf:*)` only against the bare `rm -rf` (references/cursor.md).
-- A row with `arguments: "none"` (`env`, `export`, `set` on their own) gets no `Bash` entry. An exact `Bash(env)` would refuse only `env` here, but the Cursor CLI reads this file and matches it as a prefix, refusing `env FOO=1 cmd`, `export FOO=1` and `set -e` too. The hook refuses the bare commands, and the plan names the gap. Shell builtins (`set`, `export`, `source`, `.`) get no `/bin/` spelling.
-- A row with `files` (`cat` on a `.env` file) gets no `Bash` entries: they match text, not paths. Claude Code's own Read rules already refuse `cat`, `head`, `tail` and `grep` on a denied file; the hook refuses the rest (`less`, `source`, `.`).
-- Deny and ask rules apply to each part of `a && b`, `a; b`, pipes and subshells, and past wrappers such as `timeout`, `nice` and `nohup`.
+`Bash(<prefix> *)` matches the command text as written, so a row becomes one entry per spelling (SKILL.md, *Spellings*): `Bash(git push --force *)`, `Bash(chmod -R 777 *)`. Rows with `any_operand` get one entry per operand word after the subcommand and flags (`Bash(git push --delete origin main *)` covers only that remote, so name the gap).
+- **Worked example,** `rm-recursive-force` (flags `[r, R, recursive]` and `[f, force]`): `Bash(rm -rf *)`, `Bash(rm -Rf *)`, `Bash(rm -fr *)`, `Bash(rm -fR *)`, `Bash(rm -r -f *)`, `Bash(rm -r --force *)`, `Bash(rm -R -f *)`, … `Bash(rm --force --recursive *)`, then the same under `/bin/rm` and `/usr/bin/rm`.
+- **The space is a word boundary:** `Bash(git push --force *)` doesn't match `git push --force-with-lease`, which the ask row covers. A trailing ` *` that is the only wildcard also matches the bare command (`printenv`).
+- **` *`, never `:*`:** the Cursor CLI reads this file and matches `Bash(rm -rf:*)` only against the bare `rm -rf`.
+- **No entry, and a gap instead:**
+  - `arguments: "none"` (`env`, `export`, `set` alone): an exact `Bash(env)` reads as a prefix in the Cursor CLI, refusing `env FOO=1 cmd` and `set -e` too. The hook refuses the bare commands.
+  - `arguments: "flags"` (`declare -x`): a rule on `declare -x` would refuse `declare -x NAME=value` too.
+  - `variables` (`echo $API_TOKEN`): a prefix can't match a variable's name inside an argument; the hook refuses it.
+  - `files` (`cat .env`): Bash rules match text, not paths. Claude Code's own Read rules refuse `cat`, `head`, `tail` and `grep` on a denied file; the hook refuses the rest (`less`, `source`, `.`).
+- Deny and ask rules apply to each part of `a && b`, `a; b`, pipes and subshells, and past `timeout`, `nice` and `nohup`.
 
 ## File rows
 
-- A `read` row becomes `Read(<path>)`, a `write` row `Edit(<path>)`. Project paths get `./` (the working directory), and `**/` reaches the root and every subfolder; `~/` paths stay as they are. A path with no `/` after the `./` matches at any depth, as in `.gitignore`: `Read(./.env.*)` refuses `sub/.env.local` too.
-- **`Write(...)` rules are never checked by Claude Code.** It accepts them and warns at startup; `Edit` covers every file-editing tool. The Cursor CLI reads this file and checks `Write` on its own file tools, against absolute paths, so a `write` row also gets plain `Write(**/<glob>)` entries, which Cursor matches. Cursor's globs know only `*`, so these keep no exception: Cursor refuses writes to `.env.example` too. An old `Write(./…)` entry is listed as an extra: Claude Code ignores it and Cursor never matches a `./` path.
-- A `Read` deny also blocks edits to that path.
-- **No negation.** Path globs have positive character classes only: `[!e]` and `[^e]` list `!` or `^` and `e`, and on macOS classes match case-insensitively. So an `except` becomes the globs around it: `**/.env.*` minus `**/.env.example` is `.env.`, `.env.e` … `.env.exampl`, each name that leaves `example` at some letter through a class of the other letters, digits, `_` and `.` (`.env.exa[0-9A-LN-Za-ln-z_.]*`), and `.env.example?*`. A name that leaves it through any other character is covered by the hook only. The plan lists an entry on the machine that also refuses the exception as an extra, with a note to remove it by hand.
+- A `read` row becomes `Read(<path>)`, a `write` row `Edit(<path>)`. Project paths get `./` (`./**/.env`), `~/` paths stay as they are, and an absolute path gets a second `/` (`Read(//proc/**/environ)`), because Claude Code reads `/path` as relative to the settings file. A path with no `/` after the `./` matches at any depth, as in `.gitignore`: `Read(./.env.*)` refuses `sub/.env.local` too. A `Read` deny also blocks edits.
+- **`Write(...)` is never checked by Claude Code** (it warns at startup), but the Cursor CLI checks it on its own file tools, against absolute paths. So a `write` row also gets plain `Write(**/<glob>)` entries (`Write(**/.env)`), with no exception, since Cursor's globs know only `*`. An old `Write(./…)` entry is `extra`: neither harness uses it.
+- **No negation.** Globs have positive character classes only (`[!e]` lists `!` and `e`), matched case-insensitively on macOS. So an `except` of literal names becomes the globs around them. For `**/.env.*` minus `.env.example`, `.env.sample` and `.env.template`:
+  - each name the literals start with but none of them is: `.env.`, `.env.e`, `.env.ex`, … `.env.exampl`, `.env.s`, … `.env.templat`;
+  - after each of those, a class of every letter (both cases), digit, `_` and `.` except the literals' next letters, then `*`: `.env.[0-9A-DF-RU-Za-df-ru-z_.]*` (not `e`, `s`, `t`), `.env.exa[0-9A-LN-Za-ln-z_.]*` (not `m`);
+  - each literal followed by more: `.env.example?*`.
+
+  A name that leaves the literals through any other character, and a glob exception (`**/.env*.md`), stay refused natively; the hook leaves them open. An entry on the machine that refuses an exception (`Read(./.env.*)` refuses `.env.example`) is `extra`, with a note that the user removes it to open the exception.
 
 ## MCP-tool rows
 
-- Tools are named `mcp__<server>__<tool>`; a claude.ai connector shows as `mcp__claude_ai_<Name>__<tool>` in the CLI, and a rule naming the server any other way matches nothing there.
-- The adapter asks Claude Code for its tools: it starts `claude -p` with `--output-format stream-json --verbose`, reads the tool list from the session's `init` event, and stops the session before it calls the model. Each row's regexes pick the matching names, which become exact deny entries.
-- A denied MCP tool is removed from the session, so the agent never sees it.
-
-## Auto mode
-
-A row's `guard` is written as a semantic guard for what its patterns can't list, such as a variable read by `python3 -c` or a script. Source: the repo's research, `docs/research/auto-mode-semantic-guard.md` (6.1).
-
-- **Where:** `autoMode` in `~/.claude/settings.json`, in the same write as the permissions. Claude Code reads `autoMode` only from user, managed and `--settings` files, never from a project's.
-- **What:** each guard, as `<label>: <rule>`, in `autoMode.hard_deny`, which the classifier applies whatever the user says and no `allow` entry clears. A new `hard_deny` array starts with `"$defaults"`, which keeps the built-in hard-deny rules; an existing array is the user's, and one without `$defaults` is reported as a gap and left. `autoMode.classifyAllShell: true` sends every shell command to the classifier, so a project's narrow allow rule (`Bash(printenv *)`) can't route around it.
-- **Audit:** each guard and `classifyAllShell` show as `present`; the user's other `autoMode` entries (`soft_deny`, `allow`, `environment`, their own `hard_deny` rules) are left alone. The manifest records the guards written, and only those are removed when the table drops them. `claude auto-mode config` prints the rules in effect.
-- **What the agent sees:** the rule's label in the denial (`[Environment Variable Access]`), not its text, so the instruction reaches the agent through the rule line in the shared file.
-- **Gaps:** it applies only in a session running in auto mode, and a project can set `disableAutoMode`; in a `-p` or SDK session, read-only commands (`echo $TOKEN`, `cat .env`) and file reads skip the classifier. The deny entries and the hook stay the primary guard.
-
-## Gaps
-
-Native entries alone let these through:
-
-- **Commands:** more flags in the same token (`rm -rfv`) or after the operands (`rm x -rf`), options before a subcommand (`git -C dir push --force`), and a command inside another program's string (`bash -lc "…"`, `eval`, a script).
-- **Files:** a script or another program that opens the file itself, and `less`, `source` or `.` on a `.env` file.
-- **Commands with nothing after them:** `env`, `export` and `set` alone, which have no native entry (see *Command rows*).
-- **MCP tools:** a tool connected after the run, until the next run.
-- **`$VAR` expansion:** a variable expanded inside another command (`echo $TOKEN`) prints its value, and no rule can tell that from ordinary use. The rule line asks the agent not to, and the auto-mode guard covers interpreters and scripts, not `echo` or `cat` in a `-p` session.
-
-The pre-tool hook closes the command and MCP-tool gaps for deny and allow-and-report rows, so the plan lists, per row, only the command gaps of `ask` rows and the file gap. The hook's own gaps, listed once in its plan section:
-
-- a command inside a script file or another interpreter (`python -c`), built from variables (`$cmd -rf x`), or behind an alias or function defined elsewhere; an abbreviated long option (`--recur`); a force push by refspec (`git push origin +main`);
-- a project's `.claude/settings.json` with `"disableAllHooks": true`, which turns every non-managed hook off there.
+- Tools are named `mcp__<server>__<tool>`; a claude.ai connector shows as `mcp__claude_ai_<Name>__<tool>` in the CLI.
+- **List the tools:** in an empty folder, run `claude -p "List nothing." --output-format stream-json --verbose --tools "" --no-session-persistence --max-turns 1` and read the `tools` of the first event with `"type": "system", "subtype": "init"`; stop it there, before it calls the model. No output (not logged in, not installed) is a `gap`: keep the MCP entries already there.
+- Each row's `server` and `tool` regexes (case-insensitive) pick the names; each match is an exact `deny` entry, and a `found` line names them. A denied MCP tool is removed from the session.
 
 ## Pre-tool hook
 
-- **Wiring:** one `hooks.PreToolUse` group in `~/.claude/settings.json` with matcher `*` (every tool) and one command handler, `python3 <skill>/scripts/pre_tool_hook.py --harness claude-code` wrapped so it fails open: `[ -f <script> ] && python3 <script> … || true`, so a script that's gone (the skill moved or was removed) or an error exit lets the call through instead of exit 2 blocking it, timeout 10 seconds. Against a `--home` other than the user's own, it adds `--config <home>/.config/agents/hook.json`, so a trial reports into that home, and a plan run with `--rules <table>` adds `--rules <table>`, so the hook reads the table the plan used. Settings.json gets one write carrying the permissions, the hook and `autoMemoryEnabled`.
-- **Audit:** `wired` when a match-all group runs exactly that command. The manifest records the command; when the skill moves, the old command is removed and the new one added. Other hooks are the user's and stay.
-- **Input:** Claude Code's PreToolUse JSON: `tool_name`, `tool_input` (`command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` for Grep), `cwd`, `session_id`.
-- **Answer:** a deny is `hookSpecificOutput.permissionDecision: "deny"` with the refusal in `permissionDecisionReason`, which Claude Code shows the agent. Otherwise it prints nothing and exits 0, so the native permissions decide: it never answers `allow`, which would skip them. It exits 1 when the input or the table can't be read, and the wired command's `|| true` turns that into a silent exit 0; a deny is JSON with exit 0, so it passes through.
-- **Reports** are written when the call is submitted, before any permission prompt, so a report means the agent asked to run it.
-- **Cursor runs this hook too** (the IDE and the CLI read hooks from `~/.claude/settings.json`, Claude's `PreToolUse` as `preToolUse`). Its payload is read as far as it fits, and a call it recognises is still refused (Cursor passes `permissionDecisionReason` on as `user_message`, which the CLI shows the agent). It writes no report there, seeing `cursor_version` in the payload: the hook Cursor's adapter wires in `~/.cursor/hooks.json` reports each call once.
+- **Wiring:** one match-all group in `hooks.PreToolUse`:
+
+  ```json
+  {"matcher": "*", "hooks": [{"type": "command", "timeout": 10,
+    "command": "[ -f <script> ] && python3 <script> --harness claude-code || true"}]}
+  ```
+
+  `<script>` and the fail-open wrapping are in SKILL.md, *Wiring*.
+- **Audit:** `wired` when a match-all group runs exactly that command. A handler that runs `pre_tool_hook.py` from another path is this skill's old wiring: `removed`, with the new one `added`. Other hooks are the user's and stay.
+- **Input:** `tool_name`, `tool_input` (`command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` and `glob` for Grep), `cwd`, `session_id`.
+- **Answer:** a deny is `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "<the refusal>"}}` with exit 0; Claude Code shows the agent the reason. Otherwise nothing, exit 0, so the native permissions decide. It never answers `allow`, which would skip them, and leaves `ask` rows to the native `ask` list.
+- **Reports** are written when the call is submitted, before any permission prompt.
+- **Cursor runs this hook too:** it loads `~/.claude/settings.json` hooks (Claude's `PreToolUse` as `preToolUse`). The hook still refuses what it recognises there, and leaves reporting to Cursor's own hook when the payload carries `cursor_version`, so no call is reported twice.
+- **Gap:** `"disableAllHooks": true` in this file or a project's turns every hook off. In this file, name it and leave it to the user.
+
+## Auto mode
+
+Leave auto mode's classifier as Claude Code ships it: write no `autoMode` rules. Probes in `docs/research/auto-mode-semantic-guard.md` found that a custom `hard_deny` rule for environment reads caught nothing the pre-tool hook doesn't refuse, and missed a script that prints `.env`. An `autoMode` block already in the file is the user's: list it as `extra`.
+
+## Gaps
+
+The native entries alone let these through. The hook closes them for deny and allow-and-report rows, so name them in the diff only under each `ask` row they apply to:
+
+- more flags in the same word (`rm -rfv`) or after the operands (`rm x -rf`); options before the subcommand (`git -C dir push --force`); the command inside another program's string (`bash -lc "…"`, `eval`, a script);
+- a script or another program that opens a denied file itself;
+- a tool connected after the run, until the next run (the hook matches it by name).
+
+The hook's own misses are in SKILL.md, *What it can't see*.
 
 ## What the agent sees
 
-A command the native rules refuse returns `Permission to use Bash with command <command> has been denied.`, and a refused file `File is in a directory that is denied by your permission settings.` Neither names the rule, so the instruction also reaches the agent through the shared file's rule line, loaded at the start of every session.
-
-The hook runs first, and its refusal names each refused part, its rule, reason and instruction, and says nothing else in the call ran.
-
-## Read by other harnesses
-
-The Cursor CLI also reads the `allow` and `deny` lists in `~/.claude/settings.json`, only when both lists are there (so the adapter adds an empty `allow` beside a `deny`), and a project can't remove them. There `Bash(<prefix> *)` matches every use of the prefix with something after it; `Bash(x:*)` with a space in `x` matches only the bare command, and an exact `Bash(env)` would match `env` with any arguments, which is why bare rows get no entry. For its file tools it checks `Read(...)` and `Write(...)` against absolute paths, so it matches the plain `Write(**/…)` entries, but not the `./` Read and Edit entries. What Cursor makes of the rest is in references/cursor.md.
+A native refusal says `Permission to use Bash with command <command> has been denied.` or `File is in a directory that is denied by your permission settings.`, naming no rule, so the instruction reaches the agent through the shared file's rule line. The hook runs first; its refusal names each refused part, its rule, reason and instruction.
 
 ## Checking it
 
-After an apply, in a throwaway folder, with `--setting-sources project,local --settings <the settings.json>` so only the generated entries apply:
+`verify.py` checks the rows against the hook and that the hook is wired. To see Claude Code itself enforce them, in a throwaway folder with `--setting-sources project,local --settings <a copy of settings.json>`:
 
-- **Commands:** `claude -p "Run exactly: rm -fr x" --allowedTools Bash` leaves `x` in place and quotes the hook's refusal. Allowing `Bash` proves a rule refused it, not the lack of an allow. With a settings file holding only the `hooks` key, `bash -lc "rm -rf x"` is refused too, which proves the hook, not a native entry.
-- **Reports:** `gh api rate_limit` runs, and its line appears in the report folder.
-- **Files:** asking for a Write to `.env`, `sub/.env.local` and `secrets/k` with `--allowedTools Write` leaves them unchanged, and a Read of `sub/.env.example` still works.
-- **Environment:** with fake `.env` files and a fake variable only, and the session started with a scrubbed environment (`HOME`, `PATH`, `USER` and the fake variable), since a sample that gets through prints whatever the shell holds: `printenv`, `env`, `cat .env` and a Read of `sub/.env` are refused, `env FAKE=1 true` runs. With the hooks-only settings file, `bash -c "printenv FAKE"` and `/usr/bin/env | grep FAKE` are refused by the hook, naming the rule's instruction.
-- **Mail tools:** a found tool, such as a trash tool, is absent from the session.
-
-Against the real login, `claude -p "Without tools: quote your rule about rm -rf and the file it came from."` quotes the rule line from `~/.config/agents/AGENTS.md`.
+- `claude -p "Run exactly: rm -fr x" --allowedTools Bash` leaves `x` and quotes the hook's refusal; allowing `Bash` proves a rule refused it. With a settings file holding only `hooks`, `bash -lc "rm -rf x"` is refused too, which proves the hook.
+- `gh api rate_limit` runs, and its line appears in the report folder.
+- Writes to `.env` and `secrets/k` with `--allowedTools Write` leave them unchanged; a Read of `sub/.env.example` works.
+- For environment rows, use fake `.env` files and a fake variable, and start the session with a scrubbed environment (`HOME`, `PATH`, `USER` and the fake variable), since a sample that gets through prints whatever the shell holds.
+- Against the real login, `claude -p "Without tools: quote your rule about rm -rf and the file it came from."` quotes the rule line from the shared file.

@@ -4,6 +4,7 @@ python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 """
 import io
 import json
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -217,6 +218,18 @@ class EnvironmentTest(unittest.TestCase):
                         "cat .envrc", "grep -r TOKEN src", "head README.md"):
             self.assertEqual(denied_by(command), [], command)
 
+    def test_printing_a_secret_looking_variable_is_denied(self):
+        for command in ("echo $API_TOKEN", "printf '%s' \"${DB_PASSWORD}\"", 'echo "key: $OPENAI_API_KEY"',
+                        "echo $github_token", "print -r -- $AWS_SECRET_ACCESS_KEY", "/bin/echo ${SERVICE_CREDENTIALS:-none}",
+                        "true && echo $DB_PASSWD", 'bash -c "echo $API_TOKEN"', "echo $(echo $API_KEY)"):
+            self.assertIn("env-print-secret", denied_by(command), command)
+
+    def test_ordinary_variables_and_passing_a_secret_along_are_fine(self):
+        for command in ("echo $HOME", "echo $PATH $SHELL", "echo TOKEN", "echo '$API_TOKEN'", "echo \\$API_TOKEN",
+                        'curl -H "Authorization: Bearer $TOKEN" https://example.com',
+                        "test -n \"$API_TOKEN\"", "echo ${#API_TOKEN}"):
+            self.assertNotIn("env-print-secret", denied_by(command), command)
+
     def test_the_refusal_names_the_rules_instruction(self):
         text = hook.refusal(verdict("/usr/bin/env").denials)
         self.assertIn("env-dump", text)
@@ -281,6 +294,111 @@ class ReviewFindingsTest(unittest.TestCase):
             self.assertEqual(denied_by("cat .ENV.EXAMPLE"), [])
         with mock.patch.object(commands, "FOLD_CASE", False):
             self.assertFalse(verdict(tool="Read", files=[(".ENV", "read")]).denials)
+
+
+
+def answer(command):
+    """The hook's answer for a shell command: deny, ask or allow."""
+    return verdict(command).answer
+
+
+class BypassesAndFalsePositivesTest(unittest.TestCase):
+    """Issue #82: bypasses of the hook and quoted text it refused, each with its expected answer."""
+
+    def assertAnswers(self, expected, commands_):
+        for command in commands_:
+            self.assertEqual(answer(command), expected, command)
+
+    def test_a_heredoc_marker_inside_quotes_a_comment_or_arithmetic_hides_nothing(self):
+        self.assertAnswers("deny", ('echo "<<X"\nrm -rf x', "ls # <<X\nrm -rf x", "echo $((a<<b))\nrm -rf x",
+                                    "echo '<<X'\nrm -rf x", 'echo "$((a<<b))"\nrm -rf x', "ls # a comment\nrm -rf x"))
+
+    def test_real_heredocs_still_hide_their_body(self):
+        self.assertAnswers("allow", ("cat <<EOF > notes.md\nrm -rf x\nEOF", "cat <<-EOF > n.md\n\trm -rf x\n\tEOF",
+                                     "cat << 'EOF' > n.md\nrm -rf x\nEOF\necho done"))
+        self.assertAnswers("deny", ("cat <<'EOF' > n.md\nnotes\nEOF\nrm -rf x", "sh <<EOF\nrm -rf x\nEOF"))
+
+    def test_an_unquoted_heredoc_body_runs_its_substitutions(self):
+        self.assertAnswers("deny", ("cat <<EOF > n.md\n$(rm -rf x)\nEOF",))
+        self.assertAnswers("allow", ("cat <<'EOF' > n.md\n$(rm -rf x)\nEOF",))
+
+    def test_the_wrappers_it_missed(self):
+        self.assertAnswers("deny", (
+            "setsid rm -rf x", "setsid -f rm -rf x", "busybox rm -rf x", "watch rm -rf x", "watch -n 5 rm -rf x",
+            "watch 'rm -rf x'", "flock /tmp/lock rm -rf x", "flock -w 5 /tmp/lock rm -rf x",
+            "flock /tmp/lock -c 'rm -rf x'", "parallel rm -rf ::: a b", "parallel -j 4 'rm -rf {}' ::: a",
+            "script -q /dev/null rm -rf x", "script -c 'rm -rf x' log", "chronic rm -rf x", "unbuffer rm -rf x",
+            "arch -arm64 rm -rf x", "arch -arch x86_64 rm -rf x",
+        ))
+        self.assertAnswers("allow", ("watch -n 5 ls", "flock /tmp/lock make", "parallel echo ::: a b",
+                                     "script -q /dev/null ls", "arch", "chronic make", "busybox ls"))
+
+    def test_the_shells_it_missed(self):
+        for command in ("fish -c 'rm -rf x'", "dash -c 'ls'", "ksh -c 'ls'", "fish --command 'ls'",
+                        "/usr/local/bin/fish -c ls"):
+            self.assertIn("shell-inline-command", denied_by(command), command)
+        self.assertIn("rm-recursive-force", denied_by("fish -c 'rm -rf x'"))
+        self.assertAnswers("allow", ("fish script.fish", "dash ./install.sh"))
+
+    def test_a_pipe_into_a_shell_joins_the_words_before_it(self):
+        self.assertAnswers("deny", ("echo rm -rf x | sh", 'echo "rm -rf x" | sh', "echo rm -rf x | bash",
+                                    "printf 'rm -rf x' | zsh", "timeout 5 echo rm -rf x | sh",
+                                    "echo rm -rf x | fish"))
+        self.assertAnswers("allow", ("echo rm -rf x | cat", "echo ls | sh"))
+
+    def test_deleting_the_main_branch_is_denied(self):
+        for command in ("git push origin :main", "git push --delete origin main", "git push -d origin main",
+                        "git push origin --delete main", "git push upstream +:main", "git push origin :refs/heads/main",
+                        "git push origin feature :main", "git push origin :master"):
+            self.assertEqual(answer(command), "deny", command)
+            self.assertTrue([r for r in denied_by(command) if r.startswith("git-push-delete-main")], command)
+        self.assertAnswers("allow", ("git push origin main", "git push origin HEAD:main", "git push --delete origin feat",
+                                     "git push origin :feat"))
+
+    def test_mirror_and_clean_ask(self):
+        self.assertAnswers("ask", ("git push --mirror", "git push --mirror origin", "git clean -fdx", "git clean -f",
+                                   "git clean --force -d"))
+        self.assertAnswers("allow", ("git clean -n", "git clean -nd"))
+
+    def test_find_delete_is_denied_wherever_it_hides(self):
+        for command in ("find . -delete", "find . -name '*.pyc' -delete", "timeout 5 find . -type f -delete",
+                        "/usr/bin/find /tmp/x -delete", 'bash -c "find . -delete"', "cd x && find . -empty -delete",
+                        "echo $(find . -delete)"):
+            self.assertEqual(answer(command), "deny", command)
+            self.assertIn("find-delete", denied_by(command), command)
+        self.assertAnswers("allow", ("find . -name '*.pyc'", "find . -type d", "find . -name delete",
+                                     "grep -r -- -delete src"))
+
+    def test_the_process_environment_is_denied(self):
+        for command in ("cat /proc/self/environ", "cat /proc/1/environ", "strings /proc/self/environ",
+                        "tr '\\0' '\\n' < /proc/self/environ", "xxd /proc/42/task/42/environ"):
+            self.assertEqual(answer(command), "deny", command)
+        call = hook.ToolCall(tool="Read", files=(("/proc/self/environ", "read"),), cwd=CWD)
+        self.assertTrue(hook.decide(call, TABLE, HOME).denials)
+        self.assertAnswers("allow", ("cat /proc/cpuinfo", "cat environ.md"))
+
+    def test_known_gaps_are_named_in_the_table(self):
+        # A shell glob reaching a .env file, and ps printing environments, pass the hook; the table names them.
+        self.assertAnswers("allow", ("cat .env*", "cat .e?v", "ps eww"))
+        gaps = {r.id: r.gap for r in TABLE}
+        self.assertIn(".env*", gaps["env-files-commands"])
+        self.assertIn("ps eww", gaps["proc-environ-read"])
+
+    def test_substitutions_in_single_quotes_or_escaped_are_text(self):
+        self.assertAnswers("allow", (
+            "git commit -m 'never run `rm -rf` here'", "gh pr create --body 'Mentions `sudo ls`'",
+            "echo '$(rm -rf x)'", 'echo "\\$(rm -rf x)"', 'echo "\\`rm -rf x\\`"', "echo \\`rm -rf x\\`",
+            "echo $'it\\'s `sudo ls`'",
+        ))
+        self.assertAnswers("deny", ('echo "$(rm -rf x)"', 'echo "`rm -rf x`"', "echo $(rm -rf x)",
+                                    "echo `sudo ls`", "echo \"a $(echo 'b' && rm -rf x) c\""))
+
+    def test_ordinary_env_named_files_are_readable(self):
+        for command in ("cat .env.sample", "cat .env.template", "cat docs/.env.md", "cat .env.example"):
+            self.assertEqual(answer(command), "allow", command)
+        for path in (".env.sample", "app/.env.template", "docs/.env.md"):
+            self.assertEqual(verdict(tool="Read", files=[(path, "read")]).answer, "allow", path)
+        self.assertAnswers("deny", ("cat .env", "cat .env.local", "cat .env.production"))
 
 
 class ClaudeCodeHookTest(unittest.TestCase):
@@ -355,6 +473,54 @@ class ClaudeCodeHookTest(unittest.TestCase):
                          now=datetime(2026, 9, 29, tzinfo=timezone.utc))
         self.assertEqual((code, out.getvalue()), (0, ""))
         self.assertTrue((self.dir / "reports" / "2026-09-29.jsonl").exists())
+
+
+
+class WiredCommandTest(unittest.TestCase):
+    """The fail-open command the references tell the agent to wire: a gone script or a broken
+    table lets the call through, and a deny still refuses."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self._tmp.name)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def wired(self, script, harness, *extra):
+        q = shlex.quote(str(script))
+        tail = "".join(" " + shlex.quote(e) for e in extra)
+        return f"[ -f {q} ] && python3 {q} --harness {harness}{tail} || " + ("echo '{}'" if harness == "cursor" else "true")
+
+    def run_wired(self, command, payload):
+        return subprocess.run(["/bin/sh", "-c", command], input=json.dumps(payload), capture_output=True,
+                              text=True, timeout=30)
+
+    def test_a_missing_script_exits_0_and_says_nothing(self):
+        gone = self.dir / "gone" / "pre_tool_hook.py"
+        deny = {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}, "cwd": str(self.dir)}
+        for harness in ("claude-code", "codex"):
+            proc = self.run_wired(self.wired(gone, harness), deny)
+            self.assertEqual((proc.returncode, proc.stdout), (0, ""), harness)
+        # Cursor reads an empty answer as invalid JSON, which blocks: it gets `{}`.
+        proc = self.run_wired(self.wired(gone, "cursor"), deny)
+        self.assertEqual((proc.returncode, proc.stdout.strip()), (0, "{}"))
+
+    def test_a_present_script_still_refuses(self):
+        script = SCRIPTS / "pre_tool_hook.py"
+        deny = {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}, "cwd": str(self.dir)}
+        proc = self.run_wired(self.wired(script, "claude-code"), deny)
+        self.assertEqual(json.loads(proc.stdout)["hookSpecificOutput"]["permissionDecision"], "deny")
+        cursor = {"hook_event_name": "beforeShellExecution", "command": "rm -rf x", "cwd": str(self.dir)}
+        proc = self.run_wired(self.wired(script, "cursor"), cursor)
+        self.assertEqual(json.loads(proc.stdout)["permission"], "deny")
+
+    def test_a_broken_table_fails_open_too(self):
+        bad = self.dir / "bad.json"
+        bad.write_text("{nope")
+        payload = {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}}
+        proc = self.run_wired(self.wired(SCRIPTS / "pre_tool_hook.py", "claude-code", "--rules", str(bad)), payload)
+        self.assertEqual((proc.returncode, proc.stdout), (0, ""))
 
 
 if __name__ == "__main__":

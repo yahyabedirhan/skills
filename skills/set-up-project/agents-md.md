@@ -7,9 +7,9 @@ The project's one rules file. Every harness reads it (Claude Code through `CLAUD
 
 [What a teammate needs here: the project's commands, conventions, and where things live.]
 
-## Defaults
+## Environment defaults
 
-This project's own values for the roles skills name. Each row overrides the global instructions' row of the same role, for this project only; a role left out keeps the global value.
+This project's tools for the roles skills name; each row overrides the global one.
 
 | Role | Default |
 |---|---|
@@ -30,6 +30,6 @@ This project's own values for the roles skills name. Each row overrides the glob
 [one-line summary of layout: "single-context" or "multi-context"]. See `docs/agents/domain.md`.
 ```
 
-## The Defaults table
+## Environment defaults
 
-Optional, and only for a role every contributor to this project uses the same way: a worktree tool the project's scripts assume, a session host its docs describe. A tool one person prefers belongs in that person's global Defaults, never here. The roles and what each names are in **set-up-machine**'s `references/global-instructions.md` (*The Defaults roles*); a new role is a new row there first.
+Optional, and only for a role every contributor uses the same way (a worktree tool the project's scripts assume). A tool one person prefers belongs in their own global environment defaults. The roles are in `/set-up-machine`'s `references/global-instructions.md`.

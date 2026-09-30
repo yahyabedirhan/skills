@@ -1,36 +1,55 @@
-# The shared global instructions file
+# Global instructions
 
-`~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. It holds this person's workflow and the explanation of each global rule, and nothing a teammate would need: that goes in the project's `AGENTS.md` or a skill (**maintain-environment**'s `where-things-go.md` has the layers and the team test).
+The shared global instructions file: its shape, its roles, and what belongs in it.
+
+`~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. Put in it only this person's workflow and the explanation of each global rule. Anything a teammate would need goes in the project's `AGENTS.md` or a skill, because a teammate never reads this file. `/maintain-environment` lists those places and the team test.
 
 ## Its shape
 
-set-up-machine owns the shape; the content outside the generated block is the user's. In order:
+The file has these parts, in this order. This skill decides the parts and rewrites the generated block; the content outside the block is the user's.
 
-1. **The rule line**, at the top: "Only what describes this person's own workflow and explains a global rule. Anything a teammate would need goes in the project or a skill."
-2. **`## Defaults`**: a table, one row per role, naming this person's tool for it.
-3. **The generated block** between the `set-up-machine:rules` markers: one line per rule-table row, with its reason and instruction. Rewritten from the table on every apply.
-4. **`## Personal workflow`**: how this person works, one rule per line.
+1. `# Global agent instructions`
+2. **The rule line:** `Only what describes this person's own workflow and explains a global rule. Anything a teammate would need goes in the project or a skill.`
+3. **`## Environment defaults`**, with the line "What this person uses for each role. A project's own environment defaults override a row. When a row is `none`, do what its last column says.", then a table, `| Role | Tool | What it is | When none |`, one row per role below. The Tool column is the user's; this skill writes the other two from the roles table below, so every skill that names a role finds its meaning and its fallback here, in context.
+4. **The generated block**, rewritten from `rules.json` on every run:
 
-A new file gets all four, every role `none` and the workflow section empty. On an existing file, reconcile only **adds** what the shape lacks (the rule line, the section, a missing role row as `none`) and regenerates the block; it never rewrites a value or a workflow line. Every addition shows in the plan's diff.
+   ```markdown
+   <!-- set-up-machine:rules start. Generated from set-up-machine's rule table: change the table, not these lines. -->
+   ## Global rules
 
-## The Defaults roles
+   Every harness on this machine enforces these as far as it can. A harness refuses the whole command when any part of it matches a rule, so run each risky step as its own command, and read a refusal as a refusal of that step only.
 
-A skill names a role as a placeholder of the same name (`<session-host>`) in its `## Parameters` section, with what it does when the role is unset; the row here says which tool this person uses. Changing a tool is one row here plus that tool's how-to skill, never an edit to every skill. A session host's how-to skill is named `handover-to-<session-host>`; a worktree tool's is named for the tool.
+   - **Denied:** `rm -rf` and its variants. A recursive forced delete can't be undone, … Instead: Move what's no longer needed into …
+   - **Asks first:** `git push --force-with-lease`. It rewrites the remote's history, … Say in one line why …
+   - **Allowed and reported:** `gh api`, `gh secret` and `gh variable`. They reach anything … Go ahead; each call is logged …
 
-| Role | Names | With `none` |
+   **Environment variables and `.env` files:** never read, print or change one that may hold a secret, by any route: a command, a script, an interpreter (`python3 -c`, `node -e`) or a file tool. The rules above catch the common commands; this line covers the rest. Use the variables every shell sets (`$HOME`, `$PATH`) as usual, and pass a variable to a command without printing it. If you need a value, stop, say why, and give the user the exact command.
+   <!-- set-up-machine:rules end -->
+   ```
+
+   One line per row, in table order: `- **<Denied | Asks first | Allowed and reported>:** <summary>. <reason> <instruction>`, with `Instead: ` before the instruction on deny rows only. Then, after a blank line, the **Environment variables** paragraph exactly as above: the rows catch only the commands they name, and it tells the agent to leave every other route alone.
+5. **`## Personal workflow`**, with the line `Rules for how this person works that pass the team test. Anything a project or a skill needs goes there instead.`, then this person's rules, one per line.
+
+A new file gets all five, every role `none` and the workflow section empty. On an existing file, only **add** what the shape lacks, such as the rule line, a section, a missing role row as `none` or a missing column, rewrite the What it is and When none columns from the roles table, and regenerate the block; never rewrite a Tool value or a workflow line. If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
+
+## Roles
+
+The one definition of each role.
+
+| Role | What it is | When none |
 |---|---|---|
-| `session-host` | where new agent sessions open: a terminal multiplexer or agent host | the skill works in the same session, or prints a prompt to paste |
-| `worktree-tool` | how a new worktree is made | `git worktree add` |
-| `notification-method` | how to reach this person when a skill says to notify: a command, or the harness's own tool | the harness's notification tool, else a line in the chat |
-| `agent-to-start` | the command and flags that start a new agent session | the skill's own: the current harness's command, or `claude` |
-| `skills-repo` | this person's own skills repo, as `<owner>/<repo>` | the skill asks |
-| `path-to-skills-repo` | where that repo is cloned | the skill asks |
+| `session-host` | where agent sessions run | Use this session: move into the worktree and run the starting prompt here, or print the prompt for the user to paste into a new `agent` session. A step that must run outside this session, such as freeing its own worktree, goes to the user as a command to run once it is closed. |
+| `worktree-tool` | the tool that makes and frees worktrees | `git worktree add`, beside the main checkout unless the project keeps worktrees elsewhere, giving the new branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it; `git worktree remove` to free one. |
+| `agent` | the command and flags that start a new agent session | This session's harness. |
+| `notification-method` | how a notification reaches this person: a command, or the harness's own tool | The harness's notification tool, else a line in the chat. |
+| `skills-repo` | this person's own skills repo, as `<owner>/<repo>` | Ask the user. |
+| `path-to-skills-repo` | where that repo is cloned | Ask the user. |
 
-A value is a tool name or the exact command, with a short why when the choice isn't obvious (a notification command that works around the harness's own tool). A project's `AGENTS.md` may hold its own Defaults table, and its rows override these for that project: a project that names its worktree tool uses it.
+A value is a tool name or the exact command. A project's `AGENTS.md` may hold its own environment defaults, whose rows override these.
 
 ## Personal workflow
 
-A line belongs here only when it's about this person, not the work: how they like reports, what they approve and what they leave to the agent, what stays out of public repositories. It passes the team test when a teammate with no global instructions loses nothing they need. A line that fails goes to its layer:
+A line belongs here only when it's about this person, not the work: how they like reports, what they approve and what they leave to the agent, what stays out of public repositories. It passes the team test when a teammate with no global instructions loses nothing they need. Move a line that fails it to the first place below that fits:
 
 - a teammate needs it on this project → the project's `AGENTS.md`;
 - it's how to do a task → the skill for that task, neutral about tools;
@@ -39,14 +58,12 @@ A line belongs here only when it's about this person, not the work: how they lik
 
 ## Moving a harness's file
 
-When a harness still keeps its own global file (`~/.claude/CLAUDE.md` with more than the import line, or an old `~/.codex/AGENTS.md`), move it line by line, before the harness's file becomes a link or a single import:
+When a harness still keeps its own global file (a `~/.claude/CLAUDE.md` that isn't a link, an old `~/.codex/AGENTS.md`), move it line by line before the harness's file becomes a link:
 
-1. For each line, decide its home by the list above: a Defaults row, a personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
-2. Write the Defaults values and workflow lines into the shared file; make each skill edit at its source, as **maintain-environment** says.
-3. Leave the harness's file holding only its link to the shared file. The plan reports any other line there as `extra` until it's gone.
-
-Done when every line of the old file has a named home.
+1. Choose where each line goes, using the list above: a role's row, a personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
+2. Write each role's value and the workflow lines into the shared file; make each skill edit at its source, as `/maintain-environment` says.
+3. Leave the harness's file holding only its link to the shared file.
 
 ## Memory
 
-Memory stays off in every harness: a memory is invisible to the other harnesses and lives outside any repository, so what one would hold goes into a layer above. Each adapter turns its harness's memory feature off, and each plan lists every memory file on the machine as `removed`; apply keeps a copy in the backup folder. Before approving, move any memory worth keeping into its layer.
+Memory stays off in every harness: a memory is invisible to the other harnesses and lives outside any repository, so write what a memory would hold into the shared file, a project's `AGENTS.md` or a skill instead. Each harness reference says how to turn its memory off and where its memory files are; every file is `removed` in the diff and backed up first. Put any memory worth keeping into the same diff, as lines for one of those places, so the user approves both together.

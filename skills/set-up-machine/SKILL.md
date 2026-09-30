@@ -1,92 +1,118 @@
 ---
 name: set-up-machine
-description: Set up or audit a machine's coding-agent harnesses from one rule table - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, and memory kept off. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
+description: Set up or audit a machine's coding-agent harnesses from one rule table - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, and memory kept off. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
 ---
 
 # Set up machine
 
-Two sources declare the machine:
+Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI) match two sources: the **rule table**, [`rules.json`](rules.json), which holds each global rule once as what it covers; and the **shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads. Each harness also runs the **pre-tool hook**, `scripts/pre_tool_hook.py`, before every tool call, and keeps its memory off. Never remove or loosen an entry the table didn't produce: it's the user's. Harness formats change, so check the docs a harness reference links before writing; where they differ, follow the docs and name the difference in your report. Running the skill again is the **audit**: the same steps, ending with a diff that changes nothing.
 
-- the **rule table**, [`rules.json`](rules.json): each global rule once, with its level, reason and instruction;
-- the **shared global instructions file**, `~/.config/agents/AGENTS.md`: the one file every harness's global instructions reach. Its shape (the rule line, the Defaults table by role, the generated rule lines, the personal workflow section) and what belongs in it are in [references/global-instructions.md](references/global-instructions.md); read it before writing any line into the file or moving a harness's own global file into it.
+## Parameters
 
-`scripts/set_up_machine.py` **reconciles** each harness against them: it compares what the table wants with what's on the machine, shows the diff, and applies it on one approval. Running it again is the **audit**. It needs only Python 3.9+.
-
-It also wires the **pre-tool hook**, `scripts/pre_tool_hook.py`, into each harness that has one; see *Pre-tool hook* below. Where a harness has a semantic guard (Claude Code's auto mode), it writes each row's `guard` there too, as a second net for what patterns can't list.
-
-Harnesses it covers, each with an adapter reference: [Claude Code](references/claude-code.md), [Codex](references/codex.md), [opencode](references/opencode.md) and [Cursor](references/cursor.md), its IDE agent and CLI. A harness is found by its config folder, or, since a fresh install makes that folder only on first start, by its program on `PATH`. It runs on macOS and Linux.
+- `<skills-repo>`: the user's own skills repo on GitHub, as `owner/repo`.
 
 ## Steps
 
-1. **Plan.** Run `python3 <this skill>/scripts/set_up_machine.py plan`. It writes nothing, but in the user's own home it starts each harness briefly to list the MCP tools it exposes (see *Mail tools* below). Done when you hold its whole output, which ends in either `No changes.` or a plan id.
-2. **Nothing to do?** On `No changes.`, report the audit: memory per harness, what's wired, the gaps, the stricter and extra rules, and the mail tools it found. Stop here.
-3. **Ask once.** Show the user the plan output unedited, then ask for one approval of the whole diff. Its lines, per harness:
-   - `added`: a rule the harness lacks, a link or hook it wires, or skills it installs: an external skill, or the user's own skills repo from the `skills-repo` Defaults row (the line shows the command).
-   - `tightened`: a rule the harness has at a looser level; the stricter entry is added where it wins (beside it, or after it where the last match wins).
-   - `removed`: an entry this skill wrote earlier that the table no longer has, a harness memory file, or a harness's own global file whose every line is already in the shared file, as it becomes a link. Only these are ever removed.
-   - `present`: already in place, as the table's entry or a broader one that covers it.
-   - `wired`: the pre-tool hook in place for that harness, and the folder its reports go to.
-   - `stricter`: the machine holds the rule at a stricter level than the table. It's kept; to get the table's level, the user removes that entry by hand.
-   - `found`: the tools a mail-tool rule matched on this machine. Name them in your report.
-   - `gap`: what the harness can't express, named so it isn't mistaken for enforced.
-   - `none`: the harness has no such feature (memory), so there's nothing to set.
-   - `extra`: a rule on the machine the table doesn't have, or a line in a harness's own global file besides its link to the shared file. It's kept. A rule worth having everywhere is a candidate row for the table; a line moves into the shared file (references/global-instructions.md, *Moving a harness's file*).
-4. **Apply** the approved plan: `python3 <this skill>/scripts/set_up_machine.py apply --plan-id <id>`, the command the plan printed. If apply refuses because the machine changed since the plan, go back to step 1 and ask again.
-5. **Audit.** Run the plan again. Done when it ends `No changes.` and every harness with a hook shows a `wired` line. Report the backup folder apply printed, what's wired, the gaps, the stricter and extra rules, and the mail tools found.
+1. **Inspect.** Find each harness on the machine, read its reference, then every file that reference names. Read the shared file too.
+   - **When trying a change without touching the real machine:** run the steps against a copy of the home folder in the project's `.scratch/`, and check it with `verify.py --home <copy>`. Start no harness there, since it would read the real login.
+2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape, memory off, the hook wired, and the `<skills-repo>` skills installed. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
 
-`--home <dir>` points every step at another home folder, such as a copy of this one in the project's `.scratch/`, to try a change without touching the real machine. Under a `--home` other than the user's own, plan starts no harness: give `--tool-names` to match mail tools, or the plan names the gap.
+   Work out what each harness should hold, from `rules.json`, the shared file's shape and the harness's reference, and compare it with what the machine holds. Write the whole diff: per harness and file, the exact entries or a unified diff, each line marked:
 
-## What reconcile promises
+   - `added`, `tightened` (a stricter entry added where it wins), `removed`;
+   - `present`, `wired` (the hook), `found` (the MCP tools a mail row matched);
+   - `stricter` (the machine is stricter than the table: kept), `extra` (not the table's: kept), `gap` (what the harness can't express), `none` (no such feature).
 
-- **It never removes or loosens an entry it didn't write.** The manifest `~/.config/agents/set-up-machine.json` lists every entry it wrote, per harness; everything else is the user's.
-- **The stricter rule wins** where two overlap, in the table or on the machine.
-- **The shared file is the user's outside the generated block.** The block between the `set-up-machine:rules` markers is regenerated from the table; elsewhere reconcile only adds what the file's shape lacks, and never rewrites a Defaults value or a workflow line.
-- **A semantic guard only gains the table's rules.** In a harness's guard settings (Claude Code's `autoMode`), the user's own entries stay, and only a rule this skill wrote is ever removed.
-- **Memory stays off.** Each harness's memory feature is turned off where it has one, and every memory file is listed as `removed`. Apply keeps a copy in the backup folder, so move a memory worth keeping into its layer before approving.
-- **Shared skills are installed, never guessed.** With a `skills-repo` value in the Defaults table (`<owner>/<repo>`), the plan installs that repo's skills globally and the audit shows them `present` once the skills CLI records a skill from it; with no value it prints a `none` line.
-- **Apply writes exactly the approved plan,** after copying each file it changes into `~/.config/agents/backups/<time>/`. It runs the plan's commands (an install) first, and writes nothing if one fails.
+   Use `removed` only for memory files, a harness's own global file whose every line is already in the shared file (it becomes a link), and this skill's own wiring that points at an old script. An entry a dropped row left behind is `extra`, for the user to remove.
+   - **With a `<skills-repo>` value:** the diff installs that repo's skills globally: `npx --yes skills add <owner>/<repo> -g -a codex -a claude-code -y`, leaving out `-a claude-code` when `~/.claude/skills` is a link to `~/.agents/skills`. It's `present` once `~/.agents/.skill-lock.json` records a skill from that source. With no value, it's a `none` line.
+3. **Ask once** for one approval of the whole diff. A change after that needs a new approval.
+4. **Back up** every file the diff changes or removes. Before writing any file, copy each one into `~/.config/agents/backups/<UTC time as YYYYmmddTHHMMSSZ>/`, at its path relative to the home folder (`.claude/settings.json`). Copy a symlink as a link.
+5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In a JSON file, change only the keys the diff names and keep the rest. Write through a symlink to its target.
+6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
 
-## Changing the rule table
+   Run `python3 <this skill>/scripts/verify.py` (Python 3.9+, standard library only; it writes nothing). It passes when it prints `rules ok`, a `hook wired` line for every harness found, and every `codex differs` line is a row codex.md says gets no rule.
 
-Edit `rules.json`, then run the steps. Each row:
+## Rule table
+
+`rules.json` holds each global rule once, by meaning, not in any harness's form. Each harness reference turns a row into that harness's entries; the hook and `verify.py` read it through `scripts/setupmachine/rules.py`, which refuses a malformed row.
+
+### A row
 
 | Field | Holds |
 |---|---|
 | `id` | a stable kebab-case name |
 | `level` | `deny`, `ask` or `allow-and-report` |
 | `summary` | what the rule covers, as it reads in the rule line |
-| `match` | what it covers, by meaning, in one of the three kinds below |
+| `match` | what it covers, in one of the three kinds below |
 | `reason` | why the rule exists |
 | `instruction` | for `deny`, what the agent does instead: an alternative, or "Stop, say why, and give the user the exact command; never work around it."; for `ask` and `allow-and-report`, how to go ahead |
-| `gap` | optional: what no harness can catch for the row (`echo $TOKEN`); every harness's audit names it |
-| `guard` | optional, `deny` rows: `label` and `rule`, a prose rule for a harness's semantic guard (Claude Code's auto mode), covering what the row's family can't list as patterns |
+| `samples` | `covers`: calls the row must catch; `leaves`: near misses it must let through. A shell command for a command row, a path for a file row, a tool name for an MCP row. `verify.py` checks them against the hook |
+| `gap` | optional: what no harness can catch for the row (`echo $TOKEN`); every audit names it |
 
-`match` kinds, told apart by their keys:
+### `match` kinds
 
-- **Command:** `program`, one bare name (`rm`) or a list of them; optional `subcommands`, alternative word lists after the program (`[["repo", "delete"], ["repo", "archive"]]`); optional `flags`, the flag groups the command carries, all of them, each listing one flag's names without dashes, a one-letter name being the short flag (`["r", "R", "recursive"]`); optional `operands`, words after the flags (`["777"]`), or a list of alternative word lists (`[["777"], ["a+rwx"]]`); optional `arguments: "none"`, the program with nothing after it (`env`, a bare `set`), or `arguments: "flags"`, the program with flags and nothing else (`declare -x`), which only the hook can tell apart; optional `files`, globs one of its operands must match (`cat .env`), with an optional `except`.
-- **File:** `paths`, globs relative to the project (`**/.env`) or starting `~/`, `access`, `read` or `write`, and an optional `except`, globs the row leaves out (`**/.env.example`).
-- **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of an MCP tool name (`mcp__<server>__<tool>`). Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID.
+A `match` object's keys say which kind it is:
 
-Adapters expand a row into every native entry it needs (each flag order and spelling, the `/bin/` and `/usr/bin/` paths, the harness's own file-rule kind, an `except` as the globs around it where the harness has no negation, or as an `allow` after the deny where its last match wins), and the shared file gets one rule line per row.
+- **Command:** `program`, a bare name (`rm`) or a list of them, and optionally:
+  - `subcommands`: alternative word lists after the program (`[["repo", "delete"], ["repo", "archive"]]`);
+  - `flags`: every flag group the command carries, each listing one flag's names without dashes, a one-letter name being the short flag (`["r", "R", "recursive"]`);
+  - `operands`: words right after the subcommand and flags (`["777"]`), or alternative word lists (`[["777"], ["a+rwx"]]`);
+  - `any_operand`: words any one of which may appear anywhere after the subcommand (`["main", "master"]`);
+  - `arguments: "none"`: the program with nothing after it (`env`); `arguments: "flags"`: with flags and nothing else (`declare -x`);
+  - `files`: globs one of its operands must match (`cat .env`), with an optional `except`;
+  - `variables`: globs over the names of the variables an argument expands (`*TOKEN*` covers `echo $API_TOKEN`, not `echo '$API_TOKEN'`).
+- **File:** `paths`, globs relative to the project (`**/.env`), or starting `~/` or `/`; `access`, `read` or `write`; an optional `except` (`**/.env.example`). A `read` row covers writes too.
+- **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of `mcp__<server>__<tool>`. Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID, so the row matches on every machine and account.
+
+### Spellings
+
+A harness that matches a command's text catches only the spellings it lists, so give it one entry per way of writing a command row:
+
+- **Programs:** each program as typed, then as `/bin/<program>` and `/usr/bin/<program>`, except shell builtins (`.`, `source`, `set`, `export`, `declare`, `typeset`, `unset`, `eval`, `alias`), which have no path.
+- **Flags:** a one-letter name is a short flag (`-r`), a longer one a long flag (`--recursive`). Every order of the groups, every spelling in each group, as separate words; and, when every group has a one-letter name, the one-letter names clustered in every order (`-rf`, `-fr`, `-Rf`, `-fR`).
+- **Order:** program, then subcommand words, then flags, then operands (`git push --force`, `chmod -R 777`).
+- **`find`'s options** (`-delete`) are one-dash words written after the path, so no prefix entry catches them: a command row on `find` gets no native entry, a gap the hook covers on every harness.
 
 ## Pre-tool hook
 
-One script, `scripts/pre_tool_hook.py`, reads the same `rules.json` and checks each tool call before it runs:
+`scripts/pre_tool_hook.py` (Python 3.9+, standard library only) is the hook every harness runs before each tool call. It reads `rules.json` and checks the call:
 
-- **deny** rows: it reads the command the way the shell runs it (any flag order or grouping, flags after the operands, `/bin/rm`, `RM` where the filesystem ignores case as macOS's does, `mkfs.ext4`, the inside of `bash -lc '…'`, `eval`, `sudo`, `xargs`, `find -exec`, every part of `a && b; c | d`), and refuses the call naming each refused part with its rule's reason and instruction. A wrapper that runs no command is read as itself (`env -u X` is `env`). It also checks file tools against file rows (a search's path and glob too: `Grep` with `*.env`), a command's redirect targets (`< .env` a read, `> .env` a write) and `tee`'s operands against them, a command's operands against its row's `files` (`source .env`), and MCP tools against mail-tool rows, including tools connected after the last plan. Paths fold case where the filesystem does (`.ENV` on macOS).
-- **allow-and-report** rows: it appends one JSON line per call to `<report folder>/<date>.jsonl`, readable by the user alone since a command can carry a secret, and lets the harness's own permissions decide.
-- **ask** rows stay native.
+- **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
+- **allow-and-report** rows: it writes one JSON line per call to `<report folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
+- **ask** rows: the harness's native ask entries do the asking.
 
-The native entries stay underneath, so a hook that fails or is switched off leaves them in force. Every harness's wiring fails open: a script that's gone lets calls through rather than blocking every one, and the plan names a hook script outside a skills install folder (`~/.agents/skills`, `~/.claude/skills`), such as a repo checkout, as a gap. The report folder is `report_dir` in `~/.config/agents/hook.json`, which the plan creates with `~/.local/state/agents/reports` and then leaves to the user. The script takes `--harness` (which payload and answer format), `--config` and `--rules`; each adapter's reference says how it's wired.
+### Wiring
 
-## Mail tools
+Each harness reference shows its wiring with `<script>` in place of the script's path. Replace it with the absolute path of `scripts/pre_tool_hook.py` in the installed skill (under `~/.agents/skills` or `~/.claude/skills`), never in a checkout or worktree, which can be deleted. If there is no installed copy, name the gap.
 
-Only the running harness knows which MCP tools it exposes, and their names differ by harness and by how a connector is attached. So plan asks each harness for its tool list, matches the table's MCP-tool rows against it, and prints a `found` line per row. If a harness can't be asked (not installed, not logged in, or a `--home` other than the user's own), the plan says so as a gap and keeps the entries it wrote before. `--tool-names <file>`, one name per line, supplies the list instead. opencode lists its tools only inside a session, so its plan matches the configured MCP servers instead and leaves their tools to the hook.
+The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call.
 
-## Checking a fresh Linux machine
+The report folder is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 
-`scripts/tests/linux/run.sh <repo> <output folder>` builds a Debian image with every harness installed and never logged in, installs the skills from the repo, runs plan, apply and plan in a throwaway container, and removes it. `probes.txt` in the output folder diffs against `scripts/tests/linux/probe.py` run on another machine: the hook fed each harness's sample calls, and `codex execpolicy check` samples. `sessions.sh`, run in a container kept after `in-container.sh`, adds real Codex turns against a local stand-in model; Claude Code and the Cursor CLI need a login for any session. No credentials go into the container.
+### What it can't see
 
-## Adding a harness
+Name these once in every audit:
 
-One adapter module in `scripts/setupmachine/adapters/`, registered in its `__init__.py`, owning the harness's memory setting too (move its entry out of `WITHOUT_MEMORY` in `scripts/setupmachine/memory.py`), and one reference file in `references/` covering the same headings as [Claude Code's](references/claude-code.md). Tests: `python3 -m unittest discover -s <this skill>/scripts/tests`.
+- a command inside a script file or another interpreter (`python -c`);
+- a command built from variables (`$cmd -rf x`);
+- an alias or function defined elsewhere;
+- an abbreviated long option (`--recur`);
+- a force push by refspec (`git push origin +main`);
+- a glob the shell expands (`cat .env*`);
+- each row's own `gap`.
+
+## References
+
+- [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, what counts as personal workflow, moving a harness's own file, and why memory stays off.
+- [references/rule-table.md](references/rule-table.md): changing a row of the rule table, changing the hook's code and its tests, and adding a harness.
+- One reference per harness, read for each harness found. Each says how the harness is found, where it keeps each setting, a row's native form with worked examples, the hook's wiring, and its gaps:
+  - [references/claude-code.md](references/claude-code.md): Claude Code.
+  - [references/codex.md](references/codex.md): Codex.
+  - [references/opencode.md](references/opencode.md): opencode.
+  - [references/cursor.md](references/cursor.md): Cursor's IDE and CLI.
+
+## Scripts
+
+- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine: each row's samples through the hook, and through Codex's own policy check.
+- [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
+- [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
