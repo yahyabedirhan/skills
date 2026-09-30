@@ -15,7 +15,9 @@ To design inside one service's codebase, at the level of its modules, classes an
 Requirements → Core entities → API → [Data flow] → High-level design → Deep dives
 ```
 
-1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply. Invoked inside a project with no instructions, explain that project's current design. When the purpose is unclear, ask what the user wants to do with the design, whether the system exists, and whether they want only an explanation. Read `delivery-framework.md` for what each stage covers, `existing-systems.md` when the system already exists, and a concept reference when a stage reaches its concept.
+1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply. Read `delivery-framework.md` for what each stage covers, `existing-systems.md` when the system already exists, and a concept reference when a stage reaches its concept.
+   - **Invoked inside a project with no instructions:** explain that project's current design.
+   - **When the purpose is unclear:** ask what the user wants to do with the design, whether the system exists, and whether they want only an explanation.
 2. **Requirements:** the few core features, about three, with the rest out of scope and a reason for each; and the 3-5 non-functional requirements that most constrain this system, quantified.
 3. **Core entities:** the nouns and actors the functional requirements need.
 4. **API:** the contract with the system's users, usually one endpoint per functional requirement.

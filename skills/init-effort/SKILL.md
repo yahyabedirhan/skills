@@ -20,11 +20,16 @@ Both the effort's thinking now and its build later happen in the worktree this s
 ## Flow
 
 1. **Decide where it lives:** an effort in an existing repo, which is the current one or one the idea names, or a new project that has no repo yet.
-2. **Name it.** Propose a short kebab-case effort name, and a branch that follows the project's branch naming, or `<area>/<effort>` when the project has none. Confirm both with the maintainer. For a new project, first propose a few project names and confirm one; when the idea comes with a reference project, propose names that stand on their own rather than echo it.
-3. **Create the new project,** for a new project only. Ask, every time, whether its GitHub repo is public or private, and which licence it takes, recommending MIT in the maintainer's name. Then create and push the repo. Read `project-creation.md` first.
-4. **Create the worktree** on the new branch with `<worktree-tool>`, from the latest default branch. Put it beside the main checkout unless the project keeps worktrees elsewhere. Give the branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
-5. **Write the idea into a handoff** in the worktree, in the project's handoff folder, else at `.handoff/<date>-<effort>.md`. It holds the idea as the maintainer gave it, the effort, the branch, the worktree, and, for a new project, its repo. Leave it uncommitted; the thinking session's handover commits it with the spec.
-6. **Start the thinking session** in the worktree through `<session-host>`, passing the worktree, the effort as the topic, `Thinking` as the role, and the starting prompt below. When it runs elsewhere, tell the maintainer where, and stop once it is working on the prompt or the maintainer says it started.
+2. **Name it.** Propose a short kebab-case effort name, and a branch that follows the project's branch naming, or `<area>/<effort>` when the project has none. Confirm both with the maintainer.
+   - **For a new project:** first propose a few project names and confirm one.
+     - **When the idea comes with a reference project:** propose names that stand on their own rather than echo it.
+3. **For a new project only, create it.** Ask, every time, whether its GitHub repo is public or private, and which licence it takes, recommending MIT in the maintainer's name. Then create and push the repo. Read `project-creation.md` first.
+4. **Create the worktree** on the new branch with `<worktree-tool>`, from the latest default branch, beside the main checkout. Give the branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
+   - **When the project keeps worktrees elsewhere:** put it there instead.
+5. **Write the idea into a handoff** in the worktree, in the project's handoff folder, else at `.handoff/<date>-<effort>.md`. It holds the idea as the maintainer gave it, the effort, the branch and the worktree. Leave it uncommitted; the thinking session's handover commits it with the spec.
+   - **For a new project:** it also holds its repo.
+6. **Start the thinking session** in the worktree through `<session-host>`, passing the worktree, the effort as the topic, `Thinking` as the role, and the starting prompt below.
+   - **When it runs elsewhere:** tell the maintainer where, and stop once it is working on the prompt or the maintainer says it started.
 
 The starting prompt is one line, and names only skills an agent can load:
 

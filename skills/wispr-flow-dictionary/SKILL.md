@@ -23,16 +23,21 @@ Run `status` first. When it reports a `CHANGED` schema, stop and inspect the cha
 When the user says a word came out wrong ("I said skill, it wrote SQL"), fix it in the same turn:
 
 1. `count` both forms over the full history (`--since 26w`), to see whether the wrong form is also a word the user means. SQL was: several dictations meant it.
-2. If the intended word is missing, add it as a word with `--restart`. If the word is there and `Since added` shows the mistake returning, propose a rule instead. If the wrong form is also a word the user means, propose no rule and tell the user why a rule would do harm.
+2. Choose the fix:
+   - **If the intended word is missing:** add it as a word with `--restart`.
+   - **If the word is there and `Since added` shows the mistake returning:** propose a rule instead.
+   - **If the wrong form is also a word the user means:** propose no rule, and tell the user why a rule would do harm.
 3. Tell the user what was added, and that the next review will show whether it held.
 
 ## Finding transcription mistakes
 
 Look for the words speech recognition gets wrong most, and more so with a non-native accent: names of people, companies, products, tools, and CLI commands.
 
-1. **Read** the dictionary, the `terms` table and the `--diff` history for the window; unless the user names a window, use the last 24 hours. Then read every dictation in the window, raw and formatted: `terms` and `--diff` miss mishearings that came out as ordinary words the formatter left unchanged ("verb tree", "two PR").
+1. **Read** the dictionary, the `terms` table and the `--diff` history for the window, the last 24 hours by default. Then read every dictation in the window, raw and formatted: `terms` and `--diff` miss mishearings that came out as ordinary words the formatter left unchanged ("verb tree", "two PR").
+   - **When the user names a window:** use that window instead.
 2. **Find candidates:** words that are wrong in context, such as a real word where a name belongs ("Herder session", "cloud code"), a name spelled several ways, or a command turned into a word ("Sila" for CLI). Check the raw text too; formatting sometimes hides a mishearing and sometimes fixes it.
-3. **Confirm the intended word** from the surrounding text and the user's projects: the one open now, and any other the dictation was about, which the `app` column shows. Grep them for the name. Where the intended word can't be established, list it under **Unclear** and ask.
+3. **Confirm the intended word** from the surrounding text and the user's projects: the one open now, and any other the dictation was about, which the `app` column shows. Grep them for the name.
+   - **Where the intended word can't be established:** list it under **Unclear** and ask.
 4. **Count** every misheard form and every intended form over the same window, and repeated snippets over the last 30 days.
 5. **Report**, in exactly this shape:
 
@@ -53,7 +58,9 @@ Look for the words speech recognition gets wrong most, and more so with a non-na
    - "<what Wispr wrote>": <the context>. What did you say?
    ```
 
-   Leave out anything already in the dictionary unless it is still being misheard after it was added; then it moves to **Rules to add** ("`CLI` is a word since 09-28, heard as Sila twice since"). Drop any section that is empty.
+   Leave out anything already in the dictionary.
+   - **When an entry is still being misheard after it was added:** it moves to **Rules to add** ("`CLI` is a word since 09-28, heard as Sila twice since").
+   - **When a section is empty:** drop it.
 6. **Write** only after the user approves the list: dry-run the batch first, tell the user Wispr Flow will close for a few seconds, write it with `--restart`, and give the user the batch id.
 
 The app syncs the dictionary to the user's account. Entries written this way have survived a restart; whether a sync ever drops them is not known, so say so when reporting a write.

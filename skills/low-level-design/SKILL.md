@@ -11,7 +11,9 @@ The recurring failure is structure added before it is needed: factories with one
 
 ## The flow
 
-1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix. Invoked with no instructions inside a project, write down that project's current design. When the purpose isn't clear, ask what the user wants to do with the design, whether the code exists, and whether they want only an explanation. For any purpose but a new design, read `session-purposes.md`.
+1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix. For any purpose but a new design, read `session-purposes.md`.
+   - **Invoked with no instructions inside a project:** write down that project's current design.
+   - **When the purpose isn't clear:** ask what the user wants to do with the design, whether the code exists, and whether they want only an explanation.
 2. **Requirements**: numbered, checkable requirements, and an out-of-scope list with a reason for each exclusion.
 3. **Entities and relationships**: the entities, the orchestrator that drives the main workflow, and how they relate, as arrows.
 4. **Class design**: each module's state and operations, derived from the requirements, and the folder tree.
