@@ -355,11 +355,19 @@ class BypassesAndFalsePositivesTest(unittest.TestCase):
         self.assertAnswers("allow", ("git push origin main", "git push origin HEAD:main", "git push --delete origin feat",
                                      "git push origin :feat"))
 
-    def test_mirror_clean_and_find_delete_ask(self):
+    def test_mirror_and_clean_ask(self):
         self.assertAnswers("ask", ("git push --mirror", "git push --mirror origin", "git clean -fdx", "git clean -f",
-                                   "git clean --force -d", "find . -delete", "find . -name '*.pyc' -delete",
-                                   "timeout 5 find . -type f -delete"))
-        self.assertAnswers("allow", ("git clean -n", "git clean -nd", "find . -name '*.pyc'", "find . -type d"))
+                                   "git clean --force -d"))
+        self.assertAnswers("allow", ("git clean -n", "git clean -nd"))
+
+    def test_find_delete_is_denied_wherever_it_hides(self):
+        for command in ("find . -delete", "find . -name '*.pyc' -delete", "timeout 5 find . -type f -delete",
+                        "/usr/bin/find /tmp/x -delete", 'bash -c "find . -delete"', "cd x && find . -empty -delete",
+                        "echo $(find . -delete)"):
+            self.assertEqual(answer(command), "deny", command)
+            self.assertIn("find-delete", denied_by(command), command)
+        self.assertAnswers("allow", ("find . -name '*.pyc'", "find . -type d", "find . -name delete",
+                                     "grep -r -- -delete src"))
 
     def test_the_process_environment_is_denied(self):
         for command in ("cat /proc/self/environ", "cat /proc/1/environ", "strings /proc/self/environ",
