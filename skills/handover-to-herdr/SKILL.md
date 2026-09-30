@@ -6,7 +6,7 @@ argument-hint: "Worktree path, topic, role, and the starting prompt"
 
 # Handover To Herdr
 
-This skill opens a new agent session in a Herdr tab and sends it its starting prompt. The skill that calls it, **handover** or **init-effort**, has already written the handoff and the prompt and decides what the new session does; this skill only starts that session in Herdr. For the Herdr CLI in general, use the **herdr** skill.
+This skill opens a new agent session in a Herdr tab and sends it its starting prompt. The skill that calls it, **handover** or **init-effort**, has already written the handoff and the prompt and decides what the new session does; this skill only starts that session in Herdr.
 
 It takes four inputs:
 
@@ -19,16 +19,14 @@ Closing an effort needs two more Herdr steps: finding the agents still working, 
 
 ## Parameters
 
-- `<agent-to-start>`: the command that starts the new agent. Unset, use this session's harness.
+- `<agent-to-start>`: the command that starts the new agent. Default: this session's harness.
 
 ## Herdr from anywhere
 
-This skill runs from inside a Herdr pane and from outside one, such as a desktop-app session: the `herdr` CLI reaches the server either way.
+The **herdr** skill has the full Herdr CLI contract, but it stops outside a Herdr pane. This skill also runs from outside one, such as a desktop-app session, because the `herdr` CLI reaches the server either way. Two rules replace the herdr skill's `HERDR_ENV` check for every command in this skill, `closing-an-effort.md` included:
 
-- Check that `herdr status` reaches a server; `HERDR_ENV` only says whether this session runs in a pane. If it doesn't reach one, say so and hand back to the calling skill, whose next option is this session or a pasted prompt.
+- Check that `herdr status` reaches a server; `HERDR_ENV` only says whether this session runs in a pane. If it doesn't reach one, say so and hand back to the calling skill.
 - Target explicit IDs read from Herdr's JSON, such as `w1` for a workspace, `w1:t1` for a tab and `w1:p1` for a pane. Pass `--no-focus` wherever a command takes it, and never use `--current`. That keeps every command off the pane the maintainer is using.
-
-The **herdr** skill has the full CLI contract but stops outside a pane; these rules replace its `HERDR_ENV` check for the commands below.
 
 ## 1. Open a tab in the worktree's workspace
 
@@ -72,7 +70,7 @@ herdr agent prompt <name> '<starting prompt>'
 herdr agent wait <name> --until working --timeout 60000
 ```
 
-Leave `--wait` off the prompt: it waits for the agent to settle, and a long run times out first. The handover is fire-and-forget, so `working` is the confirmation.
+Leave `--wait` off the prompt: it waits for the agent to settle, and a long run times out first.
 
 If the wait times out, look before acting. `herdr agent get <name>` shows the agent's state, and `herdr agent read <name> --source visible` shows its screen; leave `--lines` off, because it fails while the agent works. The prompt may have arrived even so, so resend it only when the screen shows it didn't.
 
