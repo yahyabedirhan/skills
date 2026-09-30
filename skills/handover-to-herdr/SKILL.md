@@ -15,7 +15,7 @@ It takes four inputs:
 - the new session's **role**: `Orchestrator`, `Thinking`, or another one-word role;
 - the **starting prompt**.
 
-Closing an effort needs two more Herdr steps: finding the agents still working, and freeing the closing session's own worktree from outside it. When `/close-effort` calls this skill for those, read [closing-an-effort.md](closing-an-effort.md).
+Closing an effort needs two more Herdr steps: finding the agents still working, and freeing the closing session's own worktree from outside it. When `/close-effort` calls this skill for those, read [close-effort-commands.md](close-effort-commands.md).
 
 ## Parameters
 
@@ -23,7 +23,7 @@ Closing an effort needs two more Herdr steps: finding the agents still working, 
 
 ## Herdr from anywhere
 
-`/herdr` documents the full Herdr CLI, but it requires `HERDR_ENV=1`, which is set only inside a Herdr pane. Run this skill from outside a pane too, such as from a desktop-app session: the `herdr` CLI reaches the server either way. For every command in this skill, `closing-an-effort.md` included, follow these two rules instead of `/herdr`'s `HERDR_ENV` check:
+`/herdr` documents the full Herdr CLI, but it requires `HERDR_ENV=1`, which is set only inside a Herdr pane. Run this skill from outside a pane too, such as from a desktop-app session: the `herdr` CLI reaches the server either way. For every command in this skill, `close-effort-commands.md` included, follow these two rules instead of `/herdr`'s `HERDR_ENV` check:
 
 - Check that `herdr status` reaches a server; `HERDR_ENV` only says whether this session runs in a pane. If it doesn't reach one, say so and hand back to the calling skill.
 - Target explicit IDs read from Herdr's JSON, such as `w1` for a workspace, `w1:t1` for a tab and `w1:p1` for a pane. Pass `--no-focus` wherever a command takes it, and never use `--current`. That keeps every command off the pane the maintainer is using.

@@ -45,7 +45,7 @@ to-tickets   tracer-bullet tickets, each naming what blocks it
 handover     hand over to an orchestrator
 ```
 
-The starting prompt names these skills and the agent loads each one itself: the user types no slash command. Run it in one unbroken context window, so the spec and tickets build on the same reasoning. [folders.md](folders.md) says where the spec and tickets land.
+The starting prompt names these skills and the agent loads each one itself: the user types no slash command. Run it in one unbroken context window, so the spec and tickets build on the same reasoning. [folder-standard.md](folder-standard.md) says where the spec and tickets land.
 
 ## Handover
 
