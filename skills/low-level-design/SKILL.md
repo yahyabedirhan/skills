@@ -107,7 +107,7 @@ A session is a loop: present, the user gives feedback, revise, present again, un
 
 ## Showing and asking
 
-Load the **show-me** skill and present every stage visually, with prose only for the reasons behind choices:
+Load `/show-me` and present every stage visually, with prose only for the reasons behind choices:
 
 - requirements and entities as short lists, relationships as arrows;
 - the folder tree with one comment per line saying what each file or folder owns;

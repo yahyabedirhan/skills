@@ -1,6 +1,6 @@
 # Effort Lifecycle
 
-How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. The thinking builds on Matt Pocock's skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, `prototype`, `tdd`, `code-review`) and on forks of his `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills` (as **set-up-project**), which replace the upstream four; the building runs on the orchestrate skills. Routine upkeep (data edits, small fixes) doesn't need any of this: it runs in the current checkout.
+How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. The thinking builds on Matt Pocock's skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, `prototype`, `tdd`, `code-review`) and on forks of his `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills` (as `/set-up-project`), which replace the upstream four; the building runs on the orchestrate skills. Routine upkeep (data edits, small fixes) doesn't need any of this: it runs in the current checkout.
 
 An effort passes through five phases in one worktree on one branch:
 
@@ -12,7 +12,7 @@ BUILD      orchestrate the tickets through delegates; open the pull request
 CLOSE      the user approves; the agent merges, follows up, and cleans up
 ```
 
-There are two paths through it, chosen by the session host, where new agent sessions open. The host path, when it's Herdr, automates every step between phases through the **handover-to-herdr** skill; the plain path runs anywhere, with this session carrying on or the user pasting each starting prompt.
+There are two paths through it, chosen by the session host, where new agent sessions open. The host path, when it's Herdr, automates every step between phases through `/handover-to-herdr`; the plain path runs anywhere, with this session carrying on or the user pasting each starting prompt.
 
 ```text
                 START                          HANDOVER                        BUILD
@@ -31,7 +31,7 @@ Plain path      init-effort                    handover                        o
 
 ## Start
 
-**init-effort** names the effort and creates its branch and worktree. The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
+`/init-effort` names the effort and creates its branch and worktree. The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
 
 For a brand-new project it first creates the repository, and the project's first effort then starts like any other. It writes the idea into a handoff in the worktree and starts the thinking session on it.
 
@@ -49,15 +49,15 @@ The starting prompt names these skills and the agent loads each one itself: the 
 
 ## Handover
 
-The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready, starts the new session on the handoff with a one-line prompt, and confirms it started. The handing session then stops, and stays open for reference.
+The session handing over owns the clean ending, through `/handover`. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready, starts the new session on the handoff with a one-line prompt, and confirms it started. The handing session then stops, and stays open for reference.
 
 ## Build
 
-**orchestrate-with-handoff** picks up the handoff and runs **orchestrate-effort**, which delegates the tickets to sub-agents in parallel, each building its ticket with **implement** in its own worktree, integrates each ticket as its own commit, and opens the pull request with **to-pr** after one branch review. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking". The orchestrator follows the **orchestrating** discipline throughout.
+`/orchestrate-with-handoff` picks up the handoff and runs `/orchestrate-effort`, which delegates the tickets to sub-agents in parallel, each building its ticket with `/implement` in its own worktree, integrates each ticket as its own commit, and opens the pull request with `/to-pr` after one branch review. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking". The orchestrator follows the `/orchestrating` discipline throughout.
 
 ## Close
 
-The user reviews and approves the pull request: that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. Workspaces and agent sessions stay open for the user to close.
+The user reviews and approves the pull request: that is their only step. The agent then merges it and closes the effort with `/close-effort`, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. Workspaces and agent sessions stay open for the user to close.
 
 ## Why two sessions
 

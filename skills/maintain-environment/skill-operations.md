@@ -1,6 +1,6 @@
 # Skill operations
 
-How a skill is created, installed, updated, moved, forked, published, removed and audited, with the `npx skills` CLI. Part of the **maintain-environment** skill.
+How a skill is created, installed, updated, moved, forked, published, removed and audited, with the `npx skills` CLI. Part of `/maintain-environment`.
 
 A skill is one of two kinds.
 
@@ -31,7 +31,7 @@ A skill moves from project to global once the user wants it in a second project.
 
 Each operation that changes an install ends with a check: list the scope's folder, confirm `SKILL.md` resolves through `~/.claude/skills` (global) or `.claude/skills` (project), and confirm the lock file names the expected source.
 
-**Create a project skill.** Write it under `<project>/.agents/skills/<name>/SKILL.md`, following the **writing-for-agents** skill when it is installed. Then link it for Claude Code from the project root, and commit the link with the project (the link itself, not a copy of the folder):
+**Create a project skill.** Write it under `<project>/.agents/skills/<name>/SKILL.md`, following `/writing-for-agents` when it is installed. Then link it for Claude Code from the project root, and commit the link with the project (the link itself, not a copy of the folder):
 
 ```bash
 ln -s ../../.agents/skills/<name> .claude/skills/<name>
@@ -67,7 +67,7 @@ Every operation that changes `<path-to-skills-repo>` starts on a branch and ends
 1. Before the first edit, branch from an up-to-date `main`: `<skill>/<topic>` for one skill, `skills/<topic>` when the change spans skills.
 2. Make the change and commit it on the branch.
 3. For a new skill or a fork that changes behaviour, run Auditing a new skill; on the same branch, commit the applied fixes and the audit's full findings (applied, and left with the reason) in the skill's decision record (such as `docs/decisions/<name>.md`).
-4. Push the branch and open the pull request through the **to-pr** skill. For an audited skill, summarise the audit in the description's *Special things to note* and link the decision record that holds the full findings.
+4. Push the branch and open the pull request through `/to-pr`. For an audited skill, summarise the audit in the description's *Special things to note* and link the decision record that holds the full findings.
 
 The operation ends with the pull request open. The merge happens when the user merges it or asks the agent to. `npx skills` installs from the default branch, so installs and updates run after the merge: the session told "merged" or "merge it" runs them, in every scope that installs the skill.
 

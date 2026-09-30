@@ -5,7 +5,7 @@ description: Change what agents run with - a permission rule, a global or projec
 
 # Maintain the environment
 
-The environment is what agents run with: permissions, global instructions, project instructions, and skills. This skill owns change to it. Setting up a machine or a project belongs to **set-up-machine** and **set-up-project**; this skill decides where a change goes, makes it at its source, and carries it everywhere it applies.
+The environment is what agents run with: permissions, global instructions, project instructions, and skills. This skill owns change to it. Setting up a machine or a project belongs to `/set-up-machine` and `/set-up-project`; this skill decides where a change goes, makes it at its source, and carries it everywhere it applies.
 
 ## Parameters
 

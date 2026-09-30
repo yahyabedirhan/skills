@@ -1,6 +1,6 @@
 # The shared global instructions file
 
-`~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. It holds this person's workflow and the explanation of each global rule, and nothing a teammate would need: that goes in the project's `AGENTS.md` or a skill (**maintain-environment**'s `where-things-go.md` has the layers and the team test).
+`~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. It holds this person's workflow and the explanation of each global rule, and nothing a teammate would need: that goes in the project's `AGENTS.md` or a skill (`/maintain-environment`'s `where-things-go.md` has the layers and the team test).
 
 ## Its shape
 
@@ -57,7 +57,7 @@ A line belongs here only when it's about this person, not the work: how they lik
 When a harness still keeps its own global file (`~/.claude/CLAUDE.md` with more than the import line, an old `~/.codex/AGENTS.md`), move it line by line before the harness's file becomes a link or a single import:
 
 1. Decide each line's home by the list above: a Defaults row, a personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
-2. Write the Defaults values and workflow lines into the shared file; make each skill edit at its source, as **maintain-environment** says.
+2. Write the Defaults values and workflow lines into the shared file; make each skill edit at its source, as `/maintain-environment` says.
 3. Leave the harness's file holding only its link to the shared file.
 
 Done when every line of the old file has a named home.

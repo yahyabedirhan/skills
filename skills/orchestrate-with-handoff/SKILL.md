@@ -10,6 +10,6 @@ disable-model-invocation: true
 Receiving the handover is the maintainer's go-ahead, so start work without asking for one.
 
 1. Read the handoff. Confirm you are in the worktree and on the branch it names; if not, say so and stop, because the effort's work lives there.
-2. Run the **orchestrate-effort** skill on the spec and tickets the handoff names, and on the handoff itself.
+2. Run `/orchestrate-effort` on the spec and tickets the handoff names, and on the handoff itself.
 
 When the spec, tickets and handoff leave a question open and the handoff says the handing session can be reached, look for the answer in that session before you decide it yourself.

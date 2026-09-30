@@ -24,7 +24,7 @@ There is no `tmp/`, no `.prs/` and no vendor-named folder: one ignored folder ho
 
 ## Setting up a project
 
-**set-up-project** applies this section. It adds both ignored paths to `.gitignore`:
+`/set-up-project` applies this section. It adds both ignored paths to `.gitignore`:
 
 ```gitignore
 .scratch/
