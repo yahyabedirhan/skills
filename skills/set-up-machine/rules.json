@@ -368,10 +368,6 @@
       "reason": "It prints the environment's tokens and keys, or one of them, into the agent's context.",
       "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`), and never print one another way (`echo $NAME`); if you need a value, stop, say why, and give the user the exact command; never work around it.",
       "gap": "a variable expanded inside another command (`echo $TOKEN`) prints its value, and no rule can tell that from ordinary use; the rule line asks the agent not to",
-      "guard": {
-        "label": "Environment Variable Access",
-        "rule": "Reading or revealing environment variables or env files: printing, echoing, dumping or listing the environment or any variable in it (e.g. `echo $VAR`, `printenv`, `env`, `export -p`, a bare `set`, `os.environ`, `process.env`), or reading `.env` / `.env.*` files by any route (shell, script, interpreter, file tool). The user reads these themselves: stop, say why, and give the user the exact command. Passing a variable into a command without printing it (e.g. `curl -H \"Authorization: Bearer $TOKEN\"`) and setting one for a single command (`FOO=1 cmd`, `env FOO=1 cmd`) are not this rule. `.env.example` holds names only and is not an env file for this rule."
-      },
       "samples": {
         "covers": ["printenv", "printenv TOKEN"],
         "leaves": ["test -n \"$TOKEN\""]
