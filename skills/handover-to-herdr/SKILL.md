@@ -1,6 +1,6 @@
 ---
 name: handover-to-herdr
-description: Start a new session in its own Herdr tab and send it a starting prompt - open the worktree as a workspace, label the tab, start the agent, confirm it's working - and close an effort's Herdr workspaces. Use when handing over through Herdr, when closing an effort whose session host is Herdr, or when another skill says to.
+description: Start a new session in its own Herdr tab and send it a starting prompt - open the worktree as a workspace, label the tab, start the agent, confirm it's working - and free a closing effort's own worktree from outside it. Use when handing over through Herdr, when closing an effort whose session host is Herdr, or when another skill says to.
 argument-hint: "Worktree path, topic, role, and the starting prompt"
 ---
 
