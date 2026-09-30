@@ -1,12 +1,12 @@
 # What a project's harness files can do to the global rules
 
-The facts behind the audit, per harness. The global rules are the machine's safety rails, written by **set-up-machine** from its rule table; a project's own files are for convenience and add only `allow` entries for the project's own commands. The code is `scripts/setupproject/audit.py`; the sources are the repo's research, `docs/research/harness-capabilities.md` (each harness's section 5, "Can a project override the global rules?") and `docs/research/auto-mode-semantic-guard.md` (1.3), and set-up-machine's adapter references.
+The facts behind the audit, per harness. The global rules are the machine's safety rails, written by **set-up-machine** from its rule table; a project's own files are for convenience and add only `allow` entries for the project's own commands. Harness formats change: check the docs set-up-machine's harness references link. Sources: the repo's research, `docs/research/harness-capabilities.md` (each harness's section 5, "Can a project override the global rules?") and `docs/research/auto-mode-semantic-guard.md` (1.3).
 
 ## How the audit reads a rule
 
-Each deny and ask row of set-up-machine's `rules.json` becomes samples of what it covers: every spelling its adapters expand it to, with an operand after it (`rm -fr x`, `/bin/rm -rf x`, `git push --force-with-lease x`), sample paths for a file row (`.env`, `sub/.env`, `secrets/key`, `~/.ssh/key`), and the row's server and tool regexes for an MCP row. A project entry that matches a sample covers the rule. `allow-and-report` rows are left out: a project allow can't make them looser.
+Each deny and ask row of set-up-machine's `rules.json` carries `samples.covers`: commands (`rm -fr x`, `git push --force-with-lease`), paths (`.env`, `sub/.env.local`, `~/.ssh/id_ed25519`) or MCP tool names. A project entry that matches one of them, by the harness's own matching below, covers the rule; for an MCP row, also check the row's `server` and `tool` regexes against the entry. `allow-and-report` rows are left out: a project allow can't make them looser. Check every harness's files, whether or not that harness is set up on this machine.
 
-## Lines
+## Findings
 
 - `weakens`: in at least one harness, the rule no longer holds as the machine sets it. The audit fails.
 - `overlaps`: a project allow covers the rule's command, and the rule still wins everywhere. Listed so the entry can be narrowed; allow-only means a project's allow names its own commands, not a rail's.
@@ -16,8 +16,8 @@ Each deny and ask row of set-up-machine's `rules.json` becomes samples of what i
 ## Claude Code: `.claude/settings.json`, `.claude/settings.local.json`
 
 - **Permissions can't be loosened.** A user deny or ask wins over any project allow.
-- **Auto mode:** a project allow resolves before auto mode's classifier, so it can route a command around the guard, unless the user settings hold `autoMode.classifyAllShell: true`, which set-up-machine writes. A project allow over a deny command row is `weakens` without it and `overlaps` with it. `autoMode` itself is read only from user settings, so a project's is a `gap` that does nothing.
-- **Switches that weaken:** `"disableAllHooks": true` turns every hook off, the pre-tool hook included; `"autoMemoryEnabled": true` turns memory back on; `"disableAutoMode"` turns auto mode and its guard off. Each is `weakens`.
+- **Auto mode:** a project allow over a deny command row is `overlaps`: the user's deny and the pre-tool hook still refuse the command. `autoMode` is read only from user settings, so a project's is a `gap` that does nothing.
+- **Switches that weaken:** `"disableAllHooks": true` turns every hook off, the pre-tool hook included; `"autoMemoryEnabled": true` turns memory back on; `"disableAutoMode"` turns auto mode off. Each is `weakens`.
 - **Read by the Cursor CLI too:** it unions the `allow` and `deny` lists of the project's `.claude/settings.json` (not `settings.local.json`) with its own, and has no ask level. So an allow there that covers an ask row (`Bash(git push *)` over `git push --force-with-lease`) is `weakens`: the Cursor CLI runs it without a prompt.
 
 ## Cursor CLI: `.cursor/cli.json`, from the git root down
@@ -44,4 +44,4 @@ Named so nothing here reads as checked: opencode agents defined in `.opencode/ag
 
 ## Fixing a line
 
-A project harness file is the project's: change it only with the user's approval. For `weakens`, remove the entry or narrow it to the project's own commands (`Bash(npm test *)` rather than `Bash(npm *)`, never a pattern that reaches a rail's command). For a rail the project wants (a deny, or a stricter level), add it through **maintain-environment**'s rule table when every project needs it, else keep it as an `extra`.
+A project harness file is the project's: change it only with the user's approval. For `weakens`, remove the entry or narrow it to the project's own commands (`Bash(npm test *)` rather than `Bash(npm *)`, never a pattern that reaches a rail's command). For a rail the project wants (a deny, or a stricter level), add it through `/set-up-machine`'s rule table when every project needs it, else keep it as an `extra`.

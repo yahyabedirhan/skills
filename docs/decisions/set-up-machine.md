@@ -105,3 +105,55 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 - **A trial `--home` never starts a real harness.** Claude Code's and Cursor's tool discovery read the real machine's config and login, so under a `--home` other than the user's own the plan skips it, names the gap and keeps the mail entries written before, unless `--tool-names` supplies the list.
 - **Searches are checked by path and glob.** A `Grep` (Claude Code, Cursor) or `grep` (opencode's `include`) whose glob names a file row's files by name (`*.env`, `.env*`) is refused; a glob matching ordinary names too (`*`, `*.*`) is a search over the folder, which the hook doesn't expand, named in each adapter's file-row gap.
 - **File paths fold case where program names do** (macOS, Windows), so `.ENV` meets `**/.env` there.
+
+## 2026-09-30: references, not scripts (#81)
+
+- **The agent sets each harness up from its reference; the adapters and the plan/apply engine are gone.** This reverses the entries above that describe adapter modules, the reconcile script, the plan id and the manifest; they stay as the record. The spec asked for one adapter per harness as a reference file, and harness formats change faster than a script frozen at one version can follow. Each reference now carries what only the code knew (native forms with worked examples, listing commands, hook payloads and answers, Codex's trust hash) and tells the agent to check the harness's current docs first.
+- **Three things stay code:** the pre-tool hook, `rules.json`, and `verify.py`. Verify is a test, not a setup step: it feeds each row's samples to the hook, runs the plain commands through `codex execpolicy check`, and checks that every harness's hook is wired to a script that exists.
+- **Every row carries `samples`** (`covers` and `leaves`). They are the rows' worked examples for agents, the data verify checks, and what set-up-project's audit matches a project entry against.
+- **Codex's check reports and never fails.** Some rows get no Codex rule by design (shell rows, bare rows, rows on files), so a `differs` line is read against references/codex.md; a `stricter` line is a user rule the diff keeps.
+- **No manifest.** Without code to keep it, "never remove what it didn't write" becomes: the diff removes only memory files, a harness's own global file that becomes a link, and this skill's own wiring pointing at an old script. An entry a dropped row left behind is `extra`, for the user to remove.
+- **Backups stay where they were,** `~/.config/agents/backups/<time>/`, taken by the agent before any write.
+- **The agent writes Codex's `trusted_hash` as part of the approved diff,** and approving the whole diff stands in for Codex's `/hooks` review (confirmed by the maintainer). `verify.py --codex-trust-hash` computes it, so the hashing lives in one place, and verify checks the entry.
+- **The auto-mode guard is optional and stays off** until the probes in #65 run. The references describe it; the diff lists each guard as `none` meanwhile.
+- **The opencode plugin is a template,** `references/opencode-plugin.js`, with the hook command filled in, so the agent copies it rather than writing JavaScript.
+- **`~/.config/agents/hook.json` is optional.** The hook already defaults to `~/.local/state/agents/reports`; the file is only for another folder.
+- **The Linux container runs verify and the unit tests.** Without a plan/apply script there is no setup to run there, and the Codex session probes needed one; they remain described in references/codex.md.
+
+## 2026-09-30: the hook's known bypasses (#82)
+
+- **Quoting is read in one pass before tokenizing.** A scanner tracks single and double quotes, `$'…'`, escapes, comments, `$(…)`, backticks and `$(( ))`, so a `<<` counts as a heredoc only where the shell reads code, and a substitution inside single quotes or escaped stays text. The regexes it replaces couldn't tell quoted from unquoted text. It also reads the substitutions in an unquoted heredoc's body, a bypass the review didn't list.
+- **More wrappers and shells:** `busybox`, `watch`, `setsid`, `flock`, `parallel`, `script`, `chronic`, `unbuffer` and `arch`, and `fish`, `ash`, `mksh`, `csh` and `tcsh`. `watch` and `parallel` also have their words read as one shell string, and `flock -c` and `script -c` their option's string. A pipe into a shell reads the words before it joined, and one by one.
+- **The verdict names ask rows too,** so tests and verify can check them, but the hook still says nothing for them: the native ask entries do the asking, as before.
+- **Deleting `main` covers `master` too**, as two rows (the `--delete` form and the empty refspec form), through a new `any_operand` match key: the branch name can sit anywhere after `push`.
+- **`/proc/*/environ` is a file row and a command row,** so file rows may now start with `/`.
+- **`.env.sample`, `.env.template` and `.env*.md` are readable,** beside `.env.example`: templates and docs about env files, not env files.
+- **Two gaps are named, not closed:** a glob the shell expands (`cat .env*`) reaches a `.env` file under a name the hook never sees, and `ps e`/`ps eww` print environments through letters no rule can tell from ordinary `ps` options.
+
+
+## 2026-09-30: environment defaults
+
+- **The global section is `## Environment defaults`, written in plain lowercase words.** It was `## Defaults`, and the skills called it "the Defaults table", "the global Defaults" and "a Defaults row", as if it were a named source of truth. The maintainer never meant a special term. "Tools" was considered and dropped, since it reads as an agent's tools. A project's `AGENTS.md` uses the same heading for its own rows, and `/set-up-project` writes it.
+- **The role `agent-to-start` is now `agent`,** matching the `<agent>` placeholder the maintainer chose in the effort skills.
+
+## 2026-09-30: the first live run (#89)
+
+- **`~/.claude/CLAUDE.md` is a symlink to the shared file, not an `@` import.** The maintainer chose it on the first live run: the shared `AGENTS.md` is the one source, and every harness that can reads it through a link. Claude Code follows the link as it does Codex's and opencode's. An import-only file from the earlier form becomes the link.
+- **Claude Code's absolute file paths take `//`.** Its permission rules read `/path` as relative to the settings file and `//path` as absolute, so the `proc-environ-read` row is `Read(//proc/**/environ)`. The reference had said `/` paths stay as they are.
+
+## 2026-09-30: no auto-mode guard; one line for environment variables
+
+- **The `guard` field and Claude Code's auto-mode section are gone.** The probes on #65 ran seven environment and `.env` reads with and without section 6.1's `hard_deny` rule. The guard's only extra catch was `env | grep`, which the hook already refuses as `env-dump`; a script that prints `.env` got through every time, and `cat .env` did too under the client-side classifier. It would add a classifier call to every shell command and close no gap, so set-up-machine writes no `autoMode` rules. Auto mode's built-in rules stay as Claude Code ships them.
+- **The generated block ends with an environment-variables paragraph.** The rows catch the common commands (`env`, `printenv`, `export -p`, reading or sourcing `.env`, the file tools); nothing pattern-based catches `echo $TOKEN`, an interpreter or a script. The maintainer asked for one plain instruction covering every route, so the block closes with it. Keeping secrets out of reach (out of the shell environment, or refused by an OS-level sandbox) is the only real prevention; the maintainer's projects hold no secrets in the environment today.
+
+## 2026-09-30: printing a secret-looking variable (#97)
+
+- **A command row can match the variables its arguments expand.** The new `variables` key holds case-insensitive globs over variable names; `env-print-secret` refuses `echo`, `printf` and `print` when an argument expands a name matching `*TOKEN*`, `*KEY*`, `*SECRET*`, `*PASSWORD*`, `*PASSWD*` or `*CREDENTIAL*`. It was `env-print`'s gap: `echo $TOKEN` can't be told from `echo $HOME` by text, but a secret's name usually says what it is.
+- **The hook reads quoting to tell an expansion from text.** Tokenising drops quotes, so `echo '$API_TOKEN'` and `echo $API_TOKEN` became the same word. `mark_expansions` marks each `$` the shell would expand before tokenising, and only rows with `variables` read the marked words, so every other row sees commands as before. `${#NAME}` (a length) and passing a variable to another command (`curl -H "Bearer $TOKEN"`) stay allowed.
+- **No native entry anywhere.** No harness's patterns can match a variable's name inside an argument; each reference lists it as a gap the hook covers.
+
+## 2026-09-30: `find -delete` is denied (#92)
+
+- **`find-delete` moved from ask to deny.** Its rule line said "asks first", but nothing asked: find writes `-delete` after the path, so no harness's prefix entry catches it, and the hook leaves ask rows to the harness. The maintainer asked for it to be blocked as far as possible, so the hook now refuses it on every harness, behind wrappers, `bash -c` and `$(…)` too. The instruction says to list with `find`, then move the files into `.scratch/`.
+- **No native entry for `find`'s options.** *Spellings* now says so for every harness; the hook is the only layer that sees them.
+

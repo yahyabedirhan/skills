@@ -1,14 +1,12 @@
 # Efficiency analysis
 
-What one run of a skill costs in tokens and minutes, and how to make the next run cheaper. Run it only when the user asks for it, usually after a new skill's first real run.
+Measure what one run of a skill costs in tokens and minutes, and find how to make the next run cheaper.
 
 ## 1. Find the run
 
-- The session transcript: a JSONL file under `~/.claude/projects/<project>/<session-id>.jsonl` (Codex: `~/.codex/sessions/`).
-- The **phases**: split the run at the user's messages, so each phase is one request and the time spent waiting for the user shows up as its own phase.
-- Every sub-agent the run dispatched. Its tokens live in its own transcript, not the parent's; the completion notice reports its total tokens, tool uses and duration.
-
-Done when every phase has a start and end time, and every sub-agent is named with its totals.
+- Find the session transcript: `~/.claude/projects/<project>/<session-id>.jsonl` for Claude Code, or under `~/.codex/sessions/` for Codex.
+- Split the run into **phases** at the user's messages, so each phase is one request and the time spent waiting for the user shows up as its own phase.
+- Find every sub-agent the run dispatched. Its tokens live in its own transcript, not the parent's; its completion notice reports its total tokens, tool uses and duration.
 
 ## 2. Measure
 
@@ -16,11 +14,9 @@ Done when every phase has a start and end time, and every sub-agent is named wit
 python3 <skill-dir>/scripts/session-usage.py <transcript.jsonl> --split <HH:MM:SS> ...
 ```
 
-It prints the user-message timestamps (to choose `--split` points) and, per phase: model calls, output tokens, cache reads, cache writes and uncached input. Add wall time per phase and the duration of each slow command (renders, installs, crawls, long waits) from the tool results.
+It prints the user-message timestamps in UTC, to choose `--split` points from, and per phase: model calls, output tokens, cache reads, cache writes and uncached input. It reads only Claude Code transcripts, so count a Codex run's tokens from its transcript by hand. Add wall time per phase and the duration of each slow command (renders, installs, crawls, long waits) from the tool results.
 
-Plan cost: on a subscription, report the host's usage reading (percent of the 5-hour and weekly windows, from the app's usage tool or `/usage`). On API billing, price the tokens with the current rates from the claude-api skill, never from memory.
-
-Done when the table has every phase and sub-agent, and plan usage or price is stated.
+Plan cost: on a subscription, report the host's usage reading (percent of the 5-hour and weekly windows, from the app's usage tool or `/usage`). On API billing, price the tokens with the current rates from `/claude-api`, never from memory, because rates change.
 
 ## 3. Split one-time from per-run
 
@@ -31,8 +27,8 @@ Mark each cost **one-time** (learning a tool, reading its docs, exploring assets
 Rank them by the saving they buy:
 
 - **Context re-reads** usually dominate: every model call re-reads the whole context, so cost grows as calls × context size. Run a heavy phase in a fresh sub-agent that starts from a short brief and returns a short report; batch commands into fewer calls; keep large outputs in files and read excerpts.
-- **Authored output**: code or prose written fresh each run moves into scripts and templates the skill ships, so a run writes only its data.
-- **Waiting**: slow commands run in the background while other work continues, with a time budget.
+- **Authored output**: move code or prose written fresh each run into scripts and templates the skill ships, so a run writes only its data.
+- **Waiting**: run slow commands in the background, each with a time budget, while other work continues.
 - **Images**: every screenshot read costs tokens; review one contact sheet rather than each frame.
 - **Model**: judge cost per task, not per token. A stronger model that finishes in fewer calls is usually cheaper overall, so keep the session's model unless a measured run says otherwise.
 

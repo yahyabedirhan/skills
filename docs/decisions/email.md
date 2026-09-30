@@ -15,3 +15,8 @@ The decisions behind the `email` skill. This file is for maintaining it and is n
 ## 2026-09-28 (later)
 
 - **The skill says how, never when.** Workflows in a tool skill (start of day, triage, end of day) framed actions like archiving as routine, and a project rule could then turn them into actions nobody asked for. The skill now covers only how to read with Spark, how to act with Gmail, and which to pick. The mechanics (read, mark done, pin, label, draft a reply) stay; deciding what to do with an email belongs to the user or to project instructions. The safety facts stay: denied tools, `spark event` sending invitations, and `delete_label` touching every email.
+
+## 2026-09-30
+
+- **Archiving is the only change made without asking.** Every other write, such as a pin, a label, a draft, an undo or a calendar event, waits until the user asks for that exact change, or agrees when the agent names it. The Gmail tools table now says which tools read freely, which archive freely, and which wait for the user. The maintainer asked for it: a draft written unasked is still a change in their mailbox.
+- **The skill uses tables and lists, not packed sentences.** The allowed and denied tools, the two tools and the Spark-to-Gmail mapping each became a table or a list, instead of one sentence carrying a dozen names.
