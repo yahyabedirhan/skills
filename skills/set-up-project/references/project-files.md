@@ -1,12 +1,12 @@
 # What a project's harness files can do to the global rules
 
-The facts behind the audit, per harness. The global rules are the machine's safety rails, written by **set-up-machine** from its rule table; a project's own files are for convenience and add only `allow` entries for the project's own commands. The code is `scripts/setupproject/audit.py`; the sources are the repo's research, `docs/research/harness-capabilities.md` (each harness's section 5, "Can a project override the global rules?") and `docs/research/auto-mode-semantic-guard.md` (1.3), and set-up-machine's adapter references.
+The facts behind the audit, per harness. The global rules are the machine's safety rails, written by **set-up-machine** from its rule table; a project's own files are for convenience and add only `allow` entries for the project's own commands. Harness formats change: check the docs set-up-machine's harness references link. Sources: the repo's research, `docs/research/harness-capabilities.md` (each harness's section 5, "Can a project override the global rules?") and `docs/research/auto-mode-semantic-guard.md` (1.3).
 
 ## How the audit reads a rule
 
-Each deny and ask row of set-up-machine's `rules.json` becomes samples of what it covers: every spelling its adapters expand it to, with an operand after it (`rm -fr x`, `/bin/rm -rf x`, `git push --force-with-lease x`), sample paths for a file row (`.env`, `sub/.env`, `secrets/key`, `~/.ssh/key`), and the row's server and tool regexes for an MCP row. A project entry that matches a sample covers the rule. `allow-and-report` rows are left out: a project allow can't make them looser.
+Each deny and ask row of set-up-machine's `rules.json` carries `samples.covers`: commands (`rm -fr x`, `git push --force-with-lease`), paths (`.env`, `sub/.env.local`, `~/.ssh/id_ed25519`) or MCP tool names. A project entry that matches one of them, by the harness's own matching below, covers the rule; for an MCP row, also check the row's `server` and `tool` regexes against the entry. `allow-and-report` rows are left out: a project allow can't make them looser. Check every harness's files, whether or not that harness is set up on this machine.
 
-## Lines
+## Findings
 
 - `weakens`: in at least one harness, the rule no longer holds as the machine sets it. The audit fails.
 - `overlaps`: a project allow covers the rule's command, and the rule still wins everywhere. Listed so the entry can be narrowed; allow-only means a project's allow names its own commands, not a rail's.
