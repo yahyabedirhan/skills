@@ -4,7 +4,7 @@ The decisions behind the `system-design` skill. This file is for maintaining the
 
 ## Maintaining
 
-`SKILL.md` is the Delivery Framework lesson, distilled, plus how to run it with the user. `existing-systems.md`, beside it, holds how to explain or redesign a system from evidence. `references/` holds the other lessons' material, one file per lesson, in the skill's own words, each ending with a Source line that cites its lesson; `SKILL.md` ends with the same for the Delivery Framework. Write each body as the material itself, without naming the source.
+`SKILL.md` is the Delivery Framework lesson, distilled, plus how to run it with the user and how to explain or redesign an existing system. `references/` holds the other lessons' material, one file per lesson, in the skill's own words, each ending with a Source line that cites its lesson; `SKILL.md` ends with the same for the Delivery Framework. Write each body as the material itself, without naming the source.
 
 To add a newly transcribed lesson, add one reference:
 
@@ -28,3 +28,4 @@ Problem walkthroughs (Design Uber) are examples of the framework, not concepts; 
 - **2026-09-30: the delivery framework stays in `SKILL.md`.** An audit had moved the stages' detail into `delivery-framework.md`; the maintainer restored it, since the framework is the skill's content on purpose, as the Hello Interview lesson lays it out. Only `existing-systems.md` stays a reference. `/low-level-design` is the same: its stages are back in `SKILL.md`, and `references/delivery-stages.md` is gone.
 - **2026-09-30: the maintainer's notes move out of the skill.** `MAINTAINING.md` sat in the skill's folder, where every install copied it; it is now the *Maintaining* section of this file, since notes for whoever extends a skill belong with its decisions, not with the skill.
 - **2026-09-30: with no instructions inside a project, the skill explains the project's design, in the conversation.** This replaces the 2026-09-25 entry that said it writes the design down: the design is written somewhere only when the user asks.
+- **2026-09-30: explaining and redesigning an existing system are in `SKILL.md`.** `existing-systems.md` sat beside `SKILL.md`, outside `references/`, and repeated its two purpose lines at more length. It is now the detail under those lines, and `references/` holds only the concept lessons. The maintainer asked for it.
