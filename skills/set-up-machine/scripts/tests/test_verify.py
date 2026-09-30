@@ -55,7 +55,7 @@ class RulesTest(unittest.TestCase):
     def test_every_sample_in_the_shipped_table_gets_its_rows_answer(self):
         code, out = run("--home", str(self.dir), "--rules", str(TABLE), "--no-codex")
         self.assertEqual(code, 0, out)
-        self.assertRegex(out, r"rules +ok +33 rows")
+        self.assertRegex(out, r"rules +ok +34 rows")
 
     def test_a_sample_the_hook_misses_fails(self):
         path = self.table([self.row(covers=["rm -rf x", "rm -r x"])])

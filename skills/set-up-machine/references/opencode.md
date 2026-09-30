@@ -27,7 +27,7 @@ No memory feature: a `none` line. Some models are prompted to keep a memory file
 
 - Each spelling (SKILL.md, *Spellings*) becomes one `bash` pattern ending in ` *`: `"rm -rf *": "deny"`, `"/bin/rm -rf *": "deny"`, `"git push --force *": "deny"`. The space keeps a word boundary: `git push --force *` doesn't match `git push --force-with-lease`.
 - `arguments: "none"` becomes the exact command, with no ` *`: `"env": "deny"`, so `env FOO=1 cmd` still runs.
-- **No pattern, and a gap instead:** `arguments: "flags"` rows and `files` rows (`cat .env`); patterns match text, not paths or "only flags".
+- **No pattern, and a gap instead:** `arguments: "flags"` rows, `files` rows (`cat .env`) and `variables` rows (`echo $API_TOKEN`); patterns match text, not paths, "only flags" or a variable's name.
 - opencode checks each plain command of a compound (`a && rm -rf x`, pipes, `$(…)`) by its text, but never a declaration: `export -p`, `declare -p` and `typeset -p` (and `local`, `readonly`) don't meet their patterns (probed). A `gap` for those rows; the hook refuses them.
 
 ## File rows

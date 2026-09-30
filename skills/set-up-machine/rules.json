@@ -374,6 +374,22 @@
       }
     },
     {
+      "id": "env-print-secret",
+      "level": "deny",
+      "summary": "`echo`, `printf` and `print` of a variable whose name looks secret (`$API_TOKEN`, `${DB_PASSWORD}`)",
+      "match": {
+        "program": ["echo", "printf", "print"],
+        "variables": ["*TOKEN*", "*KEY*", "*SECRET*", "*PASSWORD*", "*PASSWD*", "*CREDENTIAL*"]
+      },
+      "reason": "It prints a token or key into the agent's context.",
+      "instruction": "Check that the variable is set without printing it (`test -n \"$NAME\"`), and pass it to the command that needs it without printing it; if you need the value, stop, say why, and give the user the exact command; never work around it.",
+      "gap": "a secret under an ordinary name, or printed another way (`cat`, an interpreter, a script); the rule line asks the agent not to",
+      "samples": {
+        "covers": ["echo $API_TOKEN", "printf '%s' \"${DB_PASSWORD}\"", "echo \"key: $OPENAI_API_KEY\""],
+        "leaves": ["echo $HOME", "echo '$API_TOKEN'", "curl -H \"Authorization: Bearer $TOKEN\" https://example.com", "test -n \"$API_TOKEN\"", "echo ${#API_TOKEN}"]
+      }
+    },
+    {
       "id": "env-dump-declared",
       "level": "deny",
       "summary": "`export -p`, `declare -p` and `typeset -p`",

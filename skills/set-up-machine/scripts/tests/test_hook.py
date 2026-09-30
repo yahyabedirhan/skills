@@ -218,6 +218,18 @@ class EnvironmentTest(unittest.TestCase):
                         "cat .envrc", "grep -r TOKEN src", "head README.md"):
             self.assertEqual(denied_by(command), [], command)
 
+    def test_printing_a_secret_looking_variable_is_denied(self):
+        for command in ("echo $API_TOKEN", "printf '%s' \"${DB_PASSWORD}\"", 'echo "key: $OPENAI_API_KEY"',
+                        "echo $github_token", "print -r -- $AWS_SECRET_ACCESS_KEY", "/bin/echo ${SERVICE_CREDENTIALS:-none}",
+                        "true && echo $DB_PASSWD", 'bash -c "echo $API_TOKEN"', "echo $(echo $API_KEY)"):
+            self.assertIn("env-print-secret", denied_by(command), command)
+
+    def test_ordinary_variables_and_passing_a_secret_along_are_fine(self):
+        for command in ("echo $HOME", "echo $PATH $SHELL", "echo TOKEN", "echo '$API_TOKEN'", "echo \\$API_TOKEN",
+                        'curl -H "Authorization: Bearer $TOKEN" https://example.com',
+                        "test -n \"$API_TOKEN\"", "echo ${#API_TOKEN}"):
+            self.assertNotIn("env-print-secret", denied_by(command), command)
+
     def test_the_refusal_names_the_rules_instruction(self):
         text = hook.refusal(verdict("/usr/bin/env").denials)
         self.assertIn("env-dump", text)
