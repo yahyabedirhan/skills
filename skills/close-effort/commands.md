@@ -5,7 +5,7 @@ The git and gh commands for **close-effort**'s steps. Each entry says what it's 
 ## Find the pull request (step 1)
 
 - `gh pr view [<n>] --json number,url,state,headRefName,baseRefName,mergeCommit,body`: the pull request, its branches, its merge commit and its description. Without `<n>` it takes the current branch's.
-- `gh pr list --head <branch> --state all`: when this session isn't on the effort branch (such as in the main checkout) and no number was given.
+- `gh pr list --head <branch> --state all`: when no number was given and this session isn't on the effort branch, as in the main checkout.
 
 ## Find the tickets, worktrees and branches (step 1)
 
@@ -18,7 +18,7 @@ The git and gh commands for **close-effort**'s steps. Each entry says what it's 
 - `gh pr checks <n>`: whether the checks pass. Add `--watch` to wait for pending ones.
 - `gh pr merge <n> --merge|--squash|--rebase`: the flag is the project's method. `--auto` merges once pending checks pass, when the repo allows it. Leave out `--delete-branch`: it deletes branches before step 7 proves them, and switches the current checkout to the default branch.
 - `gh run list --commit <merge sha>`: the default branch's CI on the merge commit; `gh run watch <run id>` waits for one still running.
-- `git merge-base --is-ancestor <pinned sha> origin/<default>`: a commit pinned somewhere (such as an image URL) still resolves after a squash or rebase. It succeeds when the commit is on the default branch.
+- `git merge-base --is-ancestor <pinned sha> origin/<default>`: a commit pinned somewhere, like an image URL, still resolves after a squash or rebase. It succeeds when the commit is on the default branch.
 
 ## Update without moving the main checkout (step 4)
 
@@ -39,7 +39,7 @@ The git and gh commands for **close-effort**'s steps. Each entry says what it's 
 
 ## Files and work only here (step 6)
 
-- `git -C <path> status --short --ignored`: a worktree's untracked (`??`) and ignored (`!!`) files, which removing it deletes.
+- `git -C <path> status --short --ignored`: a worktree's untracked files, marked `??`, and ignored ones, marked `!!`, which removing it deletes.
 - `git -C <path> status --short`: uncommitted work; empty means clean.
 - `git log --branches --not --remotes --oneline`: commits on any local branch that no remote holds yet.
 

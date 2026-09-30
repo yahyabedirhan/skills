@@ -6,7 +6,7 @@ argument-hint: "The pull request (optional: defaults to the current branch's)"
 
 # Close Effort
 
-The maintainer's only step after delivery is approving the pull request. Everything after that is yours, whether you are the orchestrator that delivered it or any session told the pull request merged or to merge it. Run every command yourself and hand the maintainer nothing to paste; the one exception is freeing this session's own worktree when there is no session host (step 8).
+The maintainer's only step after delivery is approving the pull request. Everything after that is yours, whether you are the orchestrator that delivered it or a session told the pull request merged or to merge it. Run every command yourself and hand the maintainer nothing to paste. The one exception is freeing this session's own worktree when there is no session host, as step 8 says.
 
 The close is done when:
 
@@ -18,41 +18,41 @@ The close is done when:
 
 Workspaces and agent sessions stay open; the maintainer closes them.
 
-The commands for each step are in [commands.md](commands.md), each with what it's for, its alternatives and when to use it.
+[commands.md](commands.md) holds the commands for each step, with what each is for, its alternatives and when to use it.
 
 ## Order
 
 Run the steps in the order that fits, with three rules:
 
-- Read *Things to be aware of* (step 3) before any follow-up or cleanup.
-- Copy out the files worth keeping from a worktree (step 6) before removing it.
-- Free this session's own worktree last, from outside it (step 8).
+- Read *Things to be aware of* in step 3 before any follow-up or cleanup.
+- Copy the files worth keeping out of a worktree in step 6 before removing it.
+- Free this session's own worktree last, from outside it, in step 8.
 
 ## Proven merged, or kept
 
-Delete a branch or remove a worktree only when its work is **proven merged**, by one of:
+Delete a branch or remove a worktree only when its work is **proven merged**. Three proofs count:
 
-- **Reachable**: the branch's tip is an ancestor of the default branch (a merge commit, or a fast-forward).
-- **Matched by patch**: each of its commits has an identical patch on the default branch (rebased, or cherry-picked unchanged).
-- **In the merged pull request's head**: the pull request is merged and the branch's tip is its head or an ancestor of it. A delegate branch left over from the build counts when its ticket's commit is in that head and the branch holds nothing else.
+- **Reachable**: the branch's tip is an ancestor of the default branch. A merge commit or a fast-forward leaves it so.
+- **Matched by patch**: each of its commits has an identical patch on the default branch, as happens when commits are rebased or cherry-picked unchanged.
+- **In the merged pull request's head**: the pull request is merged, and the branch's tip is its head or an ancestor of it. A delegate branch left over from the build counts when its ticket's commit is in that head and the branch holds nothing else.
 
-A squash merge, or a commit changed while it was integrated, fails the first two; only the merged pull request's head proves it. The decision record once got this wrong.
+A squash merge, or a commit changed while it was integrated, fails the first two proofs; only the merged pull request's head proves it. The decision record once got this wrong.
 
-A worktree must also be clean after step 6, and no agent may still be working in it. Keep anything you can't prove or couldn't remove, and name it in the report with why.
+A worktree also needs to be clean after step 6, with no agent still working in it. Keep anything you can't prove or couldn't remove, and name it in the report with the reason.
 
 ## Parameters
 
-From the Defaults table (a project's row overrides the global one). Unset: no row, or `none`.
+Each comes from the Defaults table, where a project's row overrides the global one. A parameter is unset when it has no row or its row says `none`.
 
-- `<worktree-tool>`: how worktrees are made and freed. When it is Treehouse, the **treehouse** skill has its commands. Unset: git.
-- `<session-host>`: where the effort's agent sessions run. When it is Herdr, the **handover-to-herdr** skill's `closing-an-effort.md` has its commands. Unset: step 8 falls to the maintainer.
+- `<worktree-tool>`: how worktrees are made and freed. When it is Treehouse, the **treehouse** skill has its commands. Unset, use git.
+- `<session-host>`: where the effort's agent sessions run. When it is Herdr, the **handover-to-herdr** skill's `closing-an-effort.md` has its commands. Unset, step 8's last action falls to the maintainer.
 
 ## 1. Find the effort
 
-From the argument, or the current branch: the pull request, its branch, and the effort's name (its label `effort:<effort>`, or the handoff). Then gather what the effort left behind:
+Start from the argument, or else the current branch, and find the pull request, its branch, and the effort's name, which is in its `effort:<effort>` label or the handoff. Then gather what the effort left behind:
 
-- its spec, its tickets (on the tracker, or `.efforts/<effort>/` on a local one) and its handoff in `.handoff/`;
-- its worktrees, including sub-agent worktrees under `.claude/worktrees/`;
+- its spec, its tickets and its handoff in `.handoff/`; a local tracker keeps the tickets in `.efforts/<effort>/`;
+- its worktrees, sub-agent worktrees under `.claude/worktrees/` included;
 - its branches: the effort branch, sub-agent branches, and any prototype branch the spec or handoff names;
 - the agents in the session host still working in one of those worktrees.
 
@@ -60,79 +60,76 @@ Done when you hold that list, and know whether this session runs inside one of t
 
 ## 2. Merge
 
-When the pull request already merged, only check the merge. Otherwise merge it when:
+When the pull request already merged, only check the merge. Otherwise merge it once its checks pass. When the spec says "QA: blocking", every QA ticket must be closed first; a QA ticket still open blocks the merge, so tell the maintainer which one, and stop.
 
-- its checks pass;
-- when the spec says "QA: blocking", every QA ticket is closed. A QA ticket still open blocks the merge: tell the maintainer which one, and stop.
+Merge with the method the project's instructions name, else the one the repo usually uses, and leave the branches for step 7.
 
-Merge with the project's method (its instructions, else the repo's usual one), and leave the branches for step 7.
-
-Then check the merge broke nothing: the default branch's CI on the merge commit, and, after a squash or rebase, that anything pinned to a branch commit (such as an image URL with a commit SHA) still resolves. A red run or a broken pin is the first item for step 4.
+Then check the merge broke nothing. The default branch's CI must pass on the merge commit. After a squash or a rebase, anything pinned to a branch commit must still resolve, such as an image URL that carries a commit SHA. A red run or a broken pin becomes the first item for step 4.
 
 Done when the pull request is merged and its merge is checked.
 
 ## 3. Read *Things to be aware of*
 
-Read the pull request description's last section, *Things to be aware of* (the **to-pr** skill's template): what the delivering agent flagged outside "what changed", under **Decided alone**, **Surprises**, **Not in this PR** and **Follow-ups**. Route each item to one of:
+The last section of the pull request's description, *Things to be aware of*, comes from the **to-pr** skill's template. It holds what the delivering agent flagged beyond the change itself, under **Decided alone**, **Surprises**, **Not in this PR** and **Follow-ups**. Route each item to one of:
 
-- **a check you run now**: a cheap check it says was skipped (a test suite not rerun after a fix); run it on the updated default branch;
-- **a ticket**, carried over in step 4 (a follow-up already marked as a ticket is carried over as it says);
-- **a todo for the maintainer**, for the report;
+- **a check you run now**, for a cheap check it says was skipped, such as a test suite not rerun after a fix. Run it on the updated default branch.
+- **a ticket**, carried over in step 4. A follow-up already marked as a ticket is carried over as it says.
+- **a todo for the maintainer**, for the report.
 - **nothing needed**.
 
-When the description has no such section (an older effort), take the items from the handoff and tickets.
+An older effort's pull request may have no such section; take its items from the handoff and tickets instead.
 
 Done when every item has a route and each skipped check has run.
 
 ## 4. Follow up and carry over
 
-Work from the updated default branch and leave the maintainer's main checkout where it is: never switch its branch, and pull only when it is clean and already on the default branch.
+Work from the updated default branch, and leave the maintainer's main checkout on whatever branch it is on. Pull there only when it is clean and already on the default branch.
 
-Nothing is committed or pushed straight to the default branch. The close's own changes to tracked files (a local tracker's done marks, files kept in step 6) follow the project's instructions. By default they go on one small **follow-up branch** from the default branch, in its own worktree, with a pull request opened through the **to-pr** skill for the maintainer to review. When they are too small to be worth a pull request, list them in the report instead. The follow-up branch and its worktree aren't the effort's: step 7 leaves them.
+Everything reaches the default branch through a pull request. The close's own changes to tracked files, such as a local tracker's done marks or files kept in step 6, follow the project's instructions. By default they go on one small **follow-up branch** from the default branch, in its own worktree, with a pull request opened through the **to-pr** skill for the maintainer to review. Changes too small to be worth a pull request are listed in the report instead. The follow-up branch and its worktree belong to the close, not the effort, so step 7 leaves them.
 
 Then:
 
-1. **Run the post-merge follow-ups**: what the handoff, the spec or the last section says happens after the merge, such as installing or updating what changed, removing a setting the change replaced, publishing a draft release (then check its tag is on the merge commit and its assets are attached), or trying what can only be tried once merged. Report each result.
-2. **Audit what's unfinished**: the effort's open tickets, the items routed to a ticket in step 3, review findings deferred at delivery, a red run or broken pin from step 2, stale docs or assets.
-3. **Carry each unfinished item over** as a ticket in the **next effort**: labelled `effort:<next>`, linked back to where it came from. The next effort is the project's open spec or grilling ticket for its next round of work; when that isn't obvious, ask the maintainer which one, in the **orchestrating** skill's question shape.
+1. **Run the post-merge follow-ups** that the handoff, the spec or *Things to be aware of* name: installing or updating what changed, removing a setting the change replaced, trying what can only be tried once merged, or publishing a draft release and checking that its tag is on the merge commit and its assets are attached. Report each result.
+2. **Audit what's unfinished**: the effort's open tickets, the items step 3 routed to a ticket, review findings deferred at delivery, a red run or broken pin from step 2, and stale docs or assets.
+3. **Carry each unfinished item over** as a ticket in the **next effort**, labelled `effort:<next>` and linked back to where it came from. The next effort is the project's open spec or grilling ticket for its next round of work. When that isn't obvious, ask the maintainer which one, in the **orchestrating** skill's question shape.
 
-**QA tickets** left open for the maintainer (the default, non-blocking QA: the pull request said "Refs", not "Closes", so the merge left them open) stay open and assigned to them. Comment on each that the work is now on the default branch and how to reach the build, and list them in the report. They aren't unfinished work: the maintainer closes them or gives feedback.
+**QA tickets** are the exception. With the default, non-blocking QA, the pull request said "Refs" rather than "Closes", so the merge left them open. They stay open and assigned to the maintainer, who closes them or gives feedback. Comment on each that the work is now on the default branch and how to reach the build, and list them in the report.
 
-Done when every item is done, carried over as a linked next-effort ticket, or a QA ticket waiting on the maintainer; nothing is dropped.
+Done when every item is done, carried over as a linked next-effort ticket, or a QA ticket waiting on the maintainer.
 
 ## 5. Close the tracker
 
-Close the spec and every ticket the merge finished, including ones whose "closes" didn't fire (a ticket named only in a commit, or a base that isn't the default branch). A criterion that could only be shown after the merge gets checked and ticked now. Close each carried-over ticket too, with a comment linking the next-effort ticket that continues it. On a local tracker, mark them done in `.efforts/<effort>/` on the follow-up branch.
+Close the spec and every ticket the merge finished. That includes tickets a "closes" keyword should have closed but didn't, because they were named only in a commit or the pull request's base wasn't the default branch. Check and tick each criterion that could only be shown after the merge. Close each carried-over ticket too, with a comment linking the next-effort ticket that continues it. On a local tracker, mark them done in `.efforts/<effort>/` on the follow-up branch.
 
 Done when the effort's only open tickets are QA tickets waiting on the maintainer.
 
 ## 6. Leave nothing only here
 
-Removing a worktree deletes its ignored and untracked files without asking. For each worktree you are about to remove, list them and copy out anything worth keeping, per the folder standard (the **orchestrating** skill's `folders.md`): screenshots to `docs/assets/<topic>/`, notes to a handoff or the tracker, a useful script to the main checkout's `.scratch/`, editor settings (`.vscode/`) to the main checkout.
+Removing a worktree deletes its ignored and untracked files without asking. For each worktree you are about to remove, list those files and copy out what's worth keeping, following the folder standard in the **orchestrating** skill's `folders.md`: screenshots go to `docs/assets/<topic>/`, notes to a handoff or the tracker, a useful script to the main checkout's `.scratch/`, and editor settings like `.vscode/` to the main checkout.
 
-Then look at this session itself: uncommitted or unpushed work, and what it knows that isn't written down anywhere (a decision, a half-done follow-up, an open question for the maintainer). Commit and push the work; put each open item in a ticket, or in a handoff through the **handoff** skill. What lands in tracked folders goes on the follow-up branch, committed and pushed.
+Then turn to this session itself: its uncommitted or unpushed work, and what it knows that isn't written down, like a decision, a half-done follow-up or an open question for the maintainer. Commit and push the work, and put each open item in a ticket, or in a handoff through the **handoff** skill. Anything that lands in tracked folders goes on the follow-up branch, committed and pushed.
 
 Done when each worktree's untracked and ignored files are copied out or judged throwaway, and another session could continue from the repository and the tracker alone.
 
 ## 7. Free branches and worktrees
 
-Fetch and prune, then for each sub-agent worktree, each other worktree of the effort except this session's, and each branch, prove it merged, then remove it: worktrees with the worktree tool (Treehouse's return keeps the worktree in its pool), local branches, then remote branches.
+Fetch and prune first. Then take each sub-agent worktree, each of the effort's other worktrees, leaving this session's for step 8, and each branch; prove it merged, then remove it. Free worktrees with the worktree tool, then delete local branches, then remote ones. Treehouse's return puts a worktree back in its pool for the next effort.
 
-A worktree whose branch has an open pull request stays until its branch is pushed; after that, keep its local branch only when the remote doesn't hold it.
+A worktree whose branch has an open pull request stays until its branch is pushed. After that, keep its local branch only when the remote doesn't hold it.
 
-Done when every proven-merged branch and worktree other than this session's is gone, and the rest is listed with why.
+Done when every proven-merged branch and worktree other than this session's is gone, and the rest is listed with the reason.
 
 ## 8. Report, then free your own worktree
 
 Report in the chat, short, with links:
 
-- the pull request and its merge commit, and the post-merge follow-ups with their results;
-- what closed, and what carried over (each new ticket by title and link);
-- QA tickets waiting on the maintainer, and the maintainer's todos from step 3;
-- what was kept and why, including anything not proven merged;
+- the pull request, its merge commit, and each post-merge follow-up with its result;
+- what closed, and each carried-over ticket by title and link;
+- the QA tickets waiting on the maintainer, and the maintainer's todos from step 3;
+- what was kept and why, anything not proven merged included;
 - the follow-up pull request or handoff, or the changes listed in their place.
 
-Last, when this session runs inside one of the effort's worktrees, free it from outside it. Freeing it stops every process there, this session included, so it runs after the report. Skip this when this session runs elsewhere; step 7 freed every worktree.
+Last, when this session runs inside one of the effort's worktrees, free that worktree from outside it. Freeing it stops every process in it, this session included, so it happens after the report. When this session runs elsewhere, step 7 already freed every worktree and this step is done.
 
-- **When the session host is Herdr**: through the **handover-to-herdr** skill, open a shell in the repository's main checkout, labelled `shell · Close · <effort>`, and, as your last action, run the free command there after a short pause. The shell's output is its report, and the report above names where it runs. The workspace stays open.
+- **When the session host is Herdr**, open a shell in the repository's main checkout through the **handover-to-herdr** skill, labelled `shell · Close · <effort>`. As your last action, run the free command there after a short pause. The shell's output is its report, and your report names where it runs. The workspace stays open.
 - **Otherwise**, this one step is the maintainer's: end the report with the command, to run once this session is closed.
