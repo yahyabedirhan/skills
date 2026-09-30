@@ -12,6 +12,8 @@ Evidence tags:
 
 Versions seen: Herdr 0.9.0 client and server on both machines [mac, vps]; Herdr's latest release is **0.9.2, published 2026-09-29** ([releases](https://github.com/herdrdev/herdr/releases)). Claude Code 2.1.284 on the Mac, 2.1.283 on the VPS [mac, vps].
 
+**Updated 2026-09-30** after "Every harness and project is set up and audited from the skills" (#66) merged into `main`. set-up-machine is now on `main` and applied on the Mac: `~/.config/agents/AGENTS.md` exists, `~/.claude/CLAUDE.md` links to it, and Claude Code has memory off and a `PreToolUse` hook [mac]. It no longer has a plan/apply script: the agent reads one reference per harness, proposes one diff, takes one approval, backs up, writes, and checks with `scripts/verify.py`. The VPS rows below are still as found on 2026-09-29.
+
 ## At a glance
 
 | Capability | Mac | VPS today | What closes the gap |
@@ -27,8 +29,8 @@ Versions seen: Herdr 0.9.0 client and server on both machines [mac, vps]; Herdr'
 | Harnesses | Claude Code, Codex, opencode, Cursor CLI [mac] | **Claude Code only.** No `codex`, `opencode`, `cursor-agent`, `gemini`, `copilot`, `amp`, `grok` [vps] | Install the preferred agent, or fall back to `claude` (issue #13 already proposes that). |
 | Herdr | 0.9.0 client and server | 0.9.0 server, running, 5 workspaces, 1 idle Claude Code agent; no saved machines of its own [vps] | Upgrade both to 0.9.2 for `--machine` forwarding and `machine status` (see *Herdr across machines*). |
 | Agents see they're in Herdr | `HERDR_ENV=1` in panes | `HERDR_ENV=1` in a new pane, and `claude`, `herdr`, `gh`, `node` are all on its `PATH` [probe] | Nothing: the gap noted in herdr-vps.md (tools only on the login-shell `PATH`) affects SSH commands, not Herdr panes. |
-| Skills | The repo's current skills | An older set: 13 in `~/.claude/skills`, 12 in `~/.agents/skills`; no `herdr`, `handover`, `handover-to-herdr`, `set-up-machine` [vps]. Its skills clone is on `main` at an older commit, clean, behind `origin/main` [vps]. | Pull the clone and reinstall with `npx skills`; set-up-machine installs the skills repo itself once #66 merges (see *The environment*). |
-| Rule table, pre-tool hook, memory off | Not applied yet either: no `~/.config/agents/` on the Mac [mac] (set-up-machine is on the unmerged PR #66) | Hand-written: `~/.claude/settings.json` has 30 deny rules, no `PreToolUse` hook, `autoMemoryEnabled` unset (so memory is on), and 4 project memory folders exist [vps]. No `~/.config/agents/`, no `~/.claude/CLAUDE.md` [vps]. | Run set-up-machine on the VPS after #66 merges (see *The environment*). |
+| Skills | The repo's current skills | An older set: 13 in `~/.claude/skills`, 12 in `~/.agents/skills`; no `herdr`, `handover`, `handover-to-herdr`, `set-up-machine` [vps]. Its skills clone is on `main` at an older commit, clean, behind `origin/main` [vps]. | Pull the clone and reinstall with `npx skills`, or let set-up-machine's diff install the skills repo, which it now does (see *The environment*). |
+| Rule table, pre-tool hook, memory off | Applied since #66 merged: `~/.config/agents/AGENTS.md`, `~/.claude/CLAUDE.md` a link to it, a `PreToolUse` hook, `autoMemoryEnabled: false` [mac, 2026-09-30]. On 2026-09-29 none of it was there | Hand-written: `~/.claude/settings.json` has 30 deny rules, no `PreToolUse` hook, `autoMemoryEnabled` unset (so memory is on), and 4 project memory folders exist [vps]. No `~/.config/agents/`, no `~/.claude/CLAUDE.md` [vps]. | Run set-up-machine on the VPS (see *The environment*). |
 | Notifications | `osascript` (proven, issue #9); Herdr toasts off (`delivery = "off"`) [mac] | No `notify-send`, no display [vps]. `herdr notification show` on the VPS returned `shown` [probe], where it showed is unknown. Claude Code has mobile push on (`agentPushNotifEnabled: true`) [vps], which works only while Remote Control is connected ([docs](https://code.claude.com/docs/en/remote-control#mobile-push-notifications)). | Claude Code Remote Control plus push from the VPS, or a Mac-side watcher (`agent wait` over SSH or `--machine`, then `osascript`). See *Notifications*. |
 | Reach the other machine | Mac → VPS over SSH, no prompt | VPS → Mac: not possible (herdr-vps.md) | Unchanged; herdr-vps.md lists the options. |
 
@@ -103,35 +105,38 @@ With throwaway workspaces, over `ssh … bash -lc 'herdr …'`: creating and clo
 
 ## The environment on the VPS
 
-How the skills, the rule table, the pre-tool hook, memory-off and the shared global instructions would reach the VPS the same way as the Mac: through **set-up-machine**, which "runs on macOS and Linux" and needs only Python 3.9+ (`skills/set-up-machine/SKILL.md` on the effort branch).
+How the skills, the rule table, the pre-tool hook, memory-off and the shared global instructions would reach the VPS the same way as the Mac: through **set-up-machine**, which an agent runs from its per-harness references; only its pre-tool hook and `verify.py` are code, and they need Python 3.9+ and nothing outside the standard library (`skills/set-up-machine/SKILL.md` on `main`).
 
 What the VPS has for it:
 
 - Python 3.14 [vps]: enough.
-- `npx` (for the `skills` CLI) from nvm, on the login and interactive `PATH` only [vps]. Run set-up-machine from a Herdr pane or a login shell.
-- Claude Code is the only harness [vps], so the plan would cover Claude Code alone; set-up-machine finds a harness by its config folder or its program on `PATH` (`SKILL.md`).
+- `npx` (for the `skills` CLI) from nvm, on the login and interactive `PATH` only [vps]. Run the agent that applies set-up-machine from a Herdr pane or a login shell.
+- Claude Code is the only harness [vps], so the diff would cover Claude Code alone; set-up-machine finds Claude Code when `~/.claude/` exists or `claude` is on `PATH` (`references/claude-code.md`).
 - `~/.agents/.skill-lock.json` exists [vps], so the `skills` CLI has installed here before.
 
 What's missing today:
 
-1. **set-up-machine isn't on `main`.** It arrives with the open PR #66 ("Every harness and project is set up and audited from the skills"). Until it merges, neither machine has it applied: no `~/.config/agents/` on the Mac either [mac].
+1. **set-up-machine isn't applied on the VPS.** On 2026-09-29 it was still on the open PR #66 and neither machine had it. #66 merged on 2026-09-30, and the Mac has it applied since [mac]; the VPS doesn't yet.
 2. **The VPS's skills clone is behind `origin/main`** and its installed skills are an older set [vps].
-3. **Hand-made rules and memory.** 30 deny rules in `~/.claude/settings.json`, no pre-tool hook, memory on with 4 memory folders [vps]. set-up-machine's plan would list the table's rules as `added` or `present`, the hand-made ones it doesn't know as `extra` (kept), memory as off, and each memory file as `removed`, backed up first (`SKILL.md`, steps 3–4). Moving any memory worth keeping comes first.
+3. **Hand-made rules and memory.** 30 deny rules in `~/.claude/settings.json`, no pre-tool hook, memory on with 4 memory folders [vps]. set-up-machine's diff would list the table's rules as `added` or `present`, a hand-made rule stricter than the table as `stricter` and one the table lacks as `extra` (both kept), memory as off, and each memory file as `removed`, backed up first (`SKILL.md`, steps 2 and 4). Memory worth keeping goes into the same diff as lines for the shared file, a project's `AGENTS.md` or a skill (`references/global-instructions.md`, *Memory*), so decide which first.
 4. **No shared global instructions**: no `~/.config/agents/AGENTS.md` and no `~/.claude/CLAUDE.md` [vps], so a VPS agent today gets no personal instructions at all.
 
-The **Linux container check** (`scripts/tests/linux/run.sh`) builds a Debian bookworm image from `node:22-bookworm` with all four harnesses installed the official way and never logged in, installs the skills from the repo with `npx skills add … -g -a claude-code codex opencode cursor`, then runs plan, apply, plan and the rule probes in a throwaway container (`run.sh`, `in-container.sh`, `Dockerfile` on the effort branch). It proves the scripts on Linux. How the VPS differs from that image: Ubuntu 26.04 instead of Debian 12, Node 24 from nvm instead of a system Node on `PATH`, only Claude Code installed, an existing hand-made setup rather than a fresh home, and a real login. The check can run on the VPS itself (Docker is there), but building the image downloads packages: a proposed experiment.
+The **Linux container check** (`scripts/tests/linux/run.sh`) builds a Debian bookworm image from `node:22-bookworm` with the harnesses installed the official way and never logged in, installs the skills from the repo with `npx skills add … -g -a claude-code codex`, then runs `verify.py` and the unit tests in a throwaway container (`run.sh`, `in-container.sh`, `Dockerfile` on `main`). Until #66's last changes it also ran a plan and apply; with no such script left, it proves the hook and the rule samples on Linux, not a setup. How the VPS differs from that image: Ubuntu 26.04 instead of Debian 12, Node 24 from nvm instead of a system Node on `PATH`, only Claude Code installed, an existing hand-made setup rather than a fresh home, and a real login. The check can run on the VPS itself (Docker is there), but building the image downloads packages: a proposed experiment.
 
-The steps, once #66 merges (not run: each writes):
+The steps (not run: each writes):
 
 ```bash
 git -C <skills-clone> pull --ff-only
-npx skills add yahyabedirhan/skills -g --skill '*'          # or let set-up-machine's plan install it
-python3 ~/.agents/skills/set-up-machine/scripts/set_up_machine.py plan
-python3 ~/.agents/skills/set-up-machine/scripts/set_up_machine.py apply --plan-id <id>   # after the maintainer approves
-python3 ~/.agents/skills/set-up-machine/scripts/set_up_machine.py plan                    # audit: "No changes."
+# then, in a Claude Code session on the VPS: "set up this machine with the set-up-machine skill"
+#   1. it inspects each harness and proposes one diff (the skills install included)
+#   2. the maintainer approves it once
+#   3. it backs up every file it changes into ~/.config/agents/backups/<time>/, writes the diff,
+#      and checks with:
+python3 ~/.agents/skills/set-up-machine/scripts/verify.py
+# running the skill again is the audit: a diff that changes nothing
 ```
 
-The `--home <dir>` option runs plan against a copy of a home folder and starts no harness (`SKILL.md`), so a read-only dry run on a scratch copy is possible before the real one. Copying the home is itself a write under `~`, so it too waits for a go-ahead.
+A dry run first is possible: the skill runs its steps against a copy of the home folder in the project's `.scratch/` and checks it with `verify.py --home <copy>`, starting no harness there (`SKILL.md`, step 1). Copying the home is itself a write, so it too waits for a go-ahead.
 
 ## Permissions on the other machine
 
@@ -146,7 +151,7 @@ The line locally is: read freely, ask before anything that closes, stops, messag
 | Message a running agent | `agent prompt`, `agent send-keys` to an agent it didn't start | **Ask** (#13, #16) |
 | Close or stop | `workspace close`, `tab close`, `pane close`, `agent` stop keys, `server stop` (forwarded by `--machine` from 0.9.1) | **Ask** (#16) |
 | Remove | a worktree, a branch, a machine profile (`machine remove/disable`) | **Ask** (#13, #16) |
-| Change the machine | install, update or restart Herdr, `machine add`, config edits, set-up-machine's apply | **Ask** (#13; the spec's safe zone) |
+| Change the machine | install, update or restart Herdr, `machine add`, config edits, set-up-machine's write step | **Ask** (#13; the spec's safe zone) |
 
 Questions carried from the build tickets, with what this research adds:
 
@@ -155,7 +160,7 @@ Questions carried from the build tickets, with what this research adds:
 - **The preferred agent may be missing** (#13): only Claude Code is on the VPS [vps]; a handover falls back to `claude`.
 - **The toolchain may be missing** (#13): Swift is now present [vps] (#13 recorded it missing); `jq`, `treehouse`, Go and Rust aren't.
 - **Notifications from a VPS orchestrator** (#13): see *Notifications*; no route is proven yet.
-- **A gap in the rules**: `herdr --machine <vps> server stop` stops the remote server and every agent in it, from one local command. No row in set-up-machine's `rules.json` mentions `herdr` today; a row for `herdr … server stop` (and `workspace close --group`) at `ask` would hold the line mechanically. Proposed below.
+- **A gap in the rules**: `herdr --machine <vps> server stop` stops the remote server and every agent in it, from one local command. No row in set-up-machine's `rules.json` mentions `herdr`; a row for `herdr … server stop` (and `workspace close --group`) at `ask` would hold the line mechanically. Proposed below; the maintainer declined it on 2026-09-30 (D11 in [the synthesis](cloud-agents.md)): agents work freely across the Mac and the VPS.
 
 ## Where the desktop app fits
 
@@ -173,9 +178,9 @@ Each is a proposed experiment that needs something the safe zone forbids, or the
 - **Headless browser in Docker**: pull `mcr.microsoft.com/playwright:<version>-resolute` on the VPS and run one headless page load with `--init --ipc=host`; record memory use next to a running Claude Code agent. Or, with root, `npx playwright install-deps chromium` and rerun `ldd`. #72 needs the memory figure.
 - **`agent start --kind claude` in a throwaway VPS pane**, then `agent get` and exit: confirms Herdr detects Claude Code there (the pane's `PATH` already has `claude` [probe]). Starts a session, so it waits for a go-ahead.
 - **Claude Code Remote Control and push from the VPS**: start `claude --remote-control` in a throwaway Herdr pane on the VPS, ask for "notify me when done", and see whether the phone gets a push. Registers a session with Anthropic.
-- **set-up-machine on the VPS** after #66 merges: pull the skills clone, run plan (read-only apart from briefly starting Claude Code to list its tools) and show the maintainer the diff; apply only on approval. Decide first which of the 4 memory folders to keep.
+- **set-up-machine on the VPS**, now that #66 has merged: pull the skills clone, have a VPS agent run the skill up to its one diff (read-only until then) and show it to the maintainer; write only on approval. Decide first which of the 4 memory folders to keep.
 - **Worktree tool on the VPS** (from herdr-vps.md): install treehouse (and Go), or allow `herdr worktree create` / `git worktree add` there.
-- **A rule-table row for disruptive Herdr commands** (`herdr … server stop`, `workspace close --group`, and their `--machine` forms) at `ask`, since `--machine` makes them one local command away. A change to #66's table, for the maintainer.
+- **A rule-table row for disruptive Herdr commands** (`herdr … server stop`, `workspace close --group`, and their `--machine` forms) at `ask`, since `--machine` makes them one local command away. A change to set-up-machine's table; declined on 2026-09-30 (D11).
 - **Desktop app SSH session to the VPS**: add the connection in the app and check what it installs, which settings and skills load, and whether Herdr sees it.
 
 ## Exploration log
@@ -195,5 +200,6 @@ Every command or action run for this research, in order. Host names, the SSH tar
 | 7 | VPS | `grep` of the Herdr server log for notification lines (last 8 lines), line count; `herdr api snapshot` key names | Nothing |
 | 8 | Mac | `grep -c herdr skills/set-up-machine/rules.json` (0); read the sibling research files for overlap | Nothing |
 | 9 | Mac | Wrote this file in the worktree and committed it | This file |
+| 10 | Mac, 2026-09-30 | After #66 merged: `ls ~/.config/agents`, `ls -l ~/.claude/CLAUDE.md`, key names and `autoMemoryEnabled` in `~/.claude/settings.json`, `grep -c herdr` of `rules.json` (0); read set-up-machine's `SKILL.md`, `references/claude-code.md`, `references/global-instructions.md` and the Linux check on `main`; updated the Mac column, *The environment on the VPS* and the open questions | This file |
 
 Nothing was installed, configured, resized or deleted on either machine, and no existing workspace, tab, pane or agent was touched beyond reading. No Herdr item was created on the Mac.
