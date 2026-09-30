@@ -9,7 +9,7 @@ START      decide the worktree once; everything after follows it
 THINKING   settle what to build; leave a spec, tickets, and a handoff
 HANDOVER   the session commits everything and starts a fresh orchestrator
 BUILD      orchestrate the tickets through delegates; open the pull request
-CLOSE      the user says "go"; the agent merges, follows up, and cleans up
+CLOSE      the user approves; the agent merges, follows up, and cleans up
 ```
 
 There are two paths through it, chosen by the session host, where new agent sessions open. The host path, when it's Herdr, automates every step between phases through the **handover-to-herdr** skill; the plain path runs anywhere, with this session carrying on or the user pasting each starting prompt.
@@ -59,7 +59,7 @@ The orchestrator reads the handoff, shows the plan with `/show-me`, delegates th
 
 ## Close
 
-The user reviews the pull request and says "go": that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. It reads the pull request's *Things to be aware of* first, runs the post-merge follow-ups, carries unfinished work into the next effort's tickets, leaves QA tickets open for the user, closes the tracker, removes only branches and worktrees proven merged, and closes the effort's workspaces in the session host. It returns its own worktree last, from a shell the host opens outside it; with no session host, that one step is the user's.
+The user reviews and approves the pull request: that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. It reads the pull request's *Things to be aware of* first, runs the post-merge follow-ups, carries unfinished work into the next effort's tickets, leaves QA tickets open for the user, closes the tracker, leaves nothing that exists only inside its session, and removes only branches and worktrees proven merged. It frees its own worktree last, from a shell the host opens outside it, and leaves the workspaces open; with no session host, that one step is the user's.
 
 ## Why two sessions
 

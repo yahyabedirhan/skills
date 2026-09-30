@@ -124,3 +124,12 @@ The decisions behind the effort skills (`init-effort`, `orchestrating`, `orchest
 
 - **The effort skills name `handover-to-herdr` and `treehouse` directly,** in a line that routes to each ("when `<session-host>` is Herdr, use the **handover-to-herdr** skill; otherwise …"), instead of building a skill name from a placeholder (`handover-to-<session-host>`). There is one host and one worktree tool with a skill; a reader shouldn't resolve a variable to find a skill that can be named. A new tool gets its own line once its skill exists. With no session host or worktree tool set, the skills still work in the same session with `git worktree add`.
 - **`orchestrating/lifecycle.md` uses plain words** ("the session host") instead of placeholders it never declared.
+
+## 2026-09-30: close-effort says what and why (#83)
+
+- **`close-effort`'s body keeps the outcomes, the maintainer's preferences, the workflow and the lessons; its git and gh commands move to `commands.md`,** each with what it's for, its alternatives and when to use it, as `closing-an-effort.md` already did for Herdr. About 25 inline commands interrupted the explanation and none said why it was used. The three proofs of merged work stay in the body as ideas. The maintainer asked for it while reviewing #66 ([#83](https://github.com/yahyabedirhan/skills/issues/83)).
+- **Only three ordering rules:** read *Things to be aware of* before any cleanup, copy out a worktree's files before removing it, and free this session's own worktree last, from outside it. Those are the ones real closes needed; the rest runs in the order that fits.
+- **No "go" keyword.** The maintainer approves the pull request; the skills don't wait for a literal word. This replaces the "go" of the 2026-09-29 entries.
+- **Workspaces and sessions stay open.** The close no longer closes the effort's workspaces. Instead, nothing is left only inside the session: it is committed and pushed, in a ticket, or in a handoff, so another session can continue. It still frees every proven-merged worktree to save disk, its own last. This reverses the workspace close in the 2026-09-29 *closing* entry.
+- **No cleanup script.** Permission rules belong to the environment, not the skill; what can't be proven or removed is kept and reported. This reverses "a denial is final" in the 2026-09-29 *closing* entry.
+- **Without *Things to be aware of*, the close reads the handoff and tickets,** and no longer asks the delivering orchestrator through the session host.
