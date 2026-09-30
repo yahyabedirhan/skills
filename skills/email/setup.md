@@ -45,4 +45,4 @@ Check in a new session: none of the ten denied tools appears among the connector
 ## 4. End to end
 
 1. `create_draft` to the user's own address, then `delete_draft` with the returned `id`. Both succeed.
-2. Archive one handled email the way **Mark done** in [command-reference.md](command-reference.md) describes, then confirm with `spark emails Inbox` about a minute later that Spark no longer lists it.
+2. Archive one handled email the way `SKILL.md` marks an email done, then confirm with `spark emails Inbox` about a minute later that Spark no longer lists it.
