@@ -6,7 +6,7 @@ argument-hint: "The pull request (optional: defaults to the current branch's)"
 
 # Close Effort
 
-The maintainer's only step after delivery is approving the pull request. Everything after that is yours, whether you are the orchestrator that delivered it or a session told the pull request merged or to merge it. Run every command yourself and hand the maintainer nothing to paste. The one exception is freeing this session's own worktree when there is no session host, as step 8 says.
+The maintainer's only step after delivery is approving the pull request. Everything after that is yours, whether you are the orchestrator that delivered it or a session told the pull request merged or to merge it. Run every command yourself and hand the maintainer nothing to paste, except where `<session-host>` is unset.
 
 The close is done when:
 
@@ -45,8 +45,8 @@ A worktree also needs to be clean after step 6, with no agent still working in i
 
 Each comes from the Defaults table, where a project's row overrides the global one. A parameter is unset when it has no row or its row says `none`.
 
-- `<worktree-tool>`: how worktrees are made and freed. When it is Treehouse, the **treehouse** skill has its commands. Unset, use git.
-- `<session-host>`: where the effort's agent sessions run. When it is Herdr, the **handover-to-herdr** skill's `closing-an-effort.md` has its commands. Unset, step 8's last action falls to the maintainer.
+- `<worktree-tool>`: the tool that makes and frees worktrees. When it is Treehouse, use the **treehouse** skill. Unset, use git.
+- `<session-host>`: where the effort's agent sessions run. When it is Herdr, use the **handover-to-herdr** skill's `closing-an-effort.md` to find the agents still working and to free this session's worktree from a shell in the main checkout; that shell's output is its report, and your report names where it runs. Unset, freeing this session's own worktree is the maintainer's one step: end the report with the command, to run once this session is closed.
 
 ## 1. Find the effort
 
@@ -55,7 +55,7 @@ Start from the argument, or else the current branch, and find the pull request, 
 - its spec, its tickets and its handoff in `.handoff/`; a local tracker keeps the tickets in `.efforts/<effort>/`;
 - its worktrees, sub-agent worktrees under `.claude/worktrees/` included;
 - its branches: the effort branch, sub-agent branches, and any prototype branch the spec or handoff names;
-- the agents in the session host still working in one of those worktrees.
+- the agents in `<session-host>` still working in one of those worktrees.
 
 Done when you hold that list, and know whether this session runs inside one of the effort's worktrees.
 
@@ -114,7 +114,7 @@ Done when each worktree's untracked and ignored files are copied out or judged t
 
 ## 7. Free branches and worktrees
 
-Fetch and prune first. Then take each sub-agent worktree, each of the effort's other worktrees, leaving this session's for step 8, and each branch; prove it merged, then remove it. Free worktrees with the worktree tool, then delete local branches, then remote ones.
+Fetch and prune first. Then take each sub-agent worktree, each of the effort's other worktrees, leaving this session's for step 8, and each branch; prove it merged, then remove it. Free worktrees with `<worktree-tool>`, then delete local branches, then remote ones.
 
 Done when every proven-merged branch and worktree other than this session's is gone, and the rest is listed with the reason.
 
@@ -128,9 +128,6 @@ Report in the chat, short, with links:
 - what was kept and why, anything not proven merged included;
 - the follow-up pull request or handoff, or the changes listed in their place.
 
-Last, when this session runs inside one of the effort's worktrees, free that worktree from outside it. Freeing it stops every process in it, this session included, so it happens after the report. When this session runs elsewhere, step 7 already freed the other worktrees, and the report ends the close.
-
-- **When the session host is Herdr**, run the free command as your last action from a shell in the repository's main checkout, as the **handover-to-herdr** skill's `closing-an-effort.md` says. The shell's output is its report, and your report names where it runs.
-- **Otherwise**, this one step is the maintainer's: end the report with the command, to run once this session is closed.
+Last, when this session runs inside one of the effort's worktrees, free that worktree from outside it. Freeing it stops every process in it, this session included, so it happens after the report, through `<session-host>`, as your last action. When this session runs elsewhere, step 7 already freed the other worktrees, and the report ends the close.
 
 Done when the report is sent and this session's worktree is freed, or its free command ends the report.
