@@ -300,7 +300,6 @@ class FullTableTest(unittest.TestCase):
             path = Path(d) / "rules.json"
             base = {k: v for k, v in _row().items() if k != "match"}
             for match in (
-                {"paths": ["/etc/x"], "access": "read"},
                 {"paths": ["./.env"], "access": "read"},
                 {"paths": [".env"], "access": "execute"},
                 {"server": "mail", "tool": "("},
@@ -310,8 +309,7 @@ class FullTableTest(unittest.TestCase):
                 {"program": "env", "arguments": "some"},
                 {"program": "env", "arguments": "none", "flags": [["p"]]},
                 {"program": "cat", "except": ["**/.env.example"]},
-                {"program": "cat", "files": ["/etc/passwd"]},
-                {"paths": [".env"], "access": "read", "except": ["/x"]},
+                {"paths": [".env"], "access": "read", "except": ["./x"]},
             ):
                 path.write_text(json.dumps({"version": 1, "rules": [{**base, "match": match}]}))
                 with self.assertRaises(rules.RuleTableError, msg=match):
@@ -429,7 +427,7 @@ class EnvironmentRowsTest(unittest.TestCase):
         self.assertIn("Read(./**/.env)", read)
         self.assertIn("Read(./**/.env.)", read)
         self.assertIn("Read(./**/.env.exampl)", read)
-        self.assertIn("Read(./**/.env.[0-9A-DF-Za-df-z_.]*)", read)
+        self.assertIn("Read(./**/.env.[0-9A-DF-RU-Za-df-ru-z_.]*)", read)
         self.assertIn("Read(./**/.env.exampl[0-9A-DF-Za-df-z_.]*)", read)
         self.assertIn("Read(./**/.env.example?*)", read)
         self.assertNotIn("Read(./**/.env.*)", read)
@@ -444,7 +442,7 @@ class EnvironmentRowsTest(unittest.TestCase):
     def test_write_rows_also_write_plain_write_entries_for_the_cursor_cli(self):
         write = claude_code.entries_for(table_rule("env-files-write"))
         self.assertIn("Edit(./**/.env)", write)
-        self.assertIn("Edit(./**/.env.[0-9A-DF-Za-df-z_.]*)", write)
+        self.assertIn("Edit(./**/.env.[0-9A-DF-RU-Za-df-ru-z_.]*)", write)
         # Cursor's globs know only `*`, so its entries can't leave .env.example out.
         self.assertEqual([e for e in write if e.startswith("Write(")], ["Write(**/.env)", "Write(**/.env.*)"])
 
@@ -541,7 +539,7 @@ class EnvironmentRowsTest(unittest.TestCase):
         agents = self.home.read(".config/agents/AGENTS.md")
         self.assertIn("**Denied:** `printenv`, on its own or with a name.", agents)
         self.assertIn("never print one another way (`echo $NAME`)", agents)
-        self.assertIn("except `.env.example`", agents)
+        self.assertIn("except templates (`.env.example`", agents)
 
 
 class SharedFileShapeTest(unittest.TestCase):

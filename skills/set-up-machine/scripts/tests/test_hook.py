@@ -283,6 +283,103 @@ class ReviewFindingsTest(unittest.TestCase):
             self.assertFalse(verdict(tool="Read", files=[(".ENV", "read")]).denials)
 
 
+
+def answer(command):
+    """The hook's answer for a shell command: deny, ask or allow."""
+    return verdict(command).answer
+
+
+class BypassesAndFalsePositivesTest(unittest.TestCase):
+    """Issue #82: bypasses of the hook and quoted text it refused, each with its expected answer."""
+
+    def assertAnswers(self, expected, commands_):
+        for command in commands_:
+            self.assertEqual(answer(command), expected, command)
+
+    def test_a_heredoc_marker_inside_quotes_a_comment_or_arithmetic_hides_nothing(self):
+        self.assertAnswers("deny", ('echo "<<X"\nrm -rf x', "ls # <<X\nrm -rf x", "echo $((a<<b))\nrm -rf x",
+                                    "echo '<<X'\nrm -rf x", 'echo "$((a<<b))"\nrm -rf x', "ls # a comment\nrm -rf x"))
+
+    def test_real_heredocs_still_hide_their_body(self):
+        self.assertAnswers("allow", ("cat <<EOF > notes.md\nrm -rf x\nEOF", "cat <<-EOF > n.md\n\trm -rf x\n\tEOF",
+                                     "cat << 'EOF' > n.md\nrm -rf x\nEOF\necho done"))
+        self.assertAnswers("deny", ("cat <<'EOF' > n.md\nnotes\nEOF\nrm -rf x", "sh <<EOF\nrm -rf x\nEOF"))
+
+    def test_an_unquoted_heredoc_body_runs_its_substitutions(self):
+        self.assertAnswers("deny", ("cat <<EOF > n.md\n$(rm -rf x)\nEOF",))
+        self.assertAnswers("allow", ("cat <<'EOF' > n.md\n$(rm -rf x)\nEOF",))
+
+    def test_the_wrappers_it_missed(self):
+        self.assertAnswers("deny", (
+            "setsid rm -rf x", "setsid -f rm -rf x", "busybox rm -rf x", "watch rm -rf x", "watch -n 5 rm -rf x",
+            "watch 'rm -rf x'", "flock /tmp/lock rm -rf x", "flock -w 5 /tmp/lock rm -rf x",
+            "flock /tmp/lock -c 'rm -rf x'", "parallel rm -rf ::: a b", "parallel -j 4 'rm -rf {}' ::: a",
+            "script -q /dev/null rm -rf x", "script -c 'rm -rf x' log", "chronic rm -rf x", "unbuffer rm -rf x",
+            "arch -arm64 rm -rf x", "arch -arch x86_64 rm -rf x",
+        ))
+        self.assertAnswers("allow", ("watch -n 5 ls", "flock /tmp/lock make", "parallel echo ::: a b",
+                                     "script -q /dev/null ls", "arch", "chronic make", "busybox ls"))
+
+    def test_the_shells_it_missed(self):
+        for command in ("fish -c 'rm -rf x'", "dash -c 'ls'", "ksh -c 'ls'", "fish --command 'ls'",
+                        "/usr/local/bin/fish -c ls"):
+            self.assertIn("shell-inline-command", denied_by(command), command)
+        self.assertIn("rm-recursive-force", denied_by("fish -c 'rm -rf x'"))
+        self.assertAnswers("allow", ("fish script.fish", "dash ./install.sh"))
+
+    def test_a_pipe_into_a_shell_joins_the_words_before_it(self):
+        self.assertAnswers("deny", ("echo rm -rf x | sh", 'echo "rm -rf x" | sh', "echo rm -rf x | bash",
+                                    "printf 'rm -rf x' | zsh", "timeout 5 echo rm -rf x | sh",
+                                    "echo rm -rf x | fish"))
+        self.assertAnswers("allow", ("echo rm -rf x | cat", "echo ls | sh"))
+
+    def test_deleting_the_main_branch_is_denied(self):
+        for command in ("git push origin :main", "git push --delete origin main", "git push -d origin main",
+                        "git push origin --delete main", "git push upstream +:main", "git push origin :refs/heads/main",
+                        "git push origin feature :main", "git push origin :master"):
+            self.assertEqual(answer(command), "deny", command)
+            self.assertTrue([r for r in denied_by(command) if r.startswith("git-push-delete-main")], command)
+        self.assertAnswers("allow", ("git push origin main", "git push origin HEAD:main", "git push --delete origin feat",
+                                     "git push origin :feat"))
+
+    def test_mirror_clean_and_find_delete_ask(self):
+        self.assertAnswers("ask", ("git push --mirror", "git push --mirror origin", "git clean -fdx", "git clean -f",
+                                   "git clean --force -d", "find . -delete", "find . -name '*.pyc' -delete",
+                                   "timeout 5 find . -type f -delete"))
+        self.assertAnswers("allow", ("git clean -n", "git clean -nd", "find . -name '*.pyc'", "find . -type d"))
+
+    def test_the_process_environment_is_denied(self):
+        for command in ("cat /proc/self/environ", "cat /proc/1/environ", "strings /proc/self/environ",
+                        "tr '\\0' '\\n' < /proc/self/environ", "xxd /proc/42/task/42/environ"):
+            self.assertEqual(answer(command), "deny", command)
+        call = hook.ToolCall(tool="Read", files=(("/proc/self/environ", "read"),), cwd=CWD)
+        self.assertTrue(hook.decide(call, TABLE, HOME).denials)
+        self.assertAnswers("allow", ("cat /proc/cpuinfo", "cat environ.md"))
+
+    def test_known_gaps_are_named_in_the_table(self):
+        # A shell glob reaching a .env file, and ps printing environments, pass the hook; the table names them.
+        self.assertAnswers("allow", ("cat .env*", "cat .e?v", "ps eww"))
+        gaps = {r.id: r.gap for r in TABLE}
+        self.assertIn(".env*", gaps["env-files-commands"])
+        self.assertIn("ps eww", gaps["proc-environ-read"])
+
+    def test_substitutions_in_single_quotes_or_escaped_are_text(self):
+        self.assertAnswers("allow", (
+            "git commit -m 'never run `rm -rf` here'", "gh pr create --body 'Mentions `sudo ls`'",
+            "echo '$(rm -rf x)'", 'echo "\\$(rm -rf x)"', 'echo "\\`rm -rf x\\`"', "echo \\`rm -rf x\\`",
+            "echo $'it\\'s `sudo ls`'",
+        ))
+        self.assertAnswers("deny", ('echo "$(rm -rf x)"', 'echo "`rm -rf x`"', "echo $(rm -rf x)",
+                                    "echo `sudo ls`", "echo \"a $(echo 'b' && rm -rf x) c\""))
+
+    def test_ordinary_env_named_files_are_readable(self):
+        for command in ("cat .env.sample", "cat .env.template", "cat docs/.env.md", "cat .env.example"):
+            self.assertEqual(answer(command), "allow", command)
+        for path in (".env.sample", "app/.env.template", "docs/.env.md"):
+            self.assertEqual(verdict(tool="Read", files=[(path, "read")]).answer, "allow", path)
+        self.assertAnswers("deny", ("cat .env", "cat .env.local", "cat .env.production"))
+
+
 class ClaudeCodeHookTest(unittest.TestCase):
     """The script as Claude Code runs it: PreToolUse JSON in, a decision out."""
 

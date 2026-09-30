@@ -59,10 +59,10 @@
     {
       "id": "shell-inline-command",
       "level": "deny",
-      "summary": "`bash -c`, `sh -c` and `zsh -c`",
+      "summary": "`bash -c`, `sh -c`, `zsh -c` and the other shells' `-c`",
       "match": {
-        "program": ["bash", "sh", "zsh"],
-        "flags": [["c"]]
+        "program": ["bash", "sh", "zsh", "dash", "ksh", "fish", "ash", "mksh", "csh", "tcsh"],
+        "flags": [["c", "command"]]
       },
       "reason": "A command inside a quoted string hides from the other rules.",
       "instruction": "Run the command directly, one step per command; for a longer script, write it to a file in `.scratch/` and run that file."
@@ -78,6 +78,31 @@
       },
       "reason": "It overwrites the remote's history, including commits someone else pushed.",
       "instruction": "Push normally; if the remote has moved, rebase onto it or use `git push --force-with-lease`, which asks the user first."
+    },
+    {
+      "id": "git-push-delete-main",
+      "level": "deny",
+      "summary": "deleting `main` or `master` on a remote (`git push origin :main`, `git push --delete origin main`)",
+      "match": {
+        "program": "git",
+        "subcommands": [["push"]],
+        "flags": [["d", "delete"]],
+        "any_operand": ["main", "master", "refs/heads/main", "refs/heads/master"]
+      },
+      "reason": "It deletes the branch everyone else builds on, with its history, from the shared remote.",
+      "instruction": "Stop, say why, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "git-push-delete-main-refspec",
+      "level": "deny",
+      "summary": "deleting `main` or `master` on a remote with an empty refspec (`git push origin :main`)",
+      "match": {
+        "program": "git",
+        "subcommands": [["push"]],
+        "any_operand": [":main", "+:main", ":refs/heads/main", "+:refs/heads/main", ":master", "+:master", ":refs/heads/master", "+:refs/heads/master"]
+      },
+      "reason": "It deletes the branch everyone else builds on, with its history, from the shared remote.",
+      "instruction": "Stop, say why, and give the user the exact command; never work around it."
     },
     {
       "id": "git-reset-hard",
@@ -137,6 +162,41 @@
       "instruction": "Say in one line why the history needs rewriting, run it as its own command, and let the user approve it."
     },
     {
+      "id": "git-push-mirror",
+      "level": "ask",
+      "summary": "`git push --mirror`",
+      "match": {
+        "program": "git",
+        "subcommands": [["push"]],
+        "flags": [["mirror"]]
+      },
+      "reason": "It makes the remote match the local repository, deleting every remote branch and tag that isn't here.",
+      "instruction": "Push the branches you mean by name; if the whole mirror is needed, say why in one line, run it as its own command, and let the user approve it."
+    },
+    {
+      "id": "git-clean-force",
+      "level": "ask",
+      "summary": "`git clean -f` and its variants (`-fd`, `-fdx`)",
+      "match": {
+        "program": "git",
+        "subcommands": [["clean"]],
+        "flags": [["f", "force"]]
+      },
+      "reason": "It deletes untracked files, which git can't bring back, and with `-x` ignored ones such as `.env`.",
+      "instruction": "Run `git clean -n` first to list what would go, or move the files into `.scratch/`; if they must go, run it as its own command and let the user approve it."
+    },
+    {
+      "id": "find-delete",
+      "level": "ask",
+      "summary": "`find -delete`",
+      "match": {
+        "program": "find",
+        "flags": [["delete"]]
+      },
+      "reason": "It deletes every file the expression matches, and one wrong test deletes a tree.",
+      "instruction": "Run the same `find` without `-delete` to list what it matches, then move the files into `.scratch/`; if they must be deleted, run it as its own command and let the user approve it."
+    },
+    {
       "id": "gh-repo-edit",
       "level": "ask",
       "summary": "`gh repo edit`",
@@ -161,10 +221,10 @@
     {
       "id": "env-files-read",
       "level": "deny",
-      "summary": "reading `.env` and `.env.*` files in any folder, except `.env.example`",
+      "summary": "reading `.env` and `.env.*` files in any folder, except templates (`.env.example`, `.env.sample`, `.env.template`) and Markdown",
       "match": {
         "paths": ["**/.env", "**/.env.*"],
-        "except": ["**/.env.example"],
+        "except": ["**/.env.example", "**/.env.sample", "**/.env.template", "**/.env*.md"],
         "access": "read"
       },
       "reason": "They hold credentials, which must stay out of the agent's context.",
@@ -173,10 +233,10 @@
     {
       "id": "env-files-write",
       "level": "deny",
-      "summary": "writing `.env` and `.env.*` files in any folder, except `.env.example`",
+      "summary": "writing `.env` and `.env.*` files in any folder, except templates (`.env.example`, `.env.sample`, `.env.template`) and Markdown",
       "match": {
         "paths": ["**/.env", "**/.env.*"],
-        "except": ["**/.env.example"],
+        "except": ["**/.env.example", "**/.env.sample", "**/.env.template", "**/.env*.md"],
         "access": "write"
       },
       "reason": "A write can overwrite a credential, or leak one into a file that gets committed.",
@@ -189,8 +249,9 @@
       "match": {
         "program": ["cat", "less", "head", "tail", "grep", "source", "."],
         "files": ["**/.env", "**/.env.*"],
-        "except": ["**/.env.example"]
+        "except": ["**/.env.example", "**/.env.sample", "**/.env.template", "**/.env*.md"]
       },
+      "gap": "a glob the shell expands (`cat .env*`, `cat .e?v`) reaches a `.env` file under a name the hook never sees; the rule line asks the agent not to",
       "reason": "They print a `.env` file's credentials, or load them into the shell, where the next command can print them.",
       "instruction": "Read the variable names from `.env.example`; if you need a value, stop, say why, and give the user the exact command; never work around it."
     },
@@ -241,6 +302,29 @@
       },
       "reason": "They list the shell's variables with their values, the environment's tokens and keys among them.",
       "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it. Declaring a variable (`declare -x NAME=value`) is fine."
+    },
+    {
+      "id": "proc-environ-read",
+      "level": "deny",
+      "summary": "reading a process's environment under `/proc`",
+      "match": {
+        "paths": ["/proc/**/environ"],
+        "access": "read"
+      },
+      "gap": "`ps e` and `ps eww` print every process's environment through letters no rule can tell from ordinary `ps` options; the rule line asks the agent not to",
+      "reason": "A process's environment holds its tokens and keys, which must stay out of the agent's context.",
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it."
+    },
+    {
+      "id": "proc-environ-commands",
+      "level": "deny",
+      "summary": "`cat`, `strings`, `xxd` and other readers on `/proc/*/environ`",
+      "match": {
+        "program": ["cat", "less", "more", "head", "tail", "grep", "strings", "xxd", "od", "hexdump", "tr", "sed", "awk"],
+        "files": ["/proc/**/environ"]
+      },
+      "reason": "A process's environment holds its tokens and keys, which must stay out of the agent's context.",
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it."
     },
     {
       "id": "secret-files-read",

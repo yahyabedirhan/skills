@@ -225,7 +225,7 @@ class CursorAdapterTest(unittest.TestCase):
                       "working folder is inside the home folder", "account User Rules",
                       "crashes or times out",
                       "`echo $TOKEN`", "Cursor has no semantic guard", "the pre-tool hook alone refuses it",
-                      "refuses the exception (`**/.env.example`) too"):
+                      "refuses the exception (`**/.env.example`, `**/.env.sample`, `**/.env.template`, `**/.env*.md`) too"):
             self.assertIn(words, gaps)
 
     def test_its_own_entries_go_when_the_table_drops_them_and_others_stay(self):
