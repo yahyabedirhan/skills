@@ -51,7 +51,7 @@ Done when every ticket is committed and pushed, with its criteria ticked or note
 
 ## 4. Deliver
 
-Delegate the final review to a sub-agent: the full checks and `/code-review` over the whole branch against its base. Delegate the fixes for what it finds the same way you delegated tickets, then commit them. Open the pull request with `/to-pr`, and fill its last section, *Things to be aware of*, from your running list of decisions and from the surprises and skipped checks delegates reported. Besides the diff, that section is the only report the user reads, so put in it everything you learned during the build; whatever you leave out stays behind in this session.
+Delegate the final review to a sub-agent: the full checks and `/code-review` over the whole branch against its base. Delegate the fixes for what it finds the same way you delegated tickets, then commit them. Open the pull request with `/to-pr`, and put in its description your running list of decisions and the surprises and skipped checks delegates reported. Besides the diff, the description is the only report the user reads, so put in it everything you learned during the build; whatever you leave out stays behind in this session.
 
 Done when `git status` shows a clean worktree: anything it still shows is effort work to commit and push, or a file you leave out on purpose.
 
