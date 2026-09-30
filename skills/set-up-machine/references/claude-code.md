@@ -6,9 +6,9 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 
 ## Global instructions
 
-- Claude Code reads `~/.claude/CLAUDE.md` in every session and follows `@path` imports; it has no global `AGENTS.md`. Imports in user-scope files load without an approval dialog.
-- The file holds one line, `@~/.config/agents/AGENTS.md`, importing the shared file. Add it when missing; keep the rest of the file.
-- Every other line is `extra`: it moves into the shared file (global-instructions.md, *Moving a harness's file*).
+- Claude Code reads `~/.claude/CLAUDE.md` in every session, and follows a symlink; it has no global `AGENTS.md`.
+- `~/.claude/CLAUDE.md` becomes a **symlink to the shared file**, `~/.config/agents/AGENTS.md`, so the shared file is the one source and Claude Code reads it as written. It's `present` once it's that link.
+- Link it only once nothing in the old file would be lost: every other line is `extra` until it moves into the shared file (global-instructions.md, *Moving a harness's file*). The old file is `removed` (backed up). A file holding only `@~/.config/agents/AGENTS.md`, this skill's earlier form, is `removed` and becomes the link.
 
 ## Memory
 
@@ -37,7 +37,7 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 
 ## File rows
 
-- A `read` row becomes `Read(<path>)`, a `write` row `Edit(<path>)`. Project paths get `./` (`./**/.env`); `~/` and `/` paths stay as they are. A path with no `/` after the `./` matches at any depth, as in `.gitignore`: `Read(./.env.*)` refuses `sub/.env.local` too. A `Read` deny also blocks edits.
+- A `read` row becomes `Read(<path>)`, a `write` row `Edit(<path>)`. Project paths get `./` (`./**/.env`), `~/` paths stay as they are, and an absolute path gets a second `/` (`Read(//proc/**/environ)`), because Claude Code reads `/path` as relative to the settings file. A path with no `/` after the `./` matches at any depth, as in `.gitignore`: `Read(./.env.*)` refuses `sub/.env.local` too. A `Read` deny also blocks edits.
 - **`Write(...)` is never checked by Claude Code** (it warns at startup), but the Cursor CLI checks it on its own file tools, against absolute paths. So a `write` row also gets plain `Write(**/<glob>)` entries (`Write(**/.env)`), with no exception, since Cursor's globs know only `*`. An old `Write(./…)` entry is `extra`: neither harness uses it.
 - **No negation.** Globs have positive character classes only (`[!e]` lists `!` and `e`), matched case-insensitively on macOS. So an `except` of literal names becomes the globs around them. For `**/.env.*` minus `.env.example`, `.env.sample` and `.env.template`:
   - each name the literals start with but none of them is: `.env.`, `.env.e`, `.env.ex`, … `.env.exampl`, `.env.s`, … `.env.templat`;
