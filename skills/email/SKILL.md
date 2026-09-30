@@ -3,7 +3,8 @@ name: email
 description: >-
   How to work the user's email through the Spark CLI and the Gmail connector:
   which tool to pick, how to list, search and read mail, and how to mark it
-  done, label, pin and draft replies, never send. Use whenever a task reads or
+  done, label, pin and draft replies: archiving freely, any other change only
+  when asked, never sending. Use whenever a task reads or
   changes the user's mail, calendar, availability or contacts, or when this
   email setup needs configuring or checking.
 ---
@@ -14,25 +15,55 @@ Read mail with the Spark CLI, and make every change to mail through the Gmail co
 
 ## Safety
 
-Go no further than a draft: the user reviews and sends every email themselves.
+The user reviews and sends every email themselves, so go no further than a draft.
 
-- **Gmail, allowed:** `search_threads`, `get_thread`, `get_message`, `list_labels`, `label_*` and `unlabel_*`, `update_message_labels`, `create_label`, `update_label`, the undo tools (`untrash_*`, `unmark_*_spam`), and the draft tools (`create_draft`, `update_draft`, `get_draft`, `list_drafts`, `delete_draft`). `delete_label` removes a label from every email, so call it only after the user says to.
-- **Gmail, denied** by Claude Code permission rules: `send_message` (which also sends existing drafts), `reply`, `forward`, `trash_message`, `trash_thread`, `mark_message_spam`, `mark_thread_spam`, and `apply_sensitive_message_label`, `apply_sensitive_thread_label`, `batch_apply_sensitive_thread_labels` (these three can trash or spam). Claude Code hides a denied tool, so it does not show up to be called.
-- Google's permission that allows archiving also allows sending, so only those deny rules stop a send. If any denied tool can be called, the setup is incomplete: tell the user, and use the connector only for reading until the deny rules are fixed.
-- **Spark calendar:** the calendar can be read-write even when mail is read-only, and `spark event` with `--add` or `--remove` sends invitation or cancellation emails. Create, change or RSVP to an event only when the user asks for that exact change.
+Archive an email when the task calls for it. Make any other change only after the user asks for that exact change, or after you name it and they agree: a pin, a label, a draft, an undo, or a calendar event.
+
+### Gmail tools
+
+| Tools | Use |
+|---|---|
+| `search_threads`, `get_thread`, `get_message`, `list_labels`, `get_draft`, `list_drafts` | Read freely. |
+| `unlabel_thread` or `update_message_labels` removing `INBOX` | Archive freely. |
+| `label_*` and `unlabel_*` for any other label, `create_label`, `update_label` | After the user asks. |
+| `create_draft`, `update_draft`, `delete_draft` | After the user asks. |
+| `untrash_*`, `unmark_*_spam` | After the user asks. |
+| `delete_label` | Only when the user names that label to delete, since it removes the label from every email. |
+
+Claude Code's permission rules deny the rest, and a denied tool doesn't show up to be called:
+
+- `send_message`, which also sends existing drafts;
+- `reply` and `forward`;
+- `trash_message` and `trash_thread`;
+- `mark_message_spam` and `mark_thread_spam`;
+- `apply_sensitive_message_label`, `apply_sensitive_thread_label` and `batch_apply_sensitive_thread_labels`, which can trash or spam.
+
+Google's permission that allows archiving also allows sending, so only those deny rules stop a send.
+
+- **When a denied tool can be called:** the setup is incomplete. Tell the user, and only read until the deny rules are fixed.
+
+### Spark calendar
+
+The calendar can be read-write even when Spark's mail is read-only, and `spark event` with `--add` or `--remove` sends invitation or cancellation emails. Create, change or answer an event only when the user asks for that exact change.
 
 ## The two tools
 
-- **Spark CLI (`spark`)** is Readdle's CLI over Spark Desktop's local copy of the mail. It answers in about 0.1 s with compact tables, so use it for listing, searching and reading mail, Spark's categories (priority, personal, invitation, notification, newsletter), pins, calendar events, availability and contacts. It needs Spark Desktop running. Its mail access is read-only, the free level; its mail write commands need a paid level.
-- **The Gmail connector** is Google's Gmail MCP server (`gmailmcp.googleapis.com`), connected as a Claude connector, with tools named `mcp__<server-id>__<tool>`. It takes about 1 s a call and returns JSON three to four times Spark's size, so use it for every change to mail: mark done, labels, star, drafts. It needs the connector signed in.
+| Tool | Use it for | Speed and size | Needs |
+|---|---|---|---|
+| Spark CLI, `spark` | Listing, searching and reading mail; Spark's categories, pins, calendar events, availability and contacts | About 0.1 s, compact tables | Spark Desktop running. Mail access is read-only on the free level. |
+| Gmail connector, `mcp__<server-id>__<tool>` | Every change to mail | About 1 s, JSON three to four times Spark's size | The connector signed in |
+
+Spark reads Spark Desktop's local copy of the mail. The Gmail connector is Google's Gmail MCP server, `gmailmcp.googleapis.com`, connected as a Claude connector.
 
 ## How Spark's view maps to Gmail
 
-- **Done** is removing the `INBOX` label, which archives the email. Spark shows the change within about a minute.
-- **Pin** is the `STARRED` label; Spark's `is:pinned` and `is:starred` return the same emails.
-- **Labels** are Gmail labels; Spark shows them as folders.
-- **Spark's categories** are Spark's own, so no Gmail tool changes them.
-- **Date groups** such as Today, Last week or a month come from each email's date.
+| In Spark | In Gmail |
+|---|---|
+| Done | The `INBOX` label removed, which archives the email. Spark shows it within about a minute. |
+| Pin | The `STARRED` label. Spark's `is:pinned` and `is:starred` return the same emails. |
+| A folder | A Gmail label. |
+| A category: priority, personal, invitation, notification, newsletter | Spark's own; no Gmail tool changes it. |
+| Today, Last week, a month | Each email's date. |
 
 ## Flow
 
@@ -41,8 +72,9 @@ Read `command-reference.md` before the first call. When setting either tool up, 
 1. **Find** the mail with Spark.
 2. **Find it again in Gmail** before changing it, because the two tools number messages differently.
    - **When more than one thread matches:** narrow the search or ask the user which one they mean.
-3. **Act** through Gmail: mark done, pin or unpin, label, or draft a reply.
-   - **For a draft reply:** it ends with its `viewUrl`, where the user reviews and sends it.
+3. **Act** through Gmail: archive, or make the change the user asked for.
+   - **For any change but archiving that the user hasn't asked for:** name it and wait for their answer.
+   - **For a draft reply:** end with its `viewUrl`, where the user reviews and sends it.
 4. **Check** that each change took.
 
 ## References
