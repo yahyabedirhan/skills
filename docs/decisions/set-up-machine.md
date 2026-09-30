@@ -135,3 +135,9 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 
 - **The global section is `## Environment defaults`, written in plain lowercase words.** It was `## Defaults`, and the skills called it "the Defaults table", "the global Defaults" and "a Defaults row", as if it were a named source of truth. The maintainer never meant a special term. "Tools" was considered and dropped, since it reads as an agent's tools. A project's `AGENTS.md` uses the same heading for its own rows, and `/set-up-project` writes it.
 - **The role `agent-to-start` is now `agent`,** matching the `<agent>` placeholder the maintainer chose in the effort skills.
+
+## 2026-09-30: the first live run (#89)
+
+- **`~/.claude/CLAUDE.md` is a symlink to the shared file, not an `@` import.** The maintainer chose it on the first live run: the shared `AGENTS.md` is the one source, and every harness that can reads it through a link. Claude Code follows the link as it does Codex's and opencode's. An import-only file from the earlier form becomes the link.
+- **Claude Code's absolute file paths take `//`.** Its permission rules read `/path` as relative to the settings file and `//path` as absolute, so the `proc-environ-read` row is `Read(//proc/**/environ)`. The reference had said `/` paths stay as they are.
+
