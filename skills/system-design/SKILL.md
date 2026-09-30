@@ -15,7 +15,7 @@ To design inside one service's codebase, at the level of its modules, classes an
 Requirements → Core entities → API → [Data flow] → High-level design → Deep dives
 ```
 
-1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply. Invoked inside a project with no instructions, explain that project's current design. When the purpose is unclear, ask what the user wants to do with the design, whether the system exists, and whether they want only an explanation.
+1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply. Invoked inside a project with no instructions, explain that project's current design. When the purpose is unclear, ask what the user wants to do with the design, whether the system exists, and whether they want only an explanation. Read `delivery-framework.md` for what each stage covers, `existing-systems.md` when the system already exists, and a concept reference when a stage reaches its concept.
 2. **Requirements:** the few core features, about three, with the rest out of scope and a reason for each; and the 3-5 non-functional requirements that most constrain this system, quantified.
 3. **Core entities:** the nouns and actors the functional requirements need.
 4. **API:** the contract with the system's users, usually one endpoint per functional requirement.
@@ -49,12 +49,12 @@ Ask only what the code, the existing design documents and the user's earlier ans
 
 ## References
 
-- [delivery-framework.md](delivery-framework.md): what each stage covers and how to show it. Read it when working through the stages.
-- [existing-systems.md](existing-systems.md): how to build an explanation from evidence and run a redesign. Read it when the system already exists.
+- [delivery-framework.md](delivery-framework.md): what each stage covers, and how to show it.
+- [existing-systems.md](existing-systems.md): building an explanation of an existing system from evidence, and running a redesign.
 
-## Concepts and technologies
+### Concepts and technologies
 
-Each reference covers one concept: what it is, why it matters, its trade-offs, and when to choose which kind of technology. Read a reference when a stage reaches its concept, not before:
+Each covers one concept: what it is, why it matters, its trade-offs, and when to choose which kind of technology.
 
 | Reference | Covers |
 |---|---|

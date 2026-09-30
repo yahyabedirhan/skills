@@ -14,8 +14,8 @@ The environment is what agents run with: permissions, global instructions, proje
 
 ## Steps
 
-1. Choose the layer the change belongs to, and check it against the team test.
-2. Make the change at that layer's source. For a skill, that is its source repo or, for a local skill, the project; never an installed copy, which the next `npx skills update` overwrites.
+1. Choose the layer the change belongs to, and check it against the team test. Read `environment-layers.md` for the layers and the test.
+2. Make the change at that layer's source. For a skill, that is its source repo or, for a local skill, the project; never an installed copy, which the next `npx skills update` overwrites. For any operation on a skill, read `skill-operations.md`.
 3. After any skill change, run the team-test audit and judge each hit.
 4. Ship a change to the skills repo on a branch, through a pull request opened with `/to-pr`, and stop once it is open. The user merges it or asks you to.
 5. Carry the change everywhere it applies, as the table below says. `npx skills` installs from the default branch, so the installs and updates run after the merge, in the session told the pull request merged.
@@ -30,8 +30,15 @@ The environment is what agents run with: permissions, global instructions, proje
 | A local skill | Commit it with the project. |
 | A set-up skill itself | Treat it as a skill change first, then rerun that set-up skill wherever it applies. |
 
+When the user asks what a skill costs to run, or how to make it cheaper, follow `efficiency-analysis.md`.
+
 ## References
 
-- [environment-layers.md](environment-layers.md): read to choose a layer, to apply the team test, to give a skill a parameter, or to run the team-test audit, whether after a change or when the user asks which skills name a default tool.
-- [skill-operations.md](skill-operations.md): read to create, install, update, move, remove, fork or publish a skill, for shipping to the skills repo, and when the user asks which skills they use.
-- [efficiency-analysis.md](efficiency-analysis.md): read only when the user asks what a run of a skill costs or how to make it cheaper, usually after a new skill's first real run.
+- [environment-layers.md](environment-layers.md): the layers a change can go in, the team test, the skill parameter convention, and the team-test audit.
+- [skill-operations.md](skill-operations.md): the kinds of skill, and creating, installing, updating, moving, removing, forking, shipping, auditing and publishing them.
+- [efficiency-analysis.md](efficiency-analysis.md): measuring what one run of a skill costs, and making the next run cheaper.
+
+## Scripts
+
+- [scripts/default_tools.py](scripts/default_tools.py): the team-test audit: skill lines that name a default tool outside its own skill, or mention the global instructions.
+- [scripts/session-usage.py](scripts/session-usage.py): token and time use of a session transcript, split at given moments, for the efficiency analysis.

@@ -8,7 +8,7 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 | **Global instruction** | The user's personal workflow and Defaults table, and one line per global rule with what to do instead. | The shared global instructions file every harness on the machine reads. |
 | **Project `AGENTS.md`** | Anything a teammate needs to work on the project: its tracker, its commands, its conventions, its worktree tool. | The project's `AGENTS.md`, with a `CLAUDE.md` holding `@AGENTS.md` so Claude Code reads the same text. |
 | **Skill** | How to do a task, written for any team's tools and tracker: a value that differs between setups becomes a parameter. | A `SKILL.md` in the skills repo, or a local skill in one project. |
-| **Skill reference** | Detail only some runs need: a branch, a table, a tool's specifics. | A file beside the `SKILL.md`, reached by a pointer that says when to read it. |
+| **Skill reference** | How to do what the skill's flow says: commands, pitfalls, detailed procedures, tool specifics. | A file beside the `SKILL.md`. The skill's body says when to read it, and its closing `## References` section says in one line what each file covers; scripts get a `## Scripts` section the same way. |
 
 ## Team test
 

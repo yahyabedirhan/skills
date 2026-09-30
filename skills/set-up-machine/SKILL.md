@@ -14,7 +14,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 ## Steps
 
 1. **Inspect.** Find each harness on the machine, read its reference, then every file that reference names. Read the shared file too.
-2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape, memory off, the hook wired, and the `<skills-repo>` skills installed. Give every harness found its own section, listing each gap its reference names and the hook's blind spots.
+2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape, memory off, the hook wired, and the `<skills-repo>` skills installed. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/machine-diff.md` first, `references/rule-table.md` to turn a row into native entries, `references/pre-tool-hook.md` to wire the hook, and `references/global-instructions.md` whenever a global instructions file is in the diff.
 3. **Ask once** for one approval of the whole diff. A change after that needs a new approval.
 4. **Back up** every file the diff changes or removes.
 5. **Write** exactly the approved diff.
@@ -22,8 +22,14 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## References
 
-- [references/machine-diff.md](references/machine-diff.md): read before step 2. The diff's labels, what may be removed, the shared skills install, the backup folder, writing, what verify must print, and trying a change on a copy of the home folder.
-- [references/global-instructions.md](references/global-instructions.md): read whenever the shared file or a harness's own global file is in the diff. The shared file's shape, the Defaults roles, what counts as personal workflow, moving a harness's own file, and why memory stays off.
-- [references/rule-table.md](references/rule-table.md): read to turn a row into native entries or to change the table. A row's fields, its `match` kinds, and the spellings a command row needs.
-- [references/pre-tool-hook.md](references/pre-tool-hook.md): read when wiring the hook or changing the code. What it does per level, the script path and fail-open wiring, the blind spots every audit names, and the tests.
-- One reference per harness, read for each harness found: [Claude Code](references/claude-code.md), [Codex](references/codex.md), [opencode](references/opencode.md), [Cursor](references/cursor.md). Each says how the harness is found, where it keeps each setting, a row's native form with worked examples, the hook's wiring, and its gaps.
+- [references/machine-diff.md](references/machine-diff.md): the diff's labels, what may be removed, the shared skills install, the backup folder, writing, what verify must print, and trying a change on a copy of the home folder.
+- [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, what counts as personal workflow, moving a harness's own file, and why memory stays off.
+- [references/rule-table.md](references/rule-table.md): a row's fields, its `match` kinds, and the spellings a command row needs.
+- [references/pre-tool-hook.md](references/pre-tool-hook.md): what the hook does per level, its script path and fail-open wiring, the blind spots every audit names, and its tests.
+- One reference per harness:
+
+## Scripts
+
+- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine: each row's samples through the hook, and through Codex's own policy check.
+- [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before a command.
+- [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
