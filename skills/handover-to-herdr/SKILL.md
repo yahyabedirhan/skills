@@ -1,19 +1,21 @@
 ---
 name: handover-to-herdr
-description: The how-to for Herdr as a session host - start a new session in its own Herdr tab with a starting prompt and confirm it's working, and free a closing effort's own worktree from outside it. Use when handing over through Herdr, or when another skill says to.
+description: Start a new agent session in its own Herdr tab, send it its starting prompt and confirm it's working; also free a closing effort's own worktree from a Herdr tab outside it. Use when a handover, a new effort or an effort's close runs through Herdr, or when another skill says to.
 argument-hint: "Worktree path, topic, role, and the starting prompt"
 ---
 
 # Handover To Herdr
 
-The Herdr mechanism of a **handover**. The skill that calls this one, **handover** or **init-effort**, owns the flow, and has already written the handoff and the starting prompt. This skill takes four inputs:
+This skill opens a new agent session in a Herdr tab and sends it its starting prompt. The skill that calls it, **handover** or **init-effort**, has already written the handoff and the prompt and decides what the new session does; this skill only starts that session in Herdr. For the Herdr CLI in general, use the **herdr** skill.
+
+It takes four inputs:
 
 - the **worktree** path;
 - the **topic**: the effort's name, or what the work is;
 - the new session's **role**: `Orchestrator`, `Thinking`, or another one-word role;
 - the **starting prompt**.
 
-When **close-effort** runs with it, read [closing-an-effort.md](closing-an-effort.md) for its commands.
+Closing an effort needs two more Herdr steps: finding the agents still working, and freeing the closing session's own worktree from outside it. When **close-effort** calls this skill for those, read [closing-an-effort.md](closing-an-effort.md).
 
 ## Parameters
 
