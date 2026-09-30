@@ -13,9 +13,9 @@ The effort's whole life happens in the worktree this skill creates: the thinking
 
 ## Parameters
 
-- `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use the **treehouse** skill and lease the worktree to the effort. Unset, use `git worktree add` with the worktree beside the main checkout, unless the project keeps worktrees elsewhere, and give the new branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
-- `<session-host>`: where the thinking session opens. When it is Herdr, use the **handover-to-herdr** skill; for a new project it opens the project's own workspace. Unset, run the starting prompt in this session when it can move into the worktree; otherwise print the prompt in a fenced block, and ask the maintainer to start `<agent-to-start>` in the worktree and paste it.
-- `<agent-to-start>`: the command that starts a new agent session. Unset, use this session's harness.
+- `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use the **treehouse** skill and lease the worktree to the effort. Default: `git worktree add`, with the worktree beside the main checkout unless the project keeps worktrees elsewhere, and the new branch given no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
+- `<session-host>`: where the thinking session opens. When it is Herdr, use the **handover-to-herdr** skill. Default: run the starting prompt in this session when it can move into the worktree; otherwise print the prompt in a fenced block, and ask the maintainer to start `<agent-to-start>` in the worktree and paste it.
+- `<agent-to-start>`: the command that starts a new agent session. Default: this session's harness.
 
 ## 1. Decide where it lives
 
@@ -44,7 +44,7 @@ Ask, every time, whether the GitHub repo is **public or private**, and which lic
 
 1. Create the folder and a git repository in it, on `main`.
 2. Write a `README.md`, with the name as a heading and the idea in a paragraph, and the `LICENSE`.
-3. Set it up with the **set-up-project** skill, in the new folder, with GitHub as its tracker and `<owner>/<name>` as the repo. It commits nothing; the next step does.
+3. Set it up with the **set-up-project** skill, in the new folder, with GitHub as its tracker and `<owner>/<name>` as the repo.
 4. Commit it all as the first commit, `chore: start <name>`, in its own call, so a refused command stops only itself.
 5. Create the GitHub repo with the visibility the maintainer chose, as `origin`, and push `main`.
 
