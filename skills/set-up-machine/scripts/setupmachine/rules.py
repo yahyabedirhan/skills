@@ -5,11 +5,12 @@ so a row means the same thing everywhere. A row's `match` takes one of three
 kinds, told apart by its keys:
 
 - command: `program` (one name or a list), optional `subcommands`, `flags`, `operands`
-  (words after the flags, or a list of alternative word lists), `arguments: "none"` (the
+  (words right after the subcommand, or a list of alternative word lists), `any_operand`
+  (words any one of which may appear anywhere after the subcommand), `arguments: "none"` (the
   program run with nothing after it) or `arguments: "flags"` (with flags and nothing else
   after it), and `files` (globs one of its operands matches, read as a file row's paths, with an
   optional `except`);
-- file: `paths` (globs, relative to the project or `~/`), `access` (`read` or `write`)
+- file: `paths` (globs, relative to the project, or starting `~/` or `/`), `access` (`read` or `write`)
   and an optional `except` (globs the row leaves out, such as `**/.env.example`);
 - mcp-tool: `server` and `tool`, two case-insensitive regular expressions matched
   against the tool names the harness exposes on the machine.
@@ -57,6 +58,7 @@ class Rule:
     flags: tuple = ()  # command: flag groups; each group is a tuple of spellings
     subcommands: tuple = ((),)  # command: alternative word sequences after the program
     operands: tuple = ((),)  # command: alternative word sequences after the flags
+    any_operand: tuple = ()  # command: words any one of which appears after the subcommand
     bare: bool = False  # command: the program with nothing after it (`arguments: "none"`)
     flags_only: bool = False  # command: the program with one or more flags and nothing else (`arguments: "flags"`)
     files: tuple = ()  # command: globs one of its operands matches
@@ -150,8 +152,10 @@ def _parse_command(match: dict, where: str) -> dict:
     arguments = match.get("arguments")
     if arguments not in (None, "none", "flags"):
         raise RuleTableError(f'{where}: match.arguments can only be "none" or "flags"')
-    if arguments and (groups or subs != [[]] or match.get("operands") or "files" in match):
+    if arguments and (groups or subs != [[]] or match.get("operands") or "files" in match or "any_operand" in match):
         raise RuleTableError(f'{where}: match.arguments takes no flags, subcommands, operands or files')
+    if "any_operand" in match and "operands" in match:
+        raise RuleTableError(f"{where}: match.any_operand and match.operands can't be combined")
     if "except" in match and "files" not in match:
         raise RuleTableError(f"{where}: match.except needs match.files")
     return {
@@ -159,6 +163,7 @@ def _parse_command(match: dict, where: str) -> dict:
         "flags": tuple(tuple(g) for g in groups),
         "subcommands": tuple(_words(s, where, "each of match.subcommands") for s in subs),
         "operands": _operands(match.get("operands", []), where),
+        "any_operand": _words(match["any_operand"], where, "match.any_operand") if "any_operand" in match else (),
         "bare": arguments == "none",
         "flags_only": arguments == "flags",
         "files": _globs(match["files"], where, "match.files") if "files" in match else (),
@@ -175,10 +180,10 @@ def _operands(value, where: str) -> tuple:
 
 def _globs(paths, where: str, what: str) -> tuple:
     if not isinstance(paths, list) or not paths or not all(
-        isinstance(p, str) and p and not p.startswith(("/", "./")) and (p.startswith("~/") or not p.startswith("~"))
+        isinstance(p, str) and p and not p.startswith("./") and (p.startswith("~/") or not p.startswith("~"))
         for p in paths
     ):
-        raise RuleTableError(f"{where}: {what} must be globs relative to the project (`**/.env`) or starting `~/`")
+        raise RuleTableError(f"{where}: {what} must be globs relative to the project (`**/.env`), or starting `~/` or `/`")
     return tuple(paths)
 
 
@@ -264,12 +269,12 @@ def glob_regex(glob: str, cwd: str, home, fold_case: bool = False):
     """A path glob as a regex over absolute paths.
 
     `**/x` matches at any depth, even outside the project; other relative globs
-    are anchored at the working directory, and `~/` globs at the home folder.
+    are anchored at the working directory, `~/` globs at the home folder, and `/` globs at the root.
     With `fold_case`, as where the filesystem ignores case, `.ENV` matches `.env`.
     """
     if glob.startswith("~/"):
         anchor, glob = re.escape(str(home).rstrip("/")) + "/", glob[2:]
-    elif glob.startswith("**/"):
+    elif glob.startswith(("**/", "/")):
         anchor = ""
     else:
         anchor = re.escape(cwd.rstrip("/")) + "/"
@@ -294,38 +299,45 @@ def glob_regex(glob: str, cwd: str, home, fold_case: bool = False):
 
 
 def without(glob: str, excepts) -> list:
-    """Globs covering what `glob` covers minus an exception, for a harness with no negation.
+    """Globs covering what `glob` covers minus its literal exceptions, for a harness with no negation.
 
-    Works when `glob` ends in one `*` and the exception is the same text with a
-    literal in its place (`**/.env.*` minus `**/.env.example`): each shorter
-    prefix of the literal, each name that leaves it at some character, through a
-    positive class (Claude Code reads `[!x]` and `[^x]` as plain classes), and
-    each longer name. A class lists letters in both cases, digits, `_` and `.`,
-    so a name leaving the literal through any other character isn't covered.
-    A glob no exception applies to comes back as it is.
+    Works when `glob` ends in one `*` and each exception is the same text with a
+    literal in its place (`**/.env.*` minus `**/.env.example`): each name the
+    literals start with but none of them is, each name that leaves every literal
+    at some character, through a positive class (Claude Code reads `[!x]` and `[^x]`
+    as plain classes), and each longer name. A class lists letters in both cases,
+    digits, `_` and `.`, so a name leaving the literals through any other character
+    isn't covered. An exception that is itself a glob (`**/.env*.md`) can't be
+    left out, so the result covers it. A glob no exception applies to comes back as it is.
     """
     stem = glob[:-1]
     if not glob.endswith("*") or stem.endswith("*"):
         return [glob]
-    literals = [e[len(stem):] for e in excepts if e.startswith(stem) and len(e) > len(stem)]
-    literals = [lit for lit in literals if not set("*?[") & set(lit) and "/" not in lit]
+    literals = {e[len(stem):] for e in excepts if e.startswith(stem) and len(e) > len(stem)}
+    literals = sorted(lit for lit in literals if not set("*?[") & set(lit) and "/" not in lit)
     if not literals:
         return [glob]
-    if len(literals) > 1:
-        raise RuleTableError(f"{glob}: only one exception per glob can be expressed without negation")
-    lit = literals[0]
-    return ([stem + lit[:i] for i in range(len(lit))]
-            + [stem + lit[:i] + class_without(lit[i]) + "*" for i in range(len(lit))]
-            + [stem + lit + "?*"])
+    prefixes = sorted({lit[:i] for lit in literals for i in range(len(lit) + 1)})
+    out = []
+    for prefix in prefixes:
+        nexts = {lit[len(prefix)] for lit in literals if lit.startswith(prefix) and len(lit) > len(prefix)}
+        if prefix in literals:
+            out.append(stem + prefix + ("?*" if not nexts else ""))
+            if not nexts:
+                continue
+        else:
+            out.append(stem + prefix)
+        out.append(stem + prefix + class_without(nexts) + "*")
+    return [g for g in out if not (g[len(stem):] in literals)]
 
 
-def class_without(char: str) -> str:
-    """A positive character class of letters, digits, `_` and `.`, leaving out one character in both cases."""
-    left_out = {char.lower(), char.upper()}
+def class_without(chars) -> str:
+    """A positive character class of letters, digits, `_` and `.`, leaving out these characters in both cases."""
+    left_out = {c for char in chars for c in (char.lower(), char.upper())}
     parts = []
     for rng in CLASS_RANGES:
-        chars = [chr(c) for c in range(ord(rng[0]), ord(rng[2]) + 1) if chr(c) not in left_out]
-        parts += _runs(chars)
+        chars_in = [chr(c) for c in range(ord(rng[0]), ord(rng[2]) + 1) if chr(c) not in left_out]
+        parts += _runs(chars_in)
     parts += [c for c in CLASS_SINGLES if c not in left_out]
     return "[" + "".join(parts) + "]"
 

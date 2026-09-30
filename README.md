@@ -156,7 +156,7 @@ rules.json                      each global rule once: level, reason, instructio
   ↓ set_up_machine.py plan      per-harness diff: added, tightened, gaps, extra rules
   ↓ one approval → apply        writes the diff, backs up each file, records what it wrote
 ~/.config/agents/AGENTS.md      the shared global instructions: Defaults by role, rule lines, personal workflow
-~/.config/agents/hook.json      the pre-tool hook's report folder; the hook refuses every spelling of a deny row
+~/.config/agents/hook.json      the pre-tool hook's report folder; the hook reads a command as the shell runs it
 Claude Code   ~/.claude/        settings.json: deny and ask entries, the hook, auto memory off; CLAUDE.md imports the shared file
 Codex         ~/.codex/         rules/set-up-machine.rules, hooks.json, AGENTS.md → shared file, memories off in config.toml
 opencode      ~/.config/opencode/  opencode.json permissions, plugins/set-up-machine.js runs the hook, AGENTS.md → shared file

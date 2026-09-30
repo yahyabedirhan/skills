@@ -8,7 +8,8 @@ checks it against the rule table, and answers in the harness's own format:
 - **allow-and-report:** otherwise, a call an allow-and-report row covers gets one
   line in the report folder, and the hook says nothing, so the harness's own
   permissions decide;
-- `ask` rows stay with the harness's native permissions.
+- **ask:** the verdict names the ask rows a call hits (verify checks them), but the
+  hook says nothing for them: the harness's native ask entries do the asking.
 
 Each harness has a reader (its payload -> ToolCall) and a writer (the denials
 -> what it prints), in HARNESSES. The report folder comes from the hook's
@@ -54,11 +55,17 @@ class Hit:
 class Verdict:
     denials: list = field(default_factory=list)
     reports: list = field(default_factory=list)
+    asks: list = field(default_factory=list)  # ask rows the call hits; the harness's native entries do the asking
+
+    @property
+    def answer(self) -> str:
+        """deny, ask or allow: what the rule table says about the call as a whole."""
+        return "deny" if self.denials else "ask" if self.asks else "allow"
 
 
 def decide(call: ToolCall, table: list, home: Path) -> Verdict:
     verdict = Verdict()
-    checked = [r for r in table if r.level in ("deny", "allow-and-report")]
+    checked = table
     hits = []
     files = list(call.files)
     if call.command:
@@ -82,9 +89,9 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
         key = (hit.rule.id, hit.part)
         if key not in seen:
             seen.add(key)
-            (verdict.denials if hit.rule.level == "deny" else verdict.reports).append(hit)
+            {"deny": verdict.denials, "ask": verdict.asks, "allow-and-report": verdict.reports}[hit.rule.level].append(hit)
     if verdict.denials:
-        verdict.reports = []
+        verdict.reports, verdict.asks = [], []
     return verdict
 
 

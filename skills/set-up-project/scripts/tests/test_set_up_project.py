@@ -163,7 +163,8 @@ class AuditTest(Fixture):
 
     def test_cursor_allow_covering_an_ask_rule(self):
         self.write(".cursor/cli.json", json.dumps({"permissions": {"allow": ["Shell(git)", "Shell(npm)"]}}))
-        self.assertEqual(self.found("weakens"), [("Shell(git)", "git-push-force-with-lease")])
+        self.assertEqual(self.found("weakens"), [("Shell(git)", "git-push-force-with-lease"), ("Shell(git)", "git-push-mirror"),
+                                                ("Shell(git)", "git-clean-force")])
         self.assertIn(("Shell(git)", "git-reset-hard"), self.found("overlaps"))
 
     def test_cursor_nested_cli_json_is_read(self):

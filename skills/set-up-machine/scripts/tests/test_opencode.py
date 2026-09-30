@@ -76,7 +76,7 @@ class MatchingTest(unittest.TestCase):
         self.assertEqual(opencode.entries_for(BY_ID["env-files-commands"]), [])  # paths inside a command: the hook's
         self.assertEqual(opencode.entries_for(BY_ID["env-dump-listed"]), [])  # only flags: the hook's
         self.assertEqual(opencode.entries_for(ENV_READ)[:2], [("read", ".env"), ("read", "*/.env")])
-        self.assertEqual(opencode.exceptions_for(ENV_READ), [("read", ".env.example"), ("read", "*/.env.example")])
+        self.assertEqual(opencode.exceptions_for(ENV_READ)[:2], [("read", ".env.example"), ("read", "*/.env.example")])
         self.assertEqual(opencode.entries_for(BY_ID["home-credentials-read"]),
                          [("external_directory", "~/.ssh/*"), ("external_directory", "~/.aws/*")])
         self.assertEqual(opencode.entries_for(BY_ID["mail-send"]), [])
