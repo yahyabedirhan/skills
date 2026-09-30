@@ -7,8 +7,9 @@ disable-model-invocation: true
 
 # Orchestrate With Handoff
 
-Receiving the handover is the maintainer's go-ahead: start work without asking for one, and ask the maintainer only for inputs only they have.
+Receiving the handover is the maintainer's go-ahead, so start work without asking for one.
 
-1. Read the handoff in full. Confirm you are in the worktree and on the branch it names; if not, say so and stop, because the effort's work lives there.
-2. Note whether the handing session is reachable; the handoff says. When a question comes up that the spec, tickets, and handoff don't answer, look in that session if you can read it; otherwise decide it yourself and record the decision for the pull request.
-3. Run the **orchestrate-effort** skill on the spec and tickets the handoff names, carrying the handoff's notes into the plan.
+1. Read the handoff. Confirm you are in the worktree and on the branch it names; if not, say so and stop, because the effort's work lives there.
+2. Run the **orchestrate-effort** skill on the spec and tickets the handoff names, and on the handoff itself.
+
+When the spec, tickets and handoff leave a question open and the handoff says the handing session can be reached, look for the answer in that session before you decide it yourself.
