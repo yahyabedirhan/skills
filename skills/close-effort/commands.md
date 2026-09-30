@@ -2,44 +2,44 @@
 
 The git and gh commands for **close-effort**'s steps; a worktree tool's own commands are in its skill. `<default>` is the default branch, `<n>` the pull request's number. Run each commit, push and deletion as its own call, so a refused one stops only itself.
 
-## Find the pull request (step 1)
+## Find the pull request
 
 - `gh pr view [<n>] --json number,url,state,headRefName,baseRefName,mergeCommit,body`: without `<n>` it takes the current branch's.
 - `gh pr list --head <branch> --state all`: when no number was given and this session isn't on the effort branch, as in the main checkout.
 
-## Find the tickets, worktrees and branches (step 1)
+## Find the tickets, worktrees and branches
 
 - `gh issue list --label effort:<effort> --state all`: the effort's tickets on GitHub. On a local tracker, read `.efforts/<effort>/` instead.
 - `git worktree list --porcelain`: every worktree with its branch. The plain `git worktree list` is easier to read and enough when branches aren't needed.
 - `git branch -vv`: local branches with their upstream; `[gone]` marks one whose remote branch was deleted.
 
-## Merge (step 2)
+## Merge
 
 - `gh pr checks <n>`: whether the checks pass. Add `--watch` to wait for pending ones.
-- `gh pr merge <n> --merge|--squash|--rebase`: the flag is the project's method. `--auto` merges once pending checks pass, when the repo allows it. Leave out `--delete-branch`: it deletes branches before step 7 proves them, and switches the current checkout to the default branch.
+- `gh pr merge <n> --merge|--squash|--rebase`: the flag is the project's method. `--auto` merges once pending checks pass, when the repo allows it. Leave out `--delete-branch`: it deletes branches before they are proven merged, and switches the current checkout to the default branch.
 - `gh run list --commit <merge sha>`: the default branch's CI on the merge commit; `gh run watch <run id>` waits for one still running.
 - `git merge-base --is-ancestor <pinned sha> origin/<default>`: a commit pinned somewhere, like an image URL, still resolves after a squash or rebase. It succeeds when the commit is on the default branch.
 
-## Update without moving the main checkout (step 4)
+## Update without moving the main checkout
 
 - `git -C <main checkout> status --short --branch`: whether the checkout is clean and on the default branch.
 - `git -C <main checkout> pull --prune`: only when it is both. Otherwise `git -C <main checkout> fetch --prune`, and work from `origin/<default>`.
 
-## The follow-up branch (step 4)
+## The follow-up branch
 
 - `git worktree add --no-track -b <effort>-close <path> origin/<default>`: a worktree on a new branch from the default branch. When the worktree tool is Treehouse, lease one and switch its branch as the **treehouse** skill says.
 
-## Label the next effort (step 4)
+## Label the next effort
 
 - `gh label list --search effort:<next>`, then `gh label create effort:<next>` when it's missing.
 
-## Files and work only here (step 6)
+## Files and work only here
 
 - `git -C <path> status --short --ignored`: a worktree's untracked files, marked `??`, and ignored ones, marked `!!`, which removing it deletes.
 - `git -C <path> status --short`: uncommitted work; empty means clean.
 - `git log --branches --not --remotes --oneline`: commits on any local branch that no remote holds yet.
 
-## Prove merged (step 7)
+## Prove merged
 
 Fetch first with `git fetch --prune`, so `origin/<default>` is current and deleted remote branches drop out.
 
@@ -47,11 +47,11 @@ Fetch first with `git fetch --prune`, so `origin/<default>` is current and delet
 - **Matched by patch**: `git cherry origin/<default> <branch>` prints no `+` line. A `+` proves nothing either way: a squash merge or a changed commit leaves one.
 - **In the merged pull request's head**: `gh pr view <n> --json state,headRefOid` shows `MERGED`, and `git merge-base --is-ancestor <branch> <headRefOid>` succeeds. When that commit is missing locally, `git fetch origin pull/<n>/head` first. For a leftover delegate branch, `git log <headRefOid> --grep <ticket>` finds its ticket's commit, and `git log --oneline <headRefOid>..<branch>` shows only the one ticket commit the delegate made.
 
-## Free worktrees and branches (steps 7 and 8)
+## Free worktrees and branches
 
 - `git worktree remove <path>`: removes a clean worktree. Leave out `--force`: a worktree that needs it isn't clean, so it isn't proven. `git worktree prune` drops entries whose folder is already gone.
 - When the worktree tool is Treehouse, return each worktree to the pool rather than destroying it, so the pool stays warm for the next effort; destroy only one the pool shouldn't keep. The **treehouse** skill has the commands.
 - `git branch -d <branch>`: deletes a local branch git sees as merged, so it fits the reachable proof. `git branch -D <branch>` when only the patch match or the merged pull request's head proves it.
 - `git push origin --delete <branch>`: deletes the remote branch. `git ls-remote --heads origin <branch>` shows whether the remote still holds it; a repo that deletes head branches on merge may already have.
 
-This session's own worktree is freed with the same command, from outside it, as step 8 says.
+This session's own worktree is freed with the same command, from outside it, after the report.

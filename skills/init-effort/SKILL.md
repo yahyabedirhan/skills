@@ -11,8 +11,6 @@ An **effort** is work big enough for its own branch and pull request: a feature,
 
 The effort's whole life happens in the worktree this skill creates: the thinking now, the build later. This skill writes only into that worktree and, for a new project, the new repo, so the repository this session was started in stays as it was.
 
-[commands.md](commands.md) holds the commands for steps 3 and 4, with what each is for, its alternatives and when to use it.
-
 ## Parameters
 
 Each comes from the Defaults table, where a project's row overrides the global one. A parameter is unset when it has no row or its row says `none`.
@@ -36,6 +34,8 @@ Propose a short kebab-case **effort name** and a branch named the project's way,
 
 For a new project, first propose a few **project names** and confirm one. When the idea comes with a reference project, the names stand on their own rather than echo it. The project's first effort then gets its own name and branch as above.
 
+Done when the maintainer has confirmed the effort name and branch, and for a new project the project name.
+
 ## 3. Create a new project
 
 Only for a new project; otherwise skip to step 4.
@@ -47,20 +47,20 @@ Ask, every time, whether the GitHub repo is **public or private**, and which lic
 1. Create the folder and a git repository in it, on `main`.
 2. Write a `README.md`, with the name as a heading and the idea in a paragraph, and the `LICENSE`.
 3. Set it up with the **set-up-project** skill, in the new folder, with GitHub as its tracker and `<owner>/<name>` as the repo. It commits nothing; the next step does.
-4. Commit it all as the first commit, in its own call.
+4. Commit it all as the first commit, `chore: start <name>`, in its own call, so a refused command stops only itself.
 5. Create the GitHub repo with the visibility the maintainer chose, as `origin`, and push `main`.
 
 Done when the repo has one commit on `main` and it is pushed to `origin`. The first commit and `origin` are what let a worktree tool lease worktrees of the new repo.
 
 ## 4. Create the worktree
 
-Create a new worktree on the new branch, based on the latest default branch. When `<worktree-tool>` is Treehouse, make it through the **treehouse** skill, leased to the effort; otherwise use git. The new branch doesn't track the default branch; its first push sets its real upstream.
+Create a new worktree on the new branch, based on the latest default branch. When `<worktree-tool>` is Treehouse, make it through the **treehouse** skill, leased to the effort; otherwise use git. Give the new branch no upstream until its first push: a branch that tracks the default branch makes a bare `git push` target the default branch. The worktree goes beside the main checkout unless the project keeps worktrees elsewhere.
 
 Done when the worktree exists on the new branch.
 
 ## 5. Start the thinking session
 
-Write the idea into a handoff in the worktree, at the `.handoff/` path [orchestrating/folders.md](../orchestrating/folders.md) gives, with `<effort>` as the topic. It holds the idea as the maintainer gave it, the effort, the branch, the worktree, and, for a new project, its repo. Leave it uncommitted; the thinking session's handover commits it with the spec. When that handover writes its handoff on the same day and topic, it lands on the same path and updates this file in place.
+Write the idea into a handoff in the worktree, in the project's handoff folder, else at `.handoff/<date>-<effort>.md`. It holds the idea as the maintainer gave it, the effort, the branch, the worktree, and, for a new project, its repo. Leave it uncommitted; the thinking session's handover commits it with the spec.
 
 The **starting prompt** is one line, and names only skills an agent can load:
 
@@ -74,8 +74,4 @@ Start the session in the worktree, and suggest the first way that works:
 - **Otherwise, this session**: when it can move into the worktree, it runs the starting prompt here.
 - **Otherwise, a paste**: print the starting prompt in a fenced block, and ask the maintainer to start `<agent-to-start>` in the worktree and paste it.
 
-Done when the thinking session is working on the prompt. When it runs elsewhere, tell the maintainer where, and stop: this session's part is done.
-
-## After the pull request merges
-
-When the maintainer approves the pull request, says it merged, or asks to merge it, the **close-effort** skill merges it and closes the effort.
+Done when the thinking session is working on the prompt, or the maintainer says it started. When it runs elsewhere, tell the maintainer where, and stop: this session's part is done.
