@@ -143,7 +143,7 @@ main { padding-top: 48px; }
   border-bottom: 1px solid var(--line);
   display: flex; flex-direction: column; justify-content: center;
 }
-.slide-inner { width: 100%; max-width: 980px; margin-inline: auto; display: grid; gap: 28px; min-width: 0; }
+.slide-inner { width: 100%; max-width: 980px; margin-inline: auto; display: grid; gap: 28px; min-width: 0; grid-template-columns: minmax(0, 1fr); }
 .stop {
   display: flex; align-items: center; gap: 10px;
   font-family: var(--font-display); font-weight: 700; font-size: var(--step--1); color: var(--accent);
@@ -368,6 +368,86 @@ pre .c { color: var(--muted); }
 }
 .closing { font-family: var(--font-body); font-style: italic; font-size: var(--step-1); line-height: 1.45; max-width: 52ch; padding-left: 20px; border-left: 4px solid var(--accent); }
 
+/* Folds: questions grouped in expandable panels */
+.folds { display: grid; border-bottom: 1px solid var(--line); }
+.fold { border-top: 1px solid var(--line); }
+.fold > summary, .dcard summary { list-style: none; cursor: pointer; }
+.fold > summary::-webkit-details-marker, .dcard summary::-webkit-details-marker { display: none; }
+.fold > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 16px 0; font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; }
+.fold > summary::after, .dcard summary::after {
+  content: "+"; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--accent); color: var(--accent);
+  display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; line-height: 1;
+}
+.fold[open] > summary::after, .dcard details[open] summary::after { content: "\2212"; background: var(--accent); color: var(--on-accent); }
+.fold > summary:hover { color: var(--accent); }
+.fold-k { display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
+.fold-body { padding: 0 0 22px; display: grid; gap: 14px; }
+.qa { margin: 0; display: grid; }
+.qa div { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: 4px 24px; padding-block: 12px; border-top: 1px solid var(--line); }
+.qa div:first-child { border-top: 0; }
+.qa dt { font-family: var(--font-display); font-weight: 800; font-size: 0.98rem; line-height: 1.35; }
+.qa dd { margin: 0; font-size: 0.97rem; line-height: 1.55; }
+.qa-tight div { grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); padding-block: 8px; }
+@media (max-width: 720px) { .qa div, .qa-tight div { grid-template-columns: minmax(0, 1fr); } }
+.tag { font-family: var(--font-display); font-size: 0.74rem; font-weight: 800; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 7px 0; white-space: nowrap; }
+
+/* Workflows */
+.flow { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; counter-reset: fl; }
+.flow li { counter-increment: fl; font-family: var(--font-display); font-weight: 800; font-size: 0.92rem; padding: 6px 14px 4px; border-radius: 999px; background: var(--accent-soft); }
+.flow li::before { content: counter(fl) "  "; color: var(--accent); white-space: pre; }
+.places { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .places { grid-template-columns: minmax(0, 1fr); } }
+.place { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.place h3 { font-size: 1.15rem; font-weight: 900; }
+
+/* Decision cards */
+.dtools { display: flex; flex-wrap: wrap; gap: 8px; }
+.fbtn { font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; padding: 6px 14px 4px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.fbtn b { color: var(--accent); }
+.fbtn[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.fbtn[aria-pressed="true"] b { color: inherit; }
+.fbtn-quiet { margin-left: auto; border-color: var(--accent); color: var(--accent); background: transparent; }
+.dcards { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.dcards, .folds { grid-template-columns: minmax(0, 1fr); }
+.dcard, .dcard details, .fold, .place, .track { min-width: 0; }
+.dbody, .fold-body { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.dcard[hidden] { display: none; }
+.dcard details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.dcard details[open] { border-color: var(--accent); }
+.dcard summary { padding: 16px 18px; display: grid; grid-template-columns: 2.8rem minmax(0, 1fr) auto auto; gap: 4px 14px; align-items: center; }
+.dcard .did { font-family: var(--font-display); font-size: 1.1rem; min-width: 0; }
+.dhead { display: grid; gap: 3px; min-width: 0; }
+.dq-t { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; line-height: 1.3; }
+.dans { font-size: 0.93rem; line-height: 1.45; color: var(--muted); }
+.status { font-family: var(--font-display); font-weight: 800; font-size: 0.76rem; padding: 3px 10px 1px; border-radius: 999px; white-space: nowrap; }
+.s-open { background: var(--accent); color: var(--on-accent); }
+.s-changed { border: 1.5px dashed var(--accent); color: var(--accent); }
+.s-decided { border: 1.5px solid var(--line); color: var(--muted); }
+.dbody { padding: 0 18px 20px calc(2.8rem + 32px); display: grid; gap: 12px; font-size: 0.97rem; }
+.dbody b { font-family: var(--font-display); font-weight: 800; }
+@media (max-width: 640px) {
+  .dcard summary { grid-template-columns: 2.4rem minmax(0, 1fr) auto; }
+  .dcard .status { grid-column: 2; grid-row: 2; justify-self: start; }
+  .dcard summary::after { grid-column: 3; grid-row: 1; }
+  .dbody { padding: 0 16px 18px; }
+}
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+.tbl table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.88rem; line-height: 1.45; }
+.tbl caption { text-align: left; font-family: var(--font-display); font-weight: 800; font-size: 0.82rem; color: var(--muted); padding: 10px 12px 4px; }
+.tbl th, .tbl td { text-align: left; vertical-align: top; padding: 8px 12px; border-top: 1px solid var(--line); }
+.tbl thead th { font-family: var(--font-display); font-size: 0.8rem; color: var(--muted); border-top: 0; }
+.tbl tbody th { font-family: var(--font-display); font-weight: 800; }
+.tbl i { color: var(--muted); font-size: 0.85em; }
+.ticks { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+
+/* Next steps */
+.tracks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .tracks { grid-template-columns: minmax(0, 1fr); } }
+.track { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.track:first-child { border: 2px solid var(--accent); }
+.track h3 { font-size: 1.1rem; font-weight: 900; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.track .steps { font-size: 0.95rem; }
+
 footer { padding-inline: var(--gutter); padding-block: 40px 64px; font-family: var(--font-display); font-size: var(--step--1); color: var(--muted); }
 footer .slide-inner { gap: 10px; }
 @media (min-width: 1180px) { footer { margin-left: 200px; } }
@@ -392,8 +472,10 @@ footer .slide-inner { gap: 10px; }
     <li><a href="#words">Eight words</a></li>
     <li><a href="#landscape">Where agents can run</a></li>
     <li><a href="#findings">What we found</a></li>
-    <li><a href="#direction">Recommended direction</a></li>
+    <li><a href="#answers">Your questions, answered</a></li>
+    <li><a href="#workflows">How work moves</a></li>
     <li><a href="#decisions">Your decisions</a></li>
+    <li><a href="#direction">What happens next</a></li>
     <li><a href="#try">Try it yourself</a></li>
     <li><a href="#read">Reading path</a></li>
   </ol>
@@ -405,7 +487,7 @@ footer .slide-inner { gap: 10px; }
   <div class="slide-inner">
     <p class="stop"><span class="stop-dot" aria-hidden="true">0</span>Research effort, finished 29 September 2026</p>
     <h1>Where can your agents work when the laptop is closed?</h1>
-    <p class="lede">Nine research files and one synthesis map every place an agent could run for you: your Mac, your VPS, Claude Code's cloud and the other hosted agents. This page is the way in. It opens with where this could lead, explains the words, shows the landscape, gives you the result in a few lines, and then guides you through the files in the order worth reading them.</p>
+    <p class="lede">Nine research files and one synthesis map every place an agent could run for you: your Mac, your VPS, Claude Code's cloud and the other hosted agents. This page is the way in. It opens with where this could lead, explains the words and the landscape, answers the questions the research started from, and lays out every decision with what you need to make it. The files are there only for when you want more.</p>
     <p class="hero-meta">
       <span>Spec <a href="https://github.com/yahyabedirhan/skills/issues/45">#45</a></span>
       <span>Pull request <a id="pr-link" href="https://github.com/yahyabedirhan/skills/pull/76" title="Research: what agents on a server or in the cloud can do, and how to delegate to them">#76</a></span>
@@ -422,8 +504,10 @@ footer .slide-inner { gap: 10px; }
       <li><a href="#words">Words</a></li>
       <li><a href="#landscape">Landscape</a></li>
       <li><a href="#findings">Findings</a></li>
-      <li><a href="#direction">Direction</a></li>
+      <li><a href="#answers">Answers</a></li>
+      <li><a href="#workflows">Workflows</a></li>
       <li><a href="#decisions">Decisions</a></li>
+      <li><a href="#direction">Next</a></li>
       <li><a href="#try">Try it</a></li>
       <li><a href="#read">Read</a></li>
     </ol>
@@ -502,7 +586,7 @@ footer .slide-inner { gap: 10px; }
       <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="151">Herdr 0.9.2 on both machines</a><p>So the Mac can drive the VPS with <code>herdr --machine</code>. Minutes; the VPS's Herdr server restarts. (D2)</p></li>
       <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="156">The VPS set up with set-up-machine</a><p>Your current skills and instructions on the VPS, once #66 merges. (D3)</p></li>
       <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="171">Your skills loading in the cloud</a><p>Skills installed into the VM's home load; a setup script that installs them is written but not yet tried. (E16)</p></li>
-      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="230">A way for the VPS to reach your phone</a><p>Remote Control push is the candidate; nobody has tried it yet. (E5)</p></li>
+      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="248">A way for the VPS to reach your phone</a><p>Remote Control push is the candidate; nobody has tried it yet. (E5)</p></li>
     </ol>
     <p class="closing">Two gates are minutes of work once #66 merges; two are one experiment each. Until they pass, this slide is the destination, not the timetable. The rest of this page is how to get there.</p>
     <a class="next" href="#why">Next: why this research</a>
@@ -620,75 +704,371 @@ footer .slide-inner { gap: 10px; }
       <li><p><strong>Firstmate is worth borrowing from, not adopting.</strong> Take its status file per worker, its readiness check before handing work to another machine, and its rule that an unreachable machine is unknown, never a reason to fail over. <a class="src" href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="122">Firstmate file</a></p></li>
     </ol>
     <p class="note">The first pass left one gap: <strong>no first-hand facts about the cloud VM</strong>, because both of its cloud probes, run from an agent's shell, came back empty. That gap is closed. Your own <code>claude --cloud "say hi"</code> started a session, and #78 tested the cloud from inside it; where it contradicted the docs, the cloud files now say so.</p>
-    <a class="next" href="#direction">Next: the recommended direction</a>
+    <a class="next" href="#answers">Next: your questions, answered</a>
   </div>
 </section>
 
-<section class="slide" id="direction" aria-labelledby="dir-h" data-name="Recommended direction">
+<section class="slide" id="answers" aria-labelledby="ans-h" data-name="Your questions, answered">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">6</span>Recommended direction</p>
-    <h2 id="dir-h">Make the VPS a second Mac first, then test the cloud</h2>
-    <p class="lede">The synthesis recommends four moves, in this order.</p>
-    <ol class="path">
-      <li><h3>Upgrade Herdr and set up the VPS</h3><p>Herdr 0.9.2 on both machines, then the same skills and instructions as the Mac. Decisions D1 to D3.</p></li>
-      <li><h3>Build #16, then #13</h3><p>First let the Mac and the VPS see each other's state, then hand an orchestrator to the VPS, both on <code>herdr --machine</code>.</p></li>
-      <li><h3>Try the cloud setup script</h3><p>E1 and E2 are done. E16 tries the setup script that carries your skills, before anything is decided about orchestrating in the cloud.</p></li>
-      <li><h3>Fix the delegates' base branch</h3><p>Delegates' worktrees started from an old <code>main</code> during this effort. Pass the effort branch explicitly. Decision D8.</p></li>
-    </ol>
-    <div class="prose"><p>The three build tickets stay blocked, now on these decisions and experiments rather than on research. Each has a re-scoping comment from the synthesis.</p></div>
-    <div class="tickets">
-      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/16"><b>#16</b> See each other's state (lands first)</a>
-      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/13"><b>#13</b> Hand over to the VPS</a>
-      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/15"><b>#15</b> Continue an unfinished effort</a>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">6</span>Your questions, answered</p>
+    <h2 id="ans-h">The questions the spec started from, answered here</h2>
+    <p class="lede">Spec #45 asked 28 questions. Here they are in four groups, a line or two each. Open a group to read it; the links underneath are only for when you're curious.</p>
+    <div class="folds">
+      <details class="fold" open>
+        <summary><span><span class="fold-k">Questions 1-11</span>Claude Code's cloud sessions</span></summary>
+        <div class="fold-body">
+          <dl class="qa">
+            <div><dt>What machine does it run on?</dt><dd>A fresh Ubuntu 24.04 VM for each session: 4 vCPU, 15.7 GiB of RAM, 30 GB of writable disk, running as root. It's reclaimed when idle, and only what was pushed and the conversation survive. <span class="tag">first-hand</span></dd></div>
+            <div><dt>Which tools, and can it install more?</dt><dd>A broad toolchain, but no <code>gh</code> CLI. The environment's setup script runs as root before the session starts and is cached, so it can install anything.</dd></div>
+            <div><dt>Can it reach the web and drive a browser?</dt><dd>Web goes through an allowlist ("Trusted") by default; each environment can switch to Full or Custom. WebFetch obeys the list and WebSearch works. A headless Chromium is pre-installed and works once it trusts the network proxy's certificate. <span class="tag">first-hand</span></dd></div>
+            <div><dt>Does my setup load there?</dt><dd><b>Yes:</b> the repo's <code>CLAUDE.md</code> (and so <code>AGENTS.md</code>), the repo's <code>.claude/skills</code>, and skills enabled on your claude.ai account. <b>Only with one repository:</b> repo hooks, permission rules and <code>.mcp.json</code>. <b>No:</b> anything in your laptop's <code>~/.claude</code> (global instructions, skills, hooks, your own MCP servers). <b>The way in:</b> skills placed in the VM's own <code>~/.claude/skills</code> load, even mid-session, so a setup script can carry yours (D6).</dd></div>
+            <div><dt>GitHub: which branch, can it push and open a PR?</dt><dd>It starts on the branch you started it from and can push there, to its own <code>claude/…</code> branch, or to a new branch it names. Pushing to an existing branch made elsewhere is untested (E20). It opens pull requests with its Create PR button or GitHub tools. GitHub's REST API works for the attached repo; GraphQL is blocked. <span class="tag">first-hand</span></dd></div>
+            <div><dt>How is it started, and can a local agent start one?</dt><dd>You can start one from claude.ai, the phone, the Desktop app, or <code>claude --cloud "task"</code> in a terminal, which prints the session's URL and exits. From an agent: a routine's API trigger is the documented way. <code>claude --cloud</code> from an agent's shell and <code>create_session</code> from inside a cloud session are untested (E11, E17).</dd></div>
+            <div><dt>Can it run a whole effort with sub-agents?</dt><dd>Partly. Sub-agents work, but only one level deep. Background work dies when an idle VM is reclaimed, and a permission prompt stalls an unattended run. The first shape to try is a single-session effort you watch, once the skills load (E16). Claude Code projects add a coordinator that runs threads in parallel.</dd></div>
+            <div><dt>How do I watch it, answer it and hear from it?</dt><dd>Watch and answer on claude.ai or in the Claude app. <code>claude -p "&lt;msg&gt;" --cloud &lt;id&gt;</code> sends a follow-up from any machine. No CLI command prints its status, but from inside a cloud session <code>list_sessions</code> reads every session on your account. For done-or-blocked, the pull request is the signal today; the session's own phone push is half tested (<a href="https://github.com/yahyabedirhan/skills/issues/80">#80</a>).</dd></div>
+            <div><dt>Can it come back to my machine?</dt><dd><code>claude --teleport &lt;id&gt;</code> pulls its branch and conversation into a local checkout, as a copy. The docs don't say the cloud original stops (E12).</dd></div>
+            <div><dt>What does it cost?</dt><dd>Plan usage, with no charge for the VM. The one-time promo credit is spent first, and you saw it go down after #78's session. Routines have a daily run cap.</dd></div>
+            <div><dt>Scheduled or triggered agents?</dt><dd>Routines: a saved prompt, repositories and connectors that run as a cloud session on a schedule, an API call or a GitHub event. They're a research preview. A new routine gets every connected connector, with write access, by default, so review them.</dd></div>
+          </dl>
+          <p class="small"><a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md">Claude Code cloud file</a> <span class="muted">·</span> <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md">First-hand probes</a></p>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">Questions 12-16</span>Codex, Cursor, Copilot and the rest</span></summary>
+        <div class="fold-body">
+          <dl class="qa">
+            <div><dt>Codex cloud</dt><dd>An OpenAI container that reads <code>AGENTS.md</code>; whether your personal skills load there isn't documented. A local agent starts and watches it from a shell (<code>codex cloud exec</code>, <code>list</code>, <code>diff</code>, <code>apply</code>), but answers go only through the web or an <code>@codex</code> PR comment. Comes with ChatGPT Plus ($20 a month).</dd></div>
+            <div><dt>Cursor Cloud Agents</dt><dd>An Ubuntu VM with a desktop and a browser. It's the only one of the big three that carries anything of yours: skills from <code>~/.cursor/skills</code>, and your account's User Rules. It has a full REST API, follow-ups included. Pro is $20 a month, plus model use at API prices.</dd></div>
+            <div><dt>GitHub Copilot cloud agent</dt><dd>Runs on a GitHub Actions runner with a 59-minute cap, and gives one <code>copilot/…</code> branch and one draft PR per task. Start it with <code>gh agent-task create</code>; answer it by an <code>@copilot</code> PR comment. Pro is $10 a month plus AI credits; Actions minutes are free on public repos.</dd></div>
+            <div><dt>opencode and Grok</dt><dd>opencode has no hosted agent; it runs in your own GitHub Actions. Grok Bot is a general-purpose agent on a cloud computer, not a repo coding agent.</dd></div>
+            <div><dt>Jules, Devin, Amp, Factory, OpenHands</dt><dd>Each can take a repo task. Amp and Devin can carry personal skills. None beats trying Claude Code's cloud first.</dd></div>
+          </dl>
+          <p class="small"><a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">The comparison table</a></p>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">Questions 17-21, 23</span>Your VPS</span></summary>
+        <div class="fold-body">
+          <dl class="qa">
+            <div><dt>What can an agent there do, compared with the Mac?</dt><dd>Web, GitHub (<code>gh</code> is logged in) and Claude Code work. Missing: a browser (the cached one lacks 15 system libraries), notifications, Treehouse, <code>jq</code> and the other harnesses. It has 3.8 GB of RAM and no swap. <span class="tag">first-hand</span></dd></div>
+            <div><dt>What Herdr offers across machines</dt><dd>On 0.9.0 today, the Mac saves the VPS as a machine but drives it through <code>ssh … bash -lc 'herdr …'</code>. 0.9.2 adds <code>herdr --machine &lt;label&gt;</code>, with no shell quoting, and <code>machine status</code> as a readiness check (D2).</dd></div>
+            <div><dt>How your skills and instructions get there</dt><dd>set-up-machine, once #66 merges, installs the same skills, <code>AGENTS.md</code>, rule table and hook as on the Mac (D3).</dd></div>
+            <div><dt>What more CPU and RAM would unlock</dt><dd>RAM is the limit, not CPU. A Claude Code session holds 0.15-0.5 GB, and builds and browsers add gigabytes. 4 GB fits one agent; 8 GB fits two or three, or one with a browser; 16 GB fits several with browsers (D4, D5).</dd></div>
+            <div><dt>Prices, and machines that run only while working</dt><dd>Hetzner's shared line is the cheapest per GB, but it's out of stock for now. Its pricier lines and other providers are in D4. A big server made from a snapshot for a few hours costs cents; Fly.io and GitHub Codespaces stop charging for compute while stopped.</dd></div>
+            <div><dt>What an agent may do there without asking</dt><dd>Read Herdr and git state freely, and start what you chose (a handover). Today's line asks before it messages an agent it didn't start, closes or stops anything, removes worktrees or branches, or changes the machine. You've said you want agents to work freely across both machines (D11).</dd></div>
+          </dl>
+          <p class="small"><a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md">VPS file</a> <span class="muted">·</span> <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md">Sizing file</a></p>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">Question 22 and the rest</span>Handing work over, and what the research delivered</span></summary>
+        <div class="fold-body">
+          <dl class="qa">
+            <div><dt>How does a local session hand work to each place, watch it and hear it's done?</dt><dd>That's the next section, <a href="#workflows">How work moves</a>, one card per place.</dd></div>
+            <div><dt>One matrix, the decisions, re-scoped build tickets</dt><dd>The matrix is summarised in <a href="#landscape">Where agents can run</a>, the decisions are in <a href="#decisions">Your decisions</a>, and the three build tickets each carry a re-scoping comment.</dd></div>
+            <div><dt>Was anything unsafe done?</dt><dd>No. No skill, instruction or machine was changed. Every probe is listed in the exploration log at the end of each file.</dd></div>
+          </dl>
+        </div>
+      </details>
     </div>
-    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="253">Read how each build ticket changed</a> <span class="muted">(synthesis, a two-minute section)</span></p>
-    <a class="next" href="#decisions">Next: the decisions waiting for you</a>
+    <a class="next" href="#workflows">Next: how work moves</a>
+  </div>
+</section>
+
+<section class="slide" id="workflows" aria-labelledby="wf-h" data-name="How work moves">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">7</span>How work moves</p>
+    <h2 id="wf-h">The same five steps, wherever the work goes</h2>
+    <p class="lede">Today an effort starts on the Mac: a thinking session writes a spec and tickets, commits and pushes a handoff, and starts an orchestrator with a one-line prompt. The orchestrator builds and delivers one pull request. Only the place changes.</p>
+    <ol class="flow" aria-label="The five steps">
+      <li>Hand over</li><li>Watch</li><li>Answer</li><li>Hear done or blocked</li><li>Bring it back</li>
+    </ol>
+    <div class="places">
+      <article class="place">
+        <h3>Your VPS, in a Herdr tab</h3>
+        <p class="muted small">Fire and forget, the way you want it. Your whole workflow runs there unchanged.</p>
+        <dl class="kv">
+          <div><dt>Hand over</dt><dd>The same handover-to-herdr commands, on the VPS: <code>herdr --machine vps …</code> after 0.9.2 (over SSH today)</dd></div>
+          <div><dt>Watch</dt><dd>Your Mac's Herdr window shows the VPS agents' states; <code>agent read</code> reads a pane</dd></div>
+          <div><dt>Answer</dt><dd>Select the VPS in Herdr and type, or <code>herdr agent prompt</code></dd></div>
+          <div><dt>Done or blocked</dt><dd>No route proven yet: Remote Control push (E5), or a watcher on the Mac. See D9</dd></div>
+          <div><dt>Bring back</dt><dd>It's git: the branch and the PR. Check the old side is idle and pushed first</dd></div>
+        </dl>
+        <span class="role solid">Orchestrator, once set up</span>
+      </article>
+      <article class="place">
+        <h3>A Claude Code cloud session</h3>
+        <p class="muted small">No machine to keep, a bigger VM, many at once. Paid by the plan and the promo credit.</p>
+        <dl class="kv">
+          <div><dt>Hand over</dt><dd>Push, then <code>claude --cloud "Run the handoff in .handoff/…"</code>; it clones the branch. From an agent: a routine, or <code>create_session</code> (untested)</dd></div>
+          <div><dt>Watch</dt><dd>claude.ai or the Claude app; from inside another cloud session, <code>list_sessions</code></dd></div>
+          <div><dt>Answer</dt><dd>Web or phone; <code>claude -p "…" --cloud &lt;id&gt;</code> from any machine</dd></div>
+          <div><dt>Done or blocked</dt><dd>The pull request; its own phone push is half tested (#80)</dd></div>
+          <div><dt>Bring back</dt><dd>The branch, or <code>claude --teleport &lt;id&gt;</code> for the whole conversation (a copy)</dd></div>
+        </dl>
+        <span class="role">Tasks now; efforts after E16</span>
+      </article>
+      <article class="place">
+        <h3>Codex, Cursor or Copilot</h3>
+        <p class="muted small">One prompt, one branch, one PR. A delegate for a single ticket, not an orchestrator.</p>
+        <dl class="kv">
+          <div><dt>Hand over</dt><dd><code>codex cloud exec</code>, Cursor's <code>POST /v1/agents</code>, <code>gh agent-task create</code>. The brief must carry the rules; your skills don't travel</dd></div>
+          <div><dt>Watch</dt><dd>All three from a shell: <code>codex cloud list</code>, Cursor's API, <code>gh agent-task view --follow</code></dd></div>
+          <div><dt>Answer</dt><dd>Only Cursor by API; Copilot by <code>@copilot</code>, Codex by <code>@codex</code> in a PR comment</dd></div>
+          <div><dt>Done or blocked</dt><dd>The PR; Cursor has iOS push; the others are unverified</dd></div>
+          <div><dt>Bring back</dt><dd>Check out the branch; <code>codex cloud apply</code> for a diff</dd></div>
+        </dl>
+        <span class="role">Delegate only</span>
+      </article>
+    </div>
+    <p class="small"><a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="47">Every option side by side</a> <span class="muted">(the delegation file, section 2)</span></p>
+    <a class="next" href="#decisions">Next: your decisions</a>
   </div>
 </section>
 
 <section class="slide" id="decisions" aria-labelledby="dec-h" data-name="Your decisions">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">7</span>Your decisions</p>
-    <h2 id="dec-h">Thirteen decisions, each with a recommendation</h2>
-    <p class="lede">Each links to its entry in the synthesis, where you'll find the options and the reasoning. Grouped here by what they're about.</p>
-    <div class="dgroups">
-      <div class="dgroup">
-        <h3>How work is organised</h3>
-        <ul class="dlist">
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="146"><span class="did">D1</span>Where does an orchestrated effort run?</a><p class="drec">The VPS when the laptop will be closed, now; hosted agents for single tickets later.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="183"><span class="did">D8</span>What do orchestrators delegate to, from which base?</a><p class="drec">Pass the effort branch as the base now; Herdr tabs with a status file for VPS efforts.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="210"><span class="did">D13</span>Adopt Firstmate?</a><p class="drec">Borrow its ideas; don't adopt it.</p></li>
-        </ul>
-      </div>
-      <div class="dgroup">
-        <h3>The VPS</h3>
-        <ul class="dlist">
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="151"><span class="did">D2</span>Upgrade Herdr to 0.9.2 on both machines?</a><p class="drec">Yes, at a quiet moment: the VPS server restart ends its idle agent pane.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="156"><span class="did">D3</span>Set up the VPS the same way as the Mac?</a><p class="drec">Yes, once #66 merges, plus <code>jq</code> and Treehouse. Pick which memory folders to keep first.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="161"><span class="did">D4</span>Resize the VPS?</a><p class="drec">Add swap now; move to CX33 when a browser or a second agent runs there.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="166"><span class="did">D5</span>A headless browser on the VPS?</a><p class="drec">Not until a task needs one; then the Playwright Docker image.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="190"><span class="did">D9</span>How does done-or-blocked reach you from off the Mac?</a><p class="drec">Remote Control push once proven, a Mac-side watcher as the fallback; the pull request for cloud sessions, plus their own push tool if E19 confirms it reaches the phone.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="195"><span class="did">D10</span>Does the VPS need to reach the Mac?</a><p class="drec">No, the Mac always checks; Remote Control messaging where a VPS agent must ask.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="200"><span class="did">D11</span>Guard disruptive remote Herdr commands?</a><p class="drec">Yes, as rules that ask first, in a follow-up to #66.</p></li>
-        </ul>
-      </div>
-      <div class="dgroup">
-        <h3>The cloud</h3>
-        <ul class="dlist">
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="171"><span class="did">D6</span>How do your skills reach a cloud session?</a><p class="drec">The environment's setup script installs them into the VM's home; confirm it in E16. Until then, self-contained briefs.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="178"><span class="did">D7</span>Which hosted agent, if any, for single tickets?</a><p class="drec">Claude Code's cloud first; Copilot if you want a second.</p></li>
-          <li><a class="dq" href="cloud-agents.md" data-md="cloud-agents.md" data-line="205"><span class="did">D12</span>The promo credit and the one unused cloud session</a><p class="drec">Spend it on the cloud experiments (E16, E17). The credit is live and E1's session has used it; read the balance at claude.ai/settings/usage. <span class="flag">Time-sensitive:</span> the promotional pool's rate-limit window resets on 5 November (a window reset, not a refill).</p></li>
-        </ul>
-      </div>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">8</span>Your decisions</p>
+    <h2 id="dec-h">Thirteen decisions: eight answered, five need more</h2>
+    <p class="lede">Your answers from 30 September are in. Each card opens to what the decision is about, the options, what the research recommends, and what happens next, so you can decide here without opening the files.</p>
+    <div class="dtools" role="group" aria-label="Filter decisions">
+      <button type="button" class="fbtn" data-filter="all" aria-pressed="true">All <b>13</b></button>
+      <button type="button" class="fbtn" data-filter="open" aria-pressed="false">Needs more <b>5</b></button>
+      <button type="button" class="fbtn" data-filter="changed" aria-pressed="false">You changed it <b>4</b></button>
+      <button type="button" class="fbtn" data-filter="decided" aria-pressed="false">Agreed <b>4</b></button>
+      <button type="button" class="fbtn fbtn-quiet" id="expand-all" aria-pressed="false">Open all</button>
     </div>
-    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="142">Open the decisions section</a> <span class="muted">·</span> <a class="muted" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md#decisions-for-the-maintainer">on GitHub</a></p>
-    <a class="next" href="#try">Next: what you can try yourself</a>
+    <ol class="dcards" id="dcards">
+
+      <li class="dcard" data-status="open"><details>
+        <summary><span class="did">D4</span><span class="dhead"><span class="dq-t">Resize the VPS, or move it?</span><span class="dans">You: Hetzner can't resize now. You're open to paying more, even around $50 a month, or another European provider. It needs its own research.</span></span><span class="status s-open">Needs more</span></summary>
+        <div class="dbody">
+          <p><b>What it's about.</b> Your VPS (Hetzner CX23: 2 shared vCPU, 4 GB, €5.99) fits one agent with no browser. RAM is the limit, and with no swap, running out of memory kills processes.</p>
+          <p><b>Shared or dedicated?</b> A <b>shared</b> vCPU is a slice of a physical core that other customers also use. It's cheap and fine for agents, which mostly wait on the model. A <b>dedicated</b> vCPU is yours alone: steady speed for builds that run all day, at 3-5 times the price for the same RAM. Nothing you run today needs dedicated cores.</p>
+          <div class="tbl"><table>
+            <caption>What each size fits, with Hetzner's EU prices per month</caption>
+            <thead><tr><th>Size</th><th>Fits</th><th>Shared (cheap line)</th><th>Shared (AMD line)</th><th>Dedicated</th></tr></thead>
+            <tbody>
+              <tr><td>2 vCPU, 4 GB</td><td>1 agent, no browser</td><td>CX23 €5.99 <i>out of stock</i></td><td>CPX22 €19.99</td><td>—</td></tr>
+              <tr><td>4 vCPU, 8 GB</td><td>2-3 agents, or 1 with a browser</td><td>CX33 €8.99 <i>out of stock</i></td><td>CPX32 €35.99</td><td>CCX13 €43.49 (2 vCPU, 8 GB)</td></tr>
+              <tr><td>8 vCPU, 16 GB</td><td>several agents with browsers</td><td>CX43 €16.49 <i>out of stock</i></td><td>CPX42 €69.99</td><td>CCX23 €86.49 (4 vCPU)</td></tr>
+            </tbody>
+          </table></div>
+          <p><b>Outside Hetzner</b>, for 4 vCPU and 8 GB: netcup €14.50 (Vienna, Nuremberg, Amsterdam; 1-24 month terms); Vultr $40 and DigitalOcean $48 (Frankfurt, Amsterdam, hourly). Other European providers, such as OVHcloud, Scaleway, IONOS and Contabo, weren't compared.</p>
+          <p><b>What's already true.</b> The out-of-stock mark is Hetzner's capacity restriction for some customers and locations; your running CX23 isn't affected, and a refused rescale can be retried another day. Its AMD shared line (CPX) is in stock: CPX32, 8 GB for €35.99, is inside your budget today.</p>
+          <p><b>Next.</b> A research ticket: cost-effective European VPS providers for low latency, shared against dedicated, and what €30-50 a month buys. Until then, 2-4 GB of swap on the CX23 costs nothing.</p>
+          <p class="small"><a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="64">Sizing file: workloads and tiers</a> <span class="muted">·</span> <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="150">Alternatives</a></p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="open"><details>
+        <summary><span class="did">D7</span><span class="dhead"><span class="dq-t">Which hosted agents, for which single tickets?</span><span class="dans">You: yes to hosted agents for small efforts and single tickets. You want the pros, cons and costs before choosing.</span></span><span class="status s-open">Needs more</span></summary>
+        <div class="dbody">
+          <p><b>What it's about.</b> Which service takes a self-contained ticket off your hands: one prompt in, one branch and PR out. None of them can orchestrate an effort.</p>
+          <div class="tbl"><table>
+            <caption>The four worth a look</caption>
+            <thead><tr><th></th><th>Cost</th><th>Good at</th><th>Weak at</th><th>Give it</th></tr></thead>
+            <tbody>
+              <tr><th>Claude Code cloud</th><td>Your plan; promo credit first</td><td>Your skills can load (setup script); 15.7 GiB VM, a browser; many at once; watch from the phone</td><td>Idle VM loses background work; sub-agents one level deep; <code>gh</code> missing</td><td>Anything self-contained, now; efforts after E16</td></tr>
+              <tr><th>GitHub Copilot</th><td>$10 a month plus AI credits; Actions free on public repos</td><td>Lives in GitHub: assign an issue, get a draft PR; Playwright on by default</td><td>59-minute cap; one PR per task; steer only by PR comment</td><td>Small, well-specified issues in public repos</td></tr>
+              <tr><th>Cursor</th><td>$20 a month plus model use at API prices</td><td>The strongest delegate: full API with follow-ups, desktop and browser, carries your Cursor skills and rules</td><td>API prices add up; a separate skill folder to keep in sync</td><td>UI work that needs a real browser; longer tasks</td></tr>
+              <tr><th>Codex</th><td>In ChatGPT Plus, $20 a month</td><td>Start and watch from a shell; <code>apply</code> a diff locally</td><td>No follow-up from a shell; size and limits unpublished; no browser</td><td>Only if you already pay for ChatGPT</td></tr>
+            </tbody>
+          </table></div>
+          <p><b>Recommended.</b> Claude Code's cloud first: no sign-up, and the credit is there to spend. Add Copilot if you want a second, as the cheapest trial. Whichever you use, the brief carries the rules, and the result comes back as a branch you review.</p>
+          <p><b>Next.</b> Try two or three real tickets on Claude Code's cloud this week while the credit lasts, and note which kinds of ticket came back clean. Sign up for Copilot only if you want the comparison.</p>
+          <p class="small"><a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">Providers comparison</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="178">D7 in the synthesis</a></p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="open"><details>
+        <summary><span class="did">D8</span><span class="dhead"><span class="dq-t">Which branch should a delegate start from?</span><span class="dans">You: unclear what it means. Plan: keep this effort open, close the research tickets and open action items.</span></span><span class="status s-open">Needs more</span></summary>
+        <div class="dbody">
+          <p><b>What it's about, plainly.</b> When an orchestrator hands a ticket to a sub-agent (a "delegate"), the sub-agent gets its own copy of the repo (a worktree). In this effort those copies started from an old <code>main</code>, not from the effort's branch, so every delegate first had to catch up by hand. On a stacked effort it could build on stale files.</p>
+          <p><b>Options.</b> (a) Keep sub-agents and tell each one explicitly to start from the effort branch: a one-line fix to the orchestrating skills. (b) For efforts off the Mac, delegate to Herdr tabs that keep a status file, so the work survives if the orchestrator restarts. (c) Firstmate's model everywhere.</p>
+          <p><b>Recommended.</b> (a) now, (b) when efforts run on the VPS (part of #15).</p>
+          <p><b>Your plan for this effort</b> fits alongside it: merge the research, close the research tickets, and keep effort #45 going with action items. The base-branch fix would be one of them.</p>
+          <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="183">D8 in the synthesis</a></p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="open"><details>
+        <summary><span class="did">D9</span><span class="dhead"><span class="dq-t">How do you hear that an agent off the Mac is done or stuck?</span><span class="dans">You: unclear. Explained below; #80 tests the cloud half.</span></span><span class="status s-open">Needs more</span></summary>
+        <div class="dbody">
+          <p><b>What it's about, plainly.</b> On the Mac, an agent that finishes or needs you runs <code>osascript</code> and a notification pops up. That command is macOS only. On the VPS or in the cloud there's nothing to replace it yet, so without an answer you'd have to keep checking.</p>
+          <div class="tbl"><table>
+            <caption>The candidates</caption>
+            <thead><tr><th></th><th>How it works</th><th>Needs the Mac on?</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><th>(a) Remote Control push</th><td>The VPS session runs with Remote Control on; Claude pushes to your phone when it's done or needs you</td><td>No</td><td>Documented, untested (E5)</td></tr>
+              <tr><th>(b) A watcher on the Mac</th><td>A Mac session waits on the VPS agent with <code>herdr agent wait --until done --until blocked</code>, then runs <code>osascript</code></td><td>Yes</td><td>Possible, untested</td></tr>
+              <tr><th>(c) Herdr's own toast</th><td>Herdr on the VPS raises a notification in your Herdr window</td><td>Yes</td><td>Unclear where it shows (E4)</td></tr>
+              <tr><th>(d) GitHub</th><td>The pull request, and GitHub's notification about it</td><td>No</td><td>Works today</td></tr>
+              <tr><th>Cloud's own push</th><td>A cloud session's <code>PushNotification</code> tool</td><td>No</td><td>Sent once, arrival unconfirmed (#80)</td></tr>
+            </tbody>
+          </table></div>
+          <p><b>Recommended.</b> For the VPS, (a) once E5 proves it, with (b) as the fallback. For cloud sessions, (d), plus their own push if #80 confirms it.</p>
+          <p><b>Next.</b> Run #80 and E5, both a few minutes; then this answers itself.</p>
+          <p class="small"><a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="86">Notifying, in the delegation file</a></p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="open"><details>
+        <summary><span class="did">D13</span><span class="dhead"><span class="dq-t">What to take from Firstmate?</span><span class="dans">You: don't adopt it, but understand its ideas and which workflows to borrow.</span></span><span class="status s-open">Needs more</span></summary>
+        <div class="dbody">
+          <p><b>What it is.</b> An open-source "agent distro" by Treehouse's author: you clone it, start any terminal agent inside it, and that agent becomes your one point of contact for every project.</p>
+          <dl class="qa qa-tight">
+            <div><dt>Captain and first mate</dt><dd>You're the captain; you talk only to the first mate, one long-lived agent per machine that never writes code itself.</dd></div>
+            <div><dt>Crewmates</dt><dd>One visible terminal agent per task, each in its own worktree and branch, started from a written brief.</dd></div>
+            <div><dt>Brief on disk</dt><dd>The task's intent, spec, rules and definition of done, as a file. If a crewmate dies, a new one starts from the same brief.</dd></div>
+            <div><dt>Status file</dt><dd>Each crewmate appends one-line events (<code>working</code>, <code>needs-decision</code>, <code>blocked</code>, <code>done</code>) to a file. A decision stays open until a matching <code>resolved</code> line.</dd></div>
+            <div><dt>Inbox and doorbell</dt><dd>Messages to a crewmate go into files it acknowledges, not pasted keystrokes, so none are lost.</dd></div>
+            <div><dt>Watcher</dt><dd>A bash loop with no tokens spent checks every 15 seconds, and wakes the first mate only when something needs it.</dd></div>
+            <div><dt>Secondmates</dt><dd>A whole Firstmate home on another machine over SSH, with a readiness "doctor". If it's unreachable, its state is <i>unknown</i>, and work never silently fails over to the local machine.</dd></div>
+          </dl>
+          <div class="tbl"><table>
+            <caption>What to borrow, and where it lands</caption>
+            <thead><tr><th>Idea</th><th>What it changes for you</th><th>Lands in</th></tr></thead>
+            <tbody>
+              <tr><td>A status file per remote orchestrator</td><td>The Mac reads what a VPS agent needs, not only whether it's busy</td><td>#16</td></tr>
+              <tr><td>A readiness check before a handover</td><td>Gaps sorted into "fixable" and "needs you" before work is sent to the VPS</td><td>#13</td></tr>
+              <tr><td>Unreachable is unknown</td><td>A VPS that doesn't answer is never treated as done or failed</td><td>#13, #16</td></tr>
+              <tr><td>Relaunch from the brief on disk</td><td>A delegate that dies is restarted from its brief, not lost</td><td>#15</td></tr>
+              <tr><td>A worktree check in delegate briefs</td><td>The delegate confirms it's in its own worktree before it writes</td><td>orchestrating skills</td></tr>
+              <tr><td><code>--match-head-commit</code> on merge</td><td>The merge fails if the branch moved after you reviewed it</td><td>close-effort</td></tr>
+              <tr><td>gnhf's overnight loop</td><td>One command runs an agent in a loop, one commit per step, for measurable tasks overnight on the VPS</td><td>a later trial</td></tr>
+            </tbody>
+          </table></div>
+          <p><b>Recommended.</b> Borrow; don't adopt. Adopting it would replace your effort workflow, run workers with permissions bypassed, and strip AI trailers.</p>
+          <p class="small"><a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="16">How Firstmate delegates</a> <span class="muted">·</span> <a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="122">Mapped against your workflow</a></p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="changed"><details>
+        <summary><span class="did">D1</span><span class="dhead"><span class="dq-t">Where does an orchestrated effort run?</span><span class="dans">You: the Mac for now. Test the VPS and the cloud at the same time, not one after the other, and use the cloud first while the credit lasts.</span></span><span class="status s-changed">You changed it</span></summary>
+        <div class="dbody">
+          <p><b>The research said.</b> The VPS now, the cloud later: only the VPS runs your workflow unchanged, and a cloud effort needs your skills there first (E16) and an agent-side start (E17).</p>
+          <p><b>What your answer means.</b> Two tracks at once. VPS: Herdr, set-up-machine, one real effort. Cloud: the setup script (E16), then one effort in a single session you watch. The credit's deadline puts the cloud track first. Running a cloud effort doesn't need E17: you start it yourself with <code>claude --cloud</code>.</p>
+          <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="146">D1 in the synthesis</a></p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="changed"><details>
+        <summary><span class="did">D5</span><span class="dhead"><span class="dq-t">A headless browser on the VPS?</span><span class="dans">You: yes, from day zero, as part of the environment.</span></span><span class="status s-changed">You changed it</span></summary>
+        <div class="dbody">
+          <p><b>It's possible.</b> The VPS already has a Playwright headless shell, but it can't start: 15 system libraries are missing. Two ways to fix it:</p>
+          <ul class="ticks">
+            <li><b>Playwright's Docker image</b> (Ubuntu 26.04 variant): no root needed, you're already in the <code>docker</code> group, and it's removable. Run it with <code>--init --ipc=host</code>. A multi-GB image.</li>
+            <li><b><code>npx playwright install-deps chromium</code></b> as root: installs the libraries into the system.</li>
+          </ul>
+          <p><b>The catch is RAM.</b> A browser adds about 1 GB next to an agent. On today's 4 GB with no swap, it fits one agent with no build running, so it pushes D4 toward 8 GB.</p>
+          <p><b>Next.</b> Put it in set-up-machine for the VPS, and measure its memory next to an agent (E7).</p>
+          <p class="small"><a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="37">VPS file: headless browser</a></p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="changed"><details>
+        <summary><span class="did">D10</span><span class="dhead"><span class="dq-t">Does the VPS need to reach the Mac?</span><span class="dans">You: fire and forget is the flow, but keep the channel two-way if it's already there.</span></span><span class="status s-changed">You changed it</span></summary>
+        <div class="dbody">
+          <p><b>What's there.</b> Herdr goes one way: the Mac drives the VPS, and the VPS can't reach the Mac without opening it to inbound access. The two-way channel that needs no tunnel is Claude Code's cross-session messaging over Remote Control: text only, both directions, through Anthropic's servers.</p>
+          <p><b>What your answer means.</b> The Mac drives; the VPS delivers a branch or PR; and Remote Control messaging stays on, so a VPS agent can ask something when it must. Nothing opens the Mac to the internet.</p>
+          <p><b>Next.</b> E5 tries it: Remote Control in a VPS tab, and messages in both directions.</p>
+          <p class="small"><a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="84">Cross-machine messaging</a></p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="changed"><details>
+        <summary><span class="did">D11</span><span class="dhead"><span class="dq-t">Guard disruptive remote Herdr commands?</span><span class="dans">You: no guard; agents should work freely across the Mac and the VPS.</span></span><span class="status s-changed">You changed it</span></summary>
+        <div class="dbody">
+          <p><b>The research said.</b> Add ask-first rules for <code>herdr … server stop</code> and <code>workspace close --group</code>, because with <code>--machine</code> one local command can stop every agent on the VPS.</p>
+          <p><b>Your answer.</b> No such rules. One thing to settle with it: the skills' wider line still has an agent ask before it closes, stops or messages something on the other machine that it didn't start. Should that loosen too, or only the extra rules go?</p>
+          <p class="small"><a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="136">Permissions on the other machine</a></p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="decided"><details>
+        <summary><span class="did">D12</span><span class="dhead"><span class="dq-t">Spend the promo credit?</span><span class="dans">You: yes. It's working, #78's session was paid from it, and you count about a week left.</span></span><span class="status s-decided">Agreed</span></summary>
+        <div class="dbody">
+          <p><b>Next.</b> Spend it on the cloud track: E16 (setup script), then real tickets and one effort (D1, D7). The research read a rate-limit window that resets on 5 November; the usage page's expiry date is the one to plan by.</p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="decided"><details>
+        <summary><span class="did">D2</span><span class="dhead"><span class="dq-t">Upgrade Herdr to 0.9.2 on both machines?</span><span class="dans">You: yes.</span></span><span class="status s-decided">Agreed</span></summary>
+        <div class="dbody">
+          <p><b>Next.</b> Upgrade at a quiet moment; restarting the VPS's Herdr server ends its idle agent pane. Then E3 checks the <code>--machine</code> commands #13 and #16 will use.</p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="decided"><details>
+        <summary><span class="did">D3</span><span class="dhead"><span class="dq-t">Set up the VPS the same way as the Mac?</span><span class="dans">You: yes.</span></span><span class="status s-decided">Agreed</span></summary>
+        <div class="dbody">
+          <p><b>Next.</b> After #66 merges: set-up-machine on the VPS, plus <code>jq</code>, Go and Treehouse, and the browser (D5). One choice first: set-up-machine removes memory files (with a backup), so pick which of the VPS's 4 memory folders to keep.</p>
+        </div>
+      </details></li>
+
+      <li class="dcard" data-status="decided"><details>
+        <summary><span class="did">D6</span><span class="dhead"><span class="dq-t">How do your skills reach a cloud session?</span><span class="dans">You: the setup script or SessionStart hook the cloud session found installs the global skills and instructions.</span></span><span class="status s-decided">Agreed</span></summary>
+        <div class="dbody">
+          <p><b>Next.</b> E16: a personal cloud environment with that setup script; start one session, check <code>/skills</code>, and have it quote a line from your global instructions. Whether a <code>~/.claude/CLAUDE.md</code> the script writes loads is the one untested part.</p>
+          <p class="small"><a href="cloud-agents-session-workflow.md" data-md="cloud-agents-session-workflow.md" data-line="49">The setup script, in the workflow file</a></p>
+        </div>
+      </details></li>
+    </ol>
+    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="220">Your answers, recorded in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="142">All thirteen in the synthesis</a> <span class="muted">·</span> <a class="muted" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md#decisions-for-the-maintainer">on GitHub</a></p>
+    <a class="next" href="#direction">Next: what happens now</a>
   </div>
 </section>
 
+<section class="slide" id="direction" aria-labelledby="dir-h" data-name="What happens next">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">9</span>What happens next</p>
+    <h2 id="dir-h">Two tracks at once, the cloud first while the credit lasts</h2>
+    <p class="lede">The research recommended the VPS first, then the cloud. With your answers it becomes two tracks side by side, and effort #45 carries on with action items instead of closing.</p>
+    <div class="tracks">
+      <div class="track">
+        <h3>Cloud track <span class="flag">this week</span></h3>
+        <ol class="steps">
+          <li>E16: a cloud environment whose setup script installs your skills and instructions (D6).</li>
+          <li>Two or three real tickets in cloud sessions (D7).</li>
+          <li>One effort in a single cloud session you watch (D1).</li>
+          <li>#80: confirm the phone push (D9).</li>
+        </ol>
+      </div>
+      <div class="track">
+        <h3>VPS track</h3>
+        <ol class="steps">
+          <li>Herdr 0.9.2 on both machines (D2).</li>
+          <li>After #66: set-up-machine on the VPS, with Treehouse and a headless browser (D3, D5).</li>
+          <li>E5: Remote Control push and two-way messaging (D9, D10).</li>
+          <li>Build #16, then #13, and run one effort there.</li>
+        </ol>
+      </div>
+      <div class="track">
+        <h3>Still to research or decide</h3>
+        <ol class="steps">
+          <li>A new ticket: European VPS providers and sizes for €30-50 a month (D4).</li>
+          <li>The base-branch fix for delegates (D8).</li>
+          <li>Which Firstmate ideas to take into #13, #15 and #16 (D13).</li>
+          <li>Whether the wider ask-first line loosens with D11.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="tickets">
+      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/16"><b>#16</b> See each other's state</a>
+      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/13"><b>#13</b> Hand over to the VPS</a>
+      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/15"><b>#15</b> Continue an unfinished effort</a>
+      <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/80"><b>#80</b> Phone push QA</a>
+    </div>
+    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="271">How each build ticket was re-scoped</a> <span class="muted">(synthesis, a two-minute section)</span></p>
+    <a class="next" href="#try">Next: what you tried yourself</a>
+  </div>
+</section>
+
+
 <section class="slide" id="try" aria-labelledby="try-h" data-name="Try it yourself">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">8</span>Try it yourself</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">10</span>Try it yourself</p>
     <h2 id="try-h">Experiment E1: done, from your own terminal</h2>
     <div class="try">
       <div class="prose">
@@ -720,14 +1100,14 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
       </div>
     </div>
     <p class="small muted">E2 is done too: <code>list_sessions</code> shows no session left by probe 1, and <code>get_session</code> shows the promo credit in use; only the balance is left to read. Next, from the synthesis: E16 tries a cloud environment whose setup script installs your skills; E17 starts one child session with <code>create_session</code>; E18 leaves a session idle to time its reclaim; E19 needs only your word on whether the 29 September “PR ready for review” push arrived; E20 asks a session to push to a branch pushed from the Mac.</p>
-    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="226">E1 in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="202">The open questions it answered</a> <span class="muted">·</span> <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="123">What the CLI printed</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="220">All twenty experiments</a></p>
+    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="244">E1 in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="202">The open questions it answered</a> <span class="muted">·</span> <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="123">What the CLI printed</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="238">All twenty experiments</a></p>
     <a class="next" href="#read">Next: the reading path</a>
   </div>
 </section>
 
 <section class="slide" id="read" aria-labelledby="read-h" data-name="Reading path">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">9</span>Reading path</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">11</span>Reading path</p>
     <h2 id="read-h">Read the files in this order</h2>
     <p class="lede">The title of each card opens the file in VS Code. Times are for a full read; the top section of each file gives you the gist in a few minutes.</p>
     <ol class="cards">
@@ -742,7 +1122,7 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
           <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="20">The short version</a>
           <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="31">Capability matrix</a>
           <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="142">Decisions</a>
-          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="220">Experiments</a>
+          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="238">Experiments</a>
           <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md">GitHub</a>
         </p>
       </li>
@@ -934,7 +1314,7 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
   document.addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var t = e.target.tagName;
-    if (t === 'INPUT' || t === 'TEXTAREA') return;
+    if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SUMMARY' || t === 'BUTTON') return;
     if (e.key === 'n' || e.key === 'j') { e.preventDefault(); go(1); }
     else if (e.key === 'p' || e.key === 'k') { e.preventDefault(); go(-1); }
   });
@@ -959,6 +1339,24 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
     });
     if (window.console) console.log('[guide] markdown links', out.length, out);
   })();
+
+  // Decision cards: filter by status, open or close all.
+  var fbtns = Array.prototype.slice.call(document.querySelectorAll('.fbtn[data-filter]'));
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.dcard'));
+  fbtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var f = b.getAttribute('data-filter');
+      fbtns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      cards.forEach(function (c) { c.hidden = !(f === 'all' || c.getAttribute('data-status') === f); });
+    });
+  });
+  var expand = document.getElementById('expand-all');
+  expand.addEventListener('click', function () {
+    var open = expand.getAttribute('aria-pressed') !== 'true';
+    expand.setAttribute('aria-pressed', open ? 'true' : 'false');
+    expand.textContent = open ? 'Close all' : 'Open all';
+    cards.forEach(function (c) { if (!c.hidden) c.querySelector('details').open = open; });
+  });
 
   var copyBtn = document.getElementById('copy-e1');
   var cmds = document.getElementById('e1-cmds');
