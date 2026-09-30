@@ -1,6 +1,6 @@
 # API design
 
-The contract between the system and its callers, produced in the API stage of the delivery framework. A reasonable API is the goal, not a perfect one: design the user-facing endpoints, then move on to the harder parts. Internal APIs get one line in the high-level design ("services talk over gRPC").
+The contract between the system and its callers. Aim for a reasonable API, not a perfect one: design the user-facing endpoints, then move on to the harder parts. Give internal APIs one line in the high-level design ("services talk over gRPC").
 
 ## Choosing the protocol
 
@@ -22,7 +22,7 @@ Nest a resource under its parent (`/events/{id}/tickets`) when the parent is alw
 
 **Methods and idempotency** (repeating the request leaves the server in the same state): GET reads and is idempotent; POST creates and isn't; PUT replaces and is; PATCH updates part and is idempotent only when written as "set", not "append"; DELETE is idempotent even though the second call returns 404. Idempotency matters because clients retry after network failures.
 
-Status codes: the common ones are enough; the distinction that matters is 4xx (the client's fault) against 5xx (the server's).
+Use the common status codes; the distinction that matters is 4xx (the client's fault) against 5xx (the server's).
 
 ## Principles a design is judged by
 
@@ -36,7 +36,7 @@ Status codes: the common ones are enough; the distinction that matters is 4xx (t
 8. Changes don't break existing clients: adding fields is safe; renaming or removing them needs a version.
 9. Errors are actionable: the right status class plus a machine-readable code.
 
-They earn their keep as the reason behind a decision ("an idempotency key here, so a retry can't double-book").
+Cite them as the reason behind a decision ("an idempotency key here, so a retry can't double-book").
 
 ## Patterns
 

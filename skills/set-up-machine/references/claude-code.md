@@ -18,7 +18,7 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 ## Permissions
 
 - `permissions` holds the lists `deny`, `ask` and `allow`. A `deny` row goes to `deny`, `ask` to `ask`, `allow-and-report` to `allow` (the hook does the reporting).
-- **Evaluation:** deny, then ask, then allow; the first match wins. So tightening adds the stricter entry and leaves the looser one: it stops taking effect, and it isn't yours to remove. An entry already stricter than the table is `stricter`, and kept.
+- **Evaluation:** deny, then ask, then allow; the first match wins. So to tighten, add the stricter entry and leave the looser one in place: the looser one stops taking effect, and it's the user's to remove, not yours. An entry already stricter than the table is `stricter`, and kept.
 - **Always keep an `allow` list** beside `deny`, even an empty `[]`: the Cursor CLI reads this file too, and skips its whole deny list without one.
 - **Covered already:** an entry on the machine that matches everything the wanted one does counts as `present`. `Bash(gh repo delete*)` covers `Bash(gh repo delete *)`; `mcp__<server>` or a matching glob covers that server's tools. An old `Bash(<words>:*)` with a space in `<words>` doesn't count: Claude Code reads it like the ` *` form, but the Cursor CLI matches it only against the bare command. Add the ` *` entry beside it, and list the old one as `extra`.
 - **Projects can't loosen it:** a user deny holds against any project `allow`.
@@ -80,7 +80,7 @@ A deny row's `guard` is prose for auto mode's classifier, for what patterns can'
 
 ## Gaps
 
-Name each in the diff, per row where it applies. With the native entries alone these get through; the hook closes them for deny and allow-and-report rows, so list them only for `ask` rows:
+The native entries alone let these through. The hook closes them for deny and allow-and-report rows, so name them in the diff only under each `ask` row they apply to:
 
 - more flags in the same word (`rm -rfv`) or after the operands (`rm x -rf`); options before the subcommand (`git -C dir push --force`); the command inside another program's string (`bash -lc "…"`, `eval`, a script);
 - a script or another program that opens a denied file itself;

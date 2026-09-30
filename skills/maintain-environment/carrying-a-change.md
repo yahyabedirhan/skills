@@ -1,6 +1,6 @@
 # Carrying a change
 
-A change is done when it has reached everywhere it applies: every harness on every machine, every install of a skill, every project it touches. Make it at its source (see [where-things-go.md](where-things-go.md)), then carry it out from there.
+A change is done when it has reached everywhere it applies: every harness on every machine, every install of a skill, every project it touches. Make it at its source, the place [where-things-go.md](where-things-go.md) chooses, then carry it from there as the table below says.
 
 | Change | Source | How it reaches everywhere |
 |---|---|---|
@@ -10,7 +10,7 @@ A change is done when it has reached everywhere it applies: every harness on eve
 | A skill | Its source repo | Ship it (see [skill-operations.md](skill-operations.md), *Shipping to the skills repo*); after the merge, `npx skills update <name>` in every scope that installs it, on every machine. |
 | A local skill | The project's `.agents/skills/` | Commit it with the project. |
 
-A change to a set-up skill itself (a new harness reference, a new rule in the table, a new project template) is a skill change first, then a rerun of that set-up skill wherever it applies.
+Treat a change to a set-up skill itself, such as a new harness reference, a new rule in the table or a new project template, as a skill change first; then rerun that set-up skill wherever it applies.
 
 ## Say what to rerun
 

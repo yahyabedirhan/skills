@@ -1,6 +1,6 @@
 # Efficiency analysis
 
-What one run of a skill costs in tokens and minutes, and how to make the next run cheaper. Run it only when the user asks for it, usually after a new skill's first real run.
+Measure what one run of a skill costs in tokens and minutes, and find how to make the next run cheaper. Run this analysis only when the user asks for it, usually after a new skill's first real run.
 
 ## 1. Find the run
 
@@ -18,7 +18,7 @@ python3 <skill-dir>/scripts/session-usage.py <transcript.jsonl> --split <HH:MM:S
 
 It prints the user-message timestamps (to choose `--split` points) and, per phase: model calls, output tokens, cache reads, cache writes and uncached input. Add wall time per phase and the duration of each slow command (renders, installs, crawls, long waits) from the tool results.
 
-Plan cost: on a subscription, report the host's usage reading (percent of the 5-hour and weekly windows, from the app's usage tool or `/usage`). On API billing, price the tokens with the current rates from the claude-api skill, never from memory.
+Plan cost: on a subscription, report the host's usage reading (percent of the 5-hour and weekly windows, from the app's usage tool or `/usage`). On API billing, price the tokens with the current rates from `/claude-api`, never from memory, because rates change.
 
 Done when the table has every phase and sub-agent, and plan usage or price is stated.
 
@@ -31,8 +31,8 @@ Mark each cost **one-time** (learning a tool, reading its docs, exploring assets
 Rank them by the saving they buy:
 
 - **Context re-reads** usually dominate: every model call re-reads the whole context, so cost grows as calls × context size. Run a heavy phase in a fresh sub-agent that starts from a short brief and returns a short report; batch commands into fewer calls; keep large outputs in files and read excerpts.
-- **Authored output**: code or prose written fresh each run moves into scripts and templates the skill ships, so a run writes only its data.
-- **Waiting**: slow commands run in the background while other work continues, with a time budget.
+- **Authored output**: move code or prose written fresh each run into scripts and templates the skill ships, so a run writes only its data.
+- **Waiting**: run slow commands in the background, each with a time budget, while other work continues.
 - **Images**: every screenshot read costs tokens; review one contact sheet rather than each frame.
 - **Model**: judge cost per task, not per token. A stronger model that finishes in fewer calls is usually cheaper overall, so keep the session's model unless a measured run says otherwise.
 

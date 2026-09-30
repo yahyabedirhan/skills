@@ -5,7 +5,7 @@ description: Change what agents run with - a permission rule, a global or projec
 
 # Maintain the environment
 
-The environment is what agents run with: permissions, global instructions, project instructions, and skills. This skill owns change to it. Setting up a machine or a project belongs to `/set-up-machine` and `/set-up-project`; this skill decides where a change goes, makes it at its source, and carries it everywhere it applies.
+The environment is what agents run with: permissions, global instructions, project instructions, and skills. Use this skill to change it: decide where the change goes, make it at its source, and carry it everywhere it applies. To set up a machine or a project, use `/set-up-machine` or `/set-up-project` instead.
 
 ## Parameters
 
@@ -16,10 +16,10 @@ The environment is what agents run with: permissions, global instructions, proje
 
 Read only the references the change needs.
 
-- **A rule, an instruction, or know-how whose home is unsettled**: read [where-things-go.md](where-things-go.md), place it by the layering model and the team test, then edit it at that layer's home.
-- **A team-test audit** (which skills name a default tool, after any skill change), or **a skill that needs an environment value**: read the parameter convention and the audit in [where-things-go.md](where-things-go.md).
+- **A rule, an instruction, or know-how when it isn't clear which file it goes in**: read [where-things-go.md](where-things-go.md), choose the file with its table and the team test, then edit it there.
+- **A team-test audit** (which skills name a default tool, after any skill change), or **a skill that needs an environment value**: read *How a skill names an environment value* and *Auditing the skills* in [where-things-go.md](where-things-go.md).
 - **A skill** (create, install, update, move, fork, publish, remove, or an audit of which skills are used, a new skill's prompt, or a run's cost): read [skill-operations.md](skill-operations.md).
 
 ## Carry it everywhere
 
-Every change ends by reaching each harness, machine and install it applies to. Read [carrying-a-change.md](carrying-a-change.md) and finish by naming which set-up skill or update still has to run, and where.
+Carry every change to each harness, machine and install it applies to: read [carrying-a-change.md](carrying-a-change.md), and finish by naming which set-up skill or update still has to run, and where.

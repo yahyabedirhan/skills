@@ -5,9 +5,9 @@ description: Set up or audit a machine's coding-agent harnesses from one rule ta
 
 # Set up machine
 
-You bring each harness on the machine in line with two sources:
+Make each harness on the machine match two sources:
 
-- the **rule table**, [`rules.json`](rules.json): each global rule once, by meaning. [references/rule-table.md](references/rule-table.md) explains a row;
+- the **rule table**, [`rules.json`](rules.json): each global rule written once, as what it covers rather than in any harness's syntax. [references/rule-table.md](references/rule-table.md) explains a row;
 - the **shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads: [references/global-instructions.md](references/global-instructions.md).
 
 Each harness has a reference that says where it keeps each setting, the native form of a row with worked examples, how the hook is wired, and the known gaps: [Claude Code](references/claude-code.md), [Codex](references/codex.md), [opencode](references/opencode.md), [Cursor](references/cursor.md) (IDE and CLI). Harness formats change: check the docs a reference links before writing, and where they differ, follow the docs and name the difference in your report.
@@ -23,7 +23,7 @@ Two scripts ship with the skill (Python 3.9+, standard library only): `scripts/p
    - `present`, `wired` (the hook), `found` (the MCP tools a mail row matched);
    - `stricter` (the machine is stricter than the table: kept), `extra` (not the table's: kept), `gap` (what the harness can't express), `none` (no such feature).
 
-   The diff never removes or loosens what the table didn't produce. `removed` is only for memory files, a harness's own global file whose every line is already in the shared file (it becomes a link), and this skill's own wiring that points at an old script. An entry a dropped row left behind is `extra`, for the user to remove. Done when every harness found has a section and each section lists the gaps its reference names.
+   Never remove or loosen an entry the table didn't produce: it's the user's. Use `removed` only for memory files, a harness's own global file whose every line is already in the shared file (it becomes a link), and this skill's own wiring that points at an old script. An entry a dropped row left behind is `extra`, for the user to remove. Done when every harness found has a section and each section lists the gaps its reference names.
 
 3. **Ask once.** Show the diff and ask for one approval of all of it. A change you make after that needs a new approval.
 
@@ -37,7 +37,7 @@ To try a change without touching the real machine, run the steps against a copy 
 
 ## Spellings
 
-Harnesses that match a command's text need one entry per way of writing a command row:
+A harness that matches a command's text catches only the spellings it lists, so give it one entry per way of writing a command row:
 
 - **Programs:** each program as typed, then as `/bin/<program>` and `/usr/bin/<program>`, except shell builtins (`.`, `source`, `set`, `export`, `declare`, `typeset`, `unset`, `eval`, `alias`), which have no path.
 - **Flags:** a one-letter name is a short flag (`-r`), a longer one a long flag (`--recursive`). Every order of the groups, every spelling in each group, as separate words; and, when every group has a one-letter name, the one-letter names clustered in every order (`-rf`, `-fr`, `-Rf`, `-fR`).
@@ -55,10 +55,10 @@ It reads `rules.json` and checks each tool call before it runs:
 - **allow-and-report** rows: one JSON line per call in `<report folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
 - **ask** rows: the harness's native ask entries do the asking.
 
-Each reference shows its wiring, around `<script>`: the installed skill's absolute `scripts/pre_tool_hook.py` (under `~/.agents/skills` or `~/.claude/skills`), never a checkout or worktree that can go; name the gap if you can't. The wiring fails open (`[ -f <script> ] && … || true`), since exit 2 would block every call when the script is gone, so the native entries stay underneath. The report folder is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
+Each reference shows its wiring with `<script>` in place of the script's path. Replace it with the absolute path of `scripts/pre_tool_hook.py` in the installed skill (under `~/.agents/skills` or `~/.claude/skills`), never in a checkout or worktree, which can be deleted; if there is no installed copy, name the gap. The wiring fails open (`[ -f <script> ] && … || true`): if the script is gone, each call goes on under the native entries, where an exit 2 would block every call. The report folder is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 
-What it can't see, named once in every audit: a command inside a script file or another interpreter (`python -c`), one built from variables (`$cmd -rf x`), an alias or function defined elsewhere, an abbreviated long option (`--recur`), a force push by refspec (`git push origin +main`), a glob the shell expands (`cat .env*`), and each row's own `gap`.
+The hook can't see these, so name them once in every audit: a command inside a script file or another interpreter (`python -c`), one built from variables (`$cmd -rf x`), an alias or function defined elsewhere, an abbreviated long option (`--recur`), a force push by refspec (`git push origin +main`), a glob the shell expands (`cat .env*`), and each row's own `gap`.
 
 ## Changing the code
 
-Tests: `python3 -m unittest discover -s <this skill>/scripts/tests`; `scripts/tests/linux/run.sh <repo> <output folder>` runs them and `verify.py` in a fresh Linux container. A new harness is one reference with the same headings as [Claude Code's](references/claude-code.md), and its wiring check in `scripts/verify.py` (`HARNESSES`).
+Tests: `python3 -m unittest discover -s <this skill>/scripts/tests`; `scripts/tests/linux/run.sh <repo> <output folder>` runs them and `verify.py` in a fresh Linux container. To add a harness, write one reference with the same headings as [Claude Code's](references/claude-code.md), and add its wiring check to `HARNESSES` in `scripts/verify.py`.
