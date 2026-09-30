@@ -15,8 +15,8 @@ The effort's whole life happens in the worktree this skill creates: the thinking
 
 Each comes from the Defaults table, where a project's row overrides the global one. A parameter is unset when it has no row or its row says `none`.
 
-- `<worktree-tool>`: how a new worktree is made. Unset, use `git worktree add`.
-- `<session-host>`: where new agent sessions open. Unset, use this session.
+- `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use the **treehouse** skill and lease the worktree to the effort. Unset, use `git worktree add` with the worktree beside the main checkout, unless the project keeps worktrees elsewhere, and give the new branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
+- `<session-host>`: where the thinking session opens. When it is Herdr, use the **handover-to-herdr** skill; for a new project it opens the project's own workspace. Unset, run the starting prompt in this session when it can move into the worktree; otherwise print the prompt in a fenced block, and ask the maintainer to start `<agent-to-start>` in the worktree and paste it.
 - `<agent-to-start>`: the command that starts a new agent session. Unset, use this session's harness.
 
 ## 1. Decide where it lives
@@ -54,7 +54,7 @@ Done when the repo has one commit on `main` and it is pushed to `origin`. The fi
 
 ## 4. Create the worktree
 
-Create a new worktree on the new branch, based on the latest default branch. When `<worktree-tool>` is Treehouse, make it through the **treehouse** skill, leased to the effort; otherwise use git. Give the new branch no upstream until its first push: a branch that tracks the default branch makes a bare `git push` target the default branch. The worktree goes beside the main checkout unless the project keeps worktrees elsewhere.
+Create a new worktree on the new branch with `<worktree-tool>`, based on the latest default branch.
 
 Done when the worktree exists on the new branch.
 
@@ -68,10 +68,6 @@ The **starting prompt** is one line, and names only skills an agent can load:
 Think through the effort in <handoff path>: grill me on it with the grilling skill, using the prototype skill when a question needs a runnable answer, then write the spec with to-spec and the tickets with to-tickets, and hand over to an orchestrator with the handover skill.
 ```
 
-Start the session in the worktree, and suggest the first way that works:
-
-- **When `<session-host>` is Herdr**, start it with the **handover-to-herdr** skill, passing the worktree, the effort as the topic, `Thinking` as the role, and the starting prompt. For a new project it opens the project's own workspace.
-- **Otherwise, this session**: when it can move into the worktree, it runs the starting prompt here.
-- **Otherwise, a paste**: print the starting prompt in a fenced block, and ask the maintainer to start `<agent-to-start>` in the worktree and paste it.
+Start the session in the worktree through `<session-host>`, passing the worktree, the effort as the topic, `Thinking` as the role, and the starting prompt.
 
 Done when the thinking session is working on the prompt, or the maintainer says it started. When it runs elsewhere, tell the maintainer where, and stop: this session's part is done.
