@@ -251,14 +251,14 @@
     },
     {
       "id": "find-delete",
-      "level": "ask",
+      "level": "deny",
       "summary": "`find -delete`",
       "match": {
         "program": "find",
         "flags": [["delete"]]
       },
       "reason": "It deletes every file the expression matches, and one wrong test deletes a tree.",
-      "instruction": "Run the same `find` without `-delete` to list what it matches, then move the files into `.scratch/`; if they must be deleted, run it as its own command and let the user approve it.",
+      "instruction": "Run the same `find` without `-delete` to list what it matches, then move the files into `.scratch/` with `mv`; if they must be deleted for good, stop, say why, and give the user the exact command; never work around it.",
       "samples": {
         "covers": ["find . -delete", "find . -name '*.pyc' -delete"],
         "leaves": ["find . -name '*.pyc'"]

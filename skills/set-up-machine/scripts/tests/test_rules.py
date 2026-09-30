@@ -27,10 +27,10 @@ class ShippedTableTest(unittest.TestCase):
             "git-reset-hard", "gh-repo-destructive", "gh-access-keys", "calendar-mail-cli-send",
             "secret-files-read", "secret-files-write", "home-credentials-read", "mail-send", "mail-destructive",
             "env-files-read", "env-files-write", "env-files-commands", "env-dump", "env-print", "env-dump-declared",
-            "env-dump-listed", "env-print-secret", "proc-environ-read", "proc-environ-commands",
+            "env-dump-listed", "env-print-secret", "find-delete", "proc-environ-read", "proc-environ-commands",
         ):
             self.assertEqual(levels.get(rule_id), "deny", rule_id)
-        for rule_id in ("git-push-force-with-lease", "git-push-mirror", "git-clean-force", "find-delete", "gh-repo-edit"):
+        for rule_id in ("git-push-force-with-lease", "git-push-mirror", "git-clean-force", "gh-repo-edit"):
             self.assertEqual(levels.get(rule_id), "ask", rule_id)
         self.assertEqual(levels["gh-api-secrets"], "allow-and-report")
 
