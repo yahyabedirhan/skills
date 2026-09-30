@@ -38,7 +38,7 @@ Done when the maintainer has confirmed the effort name and branch, and for a new
 
 Only for a new project; otherwise skip to step 4.
 
-The project goes in the maintainer's **projects folder**, named in their instructions. When their instructions don't name one, ask for it, and suggest adding it there. Check that neither a folder nor a GitHub repo already has the project's name.
+The project goes in the maintainer's **projects folder**; when you don't know it, ask for it. Check that neither a folder nor a GitHub repo already has the project's name.
 
 Ask, every time, whether the GitHub repo is **public or private**, and which licence it takes; recommend MIT in the maintainer's name. Then:
 
