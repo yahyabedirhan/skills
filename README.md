@@ -78,8 +78,8 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | Skill | What it does | Origin |
 |---|---|---|
 | [maintain-environment](skills/maintain-environment/SKILL.md) | Changes what your agents run with: decides whether a change is a permission, a global instruction, a project instruction or a skill, and carries it to every harness, machine and install. Its skill operations install, move, update, fork, publish, remove and audit skills with `npx skills`, prompt-audit each new skill in a fresh sub-agent, and measure a skill's run cost on request. | Original. Replaces `maintain-skills`. |
-| [set-up-machine](skills/set-up-machine/SKILL.md) | Sets up and audits a machine's agent harnesses from one rule table: one shared global instructions file every harness reads, and the global rules each harness enforces. Shows a per-harness diff (added, tightened, gaps, extra rules found), applies it on one approval, and never removes or loosens a rule it didn't write. Keeps harness memory off. Covers Claude Code, Codex, opencode and Cursor. | Original. |
-| [set-up-project](skills/set-up-project/SKILL.md) | Sets up and audits a project for your agents, after checking the machine with set-up-machine (and running it, on one approval, when the machine differs): `AGENTS.md` as the one rules file with `CLAUDE.md` importing it, the issue tracker, triage labels and domain docs, the folder standard's `.gitignore`, and an audit that flags any project harness file (Claude Code, Codex, opencode, Cursor) weakening a global rule. | Fork of `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d80fa0f`](https://github.com/mattpocock/skills/tree/d80fa0f4ebe0/skills/engineering/setup-matt-pocock-skills) (MIT, see `skills/set-up-project/LICENSE.mattpocock`). Changes: agents can load it; it checks the machine first; `AGENTS.md` is always the rules file, with `CLAUDE.md` as `@AGENTS.md`, instead of editing whichever exists; an optional project Defaults table; the folder standard's `.gitignore` lines; a local tracker keeps issues in `.efforts/<effort>/` instead of `.scratch/`, and says how a ticket is picked up and marked done when the project has no spec or triage labels; the GitHub template adds effort labels and names issues by title; and a script that writes the deterministic files on one approval and audits each harness's project files against set-up-machine's rule table. |
+| [set-up-machine](skills/set-up-machine/SKILL.md) | Sets up and audits a machine's agent harnesses from one rule table: one shared global instructions file every harness reads, the global rules each harness enforces, and a pre-tool hook that catches what native rules miss. The agent follows a reference per harness, shows one diff (added, tightened, gaps, extra rules found), applies it on one approval after backing up each file, never removes or loosens a rule the table didn't produce, and runs a verify script. Keeps harness memory off. Covers Claude Code, Codex, opencode and Cursor. | Original. |
+| [set-up-project](skills/set-up-project/SKILL.md) | Sets up and audits a project for your agents, after checking the machine with set-up-machine (and running it, on one approval, when the machine differs): `AGENTS.md` as the one rules file with `CLAUDE.md` importing it, the issue tracker, triage labels and domain docs, the folder standard's `.gitignore`, and an audit that flags any project harness file (Claude Code, Codex, opencode, Cursor) weakening a global rule. | Fork of `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d80fa0f`](https://github.com/mattpocock/skills/tree/d80fa0f4ebe0/skills/engineering/setup-matt-pocock-skills) (MIT, see `skills/set-up-project/LICENSE.mattpocock`). Changes: agents can load it; it checks the machine first; `AGENTS.md` is always the rules file, with `CLAUDE.md` as `@AGENTS.md`, instead of editing whichever exists; an optional project Defaults table; the folder standard's `.gitignore` lines; a local tracker keeps issues in `.efforts/<effort>/` instead of `.scratch/`, and says how a ticket is picked up and marked done when the project has no spec or triage labels; the GitHub template adds effort labels and names issues by title; and an audit of each harness's project files against set-up-machine's rule table. |
 | [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings and a verdict. You start it with `/skill-recap` (Codex: `$skill-recap`) and file them with [to-tickets](skills/to-tickets/SKILL.md). | Original. |
 
 ### Daily workflows
@@ -152,26 +152,27 @@ recap       /skill-recap: how a session used its skills → findings → /to-tic
 `set-up-machine` does the same for the rules and instructions every harness runs with. The rule table and the shared global instructions file are declared once; each harness gets its native entries from them:
 
 ```text
-rules.json                      each global rule once: level, reason, instruction
-  ↓ set_up_machine.py plan      per-harness diff: added, tightened, gaps, extra rules
-  ↓ one approval → apply        writes the diff, backs up each file, records what it wrote
+rules.json                      each global rule once: level, reason, instruction, samples
+  ↓ inspect + references        the agent reads each harness's files and its reference
+  ↓ one diff, one approval      added, tightened, gaps, extra rules; each file backed up, then written
+  ↓ verify.py                   the samples against the hook and Codex's checker; every hook wired
 ~/.config/agents/AGENTS.md      the shared global instructions: Defaults by role, rule lines, personal workflow
-~/.config/agents/hook.json      the pre-tool hook's report folder; the hook reads a command as the shell runs it
+pre_tool_hook.py                runs before every tool call; reads a command as the shell runs it
 Claude Code   ~/.claude/        settings.json: deny and ask entries, the hook, auto memory off; CLAUDE.md imports the shared file
 Codex         ~/.codex/         rules/set-up-machine.rules, hooks.json, AGENTS.md → shared file, memories off in config.toml
 opencode      ~/.config/opencode/  opencode.json permissions, plugins/set-up-machine.js runs the hook, AGENTS.md → shared file
 Cursor        ~/.cursor/        cli-config.json permissions, hooks.json, rules/global-instructions.mdc copies the shared file
 ~/.agents/skills                your skills repo (the skills-repo Default), installed globally
-plan again                      the audit: "No changes."
+run again                       the audit: an empty diff
 ```
 
 `set-up-project` does it for one project, on top of the machine. Global rules are the safety rails; a project's own harness files only add allows:
 
 ```text
-set_up_project.py plan          set-up-machine's plan first; a machine that differs is set up on one approval
+verify.py                       set-up-machine's check first; a machine that fails is set up before the project
   explore, ask, one approval    tracker, triage labels, domain docs, optional project Defaults
-  apply + write                 AGENTS.md, CLAUDE.md as @AGENTS.md, .gitignore, docs/agents/
-plan again                      "No changes." and the audit: any project file that weakens a global rule
+  write                         AGENTS.md, CLAUDE.md as @AGENTS.md, .gitignore, docs/agents/
+audit                           any project harness file that weakens a global rule
 ```
 
 ### Daily workflows

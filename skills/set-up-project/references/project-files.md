@@ -16,7 +16,7 @@ Each deny and ask row of set-up-machine's `rules.json` carries `samples.covers`:
 ## Claude Code: `.claude/settings.json`, `.claude/settings.local.json`
 
 - **Permissions can't be loosened.** A user deny or ask wins over any project allow.
-- **Auto mode:** a project allow resolves before auto mode's classifier, so it can route a command around the guard, unless the user settings hold `autoMode.classifyAllShell: true`, which set-up-machine writes. A project allow over a deny command row is `weakens` without it and `overlaps` with it. `autoMode` itself is read only from user settings, so a project's is a `gap` that does nothing.
+- **Auto mode:** a project allow resolves before auto mode's classifier, so it can route a command around the guard, unless the user settings hold `autoMode.classifyAllShell: true`. So a project allow over a deny command row is `weakens` when the user settings hold the guard (`autoMode.hard_deny`) without `classifyAllShell`, and `overlaps` otherwise, including while the guard is off (set-up-machine's claude-code.md, *Auto mode*). `autoMode` itself is read only from user settings, so a project's is a `gap` that does nothing.
 - **Switches that weaken:** `"disableAllHooks": true` turns every hook off, the pre-tool hook included; `"autoMemoryEnabled": true` turns memory back on; `"disableAutoMode"` turns auto mode and its guard off. Each is `weakens`.
 - **Read by the Cursor CLI too:** it unions the `allow` and `deny` lists of the project's `.claude/settings.json` (not `settings.local.json`) with its own, and has no ask level. So an allow there that covers an ask row (`Bash(git push *)` over `git push --force-with-lease`) is `weakens`: the Cursor CLI runs it without a prompt.
 
