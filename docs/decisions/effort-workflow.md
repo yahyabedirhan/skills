@@ -27,7 +27,7 @@ The decisions behind the effort skills (`init-effort`, `orchestrating`, `orchest
 - **The final branch review and its fixes are delegated too**, like the tickets, so the orchestrator's context stays on coordination.
 - **Prompts use each harness's skill syntax.** Claude Code starts a skill with `/name`, Codex with `$name`; the skills that write prompts for another agent say so in one line rather than keeping two copies of each prompt.
 - **Decisions are recorded here, not as ADRs.** Most workflow decisions are easy to reverse, which fails the ADR bar, but the history still matters to whoever changes the workflow next.
-- **A tab that has handed over is marked ` [settled]`**, appended to its label, instead of being relabelled `Thinking` at handover. The user asked for it: the marker says the session is finished and the tab is only a record, which a role name doesn't. The `Thinking` role label from `init-effort-with-herdr` still names the tab while the session is live.
+- **A tab that has handed over is marked ` [settled]`**, appended to its label, instead of being relabelled `thinking` at handover. The user asked for it: the marker says the session is finished and the tab is only a record, which a role name doesn't. The `thinking` role label from `init-effort-with-herdr` still names the tab while the session is live.
 
 ## 2026-09-28
 
@@ -111,7 +111,7 @@ The decisions behind the effort skills (`init-effort`, `orchestrating`, `orchest
 
 ## 2026-09-29: roles, not tools
 
-- **The effort skills name roles, not tools.** `init-effort`, `handover`, `close-effort` and `lifecycle.md` said "Treehouse by default" and "a Herdr tab by default", so a teammate on tmux, or a change of tool, meant editing each skill. They now name `<session-host>` and `<worktree-tool>` (and `<agent-to-start>`) as parameters, resolved from the Defaults table in the environment's instructions (a project's table overriding the global one), per the parameter convention in **maintain-environment**'s `where-things-go.md`, and say what happens when unset: `git worktree add`, the same session or a pasted prompt, the host steps of a close skipped or left to the maintainer. This replaces the 2026-09-28 "Treehouse owns worktrees, Herdr owns the view" line as a default; it stays true of the maintainer's own setup.
+- **The effort skills name roles, not tools.** `init-effort`, `handover`, `close-effort` and `lifecycle.md` said "Treehouse by default" and "a Herdr tab by default", so a teammate on tmux, or a change of tool, meant editing each skill. They now name `<session-host>` and `<worktree-tool>` (and `<agent>`) as parameters, resolved from the Defaults table in the environment's instructions (a project's table overriding the global one), per the parameter convention in **maintain-environment**'s `where-things-go.md`, and say what happens when unset: `git worktree add`, the same session or a pasted prompt, the host steps of a close skipped or left to the maintainer. This replaces the 2026-09-28 "Treehouse owns worktrees, Herdr owns the view" line as a default; it stays true of the maintainer's own setup.
 - **A tool's commands live in its how-to skill.** `treehouse.md` leaves `init-effort` and becomes the `treehouse` skill, and `close-effort`'s Herdr commands move into `handover-to-herdr`'s `closing-an-effort.md`, which makes `handover-to-herdr` the how-to skill for Herdr as a session host. A session host's how-to skill is named `handover-to-<session-host>`, so the skills find it from the Defaults row alone; switching to tmux is one row and one `handover-to-tmux` skill.
 - **With no session host, a handover offers the same session.** It runs the starting prompt here, once this session works in the worktree, or prints it to paste, whichever the maintainer picks. A handover used to probe `herdr status` itself; it now follows the Defaults row, and the host's how-to skill checks it can reach the host and hands back when it can't.
 
@@ -174,3 +174,10 @@ The decisions behind the effort skills (`init-effort`, `orchestrating`, `orchest
   - `/email` never adds `TRASH` or `SPAM` with a label tool, since that would trash or spam around the deny rules.
 - **A handover uses the context it holds.** A thinking session writes its spec and tickets before handing over, since handing over raw thinking makes the next session rebuild it. Handing an active session's work to a fresh one needs a reason from the maintainer, such as a context grown too long. Work that isn't an effort has no spec or tickets, so its handoff and its one-line starting prompt say what to do next. The maintainer set these while reviewing #66.
 - **`treehouse` v2.3.0, tested on a throwaway pool:** `return` asks before deleting untracked files, and with no terminal it aborts and still exits 0; `--force` deletes them. Ignored files survive a return, even with `--force`, and reach the next effort that leases the worktree. `destroy` removes everything and needs `--include-in-use` for a worktree with a running process. `/treehouse` said `return` deleted ignored and untracked files without asking; it now states what the test showed.
+- **The maintainer's own edits during review:**
+  - `<agent-to-start>` became `<agent>`.
+  - Tab roles are lowercase: `thinking`, `orchestrator`.
+  - Handover dropped its QA check and keeps a fresh start for when the maintainer asks.
+  - close-effort's description says it runs once the pull request is good to merge or merged.
+  - handover-to-herdr names `<worktree-tool>`.
+  - The first commit of a new project is `init: start <name>`.

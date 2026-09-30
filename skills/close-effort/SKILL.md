@@ -1,6 +1,6 @@
 ---
 name: close-effort
-description: Close an effort after its pull request is approved - merge it, run the post-merge follow-ups, carry unfinished work into next-effort tickets, close the tracker, and free the branches and worktrees proven merged. Use when the maintainer says an effort's pull request is good, that it merged, or to merge it.
+description: Close an effort after its pull request is approved and merged. Run the post-merge follow-ups, carry unfinished work into next-effort tickets, close the tracker, and free the branches and worktrees merged. Use when the maintainer says an effort's pull request is good to merge, or merged.
 argument-hint: "The pull request (optional: defaults to the current branch's)"
 ---
 
@@ -20,7 +20,7 @@ Run each commit, push and deletion as its own call, so a refused one stops only 
 1. **Find the effort:** the pull request, its branch, spec, tickets and handoff, and the worktrees and branches the build left behind.
    - **From a checkout that isn't on the effort's branch:** list pull requests by head branch with `gh pr list --head` and `--state all`, since without `--state all` a merged pull request doesn't show.
 2. **Merge** the pull request once its checks pass, and check that the default branch's CI passes after the merge. Merge with `gh pr merge` and the project's usual method, and leave out `--delete-branch`: it deletes branches before they are proven merged, and switches the current checkout to the default branch.
-   - **When the spec says "QA: blocking":** wait until every QA ticket is closed, and tell the maintainer which ones are still open.
+   - **When the spec says "QA: blocking":** don't merge until every QA ticket is closed, and tell the maintainer which ones are still open.
    - **After a squash or a rebase:** check that anything pinned to one of the branch's commits, such as an image URL with a commit SHA, still resolves, since the default branch doesn't hold those commits.
 3. **Read the pull request's description and the handoff** for what the delivery left open: follow-ups, checks it skipped and decisions for the maintainer. Run the skipped checks now.
 4. **Run the post-merge follow-ups,** such as installing what changed or trying what could only be tried after the merge.

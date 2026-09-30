@@ -7,7 +7,7 @@ The folders where agents keep their records in a project, what each one holds, a
 ```text
 <repo>/
 ├── .handoff/<date>-<topic>.md     tracked   session → session
-├── .efforts/<effort>/             tracked   local-tracker projects only: spec.md, issues/
+├── .efforts/<effort>/             tracked   only for projects with a local tracker: spec.md, issues/
 ├── docs/agents/issue-tracker.md   tracked   which tracker the repo uses
 ├── docs/assets/<topic>/           tracked   screenshots worth keeping
 ├── .scratch/                      ignored   agent notes, logs, temp files, PR description source
