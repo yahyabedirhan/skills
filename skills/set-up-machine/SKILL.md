@@ -43,7 +43,7 @@ With a `skills-repo` value in the Defaults table (`<owner>/<repo>`), the diff in
 
 It reads `rules.json` and checks each tool call before it runs:
 
-- **deny** rows: it reads a command the way the shell runs it (flags in any order or place, `/bin/rm`, wrappers, `bash -lc '…'`, `eval`, `sudo`, `find -exec`, every part of `a && b | c`, quoting, heredocs), file tools, redirects and `tee` against file rows, a command's operands against a row's `files`, and MCP tools by name. It refuses the call, naming each refused part with its rule's reason and instruction.
+- **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
 - **allow-and-report** rows: one JSON line per call in `<report folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
 - **ask** rows: the harness's native ask entries do the asking.
 

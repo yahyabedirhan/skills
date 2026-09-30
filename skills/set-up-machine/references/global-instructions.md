@@ -8,7 +8,7 @@ set-up-machine owns the shape; everything outside the generated block is the use
 
 1. `# Global agent instructions`
 2. **The rule line:** `Only what describes this person's own workflow and explains a global rule. Anything a teammate would need goes in the project or a skill.`
-3. **`## Defaults`**, with the line `Skills name each role as a placeholder (`<session-host>`); this table gives its value. `none` means the skill's own fallback. A project's own Defaults table overrides a row for that project.`, then a table, `| Role | Default |`, one row per role below.
+3. **`## Defaults`**, with the line "The tools this person uses, by role. `none` means the skill's fallback. A project's Defaults table overrides a row.", then a table, `| Role | Default |`, one row per role below.
 4. **The generated block**, rewritten from `rules.json` on every run:
 
    ```markdown
@@ -32,14 +32,14 @@ A new file gets all five, every role `none` and the workflow section empty. On a
 
 A skill declares a role it uses as a placeholder of the same name (`<session-host>`) in its `## Parameters`; the row here says which tool this person uses.
 
-| Role | Names | With `none` |
-|---|---|---|
-| `session-host` | where new agent sessions open: a terminal multiplexer or agent host | the skill works in the same session, or prints a prompt to paste |
-| `worktree-tool` | how a new worktree is made | `git worktree add` |
-| `notification-method` | how to reach this person when a skill says to notify: a command, or the harness's own tool | the harness's notification tool, else a line in the chat |
-| `agent-to-start` | the command and flags that start a new agent session | the current harness's command, or `claude` |
-| `skills-repo` | this person's own skills repo, as `<owner>/<repo>` | the skill asks |
-| `path-to-skills-repo` | where that repo is cloned | the skill asks |
+| Role | Names |
+|---|---|
+| `session-host` | where new agent sessions open |
+| `worktree-tool` | how a new worktree is made |
+| `notification-method` | how a skill notifies this person: a command, or the harness's own tool |
+| `agent-to-start` | the command and flags that start a new agent session |
+| `skills-repo` | this person's own skills repo, as `<owner>/<repo>` |
+| `path-to-skills-repo` | where that repo is cloned |
 
 A value is a tool name or the exact command. A project's `AGENTS.md` may hold its own Defaults table, whose rows override these.
 
