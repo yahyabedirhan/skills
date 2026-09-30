@@ -12,7 +12,7 @@ You bring each harness on the machine in line with two sources:
 
 Each harness has a reference that says where it keeps each setting, the native form of a row with worked examples, how the hook is wired, and the known gaps: [Claude Code](references/claude-code.md), [Codex](references/codex.md), [opencode](references/opencode.md), [Cursor](references/cursor.md) (IDE and CLI). Harness formats change: check the docs a reference links before writing, and where they differ, follow the docs and name the difference in your report.
 
-Two scripts stay code (Python 3.9+, standard library only): `scripts/pre_tool_hook.py`, the **pre-tool hook** every harness runs before each tool call, and `scripts/verify.py`, which checks the result. Running this skill again is the **audit**: the same steps, ending with an empty diff.
+Two scripts ship with the skill (Python 3.9+, standard library only): `scripts/pre_tool_hook.py`, the **pre-tool hook** every harness runs before each tool call, and `scripts/verify.py`, which checks the result. Running this skill again is the **audit**: the same steps, ending with an empty diff.
 
 ## Steps
 

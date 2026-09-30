@@ -8,7 +8,7 @@ argument-hint: "Worktree path, topic, role, and the starting prompt"
 
 The Herdr mechanism of a **handover** (the **handover** skill owns the flow and has already written the handoff and the starting prompt). It takes four inputs: the **worktree** path, the **topic** (the effort's name, or what the work is), the new session's **role** (`Orchestrator`, `Thinking`, or another one-word role), and the **starting prompt**.
 
-Other skills use it when the session host is Herdr. When **close-effort** runs with it, read [closing-an-effort.md](closing-an-effort.md) for its commands.
+When **close-effort** runs with it, read [closing-an-effort.md](closing-an-effort.md) for its commands.
 
 ## Parameters
 

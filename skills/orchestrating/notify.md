@@ -24,4 +24,4 @@ Name tickets and pull requests by title, not by a number alone.
 
 ## How
 
-Send it with `<notification-method>` (the **orchestrating** skill's Parameters), which falls back to the harness's notification tool, else a line in the chat.
+Send it with `<notification-method>` (the **orchestrating** skill's Parameters).

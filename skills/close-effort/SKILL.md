@@ -22,7 +22,7 @@ Two rules hold for every destructive step (deleting a branch, removing a worktre
 
 From the Defaults table (a project's row overrides the global one). Unset: no row, or `none`.
 
-- `<worktree-tool>`: how worktrees are made and returned. Unset: git (`git worktree list`, `git worktree remove`).
+- `<worktree-tool>`: how worktrees are made and returned. Unset: git.
 - `<session-host>`: where the effort's agent sessions run. Unset: the host steps below are skipped or fall to the maintainer, as each says.
 
 ## 1. Find the effort
@@ -58,7 +58,7 @@ Before any follow-up or cleanup, read the pull request description's last sectio
 - **a todo for the maintainer**, for the report;
 - **nothing needed**.
 
-When the description has no such section (an older effort) and the delivering orchestrator still runs in Herdr, ask it once, through the **handover-to-herdr** skill: `Reply with the four lines of Things to be aware of for this pull request: Decided alone, Surprises, Not in this PR, Follow-ups.` When no such session runs, the wait times out, or the reply lacks the four lines, take the items from the handoff and tickets yourself.
+When the description has no such section, `<session-host>` is Herdr and the delivering orchestrator still runs there, ask it once through the **handover-to-herdr** skill: `Reply with the four lines of Things to be aware of for this pull request: Decided alone, Surprises, Not in this PR, Follow-ups.` When no such session runs, the wait times out, or the reply lacks the four lines, take the items from the handoff and tickets yourself.
 
 Done when every item has a route and each skipped check has run.
 
@@ -66,7 +66,7 @@ Done when every item has a route and each skipped check has run.
 
 Work from the updated default branch without moving the maintainer's main checkout: run git there as `git -C <main checkout>`, and never switch its branch. When it is clean and already on the default branch, `git -C <main checkout> pull --prune`; otherwise `git -C <main checkout> fetch --prune`, and work from `origin/<default>`.
 
-Nothing is committed or pushed straight to the default branch. Changes the close makes to tracked files (a local tracker's done marks in step 5, files kept in step 6) follow the project's instructions. By default they go on one small **follow-up branch** from `origin/<default>`, in its own worktree (`<worktree-tool>`, else `git worktree add --no-track -b <effort>-close <path> origin/<default>`), with a pull request opened through the **to-pr** skill for the maintainer to review. When they are too small to be worth a pull request, list them in the report instead. The follow-up branch and its worktree aren't the effort's: step 7 leaves them.
+Nothing is committed or pushed straight to the default branch. Changes the close makes to tracked files (a local tracker's done marks in step 5, files kept in step 6) follow the project's instructions. By default they go on one small **follow-up branch** from `origin/<default>`, in its own worktree (the **treehouse** skill when `<worktree-tool>` is Treehouse, else `git worktree add --no-track -b <effort>-close <path> origin/<default>`), with a pull request opened through the **to-pr** skill for the maintainer to review. When they are too small to be worth a pull request, list them in the report instead. The follow-up branch and its worktree aren't the effort's: step 7 leaves them.
 
 Then:
 

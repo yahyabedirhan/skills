@@ -12,7 +12,7 @@ BUILD      orchestrate the tickets through delegates; open the pull request
 CLOSE      the user says "go"; the agent merges, follows up, and cleans up
 ```
 
-There are two paths through it, chosen by the session host, where new agent sessions open (a parameter of **init-effort**, **handover** and **close-effort**). The host path, when it's Herdr, automates every step between phases through the **handover-to-herdr** skill; the plain path runs anywhere, with this session carrying on or the user pasting each starting prompt. The worktree comes from the **treehouse** skill when the worktree tool is Treehouse, else `git worktree add`.
+There are two paths through it, chosen by the session host, where new agent sessions open. The host path, when it's Herdr, automates every step between phases through the **handover-to-herdr** skill; the plain path runs anywhere, with this session carrying on or the user pasting each starting prompt.
 
 ```text
                 START                          HANDOVER                        BUILD
