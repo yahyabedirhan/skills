@@ -1,6 +1,6 @@
 # Session start commands
 
-The Herdr commands that open a tab, label it, start an agent in it and send the agent its starting prompt, with the pitfalls each one has shown.
+The `herdr` commands that open a tab, label it, start an agent in it and send the agent its starting prompt, with the pitfalls each one has shown.
 
 ## Tab
 

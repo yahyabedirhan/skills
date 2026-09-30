@@ -26,7 +26,7 @@ Flag every place a change fails the test, and move the failing part to the row o
 
 A skill that needs a value from the environment (a tool, a command, a repo) declares it as a **parameter**:
 
-- **One `## Parameters` section, in `SKILL.md`,** added only to a skill that needs such a value, with one short line per parameter: the `<kebab-case>` placeholder named after its role, what it is, and a few examples after "e.g.". For instance: "`<session-host>`: where agent sessions run, e.g. Herdr, Claude Code Desktop, Codex Desktop."
+- **One `## Parameters` section, in `SKILL.md`,** added only to a skill that needs such a value, with one short line per parameter: the `<kebab-case>` placeholder named after its role, what it is, and a few examples after "e.g.". For instance: "`<session-host>`: where agent sessions run, e.g. `herdr`, Claude Code Desktop, Codex Desktop."
 - **What to do when a role has no tool is written once,** in the roles table of `/set-up-machine`'s `global-instructions.md`, which that skill copies into the global Defaults on every machine. A skill never repeats it.
 - **A tool's own skill says when to use it,** in its description ("Use when the project's worktree tool is `treehouse`"), along with anything specific to that tool. No other skill routes to it.
 - **The body uses the placeholder as a noun** ("make the worktree with `<worktree-tool>`"). Anywhere else, plain words ("the session host").
@@ -36,18 +36,7 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
 
 ### Team-test audit
 
-Run:
+After a skill change, grep the skills for the name of each tool in the user's Defaults, and for "Defaults table". Skip each tool's own skill, and `/set-up-machine`, `/set-up-project` and this skill, which manage the instruction files. Judge each hit:
 
-```bash
-python3 <this skill>/scripts/default_tools.py --skills <skills folder>
-```
-
-It lists two kinds of line. Both are tolerated, not blocking, so it always exits 0.
-
-- **A default tool named outside its how-to skill.** The script reads the tools from the tool rows of the Defaults table in the shared global file: `session-host`, `worktree-tool` and `notification-method`. To check other tools, or when there's no table, pass `--tool <name>` once per tool. It skips a tool's how-to skill, which is any skill folder whose name contains the tool's name, and any line that routes to that skill by name.
-- **"Defaults table" or "global instructions" anywhere in a skill.** The agent already has those files in context, and without them the mention points at nothing. `/set-up-machine`, `/set-up-project` and this skill are exempt: those files are what they describe.
-
-Report every hit, each judged one of:
-
-- **a default**: the skill picks the tool, or reads the table inline. Rewrite it with a parameter, and move the tool's commands into its how-to skill;
-- **a mention**: an example or data (a dictionary word, a fixture), not a choice. Keep it, and say so.
+- **a default:** the skill picks the tool itself. Make it a parameter, and move the tool's commands into the tool's own skill.
+- **a mention:** an example, such as a parameter's "e.g.", or data. Keep it.

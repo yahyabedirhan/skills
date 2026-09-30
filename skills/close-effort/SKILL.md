@@ -11,7 +11,7 @@ Approving the pull request is the maintainer's last step. Everything after it is
 ## Parameters
 
 - `<worktree-tool>`: the tool that makes and frees worktrees, e.g. `treehouse`, or plain git worktrees.
-- `<session-host>`: where agent sessions run, e.g. Herdr, Claude Code Desktop, Codex Desktop.
+- `<session-host>`: where agent sessions run, e.g. `herdr`, Claude Code Desktop, Codex Desktop.
 
 ## Flow
 

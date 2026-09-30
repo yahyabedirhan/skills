@@ -37,7 +37,7 @@ The one definition of each role. A skill lists the roles it uses as placeholders
 | Role | What it is | When none |
 |---|---|---|
 | `session-host` | where agent sessions run | Use this session: move into the worktree and run the starting prompt here, or print the prompt for the user to paste into a new `agent-to-start` session. A step that must run outside this session, such as freeing its own worktree, goes to the user as a command to run once it is closed. |
-| `worktree-tool` | the tool that makes and frees worktrees | `git worktree add`, giving the new branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it; `git worktree remove` to free one. |
+| `worktree-tool` | the tool that makes and frees worktrees | `git worktree add`, beside the main checkout unless the project keeps worktrees elsewhere, giving the new branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it; `git worktree remove` to free one. |
 | `agent-to-start` | the command and flags that start a new agent session | This session's harness. |
 | `notification-method` | how a notification reaches this person: a command, or the harness's own tool | The harness's notification tool, else a line in the chat. |
 | `skills-repo` | this person's own skills repo, as `<owner>/<repo>` | Ask the user. |
