@@ -65,7 +65,7 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 
 ## Auditing a new skill
 
-After creating or forking a skill, have a fresh sub-agent audit it, because the author reads what it meant to write and the auditor reads only what is on disk. Tell it to run `/claude-api`'s `prompt-audit` on the skill folder and report without editing. Apply the fixes you accept, and say why each other finding was left.
+After creating or forking a skill, have a fresh sub-agent audit it, because the author reads what it meant to write and the auditor reads only what is on disk. Tell it to run `/claude-api`'s `prompt-audit` on the skill folder and report without editing, unless the user has said the auditor should make its fixes itself. Apply the fixes you accept, and say why each other finding was left.
 
 ## Auditing usage
 

@@ -36,3 +36,4 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 ## 2026-09-30 (later)
 
 - **A Parameters line says what the role is, with examples, and nothing else.** This supersedes the #83 entry above on two points: what to do when a role has no tool lives only in `/set-up-machine`'s roles table, and no skill routes to a tool's skill, since the tool's own skill says in its description when to use it. The environment layers, the team test and the parameter convention now sit in `SKILL.md`, because every change reads them, and the team-test audit is a grep.
+- **A new skill's auditor reports by default, and fixes only when the user says so.** The #66 review had auditors make their own fixes because the maintainer asked for it; without that request, the author reviews the findings and applies the ones it accepts.

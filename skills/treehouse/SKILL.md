@@ -11,8 +11,8 @@ description: Lease, list, return and destroy git worktrees with `treehouse`'s pr
 |---|---|---|
 | A durable worktree for an effort | `treehouse get --lease --lease-holder <effort>` | Prints only the path. `--json` adds the lease identity. A leased worktree is never handed out again or pruned until returned. |
 | See the pool | `treehouse status` | |
-| Give a worktree back, keeping it in the pool | `treehouse return <path>` | Kills every process still running in the worktree, including this session if it runs there. `--force` cleans and resets without prompting. |
-| Remove a worktree for good | `treehouse destroy <path> --include-leased --yes` | Without `--yes`, it only lists what it would remove. It removes a leased worktree only when you name its exact path, so `--all` never removes one. It refuses a worktree with unlanded work unless you pass `--include-unlanded`, which deletes that work. |
+| Give a worktree back, keeping it in the pool | `treehouse return <path>` | Kills every process still running in the worktree, including this session if it runs there. With untracked files it asks before deleting them; with no terminal to answer, it prints `Aborted`, keeps the worktree leased and still exits 0, so check its output. `--force` deletes the untracked files without asking. |
+| Remove a worktree for good | `treehouse destroy <path> --include-leased --yes` | Without `--yes`, it only lists what it would remove. It removes a leased worktree only when you name its exact path, so `--all` never removes one. It skips a worktree with unlanded work unless you pass `--include-unlanded`, which deletes that work, and one with a process running in it unless you pass `--include-in-use`, which ends the process first. |
 
 ## A worktree on a new branch
 
@@ -27,5 +27,7 @@ git -C <path> switch --no-track -c <branch> origin/<default-branch>
 
 ## Gotchas
 
-- `return` deletes the worktree's ignored and untracked files without asking, and `destroy` removes ignored folders such as `.scratch/` or build output without warning, since they don't count as unfinished work. Copy out anything worth keeping first.
-- `destroy` treats any shell or agent running in the worktree as a live process and skips the worktree. Close whatever runs there first, such as its terminal or agent workspace.
+- `return` keeps ignored files, even with `--force`, and the next effort that leases the worktree finds them, such as an old `.scratch/` or build output. Copy out what's worth keeping, and clear the rest before returning.
+- `destroy` removes everything in the worktree, ignored files included, without warning. Copy out anything worth keeping first.
+- `destroy` treats any shell or agent running in the worktree as a live process. Close whatever runs there first, such as its terminal or agent workspace, or pass `--include-in-use` when ending it is fine.
+- These facts are from `treehouse` v2.3.0; check them again after an update.
