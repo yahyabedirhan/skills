@@ -11,7 +11,7 @@ A **recap** looks back over one or more sessions and asks how the agent and its 
 
 ## Parameters
 
-- `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`), where findings are filed. Unset, ask the user.
+- `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`), where findings are filed. Default: ask the user.
 
 ## 1. Select the sessions
 

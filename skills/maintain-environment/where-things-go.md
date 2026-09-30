@@ -30,9 +30,9 @@ Flag every place a change fails the test, and move the failing part to its layer
 
 A skill that needs a value from the environment (a tool, a command, a repo) declares it as a **parameter**:
 
-- **One `## Parameters` section, in `SKILL.md`,** only in a skill that needs such a value: one entry per parameter, a `<kebab-case>` placeholder named after its Defaults role (**set-up-machine**'s `global-instructions.md` lists them), what it is, the skill each known value uses, and what happens when it's unset (the skill's neutral way, or asking where a guess does harm).
+- **One `## Parameters` section, in `SKILL.md`,** only in a skill that needs such a value: one entry per parameter, a `<kebab-case>` placeholder named after its Defaults role (**set-up-machine**'s `global-instructions.md` lists them), what it is, the skill each known value uses, and its **Default**, written as "Default: …": what the skill does when the value isn't set (its neutral way, or asking where a guess does harm).
 - **The section holds only the entries.** The Defaults table itself says how its rows resolve, so the section doesn't repeat it.
-- **The body uses the placeholder as a noun** ("make the worktree with `<worktree-tool>`"), and never repeats what a value routes to or what happens when it's unset: that lives only in `## Parameters`.
+- **The body uses the placeholder as a noun** ("make the worktree with `<worktree-tool>`"), and never repeats what a value routes to or its Default: that lives only in `## Parameters`.
 - **A skill uses only placeholders its `## Parameters` declares;** anywhere else, plain words ("the session host").
 - **A tool's skill is named directly, in a line that routes to it:** "when `<session-host>` is Herdr, use the **handover-to-herdr** skill; otherwise …". A new tool gets its own line once its skill exists.
 
