@@ -11,9 +11,9 @@ A **recap** looks back over one or more sessions and asks how the agent and its 
 
 ## Parameters
 
-From the Defaults table (a project's row overrides the global one). Unset: no row, or `none`.
+Each parameter comes from the Defaults table, where a project's row overrides the global one, and is unset when it has no row or its row says `none`.
 
-- `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`), where findings are filed. Unset: ask.
+- `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`), where findings are filed. Unset, ask the user.
 
 ## 1. Select the sessions
 
@@ -65,8 +65,8 @@ Give the findings, then the verdict:
 - **"No skill changes needed."** when nothing qualifies. This is a good outcome, not a failed recap.
 - Otherwise **"<n> opportunities"**, naming the skills they touch.
 
-When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in their skills repo. `to-tickets` works from the conversation, so the findings as written are its input, filed in `<skills-repo>` unless the user names another repo. For a finding about someone else's skill, the user decides whether to file it there, fork the skill, or take it upstream.
+When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in `<skills-repo>`, unless they name another repo. `to-tickets` works from the conversation, so the findings as written are its input. For a finding about someone else's skill, the user decides whether to file it there, fork the skill, or take it upstream.
 
-When the skills repo is public, write each finding the way the user's own instructions say public repositories are written: that rule lives in their agent instructions, so follow it from there.
+When `<skills-repo>` is public, write each finding the way the user's own instructions say public repositories are written: that rule lives in their agent instructions, so follow it from there.
 
 The recap ends with the report. Creating issues, commenting and editing skills are left to the user.

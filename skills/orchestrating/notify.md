@@ -24,4 +24,4 @@ Name tickets and pull requests by title, not by a number alone.
 
 ## How
 
-Send it with `<notification-method>` (the **orchestrating** skill's Parameters).
+Send it with `<notification-method>`, which the **orchestrating** skill's Parameters section defines.
