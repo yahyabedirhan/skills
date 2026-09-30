@@ -1,6 +1,6 @@
 # Folder standard
 
-The folders where agents keep their records in a project, what each one holds, and how a project adopts them. Every skill that writes a record points here instead of restating paths.
+The folders where agents keep their records in a project, what each one holds, and how a project adopts them. Point here from any skill that writes a record, rather than restating the paths.
 
 ## Layout
 
@@ -18,16 +18,16 @@ There is no `tmp/`, no `.prs/` and no vendor-named folder: one ignored folder ho
 
 ## Folder contents
 
-- **`.handoff/`**: one handoff per session that hands over, named `<date>-<topic>.md` (the topic is the effort's name when there is one). It is committed with the work it describes, so a fresh worktree sees it. A project that names its own handoff folder in its instructions uses that one.
-- **`.efforts/<effort>/`**: only on a local-files tracker. `spec.md` and `issues/<NN>-<slug>.md`, written by `/to-spec` and `/to-tickets`. With a hosted tracker (GitHub, Linear) the spec and tickets live there, and a project has no `.efforts/`. Without an effort, `<effort>` is a short slug for the feature.
+- **`.handoff/`**: one handoff per session that hands over, named `<date>-<topic>.md`, where the topic is the effort's name when there is one. It is committed with the work it describes, so a fresh worktree sees it. A project that names its own handoff folder in its instructions uses that one.
+- **`.efforts/<effort>/`**: only on a local-files tracker. `spec.md` and `issues/<NN>-<slug>.md`, written by `/to-spec` and `/to-tickets`. With a hosted tracker, such as GitHub or Linear, the spec and tickets live there, and a project has no `.efforts/`. Without an effort, `<effort>` is a short slug for the feature.
 - **`docs/agents/issue-tracker.md`**: says which tracker the repo uses and how to reach it, so a skill knows whether to publish to the tracker or to `.efforts/`.
 - **`docs/assets/<topic>/`**: screenshots and other images worth keeping, such as ones a pull request or a doc links to.
-- **`.scratch/`**: the agent's own notes area, always gitignored: notes, logs, temporary files, and the source of a pull request's description (`.scratch/pr-<number>/description.md`, beside any `show-me-*.html` made for it). GitHub holds the description itself, and the pull request's last section carries what the agent wants the maintainer to know, so nothing here needs keeping. Before a worktree is removed, copy anything worth keeping out of it (to `docs/assets/`, a handoff, or the tracker).
+- **`.scratch/`**: the agent's own notes area, always gitignored: notes, logs, temporary files, and the source of a pull request's description, at `.scratch/pr-<number>/description.md` beside any `show-me-*.html` made for it. GitHub holds the description itself, and the pull request's last section carries what the agent wants the maintainer to know, so nothing here needs keeping. Before a worktree is removed, copy anything worth keeping out of it, into `docs/assets/`, a handoff or the tracker.
 - **Decision records** stay wherever each project keeps them.
 
 ## Removal without `rm -rf`
 
-Move what's no longer needed (a delegate's temporary folder, an old log, a throwaway script) into `.scratch/` with `mv`, where git ignores it and a mistake can be undone; remove a tracked file with `git rm`, so its history keeps it. Permission checks refuse `rm -rf`.
+Move what's no longer needed, such as a delegate's temporary folder, an old log or a throwaway script, into `.scratch/` with `mv`, where git ignores it and a mistake can be undone; remove a tracked file with `git rm`, so its history keeps it. Permission checks refuse `rm -rf`.
 
 ## Project setup
 

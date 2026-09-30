@@ -25,7 +25,7 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 
 ## Command rows
 
-`Bash(<prefix> *)` matches the command text as written, so a row becomes one entry per spelling (SKILL.md, *Spellings*): `Bash(git push --force *)`, `Bash(chmod -R 777 *)`. Rows with `any_operand` get one entry per operand word after the subcommand and flags (`Bash(git push --delete origin main *)` covers only that remote, so name the gap).
+`Bash(<prefix> *)` matches the command text as written, so a row becomes one entry per spelling (rule-table.md, *Spellings*): `Bash(git push --force *)`, `Bash(chmod -R 777 *)`. Rows with `any_operand` get one entry per operand word after the subcommand and flags (`Bash(git push --delete origin main *)` covers only that remote, so name the gap).
 - **Worked example,** `rm-recursive-force` (flags `[r, R, recursive]` and `[f, force]`): `Bash(rm -rf *)`, `Bash(rm -Rf *)`, `Bash(rm -fr *)`, `Bash(rm -fR *)`, `Bash(rm -r -f *)`, `Bash(rm -r --force *)`, `Bash(rm -R -f *)`, … `Bash(rm --force --recursive *)`, then the same under `/bin/rm` and `/usr/bin/rm`.
 - **The space is a word boundary:** `Bash(git push --force *)` doesn't match `git push --force-with-lease`, which the ask row covers. A trailing ` *` that is the only wildcard also matches the bare command (`printenv`).
 - **` *`, never `:*`:** the Cursor CLI reads this file and matches `Bash(rm -rf:*)` only against the bare `rm -rf`.
@@ -61,7 +61,7 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
     "command": "[ -f <script> ] && python3 <script> --harness claude-code || true"}]}
   ```
 
-  `<script>` and the fail-open wrapping are in SKILL.md, *The pre-tool hook*.
+  `<script>` and the fail-open wrapping are in pre-tool-hook.md, *Wiring*.
 - **Audit:** `wired` when a match-all group runs exactly that command. A handler that runs `pre_tool_hook.py` from another path is this skill's old wiring: `removed`, with the new one `added`. Other hooks are the user's and stay.
 - **Input:** `tool_name`, `tool_input` (`command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` and `glob` for Grep), `cwd`, `session_id`.
 - **Answer:** a deny is `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "<the refusal>"}}` with exit 0; Claude Code shows the agent the reason. Otherwise nothing, exit 0, so the native permissions decide. It never answers `allow`, which would skip them, and leaves `ask` rows to the native `ask` list.
@@ -86,7 +86,7 @@ The native entries alone let these through. The hook closes them for deny and al
 - a script or another program that opens a denied file itself;
 - a tool connected after the run, until the next run (the hook matches it by name).
 
-The hook's own misses are in SKILL.md, *The pre-tool hook*.
+The hook's own misses are in pre-tool-hook.md, *What it can't see*.
 
 ## What the agent sees
 

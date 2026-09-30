@@ -1,14 +1,12 @@
 # Efficiency analysis
 
-Measure what one run of a skill costs in tokens and minutes, and find how to make the next run cheaper. Run this analysis only when the user asks for it, usually after a new skill's first real run.
+Measure what one run of a skill costs in tokens and minutes, and find how to make the next run cheaper.
 
 ## 1. Find the run
 
 - The session transcript: a JSONL file under `~/.claude/projects/<project>/<session-id>.jsonl` (Codex: `~/.codex/sessions/`).
 - The **phases**: split the run at the user's messages, so each phase is one request and the time spent waiting for the user shows up as its own phase.
 - Every sub-agent the run dispatched. Its tokens live in its own transcript, not the parent's; the completion notice reports its total tokens, tool uses and duration.
-
-Done when every phase has a start and end time, and every sub-agent is named with its totals.
 
 ## 2. Measure
 
@@ -19,8 +17,6 @@ python3 <skill-dir>/scripts/session-usage.py <transcript.jsonl> --split <HH:MM:S
 It prints the user-message timestamps (to choose `--split` points) and, per phase: model calls, output tokens, cache reads, cache writes and uncached input. Add wall time per phase and the duration of each slow command (renders, installs, crawls, long waits) from the tool results.
 
 Plan cost: on a subscription, report the host's usage reading (percent of the 5-hour and weekly windows, from the app's usage tool or `/usage`). On API billing, price the tokens with the current rates from `/claude-api`, never from memory, because rates change.
-
-Done when the table has every phase and sub-agent, and plan usage or price is stated.
 
 ## 3. Split one-time from per-run
 

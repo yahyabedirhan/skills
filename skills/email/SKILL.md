@@ -10,62 +10,38 @@ description: >-
 
 # Email
 
-Read mail with the Spark CLI, and make every change to mail through the Gmail connector. This skill covers how to do each thing; leave what to do with an email, and when, to the user. Go no further than a draft: the user reviews and sends every email themselves. If any tool listed under "Gmail, denied" can be called, the setup is incomplete: tell the user, and use the connector only for reading until the deny rules are fixed.
+Read mail with the Spark CLI, and make every change to mail through the Gmail connector. Leave what to do with an email, and when, to the user.
+
+[command-reference.md](command-reference.md) holds the commands and tool calls for each action below, and how to keep them cheap. Read it before the first call.
+
+## Safety
+
+Go no further than a draft: the user reviews and sends every email themselves.
+
+- **Gmail, allowed:** `search_threads`, `get_thread`, `get_message`, `list_labels`, `label_*` and `unlabel_*`, `update_message_labels`, `create_label`, `update_label`, the undo tools (`untrash_*`, `unmark_*_spam`), and the draft tools (`create_draft`, `update_draft`, `get_draft`, `list_drafts`, `delete_draft`). `delete_label` removes a label from every email, so call it only after the user says to.
+- **Gmail, denied** by Claude Code permission rules: `send_message` (which also sends existing drafts), `reply`, `forward`, `trash_message`, `trash_thread`, `mark_message_spam`, `mark_thread_spam`, and `apply_sensitive_message_label`, `apply_sensitive_thread_label`, `batch_apply_sensitive_thread_labels` (these three can trash or spam). Claude Code hides a denied tool, so it does not show up to be called.
+- Google's permission that allows archiving also allows sending, so only those deny rules stop a send. If any denied tool can be called, the setup is incomplete: tell the user, and use the connector only for reading until the deny rules are fixed.
+- **Spark calendar:** the calendar can be read-write even when mail is read-only, and `spark event` with `--add` or `--remove` sends invitation or cancellation emails. Create, change or RSVP to an event only when the user asks for that exact change.
 
 ## The two tools
 
-| | Spark CLI (`spark`) | Gmail connector |
-|---|---|---|
-| What it is | Readdle's CLI over Spark Desktop's local copy of the mail | Google's Gmail MCP server (`gmailmcp.googleapis.com`), connected as a Claude connector; tools are named `mcp__<server-id>__<tool>` |
-| Speed and size | about 0.1 s a call, compact tables | about 1 s a call, JSON three to four times the size |
-| Use it for | listing, searching and reading mail; Spark's categories (priority, personal, invitation, notification, newsletter); pins; calendar events, availability and contacts | every change to mail: mark done, labels, star, drafts |
-| Needs | Spark Desktop running | the connector signed in |
-
-The two tools number messages differently. To act on something found in Spark, find it again with Gmail's `search_threads`, using `from:` and `subject:` from the Spark row. If more than one thread matches, narrow it with `after:` and `before:` around the Spark row's date, or ask the user which one they mean.
-
-## What is enabled
-
-- **Spark mail:** read-only, the free access level. Its mail write commands (`spark action`, `spark draft`, `spark contact-action`, `spark comment`) need a paid level, so make changes through Gmail instead.
-- **Spark calendar:** the calendar can be read-write even when mail is read-only, and `spark event` with `--add` or `--remove` sends invitation or cancellation emails. Read with `spark events` and `spark availability`; create, change or RSVP to an event only when the user asks for that exact change.
-- **Gmail, allowed:** `search_threads`, `get_thread`, `get_message`, `list_labels`, `label_*` and `unlabel_*`, `update_message_labels`, `create_label`, `update_label`, the undo tools (`untrash_*`, `unmark_*_spam`), and the draft tools (`create_draft`, `update_draft`, `get_draft`, `list_drafts`, `delete_draft`). `delete_label` removes a label from every email, so call it only after the user says to.
-- **Gmail, denied** by Claude Code permission rules: `send_message` (which also sends existing drafts), `reply`, `forward`, `trash_message`, `trash_thread`, `mark_message_spam`, `mark_thread_spam`, and `apply_sensitive_message_label`, `apply_sensitive_thread_label`, `batch_apply_sensitive_thread_labels` (these three can trash or spam). Claude Code hides a denied tool, so it does not show up to be called.
-
-Google's permission that allows archiving also allows sending, so only those deny rules stop a send.
+- **Spark CLI (`spark`)** is Readdle's CLI over Spark Desktop's local copy of the mail. It answers in about 0.1 s with compact tables, so use it for listing, searching and reading mail, Spark's categories (priority, personal, invitation, notification, newsletter), pins, calendar events, availability and contacts. It needs Spark Desktop running. Its mail access is read-only, the free level; its mail write commands need a paid level.
+- **The Gmail connector** is Google's Gmail MCP server (`gmailmcp.googleapis.com`), connected as a Claude connector, with tools named `mcp__<server-id>__<tool>`. It takes about 1 s a call and returns JSON three to four times Spark's size, so use it for every change to mail: mark done, labels, star, drafts. It needs the connector signed in.
 
 ## How Spark's view maps to Gmail
 
-- **Done** is removing the `INBOX` label (archive). Spark shows the change within about a minute.
+- **Done** is removing the `INBOX` label, which archives the email. Spark shows the change within about a minute.
 - **Pin** is the `STARRED` label; Spark's `is:pinned` and `is:starred` return the same emails.
 - **Labels** are Gmail labels; Spark shows them as folders.
 - **Spark's categories** are Spark's own, so no Gmail tool changes them.
-- **Date groups** (Today, Last week, a month) come from each email's date.
+- **Date groups** such as Today, Last week or a month come from each email's date.
 
-## How to
+## Flow
 
-**Read**
-
-```bash
-spark emails Inbox --filter "category:priority is:unread"   # one Spark category
-spark emails --filter "is:pinned"                           # pinned mail
-spark search --filter 'from:<sender> newer_than:7d'         # any Gmail-style query
-spark thread <id>                                           # one email in full
-spark events --today                                        # also --tomorrow
-spark availability --help                                   # free slots across attendees
-```
-
-**Mark done.** Find the thread with `search_threads`, querying `in:inbox` plus `from:` or `subject:` with view `THREAD_VIEW_METADATA_ONLY`, then `unlabel_thread` with `["INBOX"]`. Done when the same search returns `{}`. `label_thread` with `["INBOX"]` puts it back.
-
-**Pin or unpin.** `label_thread` or `unlabel_thread` with `["STARRED"]`.
-
-**Label.** `list_labels` for the label's ID, `create_label` when it does not exist yet, then `label_thread` with that ID.
-
-**Draft a reply.** Read the thread with `get_thread`, then `create_draft` with `replyToMessageId` set to the last message's `id`. The draft's `viewUrl` is where the user reviews and sends it.
-
-## Keep it cheap
-
-- List with `spark emails` or `spark search --filter '<gmail-style query>'`. `spark search <topic>` returns the full bodies of up to 20 matches, often tens of thousands of tokens; use it only when you need those bodies.
-- `spark <command> --help` gives any command's flags. `spark skill` prints the full reference (about 13,000 tokens); reach for it only when `--help` is not enough.
-- Call `get_thread` with `messageFormat: PLAIN_TEXT`, and `search_threads` with `THREAD_VIEW_METADATA_ONLY` when only the IDs are needed.
+1. **Find** the mail with Spark.
+2. **Find it again in Gmail** before changing it, because the two tools number messages differently. When more than one thread matches, narrow the search or ask the user which one they mean.
+3. **Act** through Gmail: mark done, pin or unpin, label, or draft a reply. A draft reply ends with its `viewUrl`, where the user reviews and sends it.
+4. **Check** that each change took.
 
 ## Setup
 

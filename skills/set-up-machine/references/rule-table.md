@@ -1,4 +1,4 @@
-# The rule table
+# Rule table
 
 `rules.json` holds each global rule once, by meaning, not in any harness's form. Each harness reference turns a row into that harness's entries; the hook and `verify.py` read it through `scripts/setupmachine/rules.py`, which refuses a malformed row.
 
@@ -30,6 +30,14 @@ A `match` object's keys say which kind it is:
 - **File:** `paths`, globs relative to the project (`**/.env`), or starting `~/` or `/`; `access`, `read` or `write`; an optional `except` (`**/.env.example`). A `read` row covers writes too.
 - **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of `mcp__<server>__<tool>`. Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID, so the row matches on every machine and account.
 
+## Spellings
+
+A harness that matches a command's text catches only the spellings it lists, so give it one entry per way of writing a command row:
+
+- **Programs:** each program as typed, then as `/bin/<program>` and `/usr/bin/<program>`, except shell builtins (`.`, `source`, `set`, `export`, `declare`, `typeset`, `unset`, `eval`, `alias`), which have no path.
+- **Flags:** a one-letter name is a short flag (`-r`), a longer one a long flag (`--recursive`). Every order of the groups, every spelling in each group, as separate words; and, when every group has a one-letter name, the one-letter names clustered in every order (`-rf`, `-fr`, `-Rf`, `-fR`).
+- **Order:** program, then subcommand words, then flags, then operands (`git push --force`, `chmod -R 777`).
+
 ## Changing it
 
-Edit a row, or add one with its samples, then run `python3 <skill>/scripts/verify.py --no-codex` until `rules ok`, and the unit tests (`python3 -m unittest discover -s <skill>/scripts/tests`). The change reaches a machine when `/set-up-machine` runs there again. When the hook would read a row differently from what the row means, change the hook first, writing its test first in `tests/test_hook.py`.
+Edit a row, or add one with its samples, then run `python3 <skill>/scripts/verify.py --no-codex` until `rules ok`, and the unit tests (pre-tool-hook.md, *Changing the code*). The change reaches a machine when `/set-up-machine` runs there again. When the hook would read a row differently from what the row means, change the hook first, writing its test first in `tests/test_hook.py`.

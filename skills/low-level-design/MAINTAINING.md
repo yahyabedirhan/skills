@@ -2,7 +2,7 @@
 
 For whoever extends this skill; an agent running a session never needs it.
 
-`SKILL.md` is the Delivery Framework lesson, distilled, plus how to run it with the user. `references/` holds the other lessons' material, one file per lesson, in the skill's own words, each ending with a Source line that cites its lesson; `SKILL.md` ends with the same for the Introduction and Delivery Framework. Write the body as the material itself, without naming the source; the Source line carries the citation. `layout.md` is the exception: it comes from practice, not a lesson, so it has no Source line.
+`SKILL.md` is the session's flow and the user's preferences. `references/delivery-stages.md` holds the Delivery Framework lesson's stage detail, and `references/session-purposes.md` how each kind of session runs. `references/` holds the other lessons' material, one file per lesson, in the skill's own words, each ending with a Source line that cites its lesson; `SKILL.md` ends with the same for the Introduction and Delivery Framework. Write the body as the material itself, without naming the source; the Source line carries the citation. `layout.md` and `session-purposes.md` are the exceptions: they come from practice, not a lesson, so they have no Source line.
 
 To add a newly transcribed lesson, add one reference:
 

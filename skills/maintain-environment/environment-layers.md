@@ -10,10 +10,6 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 | **Skill** | How to do a task, written for any team's tools and tracker: a value that differs between setups becomes a parameter. | A `SKILL.md` in the skills repo, or a local skill in one project. |
 | **Skill reference** | Detail only some runs need: a branch, a table, a tool's specifics. | A file beside the `SKILL.md`, reached by a pointer that says when to read it. |
 
-**No memory.** Write what a harness memory would hold into one of the rows above, and keep memory features off: a memory is invisible to every other harness and lives outside any repository.
-
-**Public by default.** The skills repo and most projects are public, so write personal detail only in the global instructions: names, accounts, paths on the user's machine, other projects. In a skill or a public `AGENTS.md`, generalise it or turn it into a parameter.
-
 ## Team test
 
 Before settling a change, picture a teammate or contributor with a different setup: another harness, tmux instead of the user's session host, and no global instructions at all. After the change they must still be able to work on any of the user's projects using only that project's instructions and the skills.
@@ -41,7 +37,7 @@ Before any skill uses a new role, add it as a row in the Defaults table through 
 
 ### Team-test audit
 
-After a skill change, and whenever the user asks whether the skills pass the team test, run:
+Run:
 
 ```bash
 python3 <this skill>/scripts/default_tools.py --skills <skills folder>
