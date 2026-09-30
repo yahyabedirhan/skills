@@ -39,7 +39,7 @@ Delete a branch or remove a worktree only when its work is **proven merged**. Th
 
 A squash merge, or a commit changed while it was integrated, fails the first two proofs; only the merged pull request's head proves it.
 
-A worktree also needs to be clean after step 6, with no agent still working in it. Keep anything you can't prove or couldn't remove, and name it in the report with the reason. The one exception is the close's own follow-up worktree: its pushed branch is the proof, as step 4 says.
+A worktree also needs to be clean after step 6, with no agent still working in it. Keep anything you can't prove or couldn't remove, and name it in the report with the reason. The one exception is the close's own follow-up worktree, whose pushed branch is the proof.
 
 ## Parameters
 

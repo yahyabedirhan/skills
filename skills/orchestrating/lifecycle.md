@@ -47,11 +47,11 @@ to-tickets   tracer-bullet tickets, each naming what blocks it
 handover     hand over to an orchestrator
 ```
 
-The starting prompt names these skills and the agent loads each one itself: the user types no slash command. Run it in one unbroken context window, so the spec and tickets build on the same reasoning. On a local tracker the artifacts land in an **effort folder**, `.efforts/<effort>/` with `spec.md` and `issues/`, per the [folder standard](folders.md).
+The starting prompt names these skills and the agent loads each one itself: the user types no slash command. Run it in one unbroken context window, so the spec and tickets build on the same reasoning. On a local tracker the artifacts land in an **effort folder**, `.efforts/<effort>/` with `spec.md` and `issues/`.
 
 ## Handover
 
-The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready as that skill's first step lists, writes a one-line **starting prompt** that starts the new session on the handoff, starts that session in the session host or else here or through a pasted prompt, and confirms it started. The handing session then stops, and stays open for reference.
+The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready, starts the new session on the handoff with a one-line prompt, and confirms it started. The handing session then stops, and stays open for reference.
 
 ## Build
 
@@ -59,7 +59,7 @@ The orchestrator reads the handoff, shows the plan with `/show-me`, delegates th
 
 ## Close
 
-The user reviews and approves the pull request: that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. It reads the pull request's *Things to be aware of* first, runs the post-merge follow-ups, carries unfinished work into the next effort's tickets, leaves QA tickets open for the user, closes the tracker, leaves nothing that exists only inside its session, and removes only branches and worktrees proven merged. It frees its own worktree last, from a shell the host opens outside it, and leaves the workspaces open; with no session host, that one step is the user's.
+The user reviews and approves the pull request: that is their only step. The agent then merges it and closes the effort with the **close-effort** skill, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. It leaves the workspaces open and nothing that exists only inside its session.
 
 ## Why two sessions
 

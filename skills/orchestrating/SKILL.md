@@ -19,7 +19,7 @@ An **orchestrator** gets an effort built without building it. It reads the plan,
 - **One contact.** Delegates never talk to the user. Their questions come to the orchestrator, which answers them itself, as *Talking to the user* sets out.
 - **Keep moving.** While one ticket waits on the user, run another that isn't blocked.
 - **Leave nothing running.** When a delegate reports, check for anything it left running (dev servers, preview and browser tabs, background tasks) that its report doesn't name with a reason, and stop it. Sweep your own the same way before telling the user a run is finished.
-- **Move, never `rm -rf`,** and commit alone. What a delegate leaves behind moves into `.scratch/` ([folders.md](folders.md)). Each commit and each push is its own call, never chained with cleanup: a permission check that refuses one part refuses the whole chain, and the refusal then looks like a refused commit.
+- **Move, never `rm -rf`,** and commit alone. What a delegate leaves behind moves into `.scratch/`. Each commit and each push is its own call, never chained with cleanup: a permission check that refuses one part refuses the whole chain, and the refusal then looks like a refused commit.
 - **Notify at two moments only:** when the pull request is delivered, and when you're blocked. [notify.md](notify.md) holds when, what and how.
 
 A delegate is a sub-agent unless the skill that started the orchestration says otherwise. A sub-agent's own sub-agents report to the orchestrator, not to it, so tell delegates to run reviews synchronously in their own context.

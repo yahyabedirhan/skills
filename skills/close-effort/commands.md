@@ -1,6 +1,6 @@
 # Commands for closing an effort
 
-The git and gh commands for **close-effort**'s steps; a worktree tool's own commands are in its skill. `<default>` is the default branch, `<n>` the pull request's number. Run each commit, push and deletion as its own call, so a refused one stops only itself.
+The git and gh commands for **close-effort**'s steps. `<default>` is the default branch, `<n>` the pull request's number. Run each commit, push and deletion as its own call, so a refused one stops only itself.
 
 ## Find the pull request
 
@@ -27,7 +27,7 @@ The git and gh commands for **close-effort**'s steps; a worktree tool's own comm
 
 ## The follow-up branch
 
-- `git worktree add --no-track -b <effort>-close <path> origin/<default>`: a worktree on a new branch from the default branch. When the worktree tool is Treehouse, lease one and switch its branch as the **treehouse** skill says.
+- `git worktree add --no-track -b <effort>-close <path> origin/<default>`: a worktree on a new branch from the default branch.
 
 ## Label the next effort
 
