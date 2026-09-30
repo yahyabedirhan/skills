@@ -67,17 +67,38 @@ Spark reads Spark Desktop's local copy of the mail. The Gmail connector is Googl
 
 ## Flow
 
-Read `command-reference.md` before the first call. When setting either tool up, checking the deny rules, or when a call fails on sign-in or permission, follow `setup.md`.
+When setting either tool up, checking the deny rules, or when a call fails on sign-in or permission, follow `setup.md`.
 
 1. **Find** the mail with Spark.
-2. **Find it again in Gmail** before changing it, because the two tools number messages differently.
-   - **When more than one thread matches:** narrow the search or ask the user which one they mean.
+
+   ```bash
+   spark emails Inbox --filter "category:priority is:unread"   # one Spark category
+   spark emails --filter "is:pinned"                           # pinned mail
+   spark search --filter 'from:<sender> newer_than:7d'         # any Gmail-style query
+   spark thread <id>                                           # one email in full
+   spark events --today                                        # also --tomorrow
+   spark availability --help                                   # free slots across attendees
+   ```
+
+   List with `spark emails` or `spark search --filter '<gmail-style query>'`. `spark search <topic>` returns the full bodies of up to 20 matches, often tens of thousands of tokens, so use it only when you need those bodies.
+   - **When you need a command's flags:** run `spark <command> --help`. `spark skill` prints the full reference, about 13,000 tokens, so reach for it only when `--help` is not enough.
+2. **Find it again in Gmail** before changing it, because the two tools number messages differently. Search with `search_threads`, using `from:` and `subject:` from the Spark row. Pass the view `THREAD_VIEW_METADATA_ONLY` when only the IDs are needed, since it keeps the answer small.
+   - **When more than one thread matches:** narrow the search with `after:` and `before:` around the Spark row's date, or ask the user which one they mean.
 3. **Act** through Gmail: archive, or make the change the user asked for.
+
+   | Change | Calls |
+   |---|---|
+   | Mark done | Add `in:inbox` to the search from step 2, then `unlabel_thread` with `["INBOX"]`. `label_thread` with `["INBOX"]` puts it back. |
+   | Pin or unpin | `label_thread` or `unlabel_thread` with `["STARRED"]`. |
+   | Label | `list_labels` for the label's ID, `create_label` when it does not exist yet, then `label_thread` with that ID. |
+   | Draft a reply | Read the thread with `get_thread`, then `create_draft` with `replyToMessageId` set to the last message's `id`. |
+
+   Call `get_thread` with `messageFormat: PLAIN_TEXT`, since it keeps the thread small.
    - **For any change but archiving that the user hasn't asked for:** name it and wait for their answer.
    - **For a draft reply:** end with its `viewUrl`, where the user reviews and sends it.
 4. **Check** that each change took.
+   - **After marking done:** the `in:inbox` search returns `{}` once the email is archived.
 
 ## References
 
-- [command-reference.md](command-reference.md): the commands and tool calls behind each action, and how to keep them cheap.
 - [setup.md](setup.md): setting up Spark and the Gmail connector, the deny rules, and checking each part.

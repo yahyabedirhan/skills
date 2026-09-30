@@ -15,14 +15,29 @@ Look back over one or more sessions and work out how the agent and its sub-agent
 
 ## 1. Select the sessions
 
-Read `transcript-layout.md` to find and search the transcripts.
-
 - **By default**, cover the current session and every sub-agent it spawned, at any depth. The session itself is in your context. Sub-agents ran in their own contexts, so read their transcripts from disk.
   - **When part of the session was compacted away:** read its transcript for the missing stretch.
 - **When the user names a scope** such as a time window, a project or a list of sessions, use exactly that scope, sub-agents included.
   - **When the scope can be read more than one way,** such as which projects a time window covers: ask before reading.
 
+### Where transcripts live
+
+Claude Code keeps transcripts as files with one JSON object per line, laid out as below. The layout can change between versions, so when a path doesn't resolve, search `~/.claude/projects/` for the session id.
+
+```text
+~/.claude/projects/<project>/                 <project>: the session's working directory, with / and . turned into -
+  <session-id>.jsonl                          the main session
+  <session-id>/subagents/agent-<id>.jsonl     each sub-agent, nested ones included
+  <session-id>/subagents/agent-<id>.meta.json its type, task description and spawn depth
+```
+
+The current session's id is in the `CLAUDE_CODE_SESSION_ID` environment variable. Skill loads appear as `tool_use` blocks named `Skill`, with the skill in `input.skill`, and as `<command-name>/<name></command-name>` in user messages.
+
+- **For another harness:** find where it stores its sessions and how a skill load shows there. Codex keeps them under `~/.codex/sessions/` and loads a skill by reading its `skills/<name>/SKILL.md`, so a read of that file is the load. A session that edits the skill reads that file too, so tell an edit's read apart from a load.
+
 ## 2. Audit
+
+Transcripts run long: search them for what the audit needs, such as skill loads, errors, retries, long runs of tool calls on one problem, and the user's corrections, and read around each hit rather than reading them whole.
 
 Weigh every skill loaded in the scope, and every stretch where a skill was missing. Put in the recap anything where a skill helped or hurt the work, for example:
 
@@ -57,7 +72,3 @@ When there are opportunities, close with the next step: the user runs `/to-ticke
 - **For a finding about someone else's skill:** the user decides whether to file it there, fork the skill, or take it upstream.
 
 Stop after the report, and leave creating issues, commenting and editing skills to the user.
-
-## References
-
-- [transcript-layout.md](transcript-layout.md): where each harness keeps its transcripts, how a skill load shows in them, and how to search them.
