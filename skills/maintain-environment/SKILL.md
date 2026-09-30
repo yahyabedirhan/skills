@@ -9,8 +9,6 @@ The environment is what agents run with: permissions, global instructions, proje
 
 ## Parameters
 
-Each parameter comes from the user's request, else the Defaults table, where a project's row overrides the global one. It is unset when neither gives it, or its row says `none`.
-
 - `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`). Unset, ask the user.
 - `<path-to-skills-repo>`: its local clone. Unset, ask the user.
 

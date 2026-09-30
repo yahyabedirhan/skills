@@ -13,8 +13,6 @@ The effort's whole life happens in the worktree this skill creates: the thinking
 
 ## Parameters
 
-Each parameter comes from the Defaults table, where a project's row overrides the global one, and is unset when it has no row or its row says `none`.
-
 - `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use the **treehouse** skill and lease the worktree to the effort. Unset, use `git worktree add` with the worktree beside the main checkout, unless the project keeps worktrees elsewhere, and give the new branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
 - `<session-host>`: where the thinking session opens. When it is Herdr, use the **handover-to-herdr** skill; for a new project it opens the project's own workspace. Unset, run the starting prompt in this session when it can move into the worktree; otherwise print the prompt in a fenced block, and ask the maintainer to start `<agent-to-start>` in the worktree and paste it.
 - `<agent-to-start>`: the command that starts a new agent session. Unset, use this session's harness.

@@ -43,8 +43,6 @@ A worktree also needs to be clean after step 6, with no agent still working in i
 
 ## Parameters
 
-Each parameter comes from the Defaults table, where a project's row overrides the global one, and is unset when it has no row or its row says `none`.
-
 - `<worktree-tool>`: the tool that makes and frees worktrees. When it is Treehouse, use the **treehouse** skill. Unset, use git.
 - `<session-host>`: where the effort's agent sessions run. When it is Herdr, use the **handover-to-herdr** skill's `closing-an-effort.md` to find the agents still working and to free this session's worktree from a shell in the main checkout; that shell's output is its report, and your report names where it runs. Unset, freeing this session's own worktree is the maintainer's one step: end the report with the command, to run once this session is closed.
 
