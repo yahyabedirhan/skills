@@ -35,6 +35,14 @@ Two scripts stay code (Python 3.9+, standard library only): `scripts/pre_tool_ho
 
 To try a change without touching the real machine, run the steps against a copy of the home folder in the project's `.scratch/`, and `verify.py --home <copy>`; start no harness there, since it would read the real login.
 
+## Spellings
+
+Harnesses that match a command's text need one entry per way of writing a command row:
+
+- **Programs:** each program as typed, then as `/bin/<program>` and `/usr/bin/<program>`, except shell builtins (`.`, `source`, `set`, `export`, `declare`, `typeset`, `unset`, `eval`, `alias`), which have no path.
+- **Flags:** a one-letter name is a short flag (`-r`), a longer one a long flag (`--recursive`). Every order of the groups, every spelling in each group, as separate words; and, when every group has a one-letter name, the one-letter names clustered in every order (`-rf`, `-fr`, `-Rf`, `-fR`).
+- **Order:** program, then subcommand words, then flags, then operands (`git push --force`, `chmod -R 777`).
+
 ## Shared skills
 
 With a `skills-repo` value in the Defaults table (`<owner>/<repo>`), the diff installs that repo's skills globally: `npx --yes skills add <owner>/<repo> -g -a codex -a claude-code -y`, leaving out `-a claude-code` when `~/.claude/skills` is a link to `~/.agents/skills`. It's `present` once `~/.agents/.skill-lock.json` records a skill from that source. With no value, a `none` line.
@@ -47,7 +55,9 @@ It reads `rules.json` and checks each tool call before it runs:
 - **allow-and-report** rows: one JSON line per call in `<report folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
 - **ask** rows: the harness's native ask entries do the asking.
 
-The native entries stay underneath, since the wiring fails open: a script that's gone or an error lets calls through. The report folder is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`. Wire it to the installed skill's script (under `~/.agents/skills` or `~/.claude/skills`), never a checkout or worktree that can go; name the gap if you can't.
+Each reference shows its wiring, around `<script>`: the installed skill's absolute `scripts/pre_tool_hook.py` (under `~/.agents/skills` or `~/.claude/skills`), never a checkout or worktree that can go; name the gap if you can't. The wiring fails open (`[ -f <script> ] && … || true`), since exit 2 would block every call when the script is gone, so the native entries stay underneath. The report folder is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
+
+What it can't see, named once in every audit: a command inside a script file or another interpreter (`python -c`), one built from variables (`$cmd -rf x`), an alias or function defined elsewhere, an abbreviated long option (`--recur`), a force push by refspec (`git push origin +main`), a glob the shell expands (`cat .env*`), and each row's own `gap`.
 
 ## Changing the code
 

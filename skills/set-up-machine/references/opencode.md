@@ -25,7 +25,7 @@ No memory feature: a `none` line. Some models are prompted to keep a memory file
 
 ## Command rows
 
-- Each spelling (claude-code.md, *Command rows*: programs, `/bin/` and `/usr/bin/` paths, flag orders and clusters) becomes one `bash` pattern ending in ` *`: `"rm -rf *": "deny"`, `"/bin/rm -rf *": "deny"`, `"git push --force *": "deny"`. The space keeps a word boundary: `git push --force *` doesn't match `git push --force-with-lease`.
+- Each spelling (SKILL.md, *Spellings*) becomes one `bash` pattern ending in ` *`: `"rm -rf *": "deny"`, `"/bin/rm -rf *": "deny"`, `"git push --force *": "deny"`. The space keeps a word boundary: `git push --force *` doesn't match `git push --force-with-lease`.
 - `arguments: "none"` becomes the exact command, with no ` *`: `"env": "deny"`, so `env FOO=1 cmd` still runs.
 - **No pattern, and a gap instead:** `arguments: "flags"` rows and `files` rows (`cat .env`); patterns match text, not paths or "only flags".
 - opencode checks each plain command of a compound (`a && rm -rf x`, pipes, `$(…)`) by its text, but never a declaration: `export -p`, `declare -p` and `typeset -p` (and `local`, `readonly`) don't meet their patterns (probed). A `gap` for those rows; the hook refuses them.
@@ -42,7 +42,7 @@ Tools are named `<server>_<tool>`, and opencode lists them only inside a session
 
 ## Pre-tool hook
 
-- **Wiring:** the plugin `~/.config/opencode/plugins/set-up-machine.js`, which opencode loads from its global plugin folder. Write it from [opencode-plugin.js](opencode-plugin.js), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "opencode"]` (`<script>` as in claude-code.md, *Pre-tool hook*). Its `tool.execute.before` runs before every tool call, built-in and MCP, and before the permission check; it throws the hook's refusal, which stops the call. When the script is gone, can't start, exits non-zero or takes over 10 seconds, it lets the call through.
+- **Wiring:** the plugin `~/.config/opencode/plugins/set-up-machine.js`, which opencode loads from its global plugin folder. Write it from [opencode-plugin.js](opencode-plugin.js), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "opencode"]` (`<script>` as in SKILL.md, *The pre-tool hook*). Its `tool.execute.before` runs before every tool call, built-in and MCP, and before the permission check; it throws the hook's refusal, which stops the call. When the script is gone, can't start, exits non-zero or takes over 10 seconds, it lets the call through.
 - **Audit:** `wired` when the file is the template with the current command. A file there without the template's first line is someone else's: a `gap`, left alone. A plugin with an old command is rewritten.
 - **Input:** `{"tool", "sessionID", "args", "directory"}`: `args.command` (and `args.workdir`) for `bash`; `filePath` for `read`, `edit` and `write`; `path` for `grep`, `glob` and `list`; the file headers of `apply_patch`'s `patchText`. A tool that isn't built in is read as an MCP tool, trying each `_` as the split between server and tool.
 - **Answer:** the refusal as plain text, which the plugin throws; the agent reads the error's message as the tool's result. Otherwise nothing, so the native permissions decide.
@@ -56,7 +56,7 @@ With native entries alone these get through; the hook closes the command and MCP
 - a bash command (`sed`, `echo … > .env`), a script or another program opening a file; for `~/` paths, a session whose project is the home folder;
 - the rows with no pattern above, and each row's `guard` (no semantic guard: a `none` line).
 
-The hook's own misses are in claude-code.md, *Gaps*.
+The hook's own misses are in SKILL.md, *The pre-tool hook*.
 
 ## What the agent sees
 

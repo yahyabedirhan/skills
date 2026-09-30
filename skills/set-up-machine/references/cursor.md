@@ -30,7 +30,7 @@ None (Memories were removed in 2.1; the CLI never had them): a `none` line.
 - **Files:** `~/.cursor/cli-config.json`, key `permissions` with the lists `deny` and `allow` (add `"version": 1` to a new file). The CLI rewrites the rest of the file itself; keep every other key. It also unions in the `allow` and `deny` lists of `~/.claude/settings.json`, and **skips that file unless it has both lists** (claude-code.md keeps an `allow` there).
 - **Matching:** a glob knows only `*`, which matches anything, `/` and spaces included; every other character is literal (no `?`, classes or `**` of its own). `Shell(<prefix>)` matches the prefix alone and followed by a space and anything; `Shell(<prefix>:)` the prefix alone; `Shell(<cmd>:<args>)` a one-word command with arguments matching the glob. Deny wins over allow.
 - **Levels:** `deny` rows go to `deny`, `allow-and-report` rows to `allow`. `ask` has no list: under the allowlist mode a command no allow entry covers prompts, but `--force`/`--yolo` runs it, so each ask row is a `gap`.
-- **Command rows** become `Shell(<prefix>)`, one per spelling (claude-code.md, *Command rows*): `Shell(rm -rf)`, `Shell(/bin/rm -rf)`, `Shell(git push --force)`, which refuses `git push --force origin main` but not `git push --force-with-lease`. `arguments: "none"` rows become `Shell(env:)`, which leaves `env FOO=1 cmd` alone. `arguments: "flags"` and `files` rows get none: the hook alone refuses them, a `gap`.
+- **Command rows** become `Shell(<prefix>)`, one per spelling (SKILL.md, *Spellings*): `Shell(rm -rf)`, `Shell(/bin/rm -rf)`, `Shell(git push --force)`, which refuses `git push --force origin main` but not `git push --force-with-lease`. `arguments: "none"` rows become `Shell(env:)`, which leaves `env FOO=1 cmd` alone. `arguments: "flags"` and `files` rows get none: the hook alone refuses them, a `gap`.
 - **File rows** become `Read(<glob>)` and `Write(<glob>)` over absolute paths: `Read(**/.env)`, `Read(**/.env.*)`, `Read(~/.ssh/**)`; a glob without `**/`, `~/` or `/` gets `**/` in front. They bind the CLI's file tools only. With only `*`, an `except` can't be expressed, so the CLI refuses `.env.example` too; the hook leaves it open, and the IDE with it. Both are `gap`s.
 - **MCP-tool rows** become `Mcp(<server>:<tool>)`, the server being its key in `~/.cursor/mcp.json`. List the tools from an empty folder: `cursor-agent mcp list` (a line per server, `<server>: …`), then `cursor-agent mcp list-tools <server>` (a line per tool, `- <tool>`) for each server a row's `server` regex matches; strip colour codes. A listing that fails is a `gap`: keep the `Mcp(` entries already there.
 - **Covered already:** `Shell(x)` or `Bash(x)` covers every entry starting `x `; a trailing-`*` glob covers every entry starting with its stem; `Shell(cmd:*)` covers a one-word command's every use; `Mcp(server:*)` or `Mcp(server)` that server's tools.
@@ -49,7 +49,7 @@ None (Memories were removed in 2.1; the CLI never had them): a `none` line.
     "preToolUse": [{"command": "<command>", "timeout": 10, "matcher": "^(Write|Delete|Grep)$"}]}}
   ```
 
-  with `<command>` = `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'` (`<script>` as in claude-code.md, *Pre-tool hook*). The `echo '{}'` matters: Cursor reads an empty answer as invalid JSON, which blocks. `preToolUse` names an MCP tool `MCP:<tool>` without its server, so MCP goes through `beforeMCPExecution`.
+  with `<command>` = `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'` (`<script>` as in SKILL.md, *The pre-tool hook*). The `echo '{}'` matters: Cursor reads an empty answer as invalid JSON, which blocks. `preToolUse` names an MCP tool `MCP:<tool>` without its server, so MCP goes through `beforeMCPExecution`.
 - **Audit:** `wired` when all four events run exactly that command; `verify.py` checks it. A handler running `pre_tool_hook.py` from another path is old wiring: `removed`.
 - **Input:** `beforeShellExecution` has `command` and `cwd` (often empty; the hook falls back to `workspace_roots[0]`); `beforeMCPExecution` has `mcp_server_name` and `tool_name`; `beforeReadFile` has `file_path`; `preToolUse` has `tool_name` and `tool_input.file_path` (or `path`, `glob`). The session is `conversation_id`.
 - **Answer:** always JSON. A deny is `{"permission": "deny", "user_message": …, "agent_message": …}`, both the refusal; the CLI shows the agent `user_message`. Otherwise `{}`, which leaves the call to Cursor's permissions. The hook isn't `failClosed`: a crash or timeout lets the call through, and in the IDE nothing native is left underneath (a `gap`).
@@ -57,7 +57,7 @@ None (Memories were removed in 2.1; the CLI never had them): a `none` line.
 
 ## Gaps
 
-The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses (claude-code.md, *Gaps*). Each row's `guard`: Cursor has no semantic guard that covers it (Auto-review skips sandboxable commands and only steers).
+The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses (SKILL.md, *The pre-tool hook*). Each row's `guard`: Cursor has no semantic guard that covers it (Auto-review skips sandboxable commands and only steers).
 
 ## What the agent sees
 

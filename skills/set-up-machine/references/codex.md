@@ -68,7 +68,7 @@ Codex's MCP tools aren't listed before a session, so there's no native entry: a 
     "command": "[ -f <script> ] && python3 <script> --harness codex || true"}]}]}}
   ```
 
-  `<script>` as in claude-code.md, *Pre-tool hook*. It fails open the same way.
+  `<script>` and the fail-open wrapping are in SKILL.md, *The pre-tool hook*.
 - **Trust:** Codex runs a user hook only once it's trusted, which `/hooks` records in `config.toml`. Write that entry yourself, as part of the approved diff: approving the whole diff stands in for Codex's own hook review.
 
   ```toml
@@ -84,7 +84,7 @@ Codex's MCP tools aren't listed before a session, so there's no native entry: a 
 
 ## Gaps
 
-Rules alone let through flags after the operands (`git push origin main --force`), options before a subcommand (`git -C dir push --force`), and anything that isn't a plain chain of words. The hook closes them for deny and allow-and-report rows, so list them only for `ask` rows, beside the rows above that get no rule. The hook's own misses are in claude-code.md, *Gaps*.
+Rules alone let through flags after the operands (`git push origin main --force`), options before a subcommand (`git -C dir push --force`), and anything that isn't a plain chain of words. The hook closes them for deny and allow-and-report rows, so list them only for `ask` rows, beside the rows above that get no rule. The hook's own misses are in SKILL.md, *The pre-tool hook*.
 
 ## What the agent sees
 
