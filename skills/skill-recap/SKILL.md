@@ -11,8 +11,6 @@ A **recap** looks back over one or more sessions and asks how the agent and its 
 
 ## Parameters
 
-Each parameter comes from the Defaults table, where a project's row overrides the global one, and is unset when it has no row or its row says `none`.
-
 - `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`), where findings are filed. Unset, ask the user.
 
 ## 1. Select the sessions

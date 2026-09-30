@@ -9,8 +9,6 @@ An **orchestrator** gets an effort built without building it. It reads the plan,
 
 ## Parameters
 
-Each parameter comes from the Defaults table, where a project's row overrides the global one, and is unset when it has no row or its row says `none`.
-
 - `<notification-method>`: how a notification reaches the user. Unset, use the harness's notification tool, else a line in the chat.
 
 ## The discipline

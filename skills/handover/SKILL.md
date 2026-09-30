@@ -12,8 +12,6 @@ A **handoff** is the document the new session starts from; the **handoff** skill
 
 ## Parameters
 
-Each parameter comes from the Defaults table, where a project's row overrides the global one, and is unset when it has no row or its row says `none`.
-
 - `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use the **treehouse** skill. Unset, use `git worktree add`, and give the new branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
 - `<session-host>`: where the new session opens. When it is Herdr, use the **handover-to-herdr** skill; when that can't reach Herdr, treat the host as unset. Unset, offer the maintainer two ways and take the one they pick: move this session into the worktree and run the starting prompt here, or print the prompt in a fenced block to paste into a new `<agent-to-start>` session started in the worktree.
 - `<agent-to-start>`: the command that starts a new agent session. Unset, use this session's harness.

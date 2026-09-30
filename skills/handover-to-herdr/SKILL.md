@@ -19,8 +19,6 @@ Closing an effort needs two more Herdr steps: finding the agents still working, 
 
 ## Parameters
 
-Each parameter comes from the Defaults table, where a project's row overrides the global one, and is unset when it has no row or its row says `none`.
-
 - `<agent-to-start>`: the command that starts the new agent. Unset, use this session's harness.
 
 ## Herdr from anywhere
