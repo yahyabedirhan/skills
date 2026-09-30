@@ -4,7 +4,7 @@ Keeping frequently read data in memory so reads skip the store behind it. A Redi
 
 ## When a cache is justified
 
-A named bottleneck, with rough numbers:
+Add a cache only for a named bottleneck, with rough numbers, such as:
 
 - **Read-heavy load**: many reads of the same data.
 - **Expensive queries**: a feed built from joins that takes hundreds of milliseconds.
@@ -16,9 +16,9 @@ An indexed row lookup already takes a few milliseconds; caching it adds infrastr
 ## Where to cache
 
 - **External cache** (Redis, Memcached): a separate service every app server shares, with eviction and TTLs. The default.
-- **CDN**: edge servers near users cache content; the case to reach for first is static media served worldwide.
+- **CDN**: edge servers near users cache content; reach for it first for static media served worldwide.
 - **Client-side**: the browser or app keeps data (HTTP cache, local storage, offline sync). Little control over staleness.
-- **In-process**: small, hot, rarely changing values (config, feature flags, hot keys) in the server's own memory. The fastest, but each server has its own copy and invalidations don't reach the others; an extra layer on top of an external cache.
+- **In-process**: small, hot, rarely changing values (config, feature flags, hot keys) in the server's own memory. The fastest, but each server has its own copy and invalidations don't reach the others. Use it as an extra layer on top of an external cache.
 
 ## Read and write patterns
 
@@ -45,7 +45,7 @@ An indexed row lookup already takes a few milliseconds; caching it adds infrastr
 
 ## In a design
 
-Name the bottleneck with numbers; what to cache (read often, changes rarely, expensive to produce) and the key shape (`user:123:profile`); the pattern; eviction and TTL; and the one or two failure modes that matter for this system.
+State the bottleneck with numbers, what to cache (read often, changes rarely, expensive to produce), the key shape (`user:123:profile`), the pattern, eviction and TTL, and the one or two failure modes that matter for this system.
 
 ---
 

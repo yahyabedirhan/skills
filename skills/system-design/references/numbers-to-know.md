@@ -30,7 +30,7 @@ What these imply:
 - **Overestimating latency**: an indexed row lookup takes under a millisecond to a few milliseconds. Cache expensive queries, not simple lookups.
 - **A queue for modest writes**: a well-tuned PostgreSQL takes 20k+ simple writes per second (the ~10k TPS trigger above is for typical transactional writes). At 5k writes per second, batch writes, trim indexes and pool connections first. A queue earns its place for guaranteed delivery past a failing consumer, decoupling, event sourcing, or spikes beyond what the database takes.
 
-Cost: orders of magnitude matter (a hundred machines where one will do); exact prices don't.
+For cost, reason in orders of magnitude (a hundred machines where one will do), not exact prices.
 
 ---
 

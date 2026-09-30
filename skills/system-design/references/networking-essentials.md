@@ -12,7 +12,7 @@ Each layer up adds latency and processing. A TCP connection is state both ends h
 
 ## Transport: TCP or UDP
 
-TCP is connection-oriented, reliable and ordered, with flow and congestion control: the default, for nearly everything. UDP is connectionless and best-effort (no delivery or order guarantees) but faster: choose it when a late packet is worth less than a lost one (live video, games, VoIP, lossy telemetry), and when browsers aren't clients or get another path, since browsers support UDP only through WebRTC. Real products often mix them: TCP for signalling and auth, UDP for media.
+TCP is connection-oriented, reliable and ordered, with flow and congestion control: the default, for nearly everything. UDP is connectionless and best-effort (no delivery or order guarantees) but faster: choose it when a late packet is worth less than a lost one (live video, games, VoIP, lossy telemetry). Browsers support UDP only through WebRTC, so choose it only when browsers aren't clients or reach the system another way. Real products often mix them: TCP for signalling and auth, UDP for media.
 
 ## Application protocols
 
@@ -25,9 +25,9 @@ TCP is connection-oriented, reliable and ordered, with flow and congestion contr
 | WebSockets | A persistent two-way connection, upgraded from HTTP | Frequent two-way traffic: chat, games, collaboration | Stateful connections are expensive at scale; every proxy and balancer on the path must support them |
 | WebRTC | Peer-to-peer over UDP, via signalling, STUN and TURN servers | Audio and video calls | Complex; connections fail and fall back to relays |
 
-For real-time needs, start with HTTP polling and move to SSE or WebSockets when polling stops meeting the requirement. Justify a WebSocket by a requirement; its infrastructure costs the most.
+For real-time needs, start with HTTP polling and move to SSE or WebSockets when polling stops meeting the requirement. Use a WebSocket only for a requirement that needs it, because its infrastructure costs the most.
 
-HTTP being stateless is what lets servers scale by adding more of them: minimize the stateful surface of a system. HTTPS encrypts the request but doesn't make its content trustworthy: never take the user's identity from the request body.
+HTTP being stateless is what lets servers scale by adding more of them: keep as little state on the servers as possible. HTTPS encrypts the request but doesn't make its content trustworthy: never take the user's identity from the request body.
 
 ## Load balancing
 

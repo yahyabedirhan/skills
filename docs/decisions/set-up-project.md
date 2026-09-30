@@ -1,0 +1,28 @@
+# Decisions: set-up-project
+
+The decisions behind the `set-up-project` skill. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why. The spec is "Spec: every harness and project is set up and audited from the skills" (#49); the ticket is "set-up-project sets up and audits a project" (#60).
+
+## 2026-09-29
+
+- **A fork of `setup-matt-pocock-skills` at `d80fa0f`**, the last upstream commit touching the skill's folder. Section A to C, the `## Agent skills` block and the tracker, label and domain templates stay close to upstream so a later upstream change diffs cleanly. The local tracker moves from `.scratch/` to `.efforts/<effort>/`, as the `to-spec` and `to-tickets` forks already do, and the GitHub template gains the effort-label and name-by-title lines that `init-effort`'s own copy carried. That copy is gone: `init-effort` now runs set-up-project for a new project.
+- **Model-invoked, where upstream is user-invoked.** `to-spec`, `to-tickets` and `init-effort` run it themselves when no tracker is configured, and rollout issues ask an agent to run it on each project.
+- **`AGENTS.md` is always the rules file, and `CLAUDE.md` holds `@AGENTS.md`.** Upstream edits whichever of the two exists. Codex, opencode and Cursor read `AGENTS.md`; Claude Code skips it when a `CLAUDE.md` exists, so the import line is what makes one text reach every harness. A lone `CLAUDE.md` moves into `AGENTS.md`; one beside an existing `AGENTS.md` gets the import added and its other lines listed for the agent to move, since merging two files needs judgement.
+- **A script for the deterministic part, prompts for the rest.** `set_up_project.py plan|apply` checks the machine, writes `AGENTS.md`'s skeleton, `CLAUDE.md` and the `.gitignore` lines on one approval (apply takes the plan id, as set-up-machine's does), and audits. The tracker, labels and docs stay upstream's explore-present-confirm flow, reported by the plan as `todo` until written, so "No changes." means the whole setup is in place.
+- **The machine check runs set-up-machine's own reconcile, from the sibling skill folder.** The script imports `setupmachine` from `<skills>/set-up-machine/scripts` (`--machine-skill` overrides it), so the audit reads the same `rules.json` and the same adapter expansions (`opencode.entries_for`, `effective`, `command_prefixes`) as the machine; no second copy of what a rule covers. When the machine differs the plan prints set-up-machine's plan and its apply command and exits 3, and the agent takes one approval for it: set-up-project never applies the machine by itself.
+- **The audit judges each harness by how it merges project files**, from the research (each harness's section 5):
+  - opencode: the project config is merged over the global one exactly as opencode does (a key already there keeps its place, a new key goes last), and each rule's samples are evaluated before and after; a looser result is `weakens`.
+  - Cursor CLI: a project `deny` list that drops any global entry is `weakens`; an allow over an ask row is `weakens` (no ask level); over a deny row it's `overlaps`.
+  - Claude Code: permissions can't be loosened, so an allow over a deny command row is `weakens` only when the user settings lack `classifyAllShell` (auto mode's classifier would be skipped), else `overlaps`; the Cursor CLI reads the project's `.claude/settings.json` too, so an allow there over an ask row is `weakens`. `disableAllHooks`, `autoMemoryEnabled: true` and `disableAutoMode` are `weakens`.
+  - Codex: rules can't be loosened; `[features] hooks = false` and `memories = true` are `weakens`.
+- **`overlaps` doesn't fail the audit, `weakens` does.** A project allow covering a rail's command is against allow-only, but where the rail still holds everywhere it's a tidy-up, not a hole. Exit code 2 marks a failed audit, so a script or a rollout issue can tell.
+- **The audit never edits a project's harness files.** They're the project's; it names each entry and the fix, and the agent changes one only on the user's approval. A project deny or ask is `extra`, kept, and a candidate for the rule table.
+- **A project may hold its own `## Defaults` table**, overriding the global rows it names for that project. The template allows it, and Section D proposes a row only when the project itself requires a tool for a role.
+
+## 2026-09-30: no scripts (#81)
+
+- **The agent does what `set_up_project.py` did.** This reverses "a script for the deterministic part" and "the machine check runs set-up-machine's own reconcile" above, which stay as the record. `AGENTS.md`, `CLAUDE.md`'s single import and the `.gitignore` lines join the one draft the user approves, and the audit is the agent reading each project harness file against `references/project-files.md`.
+- **The machine check is set-up-machine's `verify.py`.** It's fast and writes nothing; when a line fails, the agent runs set-up-machine first. The full set-up-machine audit stays that skill's job.
+- **The audit matches project entries against each row's `samples.covers`,** the same samples verify checks, instead of spellings the adapters generated.
+- **The audit checks every harness's project files, whether or not that harness is set up on the machine.** A teammate may use a harness this machine doesn't have.
+- **With the auto-mode guard off, a project allow over a deny command row is `overlaps`:** the user deny still wins, and there's no classifier to route around.
+

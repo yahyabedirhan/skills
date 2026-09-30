@@ -1,50 +1,40 @@
 ---
 name: handover
-description: Hand work over to a new session outside this one - an orchestrator to build an effort, or a fresh session to continue - and confirm it started. Use when a session is ready to hand over, or when another skill says to.
+description: Hand work over to a new session outside this one - an orchestrator to build an effort, or a fresh session to continue - and confirm it started. Use when a session is asked to hand over.
 argument-hint: "What the new session does (optional)"
 ---
 
 # Handover
 
-A **handover** starts another session, outside this one, that carries the work on from the repository alone: an orchestrator that builds an effort, or a fresh session that continues the thinking. It can happen at any point and from any session. The new session knows only what the repository tells it, so this session leaves everything there first.
+A **handover** starts another session, usually outside this one, to carry on the work: an orchestrator that builds an effort, or a fresh session that continues the thinking. Hand over at any point, from any session. The new session knows only what the repository holds, and it takes its starting prompt as the maintainer's go-ahead, so settle in the handoff every decision this session can. Once the new session has started, don't check on it: its deliverable, such as an orchestrator's pull request, is how the maintainer hears back.
 
-A **handoff** is the document the new session starts from; the **handoff** skill writes it. The handover is the whole move: get ready, write the starting prompt, start the session through a mechanism, and confirm it started.
+The session that holds the context should put it to use before handing over. A thinking session writes its spec and tickets with `/to-spec` and `/to-tickets` before handover, otherwise handing over raw thinking leaves the next session to rebuild it. Hand an active session's work to a fresh one only when the maintainer asks for it.
 
-## 1. Get ready
+## Parameters
 
-Check each item, and fix what isn't true yet:
+- `<worktree-tool>`: the tool that makes and frees worktrees, e.g. `treehouse`, or plain git worktrees.
+- `<session-host>`: where agent sessions run, e.g. `herdr`, Claude Code Desktop, Codex Desktop.
+- `<agent>`: the command that starts a new agent session, e.g. `claude` or `codex`, with its flags.
 
-- **The worktree exists.** The work gets its own worktree and branch at the latest now, made with the project's worktree tool (its instructions name it; Treehouse by default, else `git worktree add`). Branch from `origin/<default>`, or from the local default branch when the work builds on commits there that aren't pushed. Uncommitted changes on the default branch that belong to the work move into it, and only those: the rest stay where they are.
-- **Every input only the maintainer has is collected** while they are here: answers, accounts, choices. Secrets stay out of chat and files; the handoff says where they live.
-- **The handoff is written**, with the **handoff** skill, where the folder standard puts it (the **orchestrating** skill's `folders.md`: the project's handoff folder, else `.handoff/<date>-<topic>.md`). Beyond what that skill asks, it names the worktree and branch, the spec and tickets, and whether the new session can reach this one. A session that can't receive messages (a desktop-app session, or any session outside Herdr) says so, and tells the new session to decide open questions itself and list them in the pull request.
-- **Everything is committed and pushed**: `git status` is clean in the worktree and its branch matches its remote. Run each commit, and the push, as its own call, never chained with a deletion, because a deny rule that matches the deletion blocks the whole chain; after an interrupted or rejected call, check `git log` before retrying, because a chain can stop halfway.
-- **Tracker items exist** for the spec and tickets the handoff names: issues on a hosted tracker, or files in the effort folder on a local one (`.efforts/<effort>/`, per `folders.md`).
-- **QA is settled**, for an effort in a project whose instructions opt in to QA by the maintainer: the spec says whether QA is blocking ("QA: blocking") or non-blocking, the default. When it doesn't, ask the maintainer while they are here, and write the answer into the spec.
+## Flow
 
-This session stays on its own checkout and branch throughout, so the maintainer's thread stays where it is: write into the worktree by absolute path and run git there with `git -C <worktree>`.
+1. **Give the work its own worktree and branch,** and move into it the uncommitted changes on the default branch that belong to the work, leaving the rest where they are. Until the new session starts, keep this session on its own checkout and branch, so the maintainer's checkout isn't switched under them. Write into the worktree by absolute path, and run git there with `git -C <worktree>`.
+   - **When it has none yet:** make them with `<worktree-tool>`. Branch from the remote default branch, or from the local default branch when the work builds on commits there that aren't pushed.
+2. **Collect every input only the maintainer has** for the handoff while they are here: answers, accounts, choices. Keep secrets out of chat and files, and have the handoff say where they live.
+3. **Write the handoff** with `/handoff`, and have it name the worktree and branch, the spec and tickets, and whether the new session can reach this one.
+   - **When the work isn't an effort, so there is no spec or tickets:** have the handoff say what to do next instead.
+   - **When the new session can't reach this one:** this session can't receive messages when it runs in a desktop app, or anywhere else `<session-host>` can't prompt it. Have the handoff tell the new session to decide open questions itself and list them in the pull request.
+4. **Make sure the issue tracker holds the spec and tickets** the handoff names: issues on a hosted tracker, or files in the effort's folder on a local one. Skip this when the work isn't an effort.
+5. **Commit and push everything** in the worktree, until it is clean and its branch matches its remote. Run each commit and each push as its own call, because a deny rule that matches anything else in a chain blocks the whole chain.
+   - **After an interrupted or rejected call:** check the log before retrying, because the commit or push may have landed anyway.
+6. **Write the starting prompt as one line** that starts the new session on the handoff. A prompt of several lines arrives as pasted text rather than a command, so its skill never starts; put everything else in the handoff.
 
-Done when every item holds.
+   | New session | Starting prompt |
+   |---|---|
+   | Orchestrator for an effort | `/orchestrate-with-handoff <path to the handoff>` |
+   | More work on an effort | `Continue from the handoff at <path to the handoff>.` |
+   | Work that isn't an effort | `Continue from the handoff at <path to the handoff>: <what to do, in one sentence>.` The sentence gives the new session something to start on. |
 
-## 2. Write the starting prompt
-
-The starting prompt is **one line**, and it starts the new session on the handoff:
-
-| New session | Starting prompt |
-|---|---|
-| Orchestrator for an effort | `/orchestrate-with-handoff <path to the handoff>` |
-| Anything else, such as more thinking | `Continue from the handoff at <path to the handoff>.` |
-
-Everything else the new session needs goes in the handoff: the worktree and branch, whether this session is reachable, changes to the plan, rules. A prompt pasted in over several lines arrives as pasted text rather than a command, so its skill never starts.
-
-Codex starts skills with `$` instead of `/`: when the new session runs Codex, write `$orchestrate-with-handoff`.
-
-The new session takes the prompt as the maintainer's go-ahead and starts work without asking for one. So the handoff settles every decision this session can, and carries the maintainer's inputs from step 1.
-
-## 3. Start it through a mechanism
-
-- **Herdr**, the default: when `herdr status` reaches a server, whether or not this session runs in a Herdr pane, hand over with the **handover-to-herdr** skill, passing the worktree, the topic, the new session's role, and the starting prompt.
-- **Paste**, the fallback: print the starting prompt in a fenced block, and ask the maintainer to start their preferred agent in the worktree and paste it.
-
-## 4. Confirm it started
-
-The handover is done when the new session is working on the prompt: Herdr reports it `working`, or the maintainer says it started. Tell the maintainer where it runs, then stop. The handover is fire-and-forget: this session doesn't wait on the new one, message it, or check on it; the new session's deliverable (for an orchestrator, its pull request) is how the maintainer hears back.
+   - **When `<agent>` is Codex:** write `$orchestrate-with-handoff`, since Codex starts skills with `$`.
+7. **Start `<agent>` in `<session-host>`**, passing the worktree, the topic, the new session's role, and the starting prompt.
+8. **Confirm it is working on the prompt**: `<session-host>` reports it working, the maintainer says it started, or this session runs it here. Tell the maintainer where it runs, and stop.

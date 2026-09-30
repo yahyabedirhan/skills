@@ -1,22 +1,22 @@
 # Design principles
 
-Tools for deciding whether something should be its own class, whether to use inheritance, whether an abstraction is worth it, and for explaining the decision. Apply them; name one only when it explains a trade-off.
+Use these principles to decide whether something should be its own class, whether to use inheritance and whether an abstraction is worth it, and to explain the decision. Apply them, but name one only when the name explains a trade-off.
 
 ## General principles
 
 **KISS: keep it simple.** The simplest design that works is usually right: a conditional before a strategy pattern, one class before three. It is the principle most often broken, by designs that reach for factories and decorators to look thorough. Add complexity when simplicity stops working: a class grown to many responsibilities, or a new variant that means editing five places.
 
-**DRY: don't repeat yourself.** Logic that is conceptually the same lives in one place, so a rule change or a bug fix is one edit. Code that only looks similar but serves different purposes may stay duplicated; forcing it to share couples two things that change for different reasons. DRY and KISS pull against each other: keep the logic where it is first, and extract it once it repeats (by the third copy, what varies is visible).
+**DRY: don't repeat yourself.** Keep logic that is conceptually the same in one place, so a rule change or a bug fix is one edit. Code that only looks similar but serves different purposes may stay duplicated; forcing it to share couples two things that change for different reasons. DRY and KISS pull against each other: keep the logic where it is first, and extract it once it repeats (by the third copy, what varies is visible).
 
 **YAGNI: you aren't gonna need it.** Build what the requirements need now. Design with extension in mind, but don't build ahead: guessed-at futures are usually guessed wrong and leave dead code.
 
-**Separation of concerns.** Presentation, business logic and storage live apart and don't know each other's internals. Then switching the UI touches only the UI, changing a rule touches only the rule, and each part can be tested on its own.
+**Separation of concerns.** Keep presentation, business logic and storage apart, each unaware of the others' internals. Then switching the UI touches only the UI, changing a rule touches only the rule, and each part can be tested on its own.
 
 **Law of Demeter.** A method talks to its immediate collaborators, not through them: `order.getCustomer().getAddress().getZipCode()` couples the caller to three structures; `order.getCustomerZipCode()` hides them. Fluent chains that return the same type are fine.
 
 ## SOLID
 
-Born in class-heavy languages; elsewhere, composition and plain functions often do the job with less ceremony. Apply them where the problem calls for them.
+SOLID comes from class-heavy languages; elsewhere, composition and plain functions often do the job with less ceremony. Apply them where the problem calls for them.
 
 - **Single responsibility.** One reason to change. A class that generates a report, formats it as PDF and saves it to disk changes for three reasons; split it into content, printer and storage.
 - **Open/closed.** Add behaviour by adding code, not by editing what works: a payment processor with an `if` per method type becomes a `PaymentMethod` interface with one class per method.

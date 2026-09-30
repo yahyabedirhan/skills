@@ -1,0 +1,5 @@
+interface:
+  display_name: "Set Up Project"
+  short_description: "Set up and audit a repo for coding agents"
+policy:
+  allow_implicit_invocation: true

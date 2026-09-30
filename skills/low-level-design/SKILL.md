@@ -5,41 +5,29 @@ description: Design, explain or redesign code at the level of modules, classes, 
 
 # Low-level design
 
-This skill is the **delivery framework**: the standard order for producing and presenting a low-level design. Every session follows it, whether the design is new, explained, or redesigned, so the user always finds the same things in the same places. The user decides what the session is for; the framework decides how the answer is laid out. The references hold the principles, concepts and patterns each stage draws on.
+A low-level design decides which modules exist, what state and rules each one owns, how they call each other, and where each file sits. A good one lets a newcomer find what they came for (where the program starts, how to add an endpoint, where the shared logic lives, what a change touches) without reading everything. Produce and present it through the **delivery framework** in every session, whether you are designing, explaining or redesigning, so the user always finds the same things in the same places. The user chooses what the session is for; the framework sets how you lay out the answer. Stop once the user agrees to the design, since building it is done later, from tickets.
 
-A low-level design decides which modules exist, what state and rules each one owns, how they call each other, and where each file sits. A good one lets a newcomer find what they came for (where the program starts, how to add an endpoint, where the shared logic lives, what a change touches) without reading everything. The session ends at an agreed design; building it goes to tickets.
+The recurring failure is structure added before it is needed: factories with one product, interfaces with one implementation, a file per function. Start from the simplest design that meets the requirements, and add a class, an interface or a pattern only for a named reason, such as a second implementation today or the same edit repeated across several files. Before designing a module, check whether a dependency the project already has provides it, and build only the difference.
 
-## What the session is for
+## The flow
 
-The user usually says what they want when they invoke the skill. Read the purpose from the request and its context, and restate it in one line before starting, so a misreading costs one reply.
+1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix.
+   - **Invoked with no instructions inside a project:** write down that project's current design.
+   - **When the purpose isn't clear:** ask what the user wants from the session: a new design, an explanation of the existing code, or a change to it. Check yourself whether the code exists.
+2. **Work through the delivery framework** below, stage by stage, reading a principles, concepts or patterns reference when a decision calls for it.
+3. **Present, take feedback and revise** until the user agrees.
+4. **Keep the design where the user wants it.**
 
-- Invoked with no instructions inside a project: write down that project's current design through the framework.
-- When the purpose isn't clear, ask the user what they want to do with the design, whether the code exists or is new, and whether they want only an explanation.
+The purpose decides how the stages are walked. The cases below are common, not the only options: a session can mix them, move from one to another, such as an explanation turning into a redesign, or be something else, so fit the framework to what the user asked for.
 
-The purposes below are common shapes, not a menu. A session can mix them, move from one to another (an explanation turning into a redesign), or be something else; fit the framework to what the user asked for.
-
-### Designing something new
-
-Design it end to end from the user's spec: a complete first draft through every stage. Where the design forks, present the options with what each gains and costs and a recommendation, so the user picks. When feedback changes one part, carry the change through every part it affects, and show what moved.
-
-### Explaining existing code
-
-Walk the code through the stages as it is, without changing it:
-
-- Build each stage from the evidence: an existing design document (start there and check it against the code), the code itself (entry points, types, folders, tests), or the user's description. Cite the file behind each claim.
-- Requirements read from behaviour and tests are marked **inferred**. What the code can't show (why a choice was made, what is planned) is marked **unknown** and asked about, never filled in.
-- Show what each file owns and, where a file mixes several things, what it mixes. Weaknesses are observations, not proposals.
-- Answer follow-up questions by tracing a call through the design.
-
-### Redesigning existing code
-
-1. **Explain it as it is now**, as above, and get the user's agreement that it's right.
-2. **Redesign it through the same stages**, changing only what the redesign needs. A small change runs only the stages it touches; a restructure runs them all.
-3. **Show the before and after** of every stage that changed, including the folder tree.
-
-### Deciding one thing
-
-A question like "should this be an interface?" or "where does this module go?" is one decision: the part of the design it touches, the requirement behind it, the options with their trade-offs, and a recommendation.
+- **Designing something new:** a complete first draft through every stage, from the user's spec.
+- **Explaining existing code:** walk the code through the stages as it is, without changing it.
+  - Build each stage from the evidence. Start from an existing design document and check it against the code, then the code itself: entry points, types, folders and tests. The user's description is evidence too. Cite the file behind each claim.
+  - Mark requirements read from behaviour and tests **inferred**. Mark what the code can't show, such as why a choice was made or what is planned, **unknown**, and ask about it rather than filling it in.
+  - Show what each file owns and, where a file mixes several things, what it mixes. Report weaknesses as observations without proposing changes, since this session leaves the code as it is.
+  - Answer follow-up questions by tracing a call through the design.
+- **Redesigning existing code:** explain it first and get the user's agreement that it's right. Then redesign it through the same stages, changing only what the redesign needs: a small change runs only the stages it touches, a restructure runs them all. Show the before and after of every stage that changed, including the folder tree.
+- **Deciding one thing,** such as "should this be an interface?" or "where does this module go?": answer it with the part of the design it touches, the requirement behind it, the options with their trade-offs, and a recommendation.
 
 ## The delivery framework
 
@@ -47,79 +35,69 @@ A question like "should this be an interface?" or "where does this module go?" i
 Requirements → Entities and relationships → Class design → Implementation → Extensibility
 ```
 
-Each stage rests on the one before it: the entities come from the requirements, the classes give the entities state and behaviour, the implementation proves the classes work, and extensibility tests them against what comes next. Move on once a stage has its product, and come back when a later stage exposes a gap. The two ways to fail are opposite: jumping to code before the structure is clear, and polishing details until there is no design.
+Each stage rests on the one before it: the entities come from the requirements, the classes give the entities state and behaviour, the implementation proves the classes work, and extensibility tests them against what comes next. Move to the next stage once the current one has everything its product lists. Go back to an earlier stage when a later one exposes a gap. Avoid two opposite failures: writing code before the structure is clear, and polishing details so long that the design never comes together.
 
-### 1. Requirements
+### Requirements
 
 Turn the request or spec into something to design against, working down four themes:
 
 - **Capabilities**: the operations the system must support.
 - **Rules and completion**: what defines success and failure, and when the system stops or changes state.
 - **Error handling**: how it responds to invalid input and illegal actions.
-- **Scope**: what is in (core logic, business rules), and what is explicitly out (UI, storage, concurrency, whatever the user excludes).
+- **Scope**: what is in (core logic, business rules), and what is explicitly out (UI, storage, concurrency, whatever the user excludes). The exclusions keep the design from growing features nobody asked for.
 
-Product: numbered, checkable requirements, and an out-of-scope list with a reason for each exclusion. The exclusions keep the design from growing features nobody asked for.
+Show them as a short numbered list. A mapping from requirement to module fits as a small table once the modules exist.
 
-### 2. Entities and relationships
+### Entities and relationships
 
-Take the nouns from the requirements. A noun that holds changing state or enforces rules is an entity; one that is only information attached to another is a field on it. This keeps the design from breaking into micro-objects.
+Take the nouns from the requirements. A noun that holds changing state or enforces rules is an entity; one that is only information attached to another is a field on it. This keeps the design from splitting into many tiny objects.
 
-Then settle how they relate: which entity is the **orchestrator** driving the main workflow, which own durable state, which has, uses or contains which, and where each rule lives.
+Then settle how they relate: which entity is the orchestrator, which own durable state, which has, uses or contains which, and where each rule lives.
 
-Product: the entities as a list and the relationships as arrows (`Game -> Board`). Boxes and arrows are enough; skip formal UML.
+Show the entities as a short list and the relationships as arrows (`Game -> Board`). Boxes and arrows are enough; skip formal UML.
 
-### 3. Class design
+### Class design
 
-Turn each entity into a class or module, top-down from the orchestrator, and derive both halves from the requirements rather than from intuition:
+Turn each entity into a class or module, top-down from the orchestrator, and derive its state and behaviour from the requirements rather than from intuition:
 
 - **State**: what it must remember to enforce the requirements it owns.
 - **Behaviour**: what callers must be able to ask or tell it, each operation with what it returns and rejects, in a small API where each method matches a real action or question.
 
-Keep each rule with the module that owns its state (**tell, don't ask**): lifecycle rules ("can this run now?") belong to the orchestrator, data rules ("is this cell taken?") to the module holding the data, so when something breaks you know which module to open. Place the modules in folders by [layout.md](references/layout.md).
+Keep each rule with the module that owns its state (**tell, don't ask**): lifecycle rules ("can this run now?") belong to the orchestrator, data rules ("is this cell taken?") to the module holding the data, so when something breaks you know which module to open. Place the modules in folders following [layout.md](references/layout.md).
 
-Product: each module's state and operations, and the folder tree.
+Show the folder tree with one comment per line saying what each file or folder owns.
 
-### 4. Implementation
+### Implementation
 
-Sketch the methods that carry the logic, not every method: the happy path first (the steps, the calls into other modules, the state changed), then the edge cases (invalid input, illegal operations, calls in the wrong state). Pseudocode unless the project needs real code.
+Sketch the methods that carry the logic, not every method: the happy path first (the steps, the calls into other modules, the state changed), then the edge cases (invalid input, illegal operations, calls in the wrong state). Write pseudocode unless the project needs real code.
 
-Then verify: trace one concrete scenario step by step, with the state after each step, plus one rejection, and fix what the trace reveals (a state never set, a rule checked too late).
+Then verify: trace one concrete scenario step by step, with the state after each step, plus one rejection, and fix what the trace reveals, such as a state never set or a rule checked too late.
 
-Product: the key methods and the two traces.
+Show a traced flow as a call tree, with the owning file beside each call.
 
-### 5. Extensibility
+### Extensibility
 
-Test the design against the changes likely to come next: for each, the part that absorbs it and what changes. A design that routes every state change through one place takes a feature like undo without restructuring. A change that lands in one new file plus a registration is already absorbed; one that repeats the same edit across several files needs a seam. Refuse the rest, keeping to what the requirements need now.
+List the changes likely to come next, and for each one name the part of the design that absorbs it and what changes. A design that routes every state change through one place takes a feature like undo without restructuring. A change that lands in one new file plus a registration is already absorbed; one that repeats the same edit across several files needs a seam. Refuse the changes the current requirements don't need, rather than designing for them.
 
-Product: a "change → what you touch" table, and the changes refused for now with their reasons.
+Show the changes as a small "change → what you touch" table.
 
-### Simple first, prove the need
+## Presenting and revising
 
-The recurring failure in low-level design is structure added before it is needed: factories with one product, interfaces with one implementation, a file per function. Start from the simplest design that meets the requirements and add a class, an interface or a pattern for a named reason, such as a second implementation today or the same edit repeated across several files. Before designing a module, check whether a dependency the project already has provides it, and build only the difference.
+Load `/show-me` and present every stage visually, with prose only for the reasons behind choices.
 
-## Working with the user
+- Keep one current version of the design and revise it rather than starting over.
+- Open each revision with what changed and why, as a before/after `diff` of the tree or list that changed, and carry a change through every part it affects.
+- Leave a point the user settled as it is unless they reopen it.
+- When the design has more than one reasonable option, number the options side by side, each with its cost, and lead with your recommendation.
+- Ask only what the code, the spec and the project's docs can't settle, one question at a time. Decide the rest and say what you decided.
 
-A session is a loop: present, the user gives feedback, revise, present again, until the user is satisfied.
+## Keeping the design
 
-- **Keep one current version** of the design and revise it; don't start over.
-- **Open each revision with what changed and why**, as a before/after of the parts that moved.
-- **A point the user settled stays settled** unless they reopen it.
+The user decides what is kept and where. While the design is being refined, keep it in a draft in the project's temp or scratch folder, following the repository's conventions; when it has none, ask where. An explanation can stay in the conversation. Once the user agrees and wants the design kept, write it into the project's documentation, and update an existing design document rather than adding a second, so the project has one. Open it with what a newcomer needs first, then give each stage its own section.
 
-## Showing and asking
+## References
 
-Load the **show-me** skill and present every stage visually, with prose only for the reasons behind choices:
-
-- requirements and entities as short lists, relationships as arrows;
-- the folder tree with one comment per line saying what each file or folder owns;
-- a redesign or a revision as a before/after `diff` of the tree or list that changed;
-- a traced flow as a call tree, with the owning file beside each call;
-- mappings as small tables: requirement → module, change → what you touch.
-
-At a real fork, number the options side by side, each with its cost, and lead with your recommendation. Ask only what the code, the spec and the project's docs can't settle, one question at a time; decide the rest and say what you decided.
-
-## Principles, concepts and patterns
-
-The references hold what each stage draws on. Read the one a decision needs when it needs it:
+### Principles, concepts and patterns
 
 | Reference | Covers |
 |---|---|
@@ -127,16 +105,6 @@ The references hold what each stage draws on. Read the one a decision needs when
 | [oop-concepts.md](references/oop-concepts.md) | Encapsulation, abstraction, polymorphism, inheritance and composition |
 | [design-patterns.md](references/design-patterns.md) | Creational, structural and behavioural patterns, and when each is over-engineering |
 | [layout.md](references/layout.md) | Folders, generic and business code, naming, when to split a file |
-
-## What the session produces
-
-The user decides. While the design is being refined, it lives in a draft in the project's temp or scratch folder (by the repository's conventions; ask where when it has none), and an explanation can stay in the conversation. Once the user agrees and wants it kept, the design goes into the project's documentation by the repository's conventions, updating an existing design document rather than adding a second. A written design opens with what a newcomer needs first, then follows the stages as sections:
-
-1. **Requirements**: numbered, and out of scope.
-2. **Entities and relationships**.
-3. **Class design**: each module's state and operations, and the folder tree.
-4. **Implementation**: the key methods and the traced flows.
-5. **Extensibility**: change → what you touch, and what is refused for now.
 
 ---
 
