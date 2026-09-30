@@ -20,7 +20,7 @@ Nodes and keys are hashed onto the same ring of values (in practice 0 to 2^32 - 
 
 ## Where it applies
 
-Anything spread across a cluster: databases (Cassandra, DynamoDB), caches, message brokers, CDNs, stateful servers. When a design uses one of these stores, it's enough to note that it distributes data this way. Explain the ring, virtual nodes, failures and hot spots in depth when designing the distributed database, cache or broker itself.
+Anything spread across a cluster: databases (Cassandra, DynamoDB), caches, message brokers, CDNs, stateful servers. When a design uses one of these stores, note that it distributes data this way and go no further. Explain the ring, virtual nodes, failures and hot spots in depth only when designing the distributed database, cache or broker itself.
 
 ---
 

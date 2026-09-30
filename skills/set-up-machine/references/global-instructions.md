@@ -1,10 +1,10 @@
 # The shared global instructions file
 
-`~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. It holds this person's workflow and the explanation of each global rule, and nothing a teammate would need: that goes in the project's `AGENTS.md` or a skill (`/maintain-environment`'s `where-things-go.md` has the layers and the team test).
+`~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. Put in it only this person's workflow and the explanation of each global rule. Anything a teammate would need goes in the project's `AGENTS.md` or a skill, because a teammate never reads this file. `/maintain-environment`'s `where-things-go.md` lists those places and the team test.
 
 ## Its shape
 
-set-up-machine owns the shape; everything outside the generated block is the user's. In order:
+The file has these parts, in this order. This skill decides the parts and rewrites the generated block; the content outside the block is the user's.
 
 1. `# Global agent instructions`
 2. **The rule line:** `Only what describes this person's own workflow and explains a global rule. Anything a teammate would need goes in the project or a skill.`
@@ -26,7 +26,7 @@ set-up-machine owns the shape; everything outside the generated block is the use
    One line per row, in table order: `- **<Denied | Asks first | Allowed and reported>:** <summary>. <reason> <instruction>`, with `Instead: ` before the instruction on deny rows only.
 5. **`## Personal workflow`**, with the line `Rules for how this person works that pass the team test. Anything a project or a skill needs goes there instead.`, then this person's rules, one per line.
 
-A new file gets all five, every role `none` and the workflow section empty. On an existing file, only **add** what the shape lacks (the rule line, a section, a missing role row as `none`) and regenerate the block; never rewrite a value or a workflow line. A start marker without its end marker stops the run until the user restores it.
+A new file gets all five, every role `none` and the workflow section empty. On an existing file, only **add** what the shape lacks (the rule line, a section, a missing role row as `none`) and regenerate the block; never rewrite a value or a workflow line. If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
 
 ## The Defaults roles
 
@@ -45,7 +45,7 @@ A value is a tool name or the exact command. A project's `AGENTS.md` may hold it
 
 ## Personal workflow
 
-A line belongs here only when it's about this person, not the work: how they like reports, what they approve and what they leave to the agent, what stays out of public repositories. It passes the team test when a teammate with no global instructions loses nothing they need. A line that fails goes to its layer:
+A line belongs here only when it's about this person, not the work: how they like reports, what they approve and what they leave to the agent, what stays out of public repositories. It passes the team test when a teammate with no global instructions loses nothing they need. Move a line that fails it to the first place below that fits:
 
 - a teammate needs it on this project → the project's `AGENTS.md`;
 - it's how to do a task → the skill for that task, neutral about tools;
@@ -56,12 +56,12 @@ A line belongs here only when it's about this person, not the work: how they lik
 
 When a harness still keeps its own global file (`~/.claude/CLAUDE.md` with more than the import line, an old `~/.codex/AGENTS.md`), move it line by line before the harness's file becomes a link or a single import:
 
-1. Decide each line's home by the list above: a Defaults row, a personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
+1. Choose where each line goes, using the list above: a Defaults row, a personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
 2. Write the Defaults values and workflow lines into the shared file; make each skill edit at its source, as `/maintain-environment` says.
 3. Leave the harness's file holding only its link to the shared file.
 
-Done when every line of the old file has a named home.
+Done when every line of the old file has a named destination.
 
 ## Memory
 
-Memory stays off in every harness: a memory is invisible to the other harnesses and lives outside any repository, so what one would hold goes into a layer above. Each harness reference says how to turn its memory off and where its memory files are; every file is `removed` in the diff and backed up first. Before approving, move any memory worth keeping into its layer.
+Memory stays off in every harness: a memory is invisible to the other harnesses and lives outside any repository, so write what a memory would hold into the shared file, a project's `AGENTS.md` or a skill instead. Each harness reference says how to turn its memory off and where its memory files are; every file is `removed` in the diff and backed up first. Before the user approves the diff, move any memory worth keeping into one of those places.

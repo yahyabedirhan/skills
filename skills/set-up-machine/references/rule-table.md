@@ -18,7 +18,7 @@
 
 ## `match` kinds
 
-Told apart by their keys:
+A `match` object's keys say which kind it is:
 
 - **Command:** `program`, a bare name (`rm`) or a list of them, and optionally:
   - `subcommands`: alternative word lists after the program (`[["repo", "delete"], ["repo", "archive"]]`);
@@ -28,8 +28,8 @@ Told apart by their keys:
   - `arguments: "none"`: the program with nothing after it (`env`); `arguments: "flags"`: with flags and nothing else (`declare -x`);
   - `files`: globs one of its operands must match (`cat .env`), with an optional `except`.
 - **File:** `paths`, globs relative to the project (`**/.env`), or starting `~/` or `/`; `access`, `read` or `write`; an optional `except` (`**/.env.example`). A `read` row covers writes too.
-- **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of `mcp__<server>__<tool>`. Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID.
+- **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of `mcp__<server>__<tool>`. Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID, so the row matches on every machine and account.
 
 ## Changing it
 
-Edit a row, or add one with its samples, then run `python3 <skill>/scripts/verify.py --no-codex` until `rules ok`, and the unit tests (`python3 -m unittest discover -s <skill>/scripts/tests`). The change reaches a machine when `/set-up-machine` runs there again. A row the hook can't read the way the row means is a hook change first, test-first in `tests/test_hook.py`.
+Edit a row, or add one with its samples, then run `python3 <skill>/scripts/verify.py --no-codex` until `rules ok`, and the unit tests (`python3 -m unittest discover -s <skill>/scripts/tests`). The change reaches a machine when `/set-up-machine` runs there again. When the hook would read a row differently from what the row means, change the hook first, writing its test first in `tests/test_hook.py`.

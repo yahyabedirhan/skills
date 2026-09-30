@@ -1,6 +1,6 @@
 # Effort Lifecycle
 
-How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. The thinking builds on Matt Pocock's skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, `prototype`, `tdd`, `code-review`) and on forks of his `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills` (as `/set-up-project`), which replace the upstream four; the building runs on the orchestrate skills. Routine upkeep (data edits, small fixes) doesn't need any of this: it runs in the current checkout.
+How one **effort** (a feature, a new app, a refactor, a re-architecture) travels from an idea to a merged pull request. The thinking builds on Matt Pocock's skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, `prototype`, `tdd`, `code-review`) and on forks of his `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills` (as `/set-up-project`), which replace the upstream four; the building runs on the orchestrate skills. Run routine upkeep, such as data edits and small fixes, in the current checkout without any of this.
 
 An effort passes through five phases in one worktree on one branch:
 
@@ -12,7 +12,7 @@ BUILD      orchestrate the tickets through delegates; open the pull request
 CLOSE      the user approves; the agent merges, follows up, and cleans up
 ```
 
-There are two paths through it, chosen by the session host, where new agent sessions open. The host path, when it's Herdr, automates every step between phases through `/handover-to-herdr`; the plain path runs anywhere, with this session carrying on or the user pasting each starting prompt.
+The session host, the program where new agent sessions open, decides which of two paths an effort takes. When the host is Herdr, take the host path: `/handover-to-herdr` automates every step between phases. Otherwise take the plain path, which runs anywhere: this session carries on, or the user pastes each starting prompt.
 
 ```text
                 START                          HANDOVER                        BUILD
@@ -31,7 +31,7 @@ Plain path      init-effort                    handover                        o
 
 ## Start
 
-`/init-effort` names the effort and creates its branch and worktree. The worktree is decided here, before any thinking, so the spec, tickets, and handoff are born on the effort's branch rather than on the default branch. The build later runs in the same worktree.
+`/init-effort` names the effort and creates its branch and worktree. The worktree is decided here, before any thinking, so the spec, tickets, and handoff are written on the effort's branch rather than on the default branch. The build later runs in the same worktree.
 
 For a brand-new project it first creates the repository, and the project's first effort then starts like any other. It writes the idea into a handoff in the worktree and starts the thinking session on it.
 
@@ -49,7 +49,7 @@ The starting prompt names these skills and the agent loads each one itself: the 
 
 ## Handover
 
-The session handing over owns the clean ending, through `/handover`. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready, starts the new session on the handoff with a one-line prompt, and confirms it started. The handing session then stops, and stays open for reference.
+The session that hands over finishes its own work cleanly, through `/handover`. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready, starts the new session on the handoff with a one-line prompt, and confirms it started. The handing session then stops, and stays open for reference.
 
 ## Build
 
@@ -61,4 +61,4 @@ The user reviews and approves the pull request: that is their only step. The age
 
 ## Why two sessions
 
-The thinking session fills its context with debate, dead ends, and prototype output. The builder needs none of it: the spec, tickets, and handoff carry the conclusions. Starting fresh keeps the orchestrator sharp for the long run, and each ticket's delegate starts even fresher, from one ticket file.
+The thinking session fills its context with debate, dead ends, and prototype output. The builder needs none of it: the spec, tickets, and handoff carry the conclusions. Starting fresh leaves the orchestrator's context free for the long run, and each ticket's delegate starts even fresher, from one ticket file.

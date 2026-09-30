@@ -7,19 +7,19 @@ disable-model-invocation: true
 
 # Init Effort
 
-An **effort** is work big enough for its own branch and pull request: a feature, a new app, a refactor, a re-architecture. Routine upkeep, such as data edits and small fixes, runs in the current checkout without this skill; the project's instructions may list what counts as routine there.
+An **effort** is work big enough for its own branch and pull request: a feature, a new app, a refactor, a re-architecture. Do routine upkeep, such as data edits and small fixes, in the current checkout without this skill; the project's instructions may list what counts as routine there.
 
-The effort's whole life happens in the worktree this skill creates: the thinking now, the build later. This skill writes only into that worktree and, for a new project, the new repo, so the repository this session was started in stays as it was.
+Both the effort's thinking now and its build later happen in the worktree this skill creates. Write only into that worktree and, for a new project, the new repo, so the repository this session was started in stays as it was.
 
 ## Parameters
 
-- `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use `/treehouse` and lease the worktree to the effort. Default: `git worktree add`, with the worktree beside the main checkout unless the project keeps worktrees elsewhere, and the new branch given no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
+- `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use `/treehouse` and lease the worktree to the effort. Default: `git worktree add`. Put the worktree beside the main checkout unless the project keeps worktrees elsewhere. Give the new branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
 - `<session-host>`: where the thinking session opens. When it is Herdr, use `/handover-to-herdr`. Default: run the starting prompt in this session when it can move into the worktree; otherwise print the prompt in a fenced block, and ask the maintainer to start `<agent-to-start>` in the worktree and paste it.
 - `<agent-to-start>`: the command that starts a new agent session. Default: this session's harness.
 
 ## 1. Decide where it lives
 
-From the idea, tell which it is:
+Decide from the idea which of these it is:
 
 - **An effort in an existing repo**: the current repository, or one the idea names.
 - **A new project**: the idea is for something that has no repo yet.
@@ -28,9 +28,9 @@ When it isn't clear, ask. Done when the target repo is known, or the idea is a n
 
 ## 2. Name it
 
-Propose a short kebab-case **effort name** and a branch named the project's way, `<area>/<effort>` by default, and confirm both with the maintainer.
+Propose a short kebab-case **effort name** and a branch name that follows the project's branch naming, or `<area>/<effort>` when the project has none, and confirm both with the maintainer.
 
-For a new project, first propose a few **project names** and confirm one. When the idea comes with a reference project, the names stand on their own rather than echo it. The project's first effort then gets its own name and branch as above.
+For a new project, first propose a few **project names** and confirm one. When the idea comes with a reference project, propose names that stand on their own rather than echo it. The project's first effort then gets its own name and branch as above.
 
 Done when the maintainer has confirmed the effort name and branch, and for a new project the project name.
 
@@ -38,7 +38,7 @@ Done when the maintainer has confirmed the effort name and branch, and for a new
 
 Only for a new project; otherwise skip to step 4.
 
-The project goes in the maintainer's **projects folder**; when you don't know it, ask for it. Check that neither a folder nor a GitHub repo already has the project's name.
+Put the project in the maintainer's **projects folder**; when you don't know where that is, ask. Check that neither a folder nor a GitHub repo already has the project's name.
 
 Ask, every time, whether the GitHub repo is **public or private**, and which licence it takes; recommend MIT in the maintainer's name. Then:
 
