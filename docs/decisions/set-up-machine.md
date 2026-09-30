@@ -135,3 +135,9 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 
 - **The global section is `## Environment defaults`, written in plain lowercase words.** It was `## Defaults`, and the skills called it "the Defaults table", "the global Defaults" and "a Defaults row", as if it were a named source of truth. The maintainer never meant a special term. "Tools" was considered and dropped, since it reads as an agent's tools. A project's `AGENTS.md` uses the same heading for its own rows, and `/set-up-project` writes it.
 - **The role `agent-to-start` is now `agent`,** matching the `<agent>` placeholder the maintainer chose in the effort skills.
+
+## 2026-09-30: no auto-mode guard; one line for environment variables
+
+- **The `guard` field and Claude Code's auto-mode section are gone.** The probes on #65 ran seven environment and `.env` reads with and without section 6.1's `hard_deny` rule. The guard's only extra catch was `env | grep`, which the hook already refuses as `env-dump`; a script that prints `.env` got through every time, and `cat .env` did too under the client-side classifier. It would add a classifier call to every shell command and close no gap, so set-up-machine writes no `autoMode` rules. Auto mode's built-in rules stay as Claude Code ships them.
+- **The generated block ends with an environment-variables paragraph.** The rows catch the common commands (`env`, `printenv`, `export -p`, reading or sourcing `.env`, the file tools); nothing pattern-based catches `echo $TOKEN`, an interpreter or a script. The maintainer asked for one plain instruction covering every route, so the block closes with it. Keeping secrets out of reach (out of the shell environment, or refused by an OS-level sandbox) is the only real prevention; the maintainer's projects hold no secrets in the environment today.
+
