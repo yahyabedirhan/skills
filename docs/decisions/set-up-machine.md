@@ -105,3 +105,28 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 - **A trial `--home` never starts a real harness.** Claude Code's and Cursor's tool discovery read the real machine's config and login, so under a `--home` other than the user's own the plan skips it, names the gap and keeps the mail entries written before, unless `--tool-names` supplies the list.
 - **Searches are checked by path and glob.** A `Grep` (Claude Code, Cursor) or `grep` (opencode's `include`) whose glob names a file row's files by name (`*.env`, `.env*`) is refused; a glob matching ordinary names too (`*`, `*.*`) is a search over the folder, which the hook doesn't expand, named in each adapter's file-row gap.
 - **File paths fold case where program names do** (macOS, Windows), so `.ENV` meets `**/.env` there.
+
+## 2026-09-30: references, not scripts (#81)
+
+- **The agent sets each harness up from its reference; the adapters and the plan/apply engine are gone.** This reverses the entries above that describe adapter modules, the reconcile script, the plan id and the manifest; they stay as the record. The spec asked for one adapter per harness as a reference file, and harness formats change faster than a script frozen at one version can follow. Each reference now carries what only the code knew (native forms with worked examples, listing commands, hook payloads and answers, Codex's trust hash) and tells the agent to check the harness's current docs first.
+- **Three things stay code:** the pre-tool hook, `rules.json`, and `verify.py`. Verify is a test, not a setup step: it feeds each row's samples to the hook, runs the plain commands through `codex execpolicy check`, and checks that every harness's hook is wired to a script that exists.
+- **Every row carries `samples`** (`covers` and `leaves`). They are the rows' worked examples for agents, the data verify checks, and what set-up-project's audit matches a project entry against.
+- **Codex's check reports and never fails.** Some rows get no Codex rule by design (shell rows, bare rows, rows on files), so a `differs` line is read against references/codex.md; a `stricter` line is a user rule the diff keeps.
+- **No manifest.** Without code to keep it, "never remove what it didn't write" becomes: the diff removes only memory files, a harness's own global file that becomes a link, and this skill's own wiring pointing at an old script. An entry a dropped row left behind is `extra`, for the user to remove.
+- **Backups stay where they were,** `~/.config/agents/backups/<time>/`, taken by the agent before any write.
+- **The agent writes Codex's `trusted_hash` as part of the approved diff,** and approving the whole diff stands in for Codex's `/hooks` review (confirmed by the maintainer). `verify.py --codex-trust-hash` computes it, so the hashing lives in one place, and verify checks the entry.
+- **The auto-mode guard is optional and stays off** until the probes in #65 run. The references describe it; the diff lists each guard as `none` meanwhile.
+- **The opencode plugin is a template,** `references/opencode-plugin.js`, with the hook command filled in, so the agent copies it rather than writing JavaScript.
+- **`~/.config/agents/hook.json` is optional.** The hook already defaults to `~/.local/state/agents/reports`; the file is only for another folder.
+- **The Linux container runs verify and the unit tests.** Without a plan/apply script there is no setup to run there, and the Codex session probes needed one; they remain described in references/codex.md.
+
+## 2026-09-30: the hook's known bypasses (#82)
+
+- **Quoting is read in one pass before tokenizing.** A scanner tracks single and double quotes, `$'…'`, escapes, comments, `$(…)`, backticks and `$(( ))`, so a `<<` counts as a heredoc only where the shell reads code, and a substitution inside single quotes or escaped stays text. The regexes it replaces couldn't tell quoted from unquoted text. It also reads the substitutions in an unquoted heredoc's body, a bypass the review didn't list.
+- **More wrappers and shells:** `busybox`, `watch`, `setsid`, `flock`, `parallel`, `script`, `chronic`, `unbuffer` and `arch`, and `fish`, `ash`, `mksh`, `csh` and `tcsh`. `watch` and `parallel` also have their words read as one shell string, and `flock -c` and `script -c` their option's string. A pipe into a shell reads the words before it joined, and one by one.
+- **The verdict names ask rows too,** so tests and verify can check them, but the hook still says nothing for them: the native ask entries do the asking, as before.
+- **Deleting `main` covers `master` too**, as two rows (the `--delete` form and the empty refspec form), through a new `any_operand` match key: the branch name can sit anywhere after `push`.
+- **`/proc/*/environ` is a file row and a command row,** so file rows may now start with `/`.
+- **`.env.sample`, `.env.template` and `.env*.md` are readable,** beside `.env.example`: templates and docs about env files, not env files.
+- **Two gaps are named, not closed:** a glob the shell expands (`cat .env*`) reaches a `.env` file under a name the hook never sees, and `ps e`/`ps eww` print environments through letters no rule can tell from ordinary `ps` options.
+
