@@ -11,7 +11,7 @@ Look back over one or more sessions and work out how the agent and its sub-agent
 
 ## Parameters
 
-- `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`), where findings are filed. Default: ask the user.
+- `<skills-repo>`: the user's own skills repo on GitHub, as `owner/repo`.
 
 ## 1. Select the sessions
 

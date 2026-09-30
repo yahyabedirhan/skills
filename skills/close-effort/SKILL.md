@@ -12,8 +12,8 @@ Approving the pull request is the maintainer's last step. Everything after it is
 
 ## Parameters
 
-- `<worktree-tool>`: the tool that makes and frees worktrees. When it is Treehouse, use `/treehouse`, and return worktrees to its pool rather than destroying them, so the next effort finds one ready. Default: `git worktree add` and `git worktree remove`.
-- `<session-host>`: where the effort's agent sessions run. When it is Herdr, use `/handover-to-herdr`'s `close-effort-commands.md`. Default: end the report with the command that frees this session's worktree, for the maintainer to run once this session is closed.
+- `<worktree-tool>`: the tool that makes and frees worktrees, e.g. Treehouse, or plain git worktrees.
+- `<session-host>`: where agent sessions run, e.g. Herdr, Claude Code Desktop, Codex Desktop.
 
 ## Flow
 

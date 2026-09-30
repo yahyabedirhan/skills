@@ -10,7 +10,7 @@ The file has these parts, in this order. This skill decides the parts and rewrit
 
 1. `# Global agent instructions`
 2. **The rule line:** `Only what describes this person's own workflow and explains a global rule. Anything a teammate would need goes in the project or a skill.`
-3. **`## Defaults`**, with the line "The tools this person uses, by role. `none` means the skill's fallback. A project's Defaults table overrides a row.", then a table, `| Role | Default |`, one row per role below.
+3. **`## Defaults`**, with the line "The tools this person uses, by role. A project's Defaults table overrides a row. When a row is `none`, do what its last column says.", then a table, `| Role | Tool | What it is | When none |`, one row per role below. The Tool column is the user's; this skill writes the other two from the roles table below, so every skill that names a role finds its meaning and its fallback here, in context.
 4. **The generated block**, rewritten from `rules.json` on every run:
 
    ```markdown
@@ -28,20 +28,20 @@ The file has these parts, in this order. This skill decides the parts and rewrit
    One line per row, in table order: `- **<Denied | Asks first | Allowed and reported>:** <summary>. <reason> <instruction>`, with `Instead: ` before the instruction on deny rows only.
 5. **`## Personal workflow`**, with the line `Rules for how this person works that pass the team test. Anything a project or a skill needs goes there instead.`, then this person's rules, one per line.
 
-A new file gets all five, every role `none` and the workflow section empty. On an existing file, only **add** what the shape lacks (the rule line, a section, a missing role row as `none`) and regenerate the block; never rewrite a value or a workflow line. If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
+A new file gets all five, every role `none` and the workflow section empty. On an existing file, only **add** what the shape lacks, such as the rule line, a section, a missing role row as `none` or a missing column, rewrite the What it is and When none columns from the roles table, and regenerate the block; never rewrite a Tool value or a workflow line. If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
 
 ## The Defaults roles
 
-A skill declares a role it uses as a placeholder of the same name (`<session-host>`) in its `## Parameters`; the row here says which tool this person uses.
+The one definition of each role. A skill lists the roles it uses as placeholders of the same name in its `## Parameters`, with a line on what each is; what to do when a role has no tool is written only here, and reaches every session through the Defaults section. A tool's own skill says in its description when to use it, such as `/treehouse` for a Treehouse worktree tool, so no other skill routes to it.
 
-| Role | Names |
-|---|---|
-| `session-host` | where new agent sessions open |
-| `worktree-tool` | how a new worktree is made |
-| `notification-method` | how a skill notifies this person: a command, or the harness's own tool |
-| `agent-to-start` | the command and flags that start a new agent session |
-| `skills-repo` | this person's own skills repo, as `<owner>/<repo>` |
-| `path-to-skills-repo` | where that repo is cloned |
+| Role | What it is | When none |
+|---|---|---|
+| `session-host` | where agent sessions run | Use this session: move into the worktree and run the starting prompt here, or print the prompt for the user to paste into a new `agent-to-start` session. A step that must run outside this session, such as freeing its own worktree, goes to the user as a command to run once it is closed. |
+| `worktree-tool` | the tool that makes and frees worktrees | `git worktree add`, giving the new branch no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it; `git worktree remove` to free one. |
+| `agent-to-start` | the command and flags that start a new agent session | This session's harness. |
+| `notification-method` | how a notification reaches this person: a command, or the harness's own tool | The harness's notification tool, else a line in the chat. |
+| `skills-repo` | this person's own skills repo, as `<owner>/<repo>` | Ask the user. |
+| `path-to-skills-repo` | where that repo is cloned | Ask the user. |
 
 A value is a tool name or the exact command. A project's `AGENTS.md` may hold its own Defaults table, whose rows override these.
 

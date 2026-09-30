@@ -13,9 +13,9 @@ Both the effort's thinking now and its build later happen in the worktree this s
 
 ## Parameters
 
-- `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use `/treehouse` and lease the worktree to the effort. Default: `git worktree add`.
-- `<session-host>`: where the thinking session opens. When it is Herdr, use `/handover-to-herdr`. Default: run the starting prompt in this session when it can move into the worktree; otherwise print the prompt in a fenced block, and ask the maintainer to start `<agent-to-start>` in the worktree and paste it.
-- `<agent-to-start>`: the command that starts a new agent session. Default: this session's harness.
+- `<worktree-tool>`: the tool that makes and frees worktrees, e.g. Treehouse, or plain git worktrees.
+- `<session-host>`: where agent sessions run, e.g. Herdr, Claude Code Desktop, Codex Desktop.
+- `<agent-to-start>`: the command that starts a new agent session, e.g. `claude` or `codex`, with its flags.
 
 ## Flow
 

@@ -12,9 +12,9 @@ A **handover** starts another session, usually outside this one, to carry on the
 
 ## Parameters
 
-- `<worktree-tool>`: the tool that makes a new worktree. When it is Treehouse, use `/treehouse`. Default: `git worktree add`, with no upstream on the new branch until its first push, since a branch that tracks the default branch makes a bare `git push` target it.
-- `<session-host>`: where the new session opens. When it is Herdr, use `/handover-to-herdr`; when that skill can't reach Herdr, use the default. Default: offer the maintainer two ways and take the one they pick: move this session into the worktree and run the starting prompt here, or print the prompt in a fenced block to paste into a new `<agent-to-start>` session started in the worktree.
-- `<agent-to-start>`: the command that starts a new agent session. Default: this session's harness.
+- `<worktree-tool>`: the tool that makes and frees worktrees, e.g. Treehouse, or plain git worktrees.
+- `<session-host>`: where agent sessions run, e.g. Herdr, Claude Code Desktop, Codex Desktop.
+- `<agent-to-start>`: the command that starts a new agent session, e.g. `claude` or `codex`, with its flags.
 
 ## Flow
 
