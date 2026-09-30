@@ -8,8 +8,8 @@ Where agents keep their records in a project. Every skill that writes one points
 ├── .efforts/<effort>/             tracked   local-tracker projects only: spec.md, issues/
 ├── docs/agents/issue-tracker.md   tracked   which tracker the repo uses
 ├── docs/assets/<topic>/           tracked   screenshots worth keeping
-└── .scratch/                      ignored   agent notes, logs, temp files, PR description source
-    .claude/worktrees/             ignored
+├── .scratch/                      ignored   agent notes, logs, temp files, PR description source
+└── .claude/worktrees/             ignored
 ```
 
 - **`.handoff/`**: one handoff per session that hands over, named `<date>-<topic>.md` (the topic is the effort's name when there is one). It is committed with the work it describes, so a fresh worktree sees it. A project that names its own handoff folder in its instructions uses that one.
@@ -17,7 +17,7 @@ Where agents keep their records in a project. Every skill that writes one points
 - **`docs/agents/issue-tracker.md`**: says which tracker the repo uses and how to reach it, so a skill knows whether to publish to the tracker or to `.efforts/`.
 - **`docs/assets/<topic>/`**: screenshots and other images worth keeping, such as ones a pull request or a doc links to.
 - **`.scratch/`**: the agent's own notes area, always gitignored: notes, logs, temporary files, and the source of a pull request's description (`.scratch/pr-<number>/description.md`, beside any `show-me-*.html` made for it). GitHub holds the description itself, and the pull request's last section carries what the agent wants the maintainer to know, so nothing here needs keeping. Before a worktree is removed, copy anything worth keeping out of it (to `docs/assets/`, a handoff, or the tracker).
-- **Nothing is deleted with `rm -rf`.** What's no longer needed (a delegate's temporary folder, an old log, a throwaway script) moves into `.scratch/` with `mv`, where git ignores it and a mistake can be undone; a tracked file goes with `git rm`, so its history keeps it. Permission checks refuse `rm -rf`, and a refused command bundled with a commit reads as a refused commit.
+- **Nothing is deleted with `rm -rf`.** What's no longer needed (a delegate's temporary folder, an old log, a throwaway script) moves into `.scratch/` with `mv`, where git ignores it and a mistake can be undone; a tracked file goes with `git rm`, so its history keeps it. Permission checks refuse `rm -rf`.
 - **Decision records** stay wherever each project keeps them.
 
 There is no `tmp/`, no `.prs/` and no vendor-named folder: one ignored folder holds everything temporary.
