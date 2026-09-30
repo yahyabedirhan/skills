@@ -1,16 +1,16 @@
 # Commands for closing an effort
 
-The git and gh commands for **close-effort**'s steps. Each entry says what it's for, its alternatives, and when to use each. `<default>` is the default branch, `<n>` the pull request's number. Run each commit, push and deletion as its own call, so a refused one stops only itself.
+The git and gh commands for **close-effort**'s steps; a worktree tool's own commands are in its skill. `<default>` is the default branch, `<n>` the pull request's number. Run each commit, push and deletion as its own call, so a refused one stops only itself.
 
 ## Find the pull request (step 1)
 
-- `gh pr view [<n>] --json number,url,state,headRefName,baseRefName,mergeCommit,body`: the pull request, its branches, its merge commit and its description. Without `<n>` it takes the current branch's.
+- `gh pr view [<n>] --json number,url,state,headRefName,baseRefName,mergeCommit,body`: without `<n>` it takes the current branch's.
 - `gh pr list --head <branch> --state all`: when no number was given and this session isn't on the effort branch, as in the main checkout.
 
 ## Find the tickets, worktrees and branches (step 1)
 
 - `gh issue list --label effort:<effort> --state all`: the effort's tickets on GitHub. On a local tracker, read `.efforts/<effort>/` instead.
-- `git worktree list --porcelain`: every worktree with its branch. The plain `git worktree list` is easier to read and enough when branches aren't needed. When the worktree tool is Treehouse, `treehouse status` also shows which worktrees it leases.
+- `git worktree list --porcelain`: every worktree with its branch. The plain `git worktree list` is easier to read and enough when branches aren't needed.
 - `git branch -vv`: local branches with their upstream; `[gone]` marks one whose remote branch was deleted.
 
 ## Merge (step 2)
@@ -50,8 +50,8 @@ Fetch first with `git fetch --prune`, so `origin/<default>` is current and delet
 ## Free worktrees and branches (steps 7 and 8)
 
 - `git worktree remove <path>`: removes a clean worktree. Leave out `--force`: a worktree that needs it isn't clean, so it isn't proven. `git worktree prune` drops entries whose folder is already gone.
-- When the worktree tool is Treehouse, `treehouse return <path>` gives it back to the pool, warm for the next effort; `treehouse destroy` removes it for good and suits only a worktree the pool shouldn't keep. The **treehouse** skill has both.
+- When the worktree tool is Treehouse, return each worktree to the pool rather than destroying it, so the pool stays warm for the next effort; destroy only one the pool shouldn't keep. The **treehouse** skill has the commands.
 - `git branch -d <branch>`: deletes a local branch git sees as merged, so it fits the reachable proof. `git branch -D <branch>` when only the patch match or the merged pull request's head proves it.
 - `git push origin --delete <branch>`: deletes the remote branch. `git ls-remote --heads origin <branch>` shows whether the remote still holds it; a repo that deletes head branches on merge may already have.
 
-This session's own worktree is freed with the same command, from outside it: when the session host is Herdr, as the **handover-to-herdr** skill's `closing-an-effort.md` says; otherwise the maintainer runs it once this session is closed.
+This session's own worktree is freed with the same command, from outside it, as step 8 says.

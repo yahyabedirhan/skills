@@ -4,7 +4,7 @@ The Herdr commands for **close-effort**'s session host steps. The rules of *Herd
 
 ## Find the agents still working (step 1)
 
-`herdr workspace list` and `herdr agent list`. An agent `working` in one of the effort's worktrees keeps that worktree. This session's workspace is `$HERDR_WORKSPACE_ID`, or, from outside a pane, the workspace whose `checkout_path` is this session's worktree.
+`herdr agent list` shows each agent's state and pane, and `herdr workspace list` shows the worktree behind each workspace; together they show which worktree each agent works in. An agent other than this session that is `working` in one of the effort's worktrees keeps that worktree. This session's workspace is `$HERDR_WORKSPACE_ID`, or, from outside a pane, the workspace whose `checkout_path` is this session's worktree.
 
 ## Free this session's worktree from outside it (step 8)
 

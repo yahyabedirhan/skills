@@ -1,12 +1,12 @@
 ---
 name: handover-to-herdr
-description: Start a new session in its own Herdr tab and send it a starting prompt - open the worktree as a workspace, label the tab, start the agent, confirm it's working - and free a closing effort's own worktree from outside it. Use when handing over through Herdr, when closing an effort whose session host is Herdr, or when another skill says to.
+description: The how-to for Herdr as a session host - start a new session in its own Herdr tab with a starting prompt and confirm it's working, and free a closing effort's own worktree from outside it. Use when handing over through Herdr, or when another skill says to.
 argument-hint: "Worktree path, topic, role, and the starting prompt"
 ---
 
 # Handover To Herdr
 
-The Herdr mechanism of a **handover**. The **handover** skill owns the flow, and has already written the handoff and the starting prompt. This skill takes four inputs:
+The Herdr mechanism of a **handover**. The skill that calls this one, **handover** or **init-effort**, owns the flow, and has already written the handoff and the starting prompt. This skill takes four inputs:
 
 - the **worktree** path;
 - the **topic**: the effort's name, or what the work is;
@@ -17,15 +17,13 @@ When **close-effort** runs with it, read [closing-an-effort.md](closing-an-effor
 
 ## Parameters
 
-It comes from the Defaults table, where a project's row overrides the global one. It is unset when it has no row or its row says `none`.
-
-- `<agent-to-start>`: the command that starts the new agent. Unset, use this session's harness.
+`<agent-to-start>` is the command that starts the new agent. It comes from the Defaults table, where a project's row overrides the global one, and is unset when it has no row or its row says `none`. Unset, use this session's harness.
 
 ## Herdr from anywhere
 
 This skill runs from inside a Herdr pane and from outside one, such as a desktop-app session: the `herdr` CLI reaches the server either way.
 
-- Check that `herdr status` reaches a server; `HERDR_ENV` only says whether this session runs in a pane. If it doesn't reach one, say so and hand back to **handover**, whose fallback is the same session.
+- Check that `herdr status` reaches a server; `HERDR_ENV` only says whether this session runs in a pane. If it doesn't reach one, say so and hand back to the calling skill, whose next option is this session or a pasted prompt.
 - Target explicit IDs read from Herdr's JSON, such as `w1` for a workspace, `w1:t1` for a tab and `w1:p1` for a pane. Pass `--no-focus` wherever a command takes it, and never use `--current`. That keeps every command off the pane the maintainer is using.
 
 The **herdr** skill has the full CLI contract but stops outside a pane; these rules replace its `HERDR_ENV` check for the commands below.
@@ -45,6 +43,8 @@ The **herdr** skill has the full CLI contract but stops outside a pane; these ru
 
 The worktree comes from the project's worktree tool, never from `herdr worktree create`, which puts it outside the tool's reach.
 
+Done when you hold the tab's ID and its root pane's ID.
+
 ## 2. Label the tab
 
 `herdr tab rename <tab_id> "<harness> · <role> · <topic>"`, with the harness short: `CC` for Claude Code, `Codex`, `OpenCode`, `Cursor`, or the harness's own name.
@@ -59,19 +59,21 @@ herdr agent start <name> --kind <kind> --pane <pane_id> -- <agent flags>
 
 `agent_not_ready` means the agent is blocked at a screen during startup. Read it with `herdr agent read <name> --source visible`. A new worktree path usually shows the harness's "trust this folder?" prompt: that is a security decision, so ask the maintainer to accept it in the tab, then `herdr agent wait <name> --until idle`. Show any other blocking screen to the maintainer the same way.
 
+Done when `agent start` succeeds, or the wait reaches `idle`.
+
 ## 4. Send the starting prompt and confirm
 
-Send the starting prompt exactly as **handover** wrote it, one line, in single quotes so the shell leaves a Codex `$skill` alone:
+Send the starting prompt exactly as the calling skill wrote it, one line, in single quotes so the shell leaves a Codex `$skill` alone:
 
 ```bash
 herdr agent prompt <name> '<starting prompt>'
 herdr agent wait <name> --until working --timeout 60000
 ```
 
-`agent prompt` delivers the text as a paste: one line runs as a command, while several lines arrive as pasted text and the skill never starts. Leave `--wait` off the prompt: it waits for the agent to settle, and a long run times out first. The handover is fire-and-forget, so `working` is the confirmation.
+Leave `--wait` off the prompt: it waits for the agent to settle, and a long run times out first. The handover is fire-and-forget, so `working` is the confirmation.
 
-If the wait times out, look before acting: `herdr agent get <name>`, and `herdr agent read <name> --source visible`; `--lines` fails while the agent works. The prompt may have arrived even so; resend it only when the screen shows it didn't.
+If the wait times out, look before acting. `herdr agent get <name>` shows the agent's state, and `herdr agent read <name> --source visible` shows its screen; leave `--lines` off, because it fails while the agent works. The prompt may have arrived even so, so resend it only when the screen shows it didn't.
 
-Once it is `working`, tell the maintainer the workspace and tab where it runs, and stop.
+When this session runs in a Herdr tab and its own work is done, put `[settled] ` at the start of its tab's label; `$HERDR_TAB_ID` names that tab. The marker tells the maintainer the tab is only a record now.
 
-When this session runs in a Herdr tab and its own work is done, put `[settled] ` at the start of its tab's label, the tab in `$HERDR_TAB_ID`. The marker tells the maintainer the tab is only a record now.
+The handover is done once the new agent is `working`. Give the calling skill the workspace and tab where it runs; the calling skill tells the maintainer.

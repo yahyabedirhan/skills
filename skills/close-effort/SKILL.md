@@ -11,6 +11,7 @@ The maintainer's only step after delivery is approving the pull request. Everyth
 The close is done when:
 
 - the pull request is merged, and its merge is checked;
+- every post-merge follow-up has run, with its result in the report;
 - every unfinished item is done, carried over as a next-effort ticket, or a QA ticket waiting on the maintainer;
 - the tracker is closed;
 - nothing exists only inside this session: it is committed and pushed, in a ticket, or saved in a handoff, so another session can continue where this one stopped;
@@ -18,7 +19,7 @@ The close is done when:
 
 Workspaces and agent sessions stay open; the maintainer closes them.
 
-[commands.md](commands.md) holds the commands for each step, with what each is for, its alternatives and when to use it.
+Before you run a step, read its entry in [commands.md](commands.md), which says what each command is for and when an alternative fits.
 
 ## Order
 
@@ -38,7 +39,7 @@ Delete a branch or remove a worktree only when its work is **proven merged**. Th
 
 A squash merge, or a commit changed while it was integrated, fails the first two proofs; only the merged pull request's head proves it.
 
-A worktree also needs to be clean after step 6, with no agent still working in it. Keep anything you can't prove or couldn't remove, and name it in the report with the reason.
+A worktree also needs to be clean after step 6, with no agent still working in it. Keep anything you can't prove or couldn't remove, and name it in the report with the reason. The one exception is the close's own follow-up worktree: its pushed branch is the proof, as step 4 says.
 
 ## Parameters
 
@@ -77,7 +78,7 @@ The last section of the pull request's description, *Things to be aware of*, com
 - **a todo for the maintainer**, for the report.
 - **nothing needed**.
 
-An older effort's pull request may have no such section; take its items from the handoff and tickets instead.
+When the pull request has no such section, take its items from the handoff and tickets.
 
 Done when every item has a route and each skipped check has run.
 
@@ -85,7 +86,7 @@ Done when every item has a route and each skipped check has run.
 
 Work from the updated default branch, and leave the maintainer's main checkout on whatever branch it is on. Pull there only when it is clean and already on the default branch.
 
-Everything reaches the default branch through a pull request. The close's own changes to tracked files, such as a local tracker's done marks or files kept in step 6, follow the project's instructions. By default they go on one small **follow-up branch** from the default branch, in its own worktree, with a pull request opened through the **to-pr** skill for the maintainer to review. Changes too small to be worth a pull request are listed in the report instead. The follow-up branch and its worktree belong to the close, not the effort, so step 7 leaves them.
+Everything reaches the default branch through a pull request. The close's own changes to tracked files, such as a local tracker's done marks or files kept in step 6, follow the project's instructions. By default they go on one small **follow-up branch** from the default branch, in its own worktree, with a pull request opened through the **to-pr** skill for the maintainer to review. Changes too small to be worth a pull request are listed in the report instead. The follow-up branch belongs to the close, not the effort. Once it is pushed and its pull request is open, free its worktree to save disk space, and delete its local branch when the remote holds it.
 
 Then:
 
@@ -95,7 +96,7 @@ Then:
 
 **QA tickets** are the exception. With the default, non-blocking QA, the pull request said "Refs" rather than "Closes", so the merge left them open. They stay open and assigned to the maintainer, who closes them or gives feedback. Comment on each that the work is now on the default branch and how to reach the build, and list them in the report.
 
-Done when every item is done, carried over as a linked next-effort ticket, or a QA ticket waiting on the maintainer.
+Done when every post-merge follow-up has run and its result is noted for the report, and every item is done, carried over as a linked next-effort ticket, or a QA ticket waiting on the maintainer.
 
 ## 5. Close the tracker
 
@@ -115,8 +116,6 @@ Done when each worktree's untracked and ignored files are copied out or judged t
 
 Fetch and prune first. Then take each sub-agent worktree, each of the effort's other worktrees, leaving this session's for step 8, and each branch; prove it merged, then remove it. Free worktrees with the worktree tool, then delete local branches, then remote ones.
 
-A worktree whose branch has an open pull request stays until its branch is pushed. After that, keep its local branch only when the remote doesn't hold it.
-
 Done when every proven-merged branch and worktree other than this session's is gone, and the rest is listed with the reason.
 
 ## 8. Report, then free your own worktree
@@ -129,7 +128,9 @@ Report in the chat, short, with links:
 - what was kept and why, anything not proven merged included;
 - the follow-up pull request or handoff, or the changes listed in their place.
 
-Last, when this session runs inside one of the effort's worktrees, free that worktree from outside it. Freeing it stops every process in it, this session included, so it happens after the report. When this session runs elsewhere, step 7 already freed every worktree and this step is done.
+Last, when this session runs inside one of the effort's worktrees, free that worktree from outside it. Freeing it stops every process in it, this session included, so it happens after the report. When this session runs elsewhere, step 7 already freed the other worktrees, and the report ends the close.
 
 - **When the session host is Herdr**, run the free command as your last action from a shell in the repository's main checkout, as the **handover-to-herdr** skill's `closing-an-effort.md` says. The shell's output is its report, and your report names where it runs.
 - **Otherwise**, this one step is the maintainer's: end the report with the command, to run once this session is closed.
+
+Done when the report is sent and this session's worktree is freed, or its free command ends the report.
