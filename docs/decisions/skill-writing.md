@@ -9,6 +9,7 @@ How the skills in this repo are written, and why. The rules below came from revi
 - **A step says what always happens; its special cases sit under it** as indented bullets, each opening with its condition in bold ("**When the spec says "QA: blocking":** …"). A reader sees the usual path at a glance and reads a case only when it applies.
 - **The body says when to read a file; a closing section says what it is.** A skill with supporting files ends with `## References`, and one with scripts with `## Scripts`: one line per file on what it covers. The instruction to read it ("Read `command-reference.md` before running the steps' git and gh commands") sits in the step that needs it.
 - **Name a reference by its topic,** as a noun phrase: `environment-layers.md`, `command-reference.md`, not `where-things-go.md` or `carrying-a-change.md`. Its `# Title` matches the name.
+- **A skill's folder holds only what runs the skill.** Notes for whoever maintains it, such as how to add a lesson, go in its record in `docs/decisions/`, which is never installed. `MAINTAINING.md` files inside two skills were copied into every install until they moved.
 - **The design skills are the exception.** `/system-design` and `/low-level-design` carry their delivery framework in `SKILL.md`, as the Hello Interview lesson lays it out, because the framework is the skill.
 
 ## 2026-09-30: the language
