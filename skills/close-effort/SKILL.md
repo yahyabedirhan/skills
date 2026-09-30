@@ -8,14 +8,14 @@ argument-hint: "The pull request (optional: defaults to the current branch's)"
 
 Approving the pull request is the maintainer's last step. Everything after it is yours, so run every command yourself rather than handing the maintainer commands to paste. Leave workspaces and agent sessions open; the maintainer closes them.
 
-[command-reference.md](command-reference.md) holds the git and gh commands for these steps, with their pitfalls and the three ways to prove work merged. Read it before running them.
-
 ## Parameters
 
 - `<worktree-tool>`: the tool that makes and frees worktrees, e.g. `treehouse`, or plain git worktrees.
 - `<session-host>`: where agent sessions run, e.g. Herdr, Claude Code Desktop, Codex Desktop.
 
 ## Flow
+
+Read `command-reference.md` before running the steps' git and gh commands.
 
 1. **Find the effort:** the pull request, its branch, spec, tickets and handoff, and the worktrees and branches the build left behind.
 2. **Merge** the pull request once its checks pass. When the spec says "QA: blocking", wait until every QA ticket is closed, and tell the maintainer which ones are still open. After the merge, check that the default branch's CI passes, and that anything pinned to a branch commit still resolves after a squash or rebase.
@@ -27,3 +27,7 @@ Approving the pull request is the maintainer's last step. Everything after it is
 8. **Report** what merged, what closed, what carried over and what waits on the maintainer. Then free this session's own worktree from outside it, through `<session-host>`, as your last action: freeing it ends this session.
 
 The close's own changes to tracked files, such as done marks or saved files, go through a pull request like any other change. Put them on a small follow-up branch, and leave the maintainer's main checkout on its branch, since they may be working there. Once that branch is pushed, free its worktree.
+
+## References
+
+- [command-reference.md](command-reference.md): the git and gh commands the close runs, their pitfalls, and the three ways to prove work merged.

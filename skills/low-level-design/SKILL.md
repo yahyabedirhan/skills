@@ -11,7 +11,7 @@ The recurring failure is structure added before it is needed: factories with one
 
 ## The flow
 
-1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix. Invoked with no instructions inside a project, write down that project's current design. When the purpose isn't clear, ask what the user wants to do with the design, whether the code exists, and whether they want only an explanation. Read [session-purposes.md](references/session-purposes.md) for how each purpose runs.
+1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix. Invoked with no instructions inside a project, write down that project's current design. When the purpose isn't clear, ask what the user wants to do with the design, whether the code exists, and whether they want only an explanation. For any purpose but a new design, read `session-purposes.md`.
 2. **Requirements**: numbered, checkable requirements, and an out-of-scope list with a reason for each exclusion.
 3. **Entities and relationships**: the entities, the orchestrator that drives the main workflow, and how they relate, as arrows.
 4. **Class design**: each module's state and operations, derived from the requirements, and the folder tree.
@@ -20,7 +20,7 @@ The recurring failure is structure added before it is needed: factories with one
 7. **Present, take feedback and revise** until the user agrees.
 8. **Keep the design where the user wants it.**
 
-Steps 2 to 6 are the framework's stages, and each rests on the one before it. Go back to an earlier stage when a later one exposes a gap. Avoid two opposite failures: writing code before the structure is clear, and polishing details so long that the design never comes together. Read [delivery-stages.md](references/delivery-stages.md) for how to work each stage and how to show what it produces.
+Steps 2 to 6 are the framework's stages, and each rests on the one before it. Go back to an earlier stage when a later one exposes a gap. Avoid two opposite failures: writing code before the structure is clear, and polishing details so long that the design never comes together. Read `delivery-stages.md` for how to work each one, and a principles, concepts or patterns reference when a decision calls for it.
 
 ### Presenting and revising
 
@@ -36,9 +36,12 @@ Load `/show-me` and present every stage visually, with prose only for the reason
 
 The user decides what is kept and where. While the design is being refined, keep it in a draft in the project's temp or scratch folder, following the repository's conventions; when it has none, ask where. An explanation can stay in the conversation. Once the user agrees and wants the design kept, write it into the project's documentation, and update an existing design document rather than adding a second, so the project has one. Open it with what a newcomer needs first, then give each stage its own section.
 
-## Principles, concepts and patterns
+## References
 
-Read a reference when a decision calls for it:
+- [delivery-stages.md](references/delivery-stages.md): how to work each stage, and how to show what it produces.
+- [session-purposes.md](references/session-purposes.md): how explaining existing code, redesigning it and deciding one thing run.
+
+### Principles, concepts and patterns
 
 | Reference | Covers |
 |---|---|

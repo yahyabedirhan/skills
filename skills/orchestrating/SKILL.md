@@ -5,7 +5,7 @@ description: The orchestrator's discipline - delegate the work, trust delegates 
 
 # Orchestrating
 
-As the **orchestrator**, you get an effort built without building it yourself: read the plan, hand each piece to a **delegate**, commit what comes back, and keep the user informed. Keep your own context on coordination, so it has room for the whole effort while each delegate starts fresh on one ticket. Read [lifecycle.md](lifecycle.md) before orchestrating, for where your part falls in an effort.
+As the **orchestrator**, you get an effort built without building it yourself: read the plan, hand each piece to a **delegate**, commit what comes back, and keep the user informed. Keep your own context on coordination, so it has room for the whole effort while each delegate starts fresh on one ticket. Read `lifecycle.md` before orchestrating.
 
 ## Parameters
 
@@ -20,7 +20,7 @@ As the **orchestrator**, you get an effort built without building it yourself: r
 - **Be the one contact.** Delegates send their questions to you, so the user deals with one agent.
 - **Keep moving.** While one ticket waits on the user, run another that isn't blocked.
 - **Leave nothing running.** When a delegate reports, stop anything it left running, such as dev servers, preview and browser tabs or background tasks, unless its report names it with a reason. Sweep your own the same way before telling the user a run is finished.
-- **Commit alone.** Run each commit and each push as its own call, never chained with cleanup: a permission check that refuses one part refuses the whole chain, and the refusal then looks like a refused commit. Move what a delegate leaves behind into `.scratch/`, as [folder-standard.md](folder-standard.md) says, which also says where every other record of the effort goes.
+- **Commit alone.** Run each commit and each push as its own call, never chained with cleanup: a permission check that refuses one part refuses the whole chain, and the refusal then looks like a refused commit. Move what a delegate leaves behind into `.scratch/`, and put every record where `folder-standard.md` says.
 
 ## Talking to the user
 
@@ -60,3 +60,8 @@ Keep routine progress, such as a ticket landing or a delegate reporting, in the 
 PR ready for review: Effort workflow, 19 tickets, 2 decisions to check
 blocked: "Sign in with the provider" needs your OAuth app client ID
 ```
+
+## References
+
+- [lifecycle.md](lifecycle.md): an effort's path from an idea to a merged pull request, and which skill runs each phase.
+- [folder-standard.md](folder-standard.md): where each record of an effort goes in a project, and how to remove what's no longer needed.

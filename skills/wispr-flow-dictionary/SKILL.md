@@ -7,9 +7,7 @@ description: Tune the Wispr Flow dictionary from real dictation history through 
 
 Wispr Flow is a macOS dictation app. It has no CLI, and its remote MCP server covers meetings, not dictation history or the dictionary. It keeps both in a local SQLite database, and `scripts/wispr.py` is the interface to it. Go through the script for every read and write, so the database internals stay in one place.
 
-[command-reference.md](command-reference.md) holds the script's commands and flags, how to read a long window, and the batch file format. Read it before the first command.
-
-Run `status` first. When it reports a `CHANGED` schema, stop and inspect the changed tables before any write. Take every count you report from `count`.
+Run `status` first. When it reports a `CHANGED` schema, stop and inspect the changed tables before any write. Take every count you report from `count`. Read `command-reference.md` before the first command.
 
 ## The dictionary
 
@@ -59,3 +57,11 @@ Look for the words speech recognition gets wrong most, and more so with a non-na
 6. **Write** only after the user approves the list: dry-run the batch first, tell the user Wispr Flow will close for a few seconds, write it with `--restart`, and give the user the batch id.
 
 The app syncs the dictionary to the user's account. Entries written this way have survived a restart; whether a sync ever drops them is not known, so say so when reporting a write.
+
+## References
+
+- [command-reference.md](command-reference.md): the script's commands and flags, reading a long window, and the batch file format.
+
+## Scripts
+
+- [scripts/wispr.py](scripts/wispr.py): the one interface to Wispr Flow's database.

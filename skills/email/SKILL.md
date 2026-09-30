@@ -12,8 +12,6 @@ description: >-
 
 Read mail with the Spark CLI, and make every change to mail through the Gmail connector. Leave what to do with an email, and when, to the user.
 
-[command-reference.md](command-reference.md) holds the commands and tool calls for each action below, and how to keep them cheap. Read it before the first call.
-
 ## Safety
 
 Go no further than a draft: the user reviews and sends every email themselves.
@@ -38,11 +36,14 @@ Go no further than a draft: the user reviews and sends every email themselves.
 
 ## Flow
 
+Read `command-reference.md` before the first call. When setting either tool up, checking the deny rules, or when a call fails on sign-in or permission, follow `setup.md`.
+
 1. **Find** the mail with Spark.
 2. **Find it again in Gmail** before changing it, because the two tools number messages differently. When more than one thread matches, narrow the search or ask the user which one they mean.
 3. **Act** through Gmail: mark done, pin or unpin, label, or draft a reply. A draft reply ends with its `viewUrl`, where the user reviews and sends it.
 4. **Check** that each change took.
 
-## Setup
+## References
 
-When setting either tool up, checking the deny rules, or when a call fails on sign-in or permission, follow [setup.md](setup.md).
+- [command-reference.md](command-reference.md): the commands and tool calls behind each action, and how to keep them cheap.
+- [setup.md](setup.md): setting up Spark and the Gmail connector, the deny rules, and checking each part.
