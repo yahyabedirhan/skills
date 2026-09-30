@@ -22,14 +22,14 @@ Each comes from the Defaults table, where a project's row overrides the global o
 
 Check each item, and fix what isn't true yet:
 
-- **The worktree exists.** The work gets its own worktree and branch at the latest now, made with the **treehouse** skill when `<worktree-tool>` is Treehouse, else with git, as the **init-effort** skill's `commands.md` shows. Branch from `origin/<default>`, or from the local default branch when the work builds on commits there that aren't pushed. Uncommitted changes on the default branch that belong to the work move into it, and only those; the rest stay where they are.
+- **The worktree exists.** The work gets its own worktree and branch at the latest now, made with the **treehouse** skill when `<worktree-tool>` is Treehouse, else with `git worktree add` on a new branch with no upstream until its first push, since a branch that tracks the default branch makes a bare `git push` target it. Branch from `origin/<default>`, or from the local default branch when the work builds on commits there that aren't pushed. Uncommitted changes on the default branch that belong to the work move into it, and only those; the rest stay where they are.
 - **Every input only the maintainer has is collected** while they are here: answers, accounts, choices. Secrets stay out of chat and files; the handoff says where they live.
 - **The handoff is written** with the **handoff** skill. Beyond what that skill asks, it names the worktree and branch, the spec and tickets, and whether the new session can reach this one. This session is unreachable when it can't receive messages, as with a desktop-app session or any session the session host can't prompt, and then the handoff tells the new session to decide open questions itself and list them in the pull request.
 - **Everything is committed and pushed**: the worktree is clean and its branch matches its remote. Run each commit and each push as its own call, because a deny rule that matches anything else in a chain blocks the whole chain. After an interrupted or rejected call, check the log before retrying, because the commit or push may have landed anyway.
 - **Tracker items exist** for the spec and tickets the handoff names: issues on a hosted tracker, or files in the effort's folder on a local one.
 - **QA is settled** for an effort in a project whose instructions opt in to QA by the maintainer. The spec says either "QA: blocking" or that QA is non-blocking, the default. When it doesn't, ask the maintainer while they are here, and write the answer into the spec.
 
-Until step 3, this session stays on its own checkout and branch, so the maintainer's thread stays where it is: write into the worktree by absolute path and run git there with `git -C <worktree>`.
+Until the new session starts, this session stays on its own checkout and branch, so the maintainer's thread stays where it is: write into the worktree by absolute path and run git there with `git -C <worktree>`.
 
 Done when every item holds.
 
@@ -46,7 +46,7 @@ Everything else the new session needs, such as changes to the plan and rules, go
 
 Codex starts skills with `$` instead of `/`: when the new session runs Codex, write `$orchestrate-with-handoff`.
 
-The new session takes the prompt as the maintainer's go-ahead and starts work without asking for one. So the handoff settles every decision this session can, and carries the maintainer's inputs from step 1.
+The new session takes the prompt as the maintainer's go-ahead and starts work without asking for one. So the handoff settles every decision this session can, and carries the inputs it collected from the maintainer.
 
 ## 3. Start it
 
