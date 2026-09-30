@@ -51,7 +51,7 @@ The starting prompt names these skills and the agent loads each one itself: the 
 
 ## Handover
 
-The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It checks the session is ready: the worktree exists, a **handoff** is written in the repository by the **handoff** skill (`.handoff/<date>-<topic>.md`, per the [folder standard](folders.md)), everything is committed and pushed, and the tracker items exist. It then writes a short **starting prompt** that starts the new session on the handoff, starts that session in the session host (else here, or through a pasted prompt), and confirms it started. The handing session then stops, and stays open for reference.
+The session handing over owns the clean ending, through the **handover** skill. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready as that skill's first step lists, writes a one-line **starting prompt** that starts the new session on the handoff, starts that session in the session host or else here or through a pasted prompt, and confirms it started. The handing session then stops, and stays open for reference.
 
 ## Build
 

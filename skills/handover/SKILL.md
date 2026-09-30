@@ -22,10 +22,10 @@ Each comes from the Defaults table, where a project's row overrides the global o
 
 Check each item, and fix what isn't true yet:
 
-- **The worktree exists.** The work gets its own worktree and branch at the latest now, made with the **treehouse** skill when `<worktree-tool>` is Treehouse, else `git worktree add --no-track -b <branch> ../<repo>-<topic> <base>`. Branch from `origin/<default>`, or from the local default branch when the work builds on commits there that aren't pushed. Uncommitted changes on the default branch that belong to the work move into it, and only those; the rest stay where they are.
+- **The worktree exists.** The work gets its own worktree and branch at the latest now, made with the **treehouse** skill when `<worktree-tool>` is Treehouse, else with git, as the **init-effort** skill's `commands.md` shows. Branch from `origin/<default>`, or from the local default branch when the work builds on commits there that aren't pushed. Uncommitted changes on the default branch that belong to the work move into it, and only those; the rest stay where they are.
 - **Every input only the maintainer has is collected** while they are here: answers, accounts, choices. Secrets stay out of chat and files; the handoff says where they live.
-- **The handoff is written** with the **handoff** skill, where the **orchestrating** skill's `folders.md` puts it. Beyond what that skill asks, it names the worktree and branch, the spec and tickets, and whether the new session can reach this one. When this session can't receive messages, as with a desktop-app session or any session the session host can't prompt, the handoff says so and tells the new session to decide open questions itself and list them in the pull request.
-- **Everything is committed and pushed**: the worktree is clean and its branch matches its remote. Run each commit and each push as its own call, because a deny rule that matches anything else in a chain blocks the whole chain. After an interrupted or rejected call, check the log before retrying, because a chain can stop halfway.
+- **The handoff is written** with the **handoff** skill. Beyond what that skill asks, it names the worktree and branch, the spec and tickets, and whether the new session can reach this one. This session is unreachable when it can't receive messages, as with a desktop-app session or any session the session host can't prompt, and then the handoff tells the new session to decide open questions itself and list them in the pull request.
+- **Everything is committed and pushed**: the worktree is clean and its branch matches its remote. Run each commit and each push as its own call, because a deny rule that matches anything else in a chain blocks the whole chain. After an interrupted or rejected call, check the log before retrying, because the commit or push may have landed anyway.
 - **Tracker items exist** for the spec and tickets the handoff names: issues on a hosted tracker, or files in the effort's folder on a local one.
 - **QA is settled** for an effort in a project whose instructions opt in to QA by the maintainer. The spec says either "QA: blocking" or that QA is non-blocking, the default. When it doesn't, ask the maintainer while they are here, and write the answer into the spec.
 
@@ -42,7 +42,7 @@ The starting prompt is **one line**, and it starts the new session on the handof
 | Orchestrator for an effort | `/orchestrate-with-handoff <path to the handoff>` |
 | Anything else, such as more thinking | `Continue from the handoff at <path to the handoff>.` |
 
-Everything else the new session needs goes in the handoff: the worktree and branch, whether this session is reachable, changes to the plan, rules. A prompt pasted in over several lines arrives as pasted text rather than a command, so its skill never starts.
+Everything else the new session needs, such as changes to the plan and rules, goes in the handoff, because a prompt pasted in over several lines arrives as pasted text rather than a command, and its skill never starts.
 
 Codex starts skills with `$` instead of `/`: when the new session runs Codex, write `$orchestrate-with-handoff`.
 
@@ -55,4 +55,4 @@ The new session takes the prompt as the maintainer's go-ahead and starts work wi
 
 ## 4. Confirm it started
 
-The handover is done when the new session is working on the prompt: **handover-to-herdr** reports it working, the maintainer says it started, or this session runs it here. Tell the maintainer where it runs, then stop. The new session's deliverable, such as an orchestrator's pull request, is how the maintainer hears back.
+The handover is done when the new session is working on the prompt: **handover-to-herdr** reports it working, the maintainer says it started, or this session runs it here. The handover is fire-and-forget: tell the maintainer where it runs, then stop. The new session's deliverable, such as an orchestrator's pull request, is how the maintainer hears back.
