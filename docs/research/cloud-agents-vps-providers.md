@@ -19,7 +19,7 @@ Currency and tax are stated per row, because providers differ: most European pro
 - **Cheaper fallbacks:** netcup **VPS 2000 G12.5** (8 shared vCores, 16 GB, 256 GB) at €22.62 net on 12 months [doc]; **OVHcloud VPS-4** (8 vCores, 24 GB, 200 GB) at €23.49 net month to month, no commitment [api]; **UpCloud Starter** 4 cores / 16 GB at €28 net, billed hourly [doc]. And if Hetzner reopens CX, **CX43** (8 shared vCPU / 16 GB, €16.49, hourly) is still the cheapest of all [api].
 - **Out of budget at 16 GB:** DigitalOcean, Vultr and Akamai/Linode all ask **$80-96 a month** for 16 GB shared [doc, api]; Scaleway €50-86 net plus storage and IPv4 [doc, api].
 - **Latency barely separates them.** Median ping from the Mac to each provider's nearest EU site is **54-102 ms**; all but Hetzner Helsinki fall within **54-84 ms**, and netcup (68 ms) matches Hetzner Nuremberg/Falkenstein (70-77 ms), today's region [mac]. A 10-20 ms difference is not worth choosing on, next to model calls that take seconds.
-- **Switching is a rebuild, not a copy.** Plan it as: order the new machine, set it up (by hand now, with set-up-machine once PR #66 merges), save it in Herdr as a second machine, run both side by side for two to four weeks, then delete the old one. The overlap costs €5.99 a month for the CX23.
+- **Switching is a rebuild, not a copy.** Plan it as: order the new machine, set it up (with set-up-machine, on `main` since PR #66 merged on 2026-09-30, after the base tools by hand), save it in Herdr as a second machine, run both side by side for two to four weeks, then delete the old one. The overlap costs €5.99 a month for the CX23.
 
 ## 1. Shared vs dedicated vCPU, and what else separates offers
 
@@ -225,7 +225,7 @@ What it shows:
 | **Order** | One order at the chosen provider (an account, payment, and an SSH key on the order form) | Needs the maintainer: sign-up and payment are outside this research |
 | **Rebuild, not copy** | A fresh Ubuntu LTS image, then the environment | Recommended. The current box is Ubuntu 26.04 with a hand-made setup ([cloud-agents-vps.md](cloud-agents-vps.md)); rebuilding is the moment to make it reproducible |
 | **Snapshot import** | Not a practical route off Hetzner | Hetzner Cloud's snapshot docs describe no way to download or export a snapshot (unverified: no statement either way was found in [the snapshot FAQ](https://docs.hetzner.com/cloud/servers/backups-snapshots/faq/)). netcup and OVHcloud do import images [doc], so a raw disk copy (`dd` from Hetzner's rescue system over SSH) is possible in theory, but it carries the old hand-made setup, network config and cloud-init quirks with it. Not worth it for a 40 GB box with 11 GB used |
-| **Environment** | set-up-machine, once [PR #66](https://github.com/yahyabedirhan/skills/pull/66) merges (still **open** on 2026-09-30); until then by hand | set-up-machine "runs on macOS and Linux" with Python 3.9+ and installs the skills, rule table, hook and memory-off ([cloud-agents-vps.md](cloud-agents-vps.md), section "The environment"). Before it: `nvm`/Node, Claude Code, `gh`, Herdr at the same version as the Mac, `jq`, Go and Treehouse (E8) |
+| **Environment** | set-up-machine, on `main` since [PR #66](https://github.com/yahyabedirhan/skills/pull/66) merged later on 2026-09-30 | An agent on the new box runs the skill: one diff for the skills, the shared global instructions, the rule table, the pre-tool hook and memory off, one approval, then `verify.py` (Python 3.9+) checks it ([cloud-agents-vps.md](cloud-agents-vps.md), section "The environment"). Before it: `nvm`/Node, Claude Code, `gh`, Herdr at the same version as the Mac, `jq`, Go and Treehouse (E8) |
 | **Headless browser, day zero** | On a fresh box with root, `npx playwright install --with-deps chromium`, or the Playwright Docker image (D5, E7) | On the new machine installing system libraries as root is part of building it, not a change to a running box |
 | **Log-ins** | `claude` login, `gh auth login`, a new SSH key for GitHub | Re-authenticate on the new box rather than copying credential files |
 | **Data** | `git clone` the repos; `rsync` anything uncommitted from the old box | The old box also runs "a few containers and web services" [siz](cloud-agents-vps-sizing.md#the-vps-today-vps): list them and move each on purpose |
@@ -244,7 +244,7 @@ What it shows:
 | The new machine (recommended) | €34.20 net a month on 12 months (€40.70 incl. German VAT), or €39.34 net month to month |
 | Overlap with the old VPS | €5.99 a month while both run |
 | Setup fees | none at netcup (none shown on the root-server page); IONOS €10; Hetzner none |
-| Time | A few hours by hand; less once set-up-machine exists (estimate) |
+| Time | A few hours: the base tools by hand, then one set-up-machine run (estimate) |
 | Risk | Low: the old box keeps running until the new one is proven; netcup's 30-day money-back covers a bad fit |
 
 ## 5. Ranked shortlist
@@ -295,3 +295,4 @@ Everything run for this ticket on 2026-09-30. Nothing was ordered, created, chan
 | 9 | Web | `curl` of Oracle's Always Free resources doc; WebFetch of Hetzner's snapshot FAQ (no export statement found) | nothing |
 | 10 | Mac | `dig +short` on about 70 candidate speed-test and looking-glass hostnames to find which exist | nothing |
 | 11 | Mac | for 35 hosts: `ping -c 7 -i 0.3` and 7 × `curl -s -o /dev/null -w '%{time_connect}'`, medians computed locally | nothing (outbound probes only) |
+| 12 | Mac, 2026-09-30 | After PR #66 merged: read set-up-machine on `main`; updated the switching plan's environment step and time | This file |
