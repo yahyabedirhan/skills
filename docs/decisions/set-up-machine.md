@@ -130,3 +130,8 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 - **`.env.sample`, `.env.template` and `.env*.md` are readable,** beside `.env.example`: templates and docs about env files, not env files.
 - **Two gaps are named, not closed:** a glob the shell expands (`cat .env*`) reaches a `.env` file under a name the hook never sees, and `ps e`/`ps eww` print environments through letters no rule can tell from ordinary `ps` options.
 
+
+## 2026-09-30: environment defaults
+
+- **The global section is `## Environment defaults`, written in plain lowercase words.** It was `## Defaults`, and the skills called it "the Defaults table", "the global Defaults" and "a Defaults row", as if it were a named source of truth. The maintainer never meant a special term. "Tools" was considered and dropped, since it reads as an agent's tools. A project's `AGENTS.md` uses the same heading for its own rows, and `/set-up-project` writes it.
+- **The role `agent-to-start` is now `agent`,** matching the `<agent>` placeholder the maintainer chose in the effort skills.
