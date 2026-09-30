@@ -124,5 +124,5 @@ Last, when this session runs inside one of the effort's worktrees, return it fro
 
 The return command is `<worktree-tool>`'s, or `git worktree remove <path>`.
 
-- **With `<session-host>` set:** through the **handover-to-`<session-host>`** skill, open a shell outside the worktree, in the repository's main checkout, labelled `<effort> · Close · shell`, and, as your last action, run one command there: `sleep 30; <return command>; <close this session's workspace>; git worktree list`. The pause lets the report finish first. The shell's output is its report, and the report above names where it runs.
+- **With `<session-host>` set:** through the **handover-to-`<session-host>`** skill, open a shell outside the worktree, in the repository's main checkout, labelled `shell · Close · <effort>`, and, as your last action, run one command there: `sleep 30; <return command>; <close this session's workspace>; git worktree list`. The pause lets the report finish first. The shell's output is its report, and the report above names where it runs.
 - **Unset**, this one step is the maintainer's: end the report with the return command, to run once this session is closed.

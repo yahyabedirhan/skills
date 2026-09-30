@@ -42,7 +42,7 @@ The worktree comes from the project's worktree tool, never from `herdr worktree 
 
 ## 2. Label the tab
 
-`herdr tab rename <tab_id> "<topic> · <role> · <harness>"`, with the harness short: `CC` for Claude Code, `Codex`, `OpenCode`, `Cursor`, or the harness's own name.
+`herdr tab rename <tab_id> "<harness> · <role> · <topic>"`, with the harness short: `CC` for Claude Code, `Codex`, `OpenCode`, `Cursor`, or the harness's own name.
 
 ## 3. Start the agent
 
@@ -69,4 +69,4 @@ If the wait times out, look before acting: `herdr agent get <name>`, and `herdr 
 
 Once it is `working`, tell the maintainer the workspace and tab where it runs, and stop.
 
-When this session runs in a Herdr tab and its own work is done, append ` [settled]` to its tab's label (`$HERDR_TAB_ID`): the marker tells the maintainer the tab is only a record now.
+When this session runs in a Herdr tab and its own work is done, put `[settled] ` at the start of its tab's label (`$HERDR_TAB_ID`): the marker tells the maintainer the tab is only a record now.

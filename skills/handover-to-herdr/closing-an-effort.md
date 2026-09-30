@@ -25,6 +25,6 @@ Open a tab in the repository's main-checkout workspace (the one whose `repo_root
 
 ```bash
 herdr tab create --workspace <repo workspace_id> --cwd <main checkout> --no-focus
-herdr tab rename <tab_id> "<effort> · Close · shell"
+herdr tab rename <tab_id> "shell · Close · <effort>"
 herdr pane run <pane_id> 'sleep 30; <return command>; herdr workspace close <this workspace_id>; git worktree list'
 ```
