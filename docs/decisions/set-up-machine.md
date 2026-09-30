@@ -152,3 +152,8 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 - **The hook reads quoting to tell an expansion from text.** Tokenising drops quotes, so `echo '$API_TOKEN'` and `echo $API_TOKEN` became the same word. `mark_expansions` marks each `$` the shell would expand before tokenising, and only rows with `variables` read the marked words, so every other row sees commands as before. `${#NAME}` (a length) and passing a variable to another command (`curl -H "Bearer $TOKEN"`) stay allowed.
 - **No native entry anywhere.** No harness's patterns can match a variable's name inside an argument; each reference lists it as a gap the hook covers.
 
+## 2026-09-30: `find -delete` is denied (#92)
+
+- **`find-delete` moved from ask to deny.** Its rule line said "asks first", but nothing asked: find writes `-delete` after the path, so no harness's prefix entry catches it, and the hook leaves ask rows to the harness. The maintainer asked for it to be blocked as far as possible, so the hook now refuses it on every harness, behind wrappers, `bash -c` and `$(…)` too. The instruction says to list with `find`, then move the files into `.scratch/`.
+- **No native entry for `find`'s options.** *Spellings* now says so for every harness; the hook is the only layer that sees them.
+
