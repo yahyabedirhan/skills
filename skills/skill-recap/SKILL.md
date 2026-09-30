@@ -69,6 +69,8 @@ Give the findings, then the verdict:
 
 When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in `<skills-repo>`, unless they name another repo. `/to-tickets` works from the conversation, so the findings as written are its input.
 
-- **For a finding about someone else's skill:** the user decides whether to file it there, fork the skill, or take it upstream.
+When `<skills-repo>` is public, write each finding the way the user's instructions say public repositories are written: that rule lives in their agent instructions, so follow it from there.
 
-Stop after the report, and leave creating issues, commenting and editing skills to the user.
+- **For a finding about someone else's skill:** the user decides whether to file it in `<skills-repo>` anyway, fork the skill, or take it to the skill's own repo.
+
+Stop after the report, and leave creating issues, commenting and editing skills to the user, since they choose which findings are worth acting on.

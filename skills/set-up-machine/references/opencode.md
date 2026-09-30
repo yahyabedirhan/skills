@@ -21,7 +21,7 @@ No memory feature: a `none` line. Some models are prompted to keep a memory file
 - **Evaluation:** opencode's defaults first, then every rule in the order written; the **last match wins**. `*` matches anything, `/` included; `?` one character; a trailing ` *` also matches the command with nothing after it. So write allow entries first, then ask, then deny: where two overlap, the stricter sits later and wins.
 - **Tightening:** a looser user entry stays where it is, and the stricter one goes after it. The same pattern at a looser level moves to the end at the table's level. When a later tool-wide entry (`"*": "allow"`, or `"bash": "allow"` written as a string) would override the tool's rules, move the tool's whole object after it (a string level becomes `{"*": <level>}` first).
 - **Covered already:** work out which entry opencode would apply, by last match, to the texts the wanted entry matches (for `rm -rf *`: `rm -rf` and `rm -rf x`). At the table's level, `present` (maybe covered by a broader entry); at a stricter one, `stricter`, kept.
-- **Projects can loosen it:** a project's `opencode.json` merges over the global one; a pattern new to the project comes after the global rules and wins, and the same pattern replaces the level. So does an agent's own `permission`. Only managed config holds. Both are `gap`s; set-up-project's audit checks each project.
+- **Projects can loosen it:** a project's `opencode.json` merges over the global one; a pattern new to the project comes after the global rules and wins, and the same pattern replaces the level. So does an agent's own `permission`. Only managed config holds. Both are `gap`s; `/set-up-project`'s audit checks each project.
 
 ## Command rows
 

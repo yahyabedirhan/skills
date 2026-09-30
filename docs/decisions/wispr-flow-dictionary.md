@@ -28,3 +28,8 @@ The decisions behind the `wispr-flow-dictionary` skill (named `wispr-flow` until
 
 - **Also a Claude Code plugin, from a marketplace in this repo.** `.claude-plugin/marketplace.json` lists one plugin whose `source` is the skill's own folder, so nothing is copied: a plugin root holding `SKILL.md`, with no `skills/` folder and no `skills` key, loads as a single skill, and an entry without `plugin.json` is the manifest itself. A `source` of `./` would have loaded every skill in the repo. No `version` is set, so each push reaches users as a new commit. The plugin name is permanent.
 - **Not submitted to Anthropic's directory.** The skill reads a database on the user's Mac, which a claude.ai sandbox can't reach.
+
+## 2026-09-30
+
+- **A returning mistake is counted from the wrong form, not the entry.** The 2026-09-28 entry said `count` and `terms` show a mistake returning as hits since its word was added. They don't: their since-added columns count the entry's own phrase, so they show the word in use. The skill now counts the wrong form in pasted text from the day the word was added. A prompt audit found this by reading `scripts/wispr.py`.
+- **`--backup-dir` and `--keep-backups` go before the command,** since the script's top-level parser owns them, and the full-history count uses no window, not `--since 26w`.

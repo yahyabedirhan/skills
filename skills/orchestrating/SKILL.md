@@ -13,7 +13,7 @@ As the **orchestrator**, you get an effort built without building it yourself: r
 
 ## Effort lifecycle
 
-This is how one **effort**, such as a feature, a new app, a refactor or a re-architecture, travels from an idea to a merged pull request. The thinking runs on `/grilling`, `/prototype`, `/tdd` and `/code-review` from Matt Pocock's [mattpocock/skills](https://github.com/mattpocock/skills), and on this repo's forks of his `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills`, which replace the upstream four; the last is forked as `/set-up-project`. The building runs on the orchestrate skills. Run routine upkeep, such as data edits and small fixes, in the current checkout without any of this.
+This is how one **effort**, such as a feature, a new app, a refactor or a re-architecture, travels from an idea to a merged pull request. The thinking runs on `/grilling`, `/prototype`, `/to-spec`, `/to-tickets` and `/handover`. The building runs on the orchestrate skills, whose delegates use `/implement`, `/tdd` and `/code-review`. Run routine upkeep, such as data edits and small fixes, in the current checkout without any of this.
 
 An effort passes through five phases in one worktree on one branch:
 
@@ -62,7 +62,7 @@ The starting prompt names these skills and the agent loads each one itself: the 
 
 ### Handover
 
-The session that hands over finishes its own work cleanly, through `/handover`. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready, starts the new session on the handoff with a one-line prompt, and confirms it started. The handing session then stops, and stays open for reference.
+The session that hands over finishes its own work cleanly, through `/handover`. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready, starts the new session on the handoff with a one-line prompt, and confirms it started. The session that handed over then stops, and stays open for reference.
 
 ### Build
 

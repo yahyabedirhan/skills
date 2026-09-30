@@ -59,9 +59,9 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 
 ## Shipping to the skills repo
 
-1. Branch from an up-to-date `main`: `<skill>/<topic>` for one skill, `skills/<topic>` for several.
+1. Branch from an up-to-date default branch: `<skill>/<topic>` for one skill, `skills/<topic>` for several.
 2. For a new skill or a fork that changes behaviour, audit it as below, and commit the fixes and the full findings to its decision record.
-3. In the pull request for an audited skill, summarise the audit in *Special things to note* and link the decision record.
+3. In the pull request for an audited skill, summarise the audit in the description's notes for reviewers and link the decision record.
 
 ## Auditing a new skill
 

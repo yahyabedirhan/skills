@@ -40,7 +40,7 @@ The second box lets the token send mail, so Claude Code's permission rules must 
 
 Claude Code blocks an agent from editing its own permission rules unless the user asked for that exact change, so add them only when the user asks for it; otherwise ask the user to paste the lines in. These rules bind only Claude Code, because other agents read their own permission settings. Outside Claude Code, the connector's approval prompts are the only guard against a send, so confirm they are on before relying on them.
 
-Check in a new session: none of the ten denied tools appears among the connector's available tools (Claude Code hides denied tools), or `/permissions` lists all ten. Any of them still available means a rule is missing: fix it before using the connector for anything but reading.
+Check in a new session that none of the ten denied tools appears among the connector's available tools, since Claude Code hides denied tools, or that `/permissions` lists all ten. Any of them still available means a rule is missing: fix it before using the connector for anything but reading.
 
 ## 4. End to end
 

@@ -48,3 +48,8 @@ How the skills in this repo are written, and why. The rules below came from revi
 - **Ask before generalising a rule.** "Don't point at the user's instructions" was extended from the Defaults-table rule by analogy; the maintainer never held it, and it was dropped.
 - **Prefer text to scripts when upkeep outweighs value.** The team-test audit script and its tests, 270 lines, were replaced by a grep described in `/maintain-environment`.
 - **Run each commit and push as its own call, and remove files with `git rm`.** The coordinator slipped on both once: eight commits in one shell loop, and an `rm -f` on untracked files after copying their text.
+
+## 2026-09-30: the second audit round
+
+- **Fold before auditing.** Must-read references went into `SKILL.md` first, then a fresh sub-agent per skill ran the prompt audit and made its own fixes, with this file as the rules that win a conflict. Auditing after the fold meant the auditors read each skill as an agent would.
+- **Audits catch facts, not only wording.** This round found a wrong signal in `/wispr-flow-dictionary` by reading its script, a quoting bug in `/handover-to-herdr`, a status clash in `/orchestrate-effort`, and a way around `/email`'s deny rules. Tell an auditor to check a skill's commands against their source.
