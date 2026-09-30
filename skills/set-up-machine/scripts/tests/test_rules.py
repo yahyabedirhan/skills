@@ -27,7 +27,7 @@ class ShippedTableTest(unittest.TestCase):
             "git-reset-hard", "gh-repo-destructive", "gh-access-keys", "calendar-mail-cli-send",
             "secret-files-read", "secret-files-write", "home-credentials-read", "mail-send", "mail-destructive",
             "env-files-read", "env-files-write", "env-files-commands", "env-dump", "env-print", "env-dump-declared",
-            "env-dump-listed", "proc-environ-read", "proc-environ-commands",
+            "env-dump-listed", "env-print-secret", "proc-environ-read", "proc-environ-commands",
         ):
             self.assertEqual(levels.get(rule_id), "deny", rule_id)
         for rule_id in ("git-push-force-with-lease", "git-push-mirror", "git-clean-force", "find-delete", "gh-repo-edit"):
@@ -70,6 +70,12 @@ class BadRowsTest(unittest.TestCase):
             {"paths": [".env"], "access": "read", "except": ["./x"]},
             {"program": "git", "operands": ["x"], "any_operand": ["y"]},
         )])
+
+    def test_variables_are_name_globs_on_a_command_row(self):
+        self.assertRefused([row(match={"program": "echo", "variables": "TOKEN"}),
+                            row(match={"program": "echo", "variables": []}),
+                            row(match={"program": "echo", "variables": ["$TOKEN"]}),
+                            row(match={"program": "echo", "variables": ["*TOKEN*"], "arguments": "none"})])
 
     def test_samples_need_covers(self):
         self.assertRefused([row(samples={}), row(samples={"covers": []}), row(samples={"leaves": ["x"]}),

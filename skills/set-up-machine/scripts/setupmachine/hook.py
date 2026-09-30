@@ -71,9 +71,15 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
     if call.command:
         argvs = commands.simple_commands(call.command, files=files)  # redirect targets join the files
         for argv in argvs:
-            hits += [Hit(r, shlex.join(argv)) for r in checked if r.kind == "command" and commands.covers(r, argv)
+            hits += [Hit(r, shlex.join(argv)) for r in checked if r.kind == "command" and not r.variables
+                     and commands.covers(r, argv)
                      and (not r.files or any(path_matches(r, w, call.cwd, home) for w in operand_files(argv)))]
         files += commands.tee_writes(argvs)
+        variable_rows = [r for r in checked if r.kind == "command" and r.variables]
+        if variable_rows:
+            for argv in commands.simple_commands(commands.mark_expansions(call.command)):
+                shown = shlex.join(argv).replace(commands.EXPANDS, "$")
+                hits += [Hit(r, shown) for r in variable_rows if commands.covers(r, argv)]
     for folder, glob in call.searches:
         files.append((os.path.join(folder, glob) if folder else glob, "read"))
         hits += [Hit(r, f"search {glob}") for r in checked if r.kind == "file" and glob_targets(r, glob)]
