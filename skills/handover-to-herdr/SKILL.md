@@ -6,28 +6,33 @@ argument-hint: "Worktree path, topic, role, and the starting prompt"
 
 # Handover To Herdr
 
-The Herdr mechanism of a **handover** (the **handover** skill owns the flow and has already written the handoff and the starting prompt). It takes four inputs: the **worktree** path, the **topic** (the effort's name, or what the work is), the new session's **role** (`Orchestrator`, `Thinking`, or another one-word role), and the **starting prompt**.
+The Herdr mechanism of a **handover**. The **handover** skill owns the flow, and has already written the handoff and the starting prompt. This skill takes four inputs:
+
+- the **worktree** path;
+- the **topic**: the effort's name, or what the work is;
+- the new session's **role**: `Orchestrator`, `Thinking`, or another one-word role;
+- the **starting prompt**.
 
 When **close-effort** runs with it, read [closing-an-effort.md](closing-an-effort.md) for its commands.
 
 ## Parameters
 
-From the Defaults table (a project's row overrides the global one). Unset: no row, or `none`.
+It comes from the Defaults table, where a project's row overrides the global one. It is unset when it has no row or its row says `none`.
 
-- `<agent-to-start>`: the command that starts the new agent. Unset: this session's harness.
+- `<agent-to-start>`: the command that starts the new agent. Unset, use this session's harness.
 
 ## Herdr from anywhere
 
 This skill runs from inside a Herdr pane and from outside one, such as a desktop-app session: the `herdr` CLI reaches the server either way.
 
 - Check that `herdr status` reaches a server; `HERDR_ENV` only says whether this session runs in a pane. If it doesn't reach one, say so and hand back to **handover**, whose fallback is the same session.
-- Target explicit IDs read from Herdr's JSON (`w1` workspace, `w1:t1` tab, `w1:p1` pane), pass `--no-focus` wherever a command takes it, and never use `--current`. That keeps every command off the pane the maintainer is using.
+- Target explicit IDs read from Herdr's JSON, such as `w1` for a workspace, `w1:t1` for a tab and `w1:p1` for a pane. Pass `--no-focus` wherever a command takes it, and never use `--current`. That keeps every command off the pane the maintainer is using.
 
 The **herdr** skill has the full CLI contract but stops outside a pane; these rules replace its `HERDR_ENV` check for the commands below.
 
 ## 1. Open a tab in the worktree's workspace
 
-`herdr workspace list` shows each workspace's `worktree` (its `checkout_path`, `repo_root` and `is_linked_worktree`).
+`herdr workspace list` shows each workspace's `worktree`, with its `checkout_path`, `repo_root` and `is_linked_worktree`.
 
 - When a workspace's `checkout_path` is the worktree, add a tab to it: `herdr tab create --workspace <workspace_id> --cwd <worktree> --no-focus`. It returns the tab and its root pane.
 - Otherwise open the worktree from the repository's own workspace, the one whose `repo_root` is the repository and whose `is_linked_worktree` is false:
@@ -65,8 +70,8 @@ herdr agent wait <name> --until working --timeout 60000
 
 `agent prompt` delivers the text as a paste: one line runs as a command, while several lines arrive as pasted text and the skill never starts. Leave `--wait` off the prompt: it waits for the agent to settle, and a long run times out first. The handover is fire-and-forget, so `working` is the confirmation.
 
-If the wait times out, look before acting: `herdr agent get <name>`, and `herdr agent read <name> --source visible` (`--lines` fails while the agent works). The prompt may have arrived even so; resend it only when the screen shows it didn't.
+If the wait times out, look before acting: `herdr agent get <name>`, and `herdr agent read <name> --source visible`; `--lines` fails while the agent works. The prompt may have arrived even so; resend it only when the screen shows it didn't.
 
 Once it is `working`, tell the maintainer the workspace and tab where it runs, and stop.
 
-When this session runs in a Herdr tab and its own work is done, put `[settled] ` at the start of its tab's label (`$HERDR_TAB_ID`): the marker tells the maintainer the tab is only a record now.
+When this session runs in a Herdr tab and its own work is done, put `[settled] ` at the start of its tab's label, the tab in `$HERDR_TAB_ID`. The marker tells the maintainer the tab is only a record now.
