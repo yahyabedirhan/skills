@@ -39,8 +39,10 @@ Go no further than a draft: the user reviews and sends every email themselves.
 Read `command-reference.md` before the first call. When setting either tool up, checking the deny rules, or when a call fails on sign-in or permission, follow `setup.md`.
 
 1. **Find** the mail with Spark.
-2. **Find it again in Gmail** before changing it, because the two tools number messages differently. When more than one thread matches, narrow the search or ask the user which one they mean.
-3. **Act** through Gmail: mark done, pin or unpin, label, or draft a reply. A draft reply ends with its `viewUrl`, where the user reviews and sends it.
+2. **Find it again in Gmail** before changing it, because the two tools number messages differently.
+   - **When more than one thread matches:** narrow the search or ask the user which one they mean.
+3. **Act** through Gmail: mark done, pin or unpin, label, or draft a reply.
+   - **For a draft reply:** it ends with its `viewUrl`, where the user reviews and sends it.
 4. **Check** that each change took.
 
 ## References

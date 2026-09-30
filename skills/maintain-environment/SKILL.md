@@ -15,7 +15,9 @@ The environment is what agents run with: permissions, global instructions, proje
 ## Steps
 
 1. Choose the layer the change belongs to, and check it against the team test. Read `environment-layers.md` for the layers and the test.
-2. Make the change at that layer's source. For a skill, that is its source repo or, for a local skill, the project; never an installed copy, which the next `npx skills update` overwrites. For any operation on a skill, read `skill-operations.md`.
+2. Make the change at that layer's source. For any operation on a skill, read `skill-operations.md`.
+   - **For a skill:** that is its source repo, never an installed copy, which the next `npx skills update` overwrites.
+   - **For a local skill:** that is the project.
 3. After any skill change, run the team-test audit and judge each hit.
 4. Ship a change to the skills repo on a branch, through a pull request opened with `/to-pr`, and stop once it is open. The user merges it or asks you to.
 5. Carry the change everywhere it applies, as the table below says. `npx skills` installs from the default branch, so the installs and updates run after the merge, in the session told the pull request merged.

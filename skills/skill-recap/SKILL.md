@@ -17,8 +17,10 @@ Look back over one or more sessions and work out how the agent and its sub-agent
 
 Read `transcript-layout.md` to find and search the transcripts.
 
-- **By default**, cover the current session and every sub-agent it spawned, at any depth. The session itself is in your context; when part of it was compacted away, read its transcript for the missing stretch. Sub-agents ran in their own contexts, so read their transcripts from disk.
-- **When the user names a scope** such as a time window, a project or a list of sessions, use exactly that scope, sub-agents included. When the scope can be read more than one way, such as which projects a time window covers, ask before reading.
+- **By default**, cover the current session and every sub-agent it spawned, at any depth. The session itself is in your context. Sub-agents ran in their own contexts, so read their transcripts from disk.
+  - **When part of the session was compacted away:** read its transcript for the missing stretch.
+- **When the user names a scope** such as a time window, a project or a list of sessions, use exactly that scope, sub-agents included.
+  - **When the scope can be read more than one way,** such as which projects a time window covers: ask before reading.
 
 ## 2. Audit
 
@@ -50,7 +52,9 @@ Give the findings, then the verdict:
 - **"No skill changes needed."** when nothing qualifies. This is a good outcome, not a failed recap.
 - Otherwise **"<n> opportunities"**, naming the skills they touch.
 
-When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in `<skills-repo>`, unless they name another repo. `/to-tickets` works from the conversation, so the findings as written are its input. For a finding about someone else's skill, the user decides whether to file it there, fork the skill, or take it upstream.
+When there are opportunities, close with the next step: the user runs `/to-tickets` to file them as issues in `<skills-repo>`, unless they name another repo. `/to-tickets` works from the conversation, so the findings as written are its input.
+
+- **For a finding about someone else's skill:** the user decides whether to file it there, fork the skill, or take it upstream.
 
 Stop after the report, and leave creating issues, commenting and editing skills to the user.
 
