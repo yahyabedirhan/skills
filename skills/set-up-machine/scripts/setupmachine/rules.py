@@ -19,9 +19,7 @@ kinds, told apart by its keys:
 Every row carries `samples`: `covers`, calls the row must catch (a shell command,
 a path, or an MCP tool name, by the row's kind), and `leaves`, near misses it must
 let through. The verify script feeds them to the hook. Any row may carry a `gap`:
-what no harness can catch for it, which every harness's audit names. A deny row may carry a `guard` (`label` and `rule`): a
-prose rule for a harness's semantic guard, covering the row's family, for what
-its patterns can't list.
+what no harness can catch for it, which every harness's audit names.
 """
 from __future__ import annotations
 
@@ -60,7 +58,6 @@ class Rule:
     access: str = ""  # file: read or write
     excepts: tuple = ()  # file, or command with files: globs left out
     gap: str = ""  # what no harness can catch for this row
-    guard: str = ""  # `<label>: <rule>`, prose for a harness's semantic guard (Claude Code's auto mode)
     server: str = ""  # mcp-tool: regex over the server part of the tool name
     tool: str = ""  # mcp-tool: regex over the tool part
     covers: tuple = ()  # samples the row must catch
@@ -108,14 +105,6 @@ def _parse_row(row: dict, where: str) -> Rule:
         if not isinstance(row["gap"], str) or not row["gap"]:
             raise RuleTableError(f"{where}: gap must be a sentence")
         common["gap"] = row["gap"]
-    if "guard" in row:
-        guard = row["guard"]
-        if not (isinstance(guard, dict) and set(guard) == {"label", "rule"}
-                and all(isinstance(v, str) and v for v in guard.values())):
-            raise RuleTableError(f"{where}: guard must hold a `label` and a `rule`, both text")
-        if row["level"] != "deny":
-            raise RuleTableError(f"{where}: only a deny row can carry a guard")
-        common["guard"] = f"{guard['label']}: {guard['rule']}"
     samples = row.get("samples")
     if not (isinstance(samples, dict) and set(samples) <= {"covers", "leaves"} and samples.get("covers")
             and all(isinstance(v, list) and all(isinstance(x, str) and x for x in v) for v in samples.values())):

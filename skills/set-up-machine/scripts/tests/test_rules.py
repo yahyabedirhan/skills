@@ -71,10 +71,6 @@ class BadRowsTest(unittest.TestCase):
             {"program": "git", "operands": ["x"], "any_operand": ["y"]},
         )])
 
-    def test_a_guard_needs_a_label_and_rule_on_a_deny_row(self):
-        self.assertRefused([row(guard="text"), row(guard={"label": "L"}),
-                            row(guard={"label": "L", "rule": "R"}, level="ask")])
-
     def test_samples_need_covers(self):
         self.assertRefused([row(samples={}), row(samples={"covers": []}), row(samples={"leaves": ["x"]}),
                             row(samples={"covers": ["x"], "other": ["y"]}), {k: v for k, v in row().items() if k != "samples"}])

@@ -57,7 +57,7 @@ No memory feature: a `none` line.
 
 ## Gaps
 
-The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses (SKILL.md, *What it can't see*). Each row's `guard`: Cursor has no semantic guard that covers it (Auto-review skips sandboxable commands and only steers).
+The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses (SKILL.md, *What it can't see*).
 
 ## What the agent sees
 

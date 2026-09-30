@@ -22,10 +22,12 @@ The file has these parts, in this order. This skill decides the parts and rewrit
    - **Denied:** `rm -rf` and its variants. A recursive forced delete can't be undone, … Instead: Move what's no longer needed into …
    - **Asks first:** `git push --force-with-lease`. It rewrites the remote's history, … Say in one line why …
    - **Allowed and reported:** `gh api`, `gh secret` and `gh variable`. They reach anything … Go ahead; each call is logged …
+
+   **Environment variables and `.env` files:** never read, print or change one that may hold a secret, by any route: a command, a script, an interpreter (`python3 -c`, `node -e`) or a file tool. The rules above catch the common commands; this line covers the rest. Use the variables every shell sets (`$HOME`, `$PATH`) as usual, and pass a variable to a command without printing it. If you need a value, stop, say why, and give the user the exact command.
    <!-- set-up-machine:rules end -->
    ```
 
-   One line per row, in table order: `- **<Denied | Asks first | Allowed and reported>:** <summary>. <reason> <instruction>`, with `Instead: ` before the instruction on deny rows only.
+   One line per row, in table order: `- **<Denied | Asks first | Allowed and reported>:** <summary>. <reason> <instruction>`, with `Instead: ` before the instruction on deny rows only. Then, after a blank line, the **Environment variables** paragraph exactly as above: the rows catch only the commands they name, and it tells the agent to leave every other route alone.
 5. **`## Personal workflow`**, with the line `Rules for how this person works that pass the team test. Anything a project or a skill needs goes there instead.`, then this person's rules, one per line.
 
 A new file gets all five, every role `none` and the workflow section empty. On an existing file, only **add** what the shape lacks, such as the rule line, a section, a missing role row as `none` or a missing column, rewrite the What it is and When none columns from the roles table, and regenerate the block; never rewrite a Tool value or a workflow line. If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
