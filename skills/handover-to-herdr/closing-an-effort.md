@@ -1,6 +1,6 @@
 # Closing an effort in Herdr
 
-The Herdr commands for **close-effort**'s session host steps. The rules of *Herdr from anywhere* in `SKILL.md` hold for each: check `herdr status` first, target explicit IDs from Herdr's JSON, pass `--no-focus`, never `--current`. The close leaves every workspace open.
+The Herdr commands for **close-effort**'s session host steps. The rules of *Herdr from anywhere* in `SKILL.md` hold for each: check `herdr status` first, target explicit IDs from Herdr's JSON, pass `--no-focus`, never `--current`.
 
 ## Find the agents still working (step 1)
 
@@ -8,7 +8,7 @@ The Herdr commands for **close-effort**'s session host steps. The rules of *Herd
 
 ## Free this session's worktree from outside it (step 8)
 
-Open a tab in the repository's main-checkout workspace (the one whose `repo_root` is the repository and whose `is_linked_worktree` is false), label it, and run the command in its root pane:
+Open a tab in the repository's own workspace, found as in step 1 of `SKILL.md`, label it, and run the command in its root pane:
 
 ```bash
 herdr tab create --workspace <repo workspace_id> --cwd <main checkout> --no-focus
