@@ -448,6 +448,22 @@ pre .c { color: var(--muted); }
 .track h3 { font-size: 1.1rem; font-weight: 900; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
 .track .steps { font-size: 0.95rem; }
 
+/* Deep dives */
+.tbl tr.pick { background: var(--accent-soft); }
+.tbl tr.pick th, .tbl tr.pick td:first-child { color: var(--accent); }
+.bars { display: grid; gap: 6px; }
+.bars div { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) 2.5rem; gap: 12px; align-items: center; font-size: 0.9rem; }
+.bars i { display: block; height: 10px; border-radius: 5px; background: var(--accent); width: calc(var(--v) / 110 * 100%); }
+.bars b { font-family: var(--font-display); font-variant-numeric: tabular-nums; text-align: right; }
+@media (max-width: 560px) { .bars div { grid-template-columns: minmax(0, 1fr) 2.5rem; } .bars i { grid-column: 1 / -1; grid-row: 2; } }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stats div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 2px; }
+.stats b { font-family: var(--font-display); font-weight: 900; font-size: var(--step-3); line-height: 1; color: var(--accent); }
+.stats span { font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; color: var(--muted); }
+.stats p { grid-column: 1 / -1; }
+@media (max-width: 560px) { .stats { grid-template-columns: minmax(0, 1fr); } }
+.stop .muted { font-weight: 500; }
+
 footer { padding-inline: var(--gutter); padding-block: 40px 64px; font-family: var(--font-display); font-size: var(--step--1); color: var(--muted); }
 footer .slide-inner { gap: 10px; }
 @media (min-width: 1180px) { footer { margin-left: 200px; } }
@@ -475,6 +491,9 @@ footer .slide-inner { gap: 10px; }
     <li><a href="#answers">Your questions, answered</a></li>
     <li><a href="#workflows">How work moves</a></li>
     <li><a href="#decisions">Your decisions</a></li>
+    <li><a href="#vps">Where to move the VPS</a></li>
+    <li><a href="#costs">What delegating costs</a></li>
+    <li><a href="#firstmate">How Firstmate works</a></li>
     <li><a href="#direction">What happens next</a></li>
     <li><a href="#try">Try it yourself</a></li>
     <li><a href="#read">Reading path</a></li>
@@ -487,7 +506,7 @@ footer .slide-inner { gap: 10px; }
   <div class="slide-inner">
     <p class="stop"><span class="stop-dot" aria-hidden="true">0</span>Research effort, finished 29 September 2026</p>
     <h1>Where can your agents work when the laptop is closed?</h1>
-    <p class="lede">Nine research files and one synthesis map every place an agent could run for you: your Mac, your VPS, Claude Code's cloud and the other hosted agents. This page is the way in. It opens with where this could lead, explains the words and the landscape, answers the questions the research started from, and lays out every decision with what you need to make it. The files are there only for when you want more.</p>
+    <p class="lede">Twelve research files and one synthesis map every place an agent could run for you: your Mac, your VPS, Claude Code's cloud and the other hosted agents. This page is the way in. It opens with where this could lead, explains the words and the landscape, answers the questions the research started from, and lays out every decision with what you need to make it. The files are there only for when you want more.</p>
     <p class="hero-meta">
       <span>Spec <a href="https://github.com/yahyabedirhan/skills/issues/45">#45</a></span>
       <span>Pull request <a id="pr-link" href="https://github.com/yahyabedirhan/skills/pull/76" title="Research: what agents on a server or in the cloud can do, and how to delegate to them">#76</a></span>
@@ -507,6 +526,9 @@ footer .slide-inner { gap: 10px; }
       <li><a href="#answers">Answers</a></li>
       <li><a href="#workflows">Workflows</a></li>
       <li><a href="#decisions">Decisions</a></li>
+      <li><a href="#vps">VPS</a></li>
+      <li><a href="#costs">Costs</a></li>
+      <li><a href="#firstmate">Firstmate</a></li>
       <li><a href="#direction">Next</a></li>
       <li><a href="#try">Try it</a></li>
       <li><a href="#read">Read</a></li>
@@ -583,10 +605,10 @@ footer .slide-inner { gap: 10px; }
 
     <h3 class="sub-h">What stands between us and this</h3>
     <ol class="gates" aria-label="Four gates, each still closed">
-      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="151">Herdr 0.9.2 on both machines</a><p>So the Mac can drive the VPS with <code>herdr --machine</code>. Minutes; the VPS's Herdr server restarts. (D2)</p></li>
-      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="156">The VPS set up with set-up-machine</a><p>Your current skills and instructions on the VPS, once #66 merges. (D3)</p></li>
-      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="171">Your skills loading in the cloud</a><p>Skills installed into the VM's home load; a setup script that installs them is written but not yet tried. (E16)</p></li>
-      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="248">A way for the VPS to reach your phone</a><p>Remote Control push is the candidate; nobody has tried it yet. (E5)</p></li>
+      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="154">Herdr 0.9.2 on both machines</a><p>So the Mac can drive the VPS with <code>herdr --machine</code>. Minutes; the VPS's Herdr server restarts. (D2)</p></li>
+      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="159">The VPS set up with set-up-machine</a><p>Your current skills and instructions on the VPS, once #66 merges. (D3)</p></li>
+      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="174">Your skills loading in the cloud</a><p>Skills installed into the VM's home load; a setup script that installs them is written but not yet tried. (E16)</p></li>
+      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="257">A way for the VPS to reach your phone</a><p>Remote Control push is the candidate; nobody has tried it yet. (E5)</p></li>
     </ol>
     <p class="closing">Two gates are minutes of work once #66 merges; two are one experiment each. Until they pass, this slide is the destination, not the timetable. The rest of this page is how to get there.</p>
     <a class="next" href="#why">Next: why this research</a>
@@ -685,7 +707,7 @@ footer .slide-inner { gap: 10px; }
         <p>Not a place, but a different way to run a crew. It's an open-source “agent distro” by the author of Treehouse: one agent you talk to (the first mate) starts visible terminal agents, each with its brief and status kept on disk, on your machine or on an SSH host. It runs wherever it's cloned. The research reads it for ideas to borrow.</p>
       </div>
     </div>
-    <p class="muted small">Summarised from the capability matrix in the synthesis. The full matrix, with a source behind every cell, is <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="31">here in VS Code</a>.</p>
+    <p class="muted small">Summarised from the capability matrix in the synthesis. The full matrix, with a source behind every cell, is <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="34">here in VS Code</a>.</p>
     <a class="next" href="#findings">Next: what we found</a>
   </div>
 </section>
@@ -695,7 +717,7 @@ footer .slide-inner { gap: 10px; }
     <p class="stop"><span class="stop-dot" aria-hidden="true">5</span>What we found</p>
     <h2 id="find-h">Seven findings, one line each</h2>
     <ol class="findings">
-      <li><p><strong>The Mac stays home.</strong> It's the only place with every harness, current skills, Treehouse, a browser and a working notification. Nothing researched beats it for an orchestrated effort today. <a class="src" href="cloud-agents.md" data-md="cloud-agents.md" data-line="20">Synthesis</a></p></li>
+      <li><p><strong>The Mac stays home.</strong> It's the only place with every harness, current skills, Treehouse, a browser and a working notification. Nothing researched beats it for an orchestrated effort today. <a class="src" href="cloud-agents.md" data-md="cloud-agents.md" data-line="23">Synthesis</a></p></li>
       <li><p><strong>The VPS is one upgrade away.</strong> Web, GitHub and Claude Code already work there; it needs Herdr 0.9.2, your current skills, a worktree tool and a way to notify you. <a class="src" href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="15">VPS file</a></p></li>
       <li><p><strong>Claude Code's cloud is good for tasks, and close to ready for efforts.</strong> Tested from inside: it pushes a branch it names, opens pull requests, and has a headless Chromium. Your skills load once a setup script installs them into the VM's home; idle VMs still lose background work, sub-agents can't nest, and an agent-side start is untested. <a class="src" href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="16">Probe file</a></p></li>
       <li><p><strong>Other hosted agents are delegates, not orchestrators.</strong> Codex, Cursor and Copilot each take one prompt on one branch and return a pull request; none is worth a sign-up before Claude Code's cloud is tried. <a class="src" href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">Providers file</a></p></li>
@@ -841,7 +863,7 @@ footer .slide-inner { gap: 10px; }
     <ol class="dcards" id="dcards">
 
       <li class="dcard" data-status="open"><details>
-        <summary><span class="did">D4</span><span class="dhead"><span class="dq-t">Resize the VPS, or move it?</span><span class="dans">You: Hetzner can't resize now. You're open to paying more, even around $50 a month, or another European provider. It needs its own research.</span></span><span class="status s-open">Needs more</span></summary>
+        <summary><span class="did">D4</span><span class="dhead"><span class="dq-t">Resize the VPS, or move it?</span><span class="dans">You: Hetzner can't resize; open to about $50 a month or another European provider. Research #86 is in: netcup Root Server RS 2000, 16 GB with 8 dedicated cores, €34.20 a month.</span></span><span class="status s-open">Needs more</span></summary>
         <div class="dbody">
           <p><b>What it's about.</b> Your VPS (Hetzner CX23: 2 shared vCPU, 4 GB, €5.99) fits one agent with no browser. RAM is the limit, and with no swap, running out of memory kills processes.</p>
           <p><b>Shared or dedicated?</b> A <b>shared</b> vCPU is a slice of a physical core that other customers also use. It's cheap and fine for agents, which mostly wait on the model. A <b>dedicated</b> vCPU is yours alone: steady speed for builds that run all day, at 3-5 times the price for the same RAM. Nothing you run today needs dedicated cores.</p>
@@ -856,13 +878,13 @@ footer .slide-inner { gap: 10px; }
           </table></div>
           <p><b>Outside Hetzner</b>, for 4 vCPU and 8 GB: netcup €14.50 (Vienna, Nuremberg, Amsterdam; 1-24 month terms); Vultr $40 and DigitalOcean $48 (Frankfurt, Amsterdam, hourly). Other European providers, such as OVHcloud, Scaleway, IONOS and Contabo, weren't compared.</p>
           <p><b>What's already true.</b> The out-of-stock mark is Hetzner's capacity restriction for some customers and locations; your running CX23 isn't affected, and a refused rescale can be retried another day. Its AMD shared line (CPX) is in stock: CPX32, 8 GB for €35.99, is inside your budget today.</p>
-          <p><b>Next.</b> A research ticket: cost-effective European VPS providers for low latency, shared against dedicated, and what €30-50 a month buys. Until then, 2-4 GB of swap on the CX23 costs nothing.</p>
+          <p><b>Research is in.</b> <a href="#vps">Where to move the VPS</a> compares ten providers, measures latency from your Mac and ranks a shortlist. Recommended: <b>netcup RS 2000</b> (16 GB, 8 dedicated cores, €34.20 net a month on 12 months, 30-day money-back), with the CX23 kept alongside for a few weeks. <b>Your call:</b> order it (or a fallback) and set it up as the new agent machine.</p>
           <p class="small"><a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="64">Sizing file: workloads and tiers</a> <span class="muted">·</span> <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="150">Alternatives</a></p>
         </div>
       </details></li>
 
       <li class="dcard" data-status="open"><details>
-        <summary><span class="did">D7</span><span class="dhead"><span class="dq-t">Which hosted agents, for which single tickets?</span><span class="dans">You: yes to hosted agents for small efforts and single tickets. You want the pros, cons and costs before choosing.</span></span><span class="status s-open">Needs more</span></summary>
+        <summary><span class="did">D7</span><span class="dhead"><span class="dq-t">Which hosted agents, for which single tickets?</span><span class="dans">You: yes to hosted agents for single tickets, once the costs are clear. Research #87 is in: the model costs the same everywhere; keep the Claude plan, and add Copilot at $10 only if you want a second delegate.</span></span><span class="status s-open">Needs more</span></summary>
         <div class="dbody">
           <p><b>What it's about.</b> Which service takes a self-contained ticket off your hands: one prompt in, one branch and PR out. None of them can orchestrate an effort.</p>
           <div class="tbl"><table>
@@ -876,8 +898,8 @@ footer .slide-inner { gap: 10px; }
             </tbody>
           </table></div>
           <p><b>Recommended.</b> Claude Code's cloud first: no sign-up, and the credit is there to spend. Add Copilot if you want a second, as the cheapest trial. Whichever you use, the brief carries the rules, and the result comes back as a branch you review.</p>
-          <p><b>Next.</b> Try two or three real tickets on Claude Code's cloud this week while the credit lasts, and note which kinds of ticket came back clean. Sign up for Copilot only if you want the comparison.</p>
-          <p class="small"><a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">Providers comparison</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="178">D7 in the synthesis</a></p>
+          <p><b>Research is in.</b> <a href="#costs">What delegating costs</a> has the cost per ticket, which ticket goes where, and which subscriptions to hold. <b>Your call:</b> whether to add Copilot or try Jules's free tier next to Claude Code's cloud.</p>
+          <p class="small"><a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">Providers comparison</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="181">D7 in the synthesis</a></p>
         </div>
       </details></li>
 
@@ -888,7 +910,7 @@ footer .slide-inner { gap: 10px; }
           <p><b>Options.</b> (a) Keep sub-agents and tell each one explicitly to start from the effort branch: a one-line fix to the orchestrating skills. (b) For efforts off the Mac, delegate to Herdr tabs that keep a status file, so the work survives if the orchestrator restarts. (c) Firstmate's model everywhere.</p>
           <p><b>Recommended.</b> (a) now, (b) when efforts run on the VPS (part of #15).</p>
           <p><b>Your plan for this effort</b> fits alongside it: merge the research, close the research tickets, and keep effort #45 going with action items. The base-branch fix would be one of them.</p>
-          <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="183">D8 in the synthesis</a></p>
+          <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="186">D8 in the synthesis</a></p>
         </div>
       </details></li>
 
@@ -914,7 +936,7 @@ footer .slide-inner { gap: 10px; }
       </details></li>
 
       <li class="dcard" data-status="open"><details>
-        <summary><span class="did">D13</span><span class="dhead"><span class="dq-t">What to take from Firstmate?</span><span class="dans">You: don't adopt it, but understand its ideas and which workflows to borrow.</span></span><span class="status s-open">Needs more</span></summary>
+        <summary><span class="did">D13</span><span class="dhead"><span class="dq-t">What to take from Firstmate?</span><span class="dans">You: don't adopt it; understand it and pick what to borrow. Research #88 is in: 18 ideas ranked, the top two small changes to your skills.</span></span><span class="status s-open">Needs more</span></summary>
         <div class="dbody">
           <p><b>What it is.</b> An open-source "agent distro" by Treehouse's author: you clone it, start any terminal agent inside it, and that agent becomes your one point of contact for every project.</p>
           <dl class="qa qa-tight">
@@ -940,6 +962,7 @@ footer .slide-inner { gap: 10px; }
             </tbody>
           </table></div>
           <p><b>Recommended.</b> Borrow; don't adopt. Adopting it would replace your effort workflow, run workers with permissions bypassed, and strip AI trailers.</p>
+          <p><b>Research is in.</b> <a href="#firstmate">How Firstmate works</a> covers its tools, its workflows, one task traced end to end, and the full borrow list. <b>Your call:</b> which items to take into #13, #15, #16 and the skills.</p>
           <p class="small"><a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="16">How Firstmate delegates</a> <span class="muted">·</span> <a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="122">Mapped against your workflow</a></p>
         </div>
       </details></li>
@@ -949,7 +972,7 @@ footer .slide-inner { gap: 10px; }
         <div class="dbody">
           <p><b>The research said.</b> The VPS now, the cloud later: only the VPS runs your workflow unchanged, and a cloud effort needs your skills there first (E16) and an agent-side start (E17).</p>
           <p><b>What your answer means.</b> Two tracks at once. VPS: Herdr, set-up-machine, one real effort. Cloud: the setup script (E16), then one effort in a single session you watch. The credit's deadline puts the cloud track first. Running a cloud effort doesn't need E17: you start it yourself with <code>claude --cloud</code>.</p>
-          <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="146">D1 in the synthesis</a></p>
+          <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="149">D1 in the synthesis</a></p>
         </div>
       </details></li>
 
@@ -989,7 +1012,7 @@ footer .slide-inner { gap: 10px; }
       <li class="dcard" data-status="decided"><details>
         <summary><span class="did">D12</span><span class="dhead"><span class="dq-t">Spend the promo credit?</span><span class="dans">You: yes. It's working, #78's session was paid from it, and you count about a week left.</span></span><span class="status s-decided">Agreed</span></summary>
         <div class="dbody">
-          <p><b>Next.</b> Spend it on the cloud track: E16 (setup script), then real tickets and one effort (D1, D7). The research read a rate-limit window that resets on 5 November; the usage page's expiry date is the one to plan by.</p>
+          <p><b>Next.</b> Spend it on the cloud track: E16 (setup script), then real tickets and one effort (D1, D7). Press reports say claim by <b>7 October</b>, spend by <b>4 November</b>, not for projects or routines (unverified; see <a href="#costs">What delegating costs</a>). The usage page's dates are the ones to plan by.</p>
         </div>
       </details></li>
 
@@ -1015,14 +1038,286 @@ footer .slide-inner { gap: 10px; }
         </div>
       </details></li>
     </ol>
-    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="220">Your answers, recorded in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="142">All thirteen in the synthesis</a> <span class="muted">·</span> <a class="muted" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md#decisions-for-the-maintainer">on GitHub</a></p>
+    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="223">Your answers, recorded in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="145">All thirteen in the synthesis</a> <span class="muted">·</span> <a class="muted" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md#decisions-for-the-maintainer">on GitHub</a></p>
+    <a class="next" href="#vps">Next: where to move the VPS</a>
+  </div>
+</section>
+
+<section class="slide" id="vps" aria-labelledby="vps-h" data-name="Where to move the VPS">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">9</span>Where to move the VPS <span class="muted">· research #86</span></p>
+    <h2 id="vps-h">16 GB with dedicated cores, for about €35 a month</h2>
+    <p class="lede">Hetzner's cheap line is still shut, and what Hetzner sells today at 16 GB costs €70-86. netcup's root server gives 16 GB and 8 dedicated cores for less than half of that, and latency from your Mac is the same as today.</p>
+    <div class="tbl"><table>
+      <caption>The shortlist, prices per month read on 30 September (net of VAT)</caption>
+      <thead><tr><th>#</th><th>Offer</th><th>Size</th><th>Price</th><th>Why</th><th>Against</th></tr></thead>
+      <tbody>
+        <tr class="pick"><td>1</td><th>netcup Root Server RS 2000</th><td>8 <b>dedicated</b> AMD EPYC (Zen 5), 16 GB, 256 GB NVMe</td><td><b>€34.20</b> on 12 months; €39.34 month to month</td><td>The only 16 GB with dedicated cores in budget; newest CPU on the list; 30-day money-back</td><td>No hourly billing; best price needs a 12-month term</td></tr>
+        <tr><td>2</td><th>netcup VPS 2000</th><td>8 shared, 16 GB, 256 GB</td><td>€22.62 on 12 months</td><td>Same provider and latency, two-thirds the price</td><td>Shared cores</td></tr>
+        <tr><td>3</td><th>OVHcloud VPS-4</th><td>8 shared, 24 GB, 200 GB</td><td>€23.49, no term</td><td>Most RAM for the money with no commitment; 63 ms</td><td>Monthly, not hourly</td></tr>
+        <tr><td>4</td><th>UpCloud Starter</th><td>4 cores, 16 GB, 50 GB</td><td>€28, hourly</td><td>Try it and delete it the same day</td><td>Older AMD CPUs; small disk</td></tr>
+        <tr><td>5</td><th>Hetzner CX43</th><td>8 shared, 16 GB, 160 GB</td><td>€16.49, hourly</td><td>Cheapest of all; same provider as today</td><td><i>Not orderable, no date given</i></td></tr>
+      </tbody>
+    </table></div>
+    <div class="note"><p><strong>Recommended:</strong> netcup RS 2000 in Nuremberg on a 12-month term, with the 30-day money-back guarantee as the trial. Keep today's CX23 running beside it for 2-4 weeks (€5.99 a month), and don't delete it early: Hetzner won't sell it again. If you'd rather not commit, the same plan month to month is €39.34.</p></div>
+    <div class="folds">
+      <details class="fold">
+        <summary><span><span class="fold-k">Plain words</span>Shared or dedicated cores, and what else matters</span></summary>
+        <div class="fold-body">
+          <p>A <b>shared</b> vCPU is a slice of a core that other customers' servers also use: when they're busy you wait (Linux shows it as "steal time"). A <b>dedicated</b> vCPU is a CPU thread reserved for you, so a build or a browser takes the same time every run. It's usually about twice the price per vCPU. <b>RAM decides the size; the CPU type decides how smooth the bursts are.</b></p>
+          <div class="tbl"><table>
+            <thead><tr><th>Part of the work</th><th>CPU pattern</th><th>Shared is fine?</th></tr></thead>
+            <tbody>
+              <tr><td>An agent waiting on the model, reading files, running git</td><td>Almost idle</td><td>Yes</td></tr>
+              <tr><td>Builds and test runs</td><td>A few cores flat out, for seconds to minutes</td><td>Yes, but slower when neighbours are busy</td></tr>
+              <tr><td>Headless Chromium</td><td>Spiky; one busy page can fill a core; 0.5-1 GB RAM</td><td>For one page at a time; several browsers plus a build want 4+ cores</td></tr>
+              <tr><td>Several agents at once</td><td>RAM adds up per agent</td><td>RAM is the limit, not CPU</td></tr>
+            </tbody>
+          </table></div>
+          <p class="small">Also worth checking: CPU generation (newer finishes builds sooner), x86 rather than Arm (some Docker images are x86 only), 100 GB+ NVMe for repos and the Playwright image, IPv4 included, and hourly vs term billing.</p>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">Measured from your Mac</span>Latency: 54-102 ms, too close to choose on</span></summary>
+        <div class="fold-body">
+          <div class="bars" role="list">
+            <div role="listitem"><span>DigitalOcean / Vultr Frankfurt</span><i style="--v:54"></i><b>54</b></div>
+            <div role="listitem"><span>Linode Milan</span><i style="--v:60"></i><b>60</b></div>
+            <div role="listitem"><span>OVHcloud Strasbourg</span><i style="--v:63"></i><b>63</b></div>
+            <div role="listitem"><span>netcup</span><i style="--v:68"></i><b>68</b></div>
+            <div role="listitem"><span>Hetzner Falkenstein (today's region)</span><i style="--v:70"></i><b>70</b></div>
+            <div role="listitem"><span>Scaleway Paris</span><i style="--v:72"></i><b>72</b></div>
+            <div role="listitem"><span>Hetzner Nuremberg</span><i style="--v:77"></i><b>77</b></div>
+            <div role="listitem"><span>Hetzner Helsinki</span><i style="--v:102"></i><b>102</b></div>
+          </div>
+          <p class="small muted">Median ping in ms, 7 samples each, one run on 30 September. Central Europe is 54-84 ms everywhere; avoid Helsinki. A 10-20 ms difference doesn't matter next to model calls that take seconds.</p>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">If you move</span>Switching: rebuild, run both, then retire the old one</span></summary>
+        <div class="fold-body">
+          <ol class="steps">
+            <li>Order the new machine (your account, payment and an SSH key).</li>
+            <li>Rebuild on a fresh Ubuntu LTS rather than copying the old disk: it's the moment to make the setup reproducible.</li>
+            <li>Node, Claude Code, <code>gh</code>, Herdr at the Mac's version, <code>jq</code>, Go and Treehouse; then set-up-machine once #66 merges.</li>
+            <li>The headless browser as root on day zero: <code>npx playwright install --with-deps chromium</code>, or the Playwright Docker image (D5).</li>
+            <li>Log in again (<code>claude</code>, <code>gh</code>, a new GitHub SSH key); clone the repos; move the old box's services one by one.</li>
+            <li><code>herdr machine add</code> a second saved machine with a new label; new efforts go there, running ones finish on the old box.</li>
+            <li>After 2-4 weeks, with no unpushed branches left on it, delete the CX23 and its Herdr profile.</li>
+          </ol>
+          <p class="small muted">Cost of the switch: the new machine, plus €5.99 a month for the overlap and a few hours of setup. There's no setup fee at netcup.</p>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">Also compared</span>Why the others didn't make the list</span></summary>
+        <div class="fold-body">
+          <ul class="ticks">
+            <li><b>Hetzner, orderable today:</b> CPX42 16 GB €69.99, CCX23 16 GB dedicated €86.49, CCX13 8 GB dedicated €43.49, server auction from €62.</li>
+            <li><b>DigitalOcean, Vultr, Akamai/Linode:</b> $80-96 a month for 16 GB shared. They're the lowest-latency, but you pay for regions and features, not resources.</li>
+            <li><b>Scaleway:</b> €50-86 net for 16 GB, plus storage and IPv4.</li>
+            <li><b>IONOS:</b> 16 GB shared for €34.45 with a term and a setup fee, worse than netcup's shared VPS.</li>
+            <li><b>Contabo:</b> cheapest on paper, but noisy-neighbour hardware, 24-month pricing and a slow port.</li>
+            <li><b>Hostinger:</b> multi-year payment upfront, and renewal doubles. <b>Oracle's free Arm tier:</b> reclaims idle machines.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+    <p class="small"><a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="250">Ranked shortlist</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="57">Every provider at 8 and 16 GB</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="184">All latency figures</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/86">#86</a></p>
+    <a class="next" href="#costs">Next: what delegating costs</a>
+  </div>
+</section>
+
+<section class="slide" id="costs" aria-labelledby="costs-h" data-name="What delegating costs">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">10</span>What delegating costs <span class="muted">· research #87</span></p>
+    <h2 id="costs-h">The model costs the same everywhere. Your plan is the cheapest place to pay for it.</h2>
+    <p class="lede">Cursor, Copilot and Amp all charge Claude Opus at Anthropic's list price. Services differ in who carries the cost, a flat plan or a meter, and in whether your skills come along. Compute (Actions minutes, orbs, a VPS) is small change.</p>
+    <div class="stats">
+      <div><b>≈ $1</b><span>a small fix</span></div>
+      <div><b>≈ $4</b><span>a medium feature ticket</span></div>
+      <div><b>≈ $28</b><span>a five-ticket effort</span></div>
+      <p class="small muted">Estimated model usage at list price on an Opus-class model, wherever it runs. Sonnet-class is about $0.60 / $2.40 / $17. Inside your Claude plan's windows, the cash cost is $0.</p>
+    </div>
+    <div class="tbl"><table>
+      <caption>Where a ticket can go, and what it adds to your bill</caption>
+      <thead><tr><th></th><th>Fixed per month</th><th>Extra cash per ticket</th><th>Your skills?</th><th>Watch out for</th></tr></thead>
+      <tbody>
+        <tr class="pick"><th>Claude Code cloud session</th><td>Your plan</td><td>$0 inside the plan's windows; the promo credit is spent first</td><td>Yes, via the setup script (E16)</td><td>An idle VM loses background work; permission prompts stall</td></tr>
+        <tr class="pick"><th>Claude Code on the VPS</th><td>Your plan + the VPS</td><td>$0 inside the windows</td><td>Yes, unchanged</td><td>No promo credit; RAM on a small box</td></tr>
+        <tr><th>Copilot cloud agent</th><td>$10 (1,500 AI credits)</td><td>Opus: 100 / 400 / 2,500 credits; about 3 medium tickets a month fit</td><td>No; <code>AGENTS.md</code> only</td><td>A hard 59-minute cap: a timed-out session has spent its credits</td></tr>
+        <tr><th>Cursor Cloud Agents</th><td>$20</td><td>Metered from the first token: $1 / $4 / $28 on Opus, $0.29 / $1.15 / $8 on Composer</td><td>Partly: <code>~/.cursor/skills</code> and User Rules</td><td>You set a spend limit at first use</td></tr>
+        <tr><th>Codex cloud</th><td>$20 (ChatGPT Plus)</td><td>$0 inside the allowance, then credits</td><td>Unverified</td><td>No follow-up from a shell; best-of-N multiplies usage</td></tr>
+        <tr><th>Jules</th><td>$0 free tier</td><td>15 tasks a day</td><td>Unverified</td><td>A failed task still counts</td></tr>
+        <tr><th>Devin, Factory, Amp, OpenHands</th><td>$0-20+</td><td>Quotas or tokens at list price</td><td>Some, their own way</td><td>Another subscription or meter for what the plan already gives</td></tr>
+      </tbody>
+    </table></div>
+    <div class="folds">
+      <details class="fold" open>
+        <summary><span><span class="fold-k">The delegation guide</span>Which ticket goes where</span></summary>
+        <div class="fold-body">
+          <div class="tbl"><table>
+            <thead><tr><th>Ticket</th><th>Send it to</th><th>Why</th></tr></thead>
+            <tbody>
+              <tr><td>Small, well-specified fix on a public repo</td><td>A Claude Code cloud session now; Copilot if you hold it</td><td>$0 cash; a small fix fits Copilot's 59 minutes</td></tr>
+              <tr><td>Medium feature that needs your skills</td><td>A cloud session after E16, else the VPS</td><td>The only places your skills run unchanged</td></tr>
+              <tr><td>A whole effort</td><td>The VPS or the Mac; one cloud session once E16 works</td><td>Idle reclaim and one level of sub-agents make cloud orchestration fragile today</td></tr>
+              <tr><td>Long unattended work, over an hour</td><td>The VPS</td><td>No idle reclaim, no 59-minute cap</td></tr>
+              <tr><td>Private repos</td><td>The VPS or a Claude Code cloud session</td><td>No new company gets the code</td></tr>
+              <tr><td>Recurring chores</td><td>Claude Code routines</td><td>Plan usage; the start caps are far above need</td></tr>
+              <tr><td>Browser or UI checks</td><td>A Claude Code cloud session</td><td>Headless Chromium is already there</td></tr>
+              <tr><td>A second opinion from another model family</td><td>Jules free tier, or Copilot with a GPT model</td><td>$0, or inside Copilot's credits</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">Subscriptions</span>Hold, try, or skip</span></summary>
+        <div class="fold-body">
+          <ul class="ticks">
+            <li><b>Hold:</b> the Claude plan, which everything leans on, and the VPS. Rule of thumb: if usage past Pro's limit would cost more than about $80 a month (about 20 medium tickets), Max 5x is cheaper.</li>
+            <li><b>Try, only if you want a second delegate:</b> Copilot Pro at $10, for small tickets on public repos. Cancel it if its PRs need heavy rework.</li>
+            <li><b>Try for free:</b> Jules, 15 tasks a day.</li>
+            <li><b>Skip for now:</b> Cursor (the same models metered on top of $20), ChatGPT Plus for Codex (fine if you want ChatGPT anyway), Devin, Factory, Amp, OpenHands and Managed Agents.</li>
+          </ul>
+          <p><b>Skills are the multiplier.</b> A delegate without your workflow hands back work that needs more review, and a rework round costs as much as the first pass. Every extra vendor is also another GitHub App with access to your code.</p>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">This week</span>Spending the promo credit well</span></summary>
+        <div class="fold-body">
+          <p>Press reports say the credit must be <b>claimed by 7 October</b> and <b>spent by 4 November</b>, and that it doesn't cover projects or routines. That's why you count about a week. Only Anthropic's own posts are primary sources, so treat the dates as unverified. If it burns at list price, $250 is about 60 medium tickets or 9 efforts.</p>
+          <ol class="steps">
+            <li><b>Measure:</b> read your usage page before and after one medium cloud ticket, and keep the figures private.</li>
+            <li>Small and medium tickets on public repos, as cloud sessions with self-contained briefs.</li>
+            <li>E16, the setup script that installs your skills, then a ticket that uses them.</li>
+            <li>One whole effort in a single cloud session you watch.</li>
+            <li>Keep the credit off projects and routines until coverage is clear.</li>
+          </ol>
+        </div>
+      </details>
+    </div>
+    <p class="small"><a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="115">The cost table with its assumptions</a> <span class="muted">·</span> <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="24">How each service bills</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/87">#87</a></p>
+    <a class="next" href="#firstmate">Next: how Firstmate works</a>
+  </div>
+</section>
+
+<section class="slide" id="firstmate" aria-labelledby="fm-h" data-name="How Firstmate works">
+  <div class="slide-inner">
+    <p class="stop"><span class="stop-dot" aria-hidden="true">11</span>How Firstmate works <span class="muted">· research #88</span></p>
+    <h2 id="fm-h">One supervisor, many workers, and files instead of memory</h2>
+    <p class="lede">One agent, the <b>first mate</b>, never writes code. It writes a <b>brief</b> file and starts a <b>crewmate</b> in its own terminal tab and worktree. From then on they talk only through files, and a bash <b>watcher</b> that spends no tokens wakes the first mate only when something needs it. Everything that must survive a crash is a file with one owner script.</p>
+    <ol class="flow flow-long" aria-label="The life of one task">
+      <li>Intake</li><li>Brief</li><li>Spawn</li><li>Work + status lines</li><li>Watcher wakes</li><li>Answer via inbox</li><li>PR</li><li>Captain says merge</li><li>Guarded merge</li><li>Teardown</li>
+    </ol>
+    <dl class="qa qa-tight">
+      <div><dt>Captain and first mate</dt><dd>You talk only to the first mate, a long-lived agent per machine. It triages, writes briefs, supervises and asks you for decisions, but never touches a project itself.</dd></div>
+      <div><dt>Crewmate</dt><dd>One visible terminal agent per task (Claude, Codex, opencode and others), each in its own Treehouse worktree on branch <code>fm/&lt;id&gt;</code>.</dd></div>
+      <div><dt>Brief</dt><dd><code>data/&lt;id&gt;/brief.md</code>: your words verbatim as acceptance criteria, the build spec, an isolation check, and the definition of done. A relaunched worker reads the same brief.</dd></div>
+      <div><dt>Status file</dt><dd>The worker appends sparse one-line events to <code>state/&lt;id&gt;.status</code>: <code>working</code>, <code>needs-decision [key=…]</code>, <code>blocked</code>, <code>paused</code>, <code>done</code>, <code>failed</code>. A decision stays open until a matching <code>resolved</code>.</dd></div>
+      <div><dt>Inbox and doorbell</dt><dd>Steering is a numbered file in <code>state/&lt;id&gt;.inbox/</code>, plus one constant line typed into the pane. The worker acks by moving the file to <code>handled/</code>; an unread message is re-rung, then escalated.</dd></div>
+      <div><dt>Watcher and wake queue</dt><dd><code>fm-watch.sh</code> checks every 15 s in bash, absorbs routine noise, and queues only what needs action. The first mate acknowledges a wake only after handling it. On Claude, a second headless session now handles routine wakes.</dd></div>
+      <div><dt>Secondmate</dt><dd>A whole Firstmate home on another machine over SSH, with a readiness "doctor". An unreachable machine reads <i>unknown</i>, never dead, and work never silently moves back to local.</dd></div>
+    </dl>
+    <div class="folds">
+      <details class="fold">
+        <summary><span><span class="fold-k">Tools</span>What it runs on, and the scripts that matter</span></summary>
+        <div class="fold-body">
+          <div class="tbl"><table>
+            <caption>External tools</caption>
+            <thead><tr><th>Tool</th><th>What Firstmate uses it for</th></tr></thead>
+            <tbody>
+              <tr><th>treehouse</th><td>A disposable worktree per task: <code>treehouse get</code> in the new pane, <code>treehouse return</code> at teardown</td></tr>
+              <tr><th>tmux / Herdr / zellij / cmux / Orca</th><td>The terminal backend, one tab per task. Herdr is verified and always used on a remote host</td></tr>
+              <tr><th>gh, gh-axi</th><td>PRs, checks and merges; the axi version gives workers compact output</td></tr>
+              <tr><th>no-mistakes</th><td>The strictest delivery mode: review, tests, lint, push, PR and CI watch in a disposable worktree</td></tr>
+              <tr><th>tasks-axi</th><td>The backlog, a Markdown file the scripts move items through: Queued, In flight, Done</td></tr>
+              <tr><th>quota-axi</th><td>Reads every provider's quota windows, to pick which harness and model get a task</td></tr>
+              <tr><th>chrome-devtools-axi</th><td>Browser work for workers</td></tr>
+              <tr><th>lavish-axi</th><td>Optional HTML boards for decisions and reports</td></tr>
+            </tbody>
+          </table></div>
+          <div class="tbl"><table>
+            <caption>The scripts that carry the workflow (of 214 in bin/)</caption>
+            <thead><tr><th>Script</th><th>Job</th></tr></thead>
+            <tbody>
+              <tr><th>fm-brief.sh</th><td>Scaffolds the brief; refuses to overwrite one</td></tr>
+              <tr><th>fm-spawn.sh</th><td>Locks, makes the tab, waits for the worktree, wires hooks, writes the meta record, moves the backlog item, launches the harness</td></tr>
+              <tr><th>fm-send.sh</th><td>Inbox message plus doorbell; <code>--resolve-key</code> closes a decision</td></tr>
+              <tr><th>fm-control.sh</th><td>Interrupt, exit or relaunch a worker, with a verified result</td></tr>
+              <tr><th>fm-watch.sh, fm-wake-drain.sh</th><td>The watcher loop, and the drain that shows open decisions and acks the queue</td></tr>
+              <tr><th>fm-crew-state.sh</th><td>One current-state line per task, from the log and live evidence</td></tr>
+              <tr><th>fm-captain-hold.sh</th><td>Holds a backlog item for your decision and records your exact words</td></tr>
+              <tr><th>fm-pr-check.sh, fm-pr-merge.sh</th><td>Registers the PR and polls it; merges only with every check green at the current head, with <code>--match-head-commit</code></td></tr>
+              <tr><th>fm-teardown.sh</th><td>Proves the work landed, closes the tab, returns the worktree, closes the backlog item</td></tr>
+              <tr><th>fm-on.sh, fm-remote-doctor.sh</th><td>Runs a script on a remote home over SSH (exit 255 = unknown); checks a host's readiness</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">Workflows</span>The main flows, step by step</span></summary>
+        <div class="fold-body">
+          <dl class="qa">
+            <div><dt>Intake</dt><dd>Find the project; <b>ship</b> (a change, the default) or <b>scout</b> (a report, never a PR); the delivery mode (no-mistakes, direct-PR, local-only); the merge posture (you approve every merge, or "yolo" merges green work); pick the harness; file the backlog item. Independent work starts at once.</dd></div>
+            <div><dt>Brief and spawn</dt><dd>Scaffold and fill the brief, then <code>fm-spawn.sh</code>: take locks, open a tab, run <code>treehouse get</code> and wait for a clean worktree, pre-accept the trust prompt, install hooks, write <code>state/&lt;id&gt;.meta</code>, move the item to In flight, launch the agent with the brief.</dd></div>
+            <div><dt>The worker's loop</dt><dd>An isolation check first; a branch; work; a status line only for a phase change; read the inbox at checkpoints and when the doorbell rings; each turn end touches a file the watcher reads.</dd></div>
+            <div><dt>Decisions</dt><dd>The worker writes <code>needs-decision</code> and stops. The first mate decides what's unambiguous, and escalates only a scope expansion, a product call or destructive work. It holds the item for you and relays your answer with <code>--resolve-key</code>.</dd></div>
+            <div><dt>Delivery and merge</dt><dd>"Done" counts only when the head is pushed. The PR is registered and polled; the merge waits for your word, then checks live state and merges with <code>--match-head-commit</code>, so a push after your review fails the merge.</dd></div>
+            <div><dt>Teardown</dt><dd>Refuse if anything isn't landed; close the tab; return the worktree; mark the item Done. The brief and any report stay.</dd></div>
+            <div><dt>Crash and restart</dt><dd>A new session takes a lock or stays read-only, then reconciles from the meta records, status logs and wake queue. A stuck worker is peeked, answered, interrupted, then relaunched into the same worktree with the same brief plus a progress note. "A restart must be a non-event."</dd></div>
+            <div><dt>Remote secondmates</dt><dd>Seed a home on the host after a readiness check; every call is a validated script run over SSH; requests go into the remote inbox with a correlation id; replies are mirrored back from its status file; an unreachable host reads <i>unknown</i>.</dd></div>
+          </dl>
+        </div>
+      </details>
+      <details class="fold">
+        <summary><span><span class="fold-k">Traced end to end</span>One task in 23 steps, condensed</span></summary>
+        <div class="fold-body">
+          <p class="small muted">The captain types "the login page redirects to / instead of /dashboard; fix it in acme-web". Direct-PR mode, Herdr backend, merge by the captain's word.</p>
+          <ol class="steps">
+            <li>The first mate resolves the project and mode, files <code>login-redirect-k3</code> in the backlog, and writes the brief.</li>
+            <li><code>fm-spawn.sh</code> opens a Herdr tab, gets a Treehouse worktree, writes the meta record, and launches Claude with the brief.</li>
+            <li>The worker checks it's isolated, branches, reproduces the bug, and appends <code>working</code>. The watcher absorbs it.</li>
+            <li>It finds two plausible fixes and appends <code>needs-decision [key=redirect-target]</code>. The watcher queues a wake.</li>
+            <li>It's a product call, so the first mate holds the item and asks the captain in one line, with a recommendation.</li>
+            <li>The captain answers. The first mate records it and sends it through the inbox with <code>--resolve-key</code>. The worker reads it and acks.</li>
+            <li>The worker pushes, opens a ready PR, and appends <code>done: PR …</code>. The first mate checks state and registers the PR.</li>
+            <li>The captain says "merge". <code>fm-pr-merge.sh</code> checks live state and merges with <code>--match-head-commit</code>.</li>
+            <li><code>fm-teardown.sh</code> proves it landed, closes the tab, returns the worktree, and marks the item Done. One line to the captain with the PR's URL.</li>
+          </ol>
+        </div>
+      </details>
+    </div>
+    <h3 class="sub-h">What to borrow, ranked</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>#</th><th>Idea</th><th>Lands in</th><th>What changes</th><th>Effort</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><th>Worktree-isolation check in delegate briefs</th><td>orchestrate-effort, implement</td><td>"Confirm you're in your own worktree; if not, stop and report"</td><td>S</td></tr>
+        <tr><td>2</td><th>Guarded merge</th><td>close-effort</td><td>Every check green at the current head; <code>--match-head-commit</code></td><td>S</td></tr>
+        <tr><td>3</td><th>Status-file protocol</th><td>orchestrating, #16</td><td>Fixed verbs; a decision stays open until its keyed <code>resolved</code></td><td>M</td></tr>
+        <tr><td>4</td><th>Relaunch from the brief on disk</th><td>#15, handover</td><td>Same worktree, same brief, plus a progress note; never a fresh worktree while the old one is unaccounted for</td><td>M</td></tr>
+        <tr><td>5</td><th>One owner per branch</th><td>#15</td><td>A lock naming the live session; a new one stays read-only until it can take it</td><td>M</td></tr>
+        <tr><td>6</td><th>Durable inbox and doorbell</th><td>handover-to-herdr, #13, #16</td><td>Steer a VPS session with a file plus one constant line, not a pasted prompt</td><td>M</td></tr>
+        <tr><td>7</td><th>Readiness check before a handover</th><td>#13, set-up-machine</td><td>Read-only; gaps tagged "fixable" or "needs you"</td><td>M</td></tr>
+        <tr><td>8</td><th>Unreachable is unknown</th><td>#16, #13</td><td>A failed SSH read says "can't see it", never "it stopped"</td><td>S</td></tr>
+      </tbody>
+    </table></div>
+    <details class="fold">
+      <summary><span><span class="fold-k">Items 9-18, and what not to take</span>The rest of the list</span></summary>
+      <div class="fold-body">
+        <ul class="ticks">
+          <li><b>9</b> Decide-or-escalate rules for review findings (orchestrating). <b>10</b> A ladder for a stuck delegate: peek, answer, interrupt, relaunch (orchestrating). <b>11</b> Your own words kept verbatim as acceptance criteria (handoff, to-tickets). <b>12</b> A dedicated Herdr session for agent work on the VPS (#13). <b>13</b> A discovered PATH for non-login SSH (#13). <b>14</b> "Done" means a pushed head (#13, #15, close-effort). <b>15</b> Scripts record outcomes the model might forget (#16). <b>16</b> One current-state line per remote orchestrator (#16). <b>17</b> Pre-accepting the trust prompt, which writes Claude's config (handover-to-herdr). <b>18</b> An opt-in activity ledger (#16).</li>
+          <li><b>Don't borrow:</b> Firstmate itself; the watcher and supervision-host machinery; workers that skip permission checks; stripping AI co-author lines; one PR per task; quota routing and the third-party dispatch resolver; no-mistakes as a second pipeline; banning sub-agents on the Mac; the side features. As Firstmate's own rules put it: start with "the simplest direct end-to-end path".</li>
+        </ul>
+      </div>
+    </details>
+    <p class="small"><a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="171">All 214 scripts</a> <span class="muted">·</span> <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="456">Every workflow in full</a> <span class="muted">·</span> <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="641">The borrow table</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/88">#88</a></p>
     <a class="next" href="#direction">Next: what happens now</a>
   </div>
 </section>
 
 <section class="slide" id="direction" aria-labelledby="dir-h" data-name="What happens next">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">9</span>What happens next</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">12</span>What happens next</p>
     <h2 id="dir-h">Two tracks at once, the cloud first while the credit lasts</h2>
     <p class="lede">The research recommended the VPS first, then the cloud. With your answers it becomes two tracks side by side, and effort #45 carries on with action items instead of closing.</p>
     <div class="tracks">
@@ -1045,11 +1340,12 @@ footer .slide-inner { gap: 10px; }
         </ol>
       </div>
       <div class="track">
-        <h3>Still to research or decide</h3>
+        <h3>Your calls</h3>
         <ol class="steps">
-          <li>A new ticket: European VPS providers and sizes for €30-50 a month (D4).</li>
+          <li>Order the new VPS: netcup RS 2000, or a fallback (D4, #86).</li>
+          <li>Copilot or Jules as a second delegate, or neither (D7, #87).</li>
+          <li>Which Firstmate ideas to take; the top two are small skill changes (D13, #88).</li>
           <li>The base-branch fix for delegates (D8).</li>
-          <li>Which Firstmate ideas to take into #13, #15 and #16 (D13).</li>
           <li>Whether the wider ask-first line loosens with D11.</li>
         </ol>
       </div>
@@ -1060,7 +1356,7 @@ footer .slide-inner { gap: 10px; }
       <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/15"><b>#15</b> Continue an unfinished effort</a>
       <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/80"><b>#80</b> Phone push QA</a>
     </div>
-    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="271">How each build ticket was re-scoped</a> <span class="muted">(synthesis, a two-minute section)</span></p>
+    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="280">How each build ticket was re-scoped</a> <span class="muted">(synthesis, a two-minute section)</span></p>
     <a class="next" href="#try">Next: what you tried yourself</a>
   </div>
 </section>
@@ -1068,7 +1364,7 @@ footer .slide-inner { gap: 10px; }
 
 <section class="slide" id="try" aria-labelledby="try-h" data-name="Try it yourself">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">10</span>Try it yourself</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">13</span>Try it yourself</p>
     <h2 id="try-h">Experiment E1: done, from your own terminal</h2>
     <div class="try">
       <div class="prose">
@@ -1100,14 +1396,14 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
       </div>
     </div>
     <p class="small muted">E2 is done too: <code>list_sessions</code> shows no session left by probe 1, and <code>get_session</code> shows the promo credit in use; only the balance is left to read. Next, from the synthesis: E16 tries a cloud environment whose setup script installs your skills; E17 starts one child session with <code>create_session</code>; E18 leaves a session idle to time its reclaim; E19 needs only your word on whether the 29 September “PR ready for review” push arrived; E20 asks a session to push to a branch pushed from the Mac.</p>
-    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="244">E1 in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="202">The open questions it answered</a> <span class="muted">·</span> <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="123">What the CLI printed</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="238">All twenty experiments</a></p>
+    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="253">E1 in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="202">The open questions it answered</a> <span class="muted">·</span> <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="123">What the CLI printed</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="247">All twenty experiments</a></p>
     <a class="next" href="#read">Next: the reading path</a>
   </div>
 </section>
 
 <section class="slide" id="read" aria-labelledby="read-h" data-name="Reading path">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">11</span>Reading path</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">14</span>Reading path</p>
     <h2 id="read-h">Read the files in this order</h2>
     <p class="lede">The title of each card opens the file in VS Code. Times are for a full read; the top section of each file gives you the gist in a few minutes.</p>
     <ol class="cards">
@@ -1119,10 +1415,10 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
           <p class="when">Read first. If you only read one file, read this one; its first section takes three minutes.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="20">The short version</a>
-          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="31">Capability matrix</a>
-          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="142">Decisions</a>
-          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="238">Experiments</a>
+          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="23">The short version</a>
+          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="34">Capability matrix</a>
+          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="145">Decisions</a>
+          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="247">Experiments</a>
           <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md">GitHub</a>
         </p>
       </li>
@@ -1195,6 +1491,52 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
           <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="150">What it settles for the tickets</a>
           <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="196">How this effort was handed over</a>
           <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-delegation.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md">VPS options to switch to</a></h3>
+        <span class="time">about 20 min</span>
+        <div class="body">
+          <p>Answers: shared vs dedicated cores, ten European providers at 8 and 16 GB, latency from your Mac, and what a move takes.</p>
+          <p class="when">Read before ordering a new machine (D4).</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="14">Short answer</a>
+          <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="57">Providers</a>
+          <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="184">Latency</a>
+          <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="250">Shortlist</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-vps-providers.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md">What delegating costs</a></h3>
+        <span class="time">about 20 min</span>
+        <div class="body">
+          <p>Answers: how each hosted agent bills, what a ticket and an effort cost on each, and which tickets to send where.</p>
+          <p class="when">Read before adding a subscription (D7).</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="14">Short answer</a>
+          <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="115">Cost table</a>
+          <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="143">Beyond the price</a>
+          <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="166">Delegation guide</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-costs.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md">How Firstmate works, in depth</a></h3>
+        <span class="time">about 40 min</span>
+        <div class="body">
+          <p>Answers: every tool and script, every workflow step by step, one task traced end to end, and a ranked borrow list mapped to your skills.</p>
+          <p class="when">Read before building #13, #15 or #16, or changing the orchestrating skills (D13).</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="17">Short answer</a>
+          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="30">Tools</a>
+          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="456">Workflows</a>
+          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="609">Worked example</a>
+          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="641">What to borrow</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-firstmate-deep-dive.md">GitHub</a>
         </p>
       </li>
       <li class="card">

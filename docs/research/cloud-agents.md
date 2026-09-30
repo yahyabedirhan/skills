@@ -16,6 +16,9 @@ Every fact here comes from one of the research files below; each matrix cell lin
 | **sp** | [cloud-agents-session-probe.md](cloud-agents-session-probe.md): first-hand probes from inside a Claude Code cloud session | #78 |
 | **wf** | [cloud-agents-session-workflow.md](cloud-agents-session-workflow.md): how skills reach a cloud session, and the effort workflow there | #78 |
 | **ma** | [cloud-agents-managed-agents.md](cloud-agents-managed-agents.md): Managed Agents on the Claude Platform vs Claude Code cloud sessions | #78 |
+| **vp** | [cloud-agents-vps-providers.md](cloud-agents-vps-providers.md): VPS options to switch to, shared vs dedicated, latency | #86 |
+| **co** | [cloud-agents-costs.md](cloud-agents-costs.md): what delegating costs on each hosted agent, and which ticket goes where | #87 |
+| **fd** | [cloud-agents-firstmate-deep-dive.md](cloud-agents-firstmate-deep-dive.md): Firstmate's tools, workflows and a ranked borrow list | #88 |
 
 ## The short version
 
@@ -234,6 +237,12 @@ Two findings from running this effort: harness sub-agent worktrees were created 
 | D11 | No guard rules; agents work freely across the Mac and the VPS | Changed |
 | D12 | Yes; the maintainer confirmed on the usage page that #78's session was paid from the promo credit | Agreed |
 | D13 | Don't adopt; understand its concepts and pick what to borrow | Open |
+
+### Follow-up research on the open decisions (2026-09-30)
+
+- **D4 ([vp](cloud-agents-vps-providers.md#5-ranked-shortlist), #86).** Hetzner CX and CAX are still not orderable. The recommendation is **netcup Root Server RS 2000** (8 dedicated EPYC cores, 16 GB, 256 GB NVMe, €34.20 net a month on 12 months, 30-day money-back), with the CX23 kept alongside for 2-4 weeks. Fallbacks: netcup VPS 2000 (€22.62) and OVHcloud VPS-4 (€23.49, no term). Latency from the Mac is 54-102 ms across providers, too close to choose on.
+- **D7 ([co](cloud-agents-costs.md#short-answer), #87).** Metered vendors charge Claude Opus at Anthropic's list price, so a ticket costs about the same everywhere (estimates: $1 small, $4 medium, $28 for a five-ticket effort); the Claude plan turns that into $0 cash inside its windows. Hold the plan and the VPS; add Copilot Pro ($10) only for a second delegate; try Jules's free tier; skip the rest for now. The promo credit's claim date (7 October) and expiry (4 November) come from press reports only.
+- **D13 ([fd](cloud-agents-firstmate-deep-dive.md#3-what-to-borrow), #88).** 18 ideas ranked. The first two are small skill changes: a worktree-isolation check in delegate briefs (**orchestrate-effort**, **implement**) and a guarded merge with `--match-head-commit` (**close-effort**).
 
 ## Proposed experiments
 
