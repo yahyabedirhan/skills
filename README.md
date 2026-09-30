@@ -177,3 +177,7 @@ Add its row to its family's table under [Skills](#skills), and fold it into that
 ## Research
 
 `docs/research/` holds the fact-finding behind open issues: how the harnesses, Herdr, git and GitHub actually behave, with sources and test notes. Each issue links the notes it relies on. It is not installed.
+
+## License
+
+MIT, see [`LICENSE`](LICENSE). Forked skills keep their upstream license next to their `SKILL.md`.
