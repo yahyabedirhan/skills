@@ -36,7 +36,7 @@ Delete a branch or remove a worktree only when its work is **proven merged**. Th
 - **Matched by patch**: each of its commits has an identical patch on the default branch, as happens when commits are rebased or cherry-picked unchanged.
 - **In the merged pull request's head**: the pull request is merged, and the branch's tip is its head or an ancestor of it. A delegate branch left over from the build counts when its ticket's commit is in that head and the branch holds nothing else.
 
-A squash merge, or a commit changed while it was integrated, fails the first two proofs; only the merged pull request's head proves it. The decision record once got this wrong.
+A squash merge, or a commit changed while it was integrated, fails the first two proofs; only the merged pull request's head proves it.
 
 A worktree also needs to be clean after step 6, with no agent still working in it. Keep anything you can't prove or couldn't remove, and name it in the report with the reason.
 
@@ -105,7 +105,7 @@ Done when the effort's only open tickets are QA tickets waiting on the maintaine
 
 ## 6. Leave nothing only here
 
-Removing a worktree deletes its ignored and untracked files without asking. For each worktree you are about to remove, list those files and copy out what's worth keeping, following the folder standard in the **orchestrating** skill's `folders.md`: screenshots go to `docs/assets/<topic>/`, notes to a handoff or the tracker, a useful script to the main checkout's `.scratch/`, and editor settings like `.vscode/` to the main checkout.
+Removing a worktree deletes its ignored and untracked files without asking. For each worktree you are about to remove, list those files and copy out what's worth keeping, where the **orchestrating** skill's `folders.md` puts it. Editor settings like `.vscode/` count too; copy them to the main checkout.
 
 Then turn to this session itself: its uncommitted or unpushed work, and what it knows that isn't written down, like a decision, a half-done follow-up or an open question for the maintainer. Commit and push the work, and put each open item in a ticket, or in a handoff through the **handoff** skill. Anything that lands in tracked folders goes on the follow-up branch, committed and pushed.
 
@@ -113,7 +113,7 @@ Done when each worktree's untracked and ignored files are copied out or judged t
 
 ## 7. Free branches and worktrees
 
-Fetch and prune first. Then take each sub-agent worktree, each of the effort's other worktrees, leaving this session's for step 8, and each branch; prove it merged, then remove it. Free worktrees with the worktree tool, then delete local branches, then remote ones. Treehouse's return puts a worktree back in its pool for the next effort.
+Fetch and prune first. Then take each sub-agent worktree, each of the effort's other worktrees, leaving this session's for step 8, and each branch; prove it merged, then remove it. Free worktrees with the worktree tool, then delete local branches, then remote ones.
 
 A worktree whose branch has an open pull request stays until its branch is pushed. After that, keep its local branch only when the remote doesn't hold it.
 
@@ -131,5 +131,5 @@ Report in the chat, short, with links:
 
 Last, when this session runs inside one of the effort's worktrees, free that worktree from outside it. Freeing it stops every process in it, this session included, so it happens after the report. When this session runs elsewhere, step 7 already freed every worktree and this step is done.
 
-- **When the session host is Herdr**, open a shell in the repository's main checkout through the **handover-to-herdr** skill, labelled `shell · Close · <effort>`. As your last action, run the free command there after a short pause. The shell's output is its report, and your report names where it runs. The workspace stays open.
+- **When the session host is Herdr**, run the free command as your last action from a shell in the repository's main checkout, as the **handover-to-herdr** skill's `closing-an-effort.md` says. The shell's output is its report, and your report names where it runs.
 - **Otherwise**, this one step is the maintainer's: end the report with the command, to run once this session is closed.

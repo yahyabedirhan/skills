@@ -11,7 +11,7 @@ The git and gh commands for **close-effort**'s steps. Each entry says what it's 
 
 - `gh issue list --label effort:<effort> --state all`: the effort's tickets on GitHub. On a local tracker, read `.efforts/<effort>/` instead.
 - `git worktree list --porcelain`: every worktree with its branch. The plain `git worktree list` is easier to read and enough when branches aren't needed. When the worktree tool is Treehouse, `treehouse status` also shows which worktrees it leases.
-- `git branch -vv`: local branches with their upstream; `[gone]` marks one whose remote branch was deleted. `git branch -r` lists the remote ones.
+- `git branch -vv`: local branches with their upstream; `[gone]` marks one whose remote branch was deleted.
 
 ## Merge (step 2)
 
@@ -29,13 +29,9 @@ The git and gh commands for **close-effort**'s steps. Each entry says what it's 
 
 - `git worktree add --no-track -b <effort>-close <path> origin/<default>`: a worktree on a new branch from the default branch. When the worktree tool is Treehouse, lease one and switch its branch as the **treehouse** skill says.
 
-## Carry over and close the tracker (steps 4 and 5)
+## Label the next effort (step 4)
 
 - `gh label list --search effort:<next>`, then `gh label create effort:<next>` when it's missing.
-- `gh issue create --title <title> --body <body> --label effort:<next>`: a next-effort ticket; the body links where the item came from. `--body-file` suits a long body.
-- `gh issue comment <n> --body <text>`: the note on a QA ticket that the work is on the default branch.
-- `gh issue close <n> --comment <text>`: a finished ticket, or a carried-over one with a link to the ticket that continues it.
-- `gh issue edit <n> --body-file <file>`: ticks a criterion that could only be shown after the merge.
 
 ## Files and work only here (step 6)
 
