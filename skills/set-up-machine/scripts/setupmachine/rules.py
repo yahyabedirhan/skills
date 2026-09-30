@@ -15,8 +15,10 @@ kinds, told apart by its keys:
 - mcp-tool: `server` and `tool`, two case-insensitive regular expressions matched
   against the tool names the harness exposes on the machine.
 
-Any row may carry a `gap`: what no harness can catch for it, which every
-harness's audit names. A deny row may carry a `guard` (`label` and `rule`): a
+Every row carries `samples`: `covers`, calls the row must catch (a shell command,
+a path, or an MCP tool name, by the row's kind), and `leaves`, near misses it must
+let through. The verify script feeds them to the hook. Any row may carry a `gap`:
+what no harness can catch for it, which every harness's audit names. A deny row may carry a `guard` (`label` and `rule`): a
 prose rule for a harness's semantic guard, covering the row's family, for what
 its patterns can't list.
 """
@@ -69,6 +71,8 @@ class Rule:
     guard: str = ""  # `<label>: <rule>`, prose for a harness's semantic guard (Claude Code's auto mode)
     server: str = ""  # mcp-tool: regex over the server part of the tool name
     tool: str = ""  # mcp-tool: regex over the tool part
+    covers: tuple = ()  # samples the row must catch
+    leaves: tuple = ()  # near misses the row must let through
 
     @property
     def kind(self) -> str:
@@ -120,6 +124,11 @@ def _parse_row(row: dict, where: str) -> Rule:
         if row["level"] != "deny":
             raise RuleTableError(f"{where}: only a deny row can carry a guard")
         common["guard"] = f"{guard['label']}: {guard['rule']}"
+    samples = row.get("samples")
+    if not (isinstance(samples, dict) and set(samples) <= {"covers", "leaves"} and samples.get("covers")
+            and all(isinstance(v, list) and all(isinstance(x, str) and x for x in v) for v in samples.values())):
+        raise RuleTableError(f"{where}: samples must hold `covers`, a non-empty list of calls, and optionally `leaves`")
+    common["covers"], common["leaves"] = tuple(samples["covers"]), tuple(samples.get("leaves", []))
     kinds = [k for k, key in (("command", "program"), ("file", "paths"), ("mcp-tool", "server")) if key in match]
     if len(kinds) != 1:
         raise RuleTableError(f"{where}: match needs exactly one of program, paths or server")

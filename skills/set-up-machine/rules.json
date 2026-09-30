@@ -10,7 +10,11 @@
         "flags": [["r", "R", "recursive"], ["f", "force"]]
       },
       "reason": "A recursive forced delete can't be undone, and one wrong path loses work outside the task.",
-      "instruction": "Move what's no longer needed into the project's gitignored temp folder (`.scratch/` by default) with `mv`."
+      "instruction": "Move what's no longer needed into the project's gitignored temp folder (`.scratch/` by default) with `mv`.",
+      "samples": {
+        "covers": ["rm -rf x", "rm -fr x", "rm -r -f x", "rm --recursive --force x", "/bin/rm -rf x", "rm x -rf", "rm -rfv x", "timeout 5 rm -rf x", "git status && rm -rf x"],
+        "leaves": ["rm -r x", "rm -f x", "rmdir x", "echo 'rm -rf x'"]
+      }
     },
     {
       "id": "rm-no-preserve-root",
@@ -21,7 +25,11 @@
         "flags": [["no-preserve-root"]]
       },
       "reason": "It exists only to delete the whole filesystem.",
-      "instruction": "Stop, say why you wanted it, and give the user the exact command; never work around it."
+      "instruction": "Stop, say why you wanted it, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["rm --no-preserve-root -r /"],
+        "leaves": ["rm -r x"]
+      }
     },
     {
       "id": "disk-write",
@@ -31,7 +39,11 @@
         "program": ["dd", "mkfs"]
       },
       "reason": "They write raw disks and filesystems, where one wrong device name destroys a drive.",
-      "instruction": "Stop, say why you wanted it, and give the user the exact command; never work around it."
+      "instruction": "Stop, say why you wanted it, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["dd if=/dev/zero of=/dev/disk2", "mkfs.ext4 /dev/sdb1"],
+        "leaves": ["ddgr x", "df -h"]
+      }
     },
     {
       "id": "chmod-recursive-777",
@@ -44,7 +56,11 @@
       },
       "gap": "the same mode in another spelling (`u=rwx,g=rwx,o=rwx`, `a+rwx` given in parts, `00777`) isn't listed; the rule line asks the agent not to",
       "reason": "It makes a whole tree writable by every user, and the old modes can't be recovered.",
-      "instruction": "Give the one file or folder that needs it the narrowest mode that works (`chmod u+x script.sh`)."
+      "instruction": "Give the one file or folder that needs it the narrowest mode that works (`chmod u+x script.sh`).",
+      "samples": {
+        "covers": ["chmod -R 777 .", "chmod 777 -R .", "chmod -R a+rwx ."],
+        "leaves": ["chmod -R 755 .", "chmod 777 file"]
+      }
     },
     {
       "id": "privilege-escalation",
@@ -54,7 +70,11 @@
         "program": ["sudo", "su"]
       },
       "reason": "A command run as another user, or as root, escapes every other rule on this list.",
-      "instruction": "Stop, say why it needs elevated rights, and give the user the exact command; never work around it."
+      "instruction": "Stop, say why it needs elevated rights, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["sudo ls", "/usr/bin/sudo ls", "su root"],
+        "leaves": ["command -v sudo"]
+      }
     },
     {
       "id": "shell-inline-command",
@@ -65,7 +85,11 @@
         "flags": [["c", "command"]]
       },
       "reason": "A command inside a quoted string hides from the other rules.",
-      "instruction": "Run the command directly, one step per command; for a longer script, write it to a file in `.scratch/` and run that file."
+      "instruction": "Run the command directly, one step per command; for a longer script, write it to a file in `.scratch/` and run that file.",
+      "samples": {
+        "covers": ["bash -c ls", "sh -c 'ls'", "zsh -lc ls", "fish -c ls"],
+        "leaves": ["bash script.sh", "sh ./install.sh --force"]
+      }
     },
     {
       "id": "git-push-force",
@@ -77,7 +101,11 @@
         "flags": [["f", "force"]]
       },
       "reason": "It overwrites the remote's history, including commits someone else pushed.",
-      "instruction": "Push normally; if the remote has moved, rebase onto it or use `git push --force-with-lease`, which asks the user first."
+      "instruction": "Push normally; if the remote has moved, rebase onto it or use `git push --force-with-lease`, which asks the user first.",
+      "samples": {
+        "covers": ["git push --force", "git push -f origin main", "git push origin main --force", "git -C ../repo push --force"],
+        "leaves": ["git push", "git push --force-with-lease"]
+      }
     },
     {
       "id": "git-push-delete-main",
@@ -90,7 +118,11 @@
         "any_operand": ["main", "master", "refs/heads/main", "refs/heads/master"]
       },
       "reason": "It deletes the branch everyone else builds on, with its history, from the shared remote.",
-      "instruction": "Stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["git push --delete origin main", "git push -d origin master", "git push origin --delete main"],
+        "leaves": ["git push --delete origin feature", "git push origin main"]
+      }
     },
     {
       "id": "git-push-delete-main-refspec",
@@ -102,7 +134,11 @@
         "any_operand": [":main", "+:main", ":refs/heads/main", "+:refs/heads/main", ":master", "+:master", ":refs/heads/master", "+:refs/heads/master"]
       },
       "reason": "It deletes the branch everyone else builds on, with its history, from the shared remote.",
-      "instruction": "Stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["git push origin :main", "git push upstream +:master"],
+        "leaves": ["git push origin HEAD:main", "git push origin :feature"]
+      }
     },
     {
       "id": "git-reset-hard",
@@ -114,7 +150,11 @@
         "flags": [["hard"]]
       },
       "reason": "It discards uncommitted work with no way back.",
-      "instruction": "Set work aside with a temporary WIP commit or a named stash (`git stash push -u -m <tag>`), then check out or reset without `--hard`."
+      "instruction": "Set work aside with a temporary WIP commit or a named stash (`git stash push -u -m <tag>`), then check out or reset without `--hard`.",
+      "samples": {
+        "covers": ["git reset --hard", "git reset HEAD~1 --hard"],
+        "leaves": ["git reset --soft HEAD~1"]
+      }
     },
     {
       "id": "gh-repo-destructive",
@@ -125,7 +165,11 @@
         "subcommands": [["repo", "delete"], ["repo", "archive"], ["repo", "unarchive"], ["repo", "rename"]]
       },
       "reason": "They delete a repository or change how everyone else reaches it.",
-      "instruction": "Stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["gh repo delete me/x --yes", "gh repo archive me/x", "gh repo rename y"],
+        "leaves": ["gh repo view"]
+      }
     },
     {
       "id": "gh-access-keys",
@@ -136,7 +180,11 @@
         "subcommands": [["repo", "deploy-key"], ["repo", "autolink"], ["ssh-key"], ["gpg-key"]]
       },
       "reason": "They change who and what can reach the user's account and repositories.",
-      "instruction": "Stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["gh ssh-key add k.pub", "gh repo deploy-key add k.pub", "gh gpg-key list"],
+        "leaves": ["gh auth status"]
+      }
     },
     {
       "id": "calendar-mail-cli-send",
@@ -147,7 +195,11 @@
         "subcommands": [["event"], ["comment"]]
       },
       "reason": "They send invitations, cancellations or comments to other people in the user's name.",
-      "instruction": "Read with `spark events`; for a change, stop and give the user the exact command."
+      "instruction": "Read with `spark events`; for a change, stop and give the user the exact command.",
+      "samples": {
+        "covers": ["spark event create", "spark comment add"],
+        "leaves": ["spark events"]
+      }
     },
     {
       "id": "git-push-force-with-lease",
@@ -159,7 +211,11 @@
         "flags": [["force-with-lease"]]
       },
       "reason": "It rewrites the remote's history, though only if no one else pushed since you fetched.",
-      "instruction": "Say in one line why the history needs rewriting, run it as its own command, and let the user approve it."
+      "instruction": "Say in one line why the history needs rewriting, run it as its own command, and let the user approve it.",
+      "samples": {
+        "covers": ["git push --force-with-lease", "git push origin main --force-with-lease"],
+        "leaves": ["git push"]
+      }
     },
     {
       "id": "git-push-mirror",
@@ -171,7 +227,11 @@
         "flags": [["mirror"]]
       },
       "reason": "It makes the remote match the local repository, deleting every remote branch and tag that isn't here.",
-      "instruction": "Push the branches you mean by name; if the whole mirror is needed, say why in one line, run it as its own command, and let the user approve it."
+      "instruction": "Push the branches you mean by name; if the whole mirror is needed, say why in one line, run it as its own command, and let the user approve it.",
+      "samples": {
+        "covers": ["git push --mirror", "git push --mirror origin"],
+        "leaves": ["git push origin main"]
+      }
     },
     {
       "id": "git-clean-force",
@@ -183,7 +243,11 @@
         "flags": [["f", "force"]]
       },
       "reason": "It deletes untracked files, which git can't bring back, and with `-x` ignored ones such as `.env`.",
-      "instruction": "Run `git clean -n` first to list what would go, or move the files into `.scratch/`; if they must go, run it as its own command and let the user approve it."
+      "instruction": "Run `git clean -n` first to list what would go, or move the files into `.scratch/`; if they must go, run it as its own command and let the user approve it.",
+      "samples": {
+        "covers": ["git clean -f", "git clean -fdx", "git clean --force -d"],
+        "leaves": ["git clean -n"]
+      }
     },
     {
       "id": "find-delete",
@@ -194,7 +258,11 @@
         "flags": [["delete"]]
       },
       "reason": "It deletes every file the expression matches, and one wrong test deletes a tree.",
-      "instruction": "Run the same `find` without `-delete` to list what it matches, then move the files into `.scratch/`; if they must be deleted, run it as its own command and let the user approve it."
+      "instruction": "Run the same `find` without `-delete` to list what it matches, then move the files into `.scratch/`; if they must be deleted, run it as its own command and let the user approve it.",
+      "samples": {
+        "covers": ["find . -delete", "find . -name '*.pyc' -delete"],
+        "leaves": ["find . -name '*.pyc'"]
+      }
     },
     {
       "id": "gh-repo-edit",
@@ -205,7 +273,11 @@
         "subcommands": [["repo", "edit"]]
       },
       "reason": "It changes a repository's settings, such as its visibility, for everyone.",
-      "instruction": "Say in one line what changes and why, run it as its own command, and let the user approve it."
+      "instruction": "Say in one line what changes and why, run it as its own command, and let the user approve it.",
+      "samples": {
+        "covers": ["gh repo edit --description d"],
+        "leaves": ["gh repo view"]
+      }
     },
     {
       "id": "gh-api-secrets",
@@ -216,7 +288,11 @@
         "subcommands": [["api"], ["secret"], ["variable"]]
       },
       "reason": "They reach anything the account can, including secrets, so each use is worth knowing about.",
-      "instruction": "Go ahead; each call is logged for the user to review."
+      "instruction": "Go ahead; each call is logged for the user to review.",
+      "samples": {
+        "covers": ["gh api user", "gh secret set TOKEN", "gh variable list"],
+        "leaves": ["gh pr list"]
+      }
     },
     {
       "id": "env-files-read",
@@ -228,7 +304,11 @@
         "access": "read"
       },
       "reason": "They hold credentials, which must stay out of the agent's context.",
-      "instruction": "Read the variable names from `.env.example`; if you need a value, stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Read the variable names from `.env.example`; if you need a value, stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": [".env", "sub/.env.local", ".env.production"],
+        "leaves": [".env.example", ".env.sample", "docs/.env.md", ".envrc"]
+      }
     },
     {
       "id": "env-files-write",
@@ -240,7 +320,11 @@
         "access": "write"
       },
       "reason": "A write can overwrite a credential, or leak one into a file that gets committed.",
-      "instruction": "Add the variable's name to `.env.example`; for its value, stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Add the variable's name to `.env.example`; for its value, stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": [".env", "app/.env.local"],
+        "leaves": [".env.example", ".env.template"]
+      }
     },
     {
       "id": "env-files-commands",
@@ -253,7 +337,11 @@
       },
       "gap": "a glob the shell expands (`cat .env*`, `cat .e?v`) reaches a `.env` file under a name the hook never sees; the rule line asks the agent not to",
       "reason": "They print a `.env` file's credentials, or load them into the shell, where the next command can print them.",
-      "instruction": "Read the variable names from `.env.example`; if you need a value, stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Read the variable names from `.env.example`; if you need a value, stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["cat .env", "less .env.production", "source .env", ". ./.env", "grep TOKEN sub/.env"],
+        "leaves": ["cat .env.example", "cat .envrc", "source venv/bin/activate"]
+      }
     },
     {
       "id": "env-dump",
@@ -264,7 +352,11 @@
         "arguments": "none"
       },
       "reason": "The environment holds tokens and keys, which must stay out of the agent's context.",
-      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it. Setting a variable for one command (`env NAME=value command`) is fine."
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it. Setting a variable for one command (`env NAME=value command`) is fine.",
+      "samples": {
+        "covers": ["env", "export", "set", "env -u HOME", "declare"],
+        "leaves": ["env FOO=1 true", "export FOO=1", "set -e"]
+      }
     },
     {
       "id": "env-print",
@@ -279,6 +371,10 @@
       "guard": {
         "label": "Environment Variable Access",
         "rule": "Reading or revealing environment variables or env files: printing, echoing, dumping or listing the environment or any variable in it (e.g. `echo $VAR`, `printenv`, `env`, `export -p`, a bare `set`, `os.environ`, `process.env`), or reading `.env` / `.env.*` files by any route (shell, script, interpreter, file tool). The user reads these themselves: stop, say why, and give the user the exact command. Passing a variable into a command without printing it (e.g. `curl -H \"Authorization: Bearer $TOKEN\"`) and setting one for a single command (`FOO=1 cmd`, `env FOO=1 cmd`) are not this rule. `.env.example` holds names only and is not an env file for this rule."
+      },
+      "samples": {
+        "covers": ["printenv", "printenv TOKEN"],
+        "leaves": ["test -n \"$TOKEN\""]
       }
     },
     {
@@ -290,7 +386,11 @@
         "flags": [["p"]]
       },
       "reason": "They list the shell's variables with their values, the environment's tokens and keys among them.",
-      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["export -p", "declare -p", "typeset -p TOKEN"],
+        "leaves": ["declare -x FOO=1"]
+      }
     },
     {
       "id": "env-dump-listed",
@@ -301,7 +401,11 @@
         "arguments": "flags"
       },
       "reason": "They list the shell's variables with their values, the environment's tokens and keys among them.",
-      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it. Declaring a variable (`declare -x NAME=value`) is fine."
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it. Declaring a variable (`declare -x NAME=value`) is fine.",
+      "samples": {
+        "covers": ["declare -x", "typeset +x"],
+        "leaves": ["declare -x FOO=1", "declare -a arr"]
+      }
     },
     {
       "id": "proc-environ-read",
@@ -313,7 +417,11 @@
       },
       "gap": "`ps e` and `ps eww` print every process's environment through letters no rule can tell from ordinary `ps` options; the rule line asks the agent not to",
       "reason": "A process's environment holds its tokens and keys, which must stay out of the agent's context.",
-      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["/proc/self/environ", "/proc/1/environ"],
+        "leaves": ["/proc/cpuinfo"]
+      }
     },
     {
       "id": "proc-environ-commands",
@@ -324,7 +432,11 @@
         "files": ["/proc/**/environ"]
       },
       "reason": "A process's environment holds its tokens and keys, which must stay out of the agent's context.",
-      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it."
+      "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it.",
+      "samples": {
+        "covers": ["cat /proc/self/environ", "strings /proc/1/environ"],
+        "leaves": ["cat /proc/cpuinfo"]
+      }
     },
     {
       "id": "secret-files-read",
@@ -335,7 +447,11 @@
         "access": "read"
       },
       "reason": "They hold credentials, which must stay out of the agent's context.",
-      "instruction": "Ask the user what you need from them; never print a secret."
+      "instruction": "Ask the user what you need from them; never print a secret.",
+      "samples": {
+        "covers": ["secrets/key", "app/secrets/token.txt"],
+        "leaves": ["my-secrets.txt"]
+      }
     },
     {
       "id": "secret-files-write",
@@ -346,7 +462,11 @@
         "access": "write"
       },
       "reason": "A write can overwrite a credential, or leak one into a file that gets committed.",
-      "instruction": "Tell the user what to set and where; they write the value."
+      "instruction": "Tell the user what to set and where; they write the value.",
+      "samples": {
+        "covers": ["secrets/key"],
+        "leaves": ["secrets.md"]
+      }
     },
     {
       "id": "home-credentials-read",
@@ -357,7 +477,11 @@
         "access": "read"
       },
       "reason": "They hold the keys to the user's machines and cloud accounts.",
-      "instruction": "Stop, say what you needed from them, and let the user run the command."
+      "instruction": "Stop, say what you needed from them, and let the user run the command.",
+      "samples": {
+        "covers": ["~/.ssh/id_ed25519", "~/.aws/credentials"],
+        "leaves": ["~/.sshx/y"]
+      }
     },
     {
       "id": "mail-send",
@@ -368,7 +492,11 @@
         "tool": "^(send|reply|forward)"
       },
       "reason": "A sent message can't be recalled, and it speaks for the user.",
-      "instruction": "Write a draft for the user to review and send."
+      "instruction": "Write a draft for the user to review and send.",
+      "samples": {
+        "covers": ["mcp__claude_ai_Gmail__send_message", "mcp__gmail__reply_to_thread"],
+        "leaves": ["mcp__claude_ai_Gmail__create_draft", "mcp__slack__send_message"]
+      }
     },
     {
       "id": "mail-destructive",
@@ -379,7 +507,11 @@
         "tool": "^(trash|mark_\\w*spam|(batch_)?apply_sensitive)"
       },
       "reason": "They hide or remove the user's mail, where a mistake goes unnoticed.",
-      "instruction": "Label or archive the messages, or list them and let the user decide."
+      "instruction": "Label or archive the messages, or list them and let the user decide.",
+      "samples": {
+        "covers": ["mcp__gmail__trash_thread", "mcp__claude_ai_Gmail__apply_sensitive_message_label", "mcp__gmail__mark_as_spam"],
+        "leaves": ["mcp__gmail__label_message"]
+      }
     }
   ]
 }
