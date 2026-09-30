@@ -25,11 +25,7 @@ How to set up and audit Claude Code from the rule table. **Check the current doc
 
 ## Command rows
 
-`Bash(<prefix> *)` matches the command text as written, so a row becomes one entry per spelling:
-
-- **Programs:** each program as typed, then as `/bin/<program>` and `/usr/bin/<program>`, except shell builtins (`.`, `source`, `set`, `export`, `declare`, `typeset`, `unset`, `eval`, `alias`), which have no path.
-- **Flags:** a one-letter name is a short flag (`-r`), a longer one a long flag (`--recursive`). Every order of the groups, every spelling in each group, as separate words; and, when every group has a one-letter name, the one-letter names clustered in every order (`-rf`, `-fr`, `-Rf`, `-fR`).
-- **Around the flags:** program, then subcommand words, then flags, then operands: `Bash(git push --force *)`, `Bash(chmod -R 777 *)`. Rows with `any_operand` get one entry per operand word after the subcommand and flags (`Bash(git push --delete origin main *)` covers only that remote, so name the gap).
+`Bash(<prefix> *)` matches the command text as written, so a row becomes one entry per spelling (SKILL.md, *Spellings*): `Bash(git push --force *)`, `Bash(chmod -R 777 *)`. Rows with `any_operand` get one entry per operand word after the subcommand and flags (`Bash(git push --delete origin main *)` covers only that remote, so name the gap).
 - **Worked example,** `rm-recursive-force` (flags `[r, R, recursive]` and `[f, force]`): `Bash(rm -rf *)`, `Bash(rm -Rf *)`, `Bash(rm -fr *)`, `Bash(rm -fR *)`, `Bash(rm -r -f *)`, `Bash(rm -r --force *)`, `Bash(rm -R -f *)`, … `Bash(rm --force --recursive *)`, then the same under `/bin/rm` and `/usr/bin/rm`.
 - **The space is a word boundary:** `Bash(git push --force *)` doesn't match `git push --force-with-lease`, which the ask row covers. A trailing ` *` that is the only wildcard also matches the bare command (`printenv`).
 - **` *`, never `:*`:** the Cursor CLI reads this file and matches `Bash(rm -rf:*)` only against the bare `rm -rf`.
@@ -65,7 +61,7 @@ How to set up and audit Claude Code from the rule table. **Check the current doc
     "command": "[ -f <script> ] && python3 <script> --harness claude-code || true"}]}
   ```
 
-  `<script>` is the installed skill's absolute `scripts/pre_tool_hook.py` (under `~/.agents/skills` or `~/.claude/skills`), never a checkout or worktree that can go away. The `[ -f … ] && … || true` makes it fail open: a script that's gone, or an error, exits 0 with no decision, since exit 2 would block every call.
+  `<script>` and the fail-open wrapping are in SKILL.md, *The pre-tool hook*.
 - **Audit:** `wired` when a match-all group runs exactly that command. A handler that runs `pre_tool_hook.py` from another path is this skill's old wiring: `removed`, with the new one `added`. Other hooks are the user's and stay.
 - **Input:** `tool_name`, `tool_input` (`command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` and `glob` for Grep), `cwd`, `session_id`.
 - **Answer:** a deny is `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "<the refusal>"}}` with exit 0; Claude Code shows the agent the reason. Otherwise nothing, exit 0, so the native permissions decide. It never answers `allow`, which would skip them, and leaves `ask` rows to the native `ask` list.
@@ -90,7 +86,7 @@ Name each in the diff, per row where it applies. With the native entries alone t
 - a script or another program that opens a denied file itself;
 - a tool connected after the run, until the next run (the hook matches it by name).
 
-The hook's own misses, listed once: a command inside a script file or another interpreter (`python -c`), one built from variables (`$cmd -rf x`), an alias or function defined elsewhere, an abbreviated long option (`--recur`), a force push by refspec (`git push origin +main`), a glob the shell expands (`cat .env*`), and each row's own `gap`.
+The hook's own misses are in SKILL.md, *The pre-tool hook*.
 
 ## What the agent sees
 
