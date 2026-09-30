@@ -17,7 +17,7 @@ The environment is what agents run with: permissions, global instructions, proje
 Read only the references the change needs.
 
 - **A rule, an instruction, or know-how when it isn't clear which file it goes in**: read [environment-layers.md](environment-layers.md), choose the file with its table and the team test, then edit it there.
-- **A team-test audit** (which skills name a default tool, after any skill change), or **a skill that needs an environment value**: read *How a skill names an environment value* and *Auditing the skills* in [environment-layers.md](environment-layers.md).
+- **A team-test audit** (which skills name a default tool, after any skill change), or **a skill that needs an environment value**: read *Skill parameters* and *Team-test audit* in [environment-layers.md](environment-layers.md).
 - **A skill** (create, install, update, move, fork, publish, remove, or an audit of which skills are used, a new skill's prompt, or a run's cost): read [skill-operations.md](skill-operations.md).
 
 ## Carry it everywhere

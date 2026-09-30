@@ -1,6 +1,10 @@
-# Carrying a change
+# Change propagation
 
-A change is done when it has reached everywhere it applies: every harness on every machine, every install of a skill, every project it touches. Make it at its source, the place [environment-layers.md](environment-layers.md) chooses, then carry it from there as the table below says.
+How a change reaches every place it applies: every harness on every machine, every install of a skill, every project it touches. A change is done only when it has reached all of them.
+
+## Propagation paths
+
+Make a change at its source, the place [environment-layers.md](environment-layers.md) chooses, then carry it from there as this table says.
 
 | Change | Source | How it reaches everywhere |
 |---|---|---|
@@ -12,6 +16,6 @@ A change is done when it has reached everywhere it applies: every harness on eve
 
 Treat a change to a set-up skill itself, such as a new harness reference, a new rule in the table or a new project template, as a skill change first; then rerun that set-up skill wherever it applies.
 
-## Say what to rerun
+## Outstanding steps
 
 When a change can't be carried from this session (another machine, another project, a step that waits for a merge), end by naming each remaining step: which set-up skill (`/set-up-machine` or `/set-up-project`) or which `npx skills update`, and where it runs (this machine, each other machine, each project). Done when every place the change applies is either updated or named in that list.
