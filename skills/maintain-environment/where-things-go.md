@@ -5,7 +5,7 @@ Every instruction, rule or piece of know-how has one home, chosen by who needs i
 | Layer | Holds | Home |
 |---|---|---|
 | **Permission** | A hard rule: deny, ask, or allow-and-report. | A row in **set-up-machine**'s rule table, which set-up-machine turns into each harness's native entries and the global instructions' rule line. A project may only add allows. |
-| **Global instruction** | The user's personal workflow (their Defaults: session host, worktree tool, notifications, agent to start, skills repo location), and one line explaining each global deny or ask with what to do instead. | The shared global instructions file every harness on the machine reads. |
+| **Global instruction** | The user's personal workflow and Defaults table, and one line per global rule with what to do instead. | The shared global instructions file every harness on the machine reads. |
 | **Project `AGENTS.md`** | Anything a teammate needs to work on the project: its tracker, its commands, its conventions, its worktree tool. | The project's `AGENTS.md`, with a `CLAUDE.md` holding `@AGENTS.md` so Claude Code reads the same text. |
 | **Skill** | How to do a task. Neutral about tools, team size and issue tracker: it names a role ("the project's worktree tool") and says what to do when none is named. | A `SKILL.md` in the skills repo, or a local skill in one project. |
 | **Skill reference** | Detail only some runs need: a branch, a table, a tool's specifics. | A file beside the `SKILL.md`, reached by a pointer that says when to read it. |

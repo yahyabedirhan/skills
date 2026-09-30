@@ -9,7 +9,7 @@ The project's one rules file. Every harness reads it (Claude Code through `CLAUD
 
 ## Defaults
 
-This project's own values for the roles skills name. Each row overrides the global instructions' row of the same role, for this project only; a role left out keeps the global value.
+This project's tools for the roles skills name; each row overrides the global one.
 
 | Role | Default |
 |---|---|
@@ -32,4 +32,4 @@ This project's own values for the roles skills name. Each row overrides the glob
 
 ## The Defaults table
 
-Optional, and only for a role every contributor to this project uses the same way: a worktree tool the project's scripts assume, a session host its docs describe. A tool one person prefers belongs in that person's global Defaults, never here. The roles and what each names are in **set-up-machine**'s `references/global-instructions.md` (*The Defaults roles*); a new role is a new row there first.
+Optional, and only for a role every contributor uses the same way (a worktree tool the project's scripts assume). A tool one person prefers belongs in their global Defaults. The roles are in **set-up-machine**'s `references/global-instructions.md`.

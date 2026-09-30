@@ -14,7 +14,7 @@ From the user's request, else the Defaults table (a project's row overrides the 
 - `<skills-repo>`: the user's own skills repo on GitHub (`<owner>/<repo>`). Unset: ask.
 - `<path-to-skills-repo>`: its local clone. Unset: ask.
 
-When the user supplies one by answer, offer to fill its Defaults row, so the next run finds it there.
+When the user answers one, offer to add it to the Defaults table.
 
 ## What's changing?
 
