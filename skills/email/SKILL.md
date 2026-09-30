@@ -10,7 +10,7 @@ description: >-
 
 # Email
 
-Two tools, one job each: **Spark reads, Gmail acts.** This skill says how to do things with them. What to do with an email, and when, comes from the user or the project's own instructions. Drafts are the furthest any agent goes; the user sends mail themselves. If a denied tool is available at all, the setup is incomplete: say so and use the connector only for reading until it is fixed.
+Two tools, one job each: **Spark reads, Gmail acts.** This skill says how to do things with them. What to do with an email, and when, is the user's call. Drafts are the furthest any agent goes; the user sends mail themselves. If a denied tool is available at all, the setup is incomplete: say so and use the connector only for reading until it is fixed.
 
 ## The two tools
 
