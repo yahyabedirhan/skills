@@ -4,6 +4,7 @@ python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 """
 import io
 import json
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -452,6 +453,54 @@ class ClaudeCodeHookTest(unittest.TestCase):
                          now=datetime(2026, 9, 29, tzinfo=timezone.utc))
         self.assertEqual((code, out.getvalue()), (0, ""))
         self.assertTrue((self.dir / "reports" / "2026-09-29.jsonl").exists())
+
+
+
+class WiredCommandTest(unittest.TestCase):
+    """The fail-open command the references tell the agent to wire: a gone script or a broken
+    table lets the call through, and a deny still refuses."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self._tmp.name)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def wired(self, script, harness, *extra):
+        q = shlex.quote(str(script))
+        tail = "".join(" " + shlex.quote(e) for e in extra)
+        return f"[ -f {q} ] && python3 {q} --harness {harness}{tail} || " + ("echo '{}'" if harness == "cursor" else "true")
+
+    def run_wired(self, command, payload):
+        return subprocess.run(["/bin/sh", "-c", command], input=json.dumps(payload), capture_output=True,
+                              text=True, timeout=30)
+
+    def test_a_missing_script_exits_0_and_says_nothing(self):
+        gone = self.dir / "gone" / "pre_tool_hook.py"
+        deny = {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}, "cwd": str(self.dir)}
+        for harness in ("claude-code", "codex"):
+            proc = self.run_wired(self.wired(gone, harness), deny)
+            self.assertEqual((proc.returncode, proc.stdout), (0, ""), harness)
+        # Cursor reads an empty answer as invalid JSON, which blocks: it gets `{}`.
+        proc = self.run_wired(self.wired(gone, "cursor"), deny)
+        self.assertEqual((proc.returncode, proc.stdout.strip()), (0, "{}"))
+
+    def test_a_present_script_still_refuses(self):
+        script = SCRIPTS / "pre_tool_hook.py"
+        deny = {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}, "cwd": str(self.dir)}
+        proc = self.run_wired(self.wired(script, "claude-code"), deny)
+        self.assertEqual(json.loads(proc.stdout)["hookSpecificOutput"]["permissionDecision"], "deny")
+        cursor = {"hook_event_name": "beforeShellExecution", "command": "rm -rf x", "cwd": str(self.dir)}
+        proc = self.run_wired(self.wired(script, "cursor"), cursor)
+        self.assertEqual(json.loads(proc.stdout)["permission"], "deny")
+
+    def test_a_broken_table_fails_open_too(self):
+        bad = self.dir / "bad.json"
+        bad.write_text("{nope")
+        payload = {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}}
+        proc = self.run_wired(self.wired(SCRIPTS / "pre_tool_hook.py", "claude-code", "--rules", str(bad)), payload)
+        self.assertEqual((proc.returncode, proc.stdout), (0, ""))
 
 
 if __name__ == "__main__":

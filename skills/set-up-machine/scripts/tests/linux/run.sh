@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# Prove set-up-machine on a fresh Linux machine: build the image (every harness, never logged
-# in), run in-container.sh in a throwaway container, and remove the container.
+# Check set-up-machine's code on a fresh Linux machine: build the image, run in-container.sh in a
+# throwaway container, and remove the container.
 #
 #   run.sh <repo folder> <output folder>
 #
 # No credentials go into the container: nothing from the host's home or environment is passed.
-# The output folder gets the plan, apply and audit output and probes.txt, which diffs against
-# `python3 probe.py --skill <set-up-machine> --codex-rules <rules>` run on another machine.
+# The output folder gets verify's output and the unit tests' result.
 set -euo pipefail
 repo=$(cd "$1" && pwd)
 out=$(mkdir -p "$2" && cd "$2" && pwd)
