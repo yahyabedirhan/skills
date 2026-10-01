@@ -19,7 +19,9 @@ kinds, told apart by its keys:
 Every row carries `samples`: `covers`, calls the row must catch (a shell command,
 a path, or an MCP tool name, by the row's kind), and `leaves`, near misses it must
 let through. The verify script feeds them to the hook. Any row may carry a `gap`:
-what no harness can catch for it, which every harness's audit names.
+what no harness can catch for it, which every harness's audit names. An `ask` row may
+carry `approver: "user"`: each call needs the user's own approval, so the hook refuses
+it where the harness won't ask the user.
 
 A personal repository's permissions file holds rows of the same format, loaded with
 `personal=True`: they may also take the level `allow`, which only the harnesses' native
@@ -64,6 +66,7 @@ class Rule:
     access: str = ""  # file: read or write
     excepts: tuple = ()  # file, or command with files: globs left out
     gap: str = ""  # what no harness can catch for this row
+    approver: str = ""  # ask: "user" when only the user's own approval will do, never an automatic reviewer's
     server: str = ""  # mcp-tool: regex over the server part of the tool name
     tool: str = ""  # mcp-tool: regex over the tool part
     covers: tuple = ()  # samples the row must catch
@@ -124,6 +127,10 @@ def _parse_row(row: dict, where: str, levels: tuple = LEVELS) -> Rule:
         if not isinstance(row["gap"], str) or not row["gap"]:
             raise RuleTableError(f"{where}: gap must be a sentence")
         common["gap"] = row["gap"]
+    if "approver" in row:
+        if row["approver"] != "user" or row["level"] != "ask":
+            raise RuleTableError(f'{where}: approver can only be "user", on an ask row')
+        common["approver"] = "user"
     samples = row.get("samples")
     if not (isinstance(samples, dict) and set(samples) <= {"covers", "leaves"} and samples.get("covers")
             and all(isinstance(v, list) and all(isinstance(x, str) and x for x in v) for v in samples.values())):

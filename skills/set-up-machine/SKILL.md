@@ -52,6 +52,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 | `instruction` | for `deny`, what the agent does instead: an alternative, or "Stop, say why, and give the user the exact command; never work around it."; for `ask` and `allow-and-report`, how to go ahead |
 | `samples` | `covers`: calls the row must catch; `leaves`: near misses it must let through. A shell command for a command row, a path for a file row, a tool name for an MCP row. `verify.py` checks them against the hook |
 | `gap` | optional: what no harness can catch for the row (`echo $TOKEN`); every audit names it |
+| `approver` | optional, on an `ask` row only: `user` when each call needs the user's own approval, which an automatic reviewer's or a remembered answer's doesn't replace |
 
 ### `match` kinds
 
@@ -83,7 +84,7 @@ A harness that matches a command's text catches only the spellings it lists, so 
 
 - **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
 - **allow-and-report** rows: it writes one JSON line per call to `<report folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
-- **ask** rows: the harness's native ask entries do the asking.
+- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why).
 - **allow** rows: it says nothing; the harness's native allow entries let the call run without a prompt.
 
 A malformed personal file leaves the table's rows in force: the hook skips the personal rows and `verify.py` reports the file.
@@ -106,6 +107,7 @@ Name these once in every audit:
 - an abbreviated long option (`--recur`);
 - a force push by refspec (`git push origin +main`);
 - a glob the shell expands (`cat .env*`);
+- an automatic reviewer, such as Codex's `auto_review`, answering an `approver: "user"` row, since the call's payload doesn't show the reviewer;
 - each row's own `gap`.
 
 ## References
