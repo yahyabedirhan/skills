@@ -28,7 +28,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 
 - `git remote -v` and `.git/config`: is this a GitHub repo? Which one?
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` or `## Environment defaults` section in either?
-- `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root, and anywhere in the repo the old names `CONTEXT.md` and `CONTEXT-MAP.md`, from before the convention was renamed. The skills read only the new names, so an old file goes unread.
+- `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root, and any `CONTEXT.md` or `CONTEXT-MAP.md` in the repo: the domain docs' old names, which the skills no longer read
 - `docs/adr/` and any `src/*/docs/adr/` directories
 - `docs/agents/`: does this skill's prior output already exist?
 - `.efforts/`: a sign that a local-markdown issue tracker is already in use
@@ -67,7 +67,7 @@ The defaults are the five canonical roles, each label string equal to its name: 
 
 Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSSARY.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
 
-When exploration found an old `CONTEXT.md` or `CONTEXT-MAP.md`, propose renaming each with `git mv`, so its history follows it: `git mv CONTEXT.md GLOSSARY.md`, `git mv CONTEXT-MAP.md GLOSSARY-MAP.md`, and the same for each per-context `CONTEXT.md`. Also propose updating the map's links and any project file that names the old files, such as `AGENTS.md` or `docs/agents/domain.md`.
+When exploration found an old `CONTEXT.md` or `CONTEXT-MAP.md`, propose renaming each with `git mv`, so its history follows it: `git mv CONTEXT.md GLOSSARY.md`, `git mv CONTEXT-MAP.md GLOSSARY-MAP.md`, and the same for each per-context `CONTEXT.md`. Where the new name already exists, `git mv` refuses: propose merging the old file into the new one instead, and ask which wins where they disagree. Also propose updating the map's links and any other file that names the old files; the drafts of `AGENTS.md` and `docs/agents/domain.md` already use the new names.
 
 **Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md), *Environment defaults*, says what may go there.
 
@@ -79,7 +79,7 @@ Show the user a draft of:
 - `CLAUDE.md`: the single line `@AGENTS.md` (Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and follows the import)
 - `.gitignore`: `.scratch/` and `.claude/worktrees/`, each only where it's missing
 - The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
-- Each `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md`, and the edits to the files that name them, when Section C proposed them
+- Each rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, and the edits to the files that name them, when Section C proposed them
 
 Let them edit, then take one approval for all of it. Then write:
 
@@ -93,9 +93,9 @@ Let them edit, then take one approval for all of it. Then write:
    - [domain.md](./domain.md): domain doc consumer rules + layout
 
    For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
-4. Run each approved `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md`, then update the files that named it.
+4. Run each approved rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, then update the files that named it.
 
-Done when every approved file is written.
+Done when every approved change is made.
 
 ### 5. Audit
 
@@ -104,6 +104,8 @@ Read every harness file the project holds, from the root down, against **set-up-
 - `weakens`: a global rule no longer holds as the machine sets it, in some harness. Explain which and why, and propose the fix: remove the entry, or narrow it to the project's own commands. The file is the project's, so change it only on the user's approval.
 - `overlaps`: an allow that covers a rule's command while the rule still holds. Propose narrowing it.
 - `extra` (a project deny or ask) and `gap` (what you can't judge): name each.
+
+Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it.
 
 The audit passes with no `weakens`. Done when it passes, or the user has chosen to keep a `weakens` entry: then it stays failed, and the report names that entry.
 
