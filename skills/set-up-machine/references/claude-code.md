@@ -53,6 +53,16 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 - **List the tools:** in an empty folder, run `claude -p "List nothing." --output-format stream-json --verbose --tools "" --no-session-persistence --max-turns 1` and read the `tools` of the first event with `"type": "system", "subtype": "init"`; stop it there, before it calls the model. No output (not logged in, not installed) is a `gap`: keep the MCP entries already there.
 - Each row's `server` and `tool` regexes (case-insensitive) pick the names; each match is an exact `deny` entry, and a `found` line names them. A denied MCP tool is removed from the session.
 
+## Personal rows
+
+A personal row (personal-repository.md) becomes entries the way a table row of its kind does above, in the same lists, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does.
+
+- **Worked example,** an `allow` MCP-tool row with `server` `<server>` and `tool` `^read_`: each tool of the listing above that it matches becomes an exact entry in `allow`, `mcp__<server>__read_<name>`, marked `added, personal`. With no match in the listing, the row is `n/a` here, "no tool it matches in Claude Code", and nothing is written.
+- **Its tool exists** for a command row when one of its programs is on `PATH`, for an MCP-tool row when the listing above has a tool it matches, and for a file row always.
+- **It can't loosen a table row:** deny and ask are evaluated before allow, so a personal `allow` entry never overrides the table's.
+- **The Cursor CLI** unions this file's `allow` and `deny` lists, so a personal entry written here reaches it too.
+- `verify.py` checks these entries: `personal present` with the entries it found, `personal n/a` with the tool Claude Code lacks, `personal gap` for a row with no entry here (the kinds under *No entry, and a gap instead*), and `personal FAIL` when an entry is missing.
+
 ## Pre-tool hook
 
 - **Wiring:** one match-all group in `hooks.PreToolUse`:

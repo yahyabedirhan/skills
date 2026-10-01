@@ -157,3 +157,27 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 - **`find-delete` moved from ask to deny.** Its rule line said "asks first", but nothing asked: find writes `-delete` after the path, so no harness's prefix entry catches it, and the hook leaves ask rows to the harness. The maintainer asked for it to be blocked as far as possible, so the hook now refuses it on every harness, behind wrappers, `bash -c` and `$(…)` too. The instruction says to list with `find`, then move the files into `.scratch/`.
 - **No native entry for `find`'s options.** *Spellings* now says so for every harness; the hook is the only layer that sees them.
 
+
+## 2026-10-01: the personal repository, through a pointer (#113)
+
+The spec is #111.
+
+- **A person's own parts of the shared file come from their own repository.** The Environment defaults table's Tool column and the Personal workflow section are generated from `agents/instructions.md` in that repository, the way the rules block is generated from the rule table. The roles' What it is and When none columns still come from the skill. A new machine then gets them by running the skill, with no retyping, and the repository can be private.
+- **The pointer is `~/.config/agents/source.md`,** naming the repository as `<owner>/<repo>` and its clone path, or `none`. It sits outside every repository, so it is private by being local, and works like `docs/agents/issue-tracker.md` does for a project. When it's missing, Inspect asks the user once and the diff writes it; `none` is recorded so the next run doesn't ask, and a machine with no personal repository keeps its hand-written Tool values and workflow lines.
+- **The repository's files sit in an `agents/` folder,** so the rest of the repository stays free. In `instructions.md` only the Role and Tool columns are read; any other column, such as Why, and any text outside the two sections, are notes that stay there. A role left out is `none`.
+- **`agents/permissions.json` has a place and no format yet.** The next ticket, #114, fills it with personal rows in the rule table's format.
+
+## 2026-10-01: personal rows, with a plain allow level (#114)
+
+The spec is #111.
+
+- **`agents/permissions.json` keeps its name and takes the rule table's format,** `{"version": 1, "rules": [...]}`, so one loader, `rules.load(path, personal=True)`, checks both, and a malformed personal row is refused the same way. A personal row can't reuse a table id, so a rule's id still names one row.
+- **A plain `allow` level, for personal rows only.** It is what a person needs for a tool they added: no prompt, and nothing to report. The table refuses it, since a generic rule should never loosen a harness. Every harness evaluates deny and ask over allow (Codex by strictest decision, opencode by writing allow entries first), and `verify.py` fails an allow sample a table row denies or asks for, so a personal allow can't loosen a table row.
+- **The hook and `verify.py` load personal rows alongside the table, through the pointer.** A missing pointer or file means no personal rows. A malformed personal file makes the hook skip the personal rows and keep the table's, since failing open on the whole table would drop the generic rules; `verify.py` reports the file as `personal FAIL`.
+- **A personal row is written only where its tool exists:** a command row where its program is on `PATH`, an MCP-tool row in a harness that lists a tool it matches, a file row everywhere. Elsewhere it's `n/a`, saying which tool is missing.
+- **The audit marks a personal row's entries `personal`, beside their usual mark,** never `extra`; an entry a removed personal row left behind is `extra`, like a dropped table row's. A hand-written allow the person wants kept is proposed as a personal row in the clone, the way #113 carries hand-written Tool values.
+- **`verify.py` checks personal entries in Claude Code only,** the one harness whose settings it can read in full: an entry belongs to a row when the row covers what the entry names. An MCP-tool row with no entry is `n/a`, since `verify.py` can't list a harness's tools; the other harnesses' entries are compared in the diff.
+- **Personal deny, ask and allow-and-report rows get rule lines** in the shared file's generated block, after the table's, so an agent reads their instructions. An `allow` row gets none.
+- **Nothing is lost on the switch.** When the shared file holds a value or line the repository lacks, the diff adds it to the clone's `instructions.md` first, and the report names the file for the user to commit there, since the skill doesn't push someone's personal repository.
+- **`verify.py` checks it, and a missing pointer fails.** A `personal` line is `ok` when the shared file carries the repository's values, `none` when the pointer says none, and `FAIL` when the pointer is missing or malformed, the clone or its file is missing, or a value or the workflow differs. A missing pointer fails because it is a gap the diff closes, so a set-up machine never shows it; the test homes now carry a `none` pointer.
+- **The reference names no particular tool.** The skills repo is public and general, so `references/personal-repository.md` and the tests describe the kinds of entries with placeholders.
