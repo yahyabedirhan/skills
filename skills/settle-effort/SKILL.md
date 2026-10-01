@@ -6,20 +6,19 @@ argument-hint: "The pull request (optional: defaults to the current branch's)"
 
 # Settle Effort
 
-Approving the pull request is the user's last step. Everything after it is yours. Do the effort's own steps below, then hand the rest to `/settle-session`.
+Approving the pull request is the user's last step. Everything after it is yours.
 
 ## Flow
 
-1. **Find the effort:** the pull request, its branch, spec, tickets and handoff, and the worktrees and branches the build left behind, such as delegates' leftovers.
+1. **Find the effort:** the pull request, its branch, spec, tickets and handoff, and every worktree and branch the build left behind, delegates' leftovers included.
    - **From a checkout that isn't on the effort's branch:** list pull requests by head branch with `gh pr list --head` and `--state all`, since without `--state all` a merged pull request doesn't show.
 2. **Merge** the pull request once its checks pass, and check that the default branch's CI passes after the merge. Merge with `gh pr merge` and the project's usual method, and leave out `--delete-branch`: it deletes branches before they are proven merged, and switches the current checkout to the default branch.
-   - **When the pull request is already merged:** skip the merge, and still check the default branch's CI and the case below.
-   - **When the spec says "QA: blocking":** don't merge until every QA ticket is closed, and tell the user which ones are still open.
+   - **When the spec says "QA: blocking":** merge only once every QA ticket is closed, and until then tell the user which ones are still open.
    - **After a squash or a rebase:** check that anything pinned to one of the branch's commits, such as an image URL with a commit SHA, still resolves, since the default branch doesn't hold those commits.
-3. **Read the pull request's description and the handoff** for what the delivery left open: follow-ups, checks it skipped and decisions for the user. Run the skipped checks now.
-4. **Run the post-merge follow-ups,** such as installing what changed or trying what could only be tried after the merge.
-5. **Carry unfinished work over** as tickets in the next effort, labelled for it and linked back to where each came from, and close the spec and every ticket the merge finished. `gh issue create --label` fails when the label doesn't exist yet, so create the next effort's `effort:` label first with `gh label create`.
+   - **When the pull request is already merged:** skip the merge, and still check the default branch's CI and, after a squash or a rebase, the pinned commits.
+3. **Read the pull request's description and the handoff** for what the delivery left open: follow-ups, checks it skipped and decisions for the user.
+4. **Run every follow-up and skipped check from step 3,** such as installing what changed or trying what could only be tried after the merge, and note each result for the report.
+5. **Carry unfinished work over** as tickets in the next effort, labelled for it and linked back to where each came from. `gh issue create --label` fails when the label doesn't exist yet, so create a missing `effort:` label first with `gh label create`. Then close the spec and every ticket the merge finished, by hand for any a "closes" keyword missed.
    - **When it isn't clear which effort is next:** ask the user.
    - **For QA tickets:** leave them open for the user, with a comment on how to reach the build.
-   - **When a "closes" keyword missed a ticket the merge finished:** close it by hand.
-6. **Settle the session** with `/settle-session`, naming the effort's worktrees and branches from step 1, delegates' leftovers included, as the ones to free. Have the report also say what merged, what closed and what carried over.
+6. **Settle the session** with `/settle-session`, naming every worktree and branch from step 1 as the ones to free. Have its report also say what merged, what closed, what carried over and what each follow-up from step 4 showed.
