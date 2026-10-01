@@ -1,6 +1,6 @@
 ---
 name: handover-to-herdr
-description: Start a new agent session in its own `herdr` workspace and tab, send it its starting prompt and confirm it's working. Use when a handover, a new effort or an effort's close runs through `herdr`.
+description: Start a new agent session in its own `herdr` workspace and tab, send it its starting prompt and confirm it's working. Use when a handover, a new effort or a session's settle runs through `herdr`.
 argument-hint: "Worktree path, topic, role, and the starting prompt"
 ---
 
@@ -17,7 +17,7 @@ Run this skill from inside a `herdr` pane or from outside one, such as a desktop
 
 ## Steps
 
-When `/close-effort` calls this skill, read `close-effort-commands.md` instead of these steps.
+When `/settle-session` calls this skill, read `settle-commands.md` instead of these steps.
 
 1. Check that `herdr status` reaches a server. Don't go by `HERDR_ENV=1`, which `/herdr` requires: it only says this session runs in a pane.
    - **If no server answers:** say so and hand back to the calling skill, which then works as if there were no session host.
@@ -48,10 +48,10 @@ When `/close-effort` calls this skill, read `close-effort-commands.md` instead o
 
    Leave `--wait` off the prompt: it waits until the agent goes idle again, and a long run times out before that.
    - **If the wait times out:** check the agent before you resend anything. `herdr agent get <name>` shows its state, and `herdr agent read <name> --source visible` shows its screen; leave `--lines` off, because it fails while the agent works. The prompt may have arrived anyway, so resend it only when the screen shows it didn't.
-6. If this session runs in a `herdr` tab, put `[settled] ` at the start of that tab's label once this session's own work is done. Use the same `herdr tab rename`, with `$HERDR_TAB_ID` as the tab. The marker tells the maintainer nothing more will happen in the tab, which stays only so its history can be read.
+6. Once this session's own work is done, mark its tab settled as `settle-commands.md`'s Settled marker section says.
 7. Give the calling skill the workspace and tab where the new agent runs, so it can tell the maintainer.
 
 
 ## References
 
-- [close-effort-commands.md](close-effort-commands.md): the `herdr` commands a close needs: finding the agents still working, and freeing the closing session's own worktree from outside it.
+- [settle-commands.md](settle-commands.md): the `herdr` commands a settle needs: finding the agents still working, marking the session settled, and freeing the settling session's own worktree from outside it.

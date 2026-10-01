@@ -19,10 +19,10 @@ An effort passes through five phases in one worktree on one branch:
 
 ```text
 START      decide the worktree once; everything after follows it
-THINKING   settle what to build; leave a spec, tickets, and a handoff
+THINKING   decide what to build; leave a spec, tickets, and a handoff
 HANDOVER   the session commits everything and starts a fresh orchestrator
 BUILD      orchestrate the tickets through delegates; open the pull request
-CLOSE      the user approves; the agent merges, follows up, and cleans up
+SETTLE     the user approves; the agent merges, follows up, and cleans up
 ```
 
 The session host, the program where new agent sessions open, decides which of two paths an effort takes. When the host is `herdr`, take the host path: `/handover-to-herdr` automates every step between phases. Otherwise take the plain path, which runs anywhere: this session carries on, or the user pastes each starting prompt.
@@ -68,9 +68,9 @@ The session that hands over finishes its own work cleanly, through `/handover`. 
 
 `/orchestrate-with-handoff` picks up the handoff and runs `/orchestrate-effort`, which delegates the tickets to sub-agents in parallel, each building its ticket with `/implement` in its own worktree, integrates each ticket as its own commit, and opens the pull request with `/to-pr` after one branch review. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking".
 
-### Close
+### Settle
 
-The user reviews and approves the pull request: that is their only step. The agent then merges it and closes the effort with `/close-effort`, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. Workspaces and agent sessions stay open for the user to close.
+The user reviews and approves the pull request: that is their only step. The agent then merges it and settles the effort with `/settle-effort`, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. Workspaces and agent sessions stay open for the user to close.
 
 ### Why two sessions
 
