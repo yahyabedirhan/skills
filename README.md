@@ -73,6 +73,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | Skill | What it does | Origin |
 |---|---|---|
 | [show-me](skills/show-me/SKILL.md) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks, or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`ca7c808`](https://github.com/humanlayer/skills/tree/ca7c808/plugins/show-me/skills/show-me) (MIT, see `skills/show-me/LICENSE.humanlayer`). Changes: no Mermaid views, so every view renders as plain text; agents can still load it, where upstream made it user-invocable only in `bba9d13`, because `orchestrate-effort` uses it to show the plan. |
+| [show-me-artifact](skills/show-me-artifact/SKILL.md) | Publishes a visual report or a set of decisions as a private Claude artifact, a hosted page read later or on another device, with show-me's principles: one page per topic, self-contained decision cards with a marked recommendation, and a data file plus generator when the page is republished to the same URL. Claude only; elsewhere it falls back to show-me's local HTML file. | Original. Builds on show-me, which it loads for the principles. |
 
 ### Agent setup
 
@@ -129,11 +130,13 @@ The documents in each skill's `references/` hold the principles, patterns and co
 
 ### Communication style
 
-How an agent shows its thinking so a reader takes it in quickly. `show-me` picks the smallest view that makes the point, in plain text that reads the same in a terminal, an editor, or on GitHub.
+How an agent shows its thinking so a reader takes it in quickly. `show-me` picks the smallest view that makes the point, in plain text that reads the same in a terminal, an editor, or on GitHub, and `show-me-artifact` publishes a larger report the same way as a private Claude artifact.
 
 ```text
-show-me   explains the current topic
+show-me            explains the current topic
   pseudocode · call tree · file tree · diff block · one focused HTML page
+show-me-artifact   a report or decision set to read later, as a hosted page
+  status first · progress · item tree · tables · decision cards → republished to the same URL
 ```
 
 ### Agent setup
