@@ -185,3 +185,11 @@ The spec is #111.
 - **Nothing is lost on the switch.** When the shared file holds a value or line the repository lacks, the diff adds it to the clone's `instructions.md` first, and the report names the file for the user to commit there, since the skill doesn't push someone's personal repository.
 - **`verify.py` checks it, and a missing pointer fails.** A `personal` line is `ok` when the shared file carries the repository's values, `none` when the pointer says none, and `FAIL` when the pointer is missing or malformed, the clone or its file is missing, or a value or the workflow differs. A missing pointer fails because it is a gap the diff closes, so a set-up machine never shows it; the test homes now carry a `none` pointer.
 - **The reference names no particular tool.** The skills repo is public and general, so `references/personal-repository.md` and the tests describe the kinds of entries with placeholders.
+
+
+## 2026-10-01: concise shared instructions
+
+- **Keep enforcement; remove its inventory from every session.** The shared file carried each row's summary, reason and alternative, repeating explanations across command variants. It now carries general rejection guidance, the common `rm -rf` fallback and a short secrets guardrail. The rule table, personal rows, hook messages and native permissions retain their detail. This supersedes the earlier per-row global-instructions requirements.
+- **Expand from observed failures.** Add a fallback example only when a real session is stuck after a rejection; do not pre-load every possible denial.
+- **Shorten role fallbacks at their source.** The session-host and worktree-tool rows keep the action and remove the explanation.
+- **Group personal workflow by topic.** Use concise rules under third-level headings, preserving meaning in the personal source. Copy those headings into the shared file and omit empty categories and the old fixed intro.
