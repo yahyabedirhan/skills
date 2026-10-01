@@ -1,13 +1,13 @@
 ---
 name: set-up-project
-description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, AGENTS.md as the one rules file with CLAUDE.md importing it, the issue tracker, triage labels and domain docs, the folder standard's .gitignore, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
+description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, AGENTS.md as the one rules file with CLAUDE.md pointing at it, the issue tracker, triage labels and domain docs, the folder standard's .gitignore, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
 ---
 
 # Set up project
 
 Scaffold and audit the per-repo configuration the skills assume:
 
-- **Rules file**: `AGENTS.md`, which every harness reads; `CLAUDE.md` holds only `@AGENTS.md`, since Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists
+- **Rules file**: `AGENTS.md`, which every harness reads. `CLAUDE.md` is either the single line `@AGENTS.md` or a symlink to `AGENTS.md`. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both of those forms give it the same text.
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
@@ -20,7 +20,7 @@ You explore, present what you found, confirm with the user, then write. Running 
 
 ### 1. Check the machine
 
-Run **set-up-machine**'s verify script, `python3 <set-up-machine skill>/scripts/verify.py` (the skill is installed beside this one). If any line fails, run the **set-up-machine** skill first, then come back. Done when verify passes.
+Run **set-up-machine**'s verify script, `python3 <set-up-machine skill>/scripts/verify.py` (the skill is installed beside this one). A pass is exit code 0. That means the `rules` line says `ok` and no `hook` line says `FAIL`. A `codex` line that says `differs`, `same`, `stricter`, or `skipped` is not a failure. `differs` is what the script prints for a row Codex can't express, and it still exits 0 with `rules ok`. When the exit code is not 0, run the **set-up-machine** skill first, then come back. Done when verify exits 0.
 
 ### 2. Explore
 
@@ -79,7 +79,7 @@ When exploration found a `docs/assets/` folder, propose moving each topic with `
 Show the user a draft of:
 
 - `AGENTS.md`: new from [agents-md.md](agents-md.md), or the existing one with the `## Agent skills` block and any `## Environment defaults` rows added, and each line of an existing `CLAUDE.md` moved into it
-- `CLAUDE.md`: the single line `@AGENTS.md` (Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and follows the import)
+- `CLAUDE.md`: the single line `@AGENTS.md`, or an existing symlink to `AGENTS.md` left as it is. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both forms give it the same text.
 - `.gitignore`: `.scratch/` and `.claude/worktrees/`, each only where it's missing
 - The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
 - Each rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, and the edits to the files that name them, when Section C proposed them

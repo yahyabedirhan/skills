@@ -26,3 +26,9 @@ The decisions behind the `set-up-project` skill. This file is for maintaining it
 - **The audit checks every harness's project files, whether or not that harness is set up on the machine.** A teammate may use a harness this machine doesn't have.
 - **With the auto-mode guard off, a project allow over a deny command row is `overlaps`:** the user deny still wins, and there's no classifier to route around.
 
+## 2026-10-01: the effort label, the machine check, and CLAUDE.md
+
+- **Create `effort:<effort>` before the first issue that uses it.** The GitHub template told skills to pass the label to `gh issue create`, and that command fails when the label is missing. The publish section now lists labels and runs `gh label create` only when that exact name is absent. `--limit 1000` is there because `gh label list` pages, and a short page can hide a label that already exists.
+- **A machine check passes on exit code 0.** `verify.py` prints `codex differs` for rows Codex can't express and still exits 0 with `rules ok`. "If any line fails" sent agents to set up the machine on a healthy check. A pass is the `rules` line saying `ok` and no `hook` line saying `FAIL`.
+- **`CLAUDE.md` is the import line or a symlink to `AGENTS.md`.** The intro said it holds only `@AGENTS.md`, while the write step already accepted a symlink. Both forms give Claude Code the same text, since it skips `AGENTS.md` when `CLAUDE.md` exists. The intro, the draft, and the `AGENTS.md` seed now say the same thing.
+
