@@ -6,6 +6,7 @@ python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 import io
 import json
 import os
+import re
 import shlex
 import stat
 import sys
@@ -275,8 +276,8 @@ Rules for how this person works that pass the team test. Anything a project or a
 WORKFLOW = "- First workflow line.\n- Second workflow line,\n  carried on."
 
 
-class PersonalTest(unittest.TestCase):
-    """The pointer, the personal repository it names, and the shared file generated from it."""
+class PersonalHome:
+    """A home folder copy with a pointer, the personal repository it names, and the shared file."""
 
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
@@ -306,6 +307,10 @@ class PersonalTest(unittest.TestCase):
     def lines(self):
         code, out = run("--home", str(self.home), "--rules", str(TABLE), "--no-codex")
         return code, [l for l in out.splitlines() if l.startswith("personal")]
+
+
+class PersonalTest(PersonalHome, unittest.TestCase):
+    """The pointer, the personal repository it names, and the shared file generated from it."""
 
     def test_a_missing_pointer_is_reported(self):
         code, lines = self.lines()
@@ -406,6 +411,96 @@ class PersonalTest(unittest.TestCase):
         self.shared()
         code, lines = self.lines()
         self.assertRegex(lines[0], r"personal +FAIL +.*instructions\.md has no `## Environment defaults` table")
+
+
+def personal_row(id, level, match, covers, leaves=()):
+    return {"id": id, "level": level, "summary": id, "match": match, "reason": "A reason.",
+            "instruction": "Go ahead.", "samples": {"covers": list(covers), "leaves": list(leaves)}}
+
+
+ALLOW_MCP = personal_row("server-a-read", "allow", {"server": "server-a", "tool": "^read_"},
+                         ["mcp__server-a__read_item"], ["mcp__server-a__write_item"])
+DENY_MISSING_TOOL = personal_row("tool-missing-wipe", "deny",
+                                 {"program": "no-such-tool-for-this-test", "subcommands": [["wipe"]]},
+                                 ["no-such-tool-for-this-test wipe all"], ["no-such-tool-for-this-test list"])
+
+
+class PersonalPermissionsTest(PersonalHome, unittest.TestCase):
+    """The personal repository's permissions file: its rows through the hook, and their entries in Claude Code."""
+
+    def setUp(self):
+        super().setUp()
+        self.pointer()
+        self.personal_repository()
+        self.shared()
+
+    def permissions(self, rows):
+        self.write("code/personal/agents/permissions.json", json.dumps({"version": 1, "rules": rows}))
+
+    def claude(self, permissions):
+        hooks = {"PreToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": wired(HOOK, "claude-code")}]}]}
+        self.write(".claude/settings.json", json.dumps({"permissions": permissions, "hooks": hooks}))
+
+    def output(self):
+        return run("--home", str(self.home), "--rules", str(TABLE), "--no-codex")
+
+    def test_a_personal_allow_row_for_an_mcp_tool_is_present_in_claude_code_and_not_extra(self):
+        self.permissions([ALLOW_MCP])
+        self.claude({"deny": [], "allow": ["mcp__server-a__read_item", "mcp__server-a__read_list", "mcp__other__x"]})
+        code, out = self.output()
+        self.assertEqual(code, 0, out)
+        self.assertRegex(out, r"rules +ok +34 rows and 1 personal rows")
+        self.assertRegex(out, r"personal +present +Claude Code: server-a-read \(allow, personal\): "
+                              r"mcp__server-a__read_item, mcp__server-a__read_list in ")
+        self.assertNotIn("mcp__other__x", out)
+        self.assertNotIn("extra", out)
+
+    def test_a_personal_row_whose_tool_claude_code_lacks_is_not_applicable_and_says_why(self):
+        self.permissions([ALLOW_MCP, DENY_MISSING_TOOL])
+        self.claude({"deny": [], "allow": []})
+        code, lines = self.lines()
+        self.assertEqual(code, 0, lines)
+        self.assertTrue(any(re.search(r"personal +n/a +Claude Code: server-a-read .*: no MCP tool in .* matches it", l)
+                            for l in lines), lines)
+        self.assertTrue(any(re.search(r"personal +n/a +Claude Code: tool-missing-wipe .*: no-such-tool-for-this-test "
+                                      r"isn't on PATH", l) for l in lines), lines)
+
+    def test_a_personal_row_claude_code_should_hold_but_lacks_fails(self):
+        python = Path(sys.executable).name
+        self.permissions([personal_row("python-wipe", "deny", {"program": python, "subcommands": [["wipe"]]},
+                                       [f"{python} wipe"]),
+                          personal_row("notes-read", "deny", {"paths": ["~/notes/**"], "access": "read"},
+                                       ["~/notes/a.md"])])
+        self.claude({"deny": ["Read(~/notes/**)"], "allow": []})
+        code, lines = self.lines()
+        self.assertEqual(code, 1, lines)
+        self.assertTrue(any(re.search(r"personal +FAIL +Claude Code: python-wipe .*no entry in permissions\.deny", l)
+                            for l in lines), lines)
+        self.assertTrue(any(re.search(r"personal +present +Claude Code: notes-read .*Read\(~/notes/\*\*\)", l)
+                            for l in lines), lines)
+        self.claude({"deny": ["Read(~/notes/**)", f"Bash({python} wipe *)"], "allow": []})
+        self.assertEqual(self.lines()[0], 0)
+
+    def test_personal_samples_go_through_the_hook_with_the_rule_table(self):
+        loosens = personal_row("rm-allowed", "allow", {"program": "rm", "flags": [["r"]]}, ["rm -rf x"])
+        self.permissions([DENY_MISSING_TOOL, loosens])
+        code, out = self.output()
+        self.assertEqual(code, 1)
+        self.assertIn("rm-allowed: `rm -rf x` got deny, expected allow", out)
+        self.assertNotIn("tool-missing-wipe:", out.split("rules")[0])
+        self.assertRegex(out, r"rules +FAIL +34 rows and 2 personal rows, \d+ samples, 1 wrong")
+
+    def test_a_malformed_personal_row_fails(self):
+        self.permissions([personal_row("bad", "block", {"program": "tool-a"}, ["tool-a"])])
+        code, lines = self.lines()
+        self.assertEqual(code, 1)
+        self.assertRegex(lines[1], r"personal +FAIL +.*permissions\.json: rules\[0\]: level must be one of")
+
+    def test_a_personal_row_with_a_table_id_fails(self):
+        self.permissions([{**DENY_MISSING_TOOL, "id": "rm-recursive-force"}])
+        code, lines = self.lines()
+        self.assertEqual(code, 1)
+        self.assertRegex(lines[1], r"personal +FAIL +.*'rm-recursive-force' is already a row of the rule table")
 
 
 if __name__ == "__main__":

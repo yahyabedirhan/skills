@@ -3,7 +3,8 @@
 
 usage: pre_tool_hook.py [--harness claude-code|codex|opencode] [--config FILE] [--rules FILE]
 
-It refuses a call that any deny row of the rule table covers, naming each
+It refuses a call that any deny row of the rule table, or of the personal
+repository's permissions file that ~/.config/agents/source.md names, covers, naming each
 refused part with the rule's instruction, and appends a line to the report
 folder for a call an allow-and-report row covers. The report folder is
 `report_dir` in the configuration file (default ~/.config/agents/hook.json).

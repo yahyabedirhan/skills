@@ -20,6 +20,10 @@ Every row carries `samples`: `covers`, calls the row must catch (a shell command
 a path, or an MCP tool name, by the row's kind), and `leaves`, near misses it must
 let through. The verify script feeds them to the hook. Any row may carry a `gap`:
 what no harness can catch for it, which every harness's audit names.
+
+A personal repository's permissions file holds rows of the same format, loaded with
+`personal=True`: they may also take the level `allow`, which only the harnesses' native
+entries carry out, and which the generic table refuses.
 """
 from __future__ import annotations
 
@@ -29,6 +33,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 LEVELS = ("allow-and-report", "ask", "deny")
+PERSONAL_LEVELS = ("allow",) + LEVELS
 KINDS = ("command", "file", "mcp-tool")
 ACCESS = ("read", "write")
 
@@ -77,16 +82,21 @@ class Rule:
         return (self.program,) if isinstance(self.program, str) else tuple(self.program)
 
 
-def load(path: Path = DEFAULT_TABLE) -> list:
+def load(path: Path = DEFAULT_TABLE, personal: bool = False) -> list:
+    """The rows of a rule table, or with `personal` of a personal repository's permissions file."""
     try:
         data = json.loads(Path(path).read_text())
     except (OSError, json.JSONDecodeError) as exc:
         raise RuleTableError(f"can't read the rule table {path}: {exc}") from exc
-    if data.get("version") != 1:
-        raise RuleTableError(f"{path}: unsupported table version {data.get('version')!r}")
+    if not isinstance(data, dict) or data.get("version") != 1:
+        version = data.get("version") if isinstance(data, dict) else None
+        raise RuleTableError(f"{path}: unsupported table version {version!r}")
+    rows = data.get("rules", [])
+    if not isinstance(rows, list):
+        raise RuleTableError(f"{path}: `rules` must be a list of rows")
     rules, seen = [], set()
-    for i, row in enumerate(data.get("rules", [])):
-        rule = _parse_row(row, f"{path}: rules[{i}]")
+    for i, row in enumerate(rows):
+        rule = _parse_row(row, f"{path}: rules[{i}]", PERSONAL_LEVELS if personal else LEVELS)
         if rule.id in seen:
             raise RuleTableError(f"{path}: duplicate rule id {rule.id!r}")
         seen.add(rule.id)
@@ -94,12 +104,17 @@ def load(path: Path = DEFAULT_TABLE) -> list:
     return rules
 
 
-def _parse_row(row: dict, where: str) -> Rule:
+def _parse_row(row: dict, where: str, levels: tuple = LEVELS) -> Rule:
+    if not isinstance(row, dict):
+        raise RuleTableError(f"{where}: a row must be an object")
     for key in ("id", "level", "summary", "match", "reason", "instruction"):
         if not row.get(key):
             raise RuleTableError(f"{where}: missing {key!r}")
-    if row["level"] not in LEVELS:
-        raise RuleTableError(f"{where}: level must be one of {', '.join(LEVELS)}")
+    if row["level"] not in levels:
+        only = " (`allow` is for a personal repository's rows only)" if row["level"] in PERSONAL_LEVELS else ""
+        raise RuleTableError(f"{where}: level must be one of {', '.join(levels)}{only}")
+    if not isinstance(row["match"], dict):
+        raise RuleTableError(f"{where}: match must be an object")
     match = row["match"]
     common = {k: row[k] for k in ("id", "level", "summary", "reason", "instruction")}
     if "gap" in row:

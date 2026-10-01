@@ -9,7 +9,12 @@ checks it against the rule table, and answers in the harness's own format:
   line in the report folder, and the hook says nothing, so the harness's own
   permissions decide;
 - **ask:** the verdict names the ask rows a call hits (verify checks them), but the
-  hook says nothing for them: the harness's native ask entries do the asking.
+  hook says nothing for them: the harness's native ask entries do the asking;
+- **allow**, a personal row's level: the verdict names them for verify too, and the
+  hook says nothing, so the harness's native allow entries let the call run.
+
+The rows are the rule table's, plus the personal rows of the repository that
+`~/.config/agents/source.md` names (personal.py).
 
 Each harness has a reader (its payload -> ToolCall) and a writer (the denials
 -> what it prints), in HARNESSES. The report folder comes from the hook's
@@ -27,7 +32,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import commands, rules as rule_table
+from . import commands, personal, rules as rule_table
 
 CONFIG_PATH = "~/.config/agents/hook.json"
 DEFAULT_REPORT_DIR = "~/.local/state/agents/reports"
@@ -56,6 +61,7 @@ class Verdict:
     denials: list = field(default_factory=list)
     reports: list = field(default_factory=list)
     asks: list = field(default_factory=list)  # ask rows the call hits; the harness's native entries do the asking
+    allows: list = field(default_factory=list)  # personal allow rows the call hits; the native entries allow it
 
     @property
     def answer(self) -> str:
@@ -95,9 +101,10 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
         key = (hit.rule.id, hit.part)
         if key not in seen:
             seen.add(key)
-            {"deny": verdict.denials, "ask": verdict.asks, "allow-and-report": verdict.reports}[hit.rule.level].append(hit)
+            {"deny": verdict.denials, "ask": verdict.asks, "allow-and-report": verdict.reports,
+             "allow": verdict.allows}[hit.rule.level].append(hit)
     if verdict.denials:
-        verdict.reports, verdict.asks = [], []
+        verdict.reports, verdict.asks, verdict.allows = [], [], []
     return verdict
 
 
@@ -415,6 +422,15 @@ def main(argv=None, stdin=None, stdout=None, now=None) -> int:
         payload = json.loads(stdin.read() or "{}")
         call = read(payload if isinstance(payload, dict) else {})
         table = rule_table.load(args.rules)
+    except (ValueError, OSError) as exc:
+        print(f"set-up-machine hook: {exc}", file=sys.stderr)
+        return 1
+    # A broken personal file leaves the rule table's rows in force; verify.py reports it.
+    try:
+        table = table + personal.permissions(Path.home(), table)
+    except (ValueError, OSError) as exc:
+        print(f"set-up-machine hook: personal rows skipped: {exc}", file=sys.stderr)
+    try:
         verdict = decide(call, table, Path.home())
     except (ValueError, OSError) as exc:
         print(f"set-up-machine hook: {exc}", file=sys.stderr)
