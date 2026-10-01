@@ -10,7 +10,7 @@ The file has these parts, in this order. This skill decides the parts and rewrit
 
 1. `# Global agent instructions`
 2. **The rule line:** `Only what describes this person's own workflow and explains a global rule. Anything a teammate would need goes in the project or a skill.`
-3. **`## Environment defaults`**, with the line "What this person uses for each role. A project's own environment defaults override a row. When a row is `none`, do what its last column says.", then a table, `| Role | Tool | What it is | When none |`, one row per role below. The Tool column is the user's; this skill writes the other two from the roles table below, so every skill that names a role finds its meaning and its fallback here, in context.
+3. **`## Environment defaults`**, with the line "What this person uses for each role. A project's own environment defaults override a row. When a row is `none`, do what its last column says.", then a table, `| Role | Tool | What it is | When none |`, one row per role below. The Tool column comes from the personal repository, or is the user's when there is none; this skill writes the other two from the roles table below, so every skill that names a role finds its meaning and its fallback here, in context.
 4. **The generated block**, rewritten from `rules.json` on every run:
 
    ```markdown
@@ -28,9 +28,14 @@ The file has these parts, in this order. This skill decides the parts and rewrit
    ```
 
    One line per row, in table order: `- **<Denied | Asks first | Allowed and reported>:** <summary>. <reason> <instruction>`, with `Instead: ` before the instruction on deny rows only. Then, after a blank line, the **Environment variables** paragraph exactly as above: the rows catch only the commands they name, and it tells the agent to leave every other route alone.
-5. **`## Personal workflow`**, with the line `Rules for how this person works that pass the team test. Anything a project or a skill needs goes there instead.`, then this person's rules, one per line.
+5. **`## Personal workflow`**, with the line `Rules for how this person works that pass the team test. Anything a project or a skill needs goes there instead.`, then this person's rules, one per line: the personal repository's workflow section, or the user's own lines when there is none.
 
-A new file gets all five, every role `none` and the workflow section empty. On an existing file, only **add** what the shape lacks, such as the rule line, a section, a missing role row as `none` or a missing column, rewrite the What it is and When none columns from the roles table, and regenerate the block; never rewrite a Tool value or a workflow line. If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
+A new file gets all five, every role `none` and the workflow section empty, unless a personal repository fills them. On an existing file, only **add** what the shape lacks, such as the rule line, a section, a missing role row as `none` or a missing column, rewrite the What it is and When none columns from the roles table, and regenerate the block.
+
+- **With a personal repository:** also rewrite the Tool column and the workflow lines from it, as `references/personal-repository.md` says.
+- **With none:** never rewrite a Tool value or a workflow line, since they are the user's.
+
+If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
 
 ## Roles
 
@@ -61,7 +66,7 @@ A line belongs here only when it's about this person, not the work: how they lik
 When a harness still keeps its own global file (a `~/.claude/CLAUDE.md` that isn't a link, an old `~/.codex/AGENTS.md`), move it line by line before the harness's file becomes a link:
 
 1. Choose where each line goes, using the list above: a role's row, a personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
-2. Write each role's value and the workflow lines into the shared file; make each skill edit at its source, as `/maintain-environment` says.
+2. Write each role's value and the workflow lines into the personal repository's `agents/instructions.md`, or into the shared file when there is none; make each skill edit at its source, as `/maintain-environment` says.
 3. Leave the harness's file holding only its link to the shared file.
 
 ## Memory

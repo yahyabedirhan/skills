@@ -1,5 +1,5 @@
 """Tests for the verify script: the rule table's samples against the hook, Codex's own
-checker, and each harness's hook wiring.
+checker, each harness's hook wiring, and the personal repository the pointer names.
 
 python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 """
@@ -29,6 +29,13 @@ def wired(script, harness):
     return f"[ -f {q} ] && python3 {q} --harness {harness} || {fallback}"
 
 
+def no_personal_repository(home):
+    """The pointer a machine with no personal repository holds, so other checks can pass."""
+    pointer = Path(home) / ".config" / "agents" / "source.md"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text("# Personal repository\n\n- Repository: none\n")
+
+
 def run(*argv):
     out = io.StringIO()
     code = verify.main(list(argv), out)
@@ -39,6 +46,7 @@ class RulesTest(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.dir = Path(self._tmp.name)
+        no_personal_repository(self.dir)
 
     def tearDown(self):
         self._tmp.cleanup()
@@ -118,6 +126,7 @@ class WiringTest(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.home = Path(self._tmp.name).resolve()
+        no_personal_repository(self.home)
 
     def tearDown(self):
         self._tmp.cleanup()
@@ -216,6 +225,187 @@ class WiringTest(unittest.TestCase):
                               capture_output=True, text=True, timeout=60, env={**os.environ})
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertIn("rules", proc.stdout)
+
+
+INSTRUCTIONS = """# Personal instructions
+
+Notes here stay in this repository.
+
+## Environment defaults
+
+| Role | Tool | Why |
+|---|---|---|
+| `session-host` | `host-a` | a note that stays here |
+| `agent` | `agent-a --flag` | |
+
+## Personal workflow
+
+- First workflow line.
+- Second workflow line,
+  carried on.
+"""
+
+SHARED = """# Global agent instructions
+
+Only what describes this person's own workflow and explains a global rule. Anything a teammate would need goes in the project or a skill.
+
+## Environment defaults
+
+What this person uses for each role. A project's own environment defaults override a row. When a row is `none`, do what its last column says.
+
+| Role | Tool | What it is | When none |
+|---|---|---|---|
+| `session-host` | {host} | where agent sessions run | Use this session. |
+| `worktree-tool` | {worktree} | the tool that makes and frees worktrees | `git worktree add`. |
+| `agent` | `agent-a --flag` | the command and flags that start a new agent session | This session's harness. |
+
+<!-- set-up-machine:rules start. Generated from set-up-machine's rule table: change the table, not these lines. -->
+## Global rules
+
+- **Denied:** a rule line.
+<!-- set-up-machine:rules end -->
+
+## Personal workflow
+
+Rules for how this person works that pass the team test. Anything a project or a skill needs goes there instead.
+
+{workflow}
+"""
+
+WORKFLOW = "- First workflow line.\n- Second workflow line,\n  carried on."
+
+
+class PersonalTest(unittest.TestCase):
+    """The pointer, the personal repository it names, and the shared file generated from it."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.home = Path(self._tmp.name).resolve()
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def write(self, rel, text):
+        path = self.home / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
+        return path
+
+    def pointer(self, repository="`owner-a/personal`", clone="`~/code/personal`"):
+        lines = ["# Personal repository", "", f"- Repository: {repository}"]
+        if clone is not None:
+            lines.append(f"- Clone: {clone}")
+        self.write(".config/agents/source.md", "\n".join(lines) + "\n")
+
+    def personal_repository(self, instructions=INSTRUCTIONS):
+        self.write("code/personal/agents/instructions.md", instructions)
+
+    def shared(self, host="`host-a`", worktree="`none`", workflow=WORKFLOW):
+        self.write(".config/agents/AGENTS.md", SHARED.format(host=host, worktree=worktree, workflow=workflow))
+
+    def lines(self):
+        code, out = run("--home", str(self.home), "--rules", str(TABLE), "--no-codex")
+        return code, [l for l in out.splitlines() if l.startswith("personal")]
+
+    def test_a_missing_pointer_is_reported(self):
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +no pointer at .*/\.config/agents/source\.md")
+        self.assertEqual(code, 1)
+
+    def test_a_pointer_that_says_none_passes(self):
+        self.pointer(repository="none", clone=None)
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +none +no personal repository")
+        self.assertEqual(code, 0)
+
+    def test_a_pointer_without_a_repository_line_fails(self):
+        self.write(".config/agents/source.md", "# Personal repository\n\nsomething else\n")
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*source\.md.*Repository")
+        self.assertEqual(code, 1)
+
+    def test_a_repository_that_is_not_owner_slash_repo_fails(self):
+        self.pointer(repository="`just-a-name`")
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*<owner>/<repo>")
+
+    def test_a_repository_without_a_clone_line_fails(self):
+        self.pointer(clone=None)
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*Clone")
+
+    def test_a_relative_clone_path_fails(self):
+        self.pointer(clone="`code/personal`")
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*clone path `code/personal` doesn't start with `~/` or `/`")
+
+    def test_a_clone_that_is_not_there_fails(self):
+        self.pointer()
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*code/personal/agents/instructions\.md doesn't exist")
+        self.assertEqual(code, 1)
+
+    def test_the_shared_file_generated_from_the_personal_repository_passes(self):
+        self.pointer()
+        self.personal_repository()
+        self.shared()
+        code, lines = self.lines()
+        self.assertEqual(len(lines), 1, lines)
+        self.assertRegex(lines[0], r"personal +ok +owner-a/personal at .*code/personal: 2 environment defaults, "
+                                   r"the personal workflow")
+        self.assertEqual(code, 0)
+
+    def test_an_absolute_clone_path_is_read_as_it_is(self):
+        self.pointer(clone=f"`{self.home / 'code' / 'personal'}`")
+        self.personal_repository()
+        self.shared()
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +ok")
+
+    def test_a_tool_value_the_personal_repository_does_not_hold_fails(self):
+        self.pointer()
+        self.personal_repository()
+        self.shared(host="`host-b`")
+        code, lines = self.lines()
+        self.assertIn("`session-host` is `host-b` in", lines[0])
+        self.assertIn("`host-a` in", lines[0])
+        self.assertEqual(code, 1)
+
+    def test_a_role_the_personal_repository_leaves_out_is_none(self):
+        self.pointer()
+        self.personal_repository()
+        self.shared(worktree="`tool-b`")
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*`worktree-tool` is `tool-b` in .*, `none` in ")
+
+    def test_a_role_missing_from_the_shared_file_fails(self):
+        self.pointer()
+        self.personal_repository(INSTRUCTIONS.replace("| `agent` |", "| `notification-method` |"))
+        self.shared()
+        code, lines = self.lines()
+        self.assertTrue(any("`notification-method` has no row in" in l for l in lines), lines)
+        self.assertEqual(code, 1)
+
+    def test_personal_workflow_lines_that_differ_fail(self):
+        self.pointer()
+        self.personal_repository()
+        self.shared(workflow="- First workflow line.\n- A line written by hand.")
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*Personal workflow` in .* differs from")
+        self.assertEqual(code, 1)
+
+    def test_a_missing_shared_file_fails(self):
+        self.pointer()
+        self.personal_repository()
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*\.config/agents/AGENTS\.md doesn't exist")
+
+    def test_an_instructions_file_without_its_sections_fails(self):
+        self.pointer()
+        self.personal_repository("# Personal instructions\n\nNothing yet.\n")
+        self.shared()
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*instructions\.md has no `## Environment defaults` table")
 
 
 if __name__ == "__main__":

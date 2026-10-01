@@ -11,9 +11,12 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   stricter, and kept) or `differs` from the row's level (a row Codex can't
   express, in references/codex.md, or a mistake to fix);
 - hook: each harness found has its pre-tool hook wired to a script that exists
-  (Codex's also trusted).
+  (Codex's also trusted);
+- personal: the pointer, ~/.config/agents/source.md, is there, and when it names a
+  personal repository, the shared global instructions file carries that repository's
+  environment defaults and personal workflow (references/personal-repository.md).
 
-Exits 1 when a rules or hook line fails. --codex-trust-hash prints the
+Exits 1 when a rules, hook or personal line fails. --codex-trust-hash prints the
 `trusted_hash` Codex records for a PreToolUse hook running COMMAND with matcher
 `*` and timeout 10. Python 3.9+, standard library only.
 """
@@ -32,7 +35,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import hook, rules as rule_table  # noqa: E402
+from setupmachine import hook, personal, rules as rule_table  # noqa: E402
 
 HOOK_SCRIPT = "pre_tool_hook.py"
 CURSOR_EVENTS = ("beforeShellExecution", "beforeMCPExecution", "beforeReadFile", "preToolUse")
@@ -272,7 +275,7 @@ def main(argv=None, stdout=None) -> int:
     out = stdout or sys.stdout
 
     def line(check, status, text):
-        out.write(f"{check:<6} {status:<8} {text}\n")
+        out.write(f"{check:<8} {status:<8} {text}\n")
 
     if args.codex_trust_hash is not None:
         out.write(codex_trust_hash(args.codex_trust_hash) + "\n")
@@ -312,6 +315,10 @@ def main(argv=None, stdout=None) -> int:
 
     for status, text in check_wiring(home):
         line("hook", status, text)
+        failed |= status == "FAIL"
+
+    for status, text in personal.check(home):
+        line("personal", status, text)
         failed |= status == "FAIL"
     return 1 if failed else 0
 
