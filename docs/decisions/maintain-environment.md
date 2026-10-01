@@ -42,3 +42,11 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 
 - **A fork is upgraded like a dependency, from upstream's latest version, with the fork's own changes re-applied on top.** Before #105 the skill only knew how to fork, so the upgrade steps lived only in that issue. They now sit in *Upgrade a fork* in `skill-operations.md`.
 - **An upgrade keeps the fork's choice of who can invoke it.** The maintainer forked several upstream skills mainly to drop `disable-model-invocation`, so agents could load them. Upstream can set it again later: humanlayer/skills did in `bba9d13` for `show-me`, which would break `orchestrate-effort`. The step names both places the setting lives, `SKILL.md` and `agents/openai.yaml`.
+
+## 2026-10-01: personal changes go to the personal repository (#115)
+
+- **A personal preference, an environment default or a personal permission is made in the user's personal repository, then `/set-up-machine` runs again.** Spec #111 made that repository the source and the machine's files the output, so an edit to the shared file's generated parts or to a harness's settings would be lost on the next run. The skill points at `/set-up-machine`'s `references/personal-repository.md` for which file each kind goes in, rather than restating the layout, so the layout has one source.
+- **The team test chooses between the skills repo and the personal repository.** What anybody could use goes in a skill or the rule table; what holds only for this user goes in their repository.
+- **A missing pointer is set up through `/set-up-machine` first;** this skill never writes the pointer itself, since `/set-up-machine` owns it and asks the user once.
+- **With a pointer that records no personal repository, a personal instruction still goes in the shared file,** which is its source on such a machine, as `/set-up-machine` allows. A personal permission has no home without the repository, so the skill offers to set one up rather than write it into a harness's settings, where every audit would flag it.
+- **The user commits and pushes in their personal repository.** It is private and theirs, and other machines get the change only after the push, a pull into their clone and a rerun of `/set-up-machine`.
