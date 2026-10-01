@@ -41,11 +41,13 @@ The values this skill writes into the shared file, and the person's notes on the
 
 ## Personal workflow
 
-- <one rule for how this person works>
+### <topic>
+
+- <concise rule for how this person works>
 ```
 
 - **Environment defaults:** one row per role the person fills, named as in the roles table in `global-instructions.md`. Only the Role and Tool columns are read; any other column, such as Why, is notes that stay in the repository. A role left out, or given `none`, is `none` in the shared file.
-- **Personal workflow:** everything under the heading, up to the next `## ` heading, is copied as it is into the shared file's Personal workflow section, below its fixed intro line. Notes on when and how to use a tool the person added count as workflow lines. A line still has to pass the team test that `global-instructions.md` describes.
+- **Personal workflow:** everything under the heading, up to the next `## ` heading, is copied as it is into the shared file's Personal workflow section, including its `###` topic headings. Notes on when and how to use a tool the person added count as workflow lines. A line still has to pass the team test that `global-instructions.md` describes.
 - Any other text in the file is notes, and stays in the repository.
 
 ### `agents/permissions.json`
@@ -67,7 +69,7 @@ Read `codex.md` for installed-version support, preservation and override checks.
 
 ## Writing the shared file from it
 
-With a personal repository, the Tool column of the shared file's Environment defaults table and its Personal workflow section are generated from `agents/instructions.md`, the way the rules block is generated from the rule table. The roles' What it is and When none columns still come from this skill's roles table.
+With a personal repository, the Tool column of the shared file's Environment defaults table and its Personal workflow section are generated from `agents/instructions.md`, while the rules block follows `global-instructions.md`'s compact template. The roles' What it is and When none columns still come from this skill's roles table.
 
 - **When the shared file holds a Tool value or workflow line the personal repository lacks:** add it to the clone's `agents/instructions.md` in the same diff, before the shared file is rewritten, so nothing is lost. In the report, name the file for the user to commit and push in their own repository.
 - **When `agents/instructions.md` doesn't exist yet:** the diff creates it from the shared file's current values in the shape above.
@@ -79,7 +81,7 @@ With a personal repository, the Tool column of the shared file's Environment def
 Turn each personal row into each harness's entries the way that harness's reference turns a rule-table row, written beside the table's entries in the same files. Mark every entry a personal row produced `personal` in the diff, so the user tells it from the table's and never reads it as `extra`.
 
 - **Only where its tool exists:** a command row applies where one of its programs is on `PATH`; an MCP-tool row in a harness that lists a tool it matches, by the listing that harness's reference gives; a file row in every harness. Elsewhere it's an `n/a` line naming the missing tool, and nothing is written there, since an entry for a tool the harness lacks only adds noise.
-- **Rule lines:** a personal `deny`, `ask` or `allow-and-report` row gets its line in the shared file's generated block, after the table's and in the same form, so the agent reads its instruction. An `allow` row gets none: it asks nothing of the agent, and notes on when to use the tool belong in the personal workflow.
+- **Rejection guidance:** keep personal rows' details in the permission file and harness entries. The hook supplies their reasons and alternatives; do not append them to the shared file's compact rules block. Notes on when to use a tool belong in the personal workflow.
 - **When the machine holds an `extra` entry that is the person's own choice,** such as an allow for a tool they added by hand: propose it as a personal row in the clone's `agents/permissions.json` in the same diff, so the next machine gets it too, and name the file in the report for the user to commit there.
 - **When a personal row is removed:** the entries it left behind are `extra`, for the user to remove.
 

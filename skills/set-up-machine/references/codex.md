@@ -137,4 +137,4 @@ A forbidden rule: `` exec_command failed: … `/bin/zsh -lc 'rm -fr x'` rejected
 - `verify.py` runs each plain command sample through `codex execpolicy check --resolve-host-executables --rules <each rules file> -- <argv>`. A `differs` line should be a row this file says gets no rule; any other is a mistake in the rules file. The check doesn't unwrap `bash -lc`.
 - **Hook trust:** `codex app-server` with `CODEX_HOME` at the folder, then `hooks/list` for a throwaway folder: the group is `trusted`.
 - **A session without a login:** `codex exec` with `CODEX_HOME` and `HOME` at a trial home and a `model_providers` entry pointing at a local stand-in that answers the Responses API with one `exec_command` (or `apply_patch`) call; the next request's `function_call_output` is what the agent read. With `--disable hooks` it shows the rule's justification, and with hooks on the hook's refusal.
-- **Instructions:** `codex debug prompt-input hello` in a throwaway folder shows the shared file's rule line, and no Context7 block.
+- **Instructions:** `codex debug prompt-input hello` in a throwaway folder shows the shared file's rejection guidance, and no Context7 block.
