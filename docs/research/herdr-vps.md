@@ -35,7 +35,7 @@ Read-only (run and verified):
 | An agent's recent output | `ssh vps '~/.local/bin/herdr agent read w6:p2 --source recent-unwrapped --lines 120'` |
 | Full live state | `ssh vps '~/.local/bin/herdr api snapshot'` (from `herdr api --help`; not run) |
 
-All list/get commands return JSON. `agent list` gives, per agent: `agent` (kind), `agent_status` (`idle`, `working`, `blocked`, `done`, `unknown`), `pane_id`, `tab_id`, `workspace_id`, `cwd`, `terminal_title` and the agent's native session id [vps]. On 2026-09-25 the VPS had workspaces `w5` "~ ROOT", `w7` "~ VPS MAINTAINER", `w6` "shipyard" (tabs `w6:t1` "CLI", `w6:t2` "Orchestrator"), two workspaces for private repos, and one agent: `claude` in `w6:p2`, `idle`, cwd `~/Developer/yahyabedirhan/shipyard`, unnamed [vps].
+All list/get commands return JSON. `agent list` gives, per agent: `agent` (kind), `agent_status` (`idle`, `working`, `blocked`, `done`, `unknown`), `pane_id`, `tab_id`, `workspace_id`, `cwd`, `terminal_title` and the agent's native session id [vps]. On 2026-09-25 the VPS had workspaces `w5` "~ ROOT", `w7` "~ VPS MAINTAINER", `w6` "shipyard" (tabs `w6:t1` "CLI", `w6:t2` "Orchestrator"), two workspaces for private repos, and one agent: `claude` in `w6:p2`, `idle`, cwd the shipyard checkout, unnamed [vps].
 
 Writes (syntax from `herdr <cmd> --help` [mac]; **not run**, per the research rules):
 
@@ -60,7 +60,7 @@ Notes for writes:
 Not possible today. What exists:
 
 - The Mac's SSH server is not listening: `nc -z 127.0.0.1 22` exits 1 [mac], so Remote Login is off.
-- No Tailscale on either machine (`which tailscale` [mac] and `command -v tailscale` [vps] both empty; no Tailscale app in `/Applications` [mac]). The Mac has Cloudflare WARP and OrbStack installed [mac], neither set up as a path in.
+- No Tailscale on either machine (`which tailscale` [mac] and `command -v tailscale` [vps] both empty; no Tailscale app in `/Applications` [mac]). Other networking tools installed on the Mac [mac] are not set up as a path in either.
 - The VPS has no `~/.ssh/config` and no saved Herdr machines [vps].
 - The Mac's Herdr socket is local only, like the VPS's.
 
@@ -73,28 +73,19 @@ What it would take (none set up):
 ## Finding the host
 
 - **Herdr's catalog.** `herdr machine list --json` [mac] returns `id`, `label`, `target`, `session`, `enabled`, `selected`. The file behind it is `~/.local/state/herdr/client/endpoints.json` (`{"version":1,"ssh":[…]}`) [mac]. Profiles hold only id, label, SSH target, remote session and enabled state; no credentials (`connecting-machines.mdx`). A skill can read the target with `herdr machine list --json | jq -r '.[] | select(.label=="<vps-label>") | .target'` rather than hard-coding it. Prefer the CLI over the file; the file format is not documented as stable.
-- **SSH config.** `~/.ssh/config` [mac] only contains OrbStack's `Include ~/.orbstack/ssh/config`. There is no alias for the VPS; the target is the raw `<vps-user>@<vps-host>`. Adding a `Host vps` alias is an option, but Herdr's profile would still hold whatever target it was added with.
+- **SSH config.** `~/.ssh/config` [mac] only contains an `Include` line another tool added. There is no alias for the VPS; the target is the raw `<vps-user>@<vps-host>`. Adding a `Host vps` alias is an option, but Herdr's profile would still hold whatever target it was added with.
 - **Herdr config.** `~/.config/herdr/config.toml` [mac] holds UI settings only, not machines.
 
 ## Worktrees and tooling on the VPS
 
-Repos under `~/Developer/yahyabedirhan/` [vps], all cloned over SSH from `git@github.com:yahyabedirhan/<repo>.git`:
-
-| Repo | VPS path | Branch on 2026-09-25 | Worktrees |
-| --- | --- | --- | --- |
-| a private notes repo | `~/Developer/yahyabedirhan/<notes-repo>` | `master` | main checkout only |
-| shipyard | `~/Developer/yahyabedirhan/shipyard` | `build/shipyard-core-0.0.x` | main checkout only |
-| skills | `~/Developer/yahyabedirhan/skills` | `main` | main checkout only |
-| steal | `~/Developer/yahyabedirhan/steal` | `main` | main checkout only |
-
-Also `~/Developer/open-source/ghbar` [vps]. Paths differ from the Mac: the notes repo sits under `~/Documents/` on the Mac and under `~/Developer/yahyabedirhan/` on the VPS, and three other repos exist on the Mac but not in the VPS's `~/Developer/yahyabedirhan` [mac, vps]. Map repos by their `origin` URL, not by path.
+The maintainer's repos sit under one projects folder on the VPS [vps], all cloned over SSH from GitHub, and on 2026-09-25 each was a main checkout only, with no worktrees. Paths differ from the Mac: some repos sit in another folder on the Mac, and some exist on only one of the two machines [mac, vps]. Map repos by their `origin` URL, not by path.
 
 Tools (`command -v` over plain SSH, then `bash -lc` [vps]):
 
 | Tool | VPS |
 | --- | --- |
 | `git` | `/usr/bin/git`; user.name/email set |
-| `gh` | `/usr/bin/gh`, logged in as `yahyabedirhan`, git protocol ssh |
+| `gh` | `/usr/bin/gh`, logged in to the maintainer's account, git protocol ssh |
 | `claude` | `~/.local/bin/claude` (login shell only) |
 | `herdr` | `~/.local/bin/herdr` 0.9.0 (login shell only) |
 | `swift` | `~/.local/share/swiftly/bin/swift` (login shell only; issue [#13](https://github.com/yahyabedirhan/skills/issues/13) reported it missing) |
@@ -107,9 +98,9 @@ On the Mac `treehouse` is at `~/go/bin/treehouse` [mac], and `init-effort-with-h
 Getting a pushed branch into a worktree on the VPS without treehouse (not run):
 
 ```bash
-ssh vps 'git -C ~/Developer/yahyabedirhan/<repo> fetch origin <branch> &&
-  git -C ~/Developer/yahyabedirhan/<repo> worktree add ~/Developer/worktrees/<repo>/<effort> <branch>'
-ssh vps '~/.local/bin/herdr worktree open --cwd ~/Developer/yahyabedirhan/<repo> --path ~/Developer/worktrees/<repo>/<effort> --label <effort> --no-focus'
+ssh vps 'git -C <repo-path> fetch origin <branch> &&
+  git -C <repo-path> worktree add ~/Developer/worktrees/<repo>/<effort> <branch>'
+ssh vps '~/.local/bin/herdr worktree open --cwd <repo-path> --path ~/Developer/worktrees/<repo>/<effort> --label <effort> --no-focus'
 ```
 
 `git worktree add <path> <branch>` creates a local branch tracking `origin/<branch>` when only the remote branch exists. `herdr worktree create --cwd <repo> --branch <name> --base <ref> --path <path>` does both steps in one, but puts the worktree outside any pool (`herdr worktree create --help` [mac]). The worktree folder is a suggestion; nothing on the VPS defines one yet.

@@ -81,6 +81,42 @@ class BadRowsTest(unittest.TestCase):
         self.assertRefused([row(samples={}), row(samples={"covers": []}), row(samples={"leaves": ["x"]}),
                             row(samples={"covers": ["x"], "other": ["y"]}), {k: v for k, v in row().items() if k != "samples"}])
 
+    def test_fields_of_the_wrong_type_are_refused(self):
+        self.assertRefused([row(id=["x"]), row(level=["deny"]), row(summary=1), row(reason={"a": 1}),
+                            row(instruction=["i"]), row(match={"server": 5, "tool": "^read_"}),
+                            row(match={"server": "mail", "tool": ["send"]})])
+
+    def test_an_allow_row_is_refused_in_the_rule_table(self):
+        self.assertRefused([row(level="allow")])
+
+
+class PersonalRowsTest(unittest.TestCase):
+    """A personal repository's permissions file: the rule table's rows, plus a plain `allow` level."""
+
+    def load(self, rows, data=None):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "permissions.json"
+            path.write_text(json.dumps(data if data is not None else {"version": 1, "rules": rows}))
+            return rules.load(path, personal=True)
+
+    def test_an_allow_row_and_the_tables_levels_load(self):
+        allow = row(id="tool-a", level="allow", match={"server": "server-a", "tool": "^read_"},
+                    samples={"covers": ["mcp__server-a__read_item"], "leaves": ["mcp__server-a__write_item"]})
+        loaded = self.load([allow, row(id="tool-b", level="ask")])
+        self.assertEqual([(r.id, r.level, r.kind) for r in loaded], [("tool-a", "allow", "mcp-tool"),
+                                                                      ("tool-b", "ask", "command")])
+
+    def test_a_malformed_personal_row_is_refused(self):
+        for bad in (row(level="block"), row(match={"program": "/bin/tool-a"}), row(samples={}),
+                    {k: v for k, v in row().items() if k != "reason"}, "a row", row(match=["tool-a"])):
+            with self.assertRaises(rules.RuleTableError, msg=bad):
+                self.load([bad])
+
+    def test_a_malformed_file_is_refused(self):
+        for data in ([], {"version": 2, "rules": []}, {"version": 1, "rules": {"id": "x"}}):
+            with self.assertRaises(rules.RuleTableError, msg=data):
+                self.load(None, data)
+
 
 if __name__ == "__main__":
     unittest.main()

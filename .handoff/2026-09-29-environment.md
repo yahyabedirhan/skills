@@ -25,7 +25,7 @@ start now:  #50 Settle what each harness can and can't do
 #63 Set up and audit this repo with set-up-project   ← after the merge; leave it open
 ```
 
-The rollout issues in the other repositories (shipyard, sand, steal, workstation, and one private project) are **outside this effort's pull request**. Don't touch them. They run after the merge.
+The rollout issues in the maintainer's other repositories are **outside this effort's pull request**. Don't touch them. They run after the merge.
 
 ## What the builder should know
 

@@ -5,15 +5,21 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
        verify.py --codex-trust-hash COMMAND
 
 - rules: every row's `covers` samples get the row's level from the pre-tool hook
-  (deny, ask or allow-and-report), and its `leaves` samples pass the row;
+  (deny, ask or allow-and-report), and its `leaves` samples pass the row; the
+  personal repository's rows too, an `allow` row's samples passing every other row;
 - codex: each plain command sample through `codex execpolicy check` against the
   machine's Codex rules, listed as `same`, `stricter` (another rules file is
   stricter, and kept) or `differs` from the row's level (a row Codex can't
   express, in references/codex.md, or a mistake to fix);
 - hook: each harness found has its pre-tool hook wired to a script that exists
-  (Codex's also trusted).
+  (Codex's also trusted);
+- personal: the pointer, ~/.config/agents/source.md, is there, and when it names a
+  personal repository, the shared global instructions file carries that repository's
+  environment defaults and personal workflow (references/personal-repository.md);
+  and each personal row's entries in Claude Code's settings, `present`, `n/a` when
+  Claude Code lacks the row's tool, `gap` when the row has no native entry there.
 
-Exits 1 when a rules or hook line fails. --codex-trust-hash prints the
+Exits 1 when a rules, hook or personal line fails. --codex-trust-hash prints the
 `trusted_hash` Codex records for a PreToolUse hook running COMMAND with matcher
 `*` and timeout 10. Python 3.9+, standard library only.
 """
@@ -32,7 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import hook, rules as rule_table  # noqa: E402
+from setupmachine import commands, hook, personal, rules as rule_table  # noqa: E402
 
 HOOK_SCRIPT = "pre_tool_hook.py"
 CURSOR_EVENTS = ("beforeShellExecution", "beforeMCPExecution", "beforeReadFile", "preToolUse")
@@ -46,35 +52,44 @@ class Result:
     rule: object
     sample: str
     expected: str  # the row's level, or "pass" for a near miss
-    answer: str  # the row's level when the hook's verdict holds the row, else "allow" (or "pass")
+    answer: str  # the row's level when the hook's verdict holds the row, else "allow" (or "pass");
+    # for an allow row, "allow" when it holds the row and no other row asks or denies, else "no match" or that level
 
 
 # --- the rule table against the hook ------------------------------------------
 
 
 def check_rules(table: list, home: Path) -> list:
-    """Every sample of every row through the hook's decision, as Results."""
+    """Every sample of every row, the rule table's and the personal ones, through the hook's decision, as Results."""
     cwd = str(home / "project")
     results = []
     for rule in table:
         for sample in rule.covers:
-            hit = _hits(rule, sample, table, home, cwd)
-            results.append(Result(rule, sample, rule.level, rule.level if hit else "allow"))
+            verdict = _verdict(rule, sample, table, home, cwd)
+            hit = _holds(verdict, rule)
+            if rule.level == "allow":
+                answer = verdict.answer if verdict.answer != "allow" else "allow" if hit else "no match"
+            else:
+                answer = rule.level if hit else "allow"
+            results.append(Result(rule, sample, rule.level, answer))
         for sample in rule.leaves:
-            hit = _hits(rule, sample, table, home, cwd)
+            hit = _holds(_verdict(rule, sample, table, home, cwd), rule)
             results.append(Result(rule, sample, "pass", "caught" if hit else "pass"))
     return results
 
 
-def _hits(rule, sample: str, table: list, home: Path, cwd: str) -> bool:
+def _verdict(rule, sample: str, table: list, home: Path, cwd: str):
     if rule.kind == "file":
         call = hook.ToolCall(tool="Read" if rule.access == "read" else "Write", files=((sample, rule.access),), cwd=cwd)
     elif rule.kind == "mcp-tool":
         call = hook.ToolCall(tool=sample, cwd=cwd)
     else:
         call = hook.ToolCall(tool="Bash", command=sample, cwd=cwd)
-    verdict = hook.decide(call, table, home)
-    return any(h.rule.id == rule.id for h in verdict.denials + verdict.asks + verdict.reports)
+    return hook.decide(call, table, home)
+
+
+def _holds(verdict, rule) -> bool:
+    return any(h.rule.id == rule.id for h in verdict.denials + verdict.asks + verdict.reports + verdict.allows)
 
 
 # --- Codex's own checker --------------------------------------------------------
@@ -258,6 +273,70 @@ def check_wiring(home: Path) -> list:
     return out
 
 
+# --- personal rows in Claude Code's settings -------------------------------------
+
+CLAUDE_LISTS = {"deny": "deny", "ask": "ask", "allow-and-report": "allow", "allow": "allow"}
+
+
+def check_personal_entries(home: Path, rows: list) -> list:
+    """(status, text) per personal row: its entries in Claude Code's settings, as references/claude-code.md writes them.
+
+    `present` names them; with none, `gap` for a row Claude Code has no entry for, `n/a` when
+    Claude Code lacks the row's tool (no MCP tool it matches, or no program on PATH), else FAIL.
+    """
+    folder = home / ".claude"
+    if not rows or not folder.is_dir():
+        return []
+    path = folder / "settings.json"
+    permissions = (_json(path) or {}).get("permissions")
+    permissions = permissions if isinstance(permissions, dict) else {}
+    out = []
+    for rule in rows:
+        name = CLAUDE_LISTS[rule.level]
+        listed = permissions.get(name) if isinstance(permissions.get(name), list) else []
+        entries = [e for e in listed if isinstance(e, str) and _claude_entry_of(rule, e, home)]
+        label = f"Claude Code: {rule.id} ({rule.level}, personal)"
+        if entries:
+            out.append(("present", f"{label}: {', '.join(entries)} in {path}"))
+        elif rule.kind == "command" and (rule.bare or rule.flags_only or rule.variables or rule.files):
+            out.append(("gap", f"{label}: Claude Code has no entry for this kind of command row; the hook covers "
+                               "deny and allow-and-report rows"))
+        elif rule.kind == "mcp-tool":
+            out.append(("n/a", f"{label}: no MCP tool in {path} matches it, so it's written only once Claude Code "
+                               "lists a tool it matches"))
+        elif rule.kind == "command" and not any(shutil.which(p) for p in rule.programs):
+            out.append(("n/a", f"{label}: {', '.join(rule.programs)} isn't on PATH, so there's no tool to write it for"))
+        else:
+            out.append(("FAIL", f"{label}: no entry in permissions.{name} of {path}"))
+    return out
+
+
+def _claude_entry_of(rule, entry: str, home: Path) -> bool:
+    """Whether a Claude Code permission entry is one this row produces: what the entry names, the row covers."""
+    if rule.kind == "mcp-tool":
+        return bool(rule_table.matching_tools(rule, [entry]))
+    m = re.fullmatch(r"(Bash|Read|Edit|Write)\((.+)\)", entry, re.S)
+    if not m:
+        return False
+    tool, inner = m.groups()
+    if rule.kind == "command":
+        if tool != "Bash":
+            return False
+        argvs = commands.simple_commands(re.sub(r"(:\*| \*)$", "", inner))
+        return len(argvs) == 1 and commands.covers(rule, argvs[0])
+    if tool not in (("Read",) if rule.access == "read" else ("Edit", "Write")):
+        return False
+    cwd = str(home / "project")
+    if inner.startswith("//"):
+        path = inner[1:]
+    elif inner.startswith("~/") or inner.startswith("**/"):
+        path = inner
+    else:
+        path = f"{cwd}/{inner[2:] if inner.startswith('./') else inner}"
+    path = str(home) + path[1:] if path.startswith("~/") else path
+    return any(rule_table.glob_regex(g, cwd, home).match(path) for g in rule.paths)
+
+
 # --- the report -------------------------------------------------------------------
 
 
@@ -272,7 +351,7 @@ def main(argv=None, stdout=None) -> int:
     out = stdout or sys.stdout
 
     def line(check, status, text):
-        out.write(f"{check:<6} {status:<8} {text}\n")
+        out.write(f"{check:<8} {status:<8} {text}\n")
 
     if args.codex_trust_hash is not None:
         out.write(codex_trust_hash(args.codex_trust_hash) + "\n")
@@ -284,6 +363,12 @@ def main(argv=None, stdout=None) -> int:
     except rule_table.RuleTableError as exc:
         line("rules", "FAIL", str(exc))
         return 1
+    own_lines = []
+    try:
+        own = personal.permissions(home, table)
+    except ValueError as exc:  # RuleTableError, or a file that isn't UTF-8 text
+        own, own_lines = [], [("FAIL", str(exc))]
+    table = table + own
 
     results = check_rules(table, home)
     wrong = [r for r in results if r.answer != r.expected]
@@ -292,7 +377,8 @@ def main(argv=None, stdout=None) -> int:
             line("rules", "FAIL", f"{r.rule.id}: `{r.sample}` should pass, but the row catches it")
         else:
             line("rules", "FAIL", f"{r.rule.id}: `{r.sample}` got {r.answer}, expected {r.expected}")
-    line("rules", "FAIL" if wrong else "ok", f"{len(table)} rows, {len(results)} samples, {len(wrong)} wrong")
+    rows = f"{len(table) - len(own)} rows" + (f" and {len(own)} personal rows" if own else "")
+    line("rules", "FAIL" if wrong else "ok", f"{rows}, {len(results)} samples, {len(wrong)} wrong")
     failed |= bool(wrong)
 
     codex = None if args.no_codex else (args.codex or shutil.which("codex"))
@@ -301,9 +387,10 @@ def main(argv=None, stdout=None) -> int:
         if not checked:
             line("codex", "skipped", f"no rules files in {home / '.codex' / 'rules'}")
         for rule, sample, level in checked:
-            if level == rule.level:
+            want = "allow-and-report" if rule.level == "allow" else rule.level  # Codex has one allow decision
+            if level == want:
                 line("codex", "same", f"{rule.id}: {sample} -> {_decision(level)}")
-            elif STRICTNESS.get(level, -1) > STRICTNESS[rule.level]:
+            elif STRICTNESS.get(level, -1) > STRICTNESS[want]:
                 line("codex", "stricter", f"{rule.id}: {sample} -> {_decision(level)}, the row is {rule.level}")
             else:
                 line("codex", "differs", f"{rule.id}: {sample} -> {_decision(level)}, the row is {rule.level}")
@@ -312,6 +399,10 @@ def main(argv=None, stdout=None) -> int:
 
     for status, text in check_wiring(home):
         line("hook", status, text)
+        failed |= status == "FAIL"
+
+    for status, text in personal.check(home) + own_lines + check_personal_entries(home, own):
+        line("personal", status, text)
         failed |= status == "FAIL"
     return 1 if failed else 0
 
