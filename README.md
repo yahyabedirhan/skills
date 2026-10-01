@@ -71,7 +71,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 
 | Skill | What it does | Origin |
 |---|---|---|
-| [show-me](skills/show-me/SKILL.md) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks, or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`6ab9013`](https://github.com/humanlayer/skills/tree/6ab9013a10c2/plugins/show-me/skills/show-me) (MIT, see `skills/show-me/LICENSE.humanlayer`). Changes: no Mermaid views, so every view renders as plain text. |
+| [show-me](skills/show-me/SKILL.md) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks, or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`ca7c808`](https://github.com/humanlayer/skills/tree/ca7c808/plugins/show-me/skills/show-me) (MIT, see `skills/show-me/LICENSE.humanlayer`). Changes: no Mermaid views, so every view renders as plain text; agents can still load it, where upstream made it user-invocable only in `bba9d13`, because `orchestrate-effort` uses it to show the plan. |
 
 ### Agent setup
 
