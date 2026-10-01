@@ -2,6 +2,10 @@
 
 The decisions behind the `set-up-machine` skill. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why. The spec is "Spec: every harness and project is set up and audited from the skills" (#49).
 
+## 2026-10-01: retain the occupied caller at settlement
+
+- **The session-host fallback keeps the caller and its occupied worktree open.** Remove the example that hands the user an own-worktree release command: it contradicts the settlement decisions in [Workflow: Make Herdr and Treehouse settlement reliable without closing topology](https://github.com/yahyabedirhan/skills/issues/123). This changes the source role guidance only; machine reconciliation remains a post-merge follow-up.
+
 ## 2026-09-29
 
 - **The rule table is JSON.** The reconcile script and the later pre-tool hook read it with Python 3's standard library, and macOS ships Python 3.9, which has no TOML reader (`tomllib` is 3.11+).
