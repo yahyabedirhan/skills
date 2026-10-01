@@ -54,7 +54,7 @@
         "flags": [["R", "recursive"]],
         "operands": [["777"], ["0777"], ["a+rwx"], ["a=rwx"], ["ugo+rwx"], ["ugo=rwx"]]
       },
-      "gap": "the same mode in another spelling (`u=rwx,g=rwx,o=rwx`, `a+rwx` given in parts, `00777`) isn't listed; the rule line asks the agent not to",
+      "gap": "the same mode in another spelling (`u=rwx,g=rwx,o=rwx`, `a+rwx` given in parts, `00777`) isn't listed",
       "reason": "It makes a whole tree writable by every user, and the old modes can't be recovered.",
       "instruction": "Give the one file or folder that needs it the narrowest mode that works (`chmod u+x script.sh`).",
       "samples": {
@@ -335,7 +335,7 @@
         "files": ["**/.env", "**/.env.*"],
         "except": ["**/.env.example", "**/.env.sample", "**/.env.template", "**/.env*.md"]
       },
-      "gap": "a glob the shell expands (`cat .env*`, `cat .e?v`) reaches a `.env` file under a name the hook never sees; the rule line asks the agent not to",
+      "gap": "a glob the shell expands (`cat .env*`, `cat .e?v`) reaches a `.env` file under a name the hook never sees; the shared secrets guardrail covers these routes",
       "reason": "They print a `.env` file's credentials, or load them into the shell, where the next command can print them.",
       "instruction": "Read the variable names from `.env.example`; if you need a value, stop, say why, and give the user the exact command; never work around it.",
       "samples": {
@@ -367,7 +367,7 @@
       },
       "reason": "It prints the environment's tokens and keys, or one of them, into the agent's context.",
       "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`), and never print one another way (`echo $NAME`); if you need a value, stop, say why, and give the user the exact command; never work around it.",
-      "gap": "a variable expanded inside another command (`echo $TOKEN`) prints its value, and no rule can tell that from ordinary use; the rule line asks the agent not to",
+      "gap": "a variable expanded inside another command (`echo $TOKEN`) prints its value, and no rule can tell that from ordinary use; the shared secrets guardrail covers these routes",
       "samples": {
         "covers": ["printenv", "printenv TOKEN"],
         "leaves": ["test -n \"$TOKEN\""]
@@ -383,7 +383,7 @@
       },
       "reason": "It prints a token or key into the agent's context.",
       "instruction": "Check that the variable is set without printing it (`test -n \"$NAME\"`), and pass it to the command that needs it without printing it; if you need the value, stop, say why, and give the user the exact command; never work around it.",
-      "gap": "a secret under an ordinary name, or printed another way (`cat`, an interpreter, a script); the rule line asks the agent not to",
+      "gap": "a secret under an ordinary name, or printed another way (`cat`, an interpreter, a script); the shared secrets guardrail covers these routes",
       "samples": {
         "covers": ["echo $API_TOKEN", "printf '%s' \"${DB_PASSWORD}\"", "echo \"key: $OPENAI_API_KEY\""],
         "leaves": ["echo $HOME", "echo '$API_TOKEN'", "curl -H \"Authorization: Bearer $TOKEN\" https://example.com", "test -n \"$API_TOKEN\"", "echo ${#API_TOKEN}"]
@@ -427,7 +427,7 @@
         "paths": ["/proc/**/environ"],
         "access": "read"
       },
-      "gap": "`ps e` and `ps eww` print every process's environment through letters no rule can tell from ordinary `ps` options; the rule line asks the agent not to",
+      "gap": "`ps e` and `ps eww` print every process's environment through letters no rule can tell from ordinary `ps` options; the shared secrets guardrail covers these routes",
       "reason": "A process's environment holds its tokens and keys, which must stay out of the agent's context.",
       "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it.",
       "samples": {

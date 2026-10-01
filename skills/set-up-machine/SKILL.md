@@ -46,7 +46,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 |---|---|
 | `id` | a stable kebab-case name |
 | `level` | `deny`, `ask` or `allow-and-report`; a personal row may also be `allow` |
-| `summary` | what the rule covers, as it reads in the rule line |
+| `summary` | what the rule covers, shown in rejection messages |
 | `match` | what it covers, in one of the three kinds below |
 | `reason` | why the rule exists |
 | `instruction` | for `deny`, what the agent does instead: an alternative, or "Stop, say why, and give the user the exact command; never work around it."; for `ask` and `allow-and-report`, how to go ahead |

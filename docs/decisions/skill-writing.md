@@ -53,3 +53,9 @@ How the skills in this repo are written, and why. The rules below came from revi
 
 - **Fold before auditing.** Must-read references went into `SKILL.md` first, then a fresh sub-agent per skill ran the prompt audit and made its own fixes, with this file as the rules that win a conflict. Auditing after the fold meant the auditors read each skill as an agent would.
 - **Audits catch facts, not only wording.** This round found a wrong signal in `/wispr-flow-dictionary` by reading its script, a quoting bug in `/handover-to-herdr`, a status clash in `/orchestrate-effort`, and a way around `/email`'s deny rules. Tell an auditor to check a skill's commands against their source.
+
+
+## 2026-10-01: always-loaded global instructions
+
+- **Keep permission handling concise.** Enforcement configuration and hook rejections carry command inventories, reasons and alternatives. The shared global instructions carry general rejection handling, a fallback learned from common failures and a short secrets guardrail. Add examples when observed failures justify their context cost.
+- **Group personal workflow; shorten role fallbacks.** Use topic headings and concise rules without changing their meaning. A fallback states what to do when a role has no tool; omit the explanation of the tool or risk.
