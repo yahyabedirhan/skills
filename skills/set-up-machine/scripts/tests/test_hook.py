@@ -169,9 +169,15 @@ class FileAndMcpTest(unittest.TestCase):
         self.assertEqual(self.ids("Edit", "secrets/key", "write"), ["secret-files-read", "secret-files-write"])
         self.assertEqual(self.ids("Read", "~/.ssh/id_ed25519", "read"), ["home-credentials-read"])
         self.assertEqual(self.ids("Write", "/Users/someone/.aws/credentials", "write"), ["home-credentials-read"])
+        for path in ("~/.netrc", "~/.git-credentials", "~/.config/gh/hosts.yml", "~/.npmrc", "~/.docker/config.json",
+                     "/Users/someone/.kube/config"):
+            self.assertEqual(self.ids("Read", path, "read"), ["home-credentials-read"], path)
+        for path in ("certs/server.pem", "/Users/someone/Downloads/signing.p12", "build/app.pfx"):
+            self.assertEqual(self.ids("Read", path, "read"), ["key-files-read"], path)
 
     def test_ordinary_files(self):
-        for path in (".envrc", "README.md", "src/environment.py", "/Users/someone/.sshx/y", "my-secrets.txt"):
+        for path in (".envrc", "README.md", "src/environment.py", "/Users/someone/.sshx/y", "my-secrets.txt",
+                     "app/.npmrc", "~/.config/gh/config.yml", "certs/server.pub", "notes/pem.md"):
             self.assertEqual(self.ids("Read", path, "read"), [], path)
 
     def test_env_example_stays_readable_and_writable(self):

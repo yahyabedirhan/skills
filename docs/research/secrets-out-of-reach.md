@@ -188,6 +188,8 @@ Target: a `python3` process sleeping, started with `env -i … ACME_API_TOKEN=pr
 
 ## 6. Recommendation
 
+> **Decided 2026-10-01:** rules and the hook only, with the gap accepted, plus two more file rows. 1Password, the sandbox and the Codex profile were dropped. See [the decision record](../decisions/set-up-machine.md#2026-10-01-secrets-stay-behind-rules-with-the-gap-accepted-98).
+
 The maintainer decides. The maintainer's projects hold no secrets in the environment today (#98), so everything here is preparation. Each option lists its cost.
 
 ### 6.1 set-up-machine
