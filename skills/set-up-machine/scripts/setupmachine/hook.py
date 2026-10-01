@@ -9,7 +9,9 @@ checks it against the rule table, and answers in the harness's own format:
   line in the report folder, and the hook says nothing, so the harness's own
   permissions decide;
 - **ask:** the verdict names the ask rows a call hits (verify checks them), but the
-  hook says nothing for them: the harness's native ask entries do the asking;
+  hook says nothing for them: the harness's native ask entries do the asking. A row
+  with `approver: "user"` is refused instead when the call shows the harness won't
+  ask the user, such as Claude Code in bypassPermissions mode;
 - **allow**, a personal row's level: the verdict names them for verify too, and the
   hook says nothing, so the harness's native allow entries let the call run.
 
@@ -28,7 +30,7 @@ import os
 import re
 import shlex
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -48,6 +50,7 @@ class ToolCall:
     mcp_names: tuple = ()  # the tool's possible `mcp__<server>__<tool>` names, for a harness that names MCP tools otherwise
     searches: tuple = ()  # (folder, glob) pairs a search tool reads the matching files of
     report: bool = True  # False when another hook, wired for the same harness, reports this call
+    unattended: str = ""  # why the harness won't ask the user about this call, when it won't
 
 
 @dataclass
@@ -103,6 +106,9 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
             seen.add(key)
             {"deny": verdict.denials, "ask": verdict.asks, "allow-and-report": verdict.reports,
              "allow": verdict.allows}[hit.rule.level].append(hit)
+    if call.unattended:
+        unasked = [h for h in verdict.asks if h.rule.approver == "user"]
+        verdict.denials += [Hit(h.rule, f"{h.part} ({call.unattended}, where no one asks the user)") for h in unasked]
     if verdict.denials:
         verdict.reports, verdict.asks, verdict.allows = [], [], []
     return verdict
@@ -233,6 +239,11 @@ CLAUDE_CODE_FILE_TOOLS = {
 }
 
 
+# Claude Code's permission modes in which an ask entry doesn't reach the user: dontAsk denies it,
+# bypassPermissions isn't documented to keep it, and auto mode stays in until a probe shows its ask entries reach the user.
+CLAUDE_CODE_UNATTENDED = {mode: f"Claude Code's {mode} mode" for mode in ("auto", "dontAsk", "bypassPermissions")}
+
+
 def read_claude_code(payload: dict) -> ToolCall:
     """Claude Code's PreToolUse input. Other shapes that reach the same hook (Cursor runs
     Claude Code's hooks too) are read as far as they fit: any `command` string, top level
@@ -257,6 +268,7 @@ def read_claude_code(payload: dict) -> ToolCall:
         cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
         session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
         report="cursor_version" not in payload,
+        unattended="" if "cursor_version" in payload else CLAUDE_CODE_UNATTENDED.get(payload.get("permission_mode"), ""),
     )
 
 
@@ -302,6 +314,9 @@ def read_codex(payload: dict) -> ToolCall:
         files=files,
         cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
         session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
+        # Codex reports `bypassPermissions` when its approval policy is never. An automatic
+        # reviewer doesn't show in the payload: references/codex.md names that gap.
+        unattended="Codex with approval policy never" if payload.get("permission_mode") == "bypassPermissions" else "",
     )
 
 
@@ -319,6 +334,10 @@ OPENCODE_BUILTINS = {
     "invalid", "question", "bash", "task", "webfetch", "websearch", "todowrite", "todoread", "skill", "lsp",
     "codesearch", "apply_patch", "patch", "plan_enter", "plan_exit", *OPENCODE_FILE_TOOLS,
 }
+# opencode's auto-approve (`--auto`, or its toggle) answers ask entries for the user, and the plugin can't tell it's on.
+OPENCODE_UNATTENDED = "opencode, whose auto-approve can answer for the user"
+
+
 def read_opencode(payload: dict) -> ToolCall:
     """What set-up-machine's opencode plugin sends from `tool.execute.before`:
     `tool`, `sessionID`, `args` (the tool's arguments) and `directory` (the session's folder)."""
@@ -346,6 +365,7 @@ def read_opencode(payload: dict) -> ToolCall:
         cwd=os.path.join(directory, workdir) if isinstance(workdir, str) and workdir else directory,
         session=payload.get("sessionID") if isinstance(payload.get("sessionID"), str) else "",
         mcp_names=mcp_names,
+        unattended=OPENCODE_UNATTENDED,
         searches=searches,
     )
 
@@ -360,7 +380,15 @@ def write_opencode(denials: list) -> str:
 CURSOR_FILE_TOOLS = {"Read": "read", "Grep": "read", "Write": "write", "Delete": "write"}
 
 
+# Cursor has no native ask entry for an MCP tool, and its run modes can run commands and tools without asking.
+CURSOR_UNATTENDED = "Cursor, which can run tools without asking"
+
+
 def read_cursor(payload: dict) -> ToolCall:
+    return replace(_read_cursor(payload), unattended=CURSOR_UNATTENDED)
+
+
+def _read_cursor(payload: dict) -> ToolCall:
     def text(key, source=payload):
         value = source.get(key)
         return value if isinstance(value, str) else ""

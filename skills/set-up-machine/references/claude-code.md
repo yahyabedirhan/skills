@@ -51,7 +51,9 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 
 - Tools are named `mcp__<server>__<tool>`; a claude.ai connector shows as `mcp__claude_ai_<Name>__<tool>` in the CLI.
 - **List the tools:** in an empty folder, run `claude -p "List nothing." --output-format stream-json --verbose --tools "" --no-session-persistence --max-turns 1` and read the `tools` of the first event with `"type": "system", "subtype": "init"`; stop it there, before it calls the model. No output (not logged in, not installed) is a `gap`: keep the MCP entries already there.
-- Each row's `server` and `tool` regexes (case-insensitive) pick the names; each match is an exact `deny` entry, and a `found` line names them. A denied MCP tool is removed from the session.
+- Each row's `server` and `tool` regexes (case-insensitive) pick the names; each match is an exact entry in the row's list, and a `found` line names them. A denied MCP tool is removed from the session.
+- **Ask rows:** an answer of "Yes, don't ask again" writes an `allow` entry into the project's `.claude/settings.local.json`, and the user-level `ask` entry still wins over it, since ask is evaluated before allow.
+- **`approver: "user"` rows:** the [auto mode docs](https://code.claude.com/docs/en/auto-mode-config) say an ask rule is checked before the classifier and still prompts, and `dontAsk` denies every call that would prompt; the docs don't say what `bypassPermissions` does with an ask rule, or what a non-interactive `claude -p` run does. The hook reads `permission_mode` and refuses the row's calls in `auto`, `dontAsk` and `bypassPermissions`: a `gap` line for auto mode, to drop once a probe shows its ask entries reach the user, and one for `claude -p`.
 
 ## Personal rows
 
@@ -74,7 +76,7 @@ A personal row (personal-repository.md) becomes entries the way a table row of i
 
   `<script>` and the fail-open wrapping are in SKILL.md, *Wiring*.
 - **Audit:** `wired` when a match-all group runs exactly that command. A handler that runs `pre_tool_hook.py` from another path is this skill's old wiring: `removed`, with the new one `added`. Other hooks are the user's and stay.
-- **Input:** `tool_name`, `tool_input` (`command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` and `glob` for Grep), `cwd`, `session_id`.
+- **Input:** `tool_name`, `tool_input` (`command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` and `glob` for Grep), `cwd`, `session_id`, and `permission_mode` (`default`, `plan`, `acceptEdits`, `auto`, `dontAsk` or `bypassPermissions`).
 - **Answer:** a deny is `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "<the refusal>"}}` with exit 0; Claude Code shows the agent the reason. Otherwise nothing, exit 0, so the native permissions decide. It never answers `allow`, which would skip them, and leaves `ask` rows to the native `ask` list.
 - **Reports** are written when the call is submitted, before any permission prompt.
 - **Cursor runs this hook too:** it loads `~/.claude/settings.json` hooks (Claude's `PreToolUse` as `preToolUse`). The hook still refuses what it recognises there, and leaves reporting to Cursor's own hook when the payload carries `cursor_version`, so no call is reported twice.
