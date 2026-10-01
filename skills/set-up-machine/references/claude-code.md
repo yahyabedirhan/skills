@@ -96,7 +96,7 @@ The hook's own misses are in SKILL.md, *What it can't see*.
 
 ## What the agent sees
 
-A native refusal says `Permission to use Bash with command <command> has been denied.` or `File is in a directory that is denied by your permission settings.`, naming no rule, so the instruction reaches the agent through the shared file's rule line. The hook runs first; its refusal names each refused part, its rule, reason and instruction.
+A native refusal says `Permission to use Bash with command <command> has been denied.` or `File is in a directory that is denied by your permission settings.`, naming no rule; the shared file supplies general rejection guidance and the `rm -rf` fallback. The hook runs first; its refusal names each refused part, its rule, reason and instruction.
 
 ## Checking it
 
@@ -106,4 +106,4 @@ A native refusal says `Permission to use Bash with command <command> has been de
 - `gh api rate_limit` runs, and its line appears in the report folder.
 - Writes to `.env` and `secrets/k` with `--allowedTools Write` leave them unchanged; a Read of `sub/.env.example` works.
 - For environment rows, use fake `.env` files and a fake variable, and start the session with a scrubbed environment (`HOME`, `PATH`, `USER` and the fake variable), since a sample that gets through prints whatever the shell holds.
-- Against the real login, `claude -p "Without tools: quote your rule about rm -rf and the file it came from."` quotes the rule line from the shared file.
+- Against the real login, `claude -p "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback from the shared file.

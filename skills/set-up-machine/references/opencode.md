@@ -77,4 +77,4 @@ In a sandbox: `OPENCODE_CONFIG_DIR=<a copy of the config folder>` layers it over
 - `opencode run --format json "Run exactly: rm -rf x"` leaves `x`, and the tool result is the hook's refusal; `git push --force-with-lease …` is auto-rejected as an ask; `gh api rate_limit` runs and gets a report line.
 - With only the permissions (no plugin), the same samples get opencode's own refusal, and `git push <remote> HEAD --force` runs: the gap the hook closes.
 - A `read` of `.env` is refused; a `read` of `.env.example` works.
-- `opencode run "Without tools: quote your rule about rm -rf and the file it came from."` quotes the shared file's rule line.
+- `opencode run "Without tools: quote your rule about rm -rf and the file it came from."` quotes the shared file's `rm -rf` fallback.
