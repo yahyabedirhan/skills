@@ -13,7 +13,8 @@ Approving the pull request is the user's last step. Everything after it is yours
 1. **Find the effort:** the pull request, its branch, spec, tickets and handoff, and every worktree and branch the build left behind, delegates' leftovers included.
    - **From a checkout that isn't on the effort's branch:** list pull requests by head branch with `gh pr list --head` and `--state all`, since without `--state all` a merged pull request doesn't show.
 2. **Merge** the pull request once its checks pass, and check that the default branch's CI passes after the merge. Merge with `gh pr merge` and the project's usual method, and leave out `--delete-branch`: it deletes branches before they are proven merged, and switches the current checkout to the default branch.
-   - **When the spec says "QA: blocking":** merge only once every QA ticket is closed, and until then tell the user which ones are still open.
+   - **When the spec says "QA: blocking":** merge only once every QA ticket is closed. Until then, tell the user which ones are still open and stop the settle there; it resumes once they're closed.
+   - **When the default branch's CI fails after the merge:** stop before step 5, tell the user what failed, and file or fix it as they decide.
    - **After a squash or a rebase:** check that anything pinned to one of the branch's commits, such as an image URL with a commit SHA, still resolves, since the default branch doesn't hold those commits.
    - **When the pull request is already merged:** skip the merge, and still check the default branch's CI and, after a squash or a rebase, the pinned commits.
 3. **Read the pull request's description and the handoff** for what the delivery left open: follow-ups, checks it skipped and decisions for the user.
