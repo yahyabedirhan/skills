@@ -25,7 +25,7 @@ class ShippedTableTest(unittest.TestCase):
             "rm-recursive-force", "rm-no-preserve-root", "disk-write", "chmod-recursive-777", "privilege-escalation",
             "shell-inline-command", "git-push-force", "git-push-delete-main", "git-push-delete-main-refspec",
             "git-reset-hard", "gh-repo-destructive", "gh-access-keys", "calendar-mail-cli-send",
-            "secret-files-read", "secret-files-write", "home-credentials-read", "mail-send", "mail-destructive",
+            "secret-files-read", "secret-files-write", "home-credentials-read", "key-files-read", "mail-send", "mail-destructive",
             "env-files-read", "env-files-write", "env-files-commands", "env-dump", "env-print", "env-dump-declared",
             "env-dump-listed", "env-print-secret", "find-delete", "proc-environ-read", "proc-environ-commands",
         ):
