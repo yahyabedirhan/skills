@@ -524,6 +524,54 @@
         "covers": ["mcp__gmail__trash_thread", "mcp__claude_ai_Gmail__apply_sensitive_message_label", "mcp__gmail__mark_as_spam"],
         "leaves": ["mcp__gmail__label_message"]
       }
+    },
+    {
+      "id": "mail-draft-write",
+      "level": "ask",
+      "approver": "user",
+      "summary": "mail tools that create, update or delete a saved draft",
+      "match": {
+        "server": "mail",
+        "tool": "^(create|update|delete)_draft"
+      },
+      "reason": "A saved draft is a change in the user's mailbox, and an update or delete can overwrite a draft they were writing.",
+      "instruction": "Call it only when the user asked for the draft in that mail tool, and let the user approve the call themselves; where no one will be asked, keep the draft in chat and say why.",
+      "samples": {
+        "covers": ["mcp__claude_ai_Gmail__create_draft", "mcp__claude_ai_Gmail__update_draft", "mcp__gmail__delete_draft"],
+        "leaves": ["mcp__claude_ai_Gmail__get_draft", "mcp__claude_ai_Gmail__list_drafts", "mcp__notes__create_draft"]
+      }
+    },
+    {
+      "id": "mail-cli-draft",
+      "level": "ask",
+      "approver": "user",
+      "summary": "`spark draft`",
+      "match": {
+        "program": "spark",
+        "subcommands": [["draft"]]
+      },
+      "reason": "It creates, edits or deletes a draft in the user's mailbox, and an edit or delete can overwrite a draft they were writing.",
+      "instruction": "Run it only when the user asked for the draft in Spark, as its own command, and let the user approve it themselves; where no one will be asked, keep the draft in chat and say why.",
+      "samples": {
+        "covers": ["spark draft --help", "spark draft create"],
+        "leaves": ["spark drafts", "spark emails Drafts"]
+      }
+    },
+    {
+      "id": "calendar-write",
+      "level": "deny",
+      "summary": "calendar tools that do anything but read",
+      "match": {
+        "server": "calendar",
+        "tool": "^(?!(list|get|search|find|query|check|suggest|authenticate|complete_authentication)(_|$))"
+      },
+      "reason": "Creating, changing, deleting or answering an event can send invitations, cancellations or replies to other people in the user's name.",
+      "instruction": "Read the event, then give the user the change to make themselves.",
+      "gap": "A calendar tool whose name starts with a reading verb but writes, such as a `get_or_create_event`, gets through; check each new calendar tool's description when it appears.",
+      "samples": {
+        "covers": ["mcp__claude_ai_Google_Calendar__create_event", "mcp__claude_ai_Google_Calendar__update_event", "mcp__claude_ai_Google_Calendar__delete_event", "mcp__claude_ai_Google_Calendar__respond_to_event", "mcp__google_calendar__quick_add", "mcp__calendar__patch_event"],
+        "leaves": ["mcp__claude_ai_Google_Calendar__list_events", "mcp__claude_ai_Google_Calendar__get_event", "mcp__claude_ai_Google_Calendar__list_calendars", "mcp__claude_ai_Google_Calendar__find_free_time", "mcp__claude_ai_Google_Calendar__authenticate", "mcp__claude_ai_Gmail__create_draft"]
+      }
     }
   ]
 }

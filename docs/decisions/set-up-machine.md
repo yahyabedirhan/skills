@@ -203,3 +203,9 @@ The spec is #111.
 - **Expand from observed failures.** Add a fallback example only when a real session is stuck after a rejection; do not pre-load every possible denial.
 - **Shorten role fallbacks at their source.** The session-host and worktree-tool rows keep the action and remove the explanation.
 - **Group personal workflow by topic.** Use concise rules under third-level headings, preserving meaning in the personal source. Copy those headings into the shared file and omit empty categories and the old fixed intro.
+
+## 2026-10-01: ask rows that only the user can answer (#67)
+
+- **`approver: "user"` on an ask row.** Some asks, such as a saved mail draft, must reach the user, not an automatic reviewer or a mode that answers for them. The row says so, and the hook refuses its calls where the payload shows no one will ask: Claude Code's `auto`, `dontAsk` and `bypassPermissions` modes, Codex under approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt. Claude Code's docs say auto mode still asks for an ask rule, but no probe has shown it for an MCP tool, so auto mode stays refused until one does.
+- **Codex's MCP note was stale.** Codex has native entries for MCP tools: `disabled_tools` and per-tool `approval_mode` on `[mcp_servers.<id>]`, and per-tool `enabled` and `approval_mode` plus an `approvals_reviewer` on `[apps.<id>]`. A plain MCP server has no reviewer of its own, so under a top-level `auto_review` an `approver: "user"` row there is a gap. Sources: the configuration reference and `openai/codex` at `2685e3a`.
+- **opencode takes MCP tool names as permission keys,** `<server>_<tool>`, wildcards allowed, so a row is native once a session lists the tools. Its `--auto` mode answers every ask, which the plugin can't see.
