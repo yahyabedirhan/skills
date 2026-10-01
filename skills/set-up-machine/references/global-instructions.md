@@ -41,7 +41,7 @@ The one definition of each role.
 
 | Role | What it is | When none |
 |---|---|---|
-| `session-host` | where agent sessions run | Use this session or provide a starting prompt. Give the user any command that must run after this session closes. |
+| `session-host` | where agent sessions run | Use this session or provide a starting prompt. Settlement keeps this session and its occupied worktree open. |
 | `worktree-tool` | the tool that makes and frees worktrees | Use `git worktree add/remove` beside the checkout. New branches have no upstream until their first push. |
 | `agent` | the command and flags that start a new agent session | This session's harness. |
 | `notification-method` | how a notification reaches this person: a command, or the harness's own tool | The harness's notification tool, else a line in the chat. |
