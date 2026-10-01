@@ -1,5 +1,5 @@
 interface:
   display_name: "Settle Session"
-  short_description: "Commit and push, write down, decide, and free what merged"
+  short_description: "Leave nothing running, unsaid, undecided or unsaved, and free what merged"
 policy:
   allow_implicit_invocation: true
