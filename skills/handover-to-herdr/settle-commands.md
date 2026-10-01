@@ -12,7 +12,7 @@ When this session runs in a `herdr` tab, put `[settled] ` at the start of that t
 
 ## Worktree release from outside the session
 
-Open a tab in the repository's own workspace, the one whose `repo_root` is the repository and whose `is_linked_worktree` is false. Label it, and run the commands in its root pane:
+Open a labelled tab in the repository's own workspace, the one whose `repo_root` is the repository and whose `is_linked_worktree` is false, and run the commands in the root pane it returns. When the repository has no workspace, create one first with `herdr workspace create --cwd <main checkout> --label <repo> --no-focus`.
 
 ```bash
 herdr tab create --workspace <repo workspace_id> --cwd <main checkout> --label "shell · Settle · <topic>" --no-focus
