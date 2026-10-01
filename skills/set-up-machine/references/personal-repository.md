@@ -24,7 +24,7 @@ The clone path starts `~/` or `/`. A person with no personal repository has `- R
 
 ## The repository's layout
 
-Both files sit in an `agents/` folder at the repository's root, so the rest of the repository stays free for whatever else the person keeps there.
+The source files sit in an `agents/` folder at the repository's root, so the rest of the repository stays free for whatever else the person keeps there.
 
 ### `agents/instructions.md`
 
@@ -58,6 +58,14 @@ The person's own permission rows, such as allowing a tool they added, or refusin
 - **`deny`, `ask` and `allow-and-report`** work as in the rule table: the hook refuses a deny row's calls and reports an allow-and-report row's, and the harnesses' native entries ask.
 
 The checks are the rule table's, through `scripts/setupmachine/rules.py`: a malformed row is refused, and so is an id the rule table already uses. A personal row can't loosen a table row: an `allow` row whose sample a table row denies or asks for fails `verify.py`. No file means no personal rows.
+
+### `agents/codex.toml`
+
+Keep explicitly chosen Codex CLI defaults in this private file. Use only the top-level keys `sandbox_mode`, `approval_policy` and `approvals_reviewer`; each is optional. A missing file or omitted key declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
+
+Validate the keys and values before proposing any write. Reject unknown keys, nested tables and unsupported values with an explicit gap; this file is an allowlist, not a copy of Codex's whole configuration. Keep credentials, model providers, project trust, profiles, hook state and runtime state in their existing homes. Existing memory and hook ownership remains with this skill's Codex adapter.
+
+Read `codex.md` for installed-version support, preservation and override checks. Mark each declared preference `personal` in the diff. Keep chosen values and this repository's identity and clone path out of public reports, issues, pull requests and fixtures; use synthetic values there.
 
 ## Writing the shared file from it
 
