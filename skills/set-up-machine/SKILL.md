@@ -14,6 +14,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 ## Steps
 
 1. **Inspect.** Find each harness on the machine, read its reference, then every file that reference names. Read the shared file too.
+   - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
    - **When trying a change without touching the real machine:** run the steps against a copy of the home folder in the project's `.scratch/`, and check it with `verify.py --home <copy>`. Start no harness there, since it would read the real login.
 2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape, memory off, the hook wired, and the `<skills-repo>` skills installed. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
 
@@ -105,6 +106,7 @@ Name these once in every audit:
 
 - [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, what counts as personal workflow, moving a harness's own file, and why memory stays off.
 - [references/rule-table.md](references/rule-table.md): changing a row of the rule table, changing the hook's code and its tests, and adding a harness.
+- [references/remote-machine.md](references/remote-machine.md): a remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
 - One reference per harness, read for each harness found. Each says how the harness is found, where it keeps each setting, a row's native form with worked examples, the hook's wiring, and its gaps:
   - [references/claude-code.md](references/claude-code.md): Claude Code.
   - [references/codex.md](references/codex.md): Codex.
