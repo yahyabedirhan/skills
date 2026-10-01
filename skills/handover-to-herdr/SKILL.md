@@ -48,7 +48,7 @@ When `/settle-session` calls this skill, read `settle-commands.md` instead of th
 
    Leave `--wait` off the prompt: it waits until the agent goes idle again, and a long run times out before that.
    - **If the wait times out:** check the agent before you resend anything. `herdr agent get <name>` shows its state, and `herdr agent read <name> --source visible` shows its screen; leave `--lines` off, because it fails while the agent works. The prompt may have arrived anyway, so resend it only when the screen shows it didn't.
-6. If this session runs in a `herdr` tab, put `[settled] ` at the start of that tab's label once this session's own work is done. Use the same `herdr tab rename`, with `$HERDR_TAB_ID` as the tab. The marker tells the maintainer nothing more will happen in the tab, which stays only so its history can be read.
+6. Once this session's own work is done, mark its tab settled as `settle-commands.md`'s Settled marker section says.
 7. Give the calling skill the workspace and tab where the new agent runs, so it can tell the maintainer.
 
 
