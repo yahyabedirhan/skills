@@ -1,6 +1,6 @@
 # AGENTS.md template
 
-The project's one rules file. Every harness reads it (Claude Code through `CLAUDE.md`'s `@AGENTS.md`), so it holds everything a teammate or contributor needs to work on the project, and nothing personal: this person's own workflow stays in their global instructions. Keep only the sections that apply.
+The project's one rules file. Every harness reads it. Claude Code reads it through `CLAUDE.md`, which is either the line `@AGENTS.md` or a symlink to this file. It holds everything a teammate or contributor needs to work on the project, and nothing personal: this person's own workflow stays in their global instructions. Keep only the sections that apply.
 
 ```markdown
 # Agent instructions
