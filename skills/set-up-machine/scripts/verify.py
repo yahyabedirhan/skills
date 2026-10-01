@@ -2,6 +2,7 @@
 """set-up-machine's check that the rules work on this machine. It writes nothing.
 
 usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
+                 [--codex-home DIR]
        verify.py --codex-trust-hash COMMAND
 
 - rules: every row's `covers` samples get the row's level from the pre-tool hook
@@ -18,8 +19,13 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   environment defaults and personal workflow (references/personal-repository.md);
   and each personal row's entries in Claude Code's settings, `present`, `n/a` when
   Claude Code lacks the row's tool, `gap` when the row has no native entry there.
+- config: declared agents/codex.toml preferences match persisted defaults;
+  isolated installed-parser probes check support, while effective overrides and
+  managed constraints remain explicit gaps. --codex-home selects the same folder
+  for configuration, rules and hooks. The real home honors CODEX_HOME privately;
+  fixture --home folders ignore ambient CODEX_HOME unless --codex-home is given.
 
-Exits 1 when a rules, hook or personal line fails. --codex-trust-hash prints the
+Exits 1 when a rules, hook, personal or config line fails. --codex-trust-hash prints the
 `trusted_hash` Codex records for a PreToolUse hook running COMMAND with matcher
 `*` and timeout 10. Python 3.9+, standard library only.
 """
@@ -28,6 +34,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shlex
 import shutil
@@ -38,7 +45,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import commands, hook, personal, rules as rule_table  # noqa: E402
+from setupmachine import commands, codex_config, hook, personal, rules as rule_table  # noqa: E402
 
 HOOK_SCRIPT = "pre_tool_hook.py"
 CURSOR_EVENTS = ("beforeShellExecution", "beforeMCPExecution", "beforeReadFile", "preToolUse")
@@ -95,9 +102,9 @@ def _holds(verdict, rule) -> bool:
 # --- Codex's own checker --------------------------------------------------------
 
 
-def check_codex(table: list, home: Path, codex: str) -> list:
+def check_codex(table: list, home: Path, codex: str, codex_home: Path | None = None) -> list:
     """(row, sample, Codex's decision as a level or "no match") for each plain command sample."""
-    rules_dir = home / ".codex" / "rules"
+    rules_dir = (codex_home or home / ".codex") / "rules"
     files = sorted(rules_dir.glob("*.rules")) if rules_dir.is_dir() else []
     if not files:
         return []
@@ -261,11 +268,11 @@ HARNESSES = (
 )
 
 
-def check_wiring(home: Path) -> list:
+def check_wiring(home: Path, codex_home: Path | None = None) -> list:
     """(status, text) per harness: wired, FAIL, or none when the harness isn't set up here."""
     out = []
     for label, rel, check in HARNESSES:
-        folder = home / rel
+        folder = (codex_home or home / rel) if label == "Codex" else home / rel
         if not folder.is_dir():
             out.append(("none", f"{label}: not set up here (no ~/{rel})"))
         else:
@@ -345,7 +352,8 @@ def main(argv=None, stdout=None) -> int:
     parser.add_argument("--home", type=Path, default=Path.home(), help="the home folder to check (default: $HOME)")
     parser.add_argument("--rules", type=Path, default=rule_table.DEFAULT_TABLE)
     parser.add_argument("--codex", help="the codex program (default: codex on PATH)")
-    parser.add_argument("--no-codex", action="store_true", help="skip codex execpolicy check")
+    parser.add_argument("--codex-home", type=Path, help="Codex config home; fixtures default to HOME/.codex")
+    parser.add_argument("--no-codex", action="store_true", help="skip Codex execpolicy and isolated config-parser checks")
     parser.add_argument("--codex-trust-hash", metavar="COMMAND", help="print Codex's trusted_hash for this hook command")
     args = parser.parse_args(argv)
     out = stdout or sys.stdout
@@ -357,6 +365,10 @@ def main(argv=None, stdout=None) -> int:
         out.write(codex_trust_hash(args.codex_trust_hash) + "\n")
         return 0
     home = args.home.expanduser().resolve()
+    # Fixture homes must never follow the caller's real CODEX_HOME. For the
+    # actual home, use only this explicitly authorized nonsecret path metadata.
+    custom_home = os.environ.get("CODEX_HOME") if home == Path.home().resolve() and args.codex_home is None else None
+    codex_home = (args.codex_home or (Path(custom_home) if custom_home else home / ".codex")).expanduser().resolve()
     failed = False
     try:
         table = rule_table.load(args.rules)
@@ -383,9 +395,9 @@ def main(argv=None, stdout=None) -> int:
 
     codex = None if args.no_codex else (args.codex or shutil.which("codex"))
     if codex:
-        checked = check_codex(table, home, codex)
+        checked = check_codex(table, home, codex, codex_home)
         if not checked:
-            line("codex", "skipped", f"no rules files in {home / '.codex' / 'rules'}")
+            line("codex", "skipped", "no rules files in the resolved Codex config home's rules folder")
         for rule, sample, level in checked:
             want = "allow-and-report" if rule.level == "allow" else rule.level  # Codex has one allow decision
             if level == want:
@@ -397,12 +409,15 @@ def main(argv=None, stdout=None) -> int:
     elif not args.no_codex:
         line("codex", "skipped", "codex isn't on PATH")
 
-    for status, text in check_wiring(home):
-        line("hook", status, text)
+    for status, text in check_wiring(home, codex_home):
+        line("hook", status, text.replace(str(codex_home), "<Codex config home>") if custom_home else text)
         failed |= status == "FAIL"
 
     for status, text in personal.check(home) + own_lines + check_personal_entries(home, own):
         line("personal", status, text)
+        failed |= status == "FAIL"
+    for status, text in codex_config.audit(home, codex_home, codex):
+        line("config", status, text)
         failed |= status == "FAIL"
     return 1 if failed else 0
 

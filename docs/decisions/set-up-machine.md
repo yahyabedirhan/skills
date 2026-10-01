@@ -187,6 +187,16 @@ The spec is #111.
 - **The reference names no particular tool.** The skills repo is public and general, so `references/personal-repository.md` and the tests describe the kinds of entries with placeholders.
 
 
+## 2026-10-01: private Codex CLI defaults (#119)
+
+- **Declare CLI preferences in private `agents/codex.toml`, through the existing source pointer.** Initially allow only `sandbox_mode`, `approval_policy` and `approvals_reviewer`. Missing declarations leave settings user-managed, so setup never invents a personal choice or puts one in this public repository.
+- **Validate against the installed CLI before applying.** Official documentation and installed schemas can differ. Reject unsupported source entries and report the support gap rather than ignoring input or assuming the inspected version stays current.
+- **Change only declared, supported defaults through the existing diff and backup procedure.** Preserve unrelated TOML, separate profiles, hooks, rules and stricter constraints. Preserve conflicting `default_permissions` configurations and report the incompatibility instead of migrating them.
+- **Resolve the Codex config home once and use it everywhere.** Custom homes must cover instructions, config, rules, hooks and verification together. Fixture runs use an explicit synthetic home and never inherit the live config home or authentication.
+- **Audit persisted defaults separately from effective session settings.** Profiles, trusted projects, CLI flags, cloud defaults and enforced requirements can change or constrain the result. Report observed overrides and unverified layers without treating a matching user file as proof of session behavior.
+- **Leave existing sessions running.** Changes take effect in subsequent sessions; explain `/permissions` where supported. Auto-review routes eligible approvals to a reviewer and keeps sandbox boundaries and the possibility of refusal.
+
+
 ## 2026-10-01: concise shared instructions
 
 - **Keep enforcement; remove its inventory from every session.** The shared file carried each row's summary, reason and alternative, repeating explanations across command variants. It now carries general rejection guidance, the common `rm -rf` fallback and a short secrets guardrail. The rule table, personal rows, hook messages and native permissions retain their detail. This supersedes the earlier per-row global-instructions requirements.
