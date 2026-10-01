@@ -11,7 +11,7 @@ The file has these parts, in this order. This skill decides the parts and rewrit
 1. `# Global agent instructions`
 2. **The rule line:** `Only what describes this person's own workflow and explains a global rule. Anything a teammate would need goes in the project or a skill.`
 3. **`## Environment defaults`**, with the line "What this person uses for each role. A project's own environment defaults override a row. When a row is `none`, do what its last column says.", then a table, `| Role | Tool | What it is | When none |`, one row per role below. The Tool column comes from the personal repository, or is the user's when there is none; this skill writes the other two from the roles table below, so every skill that names a role finds its meaning and its fallback here, in context.
-4. **The generated block**, rewritten from `rules.json` on every run:
+4. **The generated block**, rewritten from `rules.json` and the personal rows on every run:
 
    ```markdown
    <!-- set-up-machine:rules start. Generated from set-up-machine's rule table: change the table, not these lines. -->
@@ -27,7 +27,7 @@ The file has these parts, in this order. This skill decides the parts and rewrit
    <!-- set-up-machine:rules end -->
    ```
 
-   One line per row, in table order: `- **<Denied | Asks first | Allowed and reported>:** <summary>. <reason> <instruction>`, with `Instead: ` before the instruction on deny rows only. Then, after a blank line, the **Environment variables** paragraph exactly as above: the rows catch only the commands they name, and it tells the agent to leave every other route alone.
+   One line per row, in table order, then one per personal row that isn't `allow`, in the order of the personal repository's `agents/permissions.json`: `- **<Denied | Asks first | Allowed and reported>:** <summary>. <reason> <instruction>`, with `Instead: ` before the instruction on deny rows only. Then, after a blank line, the **Environment variables** paragraph exactly as above: the rows catch only the commands they name, and it tells the agent to leave every other route alone.
 5. **`## Personal workflow`**, with the line `Rules for how this person works that pass the team test. Anything a project or a skill needs goes there instead.`, then this person's rules, one per line: the personal repository's workflow section, or the user's own lines when there is none.
 
 A new file gets all five, every role `none` and the workflow section empty, unless a personal repository fills them. On an existing file, only **add** what the shape lacks, such as the rule line, a section, a missing role row as `none` or a missing column, rewrite the What it is and When none columns from the roles table, and regenerate the block.

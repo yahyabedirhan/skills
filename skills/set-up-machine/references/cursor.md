@@ -37,6 +37,15 @@ No memory feature: a `none` line.
 - **Gap:** a project's `.cursor/cli.json` replaces these lists, so `"deny": []` there empties them. A project can only add to the Claude settings lists, and the hook still refuses the deny rows.
 - **The IDE** reads neither file and has no user-level deny list: its hard blocks are hooks.
 
+## Personal rows
+
+A personal row (personal-repository.md) becomes CLI entries the way a table row of its kind does above, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does, and an `ask` row is a `gap`.
+
+- **Its tool exists** for a command row when one of its programs is on `PATH`, for a file row always, and for an MCP-tool row when `cursor-agent mcp list-tools` lists a tool it matches, which becomes `Mcp(<server>:<tool>)`; otherwise the row is `n/a` here.
+- **Covered already:** the CLI unions the Claude Code lists, so a personal entry written to `~/.claude/settings.json` that covers this one makes it `present, personal`.
+- **It can't loosen a table row:** deny wins over allow.
+- **The IDE** has no allow list: an `allow` row is a `gap` there, left to the IDE's own approval settings.
+
 ## Pre-tool hook
 
 - **Wiring:** `~/.cursor/hooks.json`, read by the IDE and the CLI, which a project can't turn off. One handler on four events, since each call reaches exactly one of them and nothing is reported twice (keep the user's handlers):

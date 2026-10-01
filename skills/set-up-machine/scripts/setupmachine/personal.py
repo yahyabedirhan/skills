@@ -10,7 +10,10 @@ The repository's `agents/instructions.md` holds an `## Environment defaults` tab
 and Tool columns are read; any other column is notes) and a `## Personal workflow` section.
 The shared global instructions file, `~/.config/agents/AGENTS.md`, should carry those Tool
 values (`none` for a role the repository leaves out) and that workflow section's text.
-references/personal-repository.md is the layout for agents; this module only checks it.
+
+Its `agents/permissions.json` holds personal rows in the rule table's format, which may
+also take the level `allow`; `permissions` loads them for the hook and the verify script.
+references/personal-repository.md is the layout for agents; this module only reads it.
 """
 from __future__ import annotations
 
@@ -18,9 +21,12 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import rules as rule_table
+
 POINTER = Path(".config/agents/source.md")
 SHARED = Path(".config/agents/AGENTS.md")
 INSTRUCTIONS = Path("agents/instructions.md")
+PERMISSIONS = Path("agents/permissions.json")
 DEFAULTS = "## Environment defaults"
 WORKFLOW = "## Personal workflow"
 WORKFLOW_INTRO = ("Rules for how this person works that pass the team test. "
@@ -76,6 +82,28 @@ def check(home: Path) -> list:
     lines = len(workflow.splitlines()) if workflow else 0
     return [("ok", f"{pointer.repository} at {pointer.clone}: {len(tools)} environment defaults, "
                    f"the personal workflow ({lines} lines) match {shared_path}")]
+
+
+def permissions(home: Path, table: list) -> list:
+    """The personal rows, as Rules, from the repository the pointer names.
+
+    No rows when the pointer is missing, malformed or says none (`check` reports those), or
+    when the repository has no permissions file. A malformed row, or one reusing an id of
+    the rule table, raises RuleTableError.
+    """
+    try:
+        pointer = read_pointer(home)
+    except PersonalError:
+        return []
+    if not pointer.repository or not (pointer.clone / PERMISSIONS).is_file():
+        return []
+    rows = rule_table.load(pointer.clone / PERMISSIONS, personal=True)
+    taken = {r.id for r in table}
+    for row in rows:
+        if row.id in taken:
+            raise rule_table.RuleTableError(f"{pointer.clone / PERMISSIONS}: the id {row.id!r} is already "
+                                            "a row of the rule table")
+    return rows
 
 
 def read_pointer(home: Path) -> Pointer:
