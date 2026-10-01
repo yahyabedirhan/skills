@@ -6,7 +6,7 @@ argument-hint: "The pull request (optional: defaults to the current branch's)"
 
 # Settle Effort
 
-Approving the pull request is the user's last step. Everything after it is yours, so run every command yourself rather than handing the user commands to paste. Do the effort's own steps below, then hand the rest to `/settle-session`.
+Approving the pull request is the user's last step. Everything after it is yours. Do the effort's own steps below, then hand the rest to `/settle-session`.
 
 ## Flow
 
@@ -22,4 +22,4 @@ Approving the pull request is the user's last step. Everything after it is yours
    - **When it isn't clear which effort is next:** ask the user.
    - **For QA tickets:** leave them open for the user, with a comment on how to reach the build.
    - **When a "closes" keyword missed a ticket the merge finished:** close it by hand.
-6. **Settle the session** with `/settle-session`, naming the effort's worktrees and branches from step 1 as the ones to free. A delegate's leftover branch is integrated into the effort's pull request, so it is proven merged when its ticket's commit is in the merged head and the branch holds nothing else. Have the report also say what merged, what closed and what carried over.
+6. **Settle the session** with `/settle-session`, naming the effort's worktrees and branches from step 1, delegates' leftovers included, as the ones to free. Have the report also say what merged, what closed and what carried over.

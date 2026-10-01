@@ -1,6 +1,6 @@
 # Settle commands
 
-The `herdr` commands `/settle-session` uses when its sessions run in `herdr`: finding the agents still working, marking the session settled, and freeing the settling session's own worktree.
+The `herdr` commands for settling a session that runs in `herdr`: finding the agents still working, marking the session settled, and freeing the session's own worktree from outside it.
 
 ## Active agents
 
@@ -19,4 +19,4 @@ herdr tab create --workspace <repo workspace_id> --cwd <main checkout> --label "
 herdr pane run <pane_id> 'sleep 30; <free command>; git branch -d <branch>; git worktree list'
 ```
 
-`<free command>` is the project's worktree tool command that frees this session's worktree, and `<branch>` is its branch. Use `git branch -D` when only the patch or pull-request proof showed the branch merged. The pause lets this session finish its report before the command stops it.
+`<free command>` is the project's worktree tool command that frees this session's worktree, and `<branch>` is its branch. Use `git branch -D` when only the patch or pull-request proof showed the branch merged. The pause gives this session time to finish its last message before freeing its worktree ends it.
