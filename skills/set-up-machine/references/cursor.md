@@ -70,7 +70,7 @@ The rows with no entry above, the ask rows, the exceptions the CLI refuses, the 
 
 ## What the agent sees
 
-A native CLI deny: `Permission denied: Command blocked by permissions configuration` or `Write permission denied:`, naming no rule; the copied user rule carries the instruction. A hook deny: `Rejected: Command execution was blocked by a hook: Refused by the pre-tool hook, …` ("File read" or "MCP tool execution" for those events).
+A native CLI deny: `Permission denied: Command blocked by permissions configuration` or `Write permission denied:`, naming no rule; the copied global instructions supply general rejection guidance and the `rm -rf` fallback. A hook deny: `Rejected: Command execution was blocked by a hook: Refused by the pre-tool hook, …` ("File read" or "MCP tool execution" for those events).
 
 ## Checking it
 
@@ -78,5 +78,5 @@ A native CLI deny: `Permission denied: Command blocked by permissions configurat
 
 - `rm -rf x`, `git push --force <remote> main` and `gh repo delete owner/x` return the native refusal, once from the trial `cli-config.json` and once, with its deny list emptied, from a `.claude/settings.json` holding the Claude Code lists.
 - With the hooks as `.cursor/hooks.json` and no deny list, `rm -rf x`, `bash -lc 'rm -fr x'`, a read of `.env` and a fake stdio MCP server's `send_message` (with `--approve-mcps`) are refused by the hook; `gh api rate_limit` runs and gets a report line.
-- From a folder inside the trial home, `cursor-agent -p --mode ask "Without tools: quote your rule about rm -rf and the file it came from."` quotes the rule line.
+- From a folder inside the trial home, `cursor-agent -p --mode ask "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback.
 - **IDE,** after the live setup: Customize > Hooks lists the four handlers, and asking the agent to run `rm -rf x` or to send a mail is refused with the hook's message.
