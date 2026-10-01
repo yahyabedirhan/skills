@@ -249,6 +249,72 @@ class EnvironmentTest(unittest.TestCase):
         for tool in ("mcp__claude_ai_Gmail__create_draft", "mcp__slack__send_message", "Read"):
             self.assertFalse(verdict(tool=tool).denials, tool)
 
+    def test_calendar_tools_that_do_anything_but_read_are_denied(self):
+        for tool in ("mcp__claude_ai_Google_Calendar__create_event", "mcp__claude_ai_Google_Calendar__respond_to_event",
+                     "mcp__google_calendar__delete_event", "mcp__calendar__move_event"):
+            self.assertEqual([h.rule.id for h in verdict(tool=tool).denials], ["calendar-write"], tool)
+        for tool in ("mcp__claude_ai_Google_Calendar__list_events", "mcp__claude_ai_Google_Calendar__get_event",
+                     "mcp__claude_ai_Google_Calendar__find_free_time", "mcp__claude_ai_Google_Calendar__authenticate",
+                     "mcp__claude_ai_Gmail__list_drafts"):
+            self.assertFalse(verdict(tool=tool).denials, tool)
+
+
+class UserApprovalTest(unittest.TestCase):
+    """Ask rows with `approver: user` need the user themselves to approve each call."""
+
+    def decide(self, tool="Bash", command=None, unattended=""):
+        return hook.decide(hook.ToolCall(tool=tool, command=command, cwd=CWD, unattended=unattended), TABLE, HOME)
+
+    def test_draft_writes_ask_when_the_harness_will_ask_the_user(self):
+        for tool in ("mcp__claude_ai_Gmail__create_draft", "mcp__claude_ai_Gmail__update_draft",
+                     "mcp__claude_ai_Gmail__delete_draft"):
+            v = self.decide(tool=tool)
+            self.assertEqual(([h.rule.id for h in v.asks], v.denials), (["mail-draft-write"], []), tool)
+        v = self.decide(command="spark draft create")
+        self.assertEqual(([h.rule.id for h in v.asks], v.denials), (["mail-cli-draft"], []))
+
+    def test_draft_writes_are_refused_where_no_one_is_asked(self):
+        v = self.decide(tool="mcp__claude_ai_Gmail__create_draft", unattended="bypassPermissions")
+        self.assertEqual([h.rule.id for h in v.denials], ["mail-draft-write"])
+        self.assertIn("bypassPermissions", v.denials[0].part)
+        v = self.decide(command="spark draft create && ls", unattended="auto")
+        self.assertEqual([h.rule.id for h in v.denials], ["mail-cli-draft"])
+
+    def test_other_ask_rows_are_still_left_to_the_harness(self):
+        v = self.decide(command="git push --force-with-lease", unattended="bypassPermissions")
+        self.assertEqual(([h.rule.id for h in v.asks], v.denials), (["git-push-force-with-lease"], []))
+
+    def test_reads_are_untouched(self):
+        for tool in ("mcp__claude_ai_Gmail__get_draft", "mcp__claude_ai_Gmail__list_drafts"):
+            v = self.decide(tool=tool, unattended="bypassPermissions")
+            self.assertEqual((v.asks, v.denials), ([], []), tool)
+
+    def test_claude_codes_permission_mode_says_when_no_one_is_asked(self):
+        for mode, unattended in (("default", ""), ("acceptEdits", ""), ("plan", ""), (None, ""),
+                                 ("auto", "auto"), ("dontAsk", "dontAsk"), ("bypassPermissions", "bypassPermissions")):
+            payload = {"tool_name": "mcp__claude_ai_Gmail__create_draft", "tool_input": {}}
+            if mode:
+                payload["permission_mode"] = mode
+            got = hook.read_claude_code(payload).unattended
+            self.assertEqual(bool(got), bool(unattended), mode)
+            self.assertIn(unattended, got, mode)
+
+    def test_codex_with_approval_policy_never(self):
+        payload = {"tool_name": "mcp__codex_apps__gmail_create_draft", "tool_input": {}}
+        self.assertEqual(hook.read_codex(payload).unattended, "")
+        self.assertIn("never", hook.read_codex({**payload, "permission_mode": "bypassPermissions"}).unattended)
+
+    def test_cursor_and_opencode_never_promise_the_user_is_asked(self):
+        cursor = {"hook_event_name": "beforeMCPExecution", "mcp_server_name": "gmail", "tool_name": "create_draft"}
+        call = hook.read_cursor(cursor)
+        self.assertTrue(call.unattended)
+        self.assertEqual([h.rule.id for h in hook.decide(call, TABLE, HOME).denials], ["mail-draft-write"])
+        call = hook.read_opencode({"tool": "gmail_create_draft", "args": {}})
+        self.assertTrue(call.unattended)
+        self.assertEqual([h.rule.id for h in hook.decide(call, TABLE, HOME).denials], ["mail-draft-write"])
+        call = hook.read_opencode({"tool": "bash", "args": {"command": "git push --force-with-lease"}})
+        self.assertEqual(hook.decide(call, TABLE, HOME).denials, [])
+
 
 class ReviewFindingsTest(unittest.TestCase):
     """The final branch review's findings on the hook."""
@@ -452,6 +518,16 @@ class ClaudeCodeHookTest(unittest.TestCase):
         self.assertEqual(line["command"], "gh api repos/me/x")
         self.assertEqual(line["session"], "s1")
         self.assertEqual(log.stat().st_mode & 0o777, 0o600)
+
+    def test_a_draft_in_bypass_mode_is_refused(self):
+        payload = {"session_id": "s1", "cwd": str(self.dir), "hook_event_name": "PreToolUse",
+                   "permission_mode": "bypassPermissions", "tool_name": "mcp__claude_ai_Gmail__create_draft",
+                   "tool_input": {"to": ["a@example.com"]}}
+        out = json.loads(self.run_hook(payload).stdout)["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "deny")
+        self.assertIn("mail-draft-write", out["permissionDecisionReason"])
+        payload["permission_mode"] = "default"
+        self.assertEqual(self.run_hook(payload).stdout, "")
 
     def test_an_ordinary_call_says_nothing_and_logs_nothing(self):
         proc = self.run_hook(self.bash("ls -la"))

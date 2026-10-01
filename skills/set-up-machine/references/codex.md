@@ -91,13 +91,23 @@ Codex has no file rules: it reads through the shell and writes through the shell
 
 ## MCP-tool rows
 
-Codex's MCP tools aren't listed before a session, so there's no native entry: a `gap` per row. The hook matches `mcp__<server>__<tool>` when a tool is called.
+Codex configures each MCP tool in `config.toml` ([configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference); the `openai/codex` source at `2685e3a`, `codex-rs/config/src/mcp_types.rs` and `types.rs`). A connector such as Gmail or Google Calendar is an **app**, under `[apps.<app-id>]`; any other server is under `[mcp_servers.<server-id>]`. Match each row's `server` regex against those IDs and its `tool` regex against the tool names a session lists; with no tool listing, a matching row is a `gap` and the hook still matches `mcp__<server>__<tool>` when a tool is called.
+
+| Row | `[mcp_servers.<id>]` | `[apps.<id>]` |
+|---|---|---|
+| `deny` | the tool in `disabled_tools = [...]` | `[apps.<id>.tools.<tool>]` `enabled = false` |
+| `ask` | `[mcp_servers.<id>.tools.<tool>]` `approval_mode = "prompt"` | `[apps.<id>.tools.<tool>]` `approval_mode = "prompt"` |
+| `ask` with `approver: "user"` | as `ask`, and a `gap` while the top-level `approvals_reviewer` is `auto_review`: a server has no reviewer of its own | as `ask`, plus `approvals_reviewer = "user"` in `[apps.<id>]`, so the automatic reviewer never answers it |
+
+- **Reviewer order for an app:** a connected account's `[apps.<id>.links.<link-id>]`, then `[apps.<id>]`, then `[apps._default]`, then the top-level `approvals_reviewer`. Mark a lower layer that sets `auto_review` a `gap` when it wins.
+- **`codex exec`:** it runs with approval policy `never`. A `prompt` tool is then refused, except under a full-access, disabled or external permission profile (such as `danger-full-access`), where it runs without asking; only `disabled_tools` or `enabled = false` stop it there. The hook reads `permission_mode`, which Codex sets to `bypassPermissions` under `never`, and refuses `approver: "user"` rows.
+- `approval_mode = "approve"` runs a tool without asking: on a tool a `deny` or `ask` row matches, it's looser than the table, so tighten it.
 
 ## Personal rows
 
 A personal row (personal-repository.md) becomes `prefix_rule`s the way a table row of its kind does above, in `rules/set-up-machine.rules` after the table's rules, each marked `personal`. An `allow` row gets `decision="allow"`, as an `allow-and-report` row does: the command runs outside the sandbox without a prompt.
 
-- **Its tool exists** for a command row when one of its programs is on `PATH`; otherwise the row is `n/a` here. File and MCP-tool rows get no rule, as above: a `gap` for a `deny` or `allow-and-report` row, which the hook still enforces, and for an `allow` row, which Codex then leaves to its own approval settings.
+- **Its tool exists** for a command row when one of its programs is on `PATH`; otherwise the row is `n/a` here. File rows, and MCP-tool rows without a tool listing, get no rule, as above: a `gap` for a `deny` or `allow-and-report` row, which the hook still enforces, and for an `allow` row, which Codex then leaves to its own approval settings.
 - **It can't loosen a table row:** the strictest matching decision wins, so a personal `allow` never overrides the table's `forbidden` or `prompt`.
 - The `justification` takes the table's form and ends `(set-up-machine personal rule <id>)`, so the agent can tell a personal rule from the table's.
 
@@ -120,7 +130,7 @@ A personal row (personal-repository.md) becomes `prefix_rule`s the way a table r
 
   Indexes count from 0 in `hooks.json`'s `PreToolUse` list and that group's `hooks`. Get the hash with `python3 <this skill>/scripts/verify.py --codex-trust-hash '<command>'`: sha256 over the canonical JSON (sorted keys, no spaces) of the hook's identity, `{"event_name": "pre_tool_use", "matcher": "*", "hooks": [{"type": "command", "command": <command>, "timeout": 10, "async": false}]}`. It covers the command, not the script's content, so updating the skill in place keeps the trust; a changed command needs a new entry, and the old one is `removed`.
 - **Audit:** `wired` when the group runs exactly that command and its trust entry holds the current hash; `verify.py` checks both. `[features] hooks = false` in `config.toml` turns every hook off: a `gap`, left to the user.
-- **Input:** `tool_name` is `Bash` for the shell tools, with `tool_input.command` as the model wrote it (before the `-lc` wrapper); `apply_patch`, with the patch in `tool_input.command`; or `mcp__<server>__<tool>`. Also `cwd` and `session_id`.
+- **Input:** `tool_name` is `Bash` for the shell tools, with `tool_input.command` as the model wrote it (before the `-lc` wrapper); `apply_patch`, with the patch in `tool_input.command`; or `mcp__<server>__<tool>`. Also `cwd`, `session_id` and `permission_mode`: `bypassPermissions` when the approval policy is `never`, otherwise `default`. Nothing in it shows the reviewer.
 - **Answer:** the same as Claude Code's (`permissionDecision: "deny"` with the reason). Codex passes it on as `Command blocked by PreToolUse hook: <reason>. Command: <command>`.
 - **Gap:** a trusted project's `.codex/config.toml` can set `[features] hooks = false`; the rules still hold.
 

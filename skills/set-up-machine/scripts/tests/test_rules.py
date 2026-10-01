@@ -30,8 +30,12 @@ class ShippedTableTest(unittest.TestCase):
             "env-dump-listed", "env-print-secret", "find-delete", "proc-environ-read", "proc-environ-commands",
         ):
             self.assertEqual(levels.get(rule_id), "deny", rule_id)
-        for rule_id in ("git-push-force-with-lease", "git-push-mirror", "git-clean-force", "gh-repo-edit"):
+        for rule_id in ("git-push-force-with-lease", "git-push-mirror", "git-clean-force", "gh-repo-edit",
+                        "mail-draft-write", "mail-cli-draft"):
             self.assertEqual(levels.get(rule_id), "ask", rule_id)
+        self.assertEqual(levels.get("calendar-write"), "deny")
+        approvers = {r.id for r in rules.load() if r.approver == "user"}
+        self.assertEqual(approvers, {"mail-draft-write", "mail-cli-draft"})
         self.assertEqual(levels["gh-api-secrets"], "allow-and-report")
 
     def test_every_row_has_samples(self):
@@ -52,6 +56,8 @@ class BadRowsTest(unittest.TestCase):
         self.assertRefused([
             {"id": "x"},
             row(level="block"),
+            row(approver="user"),
+            row(level="ask", approver="reviewer"),
             row(match={"program": "/bin/rm", "flags": []}),
             row(match={"program": "rm", "flags": [["-r"]]}),
         ])

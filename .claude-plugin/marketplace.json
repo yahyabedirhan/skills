@@ -9,14 +9,143 @@
   },
   "plugins": [
     {
+      "name": "effort-workflow",
+      "source": "./skills",
+      "description": "Take a feature from an idea to a merged pull request: a thinking session writes the spec and tickets, a fresh orchestrator builds them through sub-agents and opens the pull request, and settling merges it and frees the worktree.",
+      "skills": [
+        "./init-effort",
+        "./orchestrating",
+        "./orchestrate-effort",
+        "./orchestrate-with-handoff",
+        "./handoff",
+        "./handover",
+        "./handover-to-herdr",
+        "./treehouse",
+        "./implement",
+        "./to-spec",
+        "./to-tickets",
+        "./to-pr",
+        "./settle-effort",
+        "./settle-session"
+      ],
+      "dependencies": [
+        "show-me"
+      ],
+      "author": {
+        "name": "Yahya Bedirhan Pak",
+        "url": "https://github.com/yahyabedirhan"
+      },
+      "homepage": "https://github.com/yahyabedirhan/skills#effort-workflow",
+      "repository": "https://github.com/yahyabedirhan/skills",
+      "license": "MIT",
+      "keywords": [
+        "workflow",
+        "orchestration",
+        "spec",
+        "tickets",
+        "pull-request",
+        "worktree",
+        "handoff"
+      ],
+      "category": "development"
+    },
+    {
+      "name": "show-me",
+      "source": "./skills/show-me",
+      "description": "Explain the current topic visually: pseudocode, call trees, file trees, diff blocks, or one focused HTML page, in plain text that reads the same in a terminal, an editor or on GitHub.",
+      "author": {
+        "name": "Yahya Bedirhan Pak",
+        "url": "https://github.com/yahyabedirhan"
+      },
+      "homepage": "https://github.com/yahyabedirhan/skills/tree/main/skills/show-me",
+      "repository": "https://github.com/yahyabedirhan/skills",
+      "license": "MIT",
+      "keywords": [
+        "explain",
+        "diagrams",
+        "visual",
+        "communication"
+      ],
+      "category": "productivity"
+    },
+    {
+      "name": "low-level-design",
+      "source": "./skills/low-level-design",
+      "description": "Design, explain or redesign code at the level of modules, classes, files and folders through a step-by-step delivery framework, with references for the principles, OOP concepts and patterns.",
+      "author": {
+        "name": "Yahya Bedirhan Pak",
+        "url": "https://github.com/yahyabedirhan"
+      },
+      "homepage": "https://github.com/yahyabedirhan/skills/tree/main/skills/low-level-design",
+      "repository": "https://github.com/yahyabedirhan/skills",
+      "license": "MIT",
+      "keywords": [
+        "design",
+        "architecture",
+        "oop",
+        "design-patterns",
+        "modules"
+      ],
+      "category": "development"
+    },
+    {
+      "name": "system-design",
+      "source": "./skills/system-design",
+      "description": "Design, explain or redesign a system at the level of services, data stores, APIs and scale through a step-by-step delivery framework, with references for the core concepts.",
+      "author": {
+        "name": "Yahya Bedirhan Pak",
+        "url": "https://github.com/yahyabedirhan"
+      },
+      "homepage": "https://github.com/yahyabedirhan/skills/tree/main/skills/system-design",
+      "repository": "https://github.com/yahyabedirhan/skills",
+      "license": "MIT",
+      "keywords": [
+        "system-design",
+        "architecture",
+        "distributed-systems",
+        "scalability",
+        "databases"
+      ],
+      "category": "development"
+    },
+    {
+      "name": "email",
+      "source": "./skills/email",
+      "description": "Read and tidy your email: the Spark CLI for fast reading, the Gmail connector for marking done, labels, pins and drafts. It never sends; setup and checks included.",
+      "author": {
+        "name": "Yahya Bedirhan Pak",
+        "url": "https://github.com/yahyabedirhan"
+      },
+      "homepage": "https://github.com/yahyabedirhan/skills/tree/main/skills/email",
+      "repository": "https://github.com/yahyabedirhan/skills",
+      "license": "MIT",
+      "keywords": [
+        "email",
+        "gmail",
+        "spark",
+        "inbox",
+        "macos"
+      ],
+      "category": "productivity"
+    },
+    {
       "name": "wispr-flow-dictionary",
       "source": "./skills/wispr-flow-dictionary",
       "description": "Tune the Wispr Flow dictionary from your real dictation history: find the names, products and commands it mishears, fix them with backups and undo, and check each fix held. macOS.",
-      "author": { "name": "Yahya Bedirhan Pak", "url": "https://github.com/yahyabedirhan" },
+      "author": {
+        "name": "Yahya Bedirhan Pak",
+        "url": "https://github.com/yahyabedirhan"
+      },
       "homepage": "https://github.com/yahyabedirhan/skills/tree/main/skills/wispr-flow-dictionary",
       "repository": "https://github.com/yahyabedirhan/skills",
       "license": "MIT",
-      "keywords": ["wispr-flow", "dictation", "speech-to-text", "dictionary", "macos"],
+      "keywords": [
+        "wispr-flow",
+        "dictation",
+        "speech-to-text",
+        "dictionary",
+        "macos"
+      ],
       "category": "productivity"
     }
   ]
