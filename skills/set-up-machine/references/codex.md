@@ -2,7 +2,41 @@
 
 How to set up and audit Codex from the rule table. Docs: [rules](https://learn.chatgpt.com/docs/agent-configuration/rules), [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [hooks](https://learn.chatgpt.com/docs/hooks), [memories](https://learn.chatgpt.com/docs/customization/memories), and the `openai/codex` source where the docs are silent. Background: the repo's `docs/research/harness-capabilities.md`, section 2.
 
-**Found** when `~/.codex/` exists (`CODEX_HOME` moves it) or `codex` is on `PATH`; a fresh install makes the folder only on first start. Every path below is under that folder.
+**Found** when the resolved Codex config home exists or `codex` is on `PATH`; a fresh install makes the folder only on first start. Resolve the non-secret `CODEX_HOME` internally, falling back to `~/.codex`, without printing its environment value. Use that one folder for `config.toml`, instructions, profiles, rules, hooks and trust checks. Every relative Codex path below is under it. For a fixture home, pass `verify.py --home <fixture>`; it uses `<fixture>/.codex` and ignores ambient `CODEX_HOME`. Pass `--codex-home <fixture config folder>` when testing a different layout.
+
+## CLI defaults
+
+When the personal source pointer names a repository, load its optional `agents/codex.toml` as `personal-repository.md` specifies. Validate the entire file before proposing preference writes. `scripts/setupmachine/codex_config.py` supplies allowlisted parsing, a pure proposal and persisted audit; it never writes configuration. Its TOML checks require Python 3.11+; on an older Python, report the parser support gap and leave preferences unchanged.
+
+### Installed support
+
+Check `codex --version`, current help and the [official configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) for each declared key and value. Use the installed CLI's configuration schema or a synthetic configuration check with one invalid-value negative control per declared key, without authentication or secrets. The checker uses an isolated temporary config home for `codex features list`; it must accept the declared value and reject its negative control. A successful parse alone is insufficient: unknown keys and some conflicts may be ignored. Report unsupported keys, values or an unavailable validation mechanism as gaps and leave those preferences unchanged.
+
+The inspected CLI was 0.159.3 on 2026-10-01. That snapshot supported:
+
+| Key | Values accepted for this source |
+|---|---|
+| `sandbox_mode` | `read-only`, `workspace-write`, `danger-full-access` |
+| `approval_policy` | `on-request`, `never` |
+| `approvals_reviewer` | `user`, `auto_review` |
+
+Treat the snapshot as evidence to recheck, not a permanent version gate. Explicit `untrusted` is unsupported and `on-failure` deprecated in this version. Codex also supports granular approval policies, but this initial private source accepts scalar policies only. Report a granular source as unsupported; preserve an existing granular target policy and report the need for review.
+
+### Propose and apply
+
+Compare each declared preference with its top-level persisted value in `config.toml`. Mark matches `present, personal` and show the exact current and proposed entries for each safe difference, marked `personal`. Mark a stricter replacement `tightened` only when its ordering is established; report drift as a failed audit. Omitted keys remain user-managed. Compose preference edits with this adapter's existing memory and hook trust edits in the same proposed diff. `propose(text, preferences)` returns proposed TOML without writing and raises `ConfigError` for preservation or support gaps; its fixture tests exercise fresh setup, preservation and repeat audit. Then use the skill's approval and backup steps before writing. When the config home is outside the user's home, include an explicit destination under the backup folder in the diff and preserve that config home's relative paths there, so the backup does not escape its folder or collide with another file.
+
+Preserve unrelated keys, comments, profiles, hooks, rules and TOML sections. Keep an existing stricter sandbox restriction or enforced constraint and report `stricter` or `gap`; do not infer that every difference between approval policies can be ordered. Report policy conflicts whose effect cannot be established. Leave unfamiliar or uneditable TOML syntax unchanged and name the gap instead of rewriting the whole file.
+
+**When `default_permissions` conflicts with a proposed legacy sandbox key:** preserve the permission configuration and report the incompatibility. The [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference#configtoml) forbids `default_permissions` together with `sandbox_mode` or `[sandbox_workspace_write]`; setup does not silently migrate between permission models. Inspect applicable enforced requirements through documented non-secret configuration fields, and report restrictions that prevent the preference from taking effect.
+
+### Overrides and activation
+
+Report persisted defaults separately from effective settings. The [official precedence order](https://learn.chatgpt.com/docs/config-file/config-basic#configuration-precedence) is CLI flags and `--config`, trusted project config from the nearest project outward, the selected profile, user config, cloud defaults, system config and built-in defaults. The [managed configuration guide](https://learn.chatgpt.com/docs/enterprise/managed-configuration#admin-enforced-requirements-requirementstoml) describes enforced requirements that constrain the result separately. Identify observed overrides without claiming every layer was verified; cloud settings, active CLI arguments and existing session state and MDM requirements may be unavailable to a file audit.
+
+Read profile and trusted-project configuration only when needed to check declared defaults, using non-secret fields and reporting inaccessible layers as unverified. Preserve profile files. The [advanced configuration guide](https://learn.chatgpt.com/docs/config-file/config-advanced) places profiles in separate `<name>.config.toml` files under the config home; legacy inline `[profiles]` and top-level `profile` are unsupported from 0.134.0 and must be reported rather than migrated.
+
+Explain that persisted changes affect subsequent sessions. Keep running sessions open; the user can start a new session or adjust permissions through `/permissions` where that installed version supports it. `auto_review` routes eligible `on-request` or granular approvals to a reviewer; it keeps sandbox boundaries and does not guarantee approval. A matching persisted reviewer is not proof that an existing session or every approval uses it.
 
 ## Global instructions
 
