@@ -32,11 +32,18 @@ claude plugin marketplace add yahyabedirhan/skills
 
 Then install a plugin by name:
 
-| Plugin | Install |
-|---|---|
-| wispr-flow-dictionary | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
+| Plugin | Skills | Install |
+|---|---|---|
+| effort-workflow | The [effort workflow](#effort-workflow) family; installs `show-me` with it | `claude plugin install effort-workflow@yahyabedirhan-skills` |
+| show-me | show-me | `claude plugin install show-me@yahyabedirhan-skills` |
+| low-level-design | low-level-design | `claude plugin install low-level-design@yahyabedirhan-skills` |
+| system-design | system-design | `claude plugin install system-design@yahyabedirhan-skills` |
+| email | email | `claude plugin install email@yahyabedirhan-skills` |
+| wispr-flow-dictionary | wispr-flow-dictionary | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
 
-Install a skill one way or the other, not both, or Claude Code loads it twice.
+A plugin's skills run as `/<plugin>:<skill>` or by their bare name, such as `/to-pr`. The [Agent setup](#agent-setup) skills aren't plugins: `set-up-machine` wires a hook to its installed path, which a plugin update would move.
+
+Install a skill one way or the other, not both. Claude Code loads it twice, and the bare name runs the `npx skills` copy, so plugin updates go unseen. To switch to the plugin, first remove the copy with `npx skills remove <skill-name>` (add `-g` for a global install).
 
 ## Skills
 
