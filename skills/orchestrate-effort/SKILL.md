@@ -29,13 +29,13 @@ Build one effort from its spec and tickets, as its orchestrator, following `/orc
    - **On a local tracker:** the ticked boxes and the status go in the ticket's own commit, with its code: done, or waiting for the user's QA when the ticket goes to them.
    - **On a hosted tracker:** tick the issue's checklist the same way once the commit is pushed, and close the issue once every box is ticked. A ticket that goes to the user for QA stays open.
    - **When a criterion is shown only outside the checkout,** such as on a copy of the branch, in another environment or after an install: leave it unticked with a one-line note saying where it was shown and what confirms it. The ticket stays open until it is confirmed.
-   - **When a permission check refuses a removal:** leave that worktree or branch for `/close-effort`.
+   - **When a permission check refuses a removal:** leave that worktree or branch for `/settle-effort`.
 6. **Hand usable tickets to the user for QA,** only in a project whose instructions opt in to it and say how a build reaches the user. Read `user-qa.md` before the first one. The merge doesn't wait for QA.
    - **When the spec says "QA: blocking":** the pull request waits until the user closes each QA ticket; say so in the pull request.
 
    Repeat steps 4 to 6 until every ticket is committed and pushed, with its criteria ticked or noted, or deferred by the user.
 7. **Deliver.** Delegate the final review to a sub-agent: the full checks and `/code-review` over the whole branch against its base. Delegate the fixes for what it finds the same way, then commit them. Open the pull request with `/to-pr`, and put in its description your running list of decisions and the surprises and skipped checks delegates reported. Besides the diff, the description is the only report the user reads, so whatever you learned and leave out of it stays behind in this session. Leave the worktree clean: commit and push any effort work `git status` still shows, or leave a file out on purpose.
-8. **Report** the pull request, each ticket's commit, anything deferred, the tickets waiting for the user's QA and whether the merge waits for them, and the `git status` result: clean, or each file left out with its reason. Besides any QA, the user's only step is to review and approve the pull request. List what you will do once told, as your own steps: merge the pull request, run the effort's post-merge follow-ups such as installs or updates, try what can only be tried after the merge and report the result, and close the effort with `/close-effort`.
+8. **Report** the pull request, each ticket's commit, anything deferred, the tickets waiting for the user's QA and whether the merge waits for them, and the `git status` result: clean, or each file left out with its reason. Besides any QA, the user's only step is to review and approve the pull request. List what you will do once told, as your own steps: merge the pull request, run the effort's post-merge follow-ups such as installs or updates, try what can only be tried after the merge and report the result, and settle the effort with `/settle-effort`.
 
 ## References
 
