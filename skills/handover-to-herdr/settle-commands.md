@@ -1,22 +1,19 @@
 # Settle commands
 
-The `herdr` commands for settling a session that runs in `herdr`: finding the agents still working, marking the session settled, and freeing the session's own worktree from outside it.
+Inspect live callers and occupants and mark a session settled while leaving its session and all Herdr workspaces, tabs and panes open.
 
-## Active agents
+## Live caller and occupants
 
-Run `herdr agent list` for each agent's state and pane, and `herdr workspace list` for the worktree behind each workspace; read the two together to see which worktree each agent works in. Leave out only this session's own pane, `$HERDR_PANE_ID`, since other agents may work in other tabs of the same workspace and worktree.
+Check the installed CLI help and server with `herdr status`. Check whether caller context exists with `test -n "$HERDR_PANE_ID"`; when it does, run `herdr pane current --current` and read `.result.pane` for the current pane, terminal, tab and workspace IDs. Refresh this immediately before a mutation. A moved pane keeps its inherited environment, so compare other panes with the returned live pane ID, and derive the caller's tab from that response rather than `$HERDR_TAB_ID`. Without caller context, skip this command: it can resolve another client's focused pane. Preserve and report an unresolved caller instead of targeting by title or focus.
+
+Run `herdr agent list`, `herdr workspace list` and `herdr pane list`. Inspect each relevant pane with `herdr pane get <pane_id>` and `herdr pane process-info --pane <pane_id>`. Compare its current workspace/tab/pane hierarchy and `foreground_cwd`, and the foreground processes' `cwd`, with the canonical worktree path and repository verified by Git. Report idle agents, shells and services as occupants too. Workspace `checkout_path` and pane `cwd` are metadata, not proof of where a process runs; missing process location leaves occupancy uncertain. Foreground information alone also cannot exclude detached services: use the worktree tool's process checks before any release, and keep the worktree when its occupants remain uncertain. Record identities and locations without copying process arguments that may contain credentials.
+
+Leave out only the resolved live caller when finding other agents; never leave out its whole workspace. Keep the caller's own worktree leased regardless of its agent state. Preserve worktrees occupied by any session or service, and report their occupants. Use `/treehouse` for pooled-worktree release checks and lease guards, or the configured worktree tool's equivalent. A proven-merged, unoccupied worktree may be released autonomously only after fresh verification; delete its branch only after successful release and the calling skill's merge proofs. An interrupted or uncertain operation requires inspection before a retry.
 
 ## Settled marker
 
-When this session runs in a `herdr` tab whose label doesn't already start with `[settled]`, put `[settled] ` at the start of that tab's label with `herdr tab rename "$HERDR_TAB_ID" "[settled] <current label>"`; `herdr tab get "$HERDR_TAB_ID"` shows the current label. The marker tells the user nothing more will happen in the tab, which stays only so its history can be read.
+When caller resolution succeeds, inspect `herdr tab get <live tab_id>` for the current label and hierarchy. Immediately before renaming, resolve the caller again and confirm the same terminal still belongs to that tab and workspace; if it moved, inspect the newly returned hierarchy instead. When the label does not already start with `[settled]`, rename the verified live tab with `herdr tab rename <live tab_id> "[settled] <current label>"`. Use explicit IDs for the mutation and preserve focus. If the caller or hierarchy cannot be verified, leave the label alone and report why. The marker says the work is saved and settled; the session remains available for follow-up.
 
-## Worktree release from outside the session
+## Keep the session and topology open
 
-Open a labelled tab in the repository's own workspace, the one whose `repo_root` is the repository and whose `is_linked_worktree` is false, and run the commands in the root pane it returns. When the repository has no workspace, create one first with `herdr workspace create --cwd <main checkout> --label <repo> --no-focus`.
-
-```bash
-herdr tab create --workspace <repo workspace_id> --cwd <main checkout> --label "shell · Settle · <topic>" --no-focus
-herdr pane run <pane_id> 'sleep 30; <free command>; git branch -D <branch>; git worktree list'
-```
-
-`<free command>` is the project's worktree tool command that frees this session's worktree, and `<branch>` is its branch. A proof showed the branch merged before the release, so delete it with `-D`: `git branch -d` checks against the main checkout's `HEAD`, not the remote default branch, and can refuse it with no one there to see. The pause gives this session time to finish its last message before freeing its worktree ends it.
+Settlement leaves every workspace, tab and pane open and keeps the caller's occupied worktree. Schedule no delayed external release or session-ending command. An explicit cleanup request can authorize closing named topology without another approval, but closing linked or grouped topology is never inferred from that request. Inspect live identities, location, hierarchy and occupants again immediately before any separately authorized cleanup.
