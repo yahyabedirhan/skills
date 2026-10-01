@@ -28,7 +28,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 
 - `git remote -v` and `.git/config`: is this a GitHub repo? Which one?
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` or `## Environment defaults` section in either?
-- `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root
+- `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root, and anywhere in the repo the old names `CONTEXT.md` and `CONTEXT-MAP.md`, from before the convention was renamed. The skills read only the new names, so an old file goes unread.
 - `docs/adr/` and any `src/*/docs/adr/` directories
 - `docs/agents/`: does this skill's prior output already exist?
 - `.efforts/`: a sign that a local-markdown issue tracker is already in use
@@ -40,7 +40,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 
 Summarise what's present and what's missing. Then take the sections in order. One section, one answer, then the next.
 
-Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed, Section C when there's no monorepo, Section D when the project names no tool for a role).
+Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed, Section C when there's no monorepo and no old `CONTEXT.md` or `CONTEXT-MAP.md`, Section D when the project names no tool for a role).
 
 **Section A: Issue tracker.**
 
@@ -67,6 +67,8 @@ The defaults are the five canonical roles, each label string equal to its name: 
 
 Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSSARY.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
 
+When exploration found an old `CONTEXT.md` or `CONTEXT-MAP.md`, propose renaming each with `git mv`, so its history follows it: `git mv CONTEXT.md GLOSSARY.md`, `git mv CONTEXT-MAP.md GLOSSARY-MAP.md`, and the same for each per-context `CONTEXT.md`. Also propose updating the map's links and any project file that names the old files, such as `AGENTS.md` or `docs/agents/domain.md`.
+
 **Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md), *Environment defaults*, says what may go there.
 
 ### 4. Confirm and write
@@ -77,6 +79,7 @@ Show the user a draft of:
 - `CLAUDE.md`: the single line `@AGENTS.md` (Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and follows the import)
 - `.gitignore`: `.scratch/` and `.claude/worktrees/`, each only where it's missing
 - The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
+- Each `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md`, and the edits to the files that name them, when Section C proposed them
 
 Let them edit, then take one approval for all of it. Then write:
 
@@ -90,6 +93,7 @@ Let them edit, then take one approval for all of it. Then write:
    - [domain.md](./domain.md): domain doc consumer rules + layout
 
    For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
+4. Run each approved `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md`, then update the files that named it.
 
 Done when every approved file is written.
 
