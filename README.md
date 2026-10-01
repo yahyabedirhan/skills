@@ -87,7 +87,8 @@ The Origin column names the upstream commit each fork was copied from, so a late
 
 | Skill | What it does | Origin |
 |---|---|---|
-| [email](skills/email/SKILL.md) | Reads and tidies your email: Spark CLI for fast reading, the Gmail connector for marking done, labels, pins and drafts, with sending, trash and spam denied. Includes setup and checks. | Original. The daily workflows adapt the read-only recipes in [readdle/spark-cli-skills](https://github.com/readdle/spark-cli-skills) at [`507d26e`](https://github.com/readdle/spark-cli-skills/tree/507d26e/skills) (MIT); no text copied. |
+| [calendar](skills/calendar/SKILL.md) | Reads your calendar when a task needs an event: lists events for a date range and checks free time through the Spark CLI, or the Google Calendar connector when Spark Desktop is closed. Every calendar write is denied by a permission rule; creating, changing and answering events stays with you. | Original. |
+| [email](skills/email/SKILL.md) | Reads and tidies your email when you ask for an email task: Spark CLI for fast reading, the Gmail connector for marking done, labels and pins. A plain draft stays in chat; a draft saved in Gmail or Spark needs you to name the tool and approve each write. Sending, trash and spam are denied. Includes setup and checks. | Original. The daily workflows adapt the read-only recipes in [readdle/spark-cli-skills](https://github.com/readdle/spark-cli-skills) at [`507d26e`](https://github.com/readdle/spark-cli-skills/tree/507d26e/skills) (MIT); no text copied. |
 | [wispr-flow-dictionary](skills/wispr-flow-dictionary/SKILL.md) | Tunes the Wispr Flow dictionary from your real dictation history: finds the names, products and commands it mishears, fixes them with backups and undo, and shows whether each fix held. macOS. | Original. The snippet finder and quit-write-relaunch flow follow ideas from [glebis/claude-skills](https://github.com/glebis/claude-skills) (`wispr-analytics`, `wispr-fix`); no code copied. |
 
 ## How the skills work
@@ -180,16 +181,18 @@ audit                           any project harness file that weakens a global r
 
 ### Daily workflows
 
-Everyday tasks outside the code that an agent can take over safely. Each skill reads freely and changes only what you approve, with sending, deleting and other risky actions left to you.
+Everyday tasks outside the code that an agent can take over safely. Each skill changes only what you approve, with sending, deleting and other risky actions left to you.
 
-`email` reads mail fast with the Spark CLI and makes every change through the Gmail connector. It archives freely and makes any other change only when you ask; drafts are as far as it goes, and Claude Code permission rules deny sending, trash and spam.
+`email` reads mail only for an email task you asked for, fast with the Spark CLI, and makes every change through the Gmail connector. It archives freely and makes any other change only when you ask. A draft you ask for is written in chat; one saved in Gmail or Spark needs you to name the tool and approve each write in the harness. Permission rules deny sending, trash and spam.
 
 ```text
-read     Spark CLI: inbox by category, threads, pins, calendar, contacts
-act      Gmail connector: mark done (archive), labels, pins (stars), drafts
+read     Spark CLI, for an email task you asked for: inbox by category, threads, pins, contacts
+act      Gmail connector: mark done (archive), labels, pins (stars), saved drafts on approval
 how      which tool for which job; what to do and when stays with you
-setup    setup.md: both tools, the deny rules, and checks
+setup    setup.md: both tools, the deny and ask rules, and checks
 ```
+
+`calendar` reads events and free time whenever a task needs them, with Spark first and the Google Calendar connector when Spark Desktop is closed. It never changes the calendar: permission rules deny every connector write and `spark event`.
 
 `wispr-flow-dictionary` keeps [Wispr Flow](https://wisprflow.ai)'s dictionary accurate for technical vocabulary, where dictation mishears product names, company names and commands. It reads Wispr Flow's local database and writes only its `Dictionary` table, after a backup.
 
