@@ -26,7 +26,7 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 
 ### The "team test"
 
-Before settling a change, picture a teammate or contributor with a different setup: another harness, tmux instead of herdr, and a machine set up with `/set-up-machine` but none of the user's personal workflow. After the change they must still be able to work on any of the user's projects using only that project's instructions, the skills and the roles `/set-up-machine` writes.
+Before settling a change, picture a teammate or contributor with a different setup: another harness, a different session host, and a machine set up with `/set-up-machine` but none of the user's personal workflow. After the change they must still be able to work on any of the user's projects using only that project's instructions, the skills and the roles `/set-up-machine` writes.
 
 A change passes when:
 
