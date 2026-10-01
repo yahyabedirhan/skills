@@ -203,3 +203,11 @@ The spec is #111.
 - **Expand from observed failures.** Add a fallback example only when a real session is stuck after a rejection; do not pre-load every possible denial.
 - **Shorten role fallbacks at their source.** The session-host and worktree-tool rows keep the action and remove the explanation.
 - **Group personal workflow by topic.** Use concise rules under third-level headings, preserving meaning in the personal source. Copy those headings into the shared file and omit empty categories and the old fixed intro.
+
+## 2026-10-01: secrets stay behind rules, with the gap accepted (#98)
+
+- **Guard the obvious paths only.** The rows, the hook and the shared secrets guardrail stay the whole defence on every harness. The research in `docs/research/secrets-out-of-reach.md` showed what else could close the gap, and the maintainer chose not to pay for it while no real secret sits on the machine.
+- **Two more file rows.** `home-credentials-read` now covers the token files of git (`~/.netrc`, `~/.git-credentials`), `gh` (`~/.config/gh/hosts.yml`), npm (`~/.npmrc`), Docker (`~/.docker/config.json`) and `~/.kube/config`; the tools that own them still read them. `key-files-read` covers `*.pem`, `*.p12` and `*.pfx` anywhere. `*.key` is left out because Keynote files share it, and `id_*` because `~/.ssh` already covers it.
+- **The accepted gap.** An interpreter (`python3 -c 'open(".env")'`), a glob the shell expands (`cat .e?v`) and another process's launch environment (`ps eww`, or any same-user process on macOS) get past the rows. Only the global instruction to never read, print or change secrets covers them. Rules can't parse interpreter code reliably, so the gap is named rather than chased.
+- **Hygiene, outside the rule table.** Keep tokens out of shell profiles, and keep a project's keys in its gitignored `.env`, which the rows refuse.
+- **Dropped:** 1Password (`op run`), Claude Code's OS sandbox and a Codex deny profile. The sandbox is the only one that closes the gap, but it breaks git over SSH, `herdr`, `gh` and notifications unless each is excluded. Reopen this when a real secret lives on the machine.

@@ -483,16 +483,34 @@
     {
       "id": "home-credentials-read",
       "level": "deny",
-      "summary": "reading `~/.ssh` and `~/.aws`",
+      "summary": "reading `~/.ssh`, `~/.aws`, `~/.kube/config` and the token files of git, `gh`, npm and Docker in the home folder",
       "match": {
-        "paths": ["~/.ssh/**", "~/.aws/**"],
+        "paths": [
+          "~/.ssh/**", "~/.aws/**", "~/.kube/config", "~/.netrc", "~/.git-credentials",
+          "~/.config/gh/hosts.yml", "~/.npmrc", "~/.docker/config.json"
+        ],
         "access": "read"
       },
-      "reason": "They hold the keys to the user's machines and cloud accounts.",
-      "instruction": "Stop, say what you needed from them, and let the user run the command.",
+      "reason": "They hold the keys and tokens to the user's machines, cloud accounts and package registries.",
+      "instruction": "Stop, say what you needed from them, and let the user run the command; the tools that own these files still read them.",
       "samples": {
-        "covers": ["~/.ssh/id_ed25519", "~/.aws/credentials"],
-        "leaves": ["~/.sshx/y"]
+        "covers": ["~/.ssh/id_ed25519", "~/.aws/credentials", "~/.netrc", "~/.config/gh/hosts.yml", "~/.npmrc", "~/.docker/config.json"],
+        "leaves": ["~/.sshx/y", "~/.config/gh/config.yml", "app/.npmrc"]
+      }
+    },
+    {
+      "id": "key-files-read",
+      "level": "deny",
+      "summary": "reading private key and certificate bundles (`*.pem`, `*.p12`, `*.pfx`) in any folder",
+      "match": {
+        "paths": ["**/*.pem", "**/*.p12", "**/*.pfx"],
+        "access": "read"
+      },
+      "reason": "They usually hold a private key, which must stay out of the agent's context.",
+      "instruction": "Pass the file's path to the command that needs it without opening it; if you need what's inside, stop, say why, and let the user run the command.",
+      "samples": {
+        "covers": ["certs/server.pem", "~/Downloads/signing.p12", "build/app.pfx"],
+        "leaves": ["certs/server.pub", "notes/pem.md"]
       }
     },
     {
