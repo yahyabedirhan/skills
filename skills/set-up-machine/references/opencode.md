@@ -38,7 +38,11 @@ No memory feature: a `none` line. Some models are prompted to keep a memory file
 
 ## MCP-tool rows
 
-Tools are named `<server>_<tool>`, and opencode lists them only inside a session. So match each row's `server` regex against the servers in the global config's `mcp` key: no match is a `found` line saying so; a match is a `gap` (no native entry; the hook refuses the matching tools when called).
+Tools are named `<server>_<tool>`, and that name is also the tool's `permission` key, wildcards allowed (`"gmail_*": "ask"`). opencode lists the tools only inside a session, so match each row's `server` regex against the servers in the global config's `mcp` key: no match is a `found` line saying so.
+
+- **With a tool listing from a session:** each tool a row matches becomes an exact key at the row's level, after the allow entries (`"gmail_send_message": "deny"`); a whole-tool `deny` also hides the tool from the model.
+- **Without one:** a matching row is a `gap`, and the hook refuses the matching tools of a deny row when they're called.
+- **`approver: "user"` rows:** `--auto` (also `--yolo` and `--dangerously-skip-permissions`) and the TUI's auto-approve toggle answer every `ask` for the user, and the plugin can't tell they're on. So the hook refuses these rows' calls in opencode, a `gap` line; a plain `opencode run` rejects an `ask` anyway.
 
 ## Personal rows
 
