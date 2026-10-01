@@ -32,6 +32,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `docs/adr/` and any `src/*/docs/adr/` directories
 - `docs/agents/`: does this skill's prior output already exist?
 - `.efforts/`: a sign that a local-markdown issue tracker is already in use
+- `docs/assets/`: the folder standard's old image folder
 - Is the `triage` skill installed? (a `triage` skill folder alongside this one, or `triage` in your available skills.) This decides whether Section B runs at all.
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
 - A tool the project's own docs require for a role skills name (a worktree tool in a `docs/worktrees.md`, a session host its scripts assume). This decides whether Section D runs.
@@ -69,6 +70,8 @@ Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSS
 
 When exploration found an old `CONTEXT.md` or `CONTEXT-MAP.md`, propose renaming each with `git mv`, so its history follows it: `git mv CONTEXT.md GLOSSARY.md`, `git mv CONTEXT-MAP.md GLOSSARY-MAP.md`, and the same for each per-context `CONTEXT.md`. Where the new name already exists, `git mv` refuses: propose merging the old file into the new one instead, and ask which wins where they disagree. Also propose updating the map's links and any other file that names the old files; the drafts of `AGENTS.md` and `docs/agents/domain.md` already use the new names.
 
+When exploration found a `docs/assets/` folder, propose moving each topic with `git mv`, as the folder standard's *Migration from older layouts* says: images the project ships or shows to `assets/images/<topic>/`, screenshots to `assets/screenshots/<topic>/`, and each relative link to them updated.
+
 **Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md), *Environment defaults*, says what may go there.
 
 ### 4. Confirm and write
@@ -80,6 +83,7 @@ Show the user a draft of:
 - `.gitignore`: `.scratch/` and `.claude/worktrees/`, each only where it's missing
 - The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
 - Each rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, and the edits to the files that name them, when Section C proposed them
+- Each move out of `docs/assets/`, and the links it updates, when proposed
 
 Let them edit, then take one approval for all of it. Then write:
 
@@ -94,6 +98,7 @@ Let them edit, then take one approval for all of it. Then write:
 
    For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 4. Run each approved rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, then update the files that named it.
+5. Run each approved move out of `docs/assets/`, then update the links to it.
 
 Done when every approved change is made.
 
