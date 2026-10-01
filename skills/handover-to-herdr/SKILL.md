@@ -1,6 +1,6 @@
 ---
 name: handover-to-herdr
-description: Start a new agent session in its own `herdr` workspace and tab, send it its starting prompt and confirm it's working. Use when a handover, a new effort or an effort's close runs through `herdr`.
+description: Start a new agent session in its own `herdr` workspace and tab, send it its starting prompt and confirm it's working. Use when a handover, a new effort or a session's settle runs through `herdr`.
 argument-hint: "Worktree path, topic, role, and the starting prompt"
 ---
 
@@ -17,7 +17,7 @@ Run this skill from inside a `herdr` pane or from outside one, such as a desktop
 
 ## Steps
 
-When `/close-effort` calls this skill, read `close-effort-commands.md` instead of these steps.
+When `/settle-session` calls this skill, read `settle-commands.md` instead of these steps.
 
 1. Check that `herdr status` reaches a server. Don't go by `HERDR_ENV=1`, which `/herdr` requires: it only says this session runs in a pane.
    - **If no server answers:** say so and hand back to the calling skill, which then works as if there were no session host.
@@ -54,4 +54,4 @@ When `/close-effort` calls this skill, read `close-effort-commands.md` instead o
 
 ## References
 
-- [close-effort-commands.md](close-effort-commands.md): the `herdr` commands a close needs: finding the agents still working, and freeing the closing session's own worktree from outside it.
+- [settle-commands.md](settle-commands.md): the `herdr` commands a settle needs: finding the agents still working, marking the session settled, and freeing the settling session's own worktree from outside it.

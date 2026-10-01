@@ -1,0 +1,5 @@
+interface:
+  display_name: "Settle Effort"
+  short_description: "Merge an approved effort, carry over what's left, and settle"
+policy:
+  allow_implicit_invocation: true
