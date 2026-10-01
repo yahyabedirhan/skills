@@ -191,3 +191,11 @@ The spec is #111.
 - **Resolve the Codex config home once and use it everywhere.** Custom homes must cover instructions, config, rules, hooks and verification together. Fixture runs use an explicit synthetic home and never inherit the live config home or authentication.
 - **Audit persisted defaults separately from effective session settings.** Profiles, trusted projects, CLI flags, cloud defaults and enforced requirements can change or constrain the result. Report observed overrides and unverified layers without treating a matching user file as proof of session behavior.
 - **Leave existing sessions running.** Changes take effect in subsequent sessions; explain `/permissions` where supported. Auto-review routes eligible approvals to a reviewer and keeps sandbox boundaries and the possibility of refusal.
+
+
+## 2026-10-01: concise shared instructions
+
+- **Keep enforcement; remove its inventory from every session.** The shared file carried each row's summary, reason and alternative, repeating explanations across command variants. It now carries general rejection guidance, the common `rm -rf` fallback and a short secrets guardrail. The rule table, personal rows, hook messages and native permissions retain their detail. This supersedes the earlier per-row global-instructions requirements.
+- **Expand from observed failures.** Add a fallback example only when a real session is stuck after a rejection; do not pre-load every possible denial.
+- **Shorten role fallbacks at their source.** The session-host and worktree-tool rows keep the action and remove the explanation.
+- **Group personal workflow by topic.** Use concise rules under third-level headings, preserving meaning in the personal source. Copy those headings into the shared file and omit empty categories and the old fixed intro.

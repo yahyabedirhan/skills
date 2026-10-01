@@ -18,8 +18,8 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 
 | Layer | Holds | Where to write it |
 |---|---|---|
-| **Permission** | A hard rule: deny, ask, allow-and-report or, for a personal row only, allow. | A rule for anybody is a row in `/set-up-machine`'s rule table, which `/set-up-machine` turns into each harness's native entries and the global instructions' rule line. A personal permission, such as allowing a tool the user added, goes in the user's personal repository. A project may only add allows. |
-| **Global instruction** | The user's personal workflow and environment defaults, and one line per global rule with what to do instead. | The user's personal repository, from which `/set-up-machine` writes the shared global instructions file every harness on the machine reads. The rule lines come from the rule table. |
+| **Permission** | A hard rule: deny, ask, allow-and-report or, for a personal row only, allow. | A rule for anybody is a row in `/set-up-machine`'s rule table, which `/set-up-machine` turns into each harness's native entries and the hook uses for rejection guidance. A personal permission, such as allowing a tool the user added, goes in the user's personal repository. A project may only add allows. |
+| **Global instruction** | The user's personal workflow and environment defaults, concise permission-rejection guidance and a secrets guardrail. | The user's personal repository, from which `/set-up-machine` writes the shared global instructions file every harness on the machine reads. The compact rules block comes from `/set-up-machine`'s `references/global-instructions.md`. |
 | **Project `AGENTS.md`** | Anything a teammate needs to work on the project: its tracker, its commands, its conventions, its worktree tool. | The project's `AGENTS.md`, with a `CLAUDE.md` holding `@AGENTS.md` so Claude Code reads the same text. |
 | **Skill** | How to do a task, written for any team's tools and tracker: a value that differs between setups becomes a parameter. | A `SKILL.md` in the skills repo, or a local skill in one project. |
 | **Skill reference** | Detail only some runs need, such as one branch of the flow or one tool's specifics; anything every run needs stays in `SKILL.md`. | A file beside the `SKILL.md`. The skill's body says when to read it, and its closing `## References` section says in one line what each file covers; scripts get a `## Scripts` section the same way. |
@@ -31,7 +31,7 @@ Before settling a change, picture a teammate or contributor with a different set
 A change passes when:
 
 - nothing a teammate needs sits in the global instructions;
-- the global instructions hold only the user's personal workflow, their environment defaults, and explanations of global rules;
+- the global instructions hold only the user's personal workflow, their environment defaults, permission-rejection guidance and a secrets guardrail;
 - no skill depends on the user's default tool. The user's choice of tool sits in their environment defaults, and how to use a tool sits in that tool's own skill.
 
 Flag every place a change fails the test, and move the failing part to the row of the table that fits it.
