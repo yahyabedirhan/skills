@@ -366,7 +366,7 @@ def main(argv=None, stdout=None) -> int:
     own_lines = []
     try:
         own = personal.permissions(home, table)
-    except rule_table.RuleTableError as exc:
+    except ValueError as exc:  # RuleTableError, or a file that isn't UTF-8 text
         own, own_lines = [], [("FAIL", str(exc))]
     table = table + own
 
