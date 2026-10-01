@@ -75,7 +75,7 @@ When the user asks what a skill costs to run, or how to make it cheaper, follow 
 
 ## References
 
-- [skill-operations.md](skill-operations.md): the kinds of skill, and creating, installing, updating, moving, removing, forking, shipping, auditing and publishing them.
+- [skill-operations.md](skill-operations.md): the kinds of skill, and creating, installing, updating, moving, removing, forking, upgrading a fork, shipping, auditing and publishing them.
 - [efficiency-analysis.md](efficiency-analysis.md): measuring what one run of a skill costs, and making the next run cheaper.
 
 ## Scripts

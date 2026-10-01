@@ -37,3 +37,8 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 
 - **A Parameters line says what the role is, with examples, and nothing else.** This supersedes the #83 entry above on two points: what to do when a role has no tool lives only in `/set-up-machine`'s roles table, and no skill routes to a tool's skill, since the tool's own skill says in its description when to use it. The environment layers, the team test and the parameter convention now sit in `SKILL.md`, because every change reads them, and the team-test audit is a grep.
 - **A new skill's auditor reports by default, and fixes only when the user says so.** The #66 review had auditors make their own fixes because the maintainer asked for it; without that request, the author reviews the findings and applies the ones it accepts.
+
+## 2026-10-01: upgrading a fork (#105)
+
+- **A fork is upgraded like a dependency, from upstream's latest version, with the fork's own changes re-applied on top.** Before #105 the skill only knew how to fork, so the upgrade steps lived only in that issue. They now sit in *Upgrade a fork* in `skill-operations.md`.
+- **An upgrade keeps the fork's choice of who can invoke it.** The maintainer forked several upstream skills mainly to drop `disable-model-invocation`, so agents could load them. Upstream can set it again later: humanlayer/skills did in `bba9d13` for `show-me`, which would break `orchestrate-effort`. The step names both places the setting lives, `SKILL.md` and `agents/openai.yaml`.

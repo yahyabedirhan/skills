@@ -1,6 +1,6 @@
 # Skill operations
 
-Creating, installing, updating, moving, removing, forking, publishing and auditing skills with the `npx skills` CLI.
+Creating, installing, updating, moving, removing, forking, upgrading forks, publishing and auditing skills with the `npx skills` CLI.
 
 ## Kinds of skill
 
@@ -56,6 +56,16 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 4. Make only the intended change, so a diff against upstream shows just that.
 5. In the README row, name the upstream repo, the commit, the licence file and what changed.
 6. Ship it, then replace the upstream install with the fork in the same scope.
+
+**Upgrade a fork.** Treat it like a dependency upgrade: upstream's latest version is the base, and the fork's own changes go back on top.
+
+1. Fetch upstream's default branch and look at its newest release branch. Find the skill's current path, since upstream may have moved, renamed or split it since the fork.
+2. Diff upstream from the fork's Origin commit to its latest version, and list each change.
+3. Diff the fork against upstream at its Origin commit, and list the fork's own changes. Add any the README's Changes column misses.
+4. Rebuild the fork from upstream's latest version, then re-apply the fork's changes. Where an upstream change conflicts with one of the fork's, keep the fork's, unless upstream now does the same thing better.
+5. Keep the fork's choice of who can invoke it: `disable-model-invocation` in `SKILL.md` and `allow_implicit_invocation` in `agents/openai.yaml`. Letting agents load a skill is often why it was forked, and upstream can turn that off again in a later commit.
+6. In the README row, move the Origin to the new commit and update the Changes column. Keep the `LICENSE.<upstream>` file.
+7. Ship it. The pull request lists each upstream change taken or left out, with the reason for each one left out.
 
 ## Shipping to the skills repo
 
