@@ -64,7 +64,7 @@ class RulesTest(unittest.TestCase):
     def test_every_sample_in_the_shipped_table_gets_its_rows_answer(self):
         code, out = run("--home", str(self.dir), "--rules", str(TABLE), "--no-codex")
         self.assertEqual(code, 0, out)
-        self.assertRegex(out, r"rules +ok +37 rows")
+        self.assertRegex(out, r"rules +ok +38 rows")
 
     def test_a_sample_the_hook_misses_fails(self):
         path = self.table([self.row(covers=["rm -rf x", "rm -r x"])])
@@ -449,7 +449,7 @@ class PersonalPermissionsTest(PersonalHome, unittest.TestCase):
         self.claude({"deny": [], "allow": ["mcp__server-a__read_item", "mcp__server-a__read_list", "mcp__other__x"]})
         code, out = self.output()
         self.assertEqual(code, 0, out)
-        self.assertRegex(out, r"rules +ok +37 rows and 1 personal rows")
+        self.assertRegex(out, r"rules +ok +38 rows and 1 personal rows")
         self.assertRegex(out, r"personal +present +Claude Code: server-a-read \(allow, personal\): "
                               r"mcp__server-a__read_item, mcp__server-a__read_list in ")
         self.assertNotIn("mcp__other__x", out)
@@ -488,7 +488,7 @@ class PersonalPermissionsTest(PersonalHome, unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("rm-allowed: `rm -rf x` got deny, expected allow", out)
         self.assertNotIn("tool-missing-wipe:", out.split("rules")[0])
-        self.assertRegex(out, r"rules +FAIL +37 rows and 2 personal rows, \d+ samples, 1 wrong")
+        self.assertRegex(out, r"rules +FAIL +38 rows and 2 personal rows, \d+ samples, 1 wrong")
 
     def test_a_malformed_personal_row_fails(self):
         self.permissions([personal_row("bad", "block", {"program": "tool-a"}, ["tool-a"])])
