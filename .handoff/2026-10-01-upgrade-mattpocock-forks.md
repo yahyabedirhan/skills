@@ -12,7 +12,7 @@ A session in another project re-ran `set-up-project`'s audit and found two names
 
 ## What to do next
 
-1. Clone or update upstream at `~/Developer/open-source/mattpocock-skills`; a clone fetched on 2026-10-01 is already there. In anything committed, cite upstream by repository and commit, never by that local path.
+1. Clone or update upstream in the maintainer's folder for open-source clones; a clone fetched on 2026-10-01 is already there. In anything committed, cite upstream by repository and commit, never by a local path.
 2. Work through #105's *How to upgrade each fork* for `handoff`, `implement`, `to-spec`, `to-tickets` and `set-up-project`. Use one commit per fork, so the maintainer can follow each one.
 3. Do #105's *Also in scope* items: update the installed non-forked upstream skills, make sure no skill names `CONTEXT.md` any more, have `set-up-project` propose renaming an old `CONTEXT.md`, and bring the README's install advice up to date.
 4. Install the upgraded forks on this machine, and check the acceptance criteria.
