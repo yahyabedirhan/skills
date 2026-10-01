@@ -5,7 +5,7 @@ description: Change what agents run with - a permission rule, a global or projec
 
 # Maintain the environment
 
-The environment is what agents run with: permissions, global instructions, project instructions, and skills. Use this skill to change it; to set up a machine or a project, use `/set-up-machine` or `/set-up-project` instead. Write each change once, at its source, and carry it from there to every harness, machine and install it applies to. Keep harness memory features off, because a memory is invisible to every other harness and lives outside any repository; write what it would hold into one of the layers instead. The skills repo and most projects are public, so write personal detail only in the user's personal repository: names, accounts, paths on the user's machine, other projects. In a skill or a public `AGENTS.md`, generalise it or make it a parameter.
+The environment is what agents run with: permissions, global instructions, project instructions, and skills. Use this skill to change it; to set up a machine or a project, use `/set-up-machine` or `/set-up-project` instead. Write each change once, at its source, and carry it from there to every harness, machine and install it applies to. Keep harness memory features off, because a memory is invisible to every other harness and lives outside any repository; write what it would hold into one of the layers instead. The skills repo and most projects are public, so write personal detail only in the user's personal repository, or the shared global instructions file on a machine without one: names, accounts, paths on the user's machine, other projects. In a skill or a public `AGENTS.md`, generalise it or make it a parameter.
 
 ## Parameters
 
@@ -18,7 +18,7 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 
 | Layer | Holds | Where to write it |
 |---|---|---|
-| **Permission** | A hard rule: deny, ask, or allow-and-report. | A rule for anybody is a row in `/set-up-machine`'s rule table, which `/set-up-machine` turns into each harness's native entries and the global instructions' rule line. A personal permission, such as allowing a tool the user added, goes in the user's personal repository. A project may only add allows. |
+| **Permission** | A hard rule: deny, ask, allow-and-report or, for a personal row only, allow. | A rule for anybody is a row in `/set-up-machine`'s rule table, which `/set-up-machine` turns into each harness's native entries and the global instructions' rule line. A personal permission, such as allowing a tool the user added, goes in the user's personal repository. A project may only add allows. |
 | **Global instruction** | The user's personal workflow and environment defaults, and one line per global rule with what to do instead. | The user's personal repository, from which `/set-up-machine` writes the shared global instructions file every harness on the machine reads. The rule lines come from the rule table. |
 | **Project `AGENTS.md`** | Anything a teammate needs to work on the project: its tracker, its commands, its conventions, its worktree tool. | The project's `AGENTS.md`, with a `CLAUDE.md` holding `@AGENTS.md` so Claude Code reads the same text. |
 | **Skill** | How to do a task, written for any team's tools and tracker: a value that differs between setups becomes a parameter. | A `SKILL.md` in the skills repo, or a local skill in one project. |

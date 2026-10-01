@@ -426,9 +426,10 @@ def main(argv=None, stdin=None, stdout=None, now=None) -> int:
         print(f"set-up-machine hook: {exc}", file=sys.stderr)
         return 1
     # A broken personal file leaves the rule table's rows in force; verify.py reports it.
+    # Catch everything here: a crash would let the call through without the table's rows.
     try:
         table = table + personal.permissions(Path.home(), table)
-    except (ValueError, OSError) as exc:
+    except Exception as exc:
         print(f"set-up-machine hook: personal rows skipped: {exc}", file=sys.stderr)
     try:
         verdict = decide(call, table, Path.home())

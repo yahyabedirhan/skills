@@ -110,6 +110,9 @@ def _parse_row(row: dict, where: str, levels: tuple = LEVELS) -> Rule:
     for key in ("id", "level", "summary", "match", "reason", "instruction"):
         if not row.get(key):
             raise RuleTableError(f"{where}: missing {key!r}")
+    for key in ("id", "level", "summary", "reason", "instruction"):
+        if not isinstance(row[key], str):
+            raise RuleTableError(f"{where}: {key} must be a string")
     if row["level"] not in levels:
         only = " (`allow` is for a personal repository's rows only)" if row["level"] in PERSONAL_LEVELS else ""
         raise RuleTableError(f"{where}: level must be one of {', '.join(levels)}{only}")
@@ -210,6 +213,8 @@ def _parse_file(match: dict, where: str) -> dict:
 
 def _parse_mcp_tool(match: dict, where: str) -> dict:
     for key in ("server", "tool"):
+        if key in match and not isinstance(match[key], str):
+            raise RuleTableError(f"{where}: match.{key} must be a string")
         try:
             re.compile(match.get(key) or "")
         except re.error as exc:

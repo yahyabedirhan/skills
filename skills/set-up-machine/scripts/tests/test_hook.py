@@ -552,6 +552,16 @@ class PersonalRowsTest(unittest.TestCase):
         self.assertNotIn("tool-a-wipe", reason)
         self.assertIn("personal rows skipped", proc.stderr)
 
+    def test_a_personal_row_of_the_wrong_shape_leaves_the_rule_table_in_force(self):
+        for bad in ({**PERSONAL_ROWS[0], "id": ["tool-a-wipe"]},
+                    {**PERSONAL_ROWS[0], "match": {"server": 5, "tool": "^read_"}}):
+            self.write([bad])
+            proc = self.run_hook("rm -rf /tmp/x")
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            reason = json.loads(proc.stdout)["hookSpecificOutput"]["permissionDecisionReason"]
+            self.assertIn("rm-recursive-force", reason)
+            self.assertIn("personal rows skipped", proc.stderr)
+
     def test_a_personal_row_cannot_reuse_a_table_id(self):
         self.write([{**PERSONAL_ROWS[0], "id": "rm-recursive-force"}])
         with self.assertRaises(rules.RuleTableError):

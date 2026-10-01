@@ -81,6 +81,11 @@ class BadRowsTest(unittest.TestCase):
         self.assertRefused([row(samples={}), row(samples={"covers": []}), row(samples={"leaves": ["x"]}),
                             row(samples={"covers": ["x"], "other": ["y"]}), {k: v for k, v in row().items() if k != "samples"}])
 
+    def test_fields_of_the_wrong_type_are_refused(self):
+        self.assertRefused([row(id=["x"]), row(level=["deny"]), row(summary=1), row(reason={"a": 1}),
+                            row(instruction=["i"]), row(match={"server": 5, "tool": "^read_"}),
+                            row(match={"server": "mail", "tool": ["send"]})])
+
     def test_an_allow_row_is_refused_in_the_rule_table(self):
         self.assertRefused([row(level="allow")])
 
