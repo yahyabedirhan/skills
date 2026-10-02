@@ -165,6 +165,30 @@ class SupportTest(unittest.TestCase):
         with patch.object(config.subprocess, "run", return_value=CompletedProcess([], 0, "", "")):
             self.assertEqual(config.support({"approvals_reviewer": "user"}, "codex")[0][0], "gap")
 
+    def test_probe_finds_an_interpreter_beside_the_codex_program_or_its_link_target(self):
+        # An npm-installed codex under nvm starts with `#!/usr/bin/env node`, and
+        # node sits in nvm's bin folder, not in os.defpath. The fake node acts as Codex.
+        node = ("#!/bin/sh\n"
+                "if grep -q set-up-machine-invalid-value \"$CODEX_HOME/config.toml\"; then\n"
+                "  key=$(cut -d' ' -f1 \"$CODEX_HOME/config.toml\")\n"
+                "  printf 'failed to load bootstrap configuration\\nunknown variant `set-up-machine-invalid-value`\\nin `%s`\\n' \"$key\" >&2\n"
+                "  exit 1\n"
+                "fi\n")
+        for beside in ("link", "target"):
+            with self.subTest(node_beside=beside), tempfile.TemporaryDirectory() as tmp:
+                bin_folder, package = Path(tmp) / "bin", Path(tmp) / "lib" / "codex" / "bin"
+                bin_folder.mkdir()
+                package.mkdir(parents=True)
+                script = package / "codex.js"
+                script.write_text("#!/usr/bin/env node\n")
+                (bin_folder / "codex").symlink_to(script)
+                interpreter = (bin_folder if beside == "link" else package) / "node"
+                interpreter.write_text(node)
+                for program in (script, interpreter):
+                    program.chmod(0o755)
+                lines = config.support({"approvals_reviewer": "user"}, str(bin_folder / "codex"))
+                self.assertEqual(lines[0][0], "supported", lines)
+
     def test_random_probe_failure_is_not_recognition(self):
         from subprocess import CompletedProcess
         for diagnostic in ("unrelated failure", "wrapper failed for set-up-machine-invalid-value",
