@@ -13,6 +13,8 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## Steps
 
+On a local machine, follow these steps as they are. On a brand-new VPS, first set up its base with the user from `references/new-vps.md`, since it needs root, then follow these steps.
+
 1. **Inspect.** Find each harness on the machine, read its reference, then the non-secret configuration fields that reference needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a personal repository, read `references/personal-repository.md` and the repository's `agents/instructions.md` and `agents/permissions.json` in its clone. For Codex, inspect the optional `agents/codex.toml` as its reference directs; use one resolved config home throughout setup and verification.
    - **When the pointer is missing:** read `references/personal-repository.md`, then ask the user once which repository holds their personal setup and where it is cloned, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
    - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
@@ -115,7 +117,8 @@ Name these once in every audit:
 - [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, what counts as personal workflow, moving a harness's own file, and why memory stays off.
 - [references/rule-table.md](references/rule-table.md): changing a row of the rule table, changing the hook's code and its tests, and adding a harness.
 - [references/personal-repository.md](references/personal-repository.md): the pointer, the personal repository's layout, generating the shared file's personal parts from it, and its personal rows.
-- [references/remote-machine.md](references/remote-machine.md): a remote or headless machine: a fresh server's base, signing in without a browser, per-machine settings, a headless browser, keeping sessions alive, and containing a misled agent.
+- [references/new-vps.md](references/new-vps.md): setting up a new VPS from a provider's image: key access, the dedicated user and its sudo password, keys-only SSH, the firewall, updates, swap and the docker group before the steps, then the session host's integration, git credentials, `PATH` over SSH and a headless browser after them.
+- [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
 - One reference per harness, read for each harness found. Each says how the harness is found, where it keeps each setting, a row's native form with worked examples, the hook's wiring, and its gaps:
   - [references/claude-code.md](references/claude-code.md): Claude Code.
   - [references/codex.md](references/codex.md): Codex.
