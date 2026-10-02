@@ -115,7 +115,8 @@ Name these once in every audit:
 - [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, what counts as personal workflow, moving a harness's own file, and why memory stays off.
 - [references/rule-table.md](references/rule-table.md): changing a row of the rule table, changing the hook's code and its tests, and adding a harness.
 - [references/personal-repository.md](references/personal-repository.md): the pointer, the personal repository's layout, generating the shared file's personal parts from it, and its personal rows.
-- [references/remote-machine.md](references/remote-machine.md): a remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
+- [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
+  - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
 - One reference per harness, read for each harness found. Each says how the harness is found, where it keeps each setting, a row's native form with worked examples, the hook's wiring, and its gaps:
   - [references/claude-code.md](references/claude-code.md): Claude Code.
   - [references/codex.md](references/codex.md): Codex.

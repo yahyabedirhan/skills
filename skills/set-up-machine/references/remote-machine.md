@@ -2,11 +2,7 @@
 
 What changes when the machine is a remote or headless one, such as a VPS that runs agent sessions while the user is away. The steps in `SKILL.md` stay the same; this file covers what they don't.
 
-## Before the steps
-
-1. **Size.** Check the machine has at least 4 GB of RAM, Claude Code's floor, and more if other services share it.
-2. **User.** On a machine that also runs other services, work as a dedicated unprivileged user, separate from root and from those services. Creating one needs root, so give the user the commands.
-3. **Updates.** On a public-facing machine, check that unattended security upgrades are on; turning them on needs root, so give the user the command.
+Brand-new machine? Set up its base first with [new-remote-machine.md](new-remote-machine.md), then come back here.
 
 ## Signing in a harness without a browser
 
