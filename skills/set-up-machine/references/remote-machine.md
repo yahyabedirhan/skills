@@ -1,6 +1,8 @@
 # Remote machine
 
-What changes when the machine is a remote or headless one, such as a VPS that runs agent sessions while the user is away. The steps in `SKILL.md` stay the same; this file covers what they don't. The server's own base, such as its user, SSH, firewall and swap, is in `new-vps.md`.
+What changes when the machine is a remote or headless one, such as a VPS that runs agent sessions while the user is away. The steps in `SKILL.md` stay the same; this file covers what they don't.
+
+Brand-new machine? Set up its base first with [new-remote-machine.md](new-remote-machine.md), then come back here.
 
 ## Signing in a harness without a browser
 

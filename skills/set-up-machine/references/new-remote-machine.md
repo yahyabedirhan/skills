@@ -1,6 +1,6 @@
-# New VPS
+# New remote machine
 
-Setting up a new VPS from a provider's image, so agents can run on it. Go through the base with the user before the steps in `SKILL.md`, then finish with the items after them. Check each item and propose what's missing. Most need root, so give the user the commands to run.
+The base a brand-new remote machine needs before agents run on it, such as a VPS fresh from a provider's image. It extends `remote-machine.md`, which still applies. Go through the base with the user before the steps in `SKILL.md`, then finish with the items after them. Check each item and propose what's missing. Most need root, so give the user the commands to run.
 
 ## The base, before the steps
 
