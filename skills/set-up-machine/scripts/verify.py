@@ -407,7 +407,7 @@ def main(argv=None, stdout=None) -> int:
             else:
                 line("codex", "differs", f"{rule.id}: {sample} -> {_decision(level)}, the row is {rule.level}")
     elif not args.no_codex:
-        line("codex", "skipped", "codex isn't on PATH")
+        line("codex", "skipped", "codex isn't on PATH; from a non-login shell, such as one without nvm loaded, pass --codex PATH")
 
     for status, text in check_wiring(home, codex_home):
         line("hook", status, text.replace(str(codex_home), "<Codex config home>") if custom_home else text)
