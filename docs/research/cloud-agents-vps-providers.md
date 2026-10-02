@@ -11,6 +11,8 @@ Evidence tags, as in the sizing file:
 
 Currency and tax are stated per row, because providers differ: most European providers show EUR net of VAT, netcup and IONOS (German site) show EUR **including 19% German VAT**, the US-based ones show USD net of tax. Where a page showed a VAT-inclusive price for a country other than Germany, only the net figure is used here.
 
+> **Updated 2026-10-02, see [cloud-agents-vps-math.md](cloud-agents-vps-math.md).** With the maintainer's budget ($10-15, up to about $25) and goal (five agents testing in parallel), the recommendation becomes **netcup VPS 2000 G12.5** (16 GB, €22.62 net, $25.56, on 12 months); RS 2000 below stays the steadier option at $38.65.
+
 ## Short answer
 
 - **Shared vs dedicated, in one line:** a shared vCPU is a slice of a core that other customers' servers also use, so it's cheap and fine while agents wait on the model, but a long build or a busy browser page can run slower when neighbours are busy; a dedicated vCPU is a CPU thread reserved for you, so builds and browsers run at the same speed every time. For this workload **RAM decides the size, CPU type decides how smooth the bursts are**.
@@ -87,7 +89,7 @@ Prices as shown on netcup's German-VAT default: **EUR incl. 19% VAT**; net = ÷1
 | RS 1000 G12.5 | **4 dedicated** AMD EPYC 9645 | 8 GB DDR5 ECC | 128 GB NVMe | not read (unverified; netcup root servers are sold with a traffic flat rate) | €21.73 (€18.26 net) | €25.00 (€21.01 net) | Nuremberg, Vienna, or "no preference Europe" | Yes |
 | RS 2000 G12.5 | **8 dedicated** AMD EPYC 9645 | 16 GB DDR5 ECC | 256 GB NVMe | same | **€40.70 (€34.20 net)** | €46.81 (€39.34 net) | same | Yes |
 
-Sources: [netcup VPS](https://www.netcup.com/en/server/vps), [VPS ARM](https://www.netcup.com/en/server/arm-server), [Root Server](https://www.netcup.com/en/server/root-server) [doc]. Terms: 1, 12 or 24 months, no hourly billing; 30-day money-back on the basic fee; snapshots, image import and export, remote console; the location "cannot be changed later"; upgrades only to a bigger plan of the same generation and product type [doc]. The VPS page itself says the VPS lacks the root server's "dedicated CPU cores" [doc]. The VPS's CPU model is not published (unverified).
+Sources: [netcup VPS](https://www.netcup.com/en/server/vps), [VPS ARM](https://www.netcup.com/en/server/arm-server), [Root Server](https://www.netcup.com/en/server/root-server) [doc]. Terms: 1, 12 or 24 months, no hourly billing; 30-day money-back on the basic fee (corrected 2026-10-02: only the Root Server and ARM plans carry it; the x86 VPS page says the VPS doesn't include "the satisfaction guarantee"); snapshots, image import and export, remote console; the location "cannot be changed later"; upgrades only to a bigger plan of the same generation and product type [doc]. The VPS page itself says the VPS lacks the root server's "dedicated CPU cores" [doc]. The VPS's CPU model is not published (unverified).
 
 ### OVHcloud
 
