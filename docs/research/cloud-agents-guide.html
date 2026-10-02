@@ -851,19 +851,19 @@ footer .slide-inner { gap: 10px; }
 <section class="slide" id="decisions" aria-labelledby="dec-h" data-name="Your decisions">
   <div class="slide-inner">
     <p class="stop"><span class="stop-dot" aria-hidden="true">8</span>Your decisions</p>
-    <h2 id="dec-h">Thirteen decisions: eight answered, five need more</h2>
+    <h2 id="dec-h">Thirteen decisions: nine answered, four need more</h2>
     <p class="lede">Your answers from 30 September are in. Each card opens to what the decision is about, the options, what the research recommends, and what happens next, so you can decide here without opening the files.</p>
     <div class="dtools" role="group" aria-label="Filter decisions">
       <button type="button" class="fbtn" data-filter="all" aria-pressed="true">All <b>13</b></button>
-      <button type="button" class="fbtn" data-filter="open" aria-pressed="false">Needs more <b>5</b></button>
-      <button type="button" class="fbtn" data-filter="changed" aria-pressed="false">You changed it <b>4</b></button>
+      <button type="button" class="fbtn" data-filter="open" aria-pressed="false">Needs more <b>4</b></button>
+      <button type="button" class="fbtn" data-filter="changed" aria-pressed="false">You changed it <b>5</b></button>
       <button type="button" class="fbtn" data-filter="decided" aria-pressed="false">Agreed <b>4</b></button>
       <button type="button" class="fbtn fbtn-quiet" id="expand-all" aria-pressed="false">Open all</button>
     </div>
     <ol class="dcards" id="dcards">
 
-      <li class="dcard" data-status="open"><details>
-        <summary><span class="did">D4</span><span class="dhead"><span class="dq-t">Resize the VPS, or move it?</span><span class="dans">You: today's CX23 can't run one agent with tests, a browser test or anything in parallel; budget $10-15, up to about $20-25 if it's worth it. Redone 2 October: five parallel agents need 16 GB. netcup VPS 2000, $25.56 a month, is the first plan that fits.</span></span><span class="status s-open">Needs more</span></summary>
+      <li class="dcard" data-status="changed"><details>
+        <summary><span class="did">D4</span><span class="dhead"><span class="dq-t">Resize the VPS, or move it?</span><span class="dans">You: 3 agents to start, a monthly term, CPU speed first. Ordered 2 October: <b>netcup VPS 1000</b> ($15.84 a month, 8 GB, 4 vCores), set up with set-up-machine, and trialled at 2.5-3x slower than the Mac with memory to spare. Next step if needed: VPS 2000 in place.</span></span><span class="status s-changed">You changed it</span></summary>
         <div class="dbody">
           <p><b>What it's about.</b> Your VPS (Hetzner CX23: 2 shared vCPU, 4 GB, no swap, $6.77) has about 9% of your Mac's CPU, and one agent plus one test run already overflows its memory. You want about five agents at once, each running tests and browser tests through sub-agents.</p>
           <p><b>The math, in one line each.</b> Memory = 1 GB + 0.6 GB per agent + 2 GB per test run + 1 GB per browser running at the same moment: five agents with 3 test runs and 2 browsers is 12 GB, so a 16 GB machine. CPU is measured as a share of your M3 Pro (Geekbench 6): a suite that takes 1 minute on the Mac takes up to 11 on the CX23 and about 1.7 on netcup VPS 2000.</p>
