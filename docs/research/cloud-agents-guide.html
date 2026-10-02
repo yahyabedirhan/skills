@@ -775,7 +775,7 @@ footer .slide-inner { gap: 10px; }
             <div><dt>What can an agent there do, compared with the Mac?</dt><dd>Web, GitHub (<code>gh</code> is logged in) and Claude Code work. Missing: a browser (the cached one lacks 15 system libraries), notifications, Treehouse, <code>jq</code> and the other harnesses. It has 3.8 GB of RAM and no swap. <span class="tag">first-hand</span></dd></div>
             <div><dt>What Herdr offers across machines</dt><dd>On 0.9.0 today, the Mac saves the VPS as a machine but drives it through <code>ssh … bash -lc 'herdr …'</code>. 0.9.2 adds <code>herdr --machine &lt;label&gt;</code>, with no shell quoting, and <code>machine status</code> as a readiness check (D2).</dd></div>
             <div><dt>How your skills and instructions get there</dt><dd>set-up-machine, on <code>main</code> since #66 merged: an agent on the VPS runs it, shows you one diff, and on your approval installs the same skills, <code>AGENTS.md</code>, rule table and hook as on the Mac, then checks them with <code>verify.py</code> (D3).</dd></div>
-            <div><dt>What more CPU and RAM would unlock</dt><dd>RAM is the limit, not CPU. A Claude Code session holds 0.15-0.5 GB, and builds and browsers add gigabytes. 4 GB fits one agent; 8 GB fits two or three, or one with a browser; 16 GB fits several with browsers (D4, D5).</dd></div>
+            <div><dt>What more CPU and RAM would unlock</dt><dd>RAM is the limit, not CPU. A Claude Code session holds 0.15-0.5 GB, and builds and browsers add gigabytes. 4 GB doesn't fit one agent with tests; 8 GB fits five whose tests take turns; 16 GB fits five with 3 test runs and 2 browsers at once (D4, D5).</dd></div>
             <div><dt>Prices, and machines that run only while working</dt><dd>Hetzner's shared line is the cheapest per GB, but it's out of stock for now. Its pricier lines and other providers are in D4. A big server made from a snapshot for a few hours costs cents; Fly.io and GitHub Codespaces stop charging for compute while stopped.</dd></div>
             <div><dt>What an agent may do there without asking</dt><dd>Read Herdr and git state freely, and start what you chose (a handover). Today's line asks before it messages an agent it didn't start, closes or stops anything, removes worktrees or branches, or changes the machine. You've said you want agents to work freely across both machines (D11).</dd></div>
           </dl>
@@ -863,23 +863,22 @@ footer .slide-inner { gap: 10px; }
     <ol class="dcards" id="dcards">
 
       <li class="dcard" data-status="open"><details>
-        <summary><span class="did">D4</span><span class="dhead"><span class="dq-t">Resize the VPS, or move it?</span><span class="dans">You: Hetzner can't resize; open to about $50 a month or another European provider. Research #86 is in: netcup Root Server RS 2000, 16 GB with 8 dedicated cores, €34.20 a month.</span></span><span class="status s-open">Needs more</span></summary>
+        <summary><span class="did">D4</span><span class="dhead"><span class="dq-t">Resize the VPS, or move it?</span><span class="dans">You: today's CX23 can't run one agent with tests, a browser test or anything in parallel; budget $10-15, up to about $20-25 if it's worth it. Redone 2 October: five parallel agents need 16 GB. netcup VPS 2000, $25.56 a month, is the first plan that fits.</span></span><span class="status s-open">Needs more</span></summary>
         <div class="dbody">
-          <p><b>What it's about.</b> Your VPS (Hetzner CX23: 2 shared vCPU, 4 GB, €5.99) fits one agent with no browser. RAM is the limit, and with no swap, running out of memory kills processes.</p>
-          <p><b>Shared or dedicated?</b> A <b>shared</b> vCPU is a slice of a physical core that other customers also use. It's cheap and fine for agents, which mostly wait on the model. A <b>dedicated</b> vCPU is yours alone: steady speed for builds that run all day, at 3-5 times the price for the same RAM. Nothing you run today needs dedicated cores.</p>
+          <p><b>What it's about.</b> Your VPS (Hetzner CX23: 2 shared vCPU, 4 GB, no swap, $6.77) has about 9% of your Mac's CPU, and one agent plus one test run already overflows its memory. You want about five agents at once, each running tests and browser tests through sub-agents.</p>
+          <p><b>The math, in one line each.</b> Memory = 1 GB + 0.6 GB per agent + 2 GB per test run + 1 GB per browser running at the same moment: five agents with 3 test runs and 2 browsers is 12 GB, so a 16 GB machine. CPU is measured as a share of your M3 Pro (Geekbench 6): a suite that takes 1 minute on the Mac takes up to 11 on the CX23 and about 1.7 on netcup VPS 2000.</p>
           <div class="tbl"><table>
-            <caption>What each size fits, with Hetzner's EU prices per month</caption>
-            <thead><tr><th>Size</th><th>Fits</th><th>Shared (cheap line)</th><th>Shared (AMD line)</th><th>Dedicated</th></tr></thead>
+            <caption>Your price points, per month, net of VAT</caption>
+            <thead><tr><th>Price point</th><th>Best fit</th><th>RAM</th><th>CPU vs Mac</th><th>Fits</th></tr></thead>
             <tbody>
-              <tr><td>2 vCPU, 4 GB</td><td>1 agent, no browser</td><td>CX23 €5.99 <i>out of stock</i></td><td>CPX22 €19.99</td><td>—</td></tr>
-              <tr><td>4 vCPU, 8 GB</td><td>2-3 agents, or 1 with a browser</td><td>CX33 €8.99 <i>out of stock</i></td><td>CPX32 €35.99</td><td>CCX13 €43.49 (2 vCPU, 8 GB)</td></tr>
-              <tr><td>8 vCPU, 16 GB</td><td>several agents with browsers</td><td>CX43 €16.49 <i>out of stock</i></td><td>CPX42 €69.99</td><td>CCX23 €86.49 (4 vCPU)</td></tr>
+              <tr><td>$10-15</td><td>netcup VPS 1000, $13.76</td><td>8 GB</td><td>~36%</td><td>1-2 agents testing properly, or 5 whose tests take turns</td></tr>
+              <tr><td>About $25</td><td><b>netcup VPS 2000, $25.56</b></td><td>16 GB</td><td>~61%</td><td>5 agents, 3 test runs, 2 browsers at once</td></tr>
+              <tr><td>$40-50</td><td>netcup VPS 4000, $43.08</td><td>32 GB</td><td>~78%</td><td>Everyone tests with a browser at once</td></tr>
             </tbody>
           </table></div>
-          <p><b>Outside Hetzner</b>, for 4 vCPU and 8 GB: netcup €14.50 (Vienna, Nuremberg, Amsterdam; 1-24 month terms); Vultr $40 and DigitalOcean $48 (Frankfurt, Amsterdam, hourly). Other European providers, such as OVHcloud, Scaleway, IONOS and Contabo, weren't compared.</p>
-          <p><b>What's already true.</b> The out-of-stock mark is Hetzner's capacity restriction for some customers and locations; your running CX23 isn't affected, and a refused rescale can be retried another day. Its AMD shared line (CPX) is in stock: CPX32, 8 GB for €35.99, is inside your budget today.</p>
-          <p><b>Research is in.</b> <a href="#vps">Where to move the VPS</a> compares ten providers, measures latency from your Mac and ranks a shortlist. Recommended: <b>netcup RS 2000</b> (16 GB, 8 dedicated cores, €34.20 net a month on 12 months, 30-day money-back), with the CX23 kept alongside for a few weeks. <b>Your call:</b> order it (or a fallback) and set it up as the new agent machine.</p>
-          <p class="small"><a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="64">Sizing file: workloads and tiers</a> <span class="muted">·</span> <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="150">Alternatives</a></p>
+          <p><b>Hetzner, corrected.</b> Your rescale dialog doesn't offer CX33 (the earlier "cheapest step up"); the cost-optimized CX line is unavailable and suits light backends anyway. What it offers starts at CPX12 (1 core, 2 GB, less memory than today), then CPX22 (the same 4 GB), and dedicated cores from CCX13 (8 GB, about $49). Nothing at Hetzner under $40 adds memory.</p>
+          <p><b>Your call:</b> order netcup VPS 2000 on 12 months ($29.40 month to month; the VPS has no money-back guarantee, so a 1-month term is the trial); or VPS 1000 if $15 is the ceiling, upgrading later from netcup's control panel. Keep the CX23 alongside for a few weeks. <a href="#vps">The full math</a></p>
+          <p class="small"><a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="1">How much machine five parallel agents need</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="250">Provider shortlist</a></p>
         </div>
       </details></li>
 
@@ -984,7 +983,7 @@ footer .slide-inner { gap: 10px; }
             <li><b>Playwright's Docker image</b> (Ubuntu 26.04 variant): no root needed, you're already in the <code>docker</code> group, and it's removable. Run it with <code>--init --ipc=host</code>. A multi-GB image.</li>
             <li><b><code>npx playwright install-deps chromium</code></b> as root: installs the libraries into the system.</li>
           </ul>
-          <p><b>The catch is RAM.</b> A browser adds about 1 GB next to an agent. On today's 4 GB with no swap, it fits one agent with no build running, so it pushes D4 toward 8 GB.</p>
+          <p><b>The catch is RAM.</b> A browser adds about 1 GB next to an agent. On today's 4 GB with no swap, it fits one agent with no build running, so it pushes D4 toward 16 GB.</p>
           <p><b>Next.</b> Put it in set-up-machine for the VPS, and measure its memory next to an agent (E7).</p>
           <p class="small"><a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="39">VPS file: headless browser</a></p>
         </div>
@@ -1039,28 +1038,147 @@ footer .slide-inner { gap: 10px; }
       </details></li>
     </ol>
     <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="223">Your answers, recorded in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="145">All thirteen in the synthesis</a> <span class="muted">·</span> <a class="muted" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md#decisions-for-the-maintainer">on GitHub</a></p>
-    <a class="next" href="#vps">Next: where to move the VPS</a>
+    <a class="next" href="#vps">Next: how much machine, and where</a>
   </div>
 </section>
 
-<section class="slide" id="vps" aria-labelledby="vps-h" data-name="Where to move the VPS">
+<section class="slide" id="vps" aria-labelledby="vps-h" data-name="How much machine">
   <div class="slide-inner">
-    <p class="stop"><span class="stop-dot" aria-hidden="true">9</span>Where to move the VPS <span class="muted">· research #86</span></p>
-    <h2 id="vps-h">16 GB with dedicated cores, for about €35 a month</h2>
-    <p class="lede">Hetzner's cheap line is still shut, and what Hetzner sells today at 16 GB costs €70-86. netcup's root server gives 16 GB and 8 dedicated cores for less than half of that, and latency from your Mac is the same as today.</p>
+    <p class="stop"><span class="stop-dot" aria-hidden="true">9</span>How much machine, and where <span class="muted">· redone 2 October, from your trial</span></p>
+    <h2 id="vps-h">Five agents testing in parallel need 16 GB. The first plan that fits costs about $25.</h2>
+    <p class="lede">Your trial matches the numbers: today's CX23 has a ninth of your Mac's CPU and 4 GB with no swap, so one agent plus one test run is already too much. Two quantities decide a plan, not its "vCPU" count: <b>memory</b>, which must hold everything running at the same moment, and <b>CPU speed</b>, which decides how long each test takes.</p>
+    <div class="stats">
+      <div><b>9%</b><span>today's CPU, as a share of your M3 Pro</span></div>
+      <div><b>16 GB</b><span>5 agents, 3 test runs and 2 browsers at once</span></div>
+      <div><b>$25.56</b><span>netcup VPS 2000 a month: 16 GB, about 61% of your Mac</span></div>
+    </div>
+    <h3 class="sub-h">The memory math: it has to fit, or a process gets killed</h3>
+    <p>Each piece of work costs a fixed amount of memory. The units come from your Mac, where 13 Claude Code sessions take 280-660 MB each (about 400 MB on average), and from the VPS. Sub-agents live inside their session, so what costs memory is what they <i>start</i>: tests and browsers.</p>
+    <p class="note"><span><b>RAM = 1 GB</b> (system, Herdr) <b>+ 0.6 GB per agent + 2 GB per test run + 1 GB per browser</b> running at the same moment, with 20% kept free.</span></p>
     <div class="tbl"><table>
-      <caption>The shortlist, prices per month read on 30 September (net of VAT)</caption>
-      <thead><tr><th>#</th><th>Offer</th><th>Size</th><th>Price</th><th>Why</th><th>Against</th></tr></thead>
+      <caption>Three levels of your workflow</caption>
+      <thead><tr><th>Level</th><th>At the same moment</th><th>Sum</th><th>Machine</th></tr></thead>
       <tbody>
-        <tr class="pick"><td>1</td><th>netcup Root Server RS 2000</th><td>8 <b>dedicated</b> AMD EPYC (Zen 5), 16 GB, 256 GB NVMe</td><td><b>€34.20</b> on 12 months; €39.34 month to month</td><td>The only 16 GB with dedicated cores in budget; newest CPU on the list; 30-day money-back</td><td>No hourly billing; best price needs a 12-month term</td></tr>
-        <tr><td>2</td><th>netcup VPS 2000</th><td>8 shared, 16 GB, 256 GB</td><td>€22.62 on 12 months</td><td>Same provider and latency, two-thirds the price</td><td>Shared cores</td></tr>
-        <tr><td>3</td><th>OVHcloud VPS-4</th><td>8 shared, 24 GB, 200 GB</td><td>€23.49, no term</td><td>Most RAM for the money with no commitment; 63 ms</td><td>Monthly, not hourly</td></tr>
-        <tr><td>4</td><th>UpCloud Starter</th><td>4 cores, 16 GB, 50 GB</td><td>€28, hourly</td><td>Try it and delete it the same day</td><td>Older AMD CPUs; small disk</td></tr>
-        <tr><td>5</td><th>Hetzner CX43</th><td>8 shared, 16 GB, 160 GB</td><td>€16.49, hourly</td><td>Cheapest of all; same provider as today</td><td><i>Not orderable, no date given</i></td></tr>
+        <tr><td>Floor: it works, tests take turns</td><td>5 agents, 1 test run, 1 browser</td><td>1 + 3 + 2 + 1 = 7 GB</td><td>8 GB, tight</td></tr>
+        <tr class="pick"><td>Target: a normal day</td><td>5 agents, 3 test runs, 2 browsers</td><td>1 + 3 + 6 + 2 = 12 GB</td><td><b>16 GB</b></td></tr>
+        <tr><td>Comfortable: everyone tests at once</td><td>5 agents, 5 test runs, 5 browsers</td><td>1 + 3 + 10 + 5 = 19 GB</td><td>24-32 GB</td></tr>
       </tbody>
     </table></div>
-    <div class="note"><p><strong>Recommended:</strong> netcup RS 2000 in Nuremberg on a 12-month term, with the 30-day money-back guarantee as the trial. Keep today's CX23 running beside it for 2-4 weeks (€5.99 a month), and don't delete it early: Hetzner won't sell it again. If you'd rather not commit, the same plan month to month is €39.34.</p></div>
+    <p class="small">Why 3 test runs and not 5: agents mostly wait on the model. If each tests a quarter of the time, 3 or more of 5 overlap only 10% of the time. Your Mac copes with 18 GB because it compresses memory about 3:1 (21 GB of pages held in 6 GB) and swaps; a Linux server doesn't do either unless you turn on zram and swap, so it needs the uncompressed amount.</p>
+    <h3 class="sub-h">The CPU math: how much of your Mac you get</h3>
+    <p>"vCPU" isn't a speed: one core's speed varies 3x between plans. Geekbench 6 measures both, and your M3 Pro scores 3,089 single-core and 14,029 multi-core. A test suite that spreads over all cores takes up to <b>Mac ÷ server</b> times as long; a serial step, the single-core ratio.</p>
+    <div class="bars" role="list" aria-label="Multi-core speed as a percentage of the M3 Pro">
+      <div role="listitem"><span>Hetzner CX23, today</span><i style="--v:9"></i><b>9%</b></div>
+      <div role="listitem"><span>Hetzner CPX12, offered next</span><i style="--v:13"></i><b>13%</b></div>
+      <div role="listitem"><span>Hetzner CPX22</span><i style="--v:24"></i><b>24%</b></div>
+      <div role="listitem"><span>OVHcloud VPS-3 (est.)</span><i style="--v:27"></i><b>27%</b></div>
+      <div role="listitem"><span>netcup VPS 1000 (est.)</span><i style="--v:36"></i><b>36%</b></div>
+      <div role="listitem"><span>netcup VPS 2000 (est.)</span><i style="--v:61"></i><b>61%</b></div>
+      <div role="listitem"><span>netcup VPS 4000 (est.)</span><i style="--v:78"></i><b>78%</b></div>
+      <div role="listitem"><span>netcup RS 4000, 12 dedicated</span><i style="--v:100"></i><b>100%</b></div>
+    </div>
+    <p class="small muted">Published Geekbench 6 results; "est." scales a measured sibling plan from the same line. So a suite that takes 1 minute on your Mac takes up to 11 on the CX23, about 2.8 on netcup VPS 1000 and about 1.7 on VPS 2000, and each serial step takes 4.3x, 1.9x and 1.9x as long.</p>
+    <h3 class="sub-h">Your three price points</h3>
+    <div class="tbl"><table>
+      <caption>Per month, net of VAT, at €1 = $1.13 (ECB, 1 October); netcup's price is on a 12-month term</caption>
+      <thead><tr><th>Price point</th><th>Plan</th><th>Price</th><th>RAM</th><th>CPU vs Mac</th><th>What it gets you</th></tr></thead>
+      <tbody>
+        <tr><td>Today</td><th>Hetzner CX23</th><td>$6.77</td><td>4 GB</td><td>9%</td><td>One agent, no tests: what you saw</td></tr>
+        <tr><td>$10-15</td><th>netcup VPS 1000</th><td>$13.76; $15.84 monthly</td><td>8 GB</td><td>~36%</td><td>The floor: 1-2 agents testing properly, or 5 whose tests take turns</td></tr>
+        <tr><td>$10-15</td><th>OVHcloud VPS-3</th><td>$13.83, no term</td><td>12 GB</td><td>~27%</td><td>More room, slower cores</td></tr>
+        <tr><td>$10-15</td><th>Hetzner CPX12</th><td>$13.55</td><td>2 GB</td><td>13%</td><td><i>Not an upgrade: half today's memory</i></td></tr>
+        <tr class="pick"><td>About $25</td><th>netcup VPS 2000</th><td><b>$25.56</b>; $29.40 monthly</td><td><b>16 GB</b></td><td>~61%</td><td>The target: 5 agents, 3 test runs and 2 browsers at once</td></tr>
+        <tr><td>About $25</td><th>OVHcloud VPS-4</th><td>$26.54, no term</td><td>24 GB</td><td>~36%</td><td>Most memory; tests about half as fast as VPS 2000</td></tr>
+        <tr><td>About $25</td><th>Hetzner CPX22</th><td>$22.59</td><td>4 GB</td><td>24%</td><td><i>Faster cores, same 4 GB: still one agent</i></td></tr>
+        <tr><td>$40-50</td><th>netcup VPS 4000</th><td>$43.08</td><td>32 GB</td><td>~78%</td><td>Comfortable: everyone tests with a browser at once</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note"><p><strong>Recommended: netcup VPS 2000 at $25.56 a month</strong> on 12 months ($29.40 month to month). The VPS has no money-back guarantee (only Root Servers do), so start on the 1-month term as the trial. It's the cheapest plan that fits five agents testing in parallel. If $15 is the ceiling, take <b>netcup VPS 1000</b> ($13.76) and accept that tests take turns; netcup upgrades it to VPS 2000 from its control panel later. On the new box, turn on zram and a swap file, so running short of memory slows things down instead of killing them.</p>
+    <p><strong>Update, later on 2 October:</strong> with the goal moved to <b>3 agents</b> and a <b>monthly trial</b>, the plan is <b>netcup VPS 1000 on the 1-month term, $15.84</b>, upgrading in place to VPS 2000 if memory runs short, or rebuilding on RS 1000 if shared cores slow the tests. See "Against today" below.</p>
+    <p><strong>Hetzner, corrected:</strong> your rescale dialog doesn't offer CX33; it starts at CPX12, and dedicated cores at CCX13 (about $49). CPX12 has 2 GB and CPX22 the same 4 GB as today, so nothing at Hetzner under $40 adds memory.</p></div>
     <div class="folds">
+      <details class="fold" open>
+        <summary><span><span class="fold-k">$14 or $25</span>What the extra $12 a month buys</span></summary>
+        <div class="fold-body">
+          <div class="tbl"><table>
+            <thead><tr><th></th><th>netcup VPS 1000, $13.76</th><th>netcup VPS 2000, $25.56</th></tr></thead>
+            <tbody>
+              <tr><th>RAM</th><td>8 GB</td><td><b>16 GB, 2x</b></td></tr>
+              <tr><th>Fits at once</th><td>5 agents with one test run at a time, or 1-2 agents with a test run and a browser</td><td>5 agents with <b>3</b> test runs and 2 browsers</td></tr>
+              <tr><th>CPU</th><td>4 vCores, ~36% of your Mac</td><td>8 vCores, ~61%, <b>1.7x</b></td></tr>
+              <tr><th>A 1-minute Mac suite</th><td>~2.8 min</td><td>~1.7 min alone; ~5 min each with 3 at once (worst case)</td></tr>
+              <tr><th>Disk</th><td>128 GB</td><td>256 GB</td></tr>
+            </tbody>
+          </table></div>
+          <p>The $14 plan makes <b>one agent work properly</b> and lets five exist. The $25 plan lets <b>five work at once</b>. Both are 4-7x today's CPU, with cores 2.3x as fast each. In between, netcup's RS 1000 ($20.63) has 4 dedicated, faster cores but the same 8 GB, so it doesn't add agents.</p>
+        </div>
+      </details>
+      <details class="fold" open>
+        <summary><span><span class="fold-k">Against today</span>Every option as a multiplier of your CX23, by price band</span></summary>
+        <div class="fold-body">
+          <p>RAM × decides how many agents and test runs fit; 1-core × how fast each step runs (a type-check, one test file); total CPU × how fast parallel test runs finish. "Today's 10-min suite" is 10 ÷ total CPU ×, a worst case. "3 agents": 8 GB is the floor (tests take turns), 12 GB the target, 16 GB+ comfortable.</p>
+          <div class="tbl"><table>
+            <caption>Per month, shortest term, net of VAT, at €1 = $1.13. 1x = today's CX23 ($6.77, 4 GB, Geekbench 6 714 / 1,253). ~ = estimate. ⭐ = pick per band</caption>
+            <thead><tr><th>Band</th><th>Plan</th><th>$/mo</th><th>+$/mo</th><th>RAM</th><th><b>RAM ×</b></th><th><b>1-core ×</b></th><th><b>Total CPU ×</b></th><th>Today's 10-min suite</th><th>3 agents</th><th>Terms</th></tr></thead>
+            <tbody>
+              <tr><td><b>Today</b></td><th>Hetzner CX23</th><td>6.77</td><td>—</td><td>4 GB</td><td><b>1x</b></td><td><b>1x</b></td><td><b>1x</b></td><td>10 min</td><td>✗</td><td>Hourly</td></tr>
+              <tr class="pick"><td>$10</td><th>⭐ netcup Lite 2</th><td>9.02</td><td>+2.25</td><td>8 GB</td><td><b>2x</b></td><td>1.6x</td><td>3.0x</td><td>3.3 min</td><td>Floor</td><td>3-month minimum</td></tr>
+              <tr><td>$10</td><th>OVHcloud VPS-2</th><td>9.59</td><td>+2.82</td><td>8 GB</td><td><b>2x</b></td><td>~1.3x</td><td>~2.1x</td><td>~4.8 min</td><td>Floor</td><td>Month to month</td></tr>
+              <tr><td>$10</td><th>netcup VPS 500</th><td>9.02</td><td>+2.25</td><td>4 GB</td><td>1x</td><td>2.3x</td><td>2.4x</td><td>4.2 min</td><td>✗</td><td>Month to month</td></tr>
+              <tr class="pick"><td>$15</td><th>⭐ <b>netcup VPS 1000</b></th><td>15.84</td><td>+9.07</td><td>8 GB</td><td><b>2x</b></td><td>~2.3x</td><td>~4.2x</td><td>~2.4 min</td><td>Floor</td><td>Month to month</td></tr>
+              <tr><td>$15</td><th>netcup Lite 3</th><td>15.82</td><td>+9.05</td><td>16 GB</td><td><b>4x</b></td><td>1.6x</td><td>4.2x</td><td>2.4 min</td><td>Comfortable</td><td>2-month minimum</td></tr>
+              <tr><td>$15</td><th>OVHcloud VPS-3</th><td>13.83</td><td>+7.06</td><td>12 GB</td><td><b>3x</b></td><td>~1.3x</td><td>~3.0x</td><td>~3.3 min</td><td>Target</td><td>Month to month</td></tr>
+              <tr><td>$15</td><th>netcup RS 500</th><td>14.11</td><td>+7.34</td><td>4 GB</td><td>1x</td><td>~2.8x</td><td>~2.4x</td><td>~4.2 min</td><td>✗</td><td>Month to month, refund</td></tr>
+              <tr><td>$15</td><th>Hetzner CPX12</th><td>13.55</td><td>+6.78</td><td>2 GB</td><td><b>0.5x</b></td><td>2.7x</td><td>1.5x</td><td>6.6 min</td><td>✗</td><td>Hourly</td></tr>
+              <tr class="pick"><td>$20</td><th>⭐ netcup RS 1000</th><td>23.74</td><td>+16.97</td><td>8 GB</td><td><b>2x</b></td><td>~2.8x</td><td>~5.6x</td><td>~1.8 min</td><td>Floor</td><td>Month to month, refund</td></tr>
+              <tr><td>$20</td><th>UpCloud Starter 8 GB / 4 cores</th><td>22.60</td><td>+15.83</td><td>8 GB</td><td><b>2x</b></td><td>not published</td><td>not published</td><td>not published</td><td>Floor</td><td>Hourly</td></tr>
+              <tr><td>$20</td><th>Hetzner CPX22</th><td>22.59</td><td>+15.82</td><td>4 GB</td><td>1x</td><td>2.6x</td><td>2.7x</td><td>3.7 min</td><td>✗</td><td>Hourly</td></tr>
+              <tr><td>$20</td><th>Vultr / DigitalOcean basic</th><td>20-24</td><td>+13-17</td><td>4 GB</td><td>1x</td><td>~1-1.3x</td><td>~1x</td><td>~10 min</td><td>✗</td><td>Hourly</td></tr>
+              <tr class="pick"><td>$25-30</td><th>⭐ netcup VPS 2000</th><td>29.40</td><td>+22.63</td><td>16 GB</td><td><b>4x</b></td><td>~2.3x</td><td>~6.8x</td><td>~1.5 min</td><td>Comfortable</td><td>Month to month</td></tr>
+              <tr><td>$25-30</td><th>OVHcloud VPS-4</th><td>26.54</td><td>+19.77</td><td>24 GB</td><td><b>6x</b></td><td>~1.3x</td><td>~4.0x</td><td>~2.5 min</td><td>Comfortable</td><td>Month to month</td></tr>
+              <tr><td>$25-30</td><th>netcup Lite 4</th><td>29.30</td><td>+22.53</td><td>32 GB</td><td><b>8x</b></td><td>~1.5x</td><td>~6.7x</td><td>~1.5 min</td><td>Comfortable</td><td>Month to month</td></tr>
+              <tr><td>$25-30</td><th>UpCloud Starter 16 GB / 2 cores</th><td>27.12</td><td>+20.35</td><td>16 GB</td><td><b>4x</b></td><td>not published</td><td>not published</td><td>not published</td><td>Comfortable</td><td>Hourly</td></tr>
+              <tr><td><i>Reference</i></td><th><i>the Mac, M3 Pro</i></th><td>—</td><td>—</td><td>18 GB</td><td><i>4.5x</i></td><td><i>4.3x</i></td><td><i>11.2x</i></td><td><i>0.9 min</i></td><td>—</td><td>—</td></tr>
+            </tbody>
+          </table></div>
+          <ul class="ticks">
+            <li><b>The $15 pick, netcup VPS 1000:</b> 2x the memory, 2.3x per core, 4.2x total CPU for about +$9 a month. A 10-minute suite should take about 2.4.</li>
+            <li><b>Lite 3</b> is the same price with 4x the memory and the same total CPU, but its cores are only 1.6x today's: every step stays slow.</li>
+            <li><b>Each band up doubles one dimension:</b> RS 1000 (+$8) adds per-core speed and steadiness; VPS 2000 (+$14) adds memory and total CPU.</li>
+            <li><b>The best here is about half your Mac:</b> 6.8x today's CPU against the Mac's 11.2x. The ✗ rows add no memory, so the kills you saw would continue.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="fold" open>
+        <summary><span><span class="fold-k">netcup's lines</span>Lite, VPS, ARM64 and Root Server: what differs</span></summary>
+        <div class="fold-body">
+          <p>Four things separate them: what CPU you get, whether it's shared, how long you commit, and whether you can return it.</p>
+          <div class="tbl"><table>
+            <thead><tr><th></th><th><b>vServer Lite</b></th><th><b>vServer VPS</b></th><th><b>vServer ARM64</b></th><th><b>Root Server</b></th></tr></thead>
+            <tbody>
+              <tr><th><b>In one line</b></th><td>Cheapest RAM, older hardware</td><td>Standard VPS, current hardware</td><td>Same as VPS, on Arm chips</td><td>Your cores are reserved for you</td></tr>
+              <tr><th><b>Built for</b></th><td>Light, steady workloads (websites, small services)</td><td>General use</td><td>Power-efficient Arm workloads</td><td>CPU-heavy work that needs steady speed</td></tr>
+              <tr><th><b>CPU</b></th><td>Unnamed older chip, about 2.0 GHz</td><td>AMD EPYC (current generation)</td><td>Ampere Altra Max (Arm)</td><td>AMD EPYC 9645 (newest)</td></tr>
+              <tr><th><b>Shared or dedicated</b></th><td>Shared</td><td>Shared</td><td>Shared</td><td><b>Dedicated</b></td></tr>
+              <tr><th><b>Each core vs today's</b></th><td>~1.6x</td><td>~2.3x</td><td>~1.3x</td><td>~2.8x</td></tr>
+              <tr><th><b>RAM per $</b></th><td><b>Most</b> (16 GB for $15.82)</td><td>Medium (8 GB for $15.84)</td><td>Same as VPS</td><td><b>Least</b> (8 GB for $23.74)</td></tr>
+              <tr><th><b>Monthly term</b></th><td>Fixed minimum per plan: 6, 3, 2 or 1 months</td><td>1, 12 or 24 months</td><td>12 or 24 months</td><td>1, 12 or 24 months</td></tr>
+              <tr><th><b>30-day refund</b></th><td>No</td><td>No</td><td>Yes</td><td><b>Yes</b>, plus a 99.9% uptime guarantee</td></tr>
+              <tr><th><b>Upgrade path</b></th><td>Only within Lite</td><td>Within VPS (1000 → 2000 → 4000)</td><td>Within ARM</td><td>Within Root Server</td></tr>
+              <tr><th><b>Network</b></th><td>1 Gbps; throttled to 100 Mbps if the 24-hour average exceeds 100 Mbps</td><td>2.5 Gbps; throttled above 2 TB a day</td><td>2.5 Gbps; throttled above 2 TB a day</td><td>2.5 Gbps; throttled above 3 TB a day</td></tr>
+              <tr><th><b>Location</b></th><td>No choice</td><td>You choose</td><td>You choose</td><td>You choose</td></tr>
+              <tr><th><b>Software</b></th><td>x86: everything runs</td><td>x86: everything runs</td><td>Arm: some x86-only tools and Docker images won't run</td><td>x86: everything runs</td></tr>
+            </tbody>
+          </table></div>
+          <ul class="ticks">
+            <li><b>Lite:</b> the most memory for the money; each step runs slower. For when you need room more than speed.</li>
+            <li><b>VPS:</b> the balance. Fast shared cores at a fair price, no refund. <b>Your line</b>, starting at VPS 1000.</li>
+            <li><b>ARM64:</b> the VPS's price with slower cores and some compatibility risk. No advantage for your use.</li>
+            <li><b>Root Server:</b> the fastest and steadiest, the only refundable x86 line, the least memory per dollar. Worth it if shared cores slow your tests.</li>
+            <li><b>Each line upgrades only within itself:</b> moving between lines is a new order and a rebuild.</li>
+          </ul>
+        </div>
+      </details>
       <details class="fold">
         <summary><span><span class="fold-k">Plain words</span>Shared or dedicated cores, and what else matters</span></summary>
         <div class="fold-body">
@@ -1112,7 +1230,8 @@ footer .slide-inner { gap: 10px; }
         <summary><span><span class="fold-k">Also compared</span>Why the others didn't make the list</span></summary>
         <div class="fold-body">
           <ul class="ticks">
-            <li><b>Hetzner, orderable today:</b> CPX42 16 GB €69.99, CCX23 16 GB dedicated €86.49, CCX13 8 GB dedicated €43.49, server auction from €62.</li>
+            <li><b>Hetzner, orderable today:</b> CPX12 (1 core, 2 GB) €11.99 and CPX22 (2 cores, 4 GB) €19.99 add no memory; CPX32 8 GB €35.99, CCX13 8 GB dedicated €43.49, CPX42 16 GB €69.99. The CX line (CX33, CX43) is still unavailable.</li>
+            <li><b>netcup RS 2000</b> (8 dedicated cores, 16 GB, $38.65), the earlier pick: the target's memory with steadier cores, for $13 more than VPS 2000.</li>
             <li><b>DigitalOcean, Vultr, Akamai/Linode:</b> $80-96 a month for 16 GB shared. They're the lowest-latency, but you pay for regions and features, not resources.</li>
             <li><b>Scaleway:</b> €50-86 net for 16 GB, plus storage and IPv4.</li>
             <li><b>IONOS:</b> 16 GB shared for €34.45 with a term and a setup fee, worse than netcup's shared VPS.</li>
@@ -1122,7 +1241,7 @@ footer .slide-inner { gap: 10px; }
         </div>
       </details>
     </div>
-    <p class="small"><a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="250">Ranked shortlist</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="57">Every provider at 8 and 16 GB</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="184">All latency figures</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/86">#86</a></p>
+    <p class="small"><a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="44">The memory math</a> <span class="muted">·</span> <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="74">The CPU math</a> <span class="muted">·</span> <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="107">Price points</a> <span class="muted">·</span> <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="153">Against today</a> <span class="muted">·</span> <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="205">netcup's four lines</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="250">Ranked shortlist</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="57">Every provider at 8 and 16 GB</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="184">All latency figures</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/86">#86</a></p>
     <a class="next" href="#costs">Next: what delegating costs</a>
   </div>
 </section>
@@ -1342,7 +1461,7 @@ footer .slide-inner { gap: 10px; }
       <div class="track">
         <h3>Your calls</h3>
         <ol class="steps">
-          <li>Order the new VPS: netcup RS 2000, or a fallback (D4, #86).</li>
+          <li>Order the new VPS: netcup VPS 2000 ($25.56), or VPS 1000 ($13.76) if $15 is the ceiling (D4).</li>
           <li>Copilot or Jules as a second delegate, or neither (D7, #87).</li>
           <li>Which Firstmate ideas to take; the top two are small skill changes (D13, #88).</li>
           <li>The base-branch fix for delegates (D8).</li>
@@ -1491,6 +1610,20 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
           <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="150">What it settles for the tickets</a>
           <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="196">How this effort was handed over</a>
           <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-delegation.md">GitHub</a>
+        </p>
+      </li>
+      <li class="card">
+        <h3><a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md">How much machine five agents need</a></h3>
+        <span class="time">about 10 min</span>
+        <div class="body">
+          <p>Answers: how much memory and CPU five parallel agents with tests and browsers need, measured against your Mac, and what each price point buys.</p>
+          <p class="when">Read first when choosing the new machine (D4).</p>
+        </div>
+        <p class="links">
+          <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="44">Memory</a>
+          <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="74">CPU</a>
+          <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="107">Price points</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-vps-math.md">GitHub</a>
         </p>
       </li>
       <li class="card">
