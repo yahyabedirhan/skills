@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -126,6 +127,21 @@ def propose(text: str, preferences: dict) -> str:
     return proposal
 
 
+def probe_path(codex: str) -> str:
+    """PATH for the isolated probe: the codex program's folders, then os.defpath.
+
+    An npm-installed codex starts with `#!/usr/bin/env node`; under nvm its node
+    sits beside the codex link, not in os.defpath, so add that folder and the
+    link target's folder rather than the user's whole PATH.
+    """
+    program = shutil.which(codex) or codex
+    folders = [os.path.dirname(os.path.abspath(program))]
+    if os.path.islink(program):
+        folders.append(os.path.dirname(os.path.realpath(program)))
+    folders += os.defpath.split(os.pathsep)
+    return os.pathsep.join(dict.fromkeys(folder for folder in folders if folder))
+
+
 def support(preferences: dict, codex: str | None) -> list:
     """Probe the installed parser in a synthetic home, with negative controls.
 
@@ -139,10 +155,11 @@ def support(preferences: dict, codex: str | None) -> list:
             folder = Path(tmp) / "codex"
             folder.mkdir()
             path = folder / "config.toml"
+            search = probe_path(codex)
             def probe(values):
                 path.write_text("".join(f"{key} = {json.dumps(value)}\n" for key, value in values.items()))
                 return subprocess.run([codex, "features", "list"], cwd=tmp,
-                                      env={"HOME": tmp, "CODEX_HOME": str(folder), "PATH": os.defpath},
+                                      env={"HOME": tmp, "CODEX_HOME": str(folder), "PATH": search},
                                       capture_output=True, text=True, timeout=15)
             for key in preferences:
                 negative = probe({key: "set-up-machine-invalid-value"})
