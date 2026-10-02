@@ -85,7 +85,7 @@ Repos under `~/Developer/yahyabedirhan/` [vps], all cloned over SSH from `git@gi
 | a private notes repo | `~/Developer/yahyabedirhan/<notes-repo>` | `master` | main checkout only |
 | shipyard | `~/Developer/yahyabedirhan/shipyard` | `build/shipyard-core-0.0.x` | main checkout only |
 | skills | `~/Developer/yahyabedirhan/skills` | `main` | main checkout only |
-| steal | `~/Developer/yahyabedirhan/steal` | `main` | main checkout only |
+| scoop | `~/Developer/yahyabedirhan/scoop` | `main` | main checkout only |
 
 Also `~/Developer/open-source/ghbar` [vps]. Paths differ from the Mac: the notes repo sits under `~/Documents/` on the Mac and under `~/Developer/yahyabedirhan/` on the VPS, and three other repos exist on the Mac but not in the VPS's `~/Developer/yahyabedirhan` [mac, vps]. Map repos by their `origin` URL, not by path.
 
