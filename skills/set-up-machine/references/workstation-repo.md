@@ -89,7 +89,7 @@ What each machine installs beyond the harnesses' configuration: skills, and anyt
 ```
 
 - **`skills`:** each entry has a `source`, a GitHub `owner/repo`, and an optional `skills` array of skill names in it. Without `skills`, the entry means every skill in the source, including one added to it later.
-- **`commands`:** each entry has a `name`, a `check` and an `install`, run with `sh -c` in the home folder. Write `check` so it exits 0 only when the thing is installed and current, since the skill runs `install` whenever it fails.
+- **`commands`:** each entry has a `name`, a `check` and an `install`. Run each as written, as a shell command in the home folder, never wrapped in `sh -c`, since the rule table's `shell-inline-command` row refuses that. Write `check` so it exits 0 only when the thing is installed and current, since the skill runs `install` whenever it fails.
 - **`target` and `os`:** optional arrays on any entry. `target` takes `local`, the machine the user sits at, and `remote`, a machine Inspect treats as remote or headless. `os` takes `macos` and `linux`. An entry applies when both match this machine; a field left out matches every machine. An entry that doesn't apply is an `n/a` line naming the field.
 - Both arrays are optional. Refuse the file, with a `gap` line and no installs from it, when it isn't valid JSON or an entry has an unknown key or misses a required one, since a guessed entry could install the wrong thing.
 
