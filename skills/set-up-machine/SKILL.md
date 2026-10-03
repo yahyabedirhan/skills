@@ -23,7 +23,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
    - `added`, `tightened` (a stricter entry added where it wins), `removed`, `updated` (an installed skill behind its source);
    - `present`, `wired` (the hook), `found` (the MCP tools a row matched);
-   - `stricter` (the machine is stricter than the table: kept), `extra` (neither the table's nor a personal permission's: kept), `gap` (what the harness can't express), `none` (no such feature);
+   - `stricter` (the machine is stricter than the table: kept), `extra` (neither the table's nor a personal permission's: kept), `ignored` (an installed skill `agents/installs.json` leaves out on purpose: kept, never installed or removed), `gap` (what the harness can't express), `none` (no such feature);
    - `personal` beside the mark of every entry a personal permission produced (`added, personal`; `present, personal`), so the user can tell those entries from the table's and never reads them as `extra`;
    - `n/a` (not applicable) for a personal permission whose tool this harness lacks, with why: nothing is written for it there.
 
