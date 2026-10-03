@@ -51,6 +51,13 @@ class ConfigurationTest(unittest.TestCase):
         target.write_text(first.replace('"auto_review"', '"user"'))
         self.assertTrue(any(status == "FAIL" and "approvals_reviewer" in text for status, text in config.audit(self.home, self.folder)))
 
+    def test_declared_preferences_are_not_applicable_without_codex(self):
+        self.source()
+        self.folder.rmdir()
+        self.assertEqual([status for status, _ in config.audit(self.home, self.folder)], ["n/a"])
+        self.folder.mkdir()
+        self.assertIn("FAIL", [status for status, _ in config.audit(self.home, self.folder)])
+
     def test_unrelated_comments_tables_profiles_hooks_and_newlines_preserved(self):
         text = '# A comment\r\nmodel = "example"\r\napproval_policy = \'never\' # keep comment\r\n\r\n[features]\r\nhooks = true\r\n[hooks.state."example"]\r\ntrusted_hash = "hash"\r\n'
         proposal = config.propose(text, {"approval_policy": "on-request", "approvals_reviewer": "user"})
