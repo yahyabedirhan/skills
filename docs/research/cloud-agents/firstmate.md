@@ -2,8 +2,8 @@
 
 Facts for [Research: the Treehouse creator's agent tools - Firstmate and related repositories (#75)](https://github.com/yahyabedirhan/skills/issues/75). That ticket is part of [Spec: research cloud agents: what agents on a server or in the cloud can do, and how to delegate to them (#45)](https://github.com/yahyabedirhan/skills/issues/45). Researched on 2026-09-29. It builds on two other files and doesn't repeat them:
 
-- [herdr-vps.md](herdr-vps.md): how the Mac reaches Herdr on the VPS.
-- [harness-capabilities.md](harness-capabilities.md): what each harness allows.
+- [herdr-vps.md](../herdr-vps.md): how the Mac reaches Herdr on the VPS.
+- [harness-capabilities.md](../harness-capabilities.md): what each harness allows.
 
 The main subject is [Firstmate](https://github.com/kunchenguid/firstmate) ("Talk to one agent. Ship with a crew."). I read its contract and its main scripts in full. Most attention goes to how it delegates work to agents that it doesn't run itself, local or remote. The author's other repositories get a short note each.
 
@@ -145,7 +145,7 @@ This is Firstmate's answer to "run agents on another machine". It is also the cl
   - It returns ssh's exit status unchanged.
 
   After bootstrap, commands run through a **job worker** that the account owns. On macOS this is a LaunchAgent, on Linux a plain worker. Commands don't run in the SSH process or in a pane ("The remote job worker").
-- **The PATH problem, solved once.** Remote jobs never run a login shell, so `~/.profile` and `~/.zshrc` don't apply. Instead, the worker builds `PATH` from what it finds on the filesystem: `~/.local/bin`, nvm default, asdf, mise, Nix, Homebrew, system ("Non-interactive tool contract"). [herdr-vps.md](herdr-vps.md) found the same gap on the VPS: `herdr` and `claude` were only on the `PATH` of the login shell.
+- **The PATH problem, solved once.** Remote jobs never run a login shell, so `~/.profile` and `~/.zshrc` don't apply. Instead, the worker builds `PATH` from what it finds on the filesystem: `~/.local/bin`, nvm default, asdf, mise, Nix, Homebrew, system ("Non-interactive tool contract"). [herdr-vps.md](../herdr-vps.md) found the same gap on the VPS: `herdr` and `claude` were only on the `PATH` of the login shell.
 - **Readiness doctor.** `bin/fm-remote-doctor.sh` is "the single owner of what ready means". It works like this ("Readiness, repair, and the human steps", "The seed's readiness gate"):
   - By default it only reads.
   - It tags each gap `fixable:` or `human:`, with an `action:` line.
@@ -200,7 +200,7 @@ This repo's path today (see `skills/`):
 | Starting a session | `fm-spawn.sh`: new tab, `treehouse get` inside the pane, harness launched with the brief | `handover-to-herdr`: `herdr worktree open` / `tab create`, `herdr agent start`, one-line `agent prompt` | **Borrow** the trust pre-registration | Replaces handover-to-herdr's "ask the maintainer to accept the trust dialog" step. `bin/fm-claude-trust.sh` writes `hasTrustDialogAccepted` in `~/.claude.json`. It's a config write, so it needs the maintainer's go-ahead first |
 | Status back | Append-only `state/<id>.status` with fixed verbs. A decision is open until a `resolved` line with its key arrives | Sub-agent's final report. Herdr's `agent_status` for tabs | **Adopt** for off-Mac agents | A status file in the worktree (or `.scratch/`) that the Mac can read over `ssh`. It is the cheapest "see each other's state" for [#16](https://github.com/yahyabedirhan/skills/issues/16). Herdr's `idle/working/blocked/done` says whether the agent is busy, not what it needs |
 | Watching | Bash watcher that uses zero tokens, durable wake queue, Stop-hook re-arm, turn-end guard | Fire-and-forget. The orchestrator waits on sub-agent notifications | **Borrow the idea, leave the machinery** | `herdr agent wait <pane> --until done --until blocked` over SSH, plus the status file, gives most of it. Firstmate's watcher is ~3,200 lines of bash tied to its layout |
-| Answering | Durable inbox files + a constant doorbell line. The worker acknowledges by moving the file | `SendMessage` to sub-agents. `herdr agent prompt` (a paste) for tabs | **Borrow** for remote | Replaces pasting prompts over SSH. A paste has quoting problems in the remote shell ([herdr-vps.md](herdr-vps.md)) and gives no receipt |
+| Answering | Durable inbox files + a constant doorbell line. The worker acknowledges by moving the file | `SendMessage` to sub-agents. `herdr agent prompt` (a paste) for tabs | **Borrow** for remote | Replaces pasting prompts over SSH. A paste has quoting problems in the remote shell ([herdr-vps.md](../herdr-vps.md)) and gives no receipt |
 | Notifying | Chat. An OS alarm only for a stuck away supervisor. A `command:` channel for a phone | `osascript` at delivery and when blocked | **Leave** (ours already covers it). **Borrow** `command:` as the shape for a VPS notification | A VPS orchestrator could run a configured command instead of `osascript`. `osascript` doesn't exist on Linux |
 | Recovery / continue | Relaunch into the recorded worktree from the brief plus a progress note. A restart rebuilds the state from disk | Handoff document + new session | **Borrow** | [#15](https://github.com/yahyabedirhan/skills/issues/15) needs this rule: "The brief on disk is the instruction, not the harness session". Our handoff already plays that role for the orchestrator, but not for its delegates |
 | Results | One PR per ship task. Three delivery modes. The `no-mistakes` pipeline. Scout = report, never a PR | One commit per ticket, cherry-picked. One PR per effort. Research tickets write files | **Leave** | Our one PR per effort is deliberate. The scout/ship split already exists as research vs build tickets |
@@ -289,7 +289,7 @@ The backlog is a local sqlite database on the bot VM. This is the author's one d
 [treehouse](https://github.com/kunchenguid/treehouse), read at `c0992810` (v3.1.0, 2026-09-26). Already this repo's worktree tool (the **treehouse** skill). Two facts matter off the Mac:
 
 - It supports Linux.
-- Firstmate requires it on a remote host (`docs/remote-secondmates.md`). The VPS doesn't have it today ([herdr-vps.md](herdr-vps.md)).
+- Firstmate requires it on a remote host (`docs/remote-secondmates.md`). The VPS doesn't have it today ([herdr-vps.md](../herdr-vps.md)).
 
 Firstmate uses the plain `treehouse get` subshell for each task. It uses a durable `--lease` only for secondmate homes (`docs/architecture.md` "Optional secondmates"). **Adopt** on the VPS if an orchestrator runs there (already an open question in herdr-vps.md).
 
@@ -341,7 +341,7 @@ The synthesis ([#74](https://github.com/yahyabedirhan/skills/issues/74)) can sco
 ## Open questions
 
 - TODO: Is a Firstmate primary run on a Linux server, attached over SSH, a supported shape? No document covers it (only remote secondmates). Needs a trial.
-- TODO: Would a remote secondmate on the VPS work with this setup's Herdr 0.9.0? Firstmate asks for Herdr protocol 14 or newer, and 0.8.0 for its default presentation (`docs/herdr-backend.md`). So the version looks fine. But the VPS lacks `jq`, `treehouse` and `tasks-axi` ([herdr-vps.md](herdr-vps.md)), and the doctor requires them. Proposed experiment (needs installs and the maintainer's go-ahead):
+- TODO: Would a remote secondmate on the VPS work with this setup's Herdr 0.9.0? Firstmate asks for Herdr protocol 14 or newer, and 0.8.0 for its default presentation (`docs/herdr-backend.md`). So the version looks fine. But the VPS lacks `jq`, `treehouse` and `tasks-axi` ([herdr-vps.md](../herdr-vps.md)), and the doctor requires them. Proposed experiment (needs installs and the maintainer's go-ahead):
   1. In a throwaway account on the VPS, clone Firstmate.
   2. Run `bin/fm-remote-doctor.sh` read-only.
   3. Record its `fixable`/`human` gaps. Nothing else.
@@ -353,7 +353,7 @@ The synthesis ([#74](https://github.com/yahyabedirhan/skills/issues/74)) can sco
 
   It needs `no-mistakes`, `gh-axi`, `chrome-devtools-axi`, `tasks-axi` and `quota-axi` installed. Its workers run with bypassed permissions. They strip AI trailers unless `config/keep-ai-trailers` is set. Both conflict with this repo's rules.
 - TODO: Does a Grok Bot or a Cursor cloud agent fit here? Both need sign-ups. They are out of scope for this effort and left for the other-providers ticket.
-- Unverified: how Firstmate's Claude workers, launched with `--dangerously-skip-permissions`, interact with the maintainer's global deny rules ([harness-capabilities.md](harness-capabilities.md)). This file doesn't settle it.
+- Unverified: how Firstmate's Claude workers, launched with `--dangerously-skip-permissions`, interact with the maintainer's global deny rules ([harness-capabilities.md](../harness-capabilities.md)). This file doesn't settle it.
 - Unverified: whether `chrome-devtools-axi` runs headless on the VPS.
 
 ---

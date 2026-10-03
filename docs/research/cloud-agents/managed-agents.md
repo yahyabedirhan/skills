@@ -7,7 +7,7 @@ Facts for [Research: Claude Code cloud sessions tested from inside one (#78)](ht
 
 This page explains what Managed Agents is and how it is different. It also asks if Managed Agents helps a maintainer who wants to delegate coding efforts off the Mac. (An effort is one unit of planned work that ends in a pull request.) Researched 2026-09-29 from inside a Claude Code cloud session (Claude Code 2.1.285).
 
-It builds on [Claude Code in the cloud](cloud-agents-claude-code.md), which covers the Claude Code side in detail. This page doesn't repeat it.
+It builds on [Claude Code in the cloud](claude-code.md), which covers the Claude Code side in detail. This page doesn't repeat it.
 
 Evidence tags:
 
@@ -125,7 +125,7 @@ Create endpoints 300 per minute, read endpoints 1,200 per minute per organizatio
 | **Start on a schedule or hook** | Scheduled deployments (cron with timezone, minute granularity) plus a manual `run` endpoint [doc ma:scheduled-deployments] | Routines: a schedule (hourly minimum), GitHub events, or `POST …/v1/claude_code/routines/<id>/fire` with a token per routine. The call returns a session ID and URL [doc routines-fire; doc cc:routines] |
 | **Steer** | `POST /v1/sessions/{id}/events` with `user.message`. `user.interrupt` stops a turn. `user.tool_confirmation` answers `always_ask` tools. `system.message` adds guidance. While the session is idle, you can replace `tools` and `mcp_servers` [doc ma:events-and-streaming; ma:session-operations] | Type in the session UI. `claude -p "msg" --cloud <id>` posts one message [doc cc:cloud, "Send follow-ups from the CLI"] |
 | **Watch live** | SSE at `GET /v1/sessions/{id}/events/stream`. Streams per thread for multiagent. Optional token deltas [doc ma:events-and-streaming, "Event deltas"]. `session.status_idle` carries a `stop_reason` (`end_turn`, `requires_action`, `budget_reached`) | claude.ai/code, mobile, Desktop. No documented terminal stream [doc cc:cloud] |
-| **Notify** | Webhooks for session, vault and agent events (`session.status_idled`, `session.status_terminated`, `session.budget_reached` …). Up to three attempts. Not a durable log [doc ma:webhooks, "Delivery behavior"] | Desktop notifications for projects. Phone push for Remote Control. Plain cloud sessions: unverified [doc cc:projects; see cloud-agents-claude-code.md §9] |
+| **Notify** | Webhooks for session, vault and agent events (`session.status_idled`, `session.status_terminated`, `session.budget_reached` …). Up to three attempts. Not a durable log [doc ma:webhooks, "Delivery behavior"] | Desktop notifications for projects. Phone push for Remote Control. Plain cloud sessions: unverified [doc cc:projects; see claude-code.md §9] |
 | **Read back** | `GET /v1/sessions/{id}/events` lists the full persisted history. `session.usage` events carry the cumulative cost. `GET /v1/files?scope_id=<session>` lists outputs [doc ma:sessions; ma:files] | `claude --teleport <id>` copies the conversation locally. Otherwise, the UI and GitHub (branch, PR, `Claude-Session` trailer) [doc cc:cloud] |
 | **Stop / clean up** | Archive (read-only), delete (removes events and sandbox) [doc ma:session-operations] | Archive in the UI. The VM is reclaimed after idle [doc cc:cloud] |
 | **Cap spend** | `budget.max_list_cost` per session. It is a hard ceiling at list price, and the session pauses at `budget_reached` [doc ma:sessions, "Set a session budget"] | Plan limits, usage credits [doc cc:costs] |
@@ -174,7 +174,7 @@ The setup:
 
 **What Managed Agents would add:**
 
-- A real API to start, stream and read back sessions from a script, and to cap their cost, with webhooks. Claude Code has no documented way to read a cloud session's transcript from outside [cloud-agents-claude-code.md §9].
+- A real API to start, stream and read back sessions from a script, and to cap their cost, with webhooks. Claude Code has no documented way to read a cloud session's transcript from outside [claude-code.md §9].
 - **A self-hosted sandbox on the VPS.** This works on any API account and needs only outbound HTTPS. It is the only Anthropic-orchestrated way to run sessions on the VPS from an individual plan. Claude Code's self-hosted environments are "public beta on Team and Enterprise plans" [doc cc:self-hosted, "Availability and limitations"].
 - 30-day sandbox checkpoints on idle, instead of a VM reclaimed after an unstated idle period [doc ma:events-and-streaming; doc cc:cloud, "Environment expired"].
 - Hard per-session budgets.
@@ -229,7 +229,7 @@ Then run one self-hosted experiment with a budget cap, as above, before you port
 | **Harness** | Anthropic-hosted agent loop. Tools run in the sandbox [doc ma:self-hosted-sandboxes] | Claude Code CLI running inside the VM [probe] |
 | **VM / sandbox** | Container, Ubuntu 24.04, up to 8 GB RAM / 10 GB disk; `packages` per environment [doc ma:cloud-sandboxes-reference; ma:environments] | VM, Ubuntu 24.04, ~4 vCPU / 16 GB / 30 GB; setup script, cached snapshot [doc cc:env] |
 | **Network** | `unrestricted` (API default) or `limited` allowlist; web tools filtered per tool [doc ma:environments] | None / Trusted (default) / Full / Custom; GitHub, connectors, Anthropic API always reachable [doc cc:env] |
-| **GitHub** | `github_repository` resource with your token; GitHub MCP for PRs; no git proxy; not on self-hosted [doc ma:github; ma:self-hosted-sandboxes] | GitHub App or `/web-setup`. A git proxy keeps the token out. It pushes to the checked-out branch: its own `claude/…` or a new one it names. GraphQL blocked. Create PR [doc cc:env; cc:cloud; probe, see [cloud-agents-session-probe.md §4](cloud-agents-session-probe.md#4-github-proxy)] |
+| **GitHub** | `github_repository` resource with your token; GitHub MCP for PRs; no git proxy; not on self-hosted [doc ma:github; ma:self-hosted-sandboxes] | GitHub App or `/web-setup`. A git proxy keeps the token out. It pushes to the checked-out branch: its own `claude/…` or a new one it names. GraphQL blocked. Create PR [doc cc:env; cc:cloud; probe, see [session-probe.md §4](session-probe.md#4-github-proxy)] |
 | **Skills / instructions** | One `system` string; uploaded or Anthropic skills; repo `.claude/skills` on cloud only; no CLAUDE.md [doc ma:migration; ma:skills] | Repo `CLAUDE.md`, `.claude/` skills, agents, rules; claude.ai account skills; hooks with one repo [doc cc:env] |
 | **Sub-agents** | Multiagent coordinator and threads in one sandbox [doc ma:multiagent-orchestration] | Agent tool subagents; projects for parallel threads on separate VMs [doc cc:cloud; cc:projects] |
 | **Persistence** | History until deleted. Sandbox checkpointed on idle, kept 30 days. Memory stores across sessions. Outputs via Files API [doc ma:events-and-streaming; ma:memory; ma:files] | Conversation on claude.ai. VM reclaimed after idle: files lost unless pushed. Environment cache ~7 days [doc cc:cloud; cc:env] |
@@ -257,7 +257,7 @@ All on 2026-09-29, inside this Claude Code cloud session.
 
 | # | Where | Command or action | What it changed |
 |---|---|---|---|
-| 1 | Cloud VM | Read `.scratch/cloud-session/brief.md` and `docs/research/cloud-agents-claude-code.md` | Nothing |
+| 1 | Cloud VM | Read `.scratch/cloud-session/brief.md` and `docs/research/cloud-agents/claude-code.md` | Nothing |
 | 2 | Cloud VM → platform.claude.com | `curl -sS https://platform.claude.com/docs/en/managed-agents/<page>.md` for environments, cloud-sandboxes-reference, self-hosted-sandboxes, sessions and overview. **All returned 200 through the session proxy**. So WebFetch wasn't needed: `platform.claude.com` is on the Trusted list [doc cc:env, "Default allowed domains"] | Files in `.scratch/cloud-session/ma/` (ignored by git) |
 | 3 | Cloud VM → platform.claude.com | `curl` of `llms.txt`, then the quickstart, github, files, agent-setup, tools, skills, session-operations, events-and-streaming, reference, scheduled-deployments, webhooks, budgets, multiagent-orchestration, permission-policies, self-hosted-sandboxes-security, memory, onboarding, vaults and migration pages, `about-claude/pricing.md` and `api/claude-code/routines-fire.md` (all 200) | Same scratch folder |
 | 4 | Cloud VM → code.claude.com | `curl` of the `.md` form of claude-code-on-the-web, cloud-environments, self-hosted-environments, routines and costs (200) | Same scratch folder |

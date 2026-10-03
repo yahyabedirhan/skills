@@ -2,7 +2,7 @@
 
 Facts for [Research: what an agent on the VPS can do compared with the Mac (#71)](https://github.com/yahyabedirhan/skills/issues/71), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45). Researched 2026-09-29.
 
-This file extends [Herdr across the Mac and the VPS](herdr-vps.md) and doesn't repeat it. That file has the machine model, the SSH command reference, the safe-handover checks and the VPS-to-Mac options. The harness facts behind the environment section are in [What each harness can and can't do](harness-capabilities.md).
+This file extends [Herdr across the Mac and the VPS](../herdr-vps.md) and doesn't repeat it. That file has the machine model, the SSH command reference, the safe-handover checks and the VPS-to-Mac options. The harness facts behind the environment section are in [What each harness can and can't do](../harness-capabilities.md).
 
 Evidence tags:
 
@@ -30,13 +30,13 @@ set-up-machine no longer has a plan/apply script. Now the agent reads one refere
 
 | Capability | Mac | VPS today | What closes the gap |
 |---|---|---|---|
-| Machine | macOS 26.5, arm64, 11 cores, 18 GB [mac] | Ubuntu 26.04 LTS x86_64 on a small Hetzner instance: 2 vCPU, 3.8 GB RAM (about 2.4 GB available), 26 GB disk free [vps] | [VPS sizing](cloud-agents-vps-sizing.md) (#72) covers the size. |
+| Machine | macOS 26.5, arm64, 11 cores, 18 GB [mac] | Ubuntu 26.04 LTS x86_64 on a small Hetzner instance: 2 vCPU, 3.8 GB RAM (about 2.4 GB available), 26 GB disk free [vps] | [VPS sizing](vps-sizing.md) (#72) covers the size. |
 | Headless browser | Google Chrome and Safari installed. Playwright browser cache present [mac] | **Can't run one.** Playwright's `chromium_headless_shell-1243` is in the cache (266 MB). But its binary is missing 15 shared libraries (`libnss3`, `libatk-1.0`, `libgbm`, `libX11`, `libasound`, …) [vps]. No Chrome, Chromium, Firefox or Xvfb. `apt` offers `chromium-browser` only as a snap shim [vps]. | Two options. One: `npx playwright install-deps chromium` (apt as root, [Playwright: browsers](https://playwright.dev/docs/browsers#install-system-dependencies)). Two: run the browser in Docker, which the user can already use. `mcr.microsoft.com/playwright:<version>-resolute` is the Ubuntu 26.04 image. Run it with `--init --ipc=host` ([Playwright: Docker](https://playwright.dev/docs/docker)). Both are installs, so both are proposed experiments. |
 | Desktop browser / browser extension | Chrome. Claude Code can drive it through the Claude in Chrome extension (unverified here beyond the tool being offered to Mac sessions) | None: no display (`DISPLAY` and `WAYLAND_DISPLAY` unset) [vps] | Not worth closing on a server. Use headless. |
 | Web access | Yes | **Yes**, outbound HTTPS works: `example.com`, `api.github.com`, `registry.npmjs.org` answer 200 [vps] | Nothing. |
 | Running scripts | bash, zsh, Python, Node, Docker, … [mac] | bash, Python 3.14, Node 24 with npm, pnpm and npx (nvm), Swift, Docker 29 (user is in the `docker` group), curl, wget, tmux [vps]. Missing: `jq`, `rg`, `fd`, Go, Rust, Bun, Deno [vps] | Install what a project needs. `jq` matters because skills and prior research parse Herdr's JSON with it. Python works as a stand-in (see the Exploration log). |
 | File system | Home folder, local disk | Own home folder, 26 GB free, open-file limit 1024 [vps]. The user is in the `sudo` group [vps], so root is possible with a password (not tried). | Nothing for normal work. |
-| Git and worktrees | git, `treehouse` for pooled worktrees [mac] | git 2.53, `user.name`/`email` set [vps]. Every repo is a main checkout with no extra worktrees [vps]. **No `treehouse`** [vps]. | Install treehouse (it needs Go, which is also missing). Or allow `git worktree add` / `herdr worktree create` on the VPS only (open since [herdr-vps.md](herdr-vps.md#open-questions)). |
+| Git and worktrees | git, `treehouse` for pooled worktrees [mac] | git 2.53, `user.name`/`email` set [vps]. Every repo is a main checkout with no extra worktrees [vps]. **No `treehouse`** [vps]. | Install treehouse (it needs Go, which is also missing). Or allow `git worktree add` / `herdr worktree create` on the VPS only (open since [herdr-vps.md](../herdr-vps.md#open-questions)). |
 | GitHub auth | `gh` logged in | **Yes**: `gh` 2.46 logged in, git protocol SSH. `ssh -T git@github.com` authenticates [vps] | Nothing. Pushes and pull requests work as on the Mac (not tried, because they are writes). |
 | Harnesses | Claude Code, Codex, opencode, Cursor CLI [mac] | **Claude Code only.** No `codex`, `opencode`, `cursor-agent`, `gemini`, `copilot`, `amp`, `grok` [vps] | Install the preferred agent, or fall back to `claude` (issue #13 already proposes that). |
 | Herdr | 0.9.0 client and server | 0.9.0 server, running, 5 workspaces, 1 idle Claude Code agent. No saved machines of its own [vps] | Upgrade both to 0.9.2 for `--machine` forwarding and `machine status` (see *Herdr across machines*). |
@@ -53,8 +53,8 @@ set-up-machine no longer has a plan/apply script. Now the agent reads one refere
 - A Playwright install downloaded the cached headless shell on 2026-09-23 (`~/.cache/ms-playwright/chromium_headless_shell-1243`, plus `ffmpeg-1011`) [vps]. That install added no system dependencies: `ldd` on `chrome-headless-shell` lists 15 libraries `not found` [vps]. Of the usual set, the package list shows only `libxkbcommon0` [vps].
 - Playwright's own fix is `npx playwright install-deps` or `install --with-deps`. Both run the system package manager, and the command "will attempt to become a root" ([Playwright: browsers](https://playwright.dev/docs/browsers#install-system-dependencies)). `--only-shell` limits the download to the headless shell, which is enough for headless use ([same page](https://playwright.dev/docs/browsers#chromium-headless-shell)).
 - The route without root is Docker. The user is in the `docker` group, and Docker 29 already runs two containers [vps]. Playwright's official image comes in an Ubuntu 26.04 variant (`:v<version>-resolute`). Playwright advises `--ipc=host` ("Without it, Chromium can run out of memory and crash") and `--init`. It can also serve browsers to a client on the host with `run-server --port 3000` ([Playwright: Docker](https://playwright.dev/docs/docker)). To pull the image is an install, so it's a proposed experiment.
-- Memory: about 2.4 GB is available [vps]. [VPS sizing](cloud-agents-vps-sizing.md) covers how many browsers fit next to agents.
-- **Correction to [VPS sizing](cloud-agents-vps-sizing.md):** its hardware table says that, with the cached headless shell, "a headless browser needs no install to try". The `ldd` check above shows that the shell can't start without the missing system libraries (or a container). So a try does need an install.
+- Memory: about 2.4 GB is available [vps]. [VPS sizing](vps-sizing.md) covers how many browsers fit next to agents.
+- **Correction to [VPS sizing](vps-sizing.md):** its hardware table says that, with the cached headless shell, "a headless browser needs no install to try". The `ldd` check above shows that the shell can't start without the missing system libraries (or a container). So a try does need an install.
 
 ### Web access, scripts and file system
 
@@ -219,7 +219,7 @@ Questions carried from the build tickets, with what this research adds:
 - **The preferred agent may be missing** (#13): only Claude Code is on the VPS [vps]. A handover falls back to `claude`.
 - **The toolchain may be missing** (#13): Swift is now present [vps] (#13 recorded it missing). `jq`, `treehouse`, Go and Rust aren't.
 - **Notifications from a VPS orchestrator** (#13): see *Notifications*. No route is proven yet.
-- **A gap in the rules**: `herdr --machine <vps> server stop` stops the remote server and every agent in it, from one local command. No row in set-up-machine's `rules.json` mentions `herdr`. A row at `ask` for `herdr … server stop` (and `workspace close --group`) would hold the line mechanically. Proposed below. The maintainer declined it on 2026-09-30 (D11 in [the synthesis](cloud-agents.md)): agents work freely across the Mac and the VPS.
+- **A gap in the rules**: `herdr --machine <vps> server stop` stops the remote server and every agent in it, from one local command. No row in set-up-machine's `rules.json` mentions `herdr`. A row at `ask` for `herdr … server stop` (and `workspace close --group`) would hold the line mechanically. Proposed below. The maintainer declined it on 2026-09-30 (D11 in [the synthesis](README.md)): agents work freely across the Mac and the VPS.
 
 ## Where the desktop app fits
 

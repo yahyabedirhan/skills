@@ -1,6 +1,6 @@
 # How much machine five parallel agents need
 
-This page holds the math behind decision [D4](cloud-agents.md#d4-resize-the-vps). We redid it on **2026-10-02**, after the maintainer tried the current VPS and set a budget. Where this page and [cloud-agents-vps-sizing.md](cloud-agents-vps-sizing.md) disagree, this page replaces that file's sizing rule. This page also adds per-core speed. That file and [cloud-agents-vps-providers.md](cloud-agents-vps-providers.md) left it out. Provider details, latency and the steps to switch stay in those files.
+This page holds the math behind decision [D4](README.md#d4-resize-the-vps). We redid it on **2026-10-02**, after the maintainer tried the current VPS and set a budget. Where this page and [vps-sizing.md](vps-sizing.md) disagree, this page replaces that file's sizing rule. This page also adds per-core speed. That file and [vps-providers.md](vps-providers.md) left it out. Provider details, latency and the steps to switch stay in those files.
 
 The evidence tags are the same as in the sizing file:
 
@@ -136,7 +136,7 @@ Price sources:
 - OVHcloud: its public order catalogue, `vps-2027-model{2,3,4}`, read 2026-10-02 [api].
 - Hetzner: the price feed as the sizing file tabulates it. We re-read the specs on 2026-10-02 [doc].
 
-The terms, the money-back guarantee and the steps to switch are in [cloud-agents-vps-providers.md](cloud-agents-vps-providers.md).
+The terms, the money-back guarantee and the steps to switch are in [vps-providers.md](vps-providers.md).
 
 ### $10-15 against about $25: what the extra $12 buys
 
@@ -225,7 +225,7 @@ Sources beyond sections 4 and 5:
 - netcup root servers G12: on the 8-core size, buyers report 1,817-2,100 single-core and about 10,900-11,000 multi-core. That is a little above section 4's ~10,000 estimate for RS 2000. The same thread reports one root server that arrived at 328 / 1,408, and the buyer returned it for a refund. So benchmark a new server in its first week [bench: [LowEndTalk thread](https://lowendtalk.com/discussion/212781/netcup-g12-rootserver-underperforming)].
 - RS 500 and RS 1000 multi-core: estimates (2 and 4 dedicated cores, scaled from those results). Lite 4: Lite 3's per-core result × 16 cores, discounted for scaling (estimate).
 - Lite prices: [netcup vServer Lite](https://www.netcup.com/en/server/vps-lite), 2026-10-02 (€5.86, €9.50, €16.66 and €30.86 including 19% VAT, for Lite 1-4) [doc]. 1-month prices for VPS 500 (€7.98) and RS 500 (€12.49), net: the maintainer read them on [netcup deals](https://www.netcup.com/en/deals) [user].
-- UpCloud Starter, Vultr and DigitalOcean: [cloud-agents-vps-providers.md](cloud-agents-vps-providers.md#2-the-providers-at-8-gb-and-16-gb) (prices of 2026-09-30). The Vultr and DigitalOcean CPU figures are for 2-core plans from the [benchmark gist](https://gist.github.com/derhuerst/4ef9a832e031bf82d6e640e2dd6b2d24).
+- UpCloud Starter, Vultr and DigitalOcean: [vps-providers.md](vps-providers.md#2-the-providers-at-8-gb-and-16-gb) (prices of 2026-09-30). The Vultr and DigitalOcean CPU figures are for 2-core plans from the [benchmark gist](https://gist.github.com/derhuerst/4ef9a832e031bf82d6e640e2dd6b2d24).
 - Left out:
   - Contabo, Hostinger and IONOS publish only long-term or upfront prices, with no plain monthly rate.
   - Scaleway costs more than $28 for 8 GB before storage and IPv4.
