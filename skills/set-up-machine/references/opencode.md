@@ -44,9 +44,9 @@ Tools are named `<server>_<tool>`, and that name is also the tool's `permission`
 - **Without one:** a matching row is a `gap`, and the hook refuses the matching tools of a deny row when they're called.
 - **`approver: "user"` rows:** `--auto` (also `--yolo` and `--dangerously-skip-permissions`) and the TUI's auto-approve toggle answer every `ask` for the user, and the plugin can't tell they're on. So the hook refuses these rows' calls in opencode, a `gap` line; a plain `opencode run` rejects an `ask` anyway.
 
-## Personal rows
+## Personal permissions
 
-A personal row (personal-repository.md) becomes `permission` patterns the way a table row of its kind does above, each marked `personal`. An `allow` row's patterns get `allow`, written with the other allow entries first, so the table's ask and deny entries after them win and a personal `allow` never loosens a table row.
+A personal permission (workstation-repo.md) becomes `permission` patterns the way a table row of its kind does above, each marked `personal`. An `allow` row's patterns get `allow`, written with the other allow entries first, so the table's ask and deny entries after them win and a personal `allow` never loosens a table row.
 
 - **Worked example,** an `allow` command row on `<program>` with subcommand `<word>`: `"bash": {"<program> <word> *": "allow", "/bin/<program> <word> *": "allow", "/usr/bin/<program> <word> *": "allow", …}`, before the deny patterns.
 - **Its tool exists** for a command row when one of its programs is on `PATH`, for a file row always, and for an MCP-tool row when its `server` regex matches a server in the `mcp` key; otherwise the row is `n/a` here. A matching MCP-tool row is still a `gap`, as above: an `allow` row then leaves the tools to opencode's own defaults.
