@@ -23,7 +23,7 @@ what no harness can catch for it, which every harness's audit names. An `ask` ro
 carry `approver: "user"`: each call needs the user's own approval, so the hook refuses
 it where the harness won't ask the user.
 
-A personal repository's permissions file holds rows of the same format, loaded with
+A workstation repo's permissions file holds rows of the same format, loaded with
 `personal=True`: they may also take the level `allow`, which only the harnesses' native
 entries carry out, and which the generic table refuses.
 """
@@ -86,7 +86,7 @@ class Rule:
 
 
 def load(path: Path = DEFAULT_TABLE, personal: bool = False) -> list:
-    """The rows of a rule table, or with `personal` of a personal repository's permissions file."""
+    """The rows of a rule table, or with `personal` of a workstation repo's permissions file."""
     try:
         data = json.loads(Path(path).read_text())
     except (OSError, json.JSONDecodeError) as exc:
@@ -117,7 +117,7 @@ def _parse_row(row: dict, where: str, levels: tuple = LEVELS) -> Rule:
         if not isinstance(row[key], str):
             raise RuleTableError(f"{where}: {key} must be a string")
     if row["level"] not in levels:
-        only = " (`allow` is for a personal repository's rows only)" if row["level"] in PERSONAL_LEVELS else ""
+        only = " (`allow` is for a workstation repo's rows only)" if row["level"] in PERSONAL_LEVELS else ""
         raise RuleTableError(f"{where}: level must be one of {', '.join(levels)}{only}")
     if not isinstance(row["match"], dict):
         raise RuleTableError(f"{where}: match must be an object")

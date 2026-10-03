@@ -12,10 +12,10 @@ checks it against the rule table, and answers in the harness's own format:
   hook says nothing for them: the harness's native ask entries do the asking. A row
   with `approver: "user"` is refused instead when the call shows the harness won't
   ask the user, such as Claude Code in bypassPermissions mode;
-- **allow**, a personal row's level: the verdict names them for verify too, and the
+- **allow**, a personal permission's level: the verdict names them for verify too, and the
   hook says nothing, so the harness's native allow entries let the call run.
 
-The rows are the rule table's, plus the personal rows of the repository that
+The rows are the rule table's, plus the personal permissions of the repository that
 `~/.config/agents/source.md` names (personal.py).
 
 Each harness has a reader (its payload -> ToolCall) and a writer (the denials
@@ -458,7 +458,7 @@ def main(argv=None, stdin=None, stdout=None, now=None) -> int:
     try:
         table = table + personal.permissions(Path.home(), table)
     except Exception as exc:
-        print(f"set-up-machine hook: personal rows skipped: {exc}", file=sys.stderr)
+        print(f"set-up-machine hook: personal permissions skipped: {exc}", file=sys.stderr)
     try:
         verdict = decide(call, table, Path.home())
     except (ValueError, OSError) as exc:

@@ -97,7 +97,7 @@ class BadRowsTest(unittest.TestCase):
 
 
 class PersonalRowsTest(unittest.TestCase):
-    """A personal repository's permissions file: the rule table's rows, plus a plain `allow` level."""
+    """A workstation repo's permissions file: the rule table's rows, plus a plain `allow` level."""
 
     def load(self, rows, data=None):
         with tempfile.TemporaryDirectory() as d:
