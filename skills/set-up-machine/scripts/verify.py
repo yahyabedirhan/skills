@@ -19,7 +19,8 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   environment defaults and personal workflow (references/workstation-repo.md);
   and each personal permission's entries in Claude Code's settings, `present`, `n/a` when
   Claude Code lacks the row's tool, `gap` when the row has no native entry there.
-- config: declared agents/codex.toml preferences match persisted defaults;
+- config: declared agents/codex.toml preferences match persisted defaults, or `n/a`
+  when Codex isn't installed (no codex on PATH and no config home);
   isolated installed-parser probes check support, while effective overrides and
   managed constraints remain explicit gaps. --codex-home selects the same folder
   for configuration, rules and hooks. The real home honors CODEX_HOME privately;
