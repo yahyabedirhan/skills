@@ -55,9 +55,9 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 - **Ask rows:** an answer of "Yes, don't ask again" writes an `allow` entry into the project's `.claude/settings.local.json`, and the user-level `ask` entry still wins over it, since ask is evaluated before allow.
 - **`approver: "user"` rows:** the [auto mode docs](https://code.claude.com/docs/en/auto-mode-config) say an ask rule is checked before the classifier and still prompts, and `dontAsk` denies every call that would prompt; the docs don't say what `bypassPermissions` does with an ask rule, or what a non-interactive `claude -p` run does. The hook reads `permission_mode` and refuses the row's calls in `auto`, `dontAsk` and `bypassPermissions`: a `gap` line for auto mode, to drop once a probe shows its ask entries reach the user, and one for `claude -p`.
 
-## Personal rows
+## Personal permissions
 
-A personal row (personal-repository.md) becomes entries the way a table row of its kind does above, in the same lists, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does.
+A personal permission (workstation-repo.md) becomes entries the way a table row of its kind does above, in the same lists, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does.
 
 - **Worked example,** an `allow` MCP-tool row with `server` `<server>` and `tool` `^read_`: each tool of the listing above that it matches becomes an exact entry in `allow`, `mcp__<server>__read_<name>`, marked `added, personal`. With no match in the listing, the row is `n/a` here, "no tool it matches in Claude Code", and nothing is written.
 - **Its tool exists** for a command row when one of its programs is on `PATH`, for an MCP-tool row when the listing above has a tool it matches, and for a file row always.

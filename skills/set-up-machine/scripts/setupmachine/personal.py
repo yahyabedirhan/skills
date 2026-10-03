@@ -1,6 +1,6 @@
-"""The personal repository, found through the pointer, against the shared file made from it.
+"""The workstation repo, found through the pointer, against the shared file made from it.
 
-The pointer, `~/.config/agents/source.md`, names the person's personal repository and where
+The pointer, `~/.config/agents/source.md`, names the person's workstation repo and where
 it is cloned, or says there is none:
 
     - Repository: `<owner>/<repo>`      or      - Repository: none
@@ -11,9 +11,9 @@ and Tool columns are read; any other column is notes) and a `## Personal workflo
 The shared global instructions file, `~/.config/agents/AGENTS.md`, should carry those Tool
 values (`none` for a role the repository leaves out) and that workflow section's text.
 
-Its `agents/permissions.json` holds personal rows in the rule table's format, which may
+Its `agents/permissions.json` holds personal permissions in the rule table's format, which may
 also take the level `allow`; `permissions` loads them for the hook and the verify script.
-references/personal-repository.md is the layout for agents; this module only reads it.
+references/workstation-repo.md is the layout for agents; this module only reads it.
 """
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ def check(home: Path) -> list:
     except PersonalError as exc:
         return [("FAIL", str(exc))]
     if not pointer.repository:
-        return [("none", f"no personal repository (the pointer at {home / POINTER} says none)")]
+        return [("none", f"no workstation repo (the pointer at {home / POINTER} says none)")]
     instructions_path = pointer.clone / INSTRUCTIONS
     shared_path = home / SHARED
     try:
@@ -85,7 +85,7 @@ def check(home: Path) -> list:
 
 
 def permissions(home: Path, table: list) -> list:
-    """The personal rows, as Rules, from the repository the pointer names.
+    """The personal permissions, as Rules, from the repository the pointer names.
 
     No rows when the pointer is missing, malformed or says none (`check` reports those), or
     when the repository has no permissions file. A malformed row, or one reusing an id of
