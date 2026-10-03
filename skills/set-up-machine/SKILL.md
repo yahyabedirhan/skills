@@ -36,7 +36,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
 6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries. For Codex, distinguish persisted defaults from effective overrides and state how subsequent sessions pick up changes.
 
-   Run `python3 <this skill>/scripts/verify.py` (Python 3.9+, standard library only; it writes nothing). It passes when it prints `rules ok`, a `hook wired` line for every harness found, a `personal ok` or `personal none` line and no `personal FAIL` line, every `codex differs` line is a row codex.md says gets no rule, and declared Codex defaults match without a `config FAIL` line. Report `config gap` and `config override` lines separately; they limit what the audit proves.
+   Run `python3 <this skill>/scripts/verify.py` (Python 3.9+, standard library only; it writes nothing). It passes when it prints `rules ok`, a `hook wired` line for every harness found, a `personal ok` or `personal none` line and no `personal FAIL` line, every `codex differs` line is a row codex.md says gets no rule, and declared Codex defaults match without a `config FAIL` line, or a `config n/a` line says Codex isn't installed. Report `config gap` and `config override` lines separately; they limit what the audit proves.
 
 ## Rule table
 
