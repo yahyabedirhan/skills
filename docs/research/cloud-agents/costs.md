@@ -1,11 +1,11 @@
 # What hosted coding agents cost, and which tickets to send where
 
-This page gives facts and estimates for [Research: cost efficiency of hosted agent providers (#87)](https://github.com/yahyabedirhan/skills/issues/87), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45). It answers the money side of decision [D7](cloud-agents.md#d7-which-hosted-agent-if-any-for-single-ticket-delegation). Other pages say what each service can do, and this page doesn't repeat them:
+This page gives facts and estimates for [Research: cost efficiency of hosted agent providers (#87)](https://github.com/yahyabedirhan/skills/issues/87), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45). It answers the money side of decision [D7](README.md#d7-which-hosted-agent-if-any-for-single-ticket-delegation). Other pages say what each service can do, and this page doesn't repeat them:
 
-- [cloud-agents-other-providers.md](cloud-agents-other-providers.md): Codex, Cursor, Copilot, Jules, Devin, Amp, Factory, OpenHands.
-- [cloud-agents-claude-code.md](cloud-agents-claude-code.md): Claude Code's cloud.
-- [cloud-agents-managed-agents.md](cloud-agents-managed-agents.md): Managed Agents.
-- [cloud-agents-vps-sizing.md](cloud-agents-vps-sizing.md): machine prices.
+- [other-providers.md](other-providers.md): Codex, Cursor, Copilot, Jules, Devin, Amp, Factory, OpenHands.
+- [claude-code.md](claude-code.md): Claude Code's cloud.
+- [managed-agents.md](managed-agents.md): Managed Agents.
+- [vps-sizing.md](vps-sizing.md): machine prices.
 
 This research read every price on **2026-09-30** from the vendor's own pricing or docs page, linked inline. It signed up for nothing, paid for nothing and ran nothing in any provider's cloud. Prices are in USD before tax unless marked. Hetzner prices are in EUR net of VAT.
 
@@ -39,7 +39,7 @@ Evidence tags:
 |---|---|---|---|---|---|---|
 | **Claude Code cloud sessions** | Pro $20/month ($17 annual); Max 5x $100; Max 20x $200 | Plan usage (tokens, unpublished allowance) | Tokens, like a local session. No VM charge | Five-hour session window and weekly limit, shared with chat and local Claude Code | Usage credits at API rates, or wait | [pricing](https://claude.com/pricing), [cloud docs](https://code.claude.com/docs/en/claude-code-on-the-web) |
 | **Claude Code routines** | Same plans | Plan usage | Tokens | Hourly start caps (below). Routine threads stop at the plan limit | Usage credits, or the service rejects runs | [routines](https://code.claude.com/docs/en/routines) |
-| **Claude Code on the VPS** | Plan + VPS €5.99/month (CX23) | Plan usage + fixed server | Tokens | Plan windows; VPS RAM | Usage credits | [vps-sizing](cloud-agents-vps-sizing.md) |
+| **Claude Code on the VPS** | Plan + VPS €5.99/month (CX23) | Plan usage + fixed server | Tokens | Plan windows; VPS RAM | Usage credits | [vps-sizing](vps-sizing.md) |
 | **Codex cloud** | ChatGPT Plus $20/month; Pro $100, $200 or $500 | Plan allowance, then ChatGPT credits | Tokens, converted at credit rates | Five-hour and weekly limits (Pro: no five-hour limit) | Buy credits | [Codex pricing](https://learn.chatgpt.com/docs/pricing) |
 | **Cursor Cloud Agents** | Pro $20/month; Pro Plus $60; Ultra $200 | Model API price | Tokens at the chosen model's list price | A spend limit you set at first use | On-demand usage at the same rates | [Cloud Agents billing](https://cursor.com/docs/cloud-agent), [models and pricing](https://cursor.com/docs/models-and-pricing) |
 | **Copilot cloud agent** | Copilot Pro $10/month (1,500 AI credits); Pro+ $39 (7,000); Max $100 (20,000) | AI credits (1 credit = $0.01) + Actions minutes | Tokens at model list price, plus runner minutes | 59 minutes per session. Monthly credit allowance | A dollar budget for extra credits | [plans](https://docs.github.com/en/copilot/get-started/plans), [individual billing](https://docs.github.com/en/copilot/concepts/billing-and-usage/individuals/billing) |
@@ -47,8 +47,8 @@ Evidence tags:
 | **Devin** | Free (limited); Pro $20/month; Max $200 | Daily and weekly quota, then on-demand credits (dollars) | Quota share, not published per session | Pro daily and weekly; Max weekly only | Prepaid on-demand credits | [Devin self-serve plans](https://docs.devin.ai/admin/billing/self-serve) |
 | **Amp orbs** | Pay as you go; Individual tier $20/month | Orb minutes + model tokens | Minutes by orb size + tokens at API price, no markup | Idle pause after 5 or 20 minutes | Paid credits | [Amp pricing](https://ampcode.com/docs/pricing), [sizes and costs](https://ampcode.com/docs/orbs/sizes-and-costs) |
 | **Factory** | Pro $20/month; Plus $100 (managed Droid Computers); Max $200 | Rolling rate limits (5 h, 7 d, 30 d) | Standard credits for model use plus Droid Computer compute | Three rolling windows | Prepaid extra usage, $10 minimum | [Factory individual plans](https://docs.factory.ai/pricing/individuals) |
-| **OpenHands Cloud** | Free individual tier | Your own API key, or models at cost | Tokens | 10 conversations a day ([op §6.5](cloud-agents-other-providers.md#65-openhands-cloud)) | — | [OpenHands pricing](https://openhands.dev/pricing) |
-| *Managed Agents (reference)* | API account, separate from the plan | API tokens + $0.08 per running session-hour | Tokens + runtime | Per-session budget | — | [ma §5](cloud-agents-managed-agents.md#5-fit-for-this-maintainer) |
+| **OpenHands Cloud** | Free individual tier | Your own API key, or models at cost | Tokens | 10 conversations a day ([op §6.5](other-providers.md#65-openhands-cloud)) | — | [OpenHands pricing](https://openhands.dev/pricing) |
+| *Managed Agents (reference)* | API account, separate from the plan | API tokens + $0.08 per running session-hour | Tokens + runtime | Per-session budget | — | [ma §5](managed-agents.md#5-fit-for-this-maintainer) |
 
 ### Claude Code: cloud sessions, routines, projects
 
@@ -89,7 +89,7 @@ The rest is **unverified** and comes from press reports only [press [BleepingCom
 - The account needs a GitHub connection.
 - In some reports, the credit is **not usable for projects or routines**.
 
-First-hand, #78's cloud session drew on a promotional rate-limit pool. The window of that pool resets on 5 November at 08:00 UTC, which lines up with the reported expiry ([cc §11](cloud-agents-claude-code.md#11-cost-and-limits)). No source states how fast the credit burns: at API list rates or at some other rate.
+First-hand, #78's cloud session drew on a promotional rate-limit pool. The window of that pool resets on 5 November at 08:00 UTC, which lines up with the reported expiry ([cc §11](claude-code.md#11-cost-and-limits)). No source states how fast the credit burns: at API list rates or at some other rate.
 
 ### OpenAI Codex cloud
 
@@ -98,9 +98,9 @@ First-hand, #78's cloud session drew on a promotional rate-limit pool. The windo
   - "Local messages and cloud chats share your plan's usage allowance. Weekly limits may also apply."
   - Plus gets an estimated 15-150 local GPT-6 Sol messages per five hours (15-160 on GPT-6.1 Sol).
   - "Pro plans currently have no five-hour limit". "Cloud tasks may use more of your allowance than local messages". These are "not fixed message limits" [doc Codex pricing].
-  - The day before, the same page said that cloud chats on ChatGPT plans use GPT-5.6 Sol ([op §1](cloud-agents-other-providers.md#1-openai-codex-cloud)). That sentence is gone, and the page no longer names the cloud model.
+  - The day before, the same page said that cloud chats on ChatGPT plans use GPT-5.6 Sol ([op §1](other-providers.md#1-openai-codex-cloud)). That sentence is gone, and the page no longer names the cloud model.
 - **Credits** pay for use past the allowance: "ChatGPT Plus and Pro users who reach their usage limit can purchase additional credits". Rates per million tokens: GPT-5.6 Sol 100 input, 10 cached, 500 output credits. GPT-6 Sol: 50, 5, 250. GPT-6.1 Sol: 50, 2.5, 250. GPT-6 Luna: 2.5, 0.25, 12.5. There is no cache-write charge. "A typical GPT-5.6 Sol task may use 5-30 credits." Fast mode draws included usage at 2.5x [doc Codex pricing]. The dollar price of a credit on Plus and Pro is on a help-center page that refused automated fetches (HTTP 403). Press reported launch pricing as $40 per 1,000 credits, **unverified** [press [search results](https://www.morphllm.com/codex-pricing)].
-- **Best-of-N** (`--attempts 1-4`, [op §1](cloud-agents-other-providers.md#1-openai-codex-cloud)) multiplies usage by the number of attempts.
+- **Best-of-N** (`--attempts 1-4`, [op §1](other-providers.md#1-openai-codex-cloud)) multiplies usage by the number of attempts.
 
 ### Cursor Cloud Agents
 
@@ -117,7 +117,7 @@ First-hand, #78's cloud session drew on a promotional rate-limit pool. The windo
   - Composer 2.5: $0.50 input, $0.20 cache read, $2.50 output.
 - **Max Mode** no longer exists on current plans: "Current usage-based plans don't include Max Mode. On legacy request-based plans, Max Mode is billed at the model's API rate plus 20%" [doc usage and limits].
 - **Cursor's own yardstick:** "Daily Agent users: Typically $60–$100/mo total usage" and "Power users (multiple agents/automation): Often $200+/mo" [doc models and pricing].
-- Long-running agents (hours or days) need Ultra, Teams or Enterprise ([op §2](cloud-agents-other-providers.md#2-cursor-cloud-agents-and-the-agent-cli)).
+- Long-running agents (hours or days) need Ultra, Teams or Enterprise ([op §2](other-providers.md#2-cursor-cloud-agents-and-the-agent-cli)).
 
 ### GitHub Copilot cloud agent
 
@@ -126,13 +126,13 @@ First-hand, #78's cloud session drew on a promotional rate-limit pool. The windo
   - "Copilot cloud agent uses GitHub Actions minutes and AI credits. The AI credits consumed depend on the model used and the number of tokens processed during the session" [doc [about cloud agent, "usage costs"](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent)].
   - Token prices match the vendors' prices. Claude Opus 5.5: $4 / $0.20 cached / $5 cache write / $20. Sonnet 5.5: $2 / $0.20 / $2.50 / $10 [doc [models and pricing](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing)].
   - Auto model selection takes 10% off model costs on paid plans, also in the cloud agent [doc individual billing].
-  - Steering messages cost credits too ([op §3](cloud-agents-other-providers.md#3-github-copilot-cloud-agent-formerly-coding-agent)).
+  - Steering messages cost credits too ([op §3](other-providers.md#3-github-copilot-cloud-agent-formerly-coding-agent)).
 - **Past the allowance:** upgrade and pay the difference, or set a dollar budget for additional usage. "a $10 budget covers 1,000 AI credits" [doc individual billing].
 - **Actions minutes.**
   - Public repositories on standard runners: free.
   - Private repositories: the account's free minutes come first (GitHub Free 2,000 a month, GitHub Pro 3,000). After that, a Linux 2-core runner costs $0.006 a minute.
   - GitHub always charges for larger runners [doc [Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)].
-  - Private repos get a 2-CPU / 8 GB runner, and public ones get 4 CPU / 16 GB ([op §3](cloud-agents-other-providers.md#3-github-copilot-cloud-agent-formerly-coding-agent)).
+  - Private repos get a 2-CPU / 8 GB runner, and public ones get 4 CPU / 16 GB ([op §3](other-providers.md#3-github-copilot-cloud-agent-formerly-coding-agent)).
 - **Cap:** "Each Copilot cloud agent session has a maximum execution time of 59 minutes … If a task exceeds this limit, the session will time out and stop" [doc about cloud agent].
 
 ### Jules, Devin, Amp, Factory, OpenHands
@@ -184,7 +184,7 @@ Three ticket sizes, in tokens of one agent loop. Agent loops resend the conversa
 
 Where the sizes come from:
 
-- The Managed Agents research priced one sub-agent ticket on Opus 5.5 at 3 M cached reads, 0.3 M writes and 60 k output. That came to about $3.30, and a six-ticket effort to "plausibly $20-40" ([ma §5](cloud-agents-managed-agents.md#5-fit-for-this-maintainer)). The medium size here is slightly larger.
+- The Managed Agents research priced one sub-agent ticket on Opus 5.5 at 3 M cached reads, 0.3 M writes and 60 k output. That came to about $3.30, and a six-ticket effort to "plausibly $20-40" ([ma §5](managed-agents.md#5-fit-for-this-maintainer)). The medium size here is slightly larger.
 - Anthropic's average is $13 per active day, and under $30 for 90% of developers [doc costs]. That fits three medium tickets a day at about $4 each.
 - Cursor's "Daily Agent users: Typically $60–$100/mo" [doc Cursor models and pricing] fits a small or medium ticket most working days.
 - Codex's "A typical GPT-5.6 Sol task may use 5-30 credits" [doc Codex pricing] is below this page's small fix (about 28 credits, below). So either Codex's own typical task is smaller than these sizes, or GPT models use fewer tokens for the same work.
@@ -215,7 +215,7 @@ For Sonnet: $0.60, $2.40, $16.75.
 | **Amp orbs** | Orb `a1.medium`: about $0.14 / $0.36 / $1.80 (including the 5-minute idle tail), plus tokens | $1 / $4 / $28 at list, no markup | cheaper models at their list | $0 (Hobby) or $20 | Tokens dominate. The orb is under 10% |
 | **Factory** | $0 inside the rate limits | not published | Droid Core pool free | Pro $20; Plus $100 for hosted computers | Per-session cost unverified |
 | **OpenHands Cloud** | Tokens only, own key or at cost: $1 / $4 / $28 | same | any model | $0 | 10 conversations a day |
-| *Managed Agents* | $1.03 / $4.08 / $28.40 (tokens + $0.08 a running hour) | — | — | API account | For reference ([ma](cloud-agents-managed-agents.md)) |
+| *Managed Agents* | $1.03 / $4.08 / $28.40 (tokens + $0.08 a running hour) | — | — | API account | For reference ([ma](managed-agents.md)) |
 
 ### What the table says
 
@@ -230,11 +230,11 @@ For Sonnet: $0.60, $2.40, $16.75.
 
 | | Setup effort | Do the maintainer's skills carry over? | Review burden | Caps and failure modes that waste spend | Private repos |
 |---|---|---|---|---|---|
-| **Claude Code cloud** | Low: already used (#78). The setup script that installs the skills (E16) is the remaining step ([wf §2](cloud-agents-session-workflow.md#2-carrying-the-skills-and-global-instructions-into-cloud-sessions)) | Yes, once the setup script installs them. Skills in the VM's home load | Lowest: same harness, same skills and conventions as local work | Idle reclaim kills background sub-agents and shell work. The tokens are spent, and the work is lost unless pushed [doc cloud, "Environment expired"]. A permission prompt stalls an unattended run ([wf](cloud-agents-session-workflow.md)). Parallel sessions draw proportionately. Project threads resume into the next window on their own | Same vendor as the plan. The Claude GitHub App needs access to the repo |
-| **Claude Code on the VPS** | Medium: Herdr, skills, worktree tool, notifications (D2, D3) | Yes, unchanged | Lowest | No swap on CX23: running out of RAM kills agents ([siz](cloud-agents-vps-sizing.md)). Plan windows as above | Code stays on a machine the maintainer controls |
-| **Codex cloud** | Medium: a web-made environment per repo, internet off by default | Unverified. `AGENTS.md` yes ([op §1](cloud-agents-other-providers.md#1-openai-codex-cloud)) | Medium: no skills, so conventions only from `AGENTS.md` | Internet off by default makes dependency installs fail. Best-of-N multiplies usage. Fast mode costs 2.5x. No follow-up from a shell | Grants the ChatGPT GitHub connector repo access |
-| **Cursor Cloud Agents** | Medium: GitHub app, environment, spend limit, skills copied into `~/.cursor/skills` | Partly: `~/.cursor/skills` and account User Rules sync ([op §2](cloud-agents-other-providers.md#2-cursor-cloud-agents-and-the-agent-cli)) | Medium | Metered from the first token. Larger context windows cost more. Sub-agents can run a named third-party model at list price [doc usage and limits] | Privacy Mode blocks Fable models without a data-retention approval [doc models and pricing] |
-| **Copilot cloud agent** | Low: assign an issue. Put `copilot-setup-steps.yml` on the default branch for tools | No personal skills. `AGENTS.md` and `CLAUDE.md` yes ([op §3](cloud-agents-other-providers.md#3-github-copilot-cloud-agent-formerly-coding-agent)) | Medium: a draft PR per task, steering only on the web | **59-minute hard cap**: a timed-out session has spent its credits. Steering messages cost credits. A failed setup step still starts the agent without its tools | Actions minutes count (small). Private runners are half the size of public ones |
+| **Claude Code cloud** | Low: already used (#78). The setup script that installs the skills (E16) is the remaining step ([wf §2](session-workflow.md#2-carrying-the-skills-and-global-instructions-into-cloud-sessions)) | Yes, once the setup script installs them. Skills in the VM's home load | Lowest: same harness, same skills and conventions as local work | Idle reclaim kills background sub-agents and shell work. The tokens are spent, and the work is lost unless pushed [doc cloud, "Environment expired"]. A permission prompt stalls an unattended run ([wf](session-workflow.md)). Parallel sessions draw proportionately. Project threads resume into the next window on their own | Same vendor as the plan. The Claude GitHub App needs access to the repo |
+| **Claude Code on the VPS** | Medium: Herdr, skills, worktree tool, notifications (D2, D3) | Yes, unchanged | Lowest | No swap on CX23: running out of RAM kills agents ([siz](vps-sizing.md)). Plan windows as above | Code stays on a machine the maintainer controls |
+| **Codex cloud** | Medium: a web-made environment per repo, internet off by default | Unverified. `AGENTS.md` yes ([op §1](other-providers.md#1-openai-codex-cloud)) | Medium: no skills, so conventions only from `AGENTS.md` | Internet off by default makes dependency installs fail. Best-of-N multiplies usage. Fast mode costs 2.5x. No follow-up from a shell | Grants the ChatGPT GitHub connector repo access |
+| **Cursor Cloud Agents** | Medium: GitHub app, environment, spend limit, skills copied into `~/.cursor/skills` | Partly: `~/.cursor/skills` and account User Rules sync ([op §2](other-providers.md#2-cursor-cloud-agents-and-the-agent-cli)) | Medium | Metered from the first token. Larger context windows cost more. Sub-agents can run a named third-party model at list price [doc usage and limits] | Privacy Mode blocks Fable models without a data-retention approval [doc models and pricing] |
+| **Copilot cloud agent** | Low: assign an issue. Put `copilot-setup-steps.yml` on the default branch for tools | No personal skills. `AGENTS.md` and `CLAUDE.md` yes ([op §3](other-providers.md#3-github-copilot-cloud-agent-formerly-coding-agent)) | Medium: a draft PR per task, steering only on the web | **59-minute hard cap**: a timed-out session has spent its credits. Steering messages cost credits. A failed setup step still starts the agent without its tools | Actions minutes count (small). Private runners are half the size of public ones |
 | **Jules** | Low: Google sign-in and GitHub app | Unverified. `AGENTS.md` yes | Medium: plan approval step | Task count, not spend: a failed task still uses one of 15 | Grants Google repo access |
 | **Devin** | Medium | Only `SKILL.md` files in connected repos | Medium | Daily and weekly quotas | Grants Cognition repo access |
 | **Amp orbs** | Medium | Yes: Amp hosts personal skills and a global `AGENTS.md` | Medium | Amp bills the idle tail of 5-20 minutes. Opening a thread wakes the orb. **Ship** pushes to the base branch by default | Grants Amp repo access |
@@ -257,11 +257,11 @@ Three points matter more than price:
 |---|---|---|
 | Small, well-specified fix on a public repo | Claude Code cloud session now (promo credit). Copilot if held | $0 cash. Copilot's Actions minutes are free on public repos, and a small fix fits 59 minutes |
 | Medium feature that needs the repo's skills | Claude Code cloud session (after E16), else the VPS | Only place the skills run unchanged. No cash cost inside the plan |
-| Whole effort (orchestrator + ~5 tickets) | The VPS (or the Mac). One cloud session once E16 and E17 pass | Idle reclaim and one level of sub-agents make cloud orchestration fragile today ([D1](cloud-agents.md#d1-where-does-an-orchestrated-effort-run)) |
+| Whole effort (orchestrator + ~5 tickets) | The VPS (or the Mac). One cloud session once E16 and E17 pass | Idle reclaim and one level of sub-agents make cloud orchestration fragile today ([D1](README.md#d1-where-does-an-orchestrated-effort-run)) |
 | Long unattended work (over an hour) | The VPS | No idle reclaim and no 59-minute cap. Cursor's long-running agents need Ultra ($200) |
 | Private-repo tickets | The VPS or Claude Code cloud | No new vendor gets the code |
 | Recurring chores (nightly checks, dependency bumps) | Claude Code routines | Plan usage. Hourly start caps are far above need |
-| Browser or UI checks | Claude Code cloud (headless Chromium, allowlisted hosts) | Already there ([sp §1](cloud-agents-session-probe.md#1-headless-browser)) |
+| Browser or UI checks | Claude Code cloud (headless Chromium, allowlisted hosts) | Already there ([sp §1](session-probe.md#1-headless-browser)) |
 | A second opinion from another model family | Jules free tier, or Copilot with a GPT model | $0 or inside Copilot's credits. Don't subscribe for this alone |
 
 ### Which subscriptions to hold
@@ -275,11 +275,11 @@ Three points matter more than price:
   - **ChatGPT Plus for Codex.** It is a reasonable $20 if the maintainer wants ChatGPT anyway. But cloud chats take no follow-ups from a shell, and the skills don't load.
   - **Devin, Factory and Amp.** Each is another $20+ subscription or meter, for features that the Claude plan and the VPS already give.
   - **OpenHands.** It is free, but good models need a paid API key, and that is list-price metering again.
-  - **Managed Agents.** API billing comes on top of the plan, and the skills don't run there ([ma](cloud-agents-managed-agents.md)).
+  - **Managed Agents.** API billing comes on top of the plan, and the skills don't run there ([ma](managed-agents.md)).
 
 ### What to try first while the promo credit lasts
 
-Press reports say that the maintainer must claim the credit by 7 October and spend it by 4 November (unverified). The maintainer has already seen #78's session paid from it, per [D12](cloud-agents.md#d12-the-promo-credit-and-the-one-unused-cloud-session).
+Press reports say that the maintainer must claim the credit by 7 October and spend it by 4 November (unverified). The maintainer has already seen #78's session paid from it, per [D12](README.md#d12-the-promo-credit-and-the-one-unused-cloud-session).
 
 1. **Measure.** Before and after one medium cloud ticket, read claude.ai/settings/usage (credit balance). Also read `/usage` in a local session (plan windows). This gives the credit burn per ticket. After the credit ends, it gives the share of a window per ticket. Keep the figures private.
 2. **Send small and medium tickets on public repos** as cloud sessions with self-contained briefs. Check the PR quality and the review time.
@@ -309,7 +309,7 @@ All steps ran on 2026-09-30, on the Mac, in this ticket's worktree or the agent'
 
 | # | Where | Action | What it changed |
 |---|---|---|---|
-| 1 | Mac (worktree) | `gh issue view 87`. Read `cloud-agents-other-providers.md`, `cloud-agents-claude-code.md` §11, `cloud-agents-managed-agents.md`, `cloud-agents-vps-sizing.md`, and D7, D12 and the maintainer's answers in `cloud-agents.md` | Nothing |
+| 1 | Mac (worktree) | `gh issue view 87`. Read `other-providers.md`, `claude-code.md` §11, `managed-agents.md`, `vps-sizing.md`, and D7, D12 and the maintainer's answers in `README.md` | Nothing |
 | 2 | Mac (scratch) | `curl` of the Markdown form of Claude Code's costs, cloud, routines, projects and ultrareview pages; `platform.claude.com` pricing; Codex pricing, cloud and `llms-full.txt`; Cursor Cloud Agents, models and pricing, usage limits, help pricing, `llms.txt`; Devin self-serve plans; Factory individual plans | Copies in the scratch folder only |
 | 3 | Mac (scratch) | `curl` and text extraction of claude.com/pricing and the Claude help-center articles on the Pro and Max plans, usage limits, usage credits, bundles, limit resets and Claude Code with Pro or Max. Two old article URLs returned 404. The pages' links gave their current URLs | Scratch folder only |
 | 4 | Mac (scratch) | `curl` of GitHub docs article bodies: Copilot plans, individual billing, models and pricing, optimizing usage, about cloud agent, Actions billing | Scratch folder only |

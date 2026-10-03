@@ -606,31 +606,31 @@ footer .slide-inner { gap: 10px; }
       </figure>
 
       <ol class="day" aria-label="The day, stop by stop">
-        <li><span class="n" aria-hidden="true">1</span><span class="when">08:30, on the Mac</span><h3>Think it through with one agent</h3><p>Coffee, one thinking session, a spec and its tickets. Then a single line hands the whole effort over. <a class="src" href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="67">How</a></p></li>
-        <li><span class="n" aria-hidden="true">2</span><span class="when">09:15, on the VPS</span><h3>An orchestrator takes the wheel</h3><p>It starts in a Herdr tab on your server, after a quick <code>machine status</code> check, and runs its crew in the tabs beside it. <a class="src" href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="64">How</a></p></li>
-        <li><span class="n" aria-hidden="true">3</span><span class="when">10:00, in the cloud</span><h3>The crew fans out</h3><p>Self-contained tickets go to cloud sessions, each on its own fresh 15.7 GiB machine, all at once. Codex, Cursor or Copilot can take a ticket too. <span class="hedge">An agent-side start, a routine or <code>create_session</code>: untested (E11, E17)</span> <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="167">How</a></p></li>
-        <li><span class="n" aria-hidden="true">4</span><span class="when">13:30, on your phone</span><h3>A decision needs you</h3><p>Your phone buzzes over lunch. You read the question in the Claude app, answer in one line, and the crew carries on. <span class="hedge">From the VPS, <code>shipyard ping</code> reaches the Mac (tested 3 Oct); a phone route is untested (E5). A cloud session's own push was requested once; arrival unconfirmed (E19)</span> <a class="src" href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="86">How</a></p></li>
-        <li><span class="n" aria-hidden="true">5</span><span class="when">16:00, in the cloud</span><h3>GitHub wakes a routine</h3><p>A pull request opens and a routine fires on the event. Auto-fix watches the pull request and pushes fixes for failing checks and review comments. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="45">How</a></p></li>
-        <li><span class="n" aria-hidden="true">6</span><span class="when">18:30, back on the Mac</span><h3>A reviewed pull request is waiting</h3><p>Your Herdr window has shown every VPS agent's state all day. Each commit links back to the session that wrote it, and <code>--teleport</code> pulls a cloud session to your terminal if you want to take over. <a class="src" href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="80">How</a></p></li>
-        <li><span class="n" aria-hidden="true">7</span><span class="when">02:00, while you sleep</span><h3>The night shift</h3><p>A scheduled routine runs its nightly job while the VPS orchestrator keeps going. Breakfast comes with a queue of pull requests. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="216">How</a></p></li>
+        <li><span class="n" aria-hidden="true">1</span><span class="when">08:30, on the Mac</span><h3>Think it through with one agent</h3><p>Coffee, one thinking session, a spec and its tickets. Then a single line hands the whole effort over. <a class="src" href="delegation.md" data-md="delegation.md" data-line="67">How</a></p></li>
+        <li><span class="n" aria-hidden="true">2</span><span class="when">09:15, on the VPS</span><h3>An orchestrator takes the wheel</h3><p>It starts in a Herdr tab on your server, after a quick <code>machine status</code> check, and runs its crew in the tabs beside it. <a class="src" href="vps.md" data-md="vps.md" data-line="64">How</a></p></li>
+        <li><span class="n" aria-hidden="true">3</span><span class="when">10:00, in the cloud</span><h3>The crew fans out</h3><p>Self-contained tickets go to cloud sessions, each on its own fresh 15.7 GiB machine, all at once. Codex, Cursor or Copilot can take a ticket too. <span class="hedge">An agent-side start, a routine or <code>create_session</code>: untested (E11, E17)</span> <a class="src" href="claude-code.md" data-md="claude-code.md" data-line="167">How</a></p></li>
+        <li><span class="n" aria-hidden="true">4</span><span class="when">13:30, on your phone</span><h3>A decision needs you</h3><p>Your phone buzzes over lunch. You read the question in the Claude app, answer in one line, and the crew carries on. <span class="hedge">From the VPS, <code>shipyard ping</code> reaches the Mac (tested 3 Oct); a phone route is untested (E5). A cloud session's own push was requested once; arrival unconfirmed (E19)</span> <a class="src" href="delegation.md" data-md="delegation.md" data-line="86">How</a></p></li>
+        <li><span class="n" aria-hidden="true">5</span><span class="when">16:00, in the cloud</span><h3>GitHub wakes a routine</h3><p>A pull request opens and a routine fires on the event. Auto-fix watches the pull request and pushes fixes for failing checks and review comments. <a class="src" href="claude-code.md" data-md="claude-code.md" data-line="45">How</a></p></li>
+        <li><span class="n" aria-hidden="true">6</span><span class="when">18:30, back on the Mac</span><h3>A reviewed pull request is waiting</h3><p>Your Herdr window has shown every VPS agent's state all day. Each commit links back to the session that wrote it, and <code>--teleport</code> pulls a cloud session to your terminal if you want to take over. <a class="src" href="delegation.md" data-md="delegation.md" data-line="80">How</a></p></li>
+        <li><span class="n" aria-hidden="true">7</span><span class="when">02:00, while you sleep</span><h3>The night shift</h3><p>A scheduled routine runs its nightly job while the VPS orchestrator keeps going. Breakfast comes with a queue of pull requests. <a class="src" href="claude-code.md" data-md="claude-code.md" data-line="216">How</a></p></li>
       </ol>
     </div>
 
     <h3 class="sub-h">The edge of the possible</h3>
     <dl class="edge">
-      <div><dt>Parallel crews</dt><dd>A Claude Code project runs a coordinator with threads side by side, each on its own branch, each opening and auto-fixing its own pull request. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="167">Cloud file</a></dd></div>
-      <div><dt>Overnight runs</dt><dd>The VPS and the cloud don't sleep when the laptop does. A project thread that hits a usage limit waits and picks up again in the next window. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="216">Cloud file</a></dd></div>
-      <div><dt>Work that starts itself</dt><dd>A routine is a saved prompt that fires on a schedule, an API call or a GitHub event, with nobody at the keyboard. <a class="src" href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="123">Cloud file</a></dd></div>
-      <div><dt>Agents that talk across machines</dt><dd>With Remote Control on, a Mac session and a VPS or cloud session can message each other both ways, with no tunnel into your Mac. <code>claude -p … --cloud &lt;id&gt;</code> nudges a cloud session from any machine, and from inside a cloud session <code>list_sessions</code> reads every session's state. <span class="hedge">Messaging untested (E5)</span> <a class="src" href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="80">Delegation file</a></dd></div>
-      <div><dt>A fleet at a glance</dt><dd>Herdr on the Mac keeps every VPS agent's state live, and a project's overview sorts threads into Working, Waiting on you and Ready for review. Firstmate adds a status file per worker, so nothing is lost when an agent restarts. <a class="src" href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="16">Firstmate file</a></dd></div>
+      <div><dt>Parallel crews</dt><dd>A Claude Code project runs a coordinator with threads side by side, each on its own branch, each opening and auto-fixing its own pull request. <a class="src" href="claude-code.md" data-md="claude-code.md" data-line="167">Cloud file</a></dd></div>
+      <div><dt>Overnight runs</dt><dd>The VPS and the cloud don't sleep when the laptop does. A project thread that hits a usage limit waits and picks up again in the next window. <a class="src" href="claude-code.md" data-md="claude-code.md" data-line="216">Cloud file</a></dd></div>
+      <div><dt>Work that starts itself</dt><dd>A routine is a saved prompt that fires on a schedule, an API call or a GitHub event, with nobody at the keyboard. <a class="src" href="claude-code.md" data-md="claude-code.md" data-line="123">Cloud file</a></dd></div>
+      <div><dt>Agents that talk across machines</dt><dd>With Remote Control on, a Mac session and a VPS or cloud session can message each other both ways, with no tunnel into your Mac. <code>claude -p … --cloud &lt;id&gt;</code> nudges a cloud session from any machine, and from inside a cloud session <code>list_sessions</code> reads every session's state. <span class="hedge">Messaging untested (E5)</span> <a class="src" href="delegation.md" data-md="delegation.md" data-line="80">Delegation file</a></dd></div>
+      <div><dt>A fleet at a glance</dt><dd>Herdr on the Mac keeps every VPS agent's state live, and a project's overview sorts threads into Working, Waiting on you and Ready for review. Firstmate adds a status file per worker, so nothing is lost when an agent restarts. <a class="src" href="firstmate.md" data-md="firstmate.md" data-line="16">Firstmate file</a></dd></div>
     </dl>
 
     <h3 class="sub-h">What stands between us and this</h3>
     <ol class="gates" aria-label="Four gates: one passed, three still closed">
-      <li class="gate done"><span class="flag">Passed 2 October</span><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="156">Herdr 0.9.3 and a VPS set up like the Mac</a><p>The Mac drives the netcup VPS with <code>herdr --machine</code>; set-up-machine applied and verified. (D2, D3)</p></li>
-      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="329">A skill that hands over to the VPS</a><p>Done twice by hand, in eight steps. #16, then #13, then #15 turn them into skills.</p></li>
-      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="180">Your skills loading in the cloud</a><p>Skills installed into the VM's home load; a setup script that installs them is written but not yet tried. (E16)</p></li>
-      <li class="gate"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="201">A way for the VPS to reach you</a><p>Half open: <code>shipyard ping</code> reaches the Mac (tested 3 Oct). The phone is still open: Remote Control push (E5) is untried. (D9)</p></li>
+      <li class="gate done"><span class="flag">Passed 2 October</span><a href="README.md" data-md="README.md" data-line="156">Herdr 0.9.3 and a VPS set up like the Mac</a><p>The Mac drives the netcup VPS with <code>herdr --machine</code>; set-up-machine applied and verified. (D2, D3)</p></li>
+      <li class="gate"><a href="README.md" data-md="README.md" data-line="329">A skill that hands over to the VPS</a><p>Done twice by hand, in eight steps. #16, then #13, then #15 turn them into skills.</p></li>
+      <li class="gate"><a href="README.md" data-md="README.md" data-line="180">Your skills loading in the cloud</a><p>Skills installed into the VM's home load; a setup script that installs them is written but not yet tried. (E16)</p></li>
+      <li class="gate"><a href="README.md" data-md="README.md" data-line="201">A way for the VPS to reach you</a><p>Half open: <code>shipyard ping</code> reaches the Mac (tested 3 Oct). The phone is still open: Remote Control push (E5) is untried. (D9)</p></li>
     </ol>
     <p class="closing">One gate has passed and another is half open. The handover skill is the big one left; the cloud gate is one experiment. Until they pass, this slide is the destination, not the timetable. The rest of this page is how to get there.</p>
     <a class="next" href="#why">Next: why this research</a>
@@ -729,7 +729,7 @@ footer .slide-inner { gap: 10px; }
         <p>Not a place, but a different way to run a crew. It's an open-source “agent distro” by the author of Treehouse: one agent you talk to (the first mate) starts visible terminal agents, each with its brief and status kept on disk, on your machine or on an SSH host. It runs wherever it's cloned. The research reads it for ideas to borrow.</p>
       </div>
     </div>
-    <p class="muted small">Summarised from the capability matrix in the synthesis. The full matrix, with a source behind every cell, is <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="36">here in VS Code</a>.</p>
+    <p class="muted small">Summarised from the capability matrix in the synthesis. The full matrix, with a source behind every cell, is <a href="README.md" data-md="README.md" data-line="36">here in VS Code</a>.</p>
     <a class="next" href="#findings">Next: what we found</a>
   </div>
 </section>
@@ -739,13 +739,13 @@ footer .slide-inner { gap: 10px; }
     <p class="stop"><span class="stop-dot" aria-hidden="true">5</span>What we found</p>
     <h2 id="find-h">Seven findings, one line each</h2>
     <ol class="findings">
-      <li><p><strong>The Mac stays home.</strong> It's the only place with every harness, current skills, Treehouse, a browser and a working notification. Nothing researched beats it for an orchestrated effort today. <a class="src" href="cloud-agents.md" data-md="cloud-agents.md" data-line="23">Synthesis</a></p></li>
-      <li><p><strong>The VPS was one upgrade away, and now runs orchestrators.</strong> On 29 September it needed a newer Herdr, your current skills, a worktree tool and a way to notify you. <span class="tag">update 3 Oct</span> The netcup VPS has all four, and two shipyard efforts ran there, handed over by hand. <a class="src" href="cloud-agents.md" data-md="cloud-agents.md" data-line="23">Synthesis</a></p></li>
-      <li><p><strong>Claude Code's cloud is good for tasks, and close to ready for efforts.</strong> Tested from inside: it pushes a branch it names, opens pull requests, and has a headless Chromium. Your skills load once a setup script installs them into the VM's home; idle VMs still lose background work, sub-agents can't nest, and an agent-side start is untested. <a class="src" href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="16">Probe file</a></p></li>
-      <li><p><strong>Other hosted agents are delegates, not orchestrators.</strong> Codex, Cursor and Copilot each take one prompt on one branch and return a pull request; none is worth a sign-up before Claude Code's cloud is tried. <a class="src" href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">Providers file</a></p></li>
-      <li><p><strong>Managed Agents is a developer API, not a better cloud session.</strong> It bills API tokens plus session-hours on top of the plan and drops <code>CLAUDE.md</code>, skills, hooks and the Agent tool. Its one draw is a self-hosted sandbox on the VPS, worth only a budget-capped trial. <a class="src" href="cloud-agents-managed-agents.md" data-md="cloud-agents-managed-agents.md" data-line="114">Managed Agents file</a></p></li>
-      <li><p><strong>On the old VPS, RAM was the limit.</strong> With 4 GB and no swap, running out of memory killed processes, and Hetzner's rescale didn't offer a bigger shared tier. <span class="tag">update 3 Oct</span> The netcup VPS has about 8 GB with zram and swap and peaked at 4.4 GB in a trial; its slower cores are the limit now. <a class="src" href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="14">Sizing file</a></p></li>
-      <li><p><strong>Firstmate is worth borrowing from, not adopting.</strong> Take its status file per worker, its readiness check before handing work to another machine, and its rule that an unreachable machine is unknown, never a reason to fail over. <a class="src" href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="122">Firstmate file</a></p></li>
+      <li><p><strong>The Mac stays home.</strong> It's the only place with every harness, current skills, Treehouse, a browser and a working notification. Nothing researched beats it for an orchestrated effort today. <a class="src" href="README.md" data-md="README.md" data-line="23">Synthesis</a></p></li>
+      <li><p><strong>The VPS was one upgrade away, and now runs orchestrators.</strong> On 29 September it needed a newer Herdr, your current skills, a worktree tool and a way to notify you. <span class="tag">update 3 Oct</span> The netcup VPS has all four, and two shipyard efforts ran there, handed over by hand. <a class="src" href="README.md" data-md="README.md" data-line="23">Synthesis</a></p></li>
+      <li><p><strong>Claude Code's cloud is good for tasks, and close to ready for efforts.</strong> Tested from inside: it pushes a branch it names, opens pull requests, and has a headless Chromium. Your skills load once a setup script installs them into the VM's home; idle VMs still lose background work, sub-agents can't nest, and an agent-side start is untested. <a class="src" href="session-probe.md" data-md="session-probe.md" data-line="16">Probe file</a></p></li>
+      <li><p><strong>Other hosted agents are delegates, not orchestrators.</strong> Codex, Cursor and Copilot each take one prompt on one branch and return a pull request; none is worth a sign-up before Claude Code's cloud is tried. <a class="src" href="other-providers.md" data-md="other-providers.md" data-line="36">Providers file</a></p></li>
+      <li><p><strong>Managed Agents is a developer API, not a better cloud session.</strong> It bills API tokens plus session-hours on top of the plan and drops <code>CLAUDE.md</code>, skills, hooks and the Agent tool. Its one draw is a self-hosted sandbox on the VPS, worth only a budget-capped trial. <a class="src" href="managed-agents.md" data-md="managed-agents.md" data-line="114">Managed Agents file</a></p></li>
+      <li><p><strong>On the old VPS, RAM was the limit.</strong> With 4 GB and no swap, running out of memory killed processes, and Hetzner's rescale didn't offer a bigger shared tier. <span class="tag">update 3 Oct</span> The netcup VPS has about 8 GB with zram and swap and peaked at 4.4 GB in a trial; its slower cores are the limit now. <a class="src" href="vps-sizing.md" data-md="vps-sizing.md" data-line="14">Sizing file</a></p></li>
+      <li><p><strong>Firstmate is worth borrowing from, not adopting.</strong> Take its status file per worker, its readiness check before handing work to another machine, and its rule that an unreachable machine is unknown, never a reason to fail over. <a class="src" href="firstmate.md" data-md="firstmate.md" data-line="122">Firstmate file</a></p></li>
     </ol>
     <p class="note">The first pass left one gap: <strong>no first-hand facts about the cloud VM</strong>, because both of its cloud probes, run from an agent's shell, came back empty. That gap is closed. Your own <code>claude --cloud "say hi"</code> started a session, and #78 tested the cloud from inside it; where it contradicted the docs, the cloud files now say so.</p>
     <a class="next" href="#answers">Next: your questions, answered</a>
@@ -774,7 +774,7 @@ footer .slide-inner { gap: 10px; }
             <div><dt>What does it cost?</dt><dd>Plan usage, with no charge for the VM. The one-time promo credit is spent first, and you saw it go down after #78's session. Routines have a daily run cap.</dd></div>
             <div><dt>Scheduled or triggered agents?</dt><dd>Routines: a saved prompt, repositories and connectors that run as a cloud session on a schedule, an API call or a GitHub event. They're a research preview. A new routine gets every connected connector, with write access, by default, so review them.</dd></div>
           </dl>
-          <p class="small"><a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md">Claude Code cloud file</a> <span class="muted">·</span> <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md">First-hand probes</a></p>
+          <p class="small"><a href="claude-code.md" data-md="claude-code.md">Claude Code cloud file</a> <span class="muted">·</span> <a href="session-probe.md" data-md="session-probe.md">First-hand probes</a></p>
         </div>
       </details>
       <details class="fold">
@@ -787,7 +787,7 @@ footer .slide-inner { gap: 10px; }
             <div><dt>opencode and Grok</dt><dd>opencode has no hosted agent; it runs in your own GitHub Actions. Grok Bot is a general-purpose agent on a cloud computer, not a repo coding agent.</dd></div>
             <div><dt>Jules, Devin, Amp, Factory, OpenHands</dt><dd>Each can take a repo task. Amp and Devin can carry personal skills. None beats trying Claude Code's cloud first.</dd></div>
           </dl>
-          <p class="small"><a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">The comparison table</a></p>
+          <p class="small"><a href="other-providers.md" data-md="other-providers.md" data-line="36">The comparison table</a></p>
         </div>
       </details>
       <details class="fold">
@@ -796,12 +796,12 @@ footer .slide-inner { gap: 10px; }
           <dl class="qa">
             <div><dt>What can an agent there do, compared with the Mac?</dt><dd>On the old Hetzner VPS (29 September): web, GitHub (<code>gh</code> is logged in) and Claude Code worked; a browser, notifications, Treehouse, <code>jq</code> and the other harnesses were missing, with 3.8 GB of RAM and no swap. <span class="tag">first-hand</span> <span class="tag">update 3 Oct</span> The netcup VPS adds Codex, Treehouse, Go, Docker and a headless Chromium, about 8 GB with zram and swap, and <code>shipyard ping</code> to reach the Mac. Its cores are about 2.8x slower than the Mac's.</dd></div>
             <div><dt>What Herdr offers across machines</dt><dd>On 0.9.0 the Mac drove the VPS through <code>ssh … bash -lc 'herdr …'</code>. Now 0.9.3 runs on the Mac and both VPSes: <code>herdr --machine &lt;label&gt;</code> drives workspaces, panes, agents and plugins with no shell quoting, and <code>machine status</code> is the readiness check, though it can call a working VPS stopped after a manual restart (#151).</dd></div>
-            <div><dt>How your skills and instructions get there</dt><dd>set-up-machine: an agent on the VPS runs it, shows you one diff, and on your approval installs the same skills, <code>AGENTS.md</code>, rule table and hook as on the Mac, then checks them with <code>verify.py</code>. Done on the netcup VPS on 2 October; a fresh machine's base is now in <a href="../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a> (D3).</dd></div>
+            <div><dt>How your skills and instructions get there</dt><dd>set-up-machine: an agent on the VPS runs it, shows you one diff, and on your approval installs the same skills, <code>AGENTS.md</code>, rule table and hook as on the Mac, then checks them with <code>verify.py</code>. Done on the netcup VPS on 2 October; a fresh machine's base is now in <a href="../../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a> (D3).</dd></div>
             <div><dt>What more CPU and RAM would unlock</dt><dd>RAM is the limit, not CPU. A Claude Code session holds 0.15-0.5 GB, and builds and browsers add gigabytes. 4 GB doesn't fit one agent with tests; 8 GB fits five whose tests take turns; 16 GB fits five with 3 test runs and 2 browsers at once (D4, D5).</dd></div>
             <div><dt>Prices, and machines that run only while working</dt><dd>Hetzner's shared line is the cheapest per GB, but it's out of stock for now. Its pricier lines and other providers are in D4; you took a netcup VPS 1000. A big server made from a snapshot for a few hours costs cents; Fly.io and GitHub Codespaces stop charging for compute while stopped.</dd></div>
             <div><dt>What an agent may do there without asking</dt><dd>Read Herdr and git state freely, and start what you chose (a handover). Today's line asks before it messages an agent it didn't start, closes or stops anything, removes worktrees or branches, or changes the machine. You've said you want agents to work freely across both machines (D11).</dd></div>
           </dl>
-          <p class="small"><a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md">VPS file</a> <span class="muted">·</span> <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md">Sizing file</a></p>
+          <p class="small"><a href="vps.md" data-md="vps.md">VPS file</a> <span class="muted">·</span> <a href="vps-sizing.md" data-md="vps-sizing.md">Sizing file</a></p>
         </div>
       </details>
       <details class="fold">
@@ -877,7 +877,7 @@ footer .slide-inner { gap: 10px; }
       <li><code>herdr --machine X agent wait --until working</code> confirms it started.</li>
       <li>The orchestrator builds, opens the PR and runs <code>shipyard ping</code> when it's done or needs you.</li>
     </ol>
-    <p class="small"><a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="47">Every option side by side</a> <span class="muted">(the delegation file, section 2)</span></p>
+    <p class="small"><a href="delegation.md" data-md="delegation.md" data-line="47">Every option side by side</a> <span class="muted">(the delegation file, section 2)</span></p>
     <a class="next" href="#decisions">Next: your decisions</a>
   </div>
 </section>
@@ -932,7 +932,7 @@ footer .slide-inner { gap: 10px; }
           </table></div>
           <p><b>Proposed answer.</b> <code>shipyard ping</code> for the VPS, phone push for cloud sessions once #80 confirms it, and GitHub as the fallback. It also settles <a href="https://github.com/yahyabedirhan/skills/issues/144">#144</a>: on a VPS, <code>notification-method</code> is <code>shipyard ping</code>.</p>
           <p><b>Known gaps.</b> Clicking a ping can't switch the Mac's Herdr window to that machine (shipyard #152, a Herdr limit). shipyard has no Linux release yet, so its CLI is built and linked by hand on each VPS (shipyard #147). Remote Control push (E5) is still untested, and a phone route from the VPS is still open.</p>
-          <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="201">D9 in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="86">Notifying, in the delegation file</a></p>
+          <p class="small"><a href="README.md" data-md="README.md" data-line="201">D9 in the synthesis</a> <span class="muted">·</span> <a href="delegation.md" data-md="delegation.md" data-line="86">Notifying, in the delegation file</a></p>
         </div>
       </details></li>
 
@@ -966,14 +966,14 @@ footer .slide-inner { gap: 10px; }
           </table></div>
           <p><b>Not to borrow.</b> Firstmate itself (it would replace your effort workflow), its watcher machinery, workers with permissions bypassed, stripping AI trailers, and one PR per task.</p>
           <p><b>Your call.</b> Say which numbers to take. Each one you pick becomes a ticket after this PR merges, or part of #13, #15 or #16.</p>
-          <p class="small"><a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="641">The borrow table, with Firstmate's sources</a> <span class="muted">·</span> <a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="122">Mapped against your workflow</a></p>
+          <p class="small"><a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md" data-line="641">The borrow table, with Firstmate's sources</a> <span class="muted">·</span> <a href="firstmate.md" data-md="firstmate.md" data-line="122">Mapped against your workflow</a></p>
         </div>
       </details></li>
 
       <li class="dcard" data-status="changed"><details>
         <summary><span class="did">D4</span><span class="dhead"><span class="dq-t">Resize the VPS, or move it?</span><span class="dans">Done. Ordered and set up on 2 October: <b>netcup VPS 1000</b> (about 8 GB, 4 vCPU, Debian 13, monthly). About 2.8x slower than the Mac in a benchmark, with memory to spare.</span></span><span class="status s-changed">You changed it</span></summary>
         <div class="dbody">
-          <p><b>Done, 2 October.</b> Hardened base, zram and swap, Node, Claude Code, Codex, Herdr, Go, Treehouse, <code>gh</code>, Docker and a headless Chromium; you did the logins in Herdr tabs; set-up-machine applied (sandbox off) and <code>verify.py</code> passed. The trial peaked at about 4.4 of 7.8 GB. Retiring the Hetzner VPS is tracked elsewhere; VPS 2000 in place stays the step up if memory runs short. The setup is now in the skills: <a href="../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a> and <a href="../../skills/set-up-machine/references/remote-machine.md">remote-machine.md</a>.</p>
+          <p><b>Done, 2 October.</b> Hardened base, zram and swap, Node, Claude Code, Codex, Herdr, Go, Treehouse, <code>gh</code>, Docker and a headless Chromium; you did the logins in Herdr tabs; set-up-machine applied (sandbox off) and <code>verify.py</code> passed. The trial peaked at about 4.4 of 7.8 GB. Retiring the Hetzner VPS is tracked elsewhere; VPS 2000 in place stays the step up if memory runs short. The setup is now in the skills: <a href="../../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a> and <a href="../../../skills/set-up-machine/references/remote-machine.md">remote-machine.md</a>.</p>
           <p><b>What it was about.</b> Your old VPS (Hetzner CX23: 2 shared vCPU, 4 GB, no swap) had about 9% of your Mac's CPU, and one agent plus one test run overflowed its memory. You wanted about five agents at once, then three to start.</p>
           <p><b>The math, in one line each.</b> Memory = 1 GB + 0.6 GB per agent + 2 GB per test run + 1 GB per browser running at the same moment: five agents with 3 test runs and 2 browsers is 12 GB, so a 16 GB machine. CPU is measured as a share of your M3 Pro (Geekbench 6).</p>
           <div class="tbl"><table>
@@ -986,7 +986,7 @@ footer .slide-inner { gap: 10px; }
             </tbody>
           </table></div>
           <p><b>Hetzner, corrected.</b> Your rescale dialog didn't offer CX33; nothing at Hetzner under $40 adds memory. <a href="#vps">The full math</a></p>
-          <p class="small"><a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="1">How much machine five parallel agents need</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="168">D4 in the synthesis</a></p>
+          <p class="small"><a href="vps-math.md" data-md="vps-math.md" data-line="1">How much machine five parallel agents need</a> <span class="muted">·</span> <a href="README.md" data-md="README.md" data-line="168">D4 in the synthesis</a></p>
         </div>
       </details></li>
 
@@ -996,16 +996,16 @@ footer .slide-inner { gap: 10px; }
           <p><b>The research said.</b> The VPS now, the cloud later: only the VPS runs your workflow unchanged, and a cloud effort needs your skills there first (E16) and an agent-side start (E17).</p>
           <p><b>What your answer means.</b> Two tracks at once. VPS: Herdr, set-up-machine, one real effort. Cloud: the setup script (E16), then one effort in a single session you watch. Running a cloud effort doesn't need E17: you start it yourself with <code>claude --cloud</code>.</p>
           <p><b>Update 3 October.</b> The VPS track is ahead: Herdr 0.9.3 and set-up-machine are done, and two shipyard efforts were handed to a VPS orchestrator by hand and merged (<a href="#handover-by-hand">how</a>). The cloud track hasn't started; E16 is its first step.</p>
-          <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="151">D1 in the synthesis</a></p>
+          <p class="small"><a href="README.md" data-md="README.md" data-line="151">D1 in the synthesis</a></p>
         </div>
       </details></li>
 
       <li class="dcard" data-status="changed"><details>
         <summary><span class="did">D5</span><span class="dhead"><span class="dq-t">A headless browser on the VPS?</span><span class="dans">You: yes, from day zero, as part of the environment. Done: the netcup VPS has a headless Chromium.</span></span><span class="status s-changed">You changed it</span></summary>
         <div class="dbody">
-          <p><b>Done, 2 October.</b> Installed on the netcup VPS as part of its base; it's item 4 after the steps in <a href="../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a>. Left from E7: measuring a browser's memory next to a running agent.</p>
+          <p><b>Done, 2 October.</b> Installed on the netcup VPS as part of its base; it's item 4 after the steps in <a href="../../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a>. Left from E7: measuring a browser's memory next to a running agent.</p>
           <p><b>What the research found.</b> The old VPS had a Playwright headless shell that couldn't start: 15 system libraries were missing. The fixes were Playwright's Docker image or <code>npx playwright install-deps chromium</code> as root, and a browser adds about 1 GB next to an agent, which pushed D4 toward more memory.</p>
-          <p class="small"><a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="39">VPS file: headless browser</a></p>
+          <p class="small"><a href="vps.md" data-md="vps.md" data-line="39">VPS file: headless browser</a></p>
         </div>
       </details></li>
 
@@ -1015,7 +1015,7 @@ footer .slide-inner { gap: 10px; }
           <p><b>What's there.</b> Herdr goes one way: the Mac drives the VPS. The two-way channel that needs no tunnel is Claude Code's cross-session messaging over Remote Control: text only, both directions, through Anthropic's servers.</p>
           <p><b>Update 3 October.</b> A VPS agent can now signal the Mac without a tunnel: <code>shipyard ping</code>, which the Mac's shipyard app reads by polling the VPS through Herdr (D9). It's one way and carries no answer back.</p>
           <p><b>Next.</b> E5 tries Remote Control: a session in a VPS tab, and messages in both directions.</p>
-          <p class="small"><a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="84">Cross-machine messaging</a></p>
+          <p class="small"><a href="delegation.md" data-md="delegation.md" data-line="84">Cross-machine messaging</a></p>
         </div>
       </details></li>
 
@@ -1024,7 +1024,7 @@ footer .slide-inner { gap: 10px; }
         <div class="dbody">
           <p><b>The research said.</b> Add ask-first rules for <code>herdr … server stop</code> and <code>workspace close --group</code>, because with <code>--machine</code> one local command can stop every agent on the VPS.</p>
           <p><b>Your answer.</b> No such rules. One thing to settle with it: the wider line the build tickets set (#13, #16) still has an agent ask before it closes, stops or messages something on the other machine that it didn't start. Should that line loosen too, or only the extra rules go?</p>
-          <p class="small"><a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="141">Permissions on the other machine</a></p>
+          <p class="small"><a href="vps.md" data-md="vps.md" data-line="141">Permissions on the other machine</a></p>
         </div>
       </details></li>
 
@@ -1032,7 +1032,7 @@ footer .slide-inner { gap: 10px; }
         <summary><span class="did">D7</span><span class="dhead"><span class="dq-t">Which hosted agents, for which single tickets?</span><span class="dans">You, 3 October: the Claude plan only for now. No Copilot, no Jules.</span></span><span class="status s-decided">Agreed</span></summary>
         <div class="dbody">
           <p><b>Decided.</b> Single tickets go to Claude Code: a cloud session, the VPS or the Mac. E13, the hosted trials, is dropped. Research #87 found the model costs the same everywhere, so the plan is the cheapest place to pay for it; <a href="#costs">What delegating costs</a> keeps the comparison for later.</p>
-          <p class="small"><a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">Providers comparison</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="187">D7 in the synthesis</a></p>
+          <p class="small"><a href="other-providers.md" data-md="other-providers.md" data-line="36">Providers comparison</a> <span class="muted">·</span> <a href="README.md" data-md="README.md" data-line="187">D7 in the synthesis</a></p>
         </div>
       </details></li>
 
@@ -1042,7 +1042,7 @@ footer .slide-inner { gap: 10px; }
           <p><b>What it's about.</b> When an orchestrator hands a ticket to a sub-agent, the sub-agent gets its own worktree. In this effort those worktrees started from an old <code>main</code>, so every delegate first had to catch up by hand.</p>
           <p><b>Decided.</b> A delegate's worktree branches from the effort's own base, which may be <code>main</code> or another branch (a stacked effort), and stays on top of it.</p>
           <p><b>Next.</b> A new ticket for the fix in orchestrate-effort and implement, filed after this PR merges.</p>
-          <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="193">D8 in the synthesis</a></p>
+          <p class="small"><a href="README.md" data-md="README.md" data-line="193">D8 in the synthesis</a></p>
         </div>
       </details></li>
 
@@ -1063,7 +1063,7 @@ footer .slide-inner { gap: 10px; }
       <li class="dcard" data-status="decided"><details>
         <summary><span class="did">D3</span><span class="dhead"><span class="dq-t">Set up the VPS the same way as the Mac?</span><span class="dans">You: yes. Done on the netcup VPS, 2 October.</span></span><span class="status s-decided">Agreed</span></summary>
         <div class="dbody">
-          <p><b>Done.</b> set-up-machine applied with the sandbox off and <code>verify.py</code> passed; Treehouse, Go and the browser are in (E6, E8). The remote setup now lives in the skill: <a href="../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a> for a fresh machine's base and <a href="../../skills/set-up-machine/references/remote-machine.md">remote-machine.md</a> for any remote one. Still to fold in: sudo through a Herdr tab where you type the password (<a href="https://github.com/yahyabedirhan/skills/issues/148">#148</a>) and the wording of the secret deny rules (<a href="https://github.com/yahyabedirhan/skills/issues/150">#150</a>).</p>
+          <p><b>Done.</b> set-up-machine applied with the sandbox off and <code>verify.py</code> passed; Treehouse, Go and the browser are in (E6, E8). The remote setup now lives in the skill: <a href="../../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a> for a fresh machine's base and <a href="../../../skills/set-up-machine/references/remote-machine.md">remote-machine.md</a> for any remote one. Still to fold in: sudo through a Herdr tab where you type the password (<a href="https://github.com/yahyabedirhan/skills/issues/148">#148</a>) and the wording of the secret deny rules (<a href="https://github.com/yahyabedirhan/skills/issues/150">#150</a>).</p>
         </div>
       </details></li>
 
@@ -1071,11 +1071,11 @@ footer .slide-inner { gap: 10px; }
         <summary><span class="did">D6</span><span class="dhead"><span class="dq-t">How do your skills reach a cloud session?</span><span class="dans">You: the setup script or SessionStart hook the cloud session found installs the global skills and instructions.</span></span><span class="status s-decided">Agreed</span></summary>
         <div class="dbody">
           <p><b>Next.</b> E16: a personal cloud environment with that setup script; start one session, check <code>/skills</code>, and have it quote a line from your global instructions. Whether a <code>~/.claude/CLAUDE.md</code> the script writes loads is the one untested part.</p>
-          <p class="small"><a href="cloud-agents-session-workflow.md" data-md="cloud-agents-session-workflow.md" data-line="51">The setup script, in the workflow file</a></p>
+          <p class="small"><a href="session-workflow.md" data-md="session-workflow.md" data-line="51">The setup script, in the workflow file</a></p>
         </div>
       </details></li>
     </ol>
-    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="261">Decision status, in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="147">All thirteen in the synthesis</a> <span class="muted">·</span> <a class="muted" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md#decisions-for-the-maintainer">on GitHub</a></p>
+    <p class="small"><a href="README.md" data-md="README.md" data-line="261">Decision status, in the synthesis</a> <span class="muted">·</span> <a href="README.md" data-md="README.md" data-line="147">All thirteen in the synthesis</a> <span class="muted">·</span> <a class="muted" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/README.md#decisions-for-the-maintainer">on GitHub</a></p>
     <a class="next" href="#vps">Next: how much machine, and where</a>
   </div>
 </section>
@@ -1263,7 +1263,7 @@ footer .slide-inner { gap: 10px; }
             <li>After 2-4 weeks, with no unpushed branches left on it, delete the CX23 and its Herdr profile.</li>
           </ol>
           <p class="small muted">Cost of the switch: the new machine, plus the old one's monthly price for the overlap and a few hours of setup. There's no setup fee at netcup.</p>
-          <p class="small"><b>Update 3 October:</b> steps 1-6 are done for the netcup VPS (on Debian 13 rather than Ubuntu); the base is now written up in <a href="../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a>. Retiring the Hetzner VPS, step 7, is tracked elsewhere.</p>
+          <p class="small"><b>Update 3 October:</b> steps 1-6 are done for the netcup VPS (on Debian 13 rather than Ubuntu); the base is now written up in <a href="../../../skills/set-up-machine/references/new-remote-machine.md">new-remote-machine.md</a>. Retiring the Hetzner VPS, step 7, is tracked elsewhere.</p>
         </div>
       </details>
       <details class="fold">
@@ -1281,7 +1281,7 @@ footer .slide-inner { gap: 10px; }
         </div>
       </details>
     </div>
-    <p class="small"><a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="44">The memory math</a> <span class="muted">·</span> <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="74">The CPU math</a> <span class="muted">·</span> <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="107">Price points</a> <span class="muted">·</span> <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="153">Against today</a> <span class="muted">·</span> <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="205">netcup's four lines</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="250">Ranked shortlist</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="57">Every provider at 8 and 16 GB</a> <span class="muted">·</span> <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="184">All latency figures</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/86">#86</a></p>
+    <p class="small"><a href="vps-math.md" data-md="vps-math.md" data-line="44">The memory math</a> <span class="muted">·</span> <a href="vps-math.md" data-md="vps-math.md" data-line="74">The CPU math</a> <span class="muted">·</span> <a href="vps-math.md" data-md="vps-math.md" data-line="107">Price points</a> <span class="muted">·</span> <a href="vps-math.md" data-md="vps-math.md" data-line="153">Against today</a> <span class="muted">·</span> <a href="vps-math.md" data-md="vps-math.md" data-line="205">netcup's four lines</a> <span class="muted">·</span> <a href="vps-providers.md" data-md="vps-providers.md" data-line="250">Ranked shortlist</a> <span class="muted">·</span> <a href="vps-providers.md" data-md="vps-providers.md" data-line="57">Every provider at 8 and 16 GB</a> <span class="muted">·</span> <a href="vps-providers.md" data-md="vps-providers.md" data-line="184">All latency figures</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/86">#86</a></p>
     <a class="next" href="#costs">Next: what delegating costs</a>
   </div>
 </section>
@@ -1356,7 +1356,7 @@ footer .slide-inner { gap: 10px; }
         </div>
       </details>
     </div>
-    <p class="small"><a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="115">The cost table with its assumptions</a> <span class="muted">·</span> <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="24">How each service bills</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/87">#87</a></p>
+    <p class="small"><a href="costs.md" data-md="costs.md" data-line="115">The cost table with its assumptions</a> <span class="muted">·</span> <a href="costs.md" data-md="costs.md" data-line="24">How each service bills</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/87">#87</a></p>
     <a class="next" href="#firstmate">Next: how Firstmate works</a>
   </div>
 </section>
@@ -1471,7 +1471,7 @@ footer .slide-inner { gap: 10px; }
         </ul>
       </div>
     </details>
-    <p class="small"><a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="171">All 214 scripts</a> <span class="muted">·</span> <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="456">Every workflow in full</a> <span class="muted">·</span> <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="641">The borrow table</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/88">#88</a></p>
+    <p class="small"><a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md" data-line="171">All 214 scripts</a> <span class="muted">·</span> <a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md" data-line="456">Every workflow in full</a> <span class="muted">·</span> <a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md" data-line="641">The borrow table</a> <span class="muted">·</span> <a href="https://github.com/yahyabedirhan/skills/issues/88">#88</a></p>
     <a class="next" href="#direction">Next: what happens now</a>
   </div>
 </section>
@@ -1542,7 +1542,7 @@ footer .slide-inner { gap: 10px; }
       <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/148"><b>#148</b> sudo in a Herdr tab</a>
       <a class="chip" href="https://github.com/yahyabedirhan/skills/issues/151"><b>#151</b> machine status after a restart</a>
     </div>
-    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="329">How each build ticket was re-scoped</a> <span class="muted">(synthesis, a two-minute section)</span> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="286">All twenty experiments</a></p>
+    <p class="small"><a href="README.md" data-md="README.md" data-line="329">How each build ticket was re-scoped</a> <span class="muted">(synthesis, a two-minute section)</span> <span class="muted">·</span> <a href="README.md" data-md="README.md" data-line="286">All twenty experiments</a></p>
     <a class="next" href="#try">Next: what you tried yourself</a>
   </div>
 </section>
@@ -1582,7 +1582,7 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
       </div>
     </div>
     <p class="small muted">E2 is done too: <code>list_sessions</code> shows no session left by probe 1, and <code>get_session</code> shows the promo credit in use; only the balance is left to read. Next, from the synthesis: E16 tries a cloud environment whose setup script installs your skills; E17 starts one child session with <code>create_session</code>; E18 leaves a session idle to time its reclaim; E19 needs only your word on whether the 29 September “PR ready for review” push arrived; E20 asks a session to push to a branch pushed from the Mac.</p>
-    <p class="small"><a href="cloud-agents.md" data-md="cloud-agents.md" data-line="302">E1 in the synthesis</a> <span class="muted">·</span> <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="202">The open questions it answered</a> <span class="muted">·</span> <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="123">What the CLI printed</a> <span class="muted">·</span> <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="286">All twenty experiments</a></p>
+    <p class="small"><a href="README.md" data-md="README.md" data-line="302">E1 in the synthesis</a> <span class="muted">·</span> <a href="session-probe.md" data-md="session-probe.md" data-line="202">The open questions it answered</a> <span class="muted">·</span> <a href="claude-code.md" data-md="claude-code.md" data-line="123">What the CLI printed</a> <span class="muted">·</span> <a href="README.md" data-md="README.md" data-line="286">All twenty experiments</a></p>
     <a class="next" href="#read">Next: the reading path</a>
   </div>
 </section>
@@ -1594,210 +1594,210 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
     <p class="lede">The title of each card opens the file in VS Code. Times are for a full read; the top section of each file gives you the gist in a few minutes.</p>
     <ol class="cards">
       <li class="card first">
-        <h3><a href="cloud-agents.md" data-md="cloud-agents.md">The synthesis</a></h3>
+        <h3><a href="README.md" data-md="README.md">The synthesis</a></h3>
         <span class="time">about 25 min</span>
         <div class="body">
           <p>Answers: what each place can do side by side, what you need to decide, and which experiments are left.</p>
           <p class="when">Read first. If you only read one file, read this one; its first section takes three minutes.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="23">The short version</a>
-          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="36">Capability matrix</a>
-          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="147">Decisions</a>
-          <a href="cloud-agents.md" data-md="cloud-agents.md" data-line="286">Experiments</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents.md">GitHub</a>
+          <a href="README.md" data-md="README.md" data-line="23">The short version</a>
+          <a href="README.md" data-md="README.md" data-line="36">Capability matrix</a>
+          <a href="README.md" data-md="README.md" data-line="147">Decisions</a>
+          <a href="README.md" data-md="README.md" data-line="286">Experiments</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/README.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md">Claude Code in the cloud</a></h3>
+        <h3><a href="claude-code.md" data-md="claude-code.md">Claude Code in the cloud</a></h3>
         <span class="time">about 25 min</span>
         <div class="body">
           <p>Answers: what a cloud session runs on, what loads there, how it's started, watched and moved back, and what it costs. Also routines and projects.</p>
           <p class="when">Read before deciding D6, D7 and D12. Corrected against the first-hand probes.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="24">Short answer</a>
-          <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="90">What loads</a>
-          <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="123">Starting it</a>
-          <a href="cloud-agents-claude-code.md" data-md="cloud-agents-claude-code.md" data-line="227">Open questions</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-claude-code.md">GitHub</a>
+          <a href="claude-code.md" data-md="claude-code.md" data-line="24">Short answer</a>
+          <a href="claude-code.md" data-md="claude-code.md" data-line="90">What loads</a>
+          <a href="claude-code.md" data-md="claude-code.md" data-line="123">Starting it</a>
+          <a href="claude-code.md" data-md="claude-code.md" data-line="227">Open questions</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/claude-code.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md">Inside a cloud session</a></h3>
+        <h3><a href="session-probe.md" data-md="session-probe.md">Inside a cloud session</a></h3>
         <span class="time">about 20 min</span>
         <div class="body">
           <p>Answers, first-hand from inside a real cloud session: the VM, the browser, the network proxy, what GitHub allows, what sub-agents get, and the platform's own hooks.</p>
           <p class="when">Read with the Claude Code file; its last table answers that file's open questions.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="16">Short answer</a>
-          <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="74">GitHub proxy</a>
-          <a href="cloud-agents-session-probe.md" data-md="cloud-agents-session-probe.md" data-line="202">Answers to the open questions</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-session-probe.md">GitHub</a>
+          <a href="session-probe.md" data-md="session-probe.md" data-line="16">Short answer</a>
+          <a href="session-probe.md" data-md="session-probe.md" data-line="74">GitHub proxy</a>
+          <a href="session-probe.md" data-md="session-probe.md" data-line="202">Answers to the open questions</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/session-probe.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-session-workflow.md" data-md="cloud-agents-session-workflow.md">The effort workflow in a cloud session</a></h3>
+        <h3><a href="session-workflow.md" data-md="session-workflow.md">The effort workflow in a cloud session</a></h3>
         <span class="time">about 20 min</span>
         <div class="body">
           <p>Answers: how skills and instructions can reach a cloud session, a setup script that carries them, and what each step of the effort workflow needs there.</p>
           <p class="when">Read before deciding D6, or before running an effort in the cloud.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-session-workflow.md" data-md="cloud-agents-session-workflow.md" data-line="17">Short answer</a>
-          <a href="cloud-agents-session-workflow.md" data-md="cloud-agents-session-workflow.md" data-line="51">Carrying the skills</a>
-          <a href="cloud-agents-session-workflow.md" data-md="cloud-agents-session-workflow.md" data-line="182">Suggestions</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-session-workflow.md">GitHub</a>
+          <a href="session-workflow.md" data-md="session-workflow.md" data-line="17">Short answer</a>
+          <a href="session-workflow.md" data-md="session-workflow.md" data-line="51">Carrying the skills</a>
+          <a href="session-workflow.md" data-md="session-workflow.md" data-line="182">Suggestions</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/session-workflow.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-managed-agents.md" data-md="cloud-agents-managed-agents.md">Managed Agents vs cloud sessions</a></h3>
+        <h3><a href="managed-agents.md" data-md="managed-agents.md">Managed Agents vs cloud sessions</a></h3>
         <span class="time">about 20 min</span>
         <div class="body">
           <p>Answers: what Managed Agents on the Claude Platform is, how it differs from Claude Code's cloud, and whether it helps here.</p>
           <p class="when">Read only if you want a programmatic fleet or Anthropic-run sessions on the VPS.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-managed-agents.md" data-md="cloud-agents-managed-agents.md" data-line="18">Short answer</a>
-          <a href="cloud-agents-managed-agents.md" data-md="cloud-agents-managed-agents.md" data-line="114">Fit for this maintainer</a>
-          <a href="cloud-agents-managed-agents.md" data-md="cloud-agents-managed-agents.md" data-line="136">Side by side</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-managed-agents.md">GitHub</a>
+          <a href="managed-agents.md" data-md="managed-agents.md" data-line="18">Short answer</a>
+          <a href="managed-agents.md" data-md="managed-agents.md" data-line="114">Fit for this maintainer</a>
+          <a href="managed-agents.md" data-md="managed-agents.md" data-line="136">Side by side</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/managed-agents.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md">Delegating and hearing back</a></h3>
+        <h3><a href="delegation.md" data-md="delegation.md">Delegating and hearing back</a></h3>
         <span class="time">about 30 min</span>
         <div class="body">
           <p>Answers: how a Mac session hands work to each place, how you watch and answer it, how done-or-blocked reaches you, and how an unfinished effort moves.</p>
           <p class="when">Read before building #13, #15 or #16; section 6 is written for those tickets.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="47">Options side by side</a>
-          <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="150">What it settles for the tickets</a>
-          <a href="cloud-agents-delegation.md" data-md="cloud-agents-delegation.md" data-line="196">How this effort was handed over</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-delegation.md">GitHub</a>
+          <a href="delegation.md" data-md="delegation.md" data-line="47">Options side by side</a>
+          <a href="delegation.md" data-md="delegation.md" data-line="150">What it settles for the tickets</a>
+          <a href="delegation.md" data-md="delegation.md" data-line="196">How this effort was handed over</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/delegation.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md">How much machine five agents need</a></h3>
+        <h3><a href="vps-math.md" data-md="vps-math.md">How much machine five agents need</a></h3>
         <span class="time">about 10 min</span>
         <div class="body">
           <p>Answers: how much memory and CPU five parallel agents with tests and browsers need, measured against your Mac, and what each price point buys.</p>
           <p class="when">The math behind the netcup VPS 1000 you ordered (D4).</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="44">Memory</a>
-          <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="74">CPU</a>
-          <a href="cloud-agents-vps-math.md" data-md="cloud-agents-vps-math.md" data-line="107">Price points</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-vps-math.md">GitHub</a>
+          <a href="vps-math.md" data-md="vps-math.md" data-line="44">Memory</a>
+          <a href="vps-math.md" data-md="vps-math.md" data-line="74">CPU</a>
+          <a href="vps-math.md" data-md="vps-math.md" data-line="107">Price points</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/vps-math.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md">VPS options to switch to</a></h3>
+        <h3><a href="vps-providers.md" data-md="vps-providers.md">VPS options to switch to</a></h3>
         <span class="time">about 20 min</span>
         <div class="body">
           <p>Answers: shared vs dedicated cores, ten European providers at 8 and 16 GB, latency from your Mac, and what a move takes.</p>
           <p class="when">The shortlist D4 chose from; read it again before a step up.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="14">Short answer</a>
-          <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="57">Providers</a>
-          <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="184">Latency</a>
-          <a href="cloud-agents-vps-providers.md" data-md="cloud-agents-vps-providers.md" data-line="250">Shortlist</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-vps-providers.md">GitHub</a>
+          <a href="vps-providers.md" data-md="vps-providers.md" data-line="14">Short answer</a>
+          <a href="vps-providers.md" data-md="vps-providers.md" data-line="57">Providers</a>
+          <a href="vps-providers.md" data-md="vps-providers.md" data-line="184">Latency</a>
+          <a href="vps-providers.md" data-md="vps-providers.md" data-line="250">Shortlist</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/vps-providers.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md">What delegating costs</a></h3>
+        <h3><a href="costs.md" data-md="costs.md">What delegating costs</a></h3>
         <span class="time">about 20 min</span>
         <div class="body">
           <p>Answers: how each hosted agent bills, what a ticket and an effort cost on each, and which tickets to send where.</p>
           <p class="when">Read before adding a subscription (D7).</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="14">Short answer</a>
-          <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="115">Cost table</a>
-          <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="143">Beyond the price</a>
-          <a href="cloud-agents-costs.md" data-md="cloud-agents-costs.md" data-line="166">Delegation guide</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-costs.md">GitHub</a>
+          <a href="costs.md" data-md="costs.md" data-line="14">Short answer</a>
+          <a href="costs.md" data-md="costs.md" data-line="115">Cost table</a>
+          <a href="costs.md" data-md="costs.md" data-line="143">Beyond the price</a>
+          <a href="costs.md" data-md="costs.md" data-line="166">Delegation guide</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/costs.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md">How Firstmate works, in depth</a></h3>
+        <h3><a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md">How Firstmate works, in depth</a></h3>
         <span class="time">about 40 min</span>
         <div class="body">
           <p>Answers: every tool and script, every workflow step by step, one task traced end to end, and a ranked borrow list mapped to your skills.</p>
           <p class="when">Read before building #13, #15 or #16, or changing the orchestrating skills (D13).</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="17">Short answer</a>
-          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="30">Tools</a>
-          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="456">Workflows</a>
-          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="609">Worked example</a>
-          <a href="cloud-agents-firstmate-deep-dive.md" data-md="cloud-agents-firstmate-deep-dive.md" data-line="641">What to borrow</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-firstmate-deep-dive.md">GitHub</a>
+          <a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md" data-line="17">Short answer</a>
+          <a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md" data-line="30">Tools</a>
+          <a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md" data-line="456">Workflows</a>
+          <a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md" data-line="609">Worked example</a>
+          <a href="firstmate-deep-dive.md" data-md="firstmate-deep-dive.md" data-line="641">What to borrow</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/firstmate-deep-dive.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md">The VPS compared with the Mac</a></h3>
+        <h3><a href="vps.md" data-md="vps.md">The VPS compared with the Mac</a></h3>
         <span class="time">about 25 min</span>
         <div class="body">
           <p>Answers: what an agent on the VPS can do today, what <code>herdr --machine</code> (0.9.2 and later) changes across machines, how your setup would get there, and what an agent may do on the other machine without asking.</p>
           <p class="when">Read before the VPS decisions, D2 to D5 and D11.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="17">At a glance</a>
-          <a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="64">Herdr across machines</a>
-          <a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="106">The environment</a>
-          <a href="cloud-agents-vps.md" data-md="cloud-agents-vps.md" data-line="141">Permissions</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-vps.md">GitHub</a>
+          <a href="vps.md" data-md="vps.md" data-line="17">At a glance</a>
+          <a href="vps.md" data-md="vps.md" data-line="64">Herdr across machines</a>
+          <a href="vps.md" data-md="vps.md" data-line="106">The environment</a>
+          <a href="vps.md" data-md="vps.md" data-line="141">Permissions</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/vps.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md">VPS sizing and other providers</a></h3>
+        <h3><a href="vps-sizing.md" data-md="vps-sizing.md">VPS sizing and other providers</a></h3>
         <span class="time">about 25 min</span>
         <div class="body">
           <p>Answers: how much an agent actually uses, how many fit on each Hetzner tier, what other providers and on-demand machines would cost.</p>
           <p class="when">Background for D4, from before the move to netcup.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="14">Summary</a>
-          <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="140">What “not available” means</a>
-          <a href="cloud-agents-vps-sizing.md" data-md="cloud-agents-vps-sizing.md" data-line="184">Recommendation per workload</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-vps-sizing.md">GitHub</a>
+          <a href="vps-sizing.md" data-md="vps-sizing.md" data-line="14">Summary</a>
+          <a href="vps-sizing.md" data-md="vps-sizing.md" data-line="140">What “not available” means</a>
+          <a href="vps-sizing.md" data-md="vps-sizing.md" data-line="184">Recommendation per workload</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/vps-sizing.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md">Codex, Cursor, Copilot and more</a></h3>
+        <h3><a href="other-providers.md" data-md="other-providers.md">Codex, Cursor, Copilot and more</a></h3>
         <span class="time">about 35 min</span>
         <div class="body">
           <p>Answers: the same questions as the Claude Code file, for Codex, Cursor and Copilot, plus a short look at opencode, Grok, Jules, Devin, Amp, Factory and OpenHands.</p>
           <p class="when">Read only if you consider a second hosted agent (D7). The comparison and the four findings under it are enough for most.</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="18">Comparison</a>
-          <a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="36">Findings that matter most</a>
-          <a href="cloud-agents-other-providers.md" data-md="cloud-agents-other-providers.md" data-line="150">Open questions</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-other-providers.md">GitHub</a>
+          <a href="other-providers.md" data-md="other-providers.md" data-line="18">Comparison</a>
+          <a href="other-providers.md" data-md="other-providers.md" data-line="36">Findings that matter most</a>
+          <a href="other-providers.md" data-md="other-providers.md" data-line="150">Open questions</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/other-providers.md">GitHub</a>
         </p>
       </li>
       <li class="card">
-        <h3><a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md">Firstmate and related tools</a></h3>
+        <h3><a href="firstmate.md" data-md="firstmate.md">Firstmate and related tools</a></h3>
         <span class="time">about 25 min</span>
         <div class="body">
           <p>Answers: how Firstmate delegates to agents on this machine and on others, and which of its ideas fit this repo's workflow.</p>
           <p class="when">Read when building #15 or #16, or when you wonder whether a different workflow would suit you better (D13).</p>
         </div>
         <p class="links">
-          <a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="16">How it delegates</a>
-          <a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="122">Mapped against this repo</a>
-          <a href="cloud-agents-firstmate.md" data-md="cloud-agents-firstmate.md" data-line="207">The contract a delegate must meet</a>
-          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents-firstmate.md">GitHub</a>
+          <a href="firstmate.md" data-md="firstmate.md" data-line="16">How it delegates</a>
+          <a href="firstmate.md" data-md="firstmate.md" data-line="122">Mapped against this repo</a>
+          <a href="firstmate.md" data-md="firstmate.md" data-line="207">The contract a delegate must meet</a>
+          <a class="gh" href="https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/firstmate.md">GitHub</a>
         </p>
       </li>
     </ol>
-    <p class="small muted">Background from before this effort, which these files build on: <a href="herdr-vps.md" data-md="herdr-vps.md">Herdr across the Mac and the VPS</a> and <a href="harness-capabilities.md" data-md="harness-capabilities.md">What each harness can and can't do</a>.</p>
+    <p class="small muted">Background from before this effort, which these files build on: <a href="../herdr-vps.md" data-md="herdr-vps.md">Herdr across the Mac and the VPS</a> and <a href="../harness-capabilities.md" data-md="harness-capabilities.md">What each harness can and can't do</a>.</p>
   </div>
 </section>
 
@@ -1864,13 +1864,13 @@ Resume with: claude --teleport session_&lt;id&gt;</pre>
 
   // Markdown links: open in VS Code when viewed as a local file, else on GitHub.
   (function () {
-    var GH = 'https://github.com/yahyabedirhan/skills/blob/main/docs/research/';
+    var GH = 'https://github.com/yahyabedirhan/skills/blob/main/docs/research/cloud-agents/';
     var dir = null;
     if (location.protocol === 'file:') {
       var parts = decodeURIComponent(location.pathname).split('/');
       parts.pop();
-      // Next to the Markdown files already; otherwise assume a folder at the repo root (such as .scratch).
-      if (parts.slice(-2).join('/') !== 'docs/research') { parts.pop(); parts.push('docs', 'research'); }
+      // Next to the Markdown files already (docs/research/cloud-agents); otherwise assume a folder at the repo root (such as .scratch).
+      if (parts.slice(-3).join('/') !== 'docs/research/cloud-agents') { parts.pop(); parts.push('docs', 'research', 'cloud-agents'); }
       dir = parts.join('/');
     }
     var out = [];

@@ -13,8 +13,8 @@ This file maps what Anthropic offers to run Claude Code off the Mac:
 
 It builds on two files and doesn't repeat them:
 
-- [What each harness can and can't do](harness-capabilities.md): how Claude Code loads instructions, permissions and hooks locally.
-- [Herdr across the Mac and the VPS](herdr-vps.md): the VPS path.
+- [What each harness can and can't do](../harness-capabilities.md): how Claude Code loads instructions, permissions and hooks locally.
+- [Herdr across the Mac and the VPS](../herdr-vps.md): the VPS path.
 
 Evidence tags:
 
@@ -31,9 +31,9 @@ On 2026-09-29 (issue #78), a cloud session re-read sections 1 to 11 and the Shor
 
 **See also**, from issue #78:
 
-- [Inside a Claude Code cloud session: first-hand probes](cloud-agents-session-probe.md): the VM, browser, network, GitHub proxy, sub-agent tools and hooks, tested from inside one session. It answers most of the Open questions below.
-- [Running the effort workflow in a Claude Code cloud session](cloud-agents-session-workflow.md): how skills and instructions can reach a cloud session, and what the effort workflow needs there.
-- [Managed Agents on the Claude Platform vs Claude Code cloud sessions](cloud-agents-managed-agents.md): the API product with a similar name, and why it doesn't replace this one here.
+- [Inside a Claude Code cloud session: first-hand probes](session-probe.md): the VM, browser, network, GitHub proxy, sub-agent tools and hooks, tested from inside one session. It answers most of the Open questions below.
+- [Running the effort workflow in a Claude Code cloud session](session-workflow.md): how skills and instructions can reach a cloud session, and what the effort workflow needs there.
+- [Managed Agents on the Claude Platform vs Claude Code cloud sessions](managed-agents.md): the API product with a similar name, and why it doesn't replace this one here.
 
 ## Short answer
 
@@ -87,7 +87,7 @@ Cloud sessions need a claude.ai sign-in. They aren't available with a Console AP
 ## 2. Environment
 
 - **Machine.** "Each session gets a fresh virtual machine (VM) running Ubuntu 24.04 on x86_64 … with your repository cloned and common toolchains pre-installed" [doc env, "What's available in cloud sessions"].
-- **Resources.** "Approximate resource ceilings that may change over time: 4 vCPUs, 16 GB of RAM, 30 GB of disk". The VM "may stop tasks that need significantly more memory" [doc env, "Resource limits"]. The probe VM was a Firecracker microVM. It had 4 vCPU, 15.7 GiB of RAM, no swap, and 30G writable, although `df` shows 252G [probe; [session-probe §10](cloud-agents-session-probe.md#10-disk)].
+- **Resources.** "Approximate resource ceilings that may change over time: 4 vCPUs, 16 GB of RAM, 30 GB of disk". The VM "may stop tasks that need significantly more memory" [doc env, "Resource limits"]. The probe VM was a Firecracker microVM. It had 4 vCPU, 15.7 GiB of RAM, no swap, and 30G writable, although `df` shows 252G [probe; [session-probe §10](session-probe.md#10-disk)].
 - **User.** Setup scripts "run as root on Ubuntu 24.04, so `apt install` … work[s]" [doc env, "Setup scripts"]. Claude's own commands run as root too [probe].
 - **No shell for you.** "You don't get a shell into the session VM. Claude runs every command for you" [doc env, "Run tests, start services, and add packages"].
 - **Lifetime.** Sessions persist across devices and keep running with the laptop closed.
@@ -144,7 +144,7 @@ Cloud sessions need a claude.ai sign-in. They aren't available with a Console AP
   - **Full**: any domain
   - **Custom**: your list, optionally plus the defaults
 
-  A blocked request gets `403` with `x-deny-reason: host_not_allowed` [doc routines, "Environments and network access"]. First-hand, the 403 carried no `x-deny-reason` header. The body names the host (`request blocked: no rule or allowlist entry allows host "…"`) [probe; [session-probe §3](cloud-agents-session-probe.md#3-network-and-the-proxy)].
+  A blocked request gets `403` with `x-deny-reason: host_not_allowed` [doc routines, "Environments and network access"]. First-hand, the 403 carried no `x-deny-reason` header. The body names the host (`request blocked: no rule or allowlist entry allows host "…"`) [probe; [session-probe §3](session-probe.md#3-network-and-the-proxy)].
 - **Always reachable, whatever the level** [doc env, "Access levels"]:
   - GitHub, through its own proxy
   - MCP connectors (their traffic goes through Anthropic's servers)
@@ -153,8 +153,8 @@ Cloud sessions need a claude.ai sign-in. They aren't available with a Console AP
 - **Even at None**, Claude Code still talks to the Anthropic API, "which may allow data to exit the VM". On Pro and Max, you can add API keys to an environment as API credentials. They stay outside the sandbox, and the proxy attaches them to matching requests. Team and Enterprise don't have them yet [doc cloud, "Security and isolation"].
 - **Security proxy.** All outbound traffic goes through an HTTP/HTTPS proxy. It does rate limits, content filters and a DNS-level audit trail [doc env, "Security proxy"].
 - **Trusted list** includes `code.claude.com`, `docs.claude.com`, `github.com`, the npm, PyPI, crates, Go, Maven registries, Docker Hub, `ghcr.io`, `*.googleapis.com`, `*.amazonaws.com`, `developer.apple.com`, `swift.org` and more. It doesn't include general sites [doc env, "Default allowed domains"]. So research against arbitrary web pages needs **Full** or **Custom** on the environment.
-- **WebSearch** is a server-side tool on the Claude API [doc tools, WebSearch notes]. First-hand, it works in a cloud session on Trusted. **WebFetch** runs inside the VM's `claude` process, under the environment's allowlist. Allowlisted hosts fetch, and others return `EGRESS_BLOCKED` [probe; [session-probe §2](cloud-agents-session-probe.md#2-webfetch-and-websearch)].
-- **Browser.** The docs list `chromedriver` with Node but name no Chrome or Chromium binary. Claude in Chrome drives the local Chrome, and the docs don't list it for cloud sessions. First-hand [probe; [session-probe §1](cloud-agents-session-probe.md#1-headless-browser)]:
+- **WebSearch** is a server-side tool on the Claude API [doc tools, WebSearch notes]. First-hand, it works in a cloud session on Trusted. **WebFetch** runs inside the VM's `claude` process, under the environment's allowlist. Allowlisted hosts fetch, and others return `EGRESS_BLOCKED` [probe; [session-probe §2](session-probe.md#2-webfetch-and-websearch)].
+- **Browser.** The docs list `chromedriver` with Node but name no Chrome or Chromium binary. Claude in Chrome drives the local Chrome, and the docs don't list it for cloud sessions. First-hand [probe; [session-probe §1](session-probe.md#1-headless-browser)]:
   - Playwright's Chromium is pre-installed in `/opt/pw-browsers` (`PLAYWRIGHT_BROWSERS_PATH`). The harness prompt says not to run `playwright install`.
   - It launches headless in under a second on Trusted.
   - But every HTTPS page fails with `ERR_CERT_AUTHORITY_INVALID` until the browser trusts the proxy's CA. One way: `--ignore-certificate-errors-spki-list=<proxy CA SPKI hash>`.
@@ -167,12 +167,12 @@ From the "What carries over from your setup" table [doc env] and [doc settings, 
 
 | Item | Loads? |
 |---|---|
-| Repo `CLAUDE.md`, `.claude/rules/` | Yes (part of the clone). `AGENTS.md` follows the local rule in [harness-capabilities.md](harness-capabilities.md) 1.1. This repo's `CLAUDE.md` imports it |
+| Repo `CLAUDE.md`, `.claude/rules/` | Yes (part of the clone). `AGENTS.md` follows the local rule in [harness-capabilities.md](../harness-capabilities.md) 1.1. This repo's `CLAUDE.md` imports it |
 | Repo `.claude/skills/`, `.claude/agents/`, `.claude/commands/` | Yes |
 | Repo `.claude/settings.json` hooks, permission rules, `env` | Only in a session with **one** repository |
 | Repo `.mcp.json` | Only with one repository |
 | Plugins in repo or user settings | **No**. Projects can add plugins in project settings |
-| `~/.claude/CLAUDE.md`, `~/.claude/skills/`, agents, commands, user hooks, user settings | **No** ("Live on your machine"): this means the laptop's files. The VM has its own `~/.claude/`. Skills placed in its `~/.claude/skills/` load, even mid-session [probe; [session-workflow §1](cloud-agents-session-workflow.md#1-the-layers-in-a-cloud-session)] |
+| `~/.claude/CLAUDE.md`, `~/.claude/skills/`, agents, commands, user hooks, user settings | **No** ("Live on your machine"): this means the laptop's files. The VM has its own `~/.claude/`. Skills placed in its `~/.claude/skills/` load, even mid-session [probe; [session-workflow §1](session-workflow.md#1-the-layers-in-a-cloud-session)] |
 | User or local MCP servers (`claude mcp add`) | **No**. Use `--scope project` and commit `.mcp.json`, or use a claude.ai connector |
 | Skills enabled on the claude.ai account | **Yes**: "Cloud sessions automatically load skills you enable on claude.ai" [doc skills, "Use skills in Cowork and cloud sessions"] |
 | claude.ai connectors | Routines and projects: yes, chosen per routine or project. A new routine includes **all** connected connectors by default. Claude can use every tool of an included connector, writes too, without a question. Local `claude mcp add` servers never appear there. So add them at claude.ai/customize/connectors, or, with one repository, commit a `.mcp.json` [doc routines, "Review connectors"; "Connectors"]. Plain cloud sessions: the docs don't state how connectors are chosen. They only mention a session that waits to approve "an MCP connector tool call" [doc cloud, "Environment expired"]. The Desktop "+ Connectors" button isn't offered for cloud sessions [doc desktop]. Unverified. The probe session, started with `claude --cloud`, had the account's Gmail and Claude Docs connectors. It also had the GitHub MCP tools and a "Claude Code Remote" server [probe] |
@@ -186,7 +186,7 @@ There are two documented ways to carry them:
 - Enable the skills on the claude.ai account.
 - Commit a `.claude/skills/` (and project instructions) in the target repo. Routines say the same: a run "uses skills committed to the cloned repository" [doc routines, "Create a routine"].
 
-In the probe session, the account's enabled skills were synced into `~/.claude/skills/synced/`. This repo's skills, installed mid-session with `npx skills add … -g`, loaded at once, but they vanish with the VM [probe]. So a third way works: an environment setup script, or a SessionStart hook, that installs the skills into the VM's home ([session-workflow §2](cloud-agents-session-workflow.md#2-carrying-the-skills-and-global-instructions-into-cloud-sessions)). Untested: whether a `~/.claude/CLAUDE.md` that a setup script writes loads.
+In the probe session, the account's enabled skills were synced into `~/.claude/skills/synced/`. This repo's skills, installed mid-session with `npx skills add … -g`, loaded at once, but they vanish with the VM [probe]. So a third way works: an environment setup script, or a SessionStart hook, that installs the skills into the VM's home ([session-workflow §2](session-workflow.md#2-carrying-the-skills-and-global-instructions-into-cloud-sessions)). Untested: whether a `~/.claude/CLAUDE.md` that a setup script writes loads.
 
 ## 6. GitHub
 
@@ -209,7 +209,7 @@ In the probe session, the account's enabled skills were synced into `~/.claude/s
   - Routines start from the default branch "unless your prompt specifies otherwise". They push `claude/`-prefixed branches, which GitHub always accepts. A push to another branch that the prompt names gets a check first. It is refused if the branch is protected, has someone else's open PR, or carries commits by someone other than you [doc routines, "Repositories and branch permissions"].
   - Project threads work on a new branch from the default branch [doc projects].
 - **Pushing.** "`git push` works only against the session's current working branch" [doc env, "GitHub proxy"]. First-hand, that means the checked-out branch, whatever its name.
-  - The session pushed its `claude/<slug>` branch. Then it created a new branch named in the prompt (`skills/…`), checked it out, and pushed it and further commits to it. `get_session` then tracked that branch as the session's branch [probe; [session-probe §4](cloud-agents-session-probe.md#4-github-proxy)].
+  - The session pushed its `claude/<slug>` branch. Then it created a new branch named in the prompt (`skills/…`), checked it out, and pushed it and further commits to it. `get_session` then tracked that branch as the session's branch [probe; [session-probe §4](session-probe.md#4-github-proxy)].
   - The harness prompt tells the model not to push to another branch "without explicit permission". This is an instruction, not a proxy rule [probe].
   - Untested: a push to an existing branch that the session didn't create (for example an effort branch pushed from the Mac).
 - **Pull requests.**
@@ -217,7 +217,7 @@ In the probe session, the account's enabled skills were synced into `~/.claude/s
   - In the probe, the session also opened a PR itself with the GitHub MCP tool `create_pull_request` [probe].
   - Built-in GitHub tools and `gh` work through the proxy. But the proxy serves only "a pinned set of GraphQL operations for pull-request workflows". Projects v2 and other GraphQL-only APIs are out of reach [doc env, "GitHub proxy"].
   - First-hand, GraphQL is blocked entirely. Every query, PR-related or not, got `403`. The message pointed to the REST API, and to special REST routes under `/repos/{owner}/{repo}/pulls/{n}/ccr/` for review threads, comment resolution, auto-merge and draft state.
-  - REST works for the attached repository. That includes sub-issues (`200`) and `/user` (`200`, so the proxy injects a real credential) [probe; [session-probe §4](cloud-agents-session-probe.md#4-github-proxy)].
+  - REST works for the attached repository. That includes sub-issues (`200`) and `/user` (`200`, so the proxy injects a real credential) [probe; [session-probe §4](session-probe.md#4-github-proxy)].
   - `gh` itself was missing from the VM. So a `gh` command that uses GraphQL would fail even after an install.
 - **Repository scope.** API requests reach only repositories attached to the session. A running session can attach another repository [doc env; changelog 2.1.282, 2.1.283]. First-hand, the proxy refused REST calls to any other repository, even a public one ("GitHub access to this repository is not enabled for this session. Use add_repo …"). Plain `git` reads of other public repositories still work [probe].
 - **Non-GitHub.** Clones and PRs need GitHub. `CCR_FORCE_BUNDLE=1` uploads a local bundle (under 100 MB), but the session can't push back to a non-GitHub remote [doc cloud, "Send local repositories without GitHub"; "Limitations"].
@@ -319,7 +319,7 @@ In the probe session, the account's enabled skills were synced into `~/.claude/s
 
 ## 8. Long work
 
-- **Subagents** "work the same way they do locally", and the repo's `.claude/agents/` load [doc cloud, "Manage context"]. First-hand, they go only one level deep: `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1`. A sub-agent has no Agent tool, and no `PushNotification`, `ListAgents` or `CronCreate` [probe; [session-probe §5](cloud-agents-session-probe.md#5-sub-agent-tools)].
+- **Subagents** "work the same way they do locally", and the repo's `.claude/agents/` load [doc cloud, "Manage context"]. First-hand, they go only one level deep: `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1`. A sub-agent has no Agent tool, and no `PushNotification`, `ListAgents` or `CronCreate` [probe; [session-probe §5](session-probe.md#5-sub-agent-tools)].
 - **Agent teams** are off by default. Set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` on the environment [doc cloud].
 - **Idle expiry** kills background subagents and shell commands when Anthropic reclaims the VM [doc cloud, "Environment expired"]. A long orchestration that waits on a human answer risks that.
 - **Projects** are Anthropic's answer to "run a whole effort" [doc projects, "How a project is organized"; "What draws on your plan"]:
@@ -331,9 +331,9 @@ In the probe session, the account's enabled skills were synced into `~/.claude/s
   - In a project with several repositories, repo permission rules and hooks don't apply [doc projects, "What threads pick up from your repositories"].
 - **Routines** run autonomously: "there is no permission-mode picker". Commands and connector writes run "without stopping for approval", apart from some artifact actions [doc routines, "Create a routine"]. The fired prompt can't stand in for your approval of anything during the run [doc routines, "Name the routine and write the prompt"]. So a routine suits a well-defined step that nobody watches. It doesn't suit a step that needs a human go.
 - **Parallel sessions from the CLI.** Each `claude --cloud "…"` is its own independent session and branch, and they run at the same time. The docs pitch this for parallel tasks "without managing multiple worktrees" [doc cloud, "Run tasks in parallel"; doc quickstart, intro]. Parallel runs draw rate limits proportionately [doc cloud, "Limitations"].
-- **Herdr and worktrees.** Herdr isn't pre-installed. Plain `git worktree` works: the probe created, listed and removed one in the VM [probe; [session-probe §6](cloud-agents-session-probe.md#6-worktrees)]. [session-workflow §3](cloud-agents-session-workflow.md#3-the-effort-workflow-in-a-cloud-session) covers how this repo's effort workflow maps onto one VM. Within one cloud session, the parallel work is subagents. Across sessions, it's projects or several `--cloud` calls.
-- **Starting another cloud session from inside one.** The four pages don't say. The VM's `claude` is signed in with a claude.ai OAuth token and has `--cloud`. The session also has the Remote MCP `create_session` tool [probe; [session-probe §7](cloud-agents-session-probe.md#7-the-claude-cli-inside-the-vm)]. Both look possible. This research ran neither.
-- **The platform's Stop hook.** Every cloud session runs a Stop hook. It refuses to end a turn while the checkout has uncommitted, untracked, unpushed or unsigned work. So it sends the session back to commit and push. Files meant to stay local must be git-ignored [probe; [session-probe §9](cloud-agents-session-probe.md#9-hooks-and-launcher-settings)].
+- **Herdr and worktrees.** Herdr isn't pre-installed. Plain `git worktree` works: the probe created, listed and removed one in the VM [probe; [session-probe §6](session-probe.md#6-worktrees)]. [session-workflow §3](session-workflow.md#3-the-effort-workflow-in-a-cloud-session) covers how this repo's effort workflow maps onto one VM. Within one cloud session, the parallel work is subagents. Across sessions, it's projects or several `--cloud` calls.
+- **Starting another cloud session from inside one.** The four pages don't say. The VM's `claude` is signed in with a claude.ai OAuth token and has `--cloud`. The session also has the Remote MCP `create_session` tool [probe; [session-probe §7](session-probe.md#7-the-claude-cli-inside-the-vm)]. Both look possible. This research ran neither.
+- **The platform's Stop hook.** Every cloud session runs a Stop hook. It refuses to end a turn while the checkout has uncommitted, untracked, unpushed or unsigned work. So it sends the session back to commit and push. Files meant to stay local must be git-ignored [probe; [session-probe §9](session-probe.md#9-hooks-and-launcher-settings)].
 
 ## 9. Watching and answering
 
@@ -360,7 +360,7 @@ In the probe session, the account's enabled skills were synced into `~/.claude/s
   - Each entry has its repo, branch, head, dirty flag, unpushed commit count, status bucket (working, blocked, review ready, completed, failed), last summary, and whether it needs action.
   - `get_session` gives one session's status, title, pending actions, context use and rate-limit window.
   - The four pages don't document this. Nobody knows yet whether a local session gets these tools.
-- **Permission prompts can block a cloud session.** The probe session's first calls to several Remote MCP tools waited as pending actions ("Waiting on permission: `<tool>`"). The session sat in the blocked bucket until someone approved them. The record doesn't say who or what approved them. The session was in auto mode. Anyone who lists sessions sees such a session as one that needs action [probe; [session-probe §5](cloud-agents-session-probe.md#5-sub-agent-tools)].
+- **Permission prompts can block a cloud session.** The probe session's first calls to several Remote MCP tools waited as pending actions ("Waiting on permission: `<tool>`"). The session sat in the blocked bucket until someone approved them. The record doesn't say who or what approved them. The session was in auto mode. Anyone who lists sessions sees such a session as one that needs action [probe; [session-probe §5](session-probe.md#5-sub-agent-tools)].
 - **Notifications:**
   - Projects send Desktop notifications when Claude posts, or a thread errors or needs input (Desktop only) [doc projects, "See what needs you in Overview"].
   - The docs describe phone push for Remote Control sessions and Dispatch [doc mobile, "Get push notifications"]. Unverified: whether a plain cloud session pushes to the phone.
@@ -463,24 +463,24 @@ In the probe session, the account's enabled skills were synced into `~/.claude/s
 
 ## Open questions
 
-The first pass left twelve questions. Issue #78's cloud session answered most of them from inside. The rows still open say what to try next. "SP" links a section of [cloud-agents-session-probe.md](cloud-agents-session-probe.md). A bare [probe] is a check that the orchestrating session ran itself, described in the cell.
+The first pass left twelve questions. Issue #78's cloud session answered most of them from inside. The rows still open say what to try next. "SP" links a section of [session-probe.md](session-probe.md). A bare [probe] is a check that the orchestrating session ran itself, described in the cell.
 
 | Question | Answer | Evidence or next step |
 |---|---|---|
-| What does the VM actually report (`uname`, `nproc`, `free`, user, `check-tools`)? | A Firecracker microVM: Ubuntu 24.04.4, kernel 6.18, 4 vCPU Xeon, 15.7 GiB RAM, no swap, root. 30G writable of a 252G disk. Toolchains as documented, except that `gh` is missing. Playwright and Chromium present | [probe]: `uname`, `nproc`, `free`, `check-tools` in the session; [SP §7](cloud-agents-session-probe.md#7-the-claude-cli-inside-the-vm), [SP §10](cloud-agents-session-probe.md#10-disk) |
+| What does the VM actually report (`uname`, `nproc`, `free`, user, `check-tools`)? | A Firecracker microVM: Ubuntu 24.04.4, kernel 6.18, 4 vCPU Xeon, 15.7 GiB RAM, no swap, root. 30G writable of a 252G disk. Toolchains as documented, except that `gh` is missing. Playwright and Chromium present | [probe]: `uname`, `nproc`, `free`, `check-tools` in the session; [SP §7](session-probe.md#7-the-claude-cli-inside-the-vm), [SP §10](session-probe.md#10-disk) |
 | Does the create form print the session ID or URL, and how? | Yes, then it exits: `Created cloud session: <title>`, `View: https://claude.ai/code/session_<id>?from=cli&m=0`, `Resume with: claude --teleport session_<id>`. No live checklist | [probe]: the maintainer's `claude --cloud "say hi"` on the Mac (section 7) |
 | Did probe 1 create a session? | No. **Settled (E2).** | [probe]: the Remote MCP `list_sessions`, run inside the cloud session, returned a first page that reached back to 2026-09-14. So it held every 2026-09-29 session, and none came from probe 1 |
-| Can a cloud session run a headless browser, and on which network level? | Yes, on Trusted, with the pre-installed Chromium, once the browser trusts the proxy's CA (`--ignore-certificate-errors-spki-list`). Only allowlisted hosts load | [SP §1](cloud-agents-session-probe.md#1-headless-browser) |
-| Do WebFetch and WebSearch work under **Trusted**? | WebSearch yes. WebFetch runs in the VM under the allowlist: allowlisted hosts yes, others `EGRESS_BLOCKED` | [SP §2](cloud-agents-session-probe.md#2-webfetch-and-websearch) |
-| Do skills enabled on the claude.ai account load, and does this repo's `CLAUDE.md` → `AGENTS.md` import load? | Yes to both. The account's nine skills are synced into the VM's `~/.claude/skills/synced/`, and `AGENTS.md` loaded through `CLAUDE.md`. Skills installed into the VM's `~/.claude/skills/` mid-session loaded too | [probe]: file listing and the session's own context; [session-workflow §1](cloud-agents-session-workflow.md#1-the-layers-in-a-cloud-session) |
-| Does a `~/.claude/CLAUDE.md` written by the environment's setup script load? | Open (new) | Add a personal environment with the setup script in [session-workflow §2](cloud-agents-session-workflow.md#b-the-setup-script). Start one session, and ask it to quote a rule line |
+| Can a cloud session run a headless browser, and on which network level? | Yes, on Trusted, with the pre-installed Chromium, once the browser trusts the proxy's CA (`--ignore-certificate-errors-spki-list`). Only allowlisted hosts load | [SP §1](session-probe.md#1-headless-browser) |
+| Do WebFetch and WebSearch work under **Trusted**? | WebSearch yes. WebFetch runs in the VM under the allowlist: allowlisted hosts yes, others `EGRESS_BLOCKED` | [SP §2](session-probe.md#2-webfetch-and-websearch) |
+| Do skills enabled on the claude.ai account load, and does this repo's `CLAUDE.md` → `AGENTS.md` import load? | Yes to both. The account's nine skills are synced into the VM's `~/.claude/skills/synced/`, and `AGENTS.md` loaded through `CLAUDE.md`. Skills installed into the VM's `~/.claude/skills/` mid-session loaded too | [probe]: file listing and the session's own context; [session-workflow §1](session-workflow.md#1-the-layers-in-a-cloud-session) |
+| Does a `~/.claude/CLAUDE.md` written by the environment's setup script load? | Open (new) | Add a personal environment with the setup script in [session-workflow §2](session-workflow.md#b-the-setup-script). Start one session, and ask it to quote a rule line |
 | How long is the idle expiry? | Open | Not testable from inside. Leave a probe session idle, and note when a reopen provisions a fresh VM |
-| Can a plain cloud session push to a branch named in the prompt (an effort branch), not only its own? | A **new** branch, yes. The session created `skills/…` from its start branch and pushed it and further commits. `get_session` then tracked it. An **existing** branch it didn't create: untested | [probe]: `git push -u origin <new branch>`, then `get_session`; [SP §4](cloud-agents-session-probe.md#4-github-proxy). Next: a session on a throwaway `probe/…` branch pushed from the Mac, asked to push there |
-| Does a plain cloud session send phone push notifications? | Half answered. The main session's deferred `PushNotification` tool, called at the end of the #78 run, returned "Mobile push requested" [probe]. Sub-agents don't have it. Arrival on the phone is unconfirmed | [SP §5](cloud-agents-session-probe.md#5-sub-agent-tools). Next: the maintainer confirms whether that push arrived (E19) |
-| Can a cloud session start another cloud session? | Likely. The VM's `claude` is signed in with OAuth and has `--cloud`, and the Remote MCP `create_session` is present. Not run | [SP §7](cloud-agents-session-probe.md#7-the-claude-cli-inside-the-vm). Next: one `create_session` child on a throwaway branch, then archive it ([session-workflow §4](cloud-agents-session-workflow.md#4-suggestions), suggestion 6) |
+| Can a plain cloud session push to a branch named in the prompt (an effort branch), not only its own? | A **new** branch, yes. The session created `skills/…` from its start branch and pushed it and further commits. `get_session` then tracked it. An **existing** branch it didn't create: untested | [probe]: `git push -u origin <new branch>`, then `get_session`; [SP §4](session-probe.md#4-github-proxy). Next: a session on a throwaway `probe/…` branch pushed from the Mac, asked to push there |
+| Does a plain cloud session send phone push notifications? | Half answered. The main session's deferred `PushNotification` tool, called at the end of the #78 run, returned "Mobile push requested" [probe]. Sub-agents don't have it. Arrival on the phone is unconfirmed | [SP §5](session-probe.md#5-sub-agent-tools). Next: the maintainer confirms whether that push arrived (E19) |
+| Can a cloud session start another cloud session? | Likely. The VM's `claude` is signed in with OAuth and has `--cloud`, and the Remote MCP `create_session` is present. Not run | [SP §7](session-probe.md#7-the-claude-cli-inside-the-vm). Next: one `create_session` child on a throwaway branch, then archive it ([session-workflow §4](session-workflow.md#4-suggestions), suggestion 6) |
 | Promo credit terms and remaining balance | The credit is live and spent first. The session's rate-limit type is promotional, and it resets 2026-11-05 at midnight PST. Balance not visible from inside | [probe]: `get_session` on the session itself (section 11). Next: the maintainer reads the balance at claude.ai/settings/usage |
-| Does the GitHub proxy allow the REST sub-issue calls this repo's skills make? | Yes (`200`, with a real credential injected). GraphQL is blocked entirely, not only outside PR workflows | [SP §4](cloud-agents-session-probe.md#4-github-proxy) |
-| After `claude --teleport`, does the cloud original keep running? | Open | Not run. Teleport a throwaway session, then check it with `list_sessions` or on claude.ai, and archive it (E12 in [cloud-agents.md](cloud-agents.md#proposed-experiments)) |
+| Does the GitHub proxy allow the REST sub-issue calls this repo's skills make? | Yes (`200`, with a real credential injected). GraphQL is blocked entirely, not only outside PR workflows | [SP §4](session-probe.md#4-github-proxy) |
+| After `claude --teleport`, does the cloud original keep running? | Open | Not run. Teleport a throwaway session, then check it with `list_sessions` or on claude.ai, and archive it (E12 in [README.md](README.md#proposed-experiments)) |
 
 ### Settled since the first pass
 

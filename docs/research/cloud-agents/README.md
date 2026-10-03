@@ -32,19 +32,19 @@ Words used here:
 
 | Short name | File | Ticket |
 |---|---|---|
-| **cc** | [cloud-agents-claude-code.md](cloud-agents-claude-code.md): Claude Code's cloud sessions, routines, projects | #69 |
-| **op** | [cloud-agents-other-providers.md](cloud-agents-other-providers.md): Codex, Cursor, Copilot, and the rest | #70 |
-| **vps** | [cloud-agents-vps.md](cloud-agents-vps.md): the VPS compared with the Mac, Herdr across machines | #71 |
-| **siz** | [cloud-agents-vps-sizing.md](cloud-agents-vps-sizing.md): VPS sizing and other providers | #72 |
-| **del** | [cloud-agents-delegation.md](cloud-agents-delegation.md): handing over, watching, answering, notifying, continuing | #73 |
-| **fm** | [cloud-agents-firstmate.md](cloud-agents-firstmate.md): Firstmate and the Treehouse author's other tools | #75 |
-| **hv** | [herdr-vps.md](herdr-vps.md): the earlier Herdr-and-VPS research | — |
-| **sp** | [cloud-agents-session-probe.md](cloud-agents-session-probe.md): first-hand probes from inside a Claude Code cloud session | #78 |
-| **wf** | [cloud-agents-session-workflow.md](cloud-agents-session-workflow.md): how skills reach a cloud session, and the effort workflow there | #78 |
-| **ma** | [cloud-agents-managed-agents.md](cloud-agents-managed-agents.md): Managed Agents on the Claude Platform vs Claude Code cloud sessions | #78 |
-| **vp** | [cloud-agents-vps-providers.md](cloud-agents-vps-providers.md): VPS options to switch to, shared vs dedicated, latency | #86 |
-| **co** | [cloud-agents-costs.md](cloud-agents-costs.md): what delegating costs on each hosted agent, and which ticket goes where | #87 |
-| **fd** | [cloud-agents-firstmate-deep-dive.md](cloud-agents-firstmate-deep-dive.md): Firstmate's tools, workflows and a ranked borrow list | #88 |
+| **cc** | [claude-code.md](claude-code.md): Claude Code's cloud sessions, routines, projects | #69 |
+| **op** | [other-providers.md](other-providers.md): Codex, Cursor, Copilot, and the rest | #70 |
+| **vps** | [vps.md](vps.md): the VPS compared with the Mac, Herdr across machines | #71 |
+| **siz** | [vps-sizing.md](vps-sizing.md): VPS sizing and other providers | #72 |
+| **del** | [delegation.md](delegation.md): handing over, watching, answering, notifying, continuing | #73 |
+| **fm** | [firstmate.md](firstmate.md): Firstmate and the Treehouse author's other tools | #75 |
+| **hv** | [herdr-vps.md](../herdr-vps.md): the earlier Herdr-and-VPS research | — |
+| **sp** | [session-probe.md](session-probe.md): first-hand probes from inside a Claude Code cloud session | #78 |
+| **wf** | [session-workflow.md](session-workflow.md): how skills reach a cloud session, and the effort workflow there | #78 |
+| **ma** | [managed-agents.md](managed-agents.md): Managed Agents on the Claude Platform vs Claude Code cloud sessions | #78 |
+| **vp** | [vps-providers.md](vps-providers.md): VPS options to switch to, shared vs dedicated, latency | #86 |
+| **co** | [costs.md](costs.md): what delegating costs on each hosted agent, and which ticket goes where | #87 |
+| **fd** | [firstmate-deep-dive.md](firstmate-deep-dive.md): Firstmate's tools, workflows and a ranked borrow list | #88 |
 
 ## The short version
 
@@ -133,64 +133,64 @@ Columns:
 | **Moving back** | Same branch or stacked ([del §2][del2]) | Git plus safe-handover checks over SSH. VPS to Mac impossible ([hv][hv-checks], [hv][hv-back]) | Same checks through `--machine` ([vps][vps-perm]) | `claude --teleport` copies it. The docs don't say that the cloud session stops. Assume it may still run until E12 settles it ([cc §10][cc10], [del §4.4][del44]) | Codex `apply`. Check out the branch ([op][op-cmp]) | Relaunch from the brief on disk ([fm][fm-qs]) |
 | **Cost** | Owned. Plan usage ([siz][siz-sum]) | €5.99/month plus plan usage ([siz][siz-sum]) | CX33 €8.99/month (+€3). Hetzner may refuse the rescale for now ([siz][siz-avail]). **Update 3 Oct:** not offered. A netcup VPS 1000 on a monthly term instead (D4) | Plan usage, no VM charge. A one-time $100 / $250 promo credit, live and spent first. Its rate-limit window (`resetsAt`) resets 5 November. That is a window reset, not a refill ([cc §11][cc11]) | Codex in Plus $20. Cursor Pro $20 plus API prices. Copilot Pro $10 plus AI credits ([op][op-cmp]) | Free. Spends the owner's subscriptions ([fm][fm-qs]) |
 
-[cc2]: cloud-agents-claude-code.md#2-environment
-[cc3]: cloud-agents-claude-code.md#3-tools-and-commands
-[cc4]: cloud-agents-claude-code.md#4-web-and-browser
-[cc5]: cloud-agents-claude-code.md#5-what-loads
-[cc6]: cloud-agents-claude-code.md#6-github
-[cc7]: cloud-agents-claude-code.md#7-starting-it
-[cc8]: cloud-agents-claude-code.md#8-long-work
-[cc9]: cloud-agents-claude-code.md#9-watching-and-answering
-[cc10]: cloud-agents-claude-code.md#10-moving-it
-[cc11]: cloud-agents-claude-code.md#11-cost-and-limits
-[sp-short]: cloud-agents-session-probe.md#short-answer
-[sp1]: cloud-agents-session-probe.md#1-headless-browser
-[sp2]: cloud-agents-session-probe.md#2-webfetch-and-websearch
-[sp4]: cloud-agents-session-probe.md#4-github-proxy
-[sp6]: cloud-agents-session-probe.md#6-worktrees
-[sp10]: cloud-agents-session-probe.md#10-disk
-[sp-oq]: cloud-agents-session-probe.md#answers-to-69s-open-questions
-[wf-short]: cloud-agents-session-workflow.md#short-answer
-[wf1]: cloud-agents-session-workflow.md#1-the-layers-in-a-cloud-session
-[wf2]: cloud-agents-session-workflow.md#2-carrying-the-skills-and-global-instructions-into-cloud-sessions
-[wf3]: cloud-agents-session-workflow.md#3-the-effort-workflow-in-a-cloud-session
-[wf4]: cloud-agents-session-workflow.md#4-suggestions
-[wf-oq]: cloud-agents-session-workflow.md#open-questions
-[ma-fit]: cloud-agents-managed-agents.md#5-fit-for-this-maintainer
-[op-cmp]: cloud-agents-other-providers.md#comparison
-[op1]: cloud-agents-other-providers.md#1-openai-codex-cloud
-[op2]: cloud-agents-other-providers.md#2-cursor-cloud-agents-and-the-agent-cli
-[op3]: cloud-agents-other-providers.md#3-github-copilot-cloud-agent-formerly-coding-agent
-[vps-glance]: cloud-agents-vps.md#at-a-glance
-[vps-browser]: cloud-agents-vps.md#headless-browser
-[vps-web]: cloud-agents-vps.md#web-access-scripts-and-file-system
-[vps-git]: cloud-agents-vps.md#git-worktrees-and-github
-[vps-herdr]: cloud-agents-vps.md#herdr-across-machines
-[vps-upgrade]: cloud-agents-vps.md#what-an-upgrade-to-092-would-change
-[vps-notif]: cloud-agents-vps.md#notifications
-[vps-env]: cloud-agents-vps.md#the-environment-on-the-vps
-[vps-perm]: cloud-agents-vps.md#permissions-on-the-other-machine
-[siz-sum]: cloud-agents-vps-sizing.md#summary
-[siz-today]: cloud-agents-vps-sizing.md#the-vps-today-vps
-[siz-tiers]: cloud-agents-vps-sizing.md#2-workload-to-smallest-tier
-[siz-avail]: cloud-agents-vps-sizing.md#availability-what-not-available-means
-[siz-rec]: cloud-agents-vps-sizing.md#6-recommendation-per-workload
-[del1]: cloud-agents-delegation.md#1-todays-flow-and-the-steps-that-depend-on-where-the-agent-runs
-[del2]: cloud-agents-delegation.md#2-the-options-side-by-side
-[del31]: cloud-agents-delegation.md#31-handing-over-through-herdr-13s-path
-[del32]: cloud-agents-delegation.md#32-watching-and-answering
-[del33]: cloud-agents-delegation.md#33-notifying
-[del41]: cloud-agents-delegation.md#41-handing-over
-[del43]: cloud-agents-delegation.md#43-notifying
-[del44]: cloud-agents-delegation.md#44-continuing-and-keeping-two-orchestrators-off-one-branch
-[del5]: cloud-agents-delegation.md#5-other-hosted-agents-for-delegation-only
-[fm-walk]: cloud-agents-firstmate.md#how-firstmate-delegates-walkthrough
-[fm-where]: cloud-agents-firstmate.md#where-crew-agents-run
-[fm-remote]: cloud-agents-firstmate.md#remote-secondmates-in-depth
-[fm-gh]: cloud-agents-firstmate.md#github-access
-[fm-qs]: cloud-agents-firstmate.md#the-same-questions-as-the-other-research-tickets
-[fm-map]: cloud-agents-firstmate.md#mapped-against-this-repos-workflow
-[fm-axi]: cloud-agents-firstmate.md#the--axi-tools
+[cc2]: claude-code.md#2-environment
+[cc3]: claude-code.md#3-tools-and-commands
+[cc4]: claude-code.md#4-web-and-browser
+[cc5]: claude-code.md#5-what-loads
+[cc6]: claude-code.md#6-github
+[cc7]: claude-code.md#7-starting-it
+[cc8]: claude-code.md#8-long-work
+[cc9]: claude-code.md#9-watching-and-answering
+[cc10]: claude-code.md#10-moving-it
+[cc11]: claude-code.md#11-cost-and-limits
+[sp-short]: session-probe.md#short-answer
+[sp1]: session-probe.md#1-headless-browser
+[sp2]: session-probe.md#2-webfetch-and-websearch
+[sp4]: session-probe.md#4-github-proxy
+[sp6]: session-probe.md#6-worktrees
+[sp10]: session-probe.md#10-disk
+[sp-oq]: session-probe.md#answers-to-69s-open-questions
+[wf-short]: session-workflow.md#short-answer
+[wf1]: session-workflow.md#1-the-layers-in-a-cloud-session
+[wf2]: session-workflow.md#2-carrying-the-skills-and-global-instructions-into-cloud-sessions
+[wf3]: session-workflow.md#3-the-effort-workflow-in-a-cloud-session
+[wf4]: session-workflow.md#4-suggestions
+[wf-oq]: session-workflow.md#open-questions
+[ma-fit]: managed-agents.md#5-fit-for-this-maintainer
+[op-cmp]: other-providers.md#comparison
+[op1]: other-providers.md#1-openai-codex-cloud
+[op2]: other-providers.md#2-cursor-cloud-agents-and-the-agent-cli
+[op3]: other-providers.md#3-github-copilot-cloud-agent-formerly-coding-agent
+[vps-glance]: vps.md#at-a-glance
+[vps-browser]: vps.md#headless-browser
+[vps-web]: vps.md#web-access-scripts-and-file-system
+[vps-git]: vps.md#git-worktrees-and-github
+[vps-herdr]: vps.md#herdr-across-machines
+[vps-upgrade]: vps.md#what-an-upgrade-to-092-would-change
+[vps-notif]: vps.md#notifications
+[vps-env]: vps.md#the-environment-on-the-vps
+[vps-perm]: vps.md#permissions-on-the-other-machine
+[siz-sum]: vps-sizing.md#summary
+[siz-today]: vps-sizing.md#the-vps-today-vps
+[siz-tiers]: vps-sizing.md#2-workload-to-smallest-tier
+[siz-avail]: vps-sizing.md#availability-what-not-available-means
+[siz-rec]: vps-sizing.md#6-recommendation-per-workload
+[del1]: delegation.md#1-todays-flow-and-the-steps-that-depend-on-where-the-agent-runs
+[del2]: delegation.md#2-the-options-side-by-side
+[del31]: delegation.md#31-handing-over-through-herdr-13s-path
+[del32]: delegation.md#32-watching-and-answering
+[del33]: delegation.md#33-notifying
+[del41]: delegation.md#41-handing-over
+[del43]: delegation.md#43-notifying
+[del44]: delegation.md#44-continuing-and-keeping-two-orchestrators-off-one-branch
+[del5]: delegation.md#5-other-hosted-agents-for-delegation-only
+[fm-walk]: firstmate.md#how-firstmate-delegates-walkthrough
+[fm-where]: firstmate.md#where-crew-agents-run
+[fm-remote]: firstmate.md#remote-secondmates-in-depth
+[fm-gh]: firstmate.md#github-access
+[fm-qs]: firstmate.md#the-same-questions-as-the-other-research-tickets
+[fm-map]: firstmate.md#mapped-against-this-repos-workflow
+[fm-axi]: firstmate.md#the--axi-tools
 [hv-model]: herdr-vps.md#the-machine-model
 [hv-checks]: herdr-vps.md#safe-handover-checks
 [hv-back]: herdr-vps.md#vps-to-mac
@@ -257,7 +257,7 @@ Each has options and a recommendation. "E" numbers point to the proposed experim
 - **Update 3 Oct: done on the new netcup VPS** (E6, E8).
   - set-up-machine ran with the sandbox off, and `verify.py` passed.
   - Treehouse, Go, `gh` and Docker are installed. The maintainer did the logins in Herdr tabs.
-  - The remote setup now lives in the skill on `main`. [`new-remote-machine.md`](../../skills/set-up-machine/references/new-remote-machine.md) covers a fresh machine's base: user, SSH with keys only, firewall, updates, swap, PATH, browser. [`remote-machine.md`](../../skills/set-up-machine/references/remote-machine.md) covers any remote machine.
+  - The remote setup now lives in the skill on `main`. [`new-remote-machine.md`](../../../skills/set-up-machine/references/new-remote-machine.md) covers a fresh machine's base: user, SSH with keys only, firewall, updates, swap, PATH, browser. [`remote-machine.md`](../../../skills/set-up-machine/references/remote-machine.md) covers any remote machine.
   - Sudo steps go through a Herdr tab where the maintainer types the password (#148, not yet in the skills).
 
 ### D4. Resize the VPS?
@@ -281,7 +281,7 @@ Each has options and a recommendation. "E" numbers point to the proposed experim
   - (b) the Playwright Docker image, which the user can already run
   - (c) none: keep browser work on the Mac
 - **Recommendation: (c) until a task needs it, then (b) (E7).** Docker needs no root and leaves the system untouched. Measure its memory next to an agent before you rely on it on CX23 ([vps][vps-browser]).
-- **Update 3 Oct: done on the netcup VPS.** A headless Chromium is installed (item 4 after the steps in [`new-remote-machine.md`](../../skills/set-up-machine/references/new-remote-machine.md)). In the trial, the machine peaked at about 4.4 of 7.8 GB (E7, partly).
+- **Update 3 Oct: done on the netcup VPS.** A headless Chromium is installed (item 4 after the steps in [`new-remote-machine.md`](../../../skills/set-up-machine/references/new-remote-machine.md)). In the trial, the machine peaked at about 4.4 of 7.8 GB (E7, partly).
 
 ### D6. How do skills and instructions reach a Claude Code cloud session?
 
@@ -387,12 +387,12 @@ Two findings come from this effort's own run:
   - relaunch from a brief on disk (for #15)
   - a worktree-isolation check in delegate briefs
   - `--match-head-commit` in settle-effort's merge (close-effort until its rename)
-- **Update 3 Oct: still open.** The maintainer will pick from the 18 ranked ideas in [fd §3](cloud-agents-firstmate-deep-dive.md#3-what-to-borrow). The guide's D13 card lists them one line each. The top two are small: a worktree-isolation check in delegate briefs (**orchestrate-effort**, **implement**) and `--match-head-commit` in **settle-effort**'s merge.
+- **Update 3 Oct: still open.** The maintainer will pick from the 18 ranked ideas in [fd §3](firstmate-deep-dive.md#3-what-to-borrow). The guide's D13 card lists them one line each. The top two are small: a worktree-isolation check in delegate briefs (**orchestrate-effort**, **implement**) and `--match-head-commit` in **settle-effort**'s merge.
 
-[op-oq]: cloud-agents-other-providers.md#open-questions
-[fm-contract]: cloud-agents-firstmate.md#the-contract-a-delegate-backend-must-meet
-[del7]: cloud-agents-delegation.md#7-how-this-effort-itself-was-handed-over-material-for-15
-[del16]: cloud-agents-delegation.md#agents-on-the-mac-and-the-vps-can-see-each-others-state-16
+[op-oq]: other-providers.md#open-questions
+[fm-contract]: firstmate.md#the-contract-a-delegate-backend-must-meet
+[del7]: delegation.md#7-how-this-effort-itself-was-handed-over-material-for-15
+[del16]: delegation.md#agents-on-the-mac-and-the-vps-can-see-each-others-state-16
 
 ### The maintainer's answers (2026-09-30)
 
@@ -436,19 +436,19 @@ Two findings come from this effort's own run:
   - The maintainer set it up the same day (set-up-machine applied, Herdr 0.9.3).
   - A trial against the Mac on real repos showed: 2.5-3x slower, CPU-bound, peak 4.4 GB of 7.8 GB, steal under 1.3%.
   - Kept. The next step is VPS 2000 in place. The machine record is in the personal repository.
-- **D4, redone 2026-10-02 ([vm](cloud-agents-vps-math.md)).**
+- **D4, redone 2026-10-02 ([vm](vps-math.md)).**
   - The maintainer found that the CX23 can't run one agent with tests, a browser test or anything in parallel.
   - The rescale dialog offers CPX12 and up, not CX33.
   - Budget: $10-15, up to about $25.
   - Five parallel agents with 3 test runs and 2 browsers need about 12 GB, so 16 GB. The recommendation is now **netcup VPS 2000 G12.5** (8 vCores, 16 GB, €22.62 net, $25.56, on 12 months). Or VPS 1000 (8 GB, $13.76) if $15 is the ceiling.
-  - Earlier ([vp](cloud-agents-vps-providers.md#5-ranked-shortlist), #86): Hetzner CX and CAX are still not orderable. The recommendation was **netcup Root Server RS 2000** (8 dedicated EPYC cores, 16 GB, 256 GB NVMe, €34.20 net a month on 12 months, 30-day money-back), with the CX23 kept alongside for 2-4 weeks. Fallbacks: netcup VPS 2000 (€22.62) and OVHcloud VPS-4 (€23.49, no term).
+  - Earlier ([vp](vps-providers.md#5-ranked-shortlist), #86): Hetzner CX and CAX are still not orderable. The recommendation was **netcup Root Server RS 2000** (8 dedicated EPYC cores, 16 GB, 256 GB NVMe, €34.20 net a month on 12 months, 30-day money-back), with the CX23 kept alongside for 2-4 weeks. Fallbacks: netcup VPS 2000 (€22.62) and OVHcloud VPS-4 (€23.49, no term).
   - Latency from the Mac is 54-102 ms across providers. That is too close to choose on.
-- **D7 ([co](cloud-agents-costs.md#short-answer), #87).**
+- **D7 ([co](costs.md#short-answer), #87).**
   - Metered vendors charge Claude Opus at Anthropic's list price. So a ticket costs about the same everywhere (estimates: $1 small, $4 medium, $28 for a five-ticket effort).
   - The Claude plan turns that into $0 cash inside its windows.
   - Keep the plan and the VPS. Add Copilot Pro ($10) only for a second delegate. Try Jules's free tier. Skip the rest for now.
   - The promo credit's claim date (7 October) and expiry (4 November) come from press reports only.
-- **D13 ([fd](cloud-agents-firstmate-deep-dive.md#3-what-to-borrow), #88).** 18 ideas ranked. The first two are small skill changes: a worktree-isolation check in delegate briefs (**orchestrate-effort**, **implement**), and a guarded merge with `--match-head-commit` (**close-effort**, since renamed **settle-effort**).
+- **D13 ([fd](firstmate-deep-dive.md#3-what-to-borrow), #88).** 18 ideas ranked. The first two are small skill changes: a worktree-isolation check in delegate briefs (**orchestrate-effort**, **implement**), and a guarded merge with `--match-head-commit` (**close-effort**, since renamed **settle-effort**).
 
 ## Proposed experiments
 
@@ -458,7 +458,7 @@ These are what the research couldn't settle inside the spec's safe zone. Each ne
 
 | Status | Experiments |
 |---|---|
-| Done | E1, E2; E3 (Herdr 0.9.3, apart from #151); E6 (on the netcup VPS); E8 (Treehouse and Go on the netcup VPS); E9 (swap, now in [`new-remote-machine.md`](../../skills/set-up-machine/references/new-remote-machine.md)) |
+| Done | E1, E2; E3 (Herdr 0.9.3, apart from #151); E6 (on the netcup VPS); E8 (Treehouse and Go on the netcup VPS); E9 (swap, now in [`new-remote-machine.md`](../../../skills/set-up-machine/references/new-remote-machine.md)) |
 | Partly | E7: headless Chromium installed on the netcup VPS. Trial peak about 4.4 of 7.8 GB. No measurement next to a browser yet |
 | Obsolete or dropped | E10 (moved to netcup instead of a rescale); E13 (dropped by D7) |
 | QA left | E19 (#80), E4, E12, E18 |
@@ -487,11 +487,11 @@ These are what the research couldn't settle inside the spec's safe zone. Each ne
 | E19 | Ask a cloud session's main loop to "notify me when done", and watch the phone | D9 for cloud sessions | None | None | [cc open questions][cc-oq] |
 | E20 | A cloud session on a throwaway `probe/…` branch pushed from the Mac, asked to push a commit to it | Whether a cloud orchestrator can continue an effort branch made elsewhere (#15) | One small session | Low. Throwaway branch | [cc open questions][cc-oq] |
 
-[cc-oq]: cloud-agents-claude-code.md#open-questions
-[del-oq]: cloud-agents-delegation.md#open-questions
-[siz-oq]: cloud-agents-vps-sizing.md#open-questions
-[fm-oq]: cloud-agents-firstmate.md#open-questions
-[vps-desktop]: cloud-agents-vps.md#where-the-desktop-app-fits
+[cc-oq]: claude-code.md#open-questions
+[del-oq]: delegation.md#open-questions
+[siz-oq]: vps-sizing.md#open-questions
+[fm-oq]: firstmate.md#open-questions
+[vps-desktop]: vps.md#where-the-desktop-app-fits
 
 ## The three build tickets, re-scoped
 
@@ -533,7 +533,7 @@ Each ticket has the full re-scope comment. In short:
   - The agent's local permission check refused the second before anything ran.
 
   So the first pass had **no first-hand facts about the cloud VM**, and E1 handed the one unused session to the maintainer. **Update (#78):** the maintainer started it with `claude --cloud "say hi"`. The first-hand facts now live in [sp][sp-short] and [wf][wf-short].
-- **Twelve research files, this synthesis and the guide** (`cloud-agents-guide.html`) are under `docs/research/`. Each research file has an exploration log. Six come from the first pass, three from #78's cloud session and three from #86-#88. The maintainer added the Firstmate ticket (#75) mid-effort.
+- **Twelve research files, this synthesis and the guide** (`guide.html`) are under `docs/research/`. Each research file has an exploration log. Six come from the first pass, three from #78's cloud session and three from #86-#88. The maintainer added the Firstmate ticket (#75) mid-effort.
 - **The build tickets** stay blocked. They now wait on the decisions and experiments above, not on research.
 - **Update 3 Oct:** the research stayed read-only. But the maintainer's own setup work has changed the machines since: Herdr 0.9.3 everywhere, a new netcup VPS set up with set-up-machine, and shipyard's remote pings. Tickets to file once this PR merges:
   - the D8 base-branch fix
@@ -542,10 +542,10 @@ Each ticket has the full re-scope comment. In short:
 
 ## Corrections made while writing this synthesis
 
-- **Starting a cloud session from an agent.** [cloud-agents-delegation.md](cloud-agents-delegation.md) presented `claude --cloud "<one-line prompt>"` as the handover's start. But the create form needs an interactive terminal, and `-p` rejects it with a task ([cc §7][cc7], checked against the `headless` and `claude-code-on-the-web` docs). That file's table row, its sections 4.1 and 4.4, and its #15 summary now say so. Then #78 found that the create form prints the session URL and exits in a real terminal. Whether it runs from an agent's shell stays untested, and both files now say that.
-- **Herdr's toast default.** [cloud-agents-delegation.md](cloud-agents-delegation.md) read the `delivery = "herdr"` example on the 0.9.2 configuration page as a contradiction of a default of `off`. The config reference at `v0.9.2` gives `ui.toast.delivery` a default of `"off"` for both 0.9.0 and the current docs. So the example shows how to turn it on. Nothing explains the VPS probe's `shown` yet, as [cloud-agents-vps.md](cloud-agents-vps.md#notifications) says.
-- **A routine's fire response** returns `claude_code_session_id` as well as `claude_code_session_url` (the `routines` doc's example). [cloud-agents-claude-code.md](cloud-agents-claude-code.md#7-starting-it) listed only the URL.
-- **From #78's first-hand probes** (all now in [cloud-agents-claude-code.md](cloud-agents-claude-code.md)):
+- **Starting a cloud session from an agent.** [delegation.md](delegation.md) presented `claude --cloud "<one-line prompt>"` as the handover's start. But the create form needs an interactive terminal, and `-p` rejects it with a task ([cc §7][cc7], checked against the `headless` and `claude-code-on-the-web` docs). That file's table row, its sections 4.1 and 4.4, and its #15 summary now say so. Then #78 found that the create form prints the session URL and exits in a real terminal. Whether it runs from an agent's shell stays untested, and both files now say that.
+- **Herdr's toast default.** [delegation.md](delegation.md) read the `delivery = "herdr"` example on the 0.9.2 configuration page as a contradiction of a default of `off`. The config reference at `v0.9.2` gives `ui.toast.delivery` a default of `"off"` for both 0.9.0 and the current docs. So the example shows how to turn it on. Nothing explains the VPS probe's `shown` yet, as [vps.md](vps.md#notifications) says.
+- **A routine's fire response** returns `claude_code_session_id` as well as `claude_code_session_url` (the `routines` doc's example). [claude-code.md](claude-code.md#7-starting-it) listed only the URL.
+- **From #78's first-hand probes** (all now in [claude-code.md](claude-code.md)):
   - `claude --cloud "<task>"` prints the session URL and exits, with no live checklist.
   - A headless Chromium is pre-installed.
   - A blocked host gets a plain 403 with the reason in the body, and no `x-deny-reason`.
@@ -556,9 +556,9 @@ Each ticket has the full re-scope comment. In short:
   - The VPS's cached headless browser can't start without 15 system libraries ([vps][vps-browser], [siz][siz-today]).
   - Swift is on the VPS, although #13 recorded it missing ([vps][vps-perm]).
 
-[vps-log]: cloud-agents-vps.md#exploration-log
-[del-log]: cloud-agents-delegation.md#exploration-log
-[cc-log]: cloud-agents-claude-code.md#exploration-log
+[vps-log]: vps.md#exploration-log
+[del-log]: delegation.md#exploration-log
+[cc-log]: claude-code.md#exploration-log
 
 ## Exploration log
 
@@ -570,7 +570,7 @@ All on the maintainer's Mac on 2026-09-29, in this ticket's worktree or the sess
 | 2 | `gh issue view` for #74, #45, #13, #15, #16, #75, with comments; read the effort handoff and every file named at the top | Nothing |
 | 3 | `curl` of Herdr's `configuration.mdx` and both `config-reference.json` files at `v0.9.2`, and of Claude Code's `routines`, `claude-code-on-the-web` and `headless` pages in Markdown, to resolve the claims the files disagreed on | Copies in the scratch folder only |
 | 4 | Checked the repository layout (`skills/`, no `.claude/`) and the orchestrating skill's delegate rule | Nothing |
-| 5 | Wrote this file; corrected `cloud-agents-delegation.md` and `cloud-agents-claude-code.md` as listed above; one commit | These files |
+| 5 | Wrote this file; corrected `delegation.md` and `claude-code.md` as listed above; one commit | These files |
 | 6 | Cloud session (#78, integration): read the three #78 files and the orchestrator's own session probes. Updated the file table, the short version, the matrix's Claude Code cloud cells, D1, D6, D7, D9, D12. Marked E1 and E2 done, added E16 to E20 and a Managed Agents bullet, and noted the #78 corrections | This file only |
 | 7 | Mac, 2026-09-30 | After #66 merged into `main`: read set-up-machine, orchestrate-effort and close-effort there, and checked the Mac's `~/.config/agents/`. Updated the note at the top, the short version, the "VPS upgraded" column, D3, D8, D11, E6 and #13's re-scope | This file only |
 | 8 | Mac, 2026-10-03 | After `main` was merged in: read `new-remote-machine.md`, `remote-machine.md` and settle-effort there, and `gh issue view` for #13, #15, #16, #80, #144, #148, #150, #151 and shipyard #147, #152. Applied the facts that the maintainer verified that day as **Update 3 Oct** notes: the short version, the "VPS upgraded" column, D2-D5, D7-D9, D13, the decision status, the experiment status and the build tickets | This file and the guide |

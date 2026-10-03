@@ -1,6 +1,6 @@
 # VPS sizing, and cheaper or better places to run agents
 
-Facts for [Research: VPS sizing and cheaper or better places to run agents (#72)](https://github.com/yahyabedirhan/skills/issues/72), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45) (user stories 20 and 21). The research and the price reads are from **2026-09-29**. Ticket #71 covers what an agent on the VPS can do compared with the Mac. [herdr-vps.md](herdr-vps.md) covers how Herdr reaches the VPS, and this page doesn't repeat it. Tickets #69 and #70 cover hosted cloud agents (Claude Code on the web, Codex, Cursor, Copilot). This page only sizes machines.
+Facts for [Research: VPS sizing and cheaper or better places to run agents (#72)](https://github.com/yahyabedirhan/skills/issues/72), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45) (user stories 20 and 21). The research and the price reads are from **2026-09-29**. Ticket #71 covers what an agent on the VPS can do compared with the Mac. [herdr-vps.md](../herdr-vps.md) covers how Herdr reaches the VPS, and this page doesn't repeat it. Tickets #69 and #70 cover hosted cloud agents (Claude Code on the web, Codex, Cursor, Copilot). This page only sizes machines.
 
 Evidence tags:
 
@@ -16,7 +16,7 @@ Currency:
 - netcup prices are in EUR **including 19% VAT**.
 - DigitalOcean, Vultr, Fly.io and GitHub prices are in USD, excluding tax.
 
-> **Corrected 2026-10-02, see [cloud-agents-vps-math.md](cloud-agents-vps-math.md).** The maintainer's rescale dialog doesn't offer CX33. So "the cheapest real step up is CX33" no longer holds. The dialog offers CPX12 (2 GB) and up, and CCX13 for dedicated cores. The maintainer also found that CX23 can't run one agent with tests, a browser test or anything in parallel. This overrides this page's "carries one Claude Code session comfortably". The math file does the sizing again for five parallel agents. It measures the speed of each core against the Mac.
+> **Corrected 2026-10-02, see [vps-math.md](vps-math.md).** The maintainer's rescale dialog doesn't offer CX33. So "the cheapest real step up is CX33" no longer holds. The dialog offers CPX12 (2 GB) and up, and CCX13 for dedicated cores. The maintainer also found that CX23 can't run one agent with tests, a browser test or anything in parallel. This overrides this page's "carries one Claude Code session comfortably". The math file does the sizing again for five parallel agents. It measures the speed of each core against the Mac.
 
 ## Summary
 
@@ -46,7 +46,7 @@ Currency:
 | CPU load | load average 0.06 / 0.16 / 0.17. Cumulative `/proc/stat` since boot (six weeks): about 3.3% busy, 0% steal |
 | Memory pressure | `/proc/pressure/memory` all averages 0.00 now. A small cumulative stall total since boot shows that the box was short of memory at some point |
 | Processes | one `claude` (Claude Code 2.1.283) at **369 MB RSS, 511 MB peak** (`VmHWM`). Herdr 22 MB. Everything else on the box (system services and a few containers and web services) about 0.5 GB. Sum of all RSS 0.9 GB |
-| Browser | Playwright's `chromium_headless_shell` is already in the user's cache, but it can't start. 15 system libraries are missing. To try it needs an install as root or the Playwright Docker image (see [the VPS research](cloud-agents-vps.md)) |
+| Browser | Playwright's `chromium_headless_shell` is already in the user's cache, but it can't start. 15 system libraries are missing. To try it needs an install as root or the Playwright Docker image (see [the VPS research](vps.md)) |
 
 The machine doesn't print its server type. But 2 x86 vCPU, 4 GB and a 40 GB disk on a Hetzner vServer is exactly CX23 [api].
 

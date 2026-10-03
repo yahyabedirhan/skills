@@ -1,8 +1,8 @@
 # How Firstmate works: tools, workflows and what to borrow
 
-This file has the facts for [Research: how Firstmate works - tools, workflows and what to borrow (#88)](https://github.com/yahyabedirhan/skills/issues/88). That issue is part of [Spec: research cloud agents: what agents on a server or in the cloud can do, and how to delegate to them (#45)](https://github.com/yahyabedirhan/skills/issues/45). Researched on 2026-09-30. The maintainer won't adopt Firstmate. But he wants to understand it well enough to borrow from it ([D13 in cloud-agents.md](cloud-agents.md#d13-adopt-firstmate)).
+This file has the facts for [Research: how Firstmate works - tools, workflows and what to borrow (#88)](https://github.com/yahyabedirhan/skills/issues/88). That issue is part of [Spec: research cloud agents: what agents on a server or in the cloud can do, and how to delegate to them (#45)](https://github.com/yahyabedirhan/skills/issues/45). Researched on 2026-09-30. The maintainer won't adopt Firstmate. But he wants to understand it well enough to borrow from it ([D13 in README.md](README.md#d13-adopt-firstmate)).
 
-It builds on [cloud-agents-firstmate.md](cloud-agents-firstmate.md) (#75). That file already has these parts:
+It builds on [firstmate.md](firstmate.md) (#75). That file already has these parts:
 
 - Firstmate's contract
 - a nine-step walkthrough
@@ -778,7 +778,7 @@ Then (`ship-landing`):
 
 ### 2.12 Remote secondmates, at the script level
 
-The concept is in [#75](cloud-agents-firstmate.md#remote-secondmates-in-depth). This section gives the call chain.
+The concept is in [#75](firstmate.md#remote-secondmates-in-depth). This section gives the call chain.
 
 1. **Seed**:
    1. `fm-remote-home-seed.sh <id> <alias> <root> <home> <project>=<origin>…`
@@ -864,7 +864,7 @@ The first mate picks the task id `login-redirect-k3`.
 
 ## 3. What to borrow
 
-The table ranks the ideas by value for the least change. "Lands in" is a skill in this repo's [`skills/`](../../skills), or one of these open build tickets:
+The table ranks the ideas by value for the least change. "Lands in" is a skill in this repo's [`skills/`](../../../skills), or one of these open build tickets:
 - [#13](https://github.com/yahyabedirhan/skills/issues/13) *A thinking session on the Mac can hand over to an orchestrator on the VPS*
 - [#15](https://github.com/yahyabedirhan/skills/issues/15) *An unfinished effort can be handed to a new orchestrator*
 - [#16](https://github.com/yahyabedirhan/skills/issues/16) *Agents on the Mac and the VPS can see each other's state*
@@ -878,7 +878,7 @@ The table ranks the ideas by value for the least change. "Lands in" is a skill i
 | 3 | **Status-file protocol**. Sparse one-line events with fixed verbs: `working`, `needs-decision`, `blocked`, `paused … until`, `done`, `failed`, `resolved [key=…]`. A decision stays open until its keyed `resolved`. | `bin/fm-brief.sh` rules 4–6; `bin/fm-classify-lib.sh` | **orchestrating** (a delegate that runs in a Herdr tab or on the VPS, not a sub-agent) and #16 | A `.scratch/<ticket>.status` that the orchestrator reads, or a tracked path that the remote reads over SSH. The brief holds the verb list. `paused` vs `blocked` tells "waiting on CI" from "needs me". | M | Low: a file. Medium if it grows machinery. |
 | 4 | **The brief on disk is the instruction. Relaunch = same worktree + same brief + a progress note.** | `docs/agent-control.md` "Transactional relaunch"; `stuck-crewmate-recovery` | #15, **handover**, **orchestrate-with-handoff** | A continue mode. It reuses the existing worktree and branch, and appends a dated "progress so far" section to the handoff. Then it starts the new orchestrator on it. Never a fresh worktree while the old one is unaccounted for. | M | Medium |
 | 5 | **One owner per branch**. A lock names the live session. A new session stays read-only until it can take the lock. | `bin/fm-lock.sh` (session lock for each home); §3 "lock-refused" | #15 (the "two orchestrators on one branch" question), **orchestrate-with-handoff** step 1 | At start, write `.scratch/orchestrator.lock` (host, harness pane or session id, time). Before it commits, a continuing orchestrator checks the lock and the other machine's Herdr agent status (#16). | M | Medium: stale locks need a liveness check |
-| 6 | **Durable inbox + one-line doorbell**, to steer a session on another machine. The receiver acknowledges by moving the file to `handled/`. An unacknowledged message is re-rung, then escalated. | `bin/fm-task-inbox-lib.sh`; `bin/fm-send.sh` | **handover-to-herdr**, #13, #16 | For a VPS orchestrator, write the message over SSH into `.scratch/inbox/NNN.md` in its worktree. Send a constant one-line `herdr agent prompt` that points at it. This replaces multi-line pastes and remote-shell quoting ([herdr-vps.md](herdr-vps.md)), and gives a receipt. | M | Medium |
+| 6 | **Durable inbox + one-line doorbell**, to steer a session on another machine. The receiver acknowledges by moving the file to `handled/`. An unacknowledged message is re-rung, then escalated. | `bin/fm-task-inbox-lib.sh`; `bin/fm-send.sh` | **handover-to-herdr**, #13, #16 | For a VPS orchestrator, write the message over SSH into `.scratch/inbox/NNN.md` in its worktree. Send a constant one-line `herdr agent prompt` that points at it. This replaces multi-line pastes and remote-shell quoting ([herdr-vps.md](../herdr-vps.md)), and gives a receipt. | M | Medium |
 | 7 | **Readiness check before handing off a machine**. It is read-only by default. It tags each gap `fixable` or `human`, with the exact action. `--fix` runs only for gaps that can be automated. Then check again, and trust only the second read. | `bin/fm-remote-doctor.sh`; `bin/fm-remote-readiness-lib.sh` | #13; **set-up-machine** / **maintain-environment** | A `check` step before the VPS handover. It lists what is missing: `treehouse`, `jq`, the agent CLI, PATH entries that only a login shell sets. It adds `human:` lines for the maintainer. | M | Low (read-only) |
 | 8 | **Unreachable is unknown, never dead or failed-over**. SSH exit 255 means "completion unknown". Keep the route and reconcile later. | `bin/fm-on.sh`; `docs/remote-secondmates.md` | #16, #13 | One rule in the remote-check instructions. A failed SSH read reports "can't see the VPS right now", never "it stopped". It never starts a local replacement. | S | Low |
 | 9 | **Decide-or-escalate policy for review findings**. Decide what is unambiguous toward the accepted intent. Escalate only a contract expansion, an unsettled product call, a same-theme finding that accretes machinery, or destructive/security-sensitive work. Labels are evidence, not authority. | `.agents/skills/ask-user-authority/SKILL.md` | **orchestrating** "Talking to the user" | Add the four escalation triggers beside the existing question shape. Also add the five-part escalation: requirement, expansion, smallest alternative, consequences, recommendation. | S | Low |
@@ -933,7 +933,7 @@ This log lists every action taken for this file. All ran on the maintainer's Mac
 
 | # | Where | Action | What it changed |
 |---|---|---|---|
-| 1 | This worktree | `gh issue view 88`. Read `docs/research/cloud-agents-firstmate.md`, `cloud-agents.md` (D13) and `cloud-agents-session-workflow.md` for style. `gh issue view 13`, `15`, `16`. | Nothing |
+| 1 | This worktree | `gh issue view 88`. Read `docs/research/cloud-agents/firstmate.md`, `README.md` (D13) and `session-workflow.md` for style. `gh issue view 13`, `15`, `16`. | Nothing |
 | 2 | This worktree | Read `SKILL.md` of orchestrate-effort, orchestrating (+ `lifecycle.md`), implement, handover, handover-to-herdr, close-effort, to-tickets, orchestrate-with-handoff, treehouse. Listed `skills/`. | Nothing |
 | 3 | Local clone of Firstmate | `git pull` (from `260c4f08` to `eb77f02b`, 9 commits). `git log 260c4f08..HEAD`. | Updated the read-only clone outside the repo |
 | 4 | Local clone of Firstmate | Read `AGENTS.md` in full. Read `docs/scripts.md`, and `docs/configuration.md` (home layout, toolchain, supervision host, dispatch profiles, installed hooks). Read the `docs/architecture.md` headings, `docs/agent-control.md` "Transactional relaunch", the `docs/watcher-continuity.md` outline and the `docs/supervision-host.md` intro. Read `.claude/settings.json`, `.cursor/hooks.json`, `.codex/hooks.json`. Listed `.opencode`, `.pi`, `.omp`, `.grok`, `.claude/mods`. | Nothing |

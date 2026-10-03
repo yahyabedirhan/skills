@@ -1,6 +1,6 @@
 # Inside a Claude Code cloud session: first-hand probes
 
-Facts for [Research: Claude Code cloud sessions tested from inside one (#78)](https://github.com/yahyabedirhan/skills/issues/78), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45). This file answers open questions from inside a real cloud session. [Claude Code in the cloud (#69)](cloud-agents-claude-code.md) left some of these questions. The "#69's cloud sessions" TODO in [cloud-agents-delegation.md](cloud-agents-delegation.md) left the others. The probes ran on 2026-09-29. The maintainer started the session from the Mac with `claude --cloud "say hi"`. The VM ran Claude Code 2.1.285 in an Anthropic-hosted environment, on the default **Trusted** network level.
+Facts for [Research: Claude Code cloud sessions tested from inside one (#78)](https://github.com/yahyabedirhan/skills/issues/78), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45). This file answers open questions from inside a real cloud session. [Claude Code in the cloud (#69)](claude-code.md) left some of these questions. The "#69's cloud sessions" TODO in [delegation.md](delegation.md) left the others. The probes ran on 2026-09-29. The maintainer started the session from the Mac with `claude --cloud "say hi"`. The VM ran Claude Code 2.1.285 in an Anthropic-hosted environment, on the default **Trusted** network level.
 
 The probes ran in a sub-agent of that session (spawn depth 1). So the tool findings in probe 5 show what a sub-agent sees. These probes created no session, routine, trigger or webhook. They wrote nothing to GitHub and didn't change `~/.claude`.
 
@@ -8,7 +8,7 @@ Evidence tags:
 
 - **[probe]** a command run for this file. The tag gives the exact command and a shortened output.
 - **[harness]** a file the harness itself put in the VM. These are `/root/.ccr/README.md` and `/tmp/claude-append-system-prompt.txt` (text added to the end of Claude's system prompt). The hook scripts under `~/.claude/` and the command line of the `claude` process count too.
-- **[doc `<page>`, "`<section>`"]** Claude Code's docs at `https://code.claude.com/docs/en/<page>`, as [cloud-agents-claude-code.md](cloud-agents-claude-code.md) cites them.
+- **[doc `<page>`, "`<section>`"]** Claude Code's docs at `https://code.claude.com/docs/en/<page>`, as [claude-code.md](claude-code.md) cites them.
 - **Unverified** marks an inference.
 
 Each verdict compares a finding with the old doc: **confirmed**, **contradicted**, or **new**.
@@ -300,7 +300,7 @@ Apart from these files, `~/.claude/` holds `projects/`, `sessions/`, `session-en
 |---|---|---|
 | What does the VM actually report (`uname`, `nproc`, `free`, user, `check-tools`)? | Firecracker microVM, Ubuntu 24.04.4, kernel 6.18, 4 vCPU Xeon, 15.7 GiB RAM, no swap, root. 30G writable of a 252G disk. Toolchains as documented, except that `gh` is missing. Playwright and Chromium present | Brief; probes 7 and 10 |
 | Does the create form print the session ID or URL, and how? | Yes. It prints them at once, and in effect without interaction: `Created cloud session: <title>`, `View: https://claude.ai/code/session_<id>?from=cli&m=0`, `Resume with: claude --teleport session_<id>`. It showed no live checklist | Brief (maintainer's terminal) |
-| Did probe 1 create a session? | No. This sub-agent couldn't test it. The orchestrating session's `list_sessions` covered every 2026-09-29 session, and none came from probe 1 | The orchestrator's own probe, recorded in [cloud-agents-claude-code.md](cloud-agents-claude-code.md#open-questions) |
+| Did probe 1 create a session? | No. This sub-agent couldn't test it. The orchestrating session's `list_sessions` covered every 2026-09-29 session, and none came from probe 1 | The orchestrator's own probe, recorded in [claude-code.md](claude-code.md#open-questions) |
 | Can a cloud session run a headless browser, and on which network level? | Yes, on Trusted, with the pre-installed Chromium. Trust the SPKI of the proxy CA first. Only allowlisted hosts load | Probe 1 |
 | Do WebFetch and WebSearch work under Trusted? | WebSearch yes. WebFetch yes for allowlisted hosts, `EGRESS_BLOCKED` for others | Probe 2 |
 | Do skills enabled on the claude.ai account load, and does `CLAUDE.md` → `AGENTS.md` load? | Yes to both. Nine account skills synced into `~/.claude/skills/synced/`. `AGENTS.md` reached the model through `CLAUDE.md` | Brief; this sub-agent's own context |
@@ -311,7 +311,7 @@ Apart from these files, `~/.claude/` holds `projects/`, `sessions/`, `session-en
 | Promo credit terms and remaining balance | The session draws on a `ccr_promotional` rate-limit pool. Its window resets (`resetsAt`) at 2026-11-05 00:00 PST. This is a reset, not a refill. Inferred: this fits the 4 November expiry. The balance isn't visible from inside | Probe 5 (`get_session`) |
 | Does the GitHub proxy allow the REST sub-issue calls? | Yes, `200`. `/user` `200` shows authenticated access. The proxy blocks GraphQL fully | Probe 4 |
 
-These findings also answer the "#69's cloud sessions" TODO in [cloud-agents-delegation.md](cloud-agents-delegation.md):
+These findings also answer the "#69's cloud sessions" TODO in [delegation.md](delegation.md):
 
 - The create form prints a session URL and a `--teleport` ID that a skill can record (brief).
 - `/orchestrate-with-handoff` doesn't come from the claude.ai account. Only Anthropic's nine skills do. After an install with `npx skills add`, `disable-model-invocation` hides it from the model, but the user should be able to type it (probe 8).
@@ -324,7 +324,7 @@ All entries are from 2026-09-29, inside the VM of the cloud session, as a sub-ag
 
 | # | Where | Command or action | What it changed |
 |---|---|---|---|
-| 1 | VM | Read the brief, `cloud-agents-claude-code.md`, the delegation TODO | Nothing |
+| 1 | VM | Read the brief, `claude-code.md`, the delegation TODO | Nothing |
 | 2 | VM | `ToolSearch` for the listed tools. Read this sub-agent's tool list | Nothing |
 | 3 | VM | `free -m`, `env` names, `df`, `mount`, `stat -f /`, `ls /mnt/*`, `ls /opt`, `ls ~/.claude`, `ls /tmp`, `du -sh /tmp`, `touch` tests | An empty file in `/mnt/user-data/outputs`, removed at once |
 | 4 | VM | Read `/root/.ccr/README.md`, `launcher-settings.json`, the three hook scripts, and the section headings and three sections of the appended system prompt | Nothing |

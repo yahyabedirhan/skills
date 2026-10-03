@@ -1,6 +1,6 @@
 # VPS providers to switch to
 
-Facts for [Research: VPS options to switch to (#86)](https://github.com/yahyabedirhan/skills/issues/86), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45) and decision [D4](cloud-agents.md#d4-resize-the-vps). I read the prices and measured the latency on **2026-09-30**. This file does not repeat what [cloud-agents-vps-sizing.md](cloud-agents-vps-sizing.md) covers:
+Facts for [Research: VPS options to switch to (#86)](https://github.com/yahyabedirhan/skills/issues/86), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45) and decision [D4](README.md#d4-resize-the-vps). I read the prices and measured the latency on **2026-09-30**. This file does not repeat what [vps-sizing.md](vps-sizing.md) covers:
 
 - how much RAM each workload needs,
 - Hetzner's own tiers and billing,
@@ -28,7 +28,7 @@ Each row states its currency and tax, because providers differ:
 
 Some pages showed a VAT-inclusive price for a country other than Germany. For those, this file uses only the net figure.
 
-> **Updated 2026-10-02, see [cloud-agents-vps-math.md](cloud-agents-vps-math.md).** The maintainer's budget is $10-15, up to about $25. The goal is five agents that test in parallel. With these, the recommendation becomes **netcup VPS 2000 G12.5** (16 GB, €22.62 net, $25.56, on 12 months). RS 2000 below stays the steadier option at $38.65.
+> **Updated 2026-10-02, see [vps-math.md](vps-math.md).** The maintainer's budget is $10-15, up to about $25. The goal is five agents that test in parallel. With these, the recommendation becomes **netcup VPS 2000 G12.5** (16 GB, €22.62 net, $25.56, on 12 months). RS 2000 below stays the steadier option at $38.65.
 
 ## Short answer
 
@@ -66,18 +66,18 @@ A **vCPU** is what the virtual machine sees as one processor. The host decides h
 
 | Part of the work | CPU pattern | Shared vCPU is fine? | Source |
 |---|---|---|---|
-| Agent waiting on the model, reading files, running `git` | almost idle: 1-2% of a core, about 16% while working | yes | [siz §1](cloud-agents-vps-sizing.md#per-process-footprints) |
+| Agent waiting on the model, reading files, running `git` | almost idle: 1-2% of a core, about 16% while working | yes | [siz §1](vps-sizing.md#per-process-footprints) |
 | Builds and test runs (`node`, `swift build`, `pytest`) | a few cores at full load for seconds to minutes | yes, but they take longer when neighbours are busy. Dedicated gives the same time every run | estimate |
-| Headless Chromium (Playwright) | spiky. One busy page can fill a core. 0.5-1 GB RAM | yes for one page at a time. Several browsers plus a build need 4+ cores | [siz §1](cloud-agents-vps-sizing.md#per-process-footprints) |
-| Several agents at once | RAM adds up per agent. CPU adds up only when they build at the same moment | RAM is the limit, not CPU | [siz §2](cloud-agents-vps-sizing.md#2-workload-to-smallest-tier) |
+| Headless Chromium (Playwright) | spiky. One busy page can fill a core. 0.5-1 GB RAM | yes for one page at a time. Several browsers plus a build need 4+ cores | [siz §1](vps-sizing.md#per-process-footprints) |
+| Several agents at once | RAM adds up per agent. CPU adds up only when they build at the same moment | RAM is the limit, not CPU | [siz §2](vps-sizing.md#2-workload-to-smallest-tier) |
 
-So a shared 16 GB machine does the job. A dedicated one makes builds and browser runs predictable. Over six weeks, the current VPS showed 0% steal, and the CPU was idle 97% of the time [siz](cloud-agents-vps-sizing.md#the-vps-today-vps). So far, neighbours have not been a problem at Hetzner.
+So a shared 16 GB machine does the job. A dedicated one makes builds and browser runs predictable. Over six weeks, the current VPS showed 0% steal, and the CPU was idle 97% of the time [siz](vps-sizing.md#the-vps-today-vps). So far, neighbours have not been a problem at Hetzner.
 
 ### The other differences
 
 | Thing | Why it matters here | What to look for |
 |---|---|---|
-| **RAM** | Decides how many agents and browsers fit. With no swap, the system kills processes when RAM runs out | 16 GB for 2-3 agents, each with a browser [siz §2](cloud-agents-vps-sizing.md#2-workload-to-smallest-tier) |
+| **RAM** | Decides how many agents and browsers fit. With no swap, the system kills processes when RAM runs out | 16 GB for 2-3 agents, each with a browser [siz §2](vps-sizing.md#2-workload-to-smallest-tier) |
 | **CPU generation** | Newer cores finish builds and page renders sooner, per core | Published: netcup RS AMD EPYC 9645 (Zen 5), Scaleway BASIC3 AMD EPYC 7543 (Zen 3), BASIC2 Ampere. UpCloud Starter says only "previous-gen AMD CPUs". Many VPS lines don't say |
 | **Arm vs x86** | Arm (Hetzner CAX, netcup VPS ARM, Scaleway BASIC2, Oracle A1) runs Claude Code and Playwright's Chromium. But no x86-only binary or Docker image will run. A move from today's x86 box is a rebuild either way | Prefer x86 unless the price gap is large |
 | **Disk** | Repos, `node_modules`, Docker images (the Playwright image is several GB) | 100 GB+ NVMe. Scaleway and UpCloud Cloud Native sell storage separately |
@@ -105,12 +105,12 @@ I read all prices on 2026-09-30. "Orderable" means that the provider's page or A
 Sources:
 
 - Pages: [Cost-Optimized](https://www.hetzner.com/cloud/cost-optimized/), [Regular Performance](https://www.hetzner.com/cloud/regular-performance/), [General Purpose](https://www.hetzner.com/cloud/general-purpose/) [doc]. Not-available marks: 16 on Cost-Optimized (8 rows × label and tooltip), and 0 on the other two.
-- Prices: from the price feed, as tabulated in [siz §3](cloud-agents-vps-sizing.md#3-hetzners-tiers).
+- Prices: from the price feed, as tabulated in [siz §3](vps-sizing.md#3-hetzners-tiers).
 - Auction: from `https://www.hetzner.com/_resources/app/data/app/live_data_sb.json` [api].
 
 Hetzner's status notice "Limited availability of cloud instances" still has no end time (last updated 2026-09-11) [doc: [status.hetzner.com](https://status.hetzner.com/incident/0a75c7ae-3377-41dc-aabe-601063724d24)].
 
-**Is CX orderable anywhere?** No. The Cost-Optimized line exists only in the three EU locations. The page marks every CX and CAX row unavailable, with no exception for any location [doc]. Can this account create one at a given location on a given day? Only the console, or the API with a token, shows that (see [siz, Availability](cloud-agents-vps-sizing.md#availability-what-not-available-means)).
+**Is CX orderable anywhere?** No. The Cost-Optimized line exists only in the three EU locations. The page marks every CX and CAX row unavailable, with no exception for any location [doc]. Can this account create one at a given location on a given day? Only the console, or the API with a token, shows that (see [siz, Availability](vps-sizing.md#availability-what-not-available-means)).
 
 ### netcup
 
@@ -204,7 +204,7 @@ Starter uses "previous-gen AMD CPUs" and includes IPv4 [doc]. UpCloud does not s
 
 ### DigitalOcean, Vultr, Akamai/Linode
 
-USD, **net of tax**, hourly with a monthly cap. These providers bill a stopped server until you destroy it (see [siz §4](cloud-agents-vps-sizing.md#4-alternatives)).
+USD, **net of tax**, hourly with a monthly cap. These providers bill a stopped server until you destroy it (see [siz §4](vps-sizing.md#4-alternatives)).
 
 | Provider and offer | vCPU | RAM | Disk | Transfer | Price | EU locations | Source |
 |---|---|---|---|---|---|---|---|
@@ -276,17 +276,17 @@ What it shows:
 | Step | What it takes | Notes |
 |---|---|---|
 | **Order** | One order at the chosen provider (an account, payment, and an SSH key on the order form) | Needs the maintainer: sign-up and payment are outside this research |
-| **Rebuild, not copy** | A fresh Ubuntu LTS image, then the environment | Recommended. The current box is Ubuntu 26.04 with a hand-made setup ([cloud-agents-vps.md](cloud-agents-vps.md)). The rebuild is the moment to make it reproducible |
+| **Rebuild, not copy** | A fresh Ubuntu LTS image, then the environment | Recommended. The current box is Ubuntu 26.04 with a hand-made setup ([vps.md](vps.md)). The rebuild is the moment to make it reproducible |
 | **Snapshot import** | Not a practical route off Hetzner | Hetzner Cloud's snapshot docs describe no way to download or export a snapshot. Unverified: I found no statement either way in [the snapshot FAQ](https://docs.hetzner.com/cloud/servers/backups-snapshots/faq/). netcup and OVHcloud do import images [doc]. So in theory, a raw disk copy (`dd` from Hetzner's rescue system over SSH) is possible. But it carries the old hand-made setup, network config and cloud-init quirks with it. Not worth it for a 40 GB box with 11 GB used |
-| **Environment** | set-up-machine, on `main` since [PR #66](https://github.com/yahyabedirhan/skills/pull/66) merged later on 2026-09-30 | An agent on the new box runs the skill. It shows one diff for the skills, the shared global instructions, the rule table, the pre-tool hook and memory off. It asks for one approval. Then `verify.py` (Python 3.9+) checks the result ([cloud-agents-vps.md](cloud-agents-vps.md), section "The environment"). Before the skill: `nvm`/Node, Claude Code, `gh`, Herdr at the same version as the Mac, `jq`, Go and Treehouse (E8) |
+| **Environment** | set-up-machine, on `main` since [PR #66](https://github.com/yahyabedirhan/skills/pull/66) merged later on 2026-09-30 | An agent on the new box runs the skill. It shows one diff for the skills, the shared global instructions, the rule table, the pre-tool hook and memory off. It asks for one approval. Then `verify.py` (Python 3.9+) checks the result ([vps.md](vps.md), section "The environment"). Before the skill: `nvm`/Node, Claude Code, `gh`, Herdr at the same version as the Mac, `jq`, Go and Treehouse (E8) |
 | **Headless browser, day zero** | On a fresh box with root, `npx playwright install --with-deps chromium`, or the Playwright Docker image (D5, E7) | On the new machine, the install of system libraries as root is part of the build. It is not a change to a running box |
 | **Log-ins** | `claude` login, `gh auth login`, a new SSH key for GitHub | Log in again on the new box. Don't copy credential files |
-| **Data** | `git clone` the repos. `rsync` anything uncommitted from the old box | The old box also runs "a few containers and web services" [siz](cloud-agents-vps-sizing.md#the-vps-today-vps). List them and move each one on purpose |
-| **Herdr** | `herdr machine add` a **second** saved machine on the Mac with a new label. Keep the old profile | A saved machine is only a connection profile. Each machine runs its own Herdr server. So panes and sessions don't move: you start them again ([herdr-vps.md](herdr-vps.md)). Skills that read the target from `herdr machine list --json` find the new label with no code change |
+| **Data** | `git clone` the repos. `rsync` anything uncommitted from the old box | The old box also runs "a few containers and web services" [siz](vps-sizing.md#the-vps-today-vps). List them and move each one on purpose |
+| **Herdr** | `herdr machine add` a **second** saved machine on the Mac with a new label. Keep the old profile | A saved machine is only a connection profile. Each machine runs its own Herdr server. So panes and sessions don't move: you start them again ([herdr-vps.md](../herdr-vps.md)). Skills that read the target from `herdr machine list --json` find the new label with no code change |
 
 ### Side by side
 
-- Keep the CX23 running for **two to four weeks** after the new machine takes over. It costs €5.99 a month, and Hetzner bills it hourly, so a delete on any day stops the bill [siz](cloud-agents-vps-sizing.md#billing). Don't delete it to "make room". Hetzner is restricting new orders, so you can't order a deleted CX23 again.
+- Keep the CX23 running for **two to four weeks** after the new machine takes over. It costs €5.99 a month, and Hetzner bills it hourly, so a delete on any day stops the bill [siz](vps-sizing.md#billing). Don't delete it to "make room". Hetzner is restricting new orders, so you can't order a deleted CX23 again.
 - During the overlap, point new efforts at the Herdr label of the new machine. Let running efforts finish on the old one.
 - Delete the old box only after all of these are true:
   - The repos have no unpushed branches on the old box.
@@ -359,7 +359,7 @@ This lists everything I ran for this ticket on 2026-09-30. I ordered, created, c
 
 | # | Where | Action | What it changed |
 |---|---|---|---|
-| 1 | Mac, this worktree | `gh issue view 86`. Read `docs/research/cloud-agents-vps-sizing.md`, D4 in `docs/research/cloud-agents.md`, and excerpts of `cloud-agents-vps.md` and `herdr-vps.md`. `gh pr view 66` (open) | nothing |
+| 1 | Mac, this worktree | `gh issue view 86`. Read `docs/research/cloud-agents/vps-sizing.md`, D4 in `docs/research/cloud-agents/README.md`, and excerpts of `vps.md` and `herdr-vps.md`. `gh pr view 66` (open) | nothing |
 | 2 | Web | `curl` of Hetzner's price feed, the Cost-Optimized, Regular Performance and General Purpose pages (counted `not-available` labels and "currently unavailable" tooltips), the status incident, the server-auction feed `live_data_sb.json`, and the dedicated-server page (prices render in JS, not read) | scratch files outside the repo |
 | 3 | Web | `curl` of netcup's VPS, VPS ARM and Root Server pages. Parsed the plan cards and the embedded plan details (traffic, locations) | scratch files outside the repo |
 | 4 | Web | `curl` of OVHcloud's public order catalogue for `vps` and `cloud` (`ovhSubsidiary=DE`) and its Irish VPS page | scratch files outside the repo |
