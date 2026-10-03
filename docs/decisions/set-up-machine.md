@@ -226,3 +226,9 @@ The spec is #111.
 - **Outdated means the hash differs.** The lock's `skillFolderHash` is the git tree hash of the skill's folder, the same `sha` the GitHub trees API returns, so one call per source finds every skill behind its source. Before, a source counted as present once any one of its skills was installed, and nothing was ever updated.
 - **Installs need no separate approval.** A diff holding only installs and updates from the file is written without asking, since writing the file was the approval.
 - **"Personal repository" became the workstation repo, and "personal rows" became personal permissions.** The maintainer found both vague. The reference file moved to `references/workstation-repo.md`. Code names, such as `personal.py`, stay, since renaming them changes nothing a reader sees. Earlier entries keep the old words.
+
+## 2026-10-03: skill name clashes and the ignore list
+
+- **A name clash is a `gap`, and nothing is installed for that name.** The lock holds one skill per name, so when an entry would install a name already installed from another source, or two entries provide the same name, `npx skills add` would silently replace one source's copy with the other on every machine. The audit names both sources and leaves the choice to the user.
+- **A name that matches a harness's built-in command is a `gap` to note, not a skip.** One may hide the other in that harness, but the user listed the skill on purpose, so it is still installed.
+- **`ignore` lists skills a machine may have that the list leaves out on purpose,** such as an experiment on one machine or a hand-made skill the lock doesn't track. The audit marks them `ignored` instead of `extra` and never installs or removes them, so a deliberate leftover stops looking like drift. A name both ignored and listed is a malformed file, since the two say opposite things.
