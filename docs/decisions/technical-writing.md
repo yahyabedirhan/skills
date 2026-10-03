@@ -1,10 +1,10 @@
-# Decisions: research writing
+# Decisions: technical writing
 
-How research documentation in this repo is written: the files in `docs/research/` and the HTML guides beside them. Read it before writing or changing any of them, and add a dated entry for each new decision.
+How everything under `docs/` is written: research files and their HTML guides in `docs/research/`, the decision records in `docs/decisions/`, and the agent docs in `docs/agents/`. Read it before writing or changing any file there, and add a dated entry for each new decision. Skills follow `skill-writing.md` instead.
 
 ## 2026-10-03: a light version of ASD-STE100
 
-The maintainer reads English as a second language, and the cloud-agents research (#76) was hard to read: long sentences, chains of clauses joined with semicolons, and coined terms nobody defined. A light version of ASD-STE100 (Simplified Technical English) fixed it. Full STE100 doesn't fit research: its controlled dictionary would force awkward wording around product names, citations and comparisons. So only its sentence rules apply.
+The maintainer reads English as a second language, and the cloud-agents research (#76) was hard to read: long sentences, chains of clauses joined with semicolons, and coined terms nobody defined. A light version of ASD-STE100 (Simplified Technical English) fixed it, and the same rules now hold for every document under `docs/`. Full STE100 doesn't fit these documents: its controlled dictionary would force awkward wording around product names, citations and comparisons. So only its sentence rules apply.
 
 Write every prose sentence to these rules:
 
