@@ -2,7 +2,7 @@
 
 The synthesis for [Research: synthesis - capability matrix, decisions and next steps for cloud agents (#74)](https://github.com/yahyabedirhan/skills/issues/74), under [Spec: research cloud agents (#45)](https://github.com/yahyabedirhan/skills/issues/45). **Read this file first.** It puts the research side by side, lists the decisions left for the maintainer, the experiments the research couldn't run safely, and how the three blocked build tickets change. Written 2026-09-29.
 
-Every fact here comes from one of the research files below; each matrix cell links the file (and section) behind it. Nothing new was probed for this file. Updated on 2026-09-29 for [#78](https://github.com/yahyabedirhan/skills/issues/78), whose cloud session tested Claude Code's cloud from inside (the **sp**, **wf** and **ma** files). Updated on 2026-09-30 for the maintainer's answers and the follow-up research (#86-#88), and again once "Every harness and project is set up and audited from the skills" (#66) merged into `main`: set-up-machine is on `main` and applied on the Mac, and is now run by an agent from per-harness references, with no plan/apply script.
+Every fact here comes from one of the research files below; each matrix cell links the file (and section) behind it. Nothing new was probed for this file. Updated on 2026-09-29 for [#78](https://github.com/yahyabedirhan/skills/issues/78), whose cloud session tested Claude Code's cloud from inside (the **sp**, **wf** and **ma** files). Updated on 2026-09-30 for the maintainer's answers and the follow-up research (#86-#88), and again once "Every harness and project is set up and audited from the skills" (#66) merged into `main`: set-up-machine is on `main` and applied on the Mac, and is now run by an agent from per-harness references, with no plan/apply script. Updated on 2026-10-03 with what has happened since: Herdr 0.9.3 everywhere, the new netcup VPS set up, two real efforts handed to a VPS by hand, shipyard's remote pings, close-effort renamed settle-effort, and the maintainer's answers on D7, D8, D9 and D13. Each changed fact carries an **Update 3 Oct** note; the findings of 29-30 September are kept as they were.
 
 | Short name | File | Ticket |
 |---|---|---|
@@ -23,7 +23,7 @@ Every fact here comes from one of the research files below; each matrix cell lin
 ## The short version
 
 - **The Mac stays home.** It is the only place with every harness, current skills, Treehouse, a browser and a working notification. Nothing researched beats it for an orchestrated effort today.
-- **The VPS is one upgrade away from running an orchestrator like the Mac does.** Web, GitHub and Claude Code already work there. What's missing is small: Herdr 0.9.2 on both machines (for `herdr --machine`), the current skills and global instructions (set-up-machine, on `main` since #66 merged), a worktree tool, and a notification route. A browser needs an install. RAM (3.8 GB, no swap) limits it to one or two agents.
+- **The VPS runs an orchestrator like the Mac does, handed over by hand.** On 2026-09-29 it was one upgrade away. **Update 3 Oct:** Herdr 0.9.3 runs on the Mac and both VPSes, and `herdr --machine <label>` drives workspaces, panes, agents and plugins. The new netcup VPS 1000 (about 8 GB, 4 vCPU, Debian 13, zram and swap) has the current skills and global instructions from set-up-machine, Treehouse, Go, Docker and a headless Chromium; it is about 2.8x slower than the Mac in a benchmark. Two real efforts (shipyard 0.0.5 and 0.0.6) were handed from the Mac to a VPS orchestrator by hand and both merged. A VPS agent reaches the Mac with `shipyard ping`. What's missing: a skill that does the handover (#16 → #13 → #15) and a route to the phone.
 - **Claude Code's cloud sessions are good for tasks, and close to ready for efforts.** Tested from inside ([sp][sp-short]): they run with the laptop closed, cost only plan usage (the promo credit is live and spent first), push their own branch or a new one they name, open pull requests, and have a headless Chromium and working WebSearch. This repo's skills don't load there by default, but skills installed into the VM's home load at once, so an environment setup script can carry them ([wf][wf-short]). What still bites: background work dies when an idle VM is reclaimed, sub-agents can't nest, `gh` is missing and GitHub GraphQL is blocked, and a permission prompt can stall an unattended session. `claude --cloud "<task>"` prints the session URL and exits; whether it runs from an agent's shell without a terminal is untested, and a routine or the in-session `create_session` tool are the agent-side starts.
 - **The other hosted agents are delegates, not orchestrators.** Codex, Cursor and Copilot each take one prompt on one branch and return a pull request or a diff. All three can be started and watched from a shell; only Cursor takes follow-ups through an API. None loads this repo's skills as they are; only Cursor carries anything personal (account User Rules and a `~/.cursor/skills` sync) ([op §2][op2]). None is worth a sign-up before Claude Code's cloud has been tried.
 - **Managed Agents is a developer API, not a better cloud session.** It bills API tokens plus session-hours on top of the plan and drops `CLAUDE.md`, skills, hooks and the Agent tool. Don't adopt it for efforts; its one draw is a self-hosted sandbox on the VPS from an individual plan, worth a budget-capped trial only if that becomes important ([ma][ma-fit]).
@@ -31,13 +31,15 @@ Every fact here comes from one of the research files below; each matrix cell lin
 
 Recommended direction, in order: upgrade Herdr and set up the VPS environment (decisions D1-D3), build #16 and then #13 on `herdr --machine`, try the cloud setup script that carries the skills (E16) before deciding anything about cloud orchestration (E1 and E2 are done), and fix the delegate-worktree base now (D8).
 
+**Update 3 Oct:** the first step is done (D2, D3, D4). Next on the VPS: small fixes (#150, #151, #148, the Herdr server starting at boot), then #16 → #13 → #15, then QA. Next in the cloud: E16, two or three tickets in cloud sessions, one watched effort, and #80. The D8 fix is decided and not built yet.
+
 ## Capability matrix
 
 Columns:
 
 - **Mac**: the maintainer's Mac today.
 - **VPS today**: the small Hetzner VPS as found on 2026-09-29.
-- **VPS upgraded**: the same VPS after the proposed changes: Herdr 0.9.2 on both ends, set-up-machine applied, `jq` and a worktree tool installed, the Playwright system libraries or Docker image, and optionally a rescale to CX33. **Everything in this column is expected from the docs, not tried.**
+- **VPS upgraded**: the same VPS after the proposed changes: Herdr 0.9.2 on both ends, set-up-machine applied, `jq` and a worktree tool installed, the Playwright system libraries or Docker image, and optionally a rescale to CX33. **Everything in this column is expected from the docs, not tried.** **Update 3 Oct:** tried, on a new machine rather than a rescale: the netcup VPS 1000 set up on 2026-10-02 (Herdr 0.9.3, set-up-machine applied and `verify.py` passed, Treehouse and Go, zram and swap, headless Chromium, Docker) matches this column, and two efforts ran there. Notes in the cells below mark where it differs.
 - **Claude Code cloud**: a cloud session (Claude Code on the web, `claude --cloud`, routines, projects).
 - **Other hosted**: Codex cloud, Cursor Cloud Agents, GitHub Copilot cloud agent (the smaller ones are in op §6).
 - **Firstmate**: where it applies. Firstmate runs where it is cloned (Mac or Linux), so most rows describe what it adds on top of that machine.
@@ -51,7 +53,7 @@ Columns:
 | **Web** | Yes ([vps][vps-glance]) | Yes: HTTPS to web, GitHub, npm ([vps][vps-web]) | Yes ([vps][vps-web]) | Allowlist ("Trusted") by default; Full or Custom per environment. WebFetch obeys the allowlist; WebSearch works ([cc §4][cc4], [sp §2][sp2]) | Codex: off by default. Cursor: on. Copilot: firewall allowlist ([op][op-cmp]) | The host's ([fm][fm-qs]) |
 | **Browser** | Chrome, Safari, Playwright ([vps][vps-glance]) | **No**: cached headless shell lacks 15 system libraries; no display ([vps][vps-browser]) | Headless, after `playwright install-deps` (root) or the Playwright Docker image ([vps][vps-browser]) | Headless Chromium pre-installed; trust the proxy CA; allowlisted hosts only ([sp §1][sp1]) | Cursor: full desktop and computer use. Copilot: Playwright MCP on by default. Codex: none documented ([op §2][op2], [§3][op3], [§1][op1]) | Requires `chrome-devtools-axi`; headless on a server unverified ([fm][fm-axi]) |
 | **File system** | Home folder ([vps][vps-glance]) | Own home, 26 GB free; `sudo` with a password ([vps][vps-glance]) | Same ([vps][vps-glance]) | Ephemeral VM; only pushed work and the conversation persist ([cc §2][cc2]) | Ephemeral per task; Cursor keeps snapshots ([op §2][op2]) | The host's; worktree per task ([fm][fm-walk]) |
-| **Herdr** | 0.9.0, VPS saved as a machine ([hv][hv-model]) | 0.9.0; driven over `ssh … bash -lc 'herdr …'` ([vps][vps-herdr]) | 0.9.2: `herdr --machine <label>`, `machine status`, no shell quoting ([vps][vps-upgrade]) | None ([cc §8][cc8]) | None ([del §5][del5]) | One of five backends; remote homes always run on Herdr ([fm][fm-remote]) |
+| **Herdr** | 0.9.0, VPS saved as a machine ([hv][hv-model]) | 0.9.0; driven over `ssh … bash -lc 'herdr …'` ([vps][vps-herdr]) | 0.9.2: `herdr --machine <label>`, `machine status`, no shell quoting ([vps][vps-upgrade]). **Update 3 Oct:** 0.9.3 on the Mac and both VPSes; `--machine` works for workspace, pane, agent and plugin commands; `machine status` can call a working VPS stopped after a manual server restart (#151) | None ([cc §8][cc8]) | None ([del §5][del5]) | One of five backends; remote homes always run on Herdr ([fm][fm-remote]) |
 | **Git worktrees** | Treehouse ([vps][vps-glance]) | Plain git only; no Treehouse ([vps][vps-git]) | Treehouse, or `git worktree add` / `herdr worktree create` ([vps][vps-git]) | Plain `git worktree` works; parallelism is sub-agents or projects ([cc §8][cc8], [sp §6][sp6]) | One branch per task ([op][op-cmp]) | `treehouse get` per task ([fm][fm-walk]) |
 
 ### The work itself
@@ -60,7 +62,7 @@ Columns:
 |---|---|---|---|---|---|---|
 | **GitHub push and PR** | `gh` ([del §1][del1]) | Yes: `gh` logged in, SSH auth works; writes not tried ([vps][vps-git]) | Yes ([vps][vps-git]) | Push to the checked-out branch, its own `claude/…` or a new one it names (an existing branch: untested); Create PR or the GitHub MCP tools; GraphQL blocked, REST for the attached repo only ([cc §6][cc6], [sp §4][sp4]) | All push and open PRs: Codex from the web, Cursor `cursor/…` or a given branch, Copilot one `copilot/…` PR ([op][op-cmp]) | The host's `gh`; branch `fm/<id>`; PR per task; guarded merge ([fm][fm-gh]) |
 | **Loads skills and instructions** | Current skills and global instructions ([vps][vps-glance]) | Older skill set; no global instructions; hand-made deny rules, memory on ([vps][vps-env]) | Current skills, shared `AGENTS.md`, rule table, hook, memory off ([vps][vps-env]) | Repo `CLAUDE.md` and `.claude/skills`, claude.ai-enabled skills; **not** the laptop's `~/.claude`. This repo's `skills/` isn't loaded by default, but skills installed into the VM's `~/.claude/skills` load ([cc §5][cc5], [wf §1][wf1]) | Repo `AGENTS.md` everywhere; this repo's skills as they are nowhere; only Cursor carries anything personal: account User Rules and a `~/.cursor/skills` sync ([op][op-cmp], [op §2][op2]) | Its own `AGENTS.md` and skills replace ours ([fm][fm-map]) |
-| **Orchestration with sub-agents** | Yes; the baseline ([del §1][del1]) | Old `orchestrate-effort` installed; `handover`, `close-effort` missing; RAM fits one or two agents ([del §3.1][del31], [siz][siz-tiers]) | As the Mac; CX33 fits two or three agents ([siz][siz-tiers]) | Sub-agents work, one level deep; idle expiry kills background work; projects run parallel threads ([cc §8][cc8], [wf §3][wf3]) | Task-sized. Cursor has sub-agents; Codex and Copilot unverified; Copilot capped at 59 min ([op][op-cmp]) | Forbids harness sub-agents: visible workers with on-disk state instead ([fm][fm-map]) |
+| **Orchestration with sub-agents** | Yes; the baseline ([del §1][del1]) | Old `orchestrate-effort` installed; `handover`, `close-effort` (now `settle-effort`) missing; RAM fits one or two agents ([del §3.1][del31], [siz][siz-tiers]) | As the Mac; CX33 fits two or three agents ([siz][siz-tiers]) | Sub-agents work, one level deep; idle expiry kills background work; projects run parallel threads ([cc §8][cc8], [wf §3][wf3]) | Task-sized. Cursor has sub-agents; Codex and Copilot unverified; Copilot capped at 59 min ([op][op-cmp]) | Forbids harness sub-agents: visible workers with on-disk state instead ([fm][fm-map]) |
 
 ### Delegating and hearing back
 
@@ -68,9 +70,9 @@ Columns:
 |---|---|---|---|---|---|---|
 | **Started by a local agent** | handover-to-herdr ([del §2][del2]) | `herdr` over SSH; workspace create and close probed ([del §3.1][del31]) | `herdr --machine … agent start/prompt` ([del §3.1][del31]) | `claude --cloud` from an agent's shell untested (prints a URL and exits in a terminal); a routine's API trigger; `create_session` from inside a cloud session, untested ([cc §7][cc7], [del §4.1][del41]) | Yes: `codex cloud exec`, Cursor `POST /v1/agents`, `gh agent-task create` ([op][op-cmp]) | `fm-spawn.sh`; remote through `fm-on.sh` over SSH ([fm][fm-remote]) |
 | **Watched and answered** | Herdr sidebar; `agent read/prompt` ([del §2][del2]) | Mac window shows its agent states; `agent read/prompt` over SSH ([del §3.2][del32]) | Same through `--machine`; Remote Control messaging both ways, untested ([del §3.2][del32]) | claude.ai and phone; `claude -p "<msg>" --cloud <id>` sends; no CLI status read; from inside a cloud session `list_sessions`/`get_session` read every session, Remote Control ones too ([cc §9][cc9]) | All watchable from a shell; answer by API only in Cursor, by `@copilot` PR comment in Copilot, web or `@codex` PR comment in Codex ([op][op-cmp]) | Zero-token watcher; durable inbox with receipts ([fm][fm-walk]) |
-| **Notifications** | `osascript` ([del §2][del2]) | None proven: no `osascript` or `notify-send`; a Herdr notification "shown" somewhere unknown ([vps][vps-notif]) | Remote Control push, or a Mac-side `agent wait` watcher; both untested ([del §3.3][del33]) | Desktop and project notifications; a `PushNotification` tool exists, phone delivery untested; the PR is the done signal ([cc §9][cc9], [del §4.3][del43]) | Cursor: iOS push. Copilot: GitHub review request. Codex: unverified ([op][op-cmp], [del §2][del2]) | In the first mate's chat; a `command:` hook for a phone; no phone channel ([fm][fm-qs]) |
+| **Notifications** | `osascript` ([del §2][del2]) | None proven: no `osascript` or `notify-send`; a Herdr notification "shown" somewhere unknown ([vps][vps-notif]) | Remote Control push, or a Mac-side `agent wait` watcher; both untested ([del §3.3][del33]). **Update 3 Oct:** `shipyard ping` from a VPS agent shows in the Mac's shipyard menu bar, tested from both VPSes; a blocked VPS agent shows red in the Mac's Herdr sidebar; Remote Control (E5) untested | Desktop and project notifications; a `PushNotification` tool exists, phone delivery untested; the PR is the done signal ([cc §9][cc9], [del §4.3][del43]) | Cursor: iOS push. Copilot: GitHub review request. Codex: unverified ([op][op-cmp], [del §2][del2]) | In the first mate's chat; a `command:` hook for a phone; no phone channel ([fm][fm-qs]) |
 | **Moving back** | Same branch or stacked ([del §2][del2]) | Git plus safe-handover checks over SSH; VPS to Mac impossible ([hv][hv-checks], [hv][hv-back]) | Same checks through `--machine` ([vps][vps-perm]) | `claude --teleport` copies it; the docs don't say the cloud session stops; assume it may still be running until E12 settles it ([cc §10][cc10], [del §4.4][del44]) | Codex `apply`; check out the branch ([op][op-cmp]) | Relaunch from the brief on disk ([fm][fm-qs]) |
-| **Cost** | Owned; plan usage ([siz][siz-sum]) | €5.99/month plus plan usage ([siz][siz-sum]) | CX33 €8.99/month (+€3), a rescale Hetzner may refuse for now ([siz][siz-avail]) | Plan usage, no VM charge; one-time $100 / $250 promo credit, live and spent first; its rate-limit window (`resetsAt`) resets 5 November, a window reset rather than a refill ([cc §11][cc11]) | Codex in Plus $20; Cursor Pro $20 plus API prices; Copilot Pro $10 plus AI credits ([op][op-cmp]) | Free; spends the owner's subscriptions ([fm][fm-qs]) |
+| **Cost** | Owned; plan usage ([siz][siz-sum]) | €5.99/month plus plan usage ([siz][siz-sum]) | CX33 €8.99/month (+€3), a rescale Hetzner may refuse for now ([siz][siz-avail]). **Update 3 Oct:** not offered; a netcup VPS 1000 on a monthly term instead (D4) | Plan usage, no VM charge; one-time $100 / $250 promo credit, live and spent first; its rate-limit window (`resetsAt`) resets 5 November, a window reset rather than a refill ([cc §11][cc11]) | Codex in Plus $20; Cursor Pro $20 plus API prices; Copilot Pro $10 plus AI credits ([op][op-cmp]) | Free; spends the owner's subscriptions ([fm][fm-qs]) |
 
 [cc2]: cloud-agents-claude-code.md#2-environment
 [cc3]: cloud-agents-claude-code.md#3-tools-and-commands
@@ -137,7 +139,7 @@ Columns:
 ## What each can do that the others can't
 
 - **Mac:** a working notification (`osascript`), a desktop browser the agent can drive, every harness, and the maintainer at the keyboard for trust prompts and approvals ([vps][vps-glance]).
-- **VPS:** runs this repo's own skills and Herdr with the laptop closed, on a machine the maintainer controls and can install anything on, for a flat €5.99 a month ([vps][vps-glance], [siz][siz-sum]).
+- **VPS:** runs this repo's own skills and Herdr with the laptop closed, on a machine the maintainer controls and can install anything on, for a flat monthly price ([vps][vps-glance], [siz][siz-sum]). **Update 3 Oct:** now proven twice, with two shipyard efforts handed over by hand and merged.
 - **Claude Code cloud:** a bigger machine than the VPS (15.7 GiB) per session, many sessions in parallel, no machine to maintain, reachable from the phone, a headless browser out of the box, and a one-time promo credit already being spent ([cc §2][cc2], [cc §11][cc11], [sp §1][sp1]). Projects add a coordinator with parallel threads that auto-fix their own PRs ([cc §8][cc8]).
 - **Other hosted:** Cursor drives a full desktop and takes API follow-ups; Copilot lives inside GitHub (assign an issue, get a PR) and, under GitHub's general rule, uses free Actions minutes on a public repo; Codex applies a finished diff straight into a local tree ([op][op-cmp]). Cursor's My Machines can also run a cloud agent's tool calls on the VPS ([op §2][op2]).
 - **Firstmate:** survives its own restart and its workers' deaths, because the brief and the status live on disk, and it has a real remote protocol (routed requests with receipts, a readiness doctor) ([fm][fm-walk], [fm][fm-remote]).
@@ -155,21 +157,25 @@ Each has options and a recommendation. "E" numbers point to the proposed experim
 
 - **Options:** (a) upgrade both now; (b) stay on 0.9.0 and build on `ssh … bash -lc 'herdr …'`; (c) wait for a later release.
 - **Recommendation: (a), at a quiet moment (E3).** `herdr --machine` removes the login-shell wrapper and remote-shell quoting, keeps the host out of skill text, and 0.9.2 adds `machine status` for a readiness check ([vps][vps-upgrade]). The cost is a VPS server restart that ends its idle agent pane. Herdr 0.9.2 was released on 2026-09-29.
+- **Update 3 Oct: done.** Herdr 0.9.3 runs on the Mac and on both VPSes (E3). The saved machines are labelled `netcup-vps` and `hetzner-vps`, and `herdr --machine <label>` works for workspace, pane, agent and plugin commands. Known bug: after a manual server restart, `herdr machine status` reports `hetzner-vps` "stopped or incompatible" while `--machine` still works (#151).
 
 ### D3. Set up the VPS environment the same way as the Mac?
 
 - **Options:** (a) run set-up-machine on the VPS (on `main` since #66 merged), plus install `jq` and a worktree tool; (b) keep the hand-made VPS setup; (c) reinstall the VPS from scratch.
-- **Recommendation: (a) (E6, E8).** Without it a VPS orchestrator has old skills, no global instructions, memory on, and can't run `handover` or `close-effort` ([vps][vps-env], [del §3.1][del31]). Decide first which of the 4 memory folders to keep, since its diff removes memory files (backed up) and can carry what's worth keeping into the shared file in the same approval. For the worktree tool, install Treehouse (and Go) rather than special-casing `git worktree add` on the VPS; Firstmate also requires Treehouse on a remote host ([fm][fm-remote]).
+- **Recommendation: (a) (E6, E8).** Without it a VPS orchestrator has old skills, no global instructions, memory on, and can't run `handover` or `close-effort` (now `settle-effort`) ([vps][vps-env], [del §3.1][del31]). Decide first which of the 4 memory folders to keep, since its diff removes memory files (backed up) and can carry what's worth keeping into the shared file in the same approval. For the worktree tool, install Treehouse (and Go) rather than special-casing `git worktree add` on the VPS; Firstmate also requires Treehouse on a remote host ([fm][fm-remote]).
+- **Update 3 Oct: done on the new netcup VPS** (E6, E8). set-up-machine was applied with the sandbox off and `verify.py` passed; Treehouse, Go, `gh` and Docker are installed, and the maintainer did the logins in Herdr tabs. The remote setup now lives in the skill on `main`: [`new-remote-machine.md`](../../skills/set-up-machine/references/new-remote-machine.md) for a fresh machine's base (user, keys-only SSH, firewall, updates, swap, PATH, browser) and [`remote-machine.md`](../../skills/set-up-machine/references/remote-machine.md) for any remote machine. Sudo steps go through a Herdr tab where the maintainer types the password (#148, not yet in the skills).
 
 ### D4. Resize the VPS?
 
 - **Options:** (a) stay on CX23; (b) add 2-4 GB of swap; (c) rescale to CX33 with "CPU and RAM only" (+€3/month, reversible); (d) burst: create a big server from a snapshot and delete it after; (e) move provider.
 - **Recommendation: (a) plus (b) now; (c) when a browser or a second agent runs there.** One agent fits with 2.4 GB spare, but with no swap an out-of-memory spike kills processes ([siz][siz-rec]). Hetzner's "not available" mark is a temporary per-customer, per-location restriction on new servers and rescales; the running CX23 is unaffected, so a refused rescale costs only a retry another day ([siz][siz-avail]). Don't move provider: Hetzner CX is the cheapest per GB of everything compared ([siz][siz-sum]).
+- **Update 3 Oct: decided and done** (see the follow-up research below). A netcup VPS 1000 (about 8 GB, 4 vCPU, Debian 13, monthly term) was ordered and set up on 2026-10-02: hardened base, zram and swap, Node, Claude Code, Codex, Herdr, Go, Treehouse, `gh`, Docker and headless Chromium. It is about 2.8x slower than the Mac in a benchmark. Retiring the Hetzner VPS is tracked elsewhere.
 
 ### D5. A headless browser on the VPS?
 
 - **Options:** (a) `npx playwright install-deps chromium` as root; (b) the Playwright Docker image, which the user can already run; (c) none: keep browser work on the Mac.
 - **Recommendation: (c) until a task needs it, then (b) (E7).** Docker needs no root and leaves the system untouched; measure its memory next to an agent before relying on it on CX23 ([vps][vps-browser]).
+- **Update 3 Oct: done on the netcup VPS.** A headless Chromium is installed (item 4 after the steps in [`new-remote-machine.md`](../../skills/set-up-machine/references/new-remote-machine.md)); in the trial the machine peaked at about 4.4 of 7.8 GB (E7, partly).
 
 ### D6. How do skills and instructions reach a Claude Code cloud session?
 
@@ -182,6 +188,7 @@ This repo keeps its skills in `skills/`, not `.claude/skills/`, and cloud sessio
 
 - **Options:** (a) Claude Code cloud only; (b) add Copilot ($10/month, lives in GitHub, 59-minute cap, no shell steering; answer by `@copilot` PR comment); (c) add Cursor ($20 plus API prices, best API, user-skill sync and account User Rules, browser); (d) add Codex (in ChatGPT Plus, no shell follow-ups; answer on the web or by `@codex` PR comment); (e) none.
 - **Recommendation: (a) first; (b) if a second is wanted.** It needs no sign-up, and the promo credit, already live, can cover a first try ([cc §11][cc11]). Copilot is the cheapest trial and fits a public repo ([op §3][op3]); Cursor is the strongest delegate but bills model use at API prices ([op §2][op2]). Whichever is used, the delegate brief must carry the rules, and the result is read back as a branch through `gh`, as Firstmate's Grok Bot pattern does ([fm][fm-map]). Score any candidate against Firstmate's five-point backend contract ([fm][fm-contract]).
+- **Update 3 Oct: decided.** "Claude plan only for now": no Copilot, no Jules. E13 is dropped.
 
 ### D8. What does an orchestrator delegate to, and from which base?
 
@@ -189,11 +196,23 @@ Two findings from running this effort: harness sub-agent worktrees were created 
 
 - **Options:** (a) keep in-process sub-agents and pass the effort branch as the base explicitly; (b) for efforts off the Mac, delegate to Herdr tabs with a status file; (c) move to Firstmate's model everywhere.
 - **Recommendation: (a) now, as a small fix to the orchestrating skills; (b) as part of #15 for VPS efforts.** Sub-agents are fine on the Mac, where the orchestrator rarely restarts and each ticket is committed; the base branch fix is needed by every stacked effort today. Not landed yet: on `main` (2026-09-30), orchestrate-effort's step 4 still starts each delegate "in its own git worktree" with no base named.
+- **Update 3 Oct: decided, (a).** A delegate's worktree branches from the effort's own base, which may be `main` or another branch (a stacked effort), and stays on top of it. The fix to **orchestrate-effort** and **implement** is not built yet; a new ticket carries it.
 
 ### D9. How does done-or-blocked reach the maintainer from off the Mac?
 
 - **Options:** (a) Claude Code Remote Control push from the VPS session; (b) a Mac-side watcher (`herdr agent wait … --until done --until blocked`, then `osascript`); (c) Herdr's toast delivery on the Mac client; (d) GitHub notifications on the pull request.
 - **Recommendation: (a) for the VPS once E5 proves it, with (b) as the fallback; (d) for cloud sessions.** (a) is the only route that needs no Mac online ([del §3.3][del33]); (b) lives only as long as the watching session. For cloud sessions nothing else is documented ([del §4.3][del43]); a cloud session's main loop has a `PushNotification` tool whose phone delivery E19 tests. New: from inside a cloud session, `list_sessions` shows every session's state, Remote Control sessions on the Mac or VPS included, with a needs-action flag, so a cloud orchestrator can see a blocked local one and the reverse ([cc §9][cc9]). E4 settles (c), whose documented default is `off` although a VPS probe returned `shown` ([del §3.3][del33]).
+- **Update 3 Oct: still open, asked again plainly.** When an orchestrator finishes or is blocked somewhere other than the Mac, what replaces the macOS banner (`osascript`)? The routes as of today:
+
+  | From | Route | Status |
+  |---|---|---|
+  | VPS | `shipyard ping`, polled by the Mac's shipyard menu-bar app through the herdr-shipyard plugin (`herdr --machine X plugin action invoke list`, read from `plugin log list`) | Works; tested from both VPSes on 3 Oct. A click can't switch the Mac's Herdr window to that machine (shipyard #152); no Linux release yet, so the CLI is built by hand on each VPS (shipyard #147) |
+  | VPS | Herdr sidebar state on the Mac (a blocked agent shows red) | Works, only if the maintainer is looking |
+  | VPS | Herdr toast, `herdr notification show` | Untested (E4); toast delivery is off on the Mac |
+  | Cloud session | Phone push, the `PushNotification` tool | The tool said sent; arrival unchecked (#80, E19) |
+  | Any | The GitHub pull request | Always; signals done only |
+
+  Proposed answer for the maintainer to confirm: `shipyard ping` for the VPS, phone push for cloud sessions once #80 confirms it, GitHub as the fallback. That also settles #144: `notification-method` on a VPS is `shipyard ping`.
 
 ### D10. Does the VPS need to reach the Mac?
 
@@ -213,7 +232,8 @@ Two findings from running this effort: harness sub-agent worktrees were created 
 ### D13. Adopt Firstmate?
 
 - **Options:** (a) adopt it; (b) borrow ideas; (c) ignore it.
-- **Recommendation: (b).** Adopting it would replace the effort workflow, run workers with bypassed permissions and strip AI trailers ([fm][fm-map]). Borrow: the status-file protocol (for #16), a readiness check with `fixable`/`human` gaps and "unreachable is unknown" (for #13), relaunch from a brief on disk (for #15), a worktree-isolation check in delegate briefs, and `--match-head-commit` in close-effort's merge ([fm][fm-map]).
+- **Recommendation: (b).** Adopting it would replace the effort workflow, run workers with bypassed permissions and strip AI trailers ([fm][fm-map]). Borrow: the status-file protocol (for #16), a readiness check with `fixable`/`human` gaps and "unreachable is unknown" (for #13), relaunch from a brief on disk (for #15), a worktree-isolation check in delegate briefs, and `--match-head-commit` in settle-effort's merge (close-effort until its rename) ([fm][fm-map]).
+- **Update 3 Oct: still open.** The maintainer will pick from the 18 ranked ideas in [fd §3](cloud-agents-firstmate-deep-dive.md#3-what-to-borrow), listed one line each in the guide's D13 card. The top two are small: a worktree-isolation check in delegate briefs (**orchestrate-effort**, **implement**) and `--match-head-commit` in **settle-effort**'s merge.
 
 [op-oq]: cloud-agents-other-providers.md#open-questions
 [fm-contract]: cloud-agents-firstmate.md#the-contract-a-delegate-backend-must-meet
@@ -238,16 +258,44 @@ Two findings from running this effort: harness sub-agent worktrees were created 
 | D12 | Yes; the maintainer confirmed on the usage page that #78's session was paid from the promo credit | Agreed |
 | D13 | Don't adopt; understand its concepts and pick what to borrow | Open |
 
+### Decision status (2026-10-03)
+
+| | Status | Where it stands |
+|---|---|---|
+| D1 | Changed | Two tracks; the VPS track's setup is done and two efforts ran there by hand |
+| D2 | Done | Herdr 0.9.3 on the Mac and both VPSes; #151 open |
+| D3 | Done | set-up-machine applied on the netcup VPS, `verify.py` passed |
+| D4 | Done | netcup VPS 1000, set up 2026-10-02; retiring Hetzner tracked elsewhere |
+| D5 | Done | Headless Chromium on the netcup VPS |
+| D6 | Agreed | Waits on E16 |
+| D7 | Decided 3 Oct | Claude plan only for now; no Copilot or Jules |
+| D8 | Decided 3 Oct | Branch from the effort's own base and stay on it; fix not built (new ticket) |
+| D9 | Open | Proposed: `shipyard ping` for the VPS, phone push for cloud once #80 confirms, GitHub as fallback; settles #144 |
+| D10 | Changed | Remote Control (E5) untested; `shipyard ping` gives a one-way VPS → Mac signal |
+| D11 | Changed | No guard rules; whether the wider ask-first line loosens is still open |
+| D12 | Agreed | Spend the credit on the cloud track |
+| D13 | Open | The maintainer picks from the 18 ranked ideas |
+
 ### Follow-up research on the open decisions (2026-09-30)
 
 - **D4, decided 2026-10-02:** netcup VPS 1000 G12.5 on a 1-month term, for 3 agents, CPU speed first. Set up the same day (set-up-machine applied, Herdr 0.9.3) and trialled against the Mac on real repos: 2.5-3x slower, CPU-bound, peak 4.4 GB of 7.8 GB, steal under 1.3%. Kept; the next step is VPS 2000 in place. The machine record is in the personal repository.
 - **D4, redone 2026-10-02 ([vm](cloud-agents-vps-math.md)).** The maintainer found the CX23 can't run one agent with tests, a browser test or anything in parallel; the rescale dialog offers CPX12 and up, not CX33; budget $10-15, up to about $25. Five parallel agents with 3 test runs and 2 browsers need about 12 GB, so 16 GB: the recommendation is now **netcup VPS 2000 G12.5** (8 vCores, 16 GB, €22.62 net, $25.56, on 12 months), or VPS 1000 (8 GB, $13.76) if $15 is the ceiling. Earlier ([vp](cloud-agents-vps-providers.md#5-ranked-shortlist), #86): Hetzner CX and CAX are still not orderable. The recommendation was **netcup Root Server RS 2000** (8 dedicated EPYC cores, 16 GB, 256 GB NVMe, €34.20 net a month on 12 months, 30-day money-back), with the CX23 kept alongside for 2-4 weeks. Fallbacks: netcup VPS 2000 (€22.62) and OVHcloud VPS-4 (€23.49, no term). Latency from the Mac is 54-102 ms across providers, too close to choose on.
 - **D7 ([co](cloud-agents-costs.md#short-answer), #87).** Metered vendors charge Claude Opus at Anthropic's list price, so a ticket costs about the same everywhere (estimates: $1 small, $4 medium, $28 for a five-ticket effort); the Claude plan turns that into $0 cash inside its windows. Hold the plan and the VPS; add Copilot Pro ($10) only for a second delegate; try Jules's free tier; skip the rest for now. The promo credit's claim date (7 October) and expiry (4 November) come from press reports only.
-- **D13 ([fd](cloud-agents-firstmate-deep-dive.md#3-what-to-borrow), #88).** 18 ideas ranked. The first two are small skill changes: a worktree-isolation check in delegate briefs (**orchestrate-effort**, **implement**) and a guarded merge with `--match-head-commit` (**close-effort**).
+- **D13 ([fd](cloud-agents-firstmate-deep-dive.md#3-what-to-borrow), #88).** 18 ideas ranked. The first two are small skill changes: a worktree-isolation check in delegate briefs (**orchestrate-effort**, **implement**) and a guarded merge with `--match-head-commit` (**close-effort**, since renamed **settle-effort**).
 
 ## Proposed experiments
 
 What the research couldn't settle inside the spec's safe zone. Each needs the maintainer, or their go-ahead.
+
+**Update 3 Oct, where each stands:**
+
+| Status | Experiments |
+|---|---|
+| Done | E1, E2; E3 (Herdr 0.9.3, apart from #151); E6 (on the netcup VPS); E8 (Treehouse and Go on the netcup VPS); E9 (swap, now in [`new-remote-machine.md`](../../skills/set-up-machine/references/new-remote-machine.md)) |
+| Partly | E7: headless Chromium installed on the netcup VPS; trial peak about 4.4 of 7.8 GB, no measurement next to a browser yet |
+| Obsolete or dropped | E10 (moved to netcup instead of rescaling); E13 (dropped by D7) |
+| QA left | E19 (#80), E4, E12, E18 |
+| Build or setup left | E16 (the cloud setup script, key for the cloud track), E17, E20, E5, E11; E14 and E15 optional |
 
 | # | Experiment | Settles | Cost | Risk | Source |
 |---|---|---|---|---|---|
@@ -282,9 +330,9 @@ What the research couldn't settle inside the spec's safe zone. Each needs the ma
 
 The full re-scoping comments are posted on each ticket; in short:
 
-- **[A thinking session on the Mac can hand over to an orchestrator on the VPS (#13)](https://github.com/yahyabedirhan/skills/issues/13).** The shape is settled: **handover-to-herdr** gains a target machine (Local or a saved Herdr machine's label), and the VPS's own environment defaults name its worktree tool and agent. The host comes from Herdr's catalog. Build it on `herdr --machine` after D2, with the VPS set up by D3; notifications follow D9. Handing over to a Claude Code cloud session is out of its scope: no agent-side start is proven yet (see D1, E11, E17).
+- **[A thinking session on the Mac can hand over to an orchestrator on the VPS (#13)](https://github.com/yahyabedirhan/skills/issues/13).** The shape is settled: **handover-to-herdr** gains a target machine (Local or a saved Herdr machine's label), and the VPS's own environment defaults name its worktree tool and agent. The host comes from Herdr's catalog. Build it on `herdr --machine` after D2, with the VPS set up by D3; notifications follow D9. Handing over to a Claude Code cloud session is out of its scope: no agent-side start is proven yet (see D1, E11, E17). **Update 3 Oct:** D2 and D3 are done, and two shipyard efforts went to a VPS orchestrator by hand and merged: 0.0.5 to the Hetzner VPS (Herdr 0.9.0, over SSH) and 0.0.6 to the netcup VPS (Herdr 0.9.3, mostly `herdr --machine`). The manual steps are what #13 automates: push the handoff → install the toolchain (sudo in a Herdr tab where the maintainer types the password, #148) → `treehouse` lease → `herdr --machine X workspace create`, `worktree open`, `agent start --kind claude` → the maintainer accepts the trust prompt → `agent prompt "/orchestrate-with-handoff <path>"` → `agent wait --until working`. No skill does this yet; build order #16 → #13 → #15.
 - **[An unfinished effort can be handed to a new orchestrator (#15)](https://github.com/yahyabedirhan/skills/issues/15).** Detection and the same-branch or stacked question are settled; the per-place "old side is idle and pushed" checks are listed. New scope from this run: a continuation checks for a newer handoff, and delegates must branch from the effort branch (D8). Cloud continuations stay open until E12 and E20 (E1 showed a session can push a new branch it names).
-- **[Agents on the Mac and the VPS can see each other's state (#16)](https://github.com/yahyabedirhan/skills/issues/16).** Settled: every read works over SSH today and through `--machine` after D2; the permission table is in [vps][vps-perm]. New: a status file per remote orchestrator (from Firstmate), and Remote Control messaging for the reverse direction (E5). It can land first, and #13 and #15 build on it.
+- **[Agents on the Mac and the VPS can see each other's state (#16)](https://github.com/yahyabedirhan/skills/issues/16).** Settled: every read works over SSH today and through `--machine` after D2; the permission table is in [vps][vps-perm]. New: a status file per remote orchestrator (from Firstmate), and Remote Control messaging for the reverse direction (E5). It can land first, and #13 and #15 build on it. **Update 3 Oct:** the reverse direction has a working signal outside the skills: `shipyard ping` from a VPS agent, shown by the Mac's shipyard app (D9).
 
 ## The spec's decisions, as the research left them
 
@@ -292,6 +340,7 @@ The full re-scoping comments are posted on each ticket; in short:
 - **Safe probes:** the VPS probes stayed read-only apart from the throwaway workspaces and the two notifications. Of the two allowed cloud sessions, the first probe exited 1 without evidence of a session; the second was refused by the agent's local permission check before anything ran. So the first pass had **no first-hand facts about the cloud VM**, and E1 handed the one unused session to the maintainer. **Update (#78):** the maintainer started it with `claude --cloud "say hi"`, and the first-hand facts now live in [sp][sp-short] and [wf][wf-short].
 - **Twelve research files, this synthesis and the guide** (`cloud-agents-guide.html`) are under `docs/research/`, each research file with an exploration log: six from the first pass, three from #78's cloud session and three from #86-#88. The Firstmate ticket (#75) was added mid-effort by the maintainer.
 - **The build tickets** stay blocked, now on the decisions and experiments above rather than on research.
+- **Update 3 Oct:** the research stayed read-only, but the machines have changed since, by the maintainer's own setup work: Herdr 0.9.3 everywhere, a new netcup VPS set up with set-up-machine, and shipyard's remote pings. Tickets to file once this PR merges: the D8 base-branch fix, the Firstmate borrowings once picked (D13), and the cloud track (E16 onwards).
 
 ## Corrections made while writing this synthesis
 
@@ -318,3 +367,4 @@ All on the maintainer's Mac on 2026-09-29, in this ticket's worktree or the sess
 | 5 | Wrote this file; corrected `cloud-agents-delegation.md` and `cloud-agents-claude-code.md` as listed above; one commit | These files |
 | 6 | Cloud session (#78, integration): read the three #78 files and the orchestrator's own session probes; updated the file table, the short version, the matrix's Claude Code cloud cells, D1, D6, D7, D9, D12, marked E1 and E2 done, added E16 to E20 and a Managed Agents bullet, and noted the #78 corrections | This file only |
 | 7 | Mac, 2026-09-30 | After #66 merged into `main`: read set-up-machine, orchestrate-effort and close-effort there, and checked the Mac's `~/.config/agents/`; updated the note at the top, the short version, the "VPS upgraded" column, D3, D8, D11, E6 and #13's re-scope | This file only |
+| 8 | Mac, 2026-10-03 | After `main` was merged in: read `new-remote-machine.md`, `remote-machine.md` and settle-effort there, and `gh issue view` for #13, #15, #16, #80, #144, #148, #150, #151 and shipyard #147, #152; applied the facts the maintainer verified that day as **Update 3 Oct** notes: the short version, the "VPS upgraded" column, D2-D5, D7-D9, D13, the decision status, the experiment status and the build tickets | This file and the guide |
