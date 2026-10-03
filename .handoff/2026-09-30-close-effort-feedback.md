@@ -52,7 +52,7 @@ Still open, never answered by the maintainer:
 
 Read these before proposing changes, since the pain points come from them:
 
-- [#21](https://github.com/yahyabedirhan/skills/issues/21), including its three comments: the original request, shipyard's close, the job-search close ("don't hand the maintainer commands"), the "go" rule, and the decision to make close-effort its own skill.
+- [#21](https://github.com/yahyabedirhan/skills/issues/21), including its three comments: the original request, two other projects' closes ("don't hand the maintainer commands"), the "go" rule, and the decision to make close-effort its own skill.
 - #23 (*Things to be aware of*), #20 (QA tickets), #3 (no `rm -rf`, and one call per commit and push), #83.
 - Commits `4a37188` and `7fc27ad`.
 - `docs/decisions/effort-workflow.md`, under "2026-09-29: closing" and the entries after it.

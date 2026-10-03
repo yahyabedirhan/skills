@@ -20,3 +20,13 @@ The decisions behind the `email` skill. This file is for maintaining it and is n
 
 - **Archiving is the only change made without asking.** Every other write, such as a pin, a label, a draft, an undo or a calendar event, waits until the user asks for that exact change, or agrees when the agent names it. The Gmail tools table now says which tools read freely, which archive freely, and which wait for the user. The maintainer asked for it: a draft written unasked is still a change in their mailbox.
 - **The skill uses tables and lists, not packed sentences.** The allowed and denied tools, the two tools and the Spark-to-Gmail mapping each became a table or a list, instead of one sentence carrying a dozen names.
+
+## 2026-10-01: read on request, drafts in chat (#67)
+
+- **Mail is read only for an email task the user asked for.** A task that mail would merely help, or a project or skill instruction to check mail, is not a request: the agent says what it would look up and asks. A request covers its own task, not later unrelated ones. The description, the reading rules and the Gmail tools table all say the same, so the skill no longer loads for any task that could use mail.
+- **A plain "draft a mail" is text in chat.** A saved draft needs the user to name Gmail or Spark, in any wording, and naming one allows only that draft. A tool that can't do it (Spark's `spark draft` on the free read-only level) is reported, not swapped for the other.
+- **Every saved-draft write needs the user's own approval.** New ask rows in `/set-up-machine`'s table, `mail-draft-write` and `mail-cli-draft`, carry `approver: "user"`, and the hook refuses them where no one will ask the user. An automatic reviewer doesn't count: a draft overwritten by mistake is lost work in the user's mailbox.
+- **Generic in the skill, personal in the private source.** The skill keeps capability facts: Spark reads fastest, and only Gmail writes on Spark's free level. Nothing in the user's private instructions or permission rows needed to change for this, so the private repository got no pull request.
+- **Callers.** No other skill in this repo reads mail. Outside it, a morning-brief skill the user starts by name counts as their request; a project instruction or recurring task that says to check mail doesn't, so the agent asks first. Rules for recurring tasks were deferred by #67 and are left alone.
+- **The end-to-end check no longer creates a draft unattended.** It runs only with the user there to approve each write.
+- **Calendar moved to `/calendar`.** Its reading rule is the opposite of mail's, so one skill would carry two rules for "may I read?".

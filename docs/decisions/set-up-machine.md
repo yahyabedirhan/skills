@@ -2,6 +2,10 @@
 
 The decisions behind the `set-up-machine` skill. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why. The spec is "Spec: every harness and project is set up and audited from the skills" (#49).
 
+## 2026-10-01: retain the occupied caller at settlement
+
+- **The session-host fallback keeps the caller and its occupied worktree open.** Remove the example that hands the user an own-worktree release command: it contradicts the settlement decisions in [Workflow: Make Herdr and Treehouse settlement reliable without closing topology](https://github.com/yahyabedirhan/skills/issues/123). This changes the source role guidance only; machine reconciliation remains a post-merge follow-up.
+
 ## 2026-09-29
 
 - **The rule table is JSON.** The reconcile script and the later pre-tool hook read it with Python 3's standard library, and macOS ships Python 3.9, which has no TOML reader (`tomllib` is 3.11+).
@@ -157,3 +161,59 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 - **`find-delete` moved from ask to deny.** Its rule line said "asks first", but nothing asked: find writes `-delete` after the path, so no harness's prefix entry catches it, and the hook leaves ask rows to the harness. The maintainer asked for it to be blocked as far as possible, so the hook now refuses it on every harness, behind wrappers, `bash -c` and `$(…)` too. The instruction says to list with `find`, then move the files into `.scratch/`.
 - **No native entry for `find`'s options.** *Spellings* now says so for every harness; the hook is the only layer that sees them.
 
+
+## 2026-10-01: the personal repository, through a pointer (#113)
+
+The spec is #111.
+
+- **A person's own parts of the shared file come from their own repository.** The Environment defaults table's Tool column and the Personal workflow section are generated from `agents/instructions.md` in that repository, the way the rules block is generated from the rule table. The roles' What it is and When none columns still come from the skill. A new machine then gets them by running the skill, with no retyping, and the repository can be private.
+- **The pointer is `~/.config/agents/source.md`,** naming the repository as `<owner>/<repo>` and its clone path, or `none`. It sits outside every repository, so it is private by being local, and works like `docs/agents/issue-tracker.md` does for a project. When it's missing, Inspect asks the user once and the diff writes it; `none` is recorded so the next run doesn't ask, and a machine with no personal repository keeps its hand-written Tool values and workflow lines.
+- **The repository's files sit in an `agents/` folder,** so the rest of the repository stays free. In `instructions.md` only the Role and Tool columns are read; any other column, such as Why, and any text outside the two sections, are notes that stay there. A role left out is `none`.
+- **`agents/permissions.json` has a place and no format yet.** The next ticket, #114, fills it with personal rows in the rule table's format.
+
+## 2026-10-01: personal rows, with a plain allow level (#114)
+
+The spec is #111.
+
+- **`agents/permissions.json` keeps its name and takes the rule table's format,** `{"version": 1, "rules": [...]}`, so one loader, `rules.load(path, personal=True)`, checks both, and a malformed personal row is refused the same way. A personal row can't reuse a table id, so a rule's id still names one row.
+- **A plain `allow` level, for personal rows only.** It is what a person needs for a tool they added: no prompt, and nothing to report. The table refuses it, since a generic rule should never loosen a harness. Every harness evaluates deny and ask over allow (Codex by strictest decision, opencode by writing allow entries first), and `verify.py` fails an allow sample a table row denies or asks for, so a personal allow can't loosen a table row.
+- **The hook and `verify.py` load personal rows alongside the table, through the pointer.** A missing pointer or file means no personal rows. A malformed personal file makes the hook skip the personal rows and keep the table's, since failing open on the whole table would drop the generic rules; `verify.py` reports the file as `personal FAIL`.
+- **A personal row is written only where its tool exists:** a command row where its program is on `PATH`, an MCP-tool row in a harness that lists a tool it matches, a file row everywhere. Elsewhere it's `n/a`, saying which tool is missing.
+- **The audit marks a personal row's entries `personal`, beside their usual mark,** never `extra`; an entry a removed personal row left behind is `extra`, like a dropped table row's. A hand-written allow the person wants kept is proposed as a personal row in the clone, the way #113 carries hand-written Tool values.
+- **`verify.py` checks personal entries in Claude Code only,** the one harness whose settings it can read in full: an entry belongs to a row when the row covers what the entry names. An MCP-tool row with no entry is `n/a`, since `verify.py` can't list a harness's tools; the other harnesses' entries are compared in the diff.
+- **Personal deny, ask and allow-and-report rows get rule lines** in the shared file's generated block, after the table's, so an agent reads their instructions. An `allow` row gets none.
+- **Nothing is lost on the switch.** When the shared file holds a value or line the repository lacks, the diff adds it to the clone's `instructions.md` first, and the report names the file for the user to commit there, since the skill doesn't push someone's personal repository.
+- **`verify.py` checks it, and a missing pointer fails.** A `personal` line is `ok` when the shared file carries the repository's values, `none` when the pointer says none, and `FAIL` when the pointer is missing or malformed, the clone or its file is missing, or a value or the workflow differs. A missing pointer fails because it is a gap the diff closes, so a set-up machine never shows it; the test homes now carry a `none` pointer.
+- **The reference names no particular tool.** The skills repo is public and general, so `references/personal-repository.md` and the tests describe the kinds of entries with placeholders.
+
+
+## 2026-10-01: private Codex CLI defaults (#119)
+
+- **Declare CLI preferences in private `agents/codex.toml`, through the existing source pointer.** Initially allow only `sandbox_mode`, `approval_policy` and `approvals_reviewer`. Missing declarations leave settings user-managed, so setup never invents a personal choice or puts one in this public repository.
+- **Validate against the installed CLI before applying.** Official documentation and installed schemas can differ. Reject unsupported source entries and report the support gap rather than ignoring input or assuming the inspected version stays current.
+- **Change only declared, supported defaults through the existing diff and backup procedure.** Preserve unrelated TOML, separate profiles, hooks, rules and stricter constraints. Preserve conflicting `default_permissions` configurations and report the incompatibility instead of migrating them.
+- **Resolve the Codex config home once and use it everywhere.** Custom homes must cover instructions, config, rules, hooks and verification together. Fixture runs use an explicit synthetic home and never inherit the live config home or authentication.
+- **Audit persisted defaults separately from effective session settings.** Profiles, trusted projects, CLI flags, cloud defaults and enforced requirements can change or constrain the result. Report observed overrides and unverified layers without treating a matching user file as proof of session behavior.
+- **Leave existing sessions running.** Changes take effect in subsequent sessions; explain `/permissions` where supported. Auto-review routes eligible approvals to a reviewer and keeps sandbox boundaries and the possibility of refusal.
+
+
+## 2026-10-01: concise shared instructions
+
+- **Keep enforcement; remove its inventory from every session.** The shared file carried each row's summary, reason and alternative, repeating explanations across command variants. It now carries general rejection guidance, the common `rm -rf` fallback and a short secrets guardrail. The rule table, personal rows, hook messages and native permissions retain their detail. This supersedes the earlier per-row global-instructions requirements.
+- **Expand from observed failures.** Add a fallback example only when a real session is stuck after a rejection; do not pre-load every possible denial.
+- **Shorten role fallbacks at their source.** The session-host and worktree-tool rows keep the action and remove the explanation.
+- **Group personal workflow by topic.** Use concise rules under third-level headings, preserving meaning in the personal source. Copy those headings into the shared file and omit empty categories and the old fixed intro.
+
+## 2026-10-01: ask rows that only the user can answer (#67)
+
+- **`approver: "user"` on an ask row.** Some asks, such as a saved mail draft, must reach the user, not an automatic reviewer or a mode that answers for them. The row says so, and the hook refuses its calls where the payload shows no one will ask: Claude Code's `auto`, `dontAsk` and `bypassPermissions` modes, Codex under approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt. Claude Code's docs say auto mode still asks for an ask rule, but no probe has shown it for an MCP tool, so auto mode stays refused until one does.
+- **Codex's MCP note was stale.** Codex has native entries for MCP tools: `disabled_tools` and per-tool `approval_mode` on `[mcp_servers.<id>]`, and per-tool `enabled` and `approval_mode` plus an `approvals_reviewer` on `[apps.<id>]`. A plain MCP server has no reviewer of its own, so under a top-level `auto_review` an `approver: "user"` row there is a gap. Sources: the configuration reference and `openai/codex` at `2685e3a`.
+- **opencode takes MCP tool names as permission keys,** `<server>_<tool>`, wildcards allowed, so a row is native once a session lists the tools. Its `--auto` mode answers every ask, which the plugin can't see.
+
+## 2026-10-01: secrets stay behind rules, with the gap accepted (#98)
+
+- **Guard the obvious paths only.** The rows, the hook and the shared secrets guardrail stay the whole defence on every harness. The research in `docs/research/secrets-out-of-reach.md` showed what else could close the gap, and the maintainer chose not to pay for it while no real secret sits on the machine.
+- **Two more file rows.** `home-credentials-read` now covers the token files of git (`~/.netrc`, `~/.git-credentials`), `gh` (`~/.config/gh/hosts.yml`), npm (`~/.npmrc`), Docker (`~/.docker/config.json`) and `~/.kube/config`; the tools that own them still read them. `key-files-read` covers `*.pem`, `*.p12` and `*.pfx` anywhere. `*.key` is left out because Keynote files share it, and `id_*` because `~/.ssh` already covers it.
+- **The accepted gap.** An interpreter (`python3 -c 'open(".env")'`), a glob the shell expands (`cat .e?v`) and another process's launch environment (`ps eww`, or any same-user process on macOS) get past the rows. Only the global instruction to never read, print or change secrets covers them. Rules can't parse interpreter code reliably, so the gap is named rather than chased.
+- **Hygiene, outside the rule table.** Keep tokens out of shell profiles, and keep a project's keys in its gitignored `.env`, which the rows refuse.
+- **Dropped:** 1Password (`op run`), Claude Code's OS sandbox and a Codex deny profile. The sandbox is the only one that closes the gap, but it breaks git over SSH, `herdr`, `gh` and notifications unless each is excluded. Reopen this when a real secret lives on the machine.

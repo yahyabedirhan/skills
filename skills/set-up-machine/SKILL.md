@@ -1,11 +1,11 @@
 ---
 name: set-up-machine
-description: Set up or audit a machine's coding-agent harnesses from one rule table - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, and memory kept off. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
+description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's personal repository - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, memory kept off, and declared Codex CLI defaults. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
 ---
 
 # Set up machine
 
-Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI) match two sources: the **rule table**, [`rules.json`](rules.json), which holds each global rule once as what it covers; and the **shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads. Each harness also runs the **pre-tool hook**, `scripts/pre_tool_hook.py`, before every tool call, and keeps its memory off. Never remove or loosen an entry the table didn't produce: it's the user's. Harness formats change, so check the docs a harness reference links before writing; where they differ, follow the docs and name the difference in your report. Running the skill again is the **audit**: the same steps, ending with a diff that changes nothing.
+Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI) match three sources: the **rule table**, [`rules.json`](rules.json), which holds each global rule once as what it covers; the **shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads; and the user's **personal repository**, named by the **pointer** `~/.config/agents/source.md`, from which the shared file's personal parts are generated (which tool fills each role, and the personal workflow lines) and the **personal rows**, permission rows each harness carries alongside the rule table's. Codex also takes explicitly declared CLI defaults from that repository's `agents/codex.toml`. Each harness also runs the **pre-tool hook**, `scripts/pre_tool_hook.py`, before every tool call, and keeps its memory off. Never remove or loosen an entry the table didn't produce: it's the user's. Harness formats change, so check the docs a harness reference links before writing; where they differ, follow the docs and name the difference in your report. Running the skill again is the **audit**: the same steps, ending with a diff that changes nothing.
 
 ## Parameters
 
@@ -13,41 +13,46 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## Steps
 
-1. **Inspect.** Find each harness on the machine, read its reference, then every file that reference names. Read the shared file too.
+1. **Inspect.** Find each harness on the machine, read its reference, then the non-secret configuration fields that reference needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a personal repository, read `references/personal-repository.md` and the repository's `agents/instructions.md` and `agents/permissions.json` in its clone. For Codex, inspect the optional `agents/codex.toml` as its reference directs; use one resolved config home throughout setup and verification.
+   - **When the pointer is missing:** read `references/personal-repository.md`, then ask the user once which repository holds their personal setup and where it is cloned, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
+   - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
    - **When trying a change without touching the real machine:** run the steps against a copy of the home folder in the project's `.scratch/`, and check it with `verify.py --home <copy>`. Start no harness there, since it would read the real login.
-2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape, memory off, the hook wired, and the `<skills-repo>` skills installed. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
+2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, declared supported Codex defaults, and the `<skills-repo>` skills installed. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
 
-   Work out what each harness should hold, from `rules.json`, the shared file's shape and the harness's reference, and compare it with what the machine holds. Write the whole diff: per harness and file, the exact entries or a unified diff, each line marked:
+   Work out what each harness should hold, from `rules.json`, the personal rows, the shared file's shape and the harness's reference, and compare it with what the machine holds. Write the whole diff: per harness and file, the exact entries or a unified diff, each line marked:
 
    - `added`, `tightened` (a stricter entry added where it wins), `removed`;
-   - `present`, `wired` (the hook), `found` (the MCP tools a mail row matched);
-   - `stricter` (the machine is stricter than the table: kept), `extra` (not the table's: kept), `gap` (what the harness can't express), `none` (no such feature).
+   - `present`, `wired` (the hook), `found` (the MCP tools a row matched);
+   - `stricter` (the machine is stricter than the table: kept), `extra` (neither the table's nor a personal row's: kept), `gap` (what the harness can't express), `none` (no such feature);
+   - `personal` beside the mark of every entry a personal row produced (`added, personal`; `present, personal`), so the user can tell those entries from the table's and never reads them as `extra`;
+   - `n/a` (not applicable) for a personal row whose tool this harness lacks, with why: nothing is written for it there.
 
-   Use `removed` only for memory files, a harness's own global file whose every line is already in the shared file (it becomes a link), and this skill's own wiring that points at an old script. An entry a dropped row left behind is `extra`, for the user to remove.
+   Use `removed` only for memory files, a harness's own global file whose every line is already in the shared file (it becomes a link), and this skill's own wiring that points at an old script. An entry a dropped row, the table's or a personal one, left behind is `extra`, for the user to remove.
    - **With a `<skills-repo>` value:** the diff installs that repo's skills globally: `npx --yes skills add <owner>/<repo> -g -a codex -a claude-code -y`, leaving out `-a claude-code` when `~/.claude/skills` is a link to `~/.agents/skills`. It's `present` once `~/.agents/.skill-lock.json` records a skill from that source. With no value, it's a `none` line.
 3. **Ask once** for one approval of the whole diff. A change after that needs a new approval.
 4. **Back up** every file the diff changes or removes. Before writing any file, copy each one into `~/.config/agents/backups/<UTC time as YYYYmmddTHHMMSSZ>/`, at its path relative to the home folder (`.claude/settings.json`). Copy a symlink as a link.
-5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In a JSON file, change only the keys the diff names and keep the rest. Write through a symlink to its target.
-6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
+5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
+6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries. For Codex, distinguish persisted defaults from effective overrides and state how subsequent sessions pick up changes.
 
-   Run `python3 <this skill>/scripts/verify.py` (Python 3.9+, standard library only; it writes nothing). It passes when it prints `rules ok`, a `hook wired` line for every harness found, and every `codex differs` line is a row codex.md says gets no rule.
+   Run `python3 <this skill>/scripts/verify.py` (Python 3.9+, standard library only; it writes nothing). It passes when it prints `rules ok`, a `hook wired` line for every harness found, a `personal ok` or `personal none` line and no `personal FAIL` line, every `codex differs` line is a row codex.md says gets no rule, and declared Codex defaults match without a `config FAIL` line. Report `config gap` and `config override` lines separately; they limit what the audit proves.
 
 ## Rule table
 
-`rules.json` holds each global rule once, by meaning, not in any harness's form. Each harness reference turns a row into that harness's entries; the hook and `verify.py` read it through `scripts/setupmachine/rules.py`, which refuses a malformed row.
+`rules.json` holds each global rule once, by meaning, not in any harness's form. Each harness reference turns a row into that harness's entries; the hook and `verify.py` read it through `scripts/setupmachine/rules.py`, which refuses a malformed row. A personal repository's `agents/permissions.json` holds personal rows in the same format, which every harness, the hook and `verify.py` take alongside the table's (`references/personal-repository.md`).
 
 ### A row
 
 | Field | Holds |
 |---|---|
 | `id` | a stable kebab-case name |
-| `level` | `deny`, `ask` or `allow-and-report` |
-| `summary` | what the rule covers, as it reads in the rule line |
+| `level` | `deny`, `ask` or `allow-and-report`; a personal row may also be `allow` |
+| `summary` | what the rule covers, shown in rejection messages |
 | `match` | what it covers, in one of the three kinds below |
 | `reason` | why the rule exists |
 | `instruction` | for `deny`, what the agent does instead: an alternative, or "Stop, say why, and give the user the exact command; never work around it."; for `ask` and `allow-and-report`, how to go ahead |
 | `samples` | `covers`: calls the row must catch; `leaves`: near misses it must let through. A shell command for a command row, a path for a file row, a tool name for an MCP row. `verify.py` checks them against the hook |
 | `gap` | optional: what no harness can catch for the row (`echo $TOKEN`); every audit names it |
+| `approver` | optional, on an `ask` row only: `user` when each call needs the user's own approval, which an automatic reviewer's or a remembered answer's doesn't replace |
 
 ### `match` kinds
 
@@ -75,11 +80,14 @@ A harness that matches a command's text catches only the spellings it lists, so 
 
 ## Pre-tool hook
 
-`scripts/pre_tool_hook.py` (Python 3.9+, standard library only) is the hook every harness runs before each tool call. It reads `rules.json` and checks the call:
+`scripts/pre_tool_hook.py` (Python 3.9+, standard library only) is the hook every harness runs before each tool call. It reads `rules.json`, and the personal rows through the pointer, and checks the call:
 
 - **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
 - **allow-and-report** rows: it writes one JSON line per call to `<report folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
-- **ask** rows: the harness's native ask entries do the asking.
+- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why).
+- **allow** rows: it says nothing; the harness's native allow entries let the call run without a prompt.
+
+A malformed personal file leaves the table's rows in force: the hook skips the personal rows and `verify.py` reports the file.
 
 ### Wiring
 
@@ -99,12 +107,16 @@ Name these once in every audit:
 - an abbreviated long option (`--recur`);
 - a force push by refspec (`git push origin +main`);
 - a glob the shell expands (`cat .env*`);
+- an automatic reviewer, such as Codex's `auto_review`, answering an `approver: "user"` row, since the call's payload doesn't show the reviewer;
 - each row's own `gap`.
 
 ## References
 
 - [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, what counts as personal workflow, moving a harness's own file, and why memory stays off.
 - [references/rule-table.md](references/rule-table.md): changing a row of the rule table, changing the hook's code and its tests, and adding a harness.
+- [references/personal-repository.md](references/personal-repository.md): the pointer, the personal repository's layout, generating the shared file's personal parts from it, and its personal rows.
+- [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
+  - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
 - One reference per harness, read for each harness found. Each says how the harness is found, where it keeps each setting, a row's native form with worked examples, the hook's wiring, and its gaps:
   - [references/claude-code.md](references/claude-code.md): Claude Code.
   - [references/codex.md](references/codex.md): Codex.
@@ -113,6 +125,6 @@ Name these once in every audit:
 
 ## Scripts
 
-- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine: each row's samples through the hook, and through Codex's own policy check.
+- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine: each row's samples through the hook, and through Codex's own policy check; that the shared file carries the personal repository's values; that Claude Code holds each personal row's entries; and Codex defaults, installed support and override gaps at the resolved config home.
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.

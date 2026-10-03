@@ -38,7 +38,18 @@ No memory feature: a `none` line. Some models are prompted to keep a memory file
 
 ## MCP-tool rows
 
-Tools are named `<server>_<tool>`, and opencode lists them only inside a session. So match each row's `server` regex against the servers in the global config's `mcp` key: no match is a `found` line saying so; a match is a `gap` (no native entry; the hook refuses the matching tools when called).
+Tools are named `<server>_<tool>`, and that name is also the tool's `permission` key, wildcards allowed (`"gmail_*": "ask"`). opencode lists the tools only inside a session, so match each row's `server` regex against the servers in the global config's `mcp` key: no match is a `found` line saying so.
+
+- **With a tool listing from a session:** each tool a row matches becomes an exact key at the row's level, after the allow entries (`"gmail_send_message": "deny"`); a whole-tool `deny` also hides the tool from the model.
+- **Without one:** a matching row is a `gap`, and the hook refuses the matching tools of a deny row when they're called.
+- **`approver: "user"` rows:** `--auto` (also `--yolo` and `--dangerously-skip-permissions`) and the TUI's auto-approve toggle answer every `ask` for the user, and the plugin can't tell they're on. So the hook refuses these rows' calls in opencode, a `gap` line; a plain `opencode run` rejects an `ask` anyway.
+
+## Personal rows
+
+A personal row (personal-repository.md) becomes `permission` patterns the way a table row of its kind does above, each marked `personal`. An `allow` row's patterns get `allow`, written with the other allow entries first, so the table's ask and deny entries after them win and a personal `allow` never loosens a table row.
+
+- **Worked example,** an `allow` command row on `<program>` with subcommand `<word>`: `"bash": {"<program> <word> *": "allow", "/bin/<program> <word> *": "allow", "/usr/bin/<program> <word> *": "allow", …}`, before the deny patterns.
+- **Its tool exists** for a command row when one of its programs is on `PATH`, for a file row always, and for an MCP-tool row when its `server` regex matches a server in the `mcp` key; otherwise the row is `n/a` here. A matching MCP-tool row is still a `gap`, as above: an `allow` row then leaves the tools to opencode's own defaults.
 
 ## Pre-tool hook
 
@@ -70,4 +81,4 @@ In a sandbox: `OPENCODE_CONFIG_DIR=<a copy of the config folder>` layers it over
 - `opencode run --format json "Run exactly: rm -rf x"` leaves `x`, and the tool result is the hook's refusal; `git push --force-with-lease …` is auto-rejected as an ask; `gh api rate_limit` runs and gets a report line.
 - With only the permissions (no plugin), the same samples get opencode's own refusal, and `git push <remote> HEAD --force` runs: the gap the hook closes.
 - A `read` of `.env` is refused; a `read` of `.env.example` works.
-- `opencode run "Without tools: quote your rule about rm -rf and the file it came from."` quotes the shared file's rule line.
+- `opencode run "Without tools: quote your rule about rm -rf and the file it came from."` quotes the shared file's `rm -rf` fallback.
