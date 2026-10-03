@@ -13,3 +13,7 @@ Single-context: one `GLOSSARY.md` at the root when terms get settled, and the de
 ### Writing skills
 
 Before writing or changing a skill, read `docs/decisions/skill-writing.md`: the shape, the language and what a skill leaves out and keeps.
+
+### Writing docs
+
+Before writing or changing anything under `docs/` (research, guides, decision records, agent docs), read `docs/decisions/technical-writing.md`: a light version of ASD-STE100 for every sentence, and one folder per research topic.
