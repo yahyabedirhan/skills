@@ -3,30 +3,49 @@ name: email
 description: >-
   How to work the user's email through the Spark CLI and the Gmail connector:
   which tool to pick, how to list, search and read mail, and how to mark it
-  done, label, pin and draft replies. It archives freely, makes any other
-  change only when asked, and never sends. Use whenever a task reads or
-  changes the user's mail, calendar, availability or contacts, or when this
-  email setup needs configuring or checking.
+  done, label, pin and save drafts. It reads mail only for an email task the
+  user asked for, keeps a plain draft in chat, archives freely, makes any
+  other change only when asked, and never sends. Use when the user asks for an
+  email task, such as finding, reading, tidying or drafting mail, or when this
+  email setup needs configuring or checking. A task that could merely use
+  mail as context is not an email task.
 ---
 
 # Email
 
-Read mail with the Spark CLI, and make every change to mail through the Gmail connector. Leave what to do with an email, and when, to the user.
+Read mail with the Spark CLI, and make every change to mail through the Gmail connector, except a draft the user asks to have in Spark. Leave what to do with an email, and when, to the user. For calendar events and free time, use `/calendar`.
+
+## When to read mail
+
+List, search or read mail, through either tool, only when the user asks for an email task that needs those reads. The mailbox is private, so reading it is the user's call, not the agent's.
+
+- **When mail would only help another task,** such as a coding task that a thread might explain, or when a project or skill instruction says to check mail: say what you would look up and why, and read only after the user agrees.
+- **When the task changes:** the user's request covers the email task it was for. Ask again before reading mail for an unrelated task.
+
+## Drafts
+
+- **When the user asks for a draft without naming Gmail or Spark,** such as "draft a mail to the landlord": write the text in chat. Read mail for it only when the request points at mail it needs, such as the email being answered, and ask before any other lookup.
+- **When the user asks for the draft in Gmail or in Spark,** in any wording ("save it as a Gmail draft", "put it in my Spark drafts"): save it there, with that tool only. Naming a tool allows that draft, not other changes to mail.
+- **When the named tool can't do it,** such as `spark draft` refused because Spark's access level is read-only: say so, and keep the draft in chat. Don't switch to the other tool unasked.
+
+Every create, update or delete of a saved draft needs the user's own approval in the harness, even after they asked for the draft: a saved draft is a change in their mailbox, and one mistaken call can overwrite a draft they were writing. `/set-up-machine`'s ask rows `mail-draft-write` and `mail-cli-draft` make each of these calls ask.
+
+- **When the harness won't ask the user themselves,** keep the draft in chat and say why. That covers Claude Code's `bypassPermissions`, `dontAsk` and `auto` modes and a non-interactive run, Codex with an automatic reviewer, Cursor and opencode in a mode that runs tools without asking, and any harness where the call doesn't ask. An automatic reviewer's approval is not the user's.
 
 ## Safety
 
 The user reviews and sends every email themselves, so go no further than a draft.
 
-Archive an email when the task calls for it. Make any other change only after the user asks for that exact change, or after you name it and they agree: a pin, a label, a draft, an undo, or a calendar event.
+Within an email task, archive an email when the task calls for it. Make any other change only after the user asks for that exact change, or after you name it and they agree: a pin, a label, an undo, or a saved draft as above.
 
 ### Gmail tools
 
 | Tools | Use |
 |---|---|
-| `search_threads`, `get_thread`, `get_message`, `list_labels`, `get_draft`, `list_drafts` | Read freely. |
-| `unlabel_thread` or `update_message_labels` removing `INBOX` | Archive freely. |
+| `search_threads`, `get_thread`, `get_message`, `list_labels`, `get_draft`, `list_drafts` | For an email task the user asked for. |
+| `unlabel_thread` or `update_message_labels` removing `INBOX` | Archive freely within that task. |
 | `label_*`, `unlabel_*` and `update_message_labels` for any other label, `create_label`, `update_label` | After the user asks, or agrees when you name it. Never add `TRASH` or `SPAM`, since that trashes or spams the email around the deny rules. |
-| `create_draft`, `update_draft`, `delete_draft` | After the user asks, or agrees when you name it. |
+| `create_draft`, `update_draft`, `delete_draft` | When the user asks for a Gmail draft, and each call approved by the user in the harness. |
 | `untrash_*`, `unmark_*_spam` | After the user asks, or agrees when you name it. |
 | `delete_label` | Only when the user names that label to delete, since it removes the label from every email. |
 
@@ -40,18 +59,14 @@ Claude Code's permission rules deny the rest, and a denied tool doesn't show up 
 
 Google's permission that allows archiving also allows sending, so only those deny rules stop a send.
 
-- **When a denied tool can be called:** the setup is incomplete. Tell the user, and only read until the deny rules are fixed.
-
-### Spark calendar
-
-The calendar can be read-write even when Spark's mail is read-only, and `spark event` with `--add` or `--remove` sends invitation or cancellation emails. Create, change or answer an event only when the user asks for that exact change.
+- **When a denied tool can be called:** the setup is incomplete. Tell the user, never call it, and make no change to mail until the deny rules are fixed.
 
 ## The two tools
 
 | Tool | Use it for | Speed and size | Needs |
 |---|---|---|---|
-| Spark CLI, `spark` | Listing, searching and reading mail; Spark's categories, pins, calendar events, availability and contacts | About 0.1 s, compact tables | Spark Desktop running. Mail access is read-only on the free level. |
-| Gmail connector, `mcp__<server-id>__<tool>` | Every change to mail | About 1 s, JSON three to four times Spark's size | The connector signed in |
+| Spark CLI, `spark` | Listing, searching and reading mail; Spark's categories, pins and contacts | About 0.1 s, compact tables | Spark Desktop running. Mail access is read-only on the free level. |
+| Gmail connector, `mcp__<server-id>__<tool>` | Every change to mail but a Spark draft | About 1 s, JSON three to four times Spark's size | The connector signed in |
 
 Spark reads Spark Desktop's local copy of the mail. The Gmail connector is Google's Gmail MCP server, `gmailmcp.googleapis.com`, connected as a Claude connector.
 
@@ -67,7 +82,7 @@ Spark reads Spark Desktop's local copy of the mail. The Gmail connector is Googl
 
 ## Flow
 
-When setting either tool up, checking the deny rules, or when a call fails on sign-in or permission, follow `setup.md`.
+When setting either tool up, checking the deny and ask rules, or when a call fails on sign-in or permission, follow `setup.md`.
 
 1. **Find** the mail with Spark.
 
@@ -76,8 +91,7 @@ When setting either tool up, checking the deny rules, or when a call fails on si
    spark emails --filter "is:pinned"                           # pinned mail
    spark search --filter 'from:<sender> newer_than:7d'         # any Gmail-style query
    spark thread <id>                                           # one email in full
-   spark events --today                                        # also --tomorrow
-   spark availability --help                                   # free slots across attendees
+   spark contacts --help                                       # search contacts
    ```
 
    List with `spark emails` or `spark search --filter '<gmail-style query>'`. `spark search <topic>` returns the full bodies of up to 20 matches, often tens of thousands of tokens, so use it only when you need those bodies.
@@ -91,14 +105,15 @@ When setting either tool up, checking the deny rules, or when a call fails on si
    | Mark done | Add `in:inbox` to the search from step 2, then `unlabel_thread` with `["INBOX"]`. `label_thread` with `["INBOX"]` puts it back. |
    | Pin or unpin | `label_thread` or `unlabel_thread` with `["STARRED"]`. |
    | Label | `list_labels` for the label's ID, `create_label` when it does not exist yet, then `label_thread` with that ID. |
-   | Draft a reply | Read the thread with `get_thread`, then `create_draft` with `replyToMessageId` set to the last message's `id`. |
+   | Save a reply as a Gmail draft | Read the thread with `get_thread`, then `create_draft` with `replyToMessageId` set to the last message's `id`. |
 
    Call `get_thread` with `messageFormat: PLAIN_TEXT`, since it keeps the thread small.
    - **For any change but archiving that the user hasn't asked for:** name it and wait for their answer.
-   - **For a draft reply:** end with its `viewUrl`, where the user reviews and sends it.
+   - **For a saved draft:** end with its `viewUrl`, where the user reviews and sends it.
+   - **For a draft the user asked to have in Spark:** run `spark draft` as a command of its own, so the user approves that call alone, and tell the user where Spark shows the draft.
 4. **Check** that each change took.
    - **After marking done:** the `in:inbox` search returns `{}` once the email is archived.
 
 ## References
 
-- [setup.md](setup.md): setting up Spark and the Gmail connector, the deny rules, and checking each part.
+- [setup.md](setup.md): setting up Spark and the Gmail connector, the deny and ask rules, and checking each part.

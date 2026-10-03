@@ -4,6 +4,7 @@ python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 """
 import io
 import json
+import os
 import shlex
 import subprocess
 import sys
@@ -16,7 +17,7 @@ from pathlib import Path
 SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
 
-from setupmachine import commands, hook, rules  # noqa: E402
+from setupmachine import commands, hook, personal, rules  # noqa: E402
 
 TABLE = rules.load()
 HOME = Path("/Users/someone")
@@ -168,9 +169,15 @@ class FileAndMcpTest(unittest.TestCase):
         self.assertEqual(self.ids("Edit", "secrets/key", "write"), ["secret-files-read", "secret-files-write"])
         self.assertEqual(self.ids("Read", "~/.ssh/id_ed25519", "read"), ["home-credentials-read"])
         self.assertEqual(self.ids("Write", "/Users/someone/.aws/credentials", "write"), ["home-credentials-read"])
+        for path in ("~/.netrc", "~/.git-credentials", "~/.config/gh/hosts.yml", "~/.npmrc", "~/.docker/config.json",
+                     "/Users/someone/.kube/config"):
+            self.assertEqual(self.ids("Read", path, "read"), ["home-credentials-read"], path)
+        for path in ("certs/server.pem", "/Users/someone/Downloads/signing.p12", "build/app.pfx"):
+            self.assertEqual(self.ids("Read", path, "read"), ["key-files-read"], path)
 
     def test_ordinary_files(self):
-        for path in (".envrc", "README.md", "src/environment.py", "/Users/someone/.sshx/y", "my-secrets.txt"):
+        for path in (".envrc", "README.md", "src/environment.py", "/Users/someone/.sshx/y", "my-secrets.txt",
+                     "app/.npmrc", "~/.config/gh/config.yml", "certs/server.pub", "notes/pem.md"):
             self.assertEqual(self.ids("Read", path, "read"), [], path)
 
     def test_env_example_stays_readable_and_writable(self):
@@ -241,6 +248,72 @@ class EnvironmentTest(unittest.TestCase):
             self.assertTrue(verdict(tool=tool).denials, tool)
         for tool in ("mcp__claude_ai_Gmail__create_draft", "mcp__slack__send_message", "Read"):
             self.assertFalse(verdict(tool=tool).denials, tool)
+
+    def test_calendar_tools_that_do_anything_but_read_are_denied(self):
+        for tool in ("mcp__claude_ai_Google_Calendar__create_event", "mcp__claude_ai_Google_Calendar__respond_to_event",
+                     "mcp__google_calendar__delete_event", "mcp__calendar__move_event"):
+            self.assertEqual([h.rule.id for h in verdict(tool=tool).denials], ["calendar-write"], tool)
+        for tool in ("mcp__claude_ai_Google_Calendar__list_events", "mcp__claude_ai_Google_Calendar__get_event",
+                     "mcp__claude_ai_Google_Calendar__find_free_time", "mcp__claude_ai_Google_Calendar__authenticate",
+                     "mcp__claude_ai_Gmail__list_drafts"):
+            self.assertFalse(verdict(tool=tool).denials, tool)
+
+
+class UserApprovalTest(unittest.TestCase):
+    """Ask rows with `approver: user` need the user themselves to approve each call."""
+
+    def decide(self, tool="Bash", command=None, unattended=""):
+        return hook.decide(hook.ToolCall(tool=tool, command=command, cwd=CWD, unattended=unattended), TABLE, HOME)
+
+    def test_draft_writes_ask_when_the_harness_will_ask_the_user(self):
+        for tool in ("mcp__claude_ai_Gmail__create_draft", "mcp__claude_ai_Gmail__update_draft",
+                     "mcp__claude_ai_Gmail__delete_draft"):
+            v = self.decide(tool=tool)
+            self.assertEqual(([h.rule.id for h in v.asks], v.denials), (["mail-draft-write"], []), tool)
+        v = self.decide(command="spark draft create")
+        self.assertEqual(([h.rule.id for h in v.asks], v.denials), (["mail-cli-draft"], []))
+
+    def test_draft_writes_are_refused_where_no_one_is_asked(self):
+        v = self.decide(tool="mcp__claude_ai_Gmail__create_draft", unattended="bypassPermissions")
+        self.assertEqual([h.rule.id for h in v.denials], ["mail-draft-write"])
+        self.assertIn("bypassPermissions", v.denials[0].part)
+        v = self.decide(command="spark draft create && ls", unattended="auto")
+        self.assertEqual([h.rule.id for h in v.denials], ["mail-cli-draft"])
+
+    def test_other_ask_rows_are_still_left_to_the_harness(self):
+        v = self.decide(command="git push --force-with-lease", unattended="bypassPermissions")
+        self.assertEqual(([h.rule.id for h in v.asks], v.denials), (["git-push-force-with-lease"], []))
+
+    def test_reads_are_untouched(self):
+        for tool in ("mcp__claude_ai_Gmail__get_draft", "mcp__claude_ai_Gmail__list_drafts"):
+            v = self.decide(tool=tool, unattended="bypassPermissions")
+            self.assertEqual((v.asks, v.denials), ([], []), tool)
+
+    def test_claude_codes_permission_mode_says_when_no_one_is_asked(self):
+        for mode, unattended in (("default", ""), ("acceptEdits", ""), ("plan", ""), (None, ""),
+                                 ("auto", "auto"), ("dontAsk", "dontAsk"), ("bypassPermissions", "bypassPermissions")):
+            payload = {"tool_name": "mcp__claude_ai_Gmail__create_draft", "tool_input": {}}
+            if mode:
+                payload["permission_mode"] = mode
+            got = hook.read_claude_code(payload).unattended
+            self.assertEqual(bool(got), bool(unattended), mode)
+            self.assertIn(unattended, got, mode)
+
+    def test_codex_with_approval_policy_never(self):
+        payload = {"tool_name": "mcp__codex_apps__gmail_create_draft", "tool_input": {}}
+        self.assertEqual(hook.read_codex(payload).unattended, "")
+        self.assertIn("never", hook.read_codex({**payload, "permission_mode": "bypassPermissions"}).unattended)
+
+    def test_cursor_and_opencode_never_promise_the_user_is_asked(self):
+        cursor = {"hook_event_name": "beforeMCPExecution", "mcp_server_name": "gmail", "tool_name": "create_draft"}
+        call = hook.read_cursor(cursor)
+        self.assertTrue(call.unattended)
+        self.assertEqual([h.rule.id for h in hook.decide(call, TABLE, HOME).denials], ["mail-draft-write"])
+        call = hook.read_opencode({"tool": "gmail_create_draft", "args": {}})
+        self.assertTrue(call.unattended)
+        self.assertEqual([h.rule.id for h in hook.decide(call, TABLE, HOME).denials], ["mail-draft-write"])
+        call = hook.read_opencode({"tool": "bash", "args": {"command": "git push --force-with-lease"}})
+        self.assertEqual(hook.decide(call, TABLE, HOME).denials, [])
 
 
 class ReviewFindingsTest(unittest.TestCase):
@@ -417,7 +490,7 @@ class ClaudeCodeHookTest(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(SCRIPTS / "pre_tool_hook.py"), "--config", str(self.config), *extra],
             input=payload if isinstance(payload, str) else json.dumps(payload),
-            capture_output=True, text=True, timeout=30,
+            capture_output=True, text=True, timeout=30, env={**os.environ, "HOME": str(self.dir)},
         )
         return proc
 
@@ -446,6 +519,16 @@ class ClaudeCodeHookTest(unittest.TestCase):
         self.assertEqual(line["session"], "s1")
         self.assertEqual(log.stat().st_mode & 0o777, 0o600)
 
+    def test_a_draft_in_bypass_mode_is_refused(self):
+        payload = {"session_id": "s1", "cwd": str(self.dir), "hook_event_name": "PreToolUse",
+                   "permission_mode": "bypassPermissions", "tool_name": "mcp__claude_ai_Gmail__create_draft",
+                   "tool_input": {"to": ["a@example.com"]}}
+        out = json.loads(self.run_hook(payload).stdout)["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "deny")
+        self.assertIn("mail-draft-write", out["permissionDecisionReason"])
+        payload["permission_mode"] = "default"
+        self.assertEqual(self.run_hook(payload).stdout, "")
+
     def test_an_ordinary_call_says_nothing_and_logs_nothing(self):
         proc = self.run_hook(self.bash("ls -la"))
         self.assertEqual((proc.returncode, proc.stdout), (0, ""))
@@ -469,10 +552,108 @@ class ClaudeCodeHookTest(unittest.TestCase):
 
     def test_main_in_process(self):
         out = io.StringIO()
-        code = hook.main(["--config", str(self.config)], io.StringIO(json.dumps(self.bash("gh secret list"))), out,
-                         now=datetime(2026, 9, 29, tzinfo=timezone.utc))
+        with mock.patch.dict(os.environ, {"HOME": str(self.dir)}):
+            code = hook.main(["--config", str(self.config)], io.StringIO(json.dumps(self.bash("gh secret list"))), out,
+                             now=datetime(2026, 9, 29, tzinfo=timezone.utc))
         self.assertEqual((code, out.getvalue()), (0, ""))
         self.assertTrue((self.dir / "reports" / "2026-09-29.jsonl").exists())
+
+
+PERSONAL_ROWS = [
+    {"id": "tool-a-wipe", "level": "deny", "summary": "`tool-a wipe`", "match": {"program": "tool-a", "subcommands": [["wipe"]]},
+     "reason": "It wipes the tool's store.", "instruction": "Stop, say why, and give the user the exact command.",
+     "samples": {"covers": ["tool-a wipe all"], "leaves": ["tool-a list"]}},
+    {"id": "server-a-read", "level": "allow", "summary": "server-a's read tools", "match": {"server": "server-a", "tool": "^read_"},
+     "reason": "They only read.", "instruction": "Go ahead.",
+     "samples": {"covers": ["mcp__server-a__read_item"], "leaves": ["mcp__server-a__write_item"]}},
+    {"id": "tool-b-sync", "level": "allow-and-report", "summary": "`tool-b sync`", "match": {"program": "tool-b", "subcommands": [["sync"]]},
+     "reason": "It reaches the network.", "instruction": "Go ahead; each call is logged.",
+     "samples": {"covers": ["tool-b sync"]}},
+]
+
+
+class PersonalRowsTest(unittest.TestCase):
+    """The rows of the personal repository the pointer names, checked alongside the rule table."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.home = Path(self._tmp.name).resolve()
+        pointer = self.home / ".config" / "agents" / "source.md"
+        pointer.parent.mkdir(parents=True)
+        pointer.write_text("# Personal repository\n\n- Repository: `owner-a/personal`\n- Clone: `~/code/personal`\n")
+        self.permissions = self.home / "code" / "personal" / "agents" / "permissions.json"
+        self.permissions.parent.mkdir(parents=True)
+        self.write(PERSONAL_ROWS)
+        self.config = self.home / "hook.json"
+        self.config.write_text(json.dumps({"report_dir": str(self.home / "reports")}))
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def write(self, rows):
+        self.permissions.write_text(json.dumps({"version": 1, "rules": rows}))
+
+    def decide(self, call):
+        table = TABLE + personal.permissions(self.home, TABLE)
+        return hook.decide(call, table, self.home)
+
+    def run_hook(self, command):
+        payload = {"session_id": "s1", "cwd": str(self.home), "tool_name": "Bash", "tool_input": {"command": command}}
+        return subprocess.run([sys.executable, str(SCRIPTS / "pre_tool_hook.py"), "--config", str(self.config)],
+                              input=json.dumps(payload), capture_output=True, text=True, timeout=30,
+                              env={**os.environ, "HOME": str(self.home)})
+
+    def test_a_personal_deny_row_is_refused_and_its_near_miss_let_through(self):
+        denied = self.decide(hook.ToolCall(tool="Bash", command="cd x && tool-a wipe all", cwd=CWD)).denials
+        self.assertEqual([h.rule.id for h in denied], ["tool-a-wipe"])
+        self.assertEqual(self.decide(hook.ToolCall(tool="Bash", command="tool-a list", cwd=CWD)).answer, "allow")
+
+    def test_the_wired_hook_reads_them_through_the_pointer(self):
+        proc = self.run_hook("tool-a wipe all")
+        out = json.loads(proc.stdout)["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "deny")
+        self.assertIn("tool-a-wipe", out["permissionDecisionReason"])
+        self.assertEqual((self.run_hook("tool-a list").stdout, self.run_hook("ls").stdout), ("", ""))
+
+    def test_a_personal_allow_and_report_row_is_reported(self):
+        proc = self.run_hook("tool-b sync")
+        self.assertEqual((proc.returncode, proc.stdout), (0, ""), proc.stderr)
+        [log] = list((self.home / "reports").iterdir())
+        self.assertEqual(json.loads(log.read_text())["rules"], ["tool-b-sync"])
+
+    def test_an_allow_row_leaves_the_call_to_the_harness(self):
+        verdict = self.decide(hook.ToolCall(tool="mcp__server-a__read_item", cwd=CWD))
+        self.assertEqual((verdict.answer, [h.rule.id for h in verdict.allows]), ("allow", ["server-a-read"]))
+        self.assertEqual(hook.write_claude_code(verdict.denials), "")
+
+    def test_a_broken_personal_file_leaves_the_rule_table_in_force(self):
+        self.permissions.write_text("{nope")
+        proc = self.run_hook("tool-a wipe all && rm -rf x")
+        reason = json.loads(proc.stdout)["hookSpecificOutput"]["permissionDecisionReason"]
+        self.assertIn("rm-recursive-force", reason)
+        self.assertNotIn("tool-a-wipe", reason)
+        self.assertIn("personal rows skipped", proc.stderr)
+
+    def test_a_personal_row_of_the_wrong_shape_leaves_the_rule_table_in_force(self):
+        for bad in ({**PERSONAL_ROWS[0], "id": ["tool-a-wipe"]},
+                    {**PERSONAL_ROWS[0], "match": {"server": 5, "tool": "^read_"}}):
+            self.write([bad])
+            proc = self.run_hook("rm -rf /tmp/x")
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            reason = json.loads(proc.stdout)["hookSpecificOutput"]["permissionDecisionReason"]
+            self.assertIn("rm-recursive-force", reason)
+            self.assertIn("personal rows skipped", proc.stderr)
+
+    def test_a_personal_row_cannot_reuse_a_table_id(self):
+        self.write([{**PERSONAL_ROWS[0], "id": "rm-recursive-force"}])
+        with self.assertRaises(rules.RuleTableError):
+            personal.permissions(self.home, TABLE)
+
+    def test_no_pointer_or_no_permissions_file_means_no_personal_rows(self):
+        self.permissions.unlink()
+        self.assertEqual(personal.permissions(self.home, TABLE), [])
+        (self.home / ".config" / "agents" / "source.md").unlink()
+        self.assertEqual(personal.permissions(self.home, TABLE), [])
 
 
 
@@ -494,7 +675,7 @@ class WiredCommandTest(unittest.TestCase):
 
     def run_wired(self, command, payload):
         return subprocess.run(["/bin/sh", "-c", command], input=json.dumps(payload), capture_output=True,
-                              text=True, timeout=30)
+                              text=True, timeout=30, env={**os.environ, "HOME": str(self.dir)})
 
     def test_a_missing_script_exits_0_and_says_nothing(self):
         gone = self.dir / "gone" / "pre_tool_hook.py"

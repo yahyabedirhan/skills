@@ -5,7 +5,7 @@ description: Change what agents run with - a permission rule, a global or projec
 
 # Maintain the environment
 
-The environment is what agents run with: permissions, global instructions, project instructions, and skills. Use this skill to change it; to set up a machine or a project, use `/set-up-machine` or `/set-up-project` instead. Write each change once, at its source, and carry it from there to every harness, machine and install it applies to. Keep harness memory features off, because a memory is invisible to every other harness and lives outside any repository; write what it would hold into one of the layers instead. The skills repo and most projects are public, so write personal detail only in the global instructions: names, accounts, paths on the user's machine, other projects. In a skill or a public `AGENTS.md`, generalise it or make it a parameter.
+The environment is what agents run with: permissions, global instructions, project instructions, and skills. Use this skill to change it; to set up a machine or a project, use `/set-up-machine` or `/set-up-project` instead. Write each change once, at its source, and carry it from there to every harness, machine and install it applies to. Keep harness memory features off, because a memory is invisible to every other harness and lives outside any repository; write what it would hold into one of the layers instead. The skills repo and most projects are public, so write personal detail only in the user's personal repository, or the shared global instructions file on a machine without one: names, accounts, paths on the user's machine, other projects. In a skill or a public `AGENTS.md`, generalise it or make it a parameter.
 
 ## Parameters
 
@@ -18,23 +18,25 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 
 | Layer | Holds | Where to write it |
 |---|---|---|
-| **Permission** | A hard rule: deny, ask, or allow-and-report. | A row in `/set-up-machine`'s rule table, which `/set-up-machine` turns into each harness's native entries and the global instructions' rule line. A project may only add allows. |
-| **Global instruction** | The user's personal workflow and environment defaults, and one line per global rule with what to do instead. | The shared global instructions file every harness on the machine reads. |
+| **Permission** | A hard rule: deny, ask, allow-and-report or, for a personal row only, allow. | A rule for anybody is a row in `/set-up-machine`'s rule table, which `/set-up-machine` turns into each harness's native entries and the hook uses for rejection guidance. A personal permission, such as allowing a tool the user added, goes in the user's personal repository. A project may only add allows. |
+| **Global instruction** | The user's personal workflow and environment defaults, concise permission-rejection guidance and a secrets guardrail. | The user's personal repository, from which `/set-up-machine` writes the shared global instructions file every harness on the machine reads. The compact rules block comes from `/set-up-machine`'s `references/global-instructions.md`. |
 | **Project `AGENTS.md`** | Anything a teammate needs to work on the project: its tracker, its commands, its conventions, its worktree tool. | The project's `AGENTS.md`, with a `CLAUDE.md` holding `@AGENTS.md` so Claude Code reads the same text. |
 | **Skill** | How to do a task, written for any team's tools and tracker: a value that differs between setups becomes a parameter. | A `SKILL.md` in the skills repo, or a local skill in one project. |
 | **Skill reference** | Detail only some runs need, such as one branch of the flow or one tool's specifics; anything every run needs stays in `SKILL.md`. | A file beside the `SKILL.md`. The skill's body says when to read it, and its closing `## References` section says in one line what each file covers; scripts get a `## Scripts` section the same way. |
 
 ### The "team test"
 
-Before settling a change, picture a teammate or contributor with a different setup: another harness, tmux instead of herdr, and a machine set up with `/set-up-machine` but none of the user's personal workflow. After the change they must still be able to work on any of the user's projects using only that project's instructions, the skills and the roles `/set-up-machine` writes.
+Before settling a change, picture a teammate or contributor with a different setup: another harness, a different session host, and a machine set up with `/set-up-machine` but none of the user's personal workflow. After the change they must still be able to work on any of the user's projects using only that project's instructions, the skills and the roles `/set-up-machine` writes.
 
 A change passes when:
 
 - nothing a teammate needs sits in the global instructions;
-- the global instructions hold only the user's personal workflow, their environment defaults, and explanations of global rules;
+- the global instructions hold only the user's personal workflow, their environment defaults, permission-rejection guidance and a secrets guardrail;
 - no skill depends on the user's default tool. The user's choice of tool sits in their environment defaults, and how to use a tool sits in that tool's own skill.
 
 Flag every place a change fails the test, and move the failing part to the row of the table that fits it.
+
+The test also decides between the skills repo and the personal repository. What anybody could use, such as a safety rule or how to do a task, goes in a skill or the rule table. What holds only for this user, such as which tool fills a role, a personal workflow line or a personal permission, goes in their personal repository.
 
 ### Skill parameters
 
@@ -54,6 +56,9 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
 2. Make the change at that layer's source. For any operation on a skill, read `skill-operations.md`.
    - **For an installed skill:** that is its source repo, never an installed copy, which the next `npx skills update` overwrites.
    - **For a local skill:** that is the project.
+   - **For a personal change** (a personal preference, an environment default or a personal permission): that is the personal repository the pointer `~/.config/agents/source.md` names, in its clone. `/set-up-machine`'s `references/personal-repository.md` says which file each kind goes in. Leave the shared file's generated parts and the harness settings to `/set-up-machine`, since its next run rewrites them from the repository.
+   - **When the pointer is missing:** set one up through `/set-up-machine` first, then make the change in the repository it names.
+   - **When the pointer records no personal repository:** write a personal instruction in the shared file itself, which is its source on such a machine. A personal permission has no home there, so offer to set up a personal repository through `/set-up-machine`.
 3. After any skill change, run the team-test audit: grep the skills for the name of each tool in the user's environment defaults, and for "environment defaults". Skip each tool's own skill, and `/set-up-machine`, `/set-up-project` and this skill, which manage the instruction files. Judge each hit:
    - **When it is a default,** the skill picks the tool itself: make it a parameter, and move the tool's commands into the tool's own skill.
    - **When it is a mention,** an example such as a parameter's "e.g.", or data: keep it.
@@ -64,8 +69,9 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
 
 | Change | How it reaches everywhere |
 |---|---|
-| A permission | Ship the `/set-up-machine` rule-table row; after the merge, update the installed skills and rerun `/set-up-machine` on each machine. |
-| A global instruction | Rerun `/set-up-machine` on each machine; every harness reads the one shared file. |
+| A permission for anybody | Ship the `/set-up-machine` rule-table row; after the merge, update the installed skills and rerun `/set-up-machine` on each machine. |
+| A personal change | Have the user commit and push it in their personal repository, then pull it into the clone and rerun `/set-up-machine` on each machine. |
+| A global instruction with no personal repository | Rerun `/set-up-machine` on each machine; every harness reads the one shared file. |
 | A project instruction or project permission | Commit it in the project. For a standard every project shares, change `/set-up-project` instead and rerun it in each project. |
 | A skill in a source repo | Ship it; after the merge, `npx skills update <name>` in every scope that installs it, on every machine. |
 | A local skill | Commit it with the project. |
@@ -75,7 +81,7 @@ When the user asks what a skill costs to run, or how to make it cheaper, follow 
 
 ## References
 
-- [skill-operations.md](skill-operations.md): the kinds of skill, and creating, installing, updating, moving, removing, forking, shipping, auditing and publishing them.
+- [skill-operations.md](skill-operations.md): the kinds of skill, and creating, installing, updating, moving, removing, forking, upgrading a fork, shipping, auditing and publishing them.
 - [efficiency-analysis.md](efficiency-analysis.md): measuring what one run of a skill costs, and making the next run cheaper.
 
 ## Scripts

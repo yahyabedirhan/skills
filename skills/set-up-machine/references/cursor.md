@@ -33,9 +33,19 @@ No memory feature: a `none` line.
 - **Command rows** become `Shell(<prefix>)`, one per spelling (SKILL.md, *Spellings*): `Shell(rm -rf)`, `Shell(/bin/rm -rf)`, `Shell(git push --force)`, which refuses `git push --force origin main` but not `git push --force-with-lease`. `arguments: "none"` rows become `Shell(env:)`, which leaves `env FOO=1 cmd` alone. `arguments: "flags"`, `files` and `variables` rows get none: the hook alone refuses them, a `gap`.
 - **File rows** become `Read(<glob>)` and `Write(<glob>)` over absolute paths: `Read(**/.env)`, `Read(**/.env.*)`, `Read(~/.ssh/**)`; a glob without `**/`, `~/` or `/` gets `**/` in front. They bind the CLI's file tools only. With only `*`, an `except` can't be expressed, so the CLI refuses `.env.example` too; the hook leaves it open, and the IDE with it. Both are `gap`s.
 - **MCP-tool rows** become `Mcp(<server>:<tool>)`, the server being its key in `~/.cursor/mcp.json`. List the tools from an empty folder: `cursor-agent mcp list` (a line per server, `<server>: …`), then `cursor-agent mcp list-tools <server>` (a line per tool, `- <tool>`) for each server a row's `server` regex matches; strip colour codes. A listing that fails is a `gap`: keep the `Mcp(` entries already there.
+- **`approver: "user"` rows:** with no ask list, and run modes that run a tool without asking, Cursor can't promise the user is asked. The hook refuses these rows' calls in Cursor, IDE and CLI alike: a `gap` line.
 - **Covered already:** `Shell(x)` or `Bash(x)` covers every entry starting `x `; a trailing-`*` glob covers every entry starting with its stem; `Shell(cmd:*)` covers a one-word command's every use; `Mcp(server:*)` or `Mcp(server)` that server's tools.
 - **Gap:** a project's `.cursor/cli.json` replaces these lists, so `"deny": []` there empties them. A project can only add to the Claude settings lists, and the hook still refuses the deny rows.
 - **The IDE** reads neither file and has no user-level deny list: its hard blocks are hooks.
+
+## Personal rows
+
+A personal row (personal-repository.md) becomes CLI entries the way a table row of its kind does above, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does, and an `ask` row is a `gap`.
+
+- **Its tool exists** for a command row when one of its programs is on `PATH`, for a file row always, and for an MCP-tool row when `cursor-agent mcp list-tools` lists a tool it matches, which becomes `Mcp(<server>:<tool>)`; otherwise the row is `n/a` here.
+- **Covered already:** the CLI unions the Claude Code lists, so a personal entry written to `~/.claude/settings.json` that covers this one makes it `present, personal`.
+- **It can't loosen a table row:** deny wins over allow.
+- **The IDE** has no allow list: an `allow` row is a `gap` there, left to the IDE's own approval settings.
 
 ## Pre-tool hook
 
@@ -61,7 +71,7 @@ The rows with no entry above, the ask rows, the exceptions the CLI refuses, the 
 
 ## What the agent sees
 
-A native CLI deny: `Permission denied: Command blocked by permissions configuration` or `Write permission denied:`, naming no rule; the copied user rule carries the instruction. A hook deny: `Rejected: Command execution was blocked by a hook: Refused by the pre-tool hook, …` ("File read" or "MCP tool execution" for those events).
+A native CLI deny: `Permission denied: Command blocked by permissions configuration` or `Write permission denied:`, naming no rule; the copied global instructions supply general rejection guidance and the `rm -rf` fallback. A hook deny: `Rejected: Command execution was blocked by a hook: Refused by the pre-tool hook, …` ("File read" or "MCP tool execution" for those events).
 
 ## Checking it
 
@@ -69,5 +79,5 @@ A native CLI deny: `Permission denied: Command blocked by permissions configurat
 
 - `rm -rf x`, `git push --force <remote> main` and `gh repo delete owner/x` return the native refusal, once from the trial `cli-config.json` and once, with its deny list emptied, from a `.claude/settings.json` holding the Claude Code lists.
 - With the hooks as `.cursor/hooks.json` and no deny list, `rm -rf x`, `bash -lc 'rm -fr x'`, a read of `.env` and a fake stdio MCP server's `send_message` (with `--approve-mcps`) are refused by the hook; `gh api rate_limit` runs and gets a report line.
-- From a folder inside the trial home, `cursor-agent -p --mode ask "Without tools: quote your rule about rm -rf and the file it came from."` quotes the rule line.
+- From a folder inside the trial home, `cursor-agent -p --mode ask "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback.
 - **IDE,** after the live setup: Customize > Hooks lists the four handlers, and asking the agent to run `rm -rf x` or to send a mail is refused with the hook's message.

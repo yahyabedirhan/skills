@@ -32,11 +32,18 @@ claude plugin marketplace add yahyabedirhan/skills
 
 Then install a plugin by name:
 
-| Plugin | Install |
-|---|---|
-| wispr-flow-dictionary | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
+| Plugin | Skills | Install |
+|---|---|---|
+| effort-workflow | The [effort workflow](#effort-workflow) family; installs `show-me` with it | `claude plugin install effort-workflow@yahyabedirhan-skills` |
+| show-me | show-me | `claude plugin install show-me@yahyabedirhan-skills` |
+| low-level-design | low-level-design | `claude plugin install low-level-design@yahyabedirhan-skills` |
+| system-design | system-design | `claude plugin install system-design@yahyabedirhan-skills` |
+| email | email | `claude plugin install email@yahyabedirhan-skills` |
+| wispr-flow-dictionary | wispr-flow-dictionary | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
 
-Install a skill one way or the other, not both, or Claude Code loads it twice.
+A plugin's skills run as `/<plugin>:<skill>` or by their bare name, such as `/to-pr`. The [Agent setup](#agent-setup) skills aren't plugins: `set-up-machine` wires a hook to its installed path, which a plugin update would move.
+
+Install a skill one way or the other, not both. Claude Code loads it twice, and the bare name runs the `npx skills` copy, so plugin updates go unseen. To switch to the plugin, first remove the copy with `npx skills remove <skill-name>` (add `-g` for a global install).
 
 ## Skills
 
@@ -49,16 +56,17 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | [init-effort](skills/init-effort/SKILL.md) | Starts an effort on its own branch and worktree (with your worktree tool, else `git worktree add`), or a brand-new project in its own GitHub repo, and starts its thinking session in your session host, else here or through a pasted prompt. | Original. |
 | [orchestrating](skills/orchestrating/SKILL.md) | The orchestrator's discipline: delegate, trust delegates, be the user's one contact, deciding what it can and asking only for a critical blocker. Holds the effort lifecycle and when to notify. | Original. |
 | [orchestrate-effort](skills/orchestrate-effort/SKILL.md) | Builds an effort from its spec and tickets through sub-agents and opens the pull request. | Original. |
-| [handoff](skills/handoff/SKILL.md) | Writes a handoff document in the repository for another session to pick up, and leaves it for the caller to commit. | Fork of `handoff` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d28dfdc`](https://github.com/mattpocock/skills/tree/d28dfdc39bea/skills/productivity/handoff) (MIT, see `skills/handoff/LICENSE.mattpocock`). Changes: agents can load it, and it saves to the repository's handoff folder (`.handoff/<date>-<topic>.md`) instead of a temp folder. |
+| [handoff](skills/handoff/SKILL.md) | Writes a handoff document in the repository for another session to pick up, and leaves it for the caller to commit. | Fork of `handoff` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/productivity/handoff) (MIT, see `skills/handoff/LICENSE.mattpocock`). Changes: agents can load it, and it saves to the repository's handoff folder (`.handoff/<date>-<topic>.md`) instead of a temp folder. |
 | [handover](skills/handover/SKILL.md) | Hands work over to a new session outside this one: gets the work and its handoff ready, writes a one-line starting prompt, starts the session and confirms it started. | Original. |
-| [handover-to-herdr](skills/handover-to-herdr/SKILL.md) | Starts a new agent session in a labelled `herdr` tab, sends it its starting prompt and confirms it's working, for handover and init-effort. It also finds the agents still working and frees a closing effort's own worktree from outside it, for close-effort. Works from inside or outside a `herdr` pane. | Original. |
+| [handover-to-herdr](skills/handover-to-herdr/SKILL.md) | Starts a new agent session in a labelled `herdr` tab, sends it its starting prompt and confirms it's working, for handover and init-effort. It also resolves live session identities, checks occupants and marks a settled session's tab while keeping topology open. Works from inside or outside a `herdr` pane. | Original. |
 | [treehouse](skills/treehouse/SKILL.md) | Leases, lists, returns and destroys worktrees from `treehouse`'s pre-warmed pool, with the gotchas, for the skills that make or free worktrees when `treehouse` is your worktree tool. | Original. |
 | [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | Picks up an effort from a handoff and runs orchestrate-effort. | Original. |
-| [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`697d4ce`](https://github.com/mattpocock/skills/tree/697d4ce9742d/skills/engineering/implement) (MIT, see `skills/implement/LICENSE.mattpocock`). Changes: agents can load it, so an orchestrator's sub-agents can use it, it commits only when the delegating agent doesn't, it reviews at the depth the delegating agent sets, it runs typechecking only where the project has a typechecker, with no one to agree tdd seams with it chooses them and names them in its report, it stops what it started before reporting, and it moves what it no longer needs into `.scratch/` instead of running `rm -rf`. |
-| [to-spec](skills/to-spec/SKILL.md) | Turns the current conversation into a spec and publishes it to the project's tracker, or to `.efforts/<effort>/spec.md` on a local one. | Fork of `to-spec` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`5c89081`](https://github.com/mattpocock/skills/tree/5c89081d4bbe/skills/engineering/to-spec) (MIT, see `skills/to-spec/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself, and a local tracker keeps the spec in `.efforts/<effort>/` instead of `.scratch/`. |
-| [to-tickets](skills/to-tickets/SKILL.md) | Breaks a plan, spec or conversation into tracer-bullet tickets, each naming what blocks it, and publishes them to the project's tracker, or to `.efforts/<effort>/issues/` on a local one. | Fork of `to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`5c89081`](https://github.com/mattpocock/skills/tree/5c89081d4bbe/skills/engineering/to-tickets) (MIT, see `skills/to-tickets/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself; a local tracker keeps the tickets in `.efforts/<effort>/issues/` instead of `.scratch/`; and tickets are named by title, never by a number alone. |
+| [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/implement) (MIT, see `skills/implement/LICENSE.mattpocock`). Changes: agents can load it, so an orchestrator's sub-agents can use it, it commits only when the delegating agent doesn't, it reviews at the depth the delegating agent sets, it runs typechecking only where the project has a typechecker, with no one to agree tdd seams with it chooses them and names them in its report, it stops what it started before reporting, and it moves what it no longer needs into `.scratch/` instead of running `rm -rf`. |
+| [to-spec](skills/to-spec/SKILL.md) | Turns the current conversation into a spec and publishes it to the project's tracker, or to `.efforts/<effort>/spec.md` on a local one. | Fork of `to-spec` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/to-spec) (MIT, see `skills/to-spec/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself; with no tracker configured it runs set-up-project instead of telling you to run `setup-matt-pocock-skills`; and a local tracker keeps the spec in `.efforts/<effort>/` instead of `.scratch/`. |
+| [to-tickets](skills/to-tickets/SKILL.md) | Breaks a plan, spec or conversation into tracer-bullet tickets, each naming what blocks it, and publishes them to the project's tracker, or to `.efforts/<effort>/issues/` on a local one. | Fork of `to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/to-tickets) (MIT, see `skills/to-tickets/LICENSE.mattpocock`). Changes: agents can load it, so a thinking session runs it itself; with no tracker configured it runs set-up-project instead of telling you to run `setup-matt-pocock-skills`; a local tracker keeps the tickets in `.efforts/<effort>/issues/` instead of `.scratch/`; and tickets are named by title, never by a number alone. |
 | [to-pr](skills/to-pr/SKILL.md) | Opens a pull request or rewrites its description: a one-sentence why, reviewer notes, and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr) (MIT, see `skills/to-pr/LICENSE.humanlayer`). Changes: renamed, a real trigger description, no Mermaid views, the description source saved to `.scratch/` per the folder standard instead of `.humanlayer/`, issues named by title, never by a number alone, review links per changed file in the final report, and a last section, *Things to be aware of*, for decisions made alone, surprises, what's left out and follow-ups, and "Refs", not "Closes", for a ticket waiting for the maintainer's QA. |
-| [close-effort](skills/close-effort/SKILL.md) | Closes an effort once you say its pull request is good to merge, or merged: merges it, runs the post-merge follow-ups, carries unfinished work into next-effort tickets, closes the tracker, leaves nothing that exists only inside its session, and removes only branches and worktrees proven merged, then its own worktree from a shell your session host opens outside it. Workspaces stay open. | Original. |
+| [settle-effort](skills/settle-effort/SKILL.md) | Settles an effort after you approve its pull request: merges it, runs the post-merge follow-ups, carries unfinished work into next-effort tickets and closes the spec and tickets, then settles the session with settle-session. Replaces `close-effort`. | Original. |
+| [settle-session](skills/settle-session/SKILL.md) | Settles any session, effort or not, when you say "settle": finishes its work, commits and pushes everything, writes down what it knows in the tracker, a pull request or a handoff, gets every open thread done, filed or decided by you, and releases only clean, unoccupied worktrees proven merged before deleting their branches. The caller session, occupied worktrees and terminal topology stay open. | Original. |
 
 ### Design frameworks
 
@@ -71,22 +79,24 @@ The Origin column names the upstream commit each fork was copied from, so a late
 
 | Skill | What it does | Origin |
 |---|---|---|
-| [show-me](skills/show-me/SKILL.md) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks, or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`6ab9013`](https://github.com/humanlayer/skills/tree/6ab9013a10c2/plugins/show-me/skills/show-me) (MIT, see `skills/show-me/LICENSE.humanlayer`). Changes: no Mermaid views, so every view renders as plain text. |
+| [show-me](skills/show-me/SKILL.md) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks, or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`ca7c808`](https://github.com/humanlayer/skills/tree/ca7c808/plugins/show-me/skills/show-me) (MIT, see `skills/show-me/LICENSE.humanlayer`). Changes: no Mermaid views, so every view renders as plain text; agents can still load it, where upstream made it user-invocable only in `bba9d13`, because `orchestrate-effort` uses it to show the plan. |
+| [show-me-artifact](skills/show-me-artifact/SKILL.md) | Publishes a visual report or a set of decisions as a private Claude artifact, a hosted page read later or on another device, with show-me's principles: one page per topic, self-contained decision cards with a marked recommendation, and a data file plus generator when the page is republished to the same URL. Claude only; elsewhere it falls back to show-me's local HTML file. | Original. Builds on show-me, which it loads for the principles. |
 
 ### Agent setup
 
 | Skill | What it does | Origin |
 |---|---|---|
-| [maintain-environment](skills/maintain-environment/SKILL.md) | Changes what your agents run with: decides whether a change is a permission, a global instruction, a project instruction or a skill, and carries it to every harness, machine and install. Its skill operations install, move, update, fork, publish, remove and audit skills with `npx skills`, prompt-audit each new skill in a fresh sub-agent, and measure a skill's run cost on request. | Original. Replaces `maintain-skills`. |
+| [maintain-environment](skills/maintain-environment/SKILL.md) | Changes what your agents run with: decides whether a change is a permission, a global instruction, a project instruction or a skill, and carries it to every harness, machine and install. Its skill operations install, move, update, fork, publish, remove and audit skills with `npx skills`, upgrade a fork from upstream's latest version while keeping its changes, prompt-audit each new skill in a fresh sub-agent, and measure a skill's run cost on request. | Original. Replaces `maintain-skills`. |
 | [set-up-machine](skills/set-up-machine/SKILL.md) | Sets up and audits a machine's agent harnesses from one rule table: one shared global instructions file every harness reads, the global rules each harness enforces, and a pre-tool hook that catches what native rules miss. The agent follows a reference per harness, shows one diff (added, tightened, gaps, extra rules found), applies it on one approval after backing up each file, never removes or loosens a rule the table didn't produce, and runs a verify script. Keeps harness memory off. Covers Claude Code, Codex, opencode and Cursor. | Original. |
-| [set-up-project](skills/set-up-project/SKILL.md) | Sets up and audits a project for your agents, after checking the machine with set-up-machine (and running it, on one approval, when the machine differs): `AGENTS.md` as the one rules file with `CLAUDE.md` importing it, the issue tracker, triage labels and domain docs, the folder standard's `.gitignore`, and an audit that flags any project harness file (Claude Code, Codex, opencode, Cursor) weakening a global rule. | Fork of `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d80fa0f`](https://github.com/mattpocock/skills/tree/d80fa0f4ebe0/skills/engineering/setup-matt-pocock-skills) (MIT, see `skills/set-up-project/LICENSE.mattpocock`). Changes: agents can load it; it checks the machine first; `AGENTS.md` is always the rules file, with `CLAUDE.md` as `@AGENTS.md`, instead of editing whichever exists; optional project environment defaults; the folder standard's `.gitignore` lines; a local tracker keeps issues in `.efforts/<effort>/` instead of `.scratch/`, and says how a ticket is picked up and marked done when the project has no spec or triage labels; the GitHub template adds effort labels and names issues by title; and an audit of each harness's project files against set-up-machine's rule table. |
+| [set-up-project](skills/set-up-project/SKILL.md) | Sets up and audits a project for your agents, after checking the machine with set-up-machine (and running it, on one approval, when the machine differs): `AGENTS.md` as the one rules file with `CLAUDE.md` importing it, the issue tracker, triage labels and domain docs, the folder standard's `.gitignore`, and an audit that flags any project harness file (Claude Code, Codex, opencode, Cursor) weakening a global rule. | Fork of `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/setup-matt-pocock-skills) (MIT, see `skills/set-up-project/LICENSE.mattpocock`). Changes: agents can load it; it checks the machine first; `AGENTS.md` is always the rules file, with `CLAUDE.md` as `@AGENTS.md`, instead of editing whichever exists; optional project environment defaults; the folder standard's `.gitignore` lines; a local tracker keeps issues in `.efforts/<effort>/` instead of `.scratch/`, and says how a ticket is picked up and marked done when the project has no spec or triage labels; the GitHub template adds effort labels and names issues by title; it proposes a `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md` to its `GLOSSARY` name; and an audit of each harness's project files against set-up-machine's rule table. |
 | [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings and a verdict. You start it with `/skill-recap` (Codex: `$skill-recap`) and file them with [to-tickets](skills/to-tickets/SKILL.md). | Original. |
 
 ### Daily workflows
 
 | Skill | What it does | Origin |
 |---|---|---|
-| [email](skills/email/SKILL.md) | Reads and tidies your email: Spark CLI for fast reading, the Gmail connector for marking done, labels, pins and drafts, with sending, trash and spam denied. Includes setup and checks. | Original. The daily workflows adapt the read-only recipes in [readdle/spark-cli-skills](https://github.com/readdle/spark-cli-skills) at [`507d26e`](https://github.com/readdle/spark-cli-skills/tree/507d26e/skills) (MIT); no text copied. |
+| [calendar](skills/calendar/SKILL.md) | Reads your calendar when a task needs an event: lists events for a date range and checks free time through the Spark CLI, or the Google Calendar connector when Spark Desktop is closed. Every calendar write is denied by a permission rule; creating, changing and answering events stays with you. | Original. |
+| [email](skills/email/SKILL.md) | Reads and tidies your email when you ask for an email task: Spark CLI for fast reading, the Gmail connector for marking done, labels and pins. A plain draft stays in chat; a draft saved in Gmail or Spark needs you to name the tool and approve each write. Sending, trash and spam are denied. Includes setup and checks. | Original. The daily workflows adapt the read-only recipes in [readdle/spark-cli-skills](https://github.com/readdle/spark-cli-skills) at [`507d26e`](https://github.com/readdle/spark-cli-skills/tree/507d26e/skills) (MIT); no text copied. |
 | [wispr-flow-dictionary](skills/wispr-flow-dictionary/SKILL.md) | Tunes the Wispr Flow dictionary from your real dictation history: finds the names, products and commands it mishears, fixes them with backups and undo, and shows whether each fix held. macOS. | Original. The snippet finder and quit-write-relaunch flow follow ideas from [glebis/claude-skills](https://github.com/glebis/claude-skills) (`wispr-analytics`, `wispr-fix`); no code copied. |
 
 ## How the skills work
@@ -107,10 +117,11 @@ BUILD      orchestrate-with-handoff → orchestrate-effort
              implement                                   each ticket, built by a sub-agent
              show-me                                     shows the plan
              to-pr                                       last step: opens the pull request
-CLOSE      close-effort                                  after you approve: merge, follow up, carry over, clean up
+SETTLE     settle-effort                                 after you approve: merge, follow up, carry over
+             settle-session                              leaves nothing hanging, frees what merged
 ```
 
-Install the family together with `show-me` and these skills from [mattpocock/skills](https://github.com/mattpocock/skills): `grilling`, `prototype`, `tdd` and `code-review`, with `set-up-project` and `set-up-machine` from [Agent setup](#agent-setup) to set each project up. Leave out that repo's `handoff`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills`: the forks here replace them. The full path is in [the effort lifecycle](skills/orchestrating/SKILL.md#effort-lifecycle), and where each record goes (spec, tickets, handoff, notes) in the [folder standard](skills/orchestrating/folder-standard.md).
+Install the family together with `show-me` and these skills from [mattpocock/skills](https://github.com/mattpocock/skills): `grilling`, `prototype`, `tdd` and `code-review`, with `set-up-project` and `set-up-machine` from [Agent setup](#agent-setup) to set each project up. Leave out that repo's `handoff`, `implement`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills`, which the forks here replace, and its `implement-spec` and `pr`, which `orchestrate-effort` and `to-pr` replace. The full path is in [the effort lifecycle](skills/orchestrating/SKILL.md#effort-lifecycle), and where each record goes (spec, tickets, handoff, notes) in the [folder standard](skills/orchestrating/folder-standard.md).
 
 ### Design frameworks
 
@@ -127,11 +138,13 @@ The documents in each skill's `references/` hold the principles, patterns and co
 
 ### Communication style
 
-How an agent shows its thinking so a reader takes it in quickly. `show-me` picks the smallest view that makes the point, in plain text that reads the same in a terminal, an editor, or on GitHub.
+How an agent shows its thinking so a reader takes it in quickly. `show-me` picks the smallest view that makes the point, in plain text that reads the same in a terminal, an editor, or on GitHub, and `show-me-artifact` publishes a larger report the same way as a private Claude artifact.
 
 ```text
-show-me   explains the current topic
+show-me            explains the current topic
   pseudocode · call tree · file tree · diff block · one focused HTML page
+show-me-artifact   a report or decision set to read later, as a hosted page
+  status first · progress · item tree · tables · decision cards → republished to the same URL
 ```
 
 ### Agent setup
@@ -157,6 +170,7 @@ rules.json                      each global rule once: level, reason, instructio
   ↓ one diff, one approval      added, tightened, gaps, extra rules; each file backed up, then written
   ↓ verify.py                   the samples against the hook and Codex's checker; every hook wired
 ~/.config/agents/AGENTS.md      the shared global instructions: environment defaults, rule lines, personal workflow
+~/.config/agents/source.md      the pointer to your personal repository, where your environment defaults, workflow and personal rows come from
 pre_tool_hook.py                runs before every tool call; reads a command as the shell runs it
 Claude Code   ~/.claude/        settings.json: deny and ask entries, the hook, auto memory off; CLAUDE.md imports the shared file
 Codex         ~/.codex/         rules/set-up-machine.rules, hooks.json, AGENTS.md → shared file, memories off in config.toml
@@ -177,16 +191,18 @@ audit                           any project harness file that weakens a global r
 
 ### Daily workflows
 
-Everyday tasks outside the code that an agent can take over safely. Each skill reads freely and changes only what you approve, with sending, deleting and other risky actions left to you.
+Everyday tasks outside the code that an agent can take over safely. Each skill changes only what you approve, with sending, deleting and other risky actions left to you.
 
-`email` reads mail fast with the Spark CLI and makes every change through the Gmail connector. It archives freely and makes any other change only when you ask; drafts are as far as it goes, and Claude Code permission rules deny sending, trash and spam.
+`email` reads mail only for an email task you asked for, fast with the Spark CLI, and makes every change through the Gmail connector. It archives freely and makes any other change only when you ask. A draft you ask for is written in chat; one saved in Gmail or Spark needs you to name the tool and approve each write in the harness. Permission rules deny sending, trash and spam.
 
 ```text
-read     Spark CLI: inbox by category, threads, pins, calendar, contacts
-act      Gmail connector: mark done (archive), labels, pins (stars), drafts
+read     Spark CLI, for an email task you asked for: inbox by category, threads, pins, contacts
+act      Gmail connector: mark done (archive), labels, pins (stars), saved drafts on approval
 how      which tool for which job; what to do and when stays with you
-setup    setup.md: both tools, the deny rules, and checks
+setup    setup.md: both tools, the deny and ask rules, and checks
 ```
+
+`calendar` reads events and free time whenever a task needs them, with Spark first and the Google Calendar connector when Spark Desktop is closed. It never changes the calendar: permission rules deny every connector write and `spark event`.
 
 `wispr-flow-dictionary` keeps [Wispr Flow](https://wisprflow.ai)'s dictionary accurate for technical vocabulary, where dictation mishears product names, company names and commands. It reads Wispr Flow's local database and writes only its `Dictionary` table, after a backup.
 

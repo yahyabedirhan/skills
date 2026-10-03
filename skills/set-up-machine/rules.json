@@ -54,7 +54,7 @@
         "flags": [["R", "recursive"]],
         "operands": [["777"], ["0777"], ["a+rwx"], ["a=rwx"], ["ugo+rwx"], ["ugo=rwx"]]
       },
-      "gap": "the same mode in another spelling (`u=rwx,g=rwx,o=rwx`, `a+rwx` given in parts, `00777`) isn't listed; the rule line asks the agent not to",
+      "gap": "the same mode in another spelling (`u=rwx,g=rwx,o=rwx`, `a+rwx` given in parts, `00777`) isn't listed",
       "reason": "It makes a whole tree writable by every user, and the old modes can't be recovered.",
       "instruction": "Give the one file or folder that needs it the narrowest mode that works (`chmod u+x script.sh`).",
       "samples": {
@@ -335,7 +335,7 @@
         "files": ["**/.env", "**/.env.*"],
         "except": ["**/.env.example", "**/.env.sample", "**/.env.template", "**/.env*.md"]
       },
-      "gap": "a glob the shell expands (`cat .env*`, `cat .e?v`) reaches a `.env` file under a name the hook never sees; the rule line asks the agent not to",
+      "gap": "a glob the shell expands (`cat .env*`, `cat .e?v`) reaches a `.env` file under a name the hook never sees; the shared secrets guardrail covers these routes",
       "reason": "They print a `.env` file's credentials, or load them into the shell, where the next command can print them.",
       "instruction": "Read the variable names from `.env.example`; if you need a value, stop, say why, and give the user the exact command; never work around it.",
       "samples": {
@@ -367,7 +367,7 @@
       },
       "reason": "It prints the environment's tokens and keys, or one of them, into the agent's context.",
       "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`), and never print one another way (`echo $NAME`); if you need a value, stop, say why, and give the user the exact command; never work around it.",
-      "gap": "a variable expanded inside another command (`echo $TOKEN`) prints its value, and no rule can tell that from ordinary use; the rule line asks the agent not to",
+      "gap": "a variable expanded inside another command (`echo $TOKEN`) prints its value, and no rule can tell that from ordinary use; the shared secrets guardrail covers these routes",
       "samples": {
         "covers": ["printenv", "printenv TOKEN"],
         "leaves": ["test -n \"$TOKEN\""]
@@ -383,7 +383,7 @@
       },
       "reason": "It prints a token or key into the agent's context.",
       "instruction": "Check that the variable is set without printing it (`test -n \"$NAME\"`), and pass it to the command that needs it without printing it; if you need the value, stop, say why, and give the user the exact command; never work around it.",
-      "gap": "a secret under an ordinary name, or printed another way (`cat`, an interpreter, a script); the rule line asks the agent not to",
+      "gap": "a secret under an ordinary name, or printed another way (`cat`, an interpreter, a script); the shared secrets guardrail covers these routes",
       "samples": {
         "covers": ["echo $API_TOKEN", "printf '%s' \"${DB_PASSWORD}\"", "echo \"key: $OPENAI_API_KEY\""],
         "leaves": ["echo $HOME", "echo '$API_TOKEN'", "curl -H \"Authorization: Bearer $TOKEN\" https://example.com", "test -n \"$API_TOKEN\"", "echo ${#API_TOKEN}"]
@@ -427,7 +427,7 @@
         "paths": ["/proc/**/environ"],
         "access": "read"
       },
-      "gap": "`ps e` and `ps eww` print every process's environment through letters no rule can tell from ordinary `ps` options; the rule line asks the agent not to",
+      "gap": "`ps e` and `ps eww` print every process's environment through letters no rule can tell from ordinary `ps` options; the shared secrets guardrail covers these routes",
       "reason": "A process's environment holds its tokens and keys, which must stay out of the agent's context.",
       "instruction": "Check that a variable is set without printing it (`test -n \"$NAME\"`); if you need a value, stop, say why, and give the user the exact command; never work around it.",
       "samples": {
@@ -483,16 +483,34 @@
     {
       "id": "home-credentials-read",
       "level": "deny",
-      "summary": "reading `~/.ssh` and `~/.aws`",
+      "summary": "reading `~/.ssh`, `~/.aws`, `~/.kube/config` and the token files of git, `gh`, npm and Docker in the home folder",
       "match": {
-        "paths": ["~/.ssh/**", "~/.aws/**"],
+        "paths": [
+          "~/.ssh/**", "~/.aws/**", "~/.kube/config", "~/.netrc", "~/.git-credentials",
+          "~/.config/gh/hosts.yml", "~/.npmrc", "~/.docker/config.json"
+        ],
         "access": "read"
       },
-      "reason": "They hold the keys to the user's machines and cloud accounts.",
-      "instruction": "Stop, say what you needed from them, and let the user run the command.",
+      "reason": "They hold the keys and tokens to the user's machines, cloud accounts and package registries.",
+      "instruction": "Stop, say what you needed from them, and let the user run the command; the tools that own these files still read them.",
       "samples": {
-        "covers": ["~/.ssh/id_ed25519", "~/.aws/credentials"],
-        "leaves": ["~/.sshx/y"]
+        "covers": ["~/.ssh/id_ed25519", "~/.aws/credentials", "~/.netrc", "~/.config/gh/hosts.yml", "~/.npmrc", "~/.docker/config.json"],
+        "leaves": ["~/.sshx/y", "~/.config/gh/config.yml", "app/.npmrc"]
+      }
+    },
+    {
+      "id": "key-files-read",
+      "level": "deny",
+      "summary": "reading private key and certificate bundles (`*.pem`, `*.p12`, `*.pfx`) in any folder",
+      "match": {
+        "paths": ["**/*.pem", "**/*.p12", "**/*.pfx"],
+        "access": "read"
+      },
+      "reason": "They usually hold a private key, which must stay out of the agent's context.",
+      "instruction": "Pass the file's path to the command that needs it without opening it; if you need what's inside, stop, say why, and let the user run the command.",
+      "samples": {
+        "covers": ["certs/server.pem", "~/Downloads/signing.p12", "build/app.pfx"],
+        "leaves": ["certs/server.pub", "notes/pem.md"]
       }
     },
     {
@@ -523,6 +541,54 @@
       "samples": {
         "covers": ["mcp__gmail__trash_thread", "mcp__claude_ai_Gmail__apply_sensitive_message_label", "mcp__gmail__mark_as_spam"],
         "leaves": ["mcp__gmail__label_message"]
+      }
+    },
+    {
+      "id": "mail-draft-write",
+      "level": "ask",
+      "approver": "user",
+      "summary": "mail tools that create, update or delete a saved draft",
+      "match": {
+        "server": "mail",
+        "tool": "^(create|update|delete)_draft"
+      },
+      "reason": "A saved draft is a change in the user's mailbox, and an update or delete can overwrite a draft they were writing.",
+      "instruction": "Call it only when the user asked for the draft in that mail tool, and let the user approve the call themselves; where no one will be asked, keep the draft in chat and say why.",
+      "samples": {
+        "covers": ["mcp__claude_ai_Gmail__create_draft", "mcp__claude_ai_Gmail__update_draft", "mcp__gmail__delete_draft"],
+        "leaves": ["mcp__claude_ai_Gmail__get_draft", "mcp__claude_ai_Gmail__list_drafts", "mcp__notes__create_draft"]
+      }
+    },
+    {
+      "id": "mail-cli-draft",
+      "level": "ask",
+      "approver": "user",
+      "summary": "`spark draft`",
+      "match": {
+        "program": "spark",
+        "subcommands": [["draft"]]
+      },
+      "reason": "It creates, edits or deletes a draft in the user's mailbox, and an edit or delete can overwrite a draft they were writing.",
+      "instruction": "Run it only when the user asked for the draft in Spark, as its own command, and let the user approve it themselves; where no one will be asked, keep the draft in chat and say why.",
+      "samples": {
+        "covers": ["spark draft --help", "spark draft create"],
+        "leaves": ["spark drafts", "spark emails Drafts"]
+      }
+    },
+    {
+      "id": "calendar-write",
+      "level": "deny",
+      "summary": "calendar tools that do anything but read",
+      "match": {
+        "server": "calendar",
+        "tool": "^(?!(list|get|search|find|query|check|suggest|authenticate|complete_authentication)(_|$))"
+      },
+      "reason": "Creating, changing, deleting or answering an event can send invitations, cancellations or replies to other people in the user's name.",
+      "instruction": "Read the event, then give the user the change to make themselves.",
+      "gap": "A calendar tool whose name starts with a reading verb but writes, such as a `get_or_create_event`, gets through; check each new calendar tool's description when it appears.",
+      "samples": {
+        "covers": ["mcp__claude_ai_Google_Calendar__create_event", "mcp__claude_ai_Google_Calendar__update_event", "mcp__claude_ai_Google_Calendar__delete_event", "mcp__claude_ai_Google_Calendar__respond_to_event", "mcp__google_calendar__quick_add", "mcp__calendar__patch_event"],
+        "leaves": ["mcp__claude_ai_Google_Calendar__list_events", "mcp__claude_ai_Google_Calendar__get_event", "mcp__claude_ai_Google_Calendar__list_calendars", "mcp__claude_ai_Google_Calendar__find_free_time", "mcp__claude_ai_Google_Calendar__authenticate", "mcp__claude_ai_Gmail__create_draft"]
       }
     }
   ]

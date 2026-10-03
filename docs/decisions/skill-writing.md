@@ -9,7 +9,7 @@ How the skills in this repo are written, and why. The rules below came from revi
 - **A reference is only for what some runs need.** When every run must read a file, its content goes in `SKILL.md`, however much "how" it holds: a reference the agent must always open is a detour, and one it skips is lost. This supersedes what-versus-how as the test for moving something out. Handover's readiness checklist and close-effort's commands came back into their skills for this reason.
 - **A step says what always happens; its special cases sit under it** as indented bullets, each opening with its condition in bold ("**When the spec says "QA: blocking":** …"). A reader sees the usual path at a glance and reads a case only when it applies.
 - **The body says when to read a file; a closing section says what it is.** A skill with supporting files ends with `## References`, and one with scripts with `## Scripts`: one line per file on what it covers. The instruction to read it ("Read `user-qa.md` before the first one", in `/orchestrate-effort`'s QA step) sits in the step that needs it.
-- **Name a reference by its topic,** as a noun phrase: `user-qa.md`, `close-effort-commands.md`, not `where-things-go.md` or `carrying-a-change.md`. Its `# Title` matches the name.
+- **Name a reference by its topic,** as a noun phrase: `user-qa.md`, `settle-commands.md`, not `where-things-go.md` or `carrying-a-change.md`. Its `# Title` matches the name.
 - **A skill's folder holds only what runs the skill.** Notes for whoever maintains it, such as how to add a lesson, go in its record in `docs/decisions/`, which is never installed. `MAINTAINING.md` files inside two skills were copied into every install until they moved.
 - **The design skills are the exception.** `/system-design` and `/low-level-design` carry their delivery framework in `SKILL.md`, as the Hello Interview lesson lays it out, because the framework is the skill.
 
@@ -53,3 +53,9 @@ How the skills in this repo are written, and why. The rules below came from revi
 
 - **Fold before auditing.** Must-read references went into `SKILL.md` first, then a fresh sub-agent per skill ran the prompt audit and made its own fixes, with this file as the rules that win a conflict. Auditing after the fold meant the auditors read each skill as an agent would.
 - **Audits catch facts, not only wording.** This round found a wrong signal in `/wispr-flow-dictionary` by reading its script, a quoting bug in `/handover-to-herdr`, a status clash in `/orchestrate-effort`, and a way around `/email`'s deny rules. Tell an auditor to check a skill's commands against their source.
+
+
+## 2026-10-01: always-loaded global instructions
+
+- **Keep permission handling concise.** Enforcement configuration and hook rejections carry command inventories, reasons and alternatives. The shared global instructions carry general rejection handling, a fallback learned from common failures and a short secrets guardrail. Add examples when observed failures justify their context cost.
+- **Group personal workflow; shorten role fallbacks.** Use topic headings and concise rules without changing their meaning. A fallback states what to do when a role has no tool; omit the explanation of the tool or risk.

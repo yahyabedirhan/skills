@@ -21,28 +21,36 @@ Check: `spark accounts` lists the account with `(Access: read-only)`, and `spark
 
 Check: `search_threads` with `in:inbox` returns threads.
 
-## 3. Deny rules
+## 3. Deny and ask rules
 
-The second box lets the token send mail, so Claude Code's permission rules must block sending. Add these to `permissions.deny` in the user's `~/.claude/settings.json`, with the real server ID:
+The second box lets the token send mail, so permission rules must block sending and make every saved-draft change ask the user. `/set-up-machine` writes them into each harness from its rule table: the deny rows `mail-send` and `mail-destructive`, and the ask rows `mail-draft-write` and `mail-cli-draft`. Run it once the connector is signed in, since it reads the connector's tool names from a session. In Claude Code they become these entries in `~/.claude/settings.json`, with the real server ID:
 
 ```json
-"mcp__<server-id>__send_message",
-"mcp__<server-id>__reply",
-"mcp__<server-id>__forward",
-"mcp__<server-id>__trash_message",
-"mcp__<server-id>__trash_thread",
-"mcp__<server-id>__mark_message_spam",
-"mcp__<server-id>__mark_thread_spam",
-"mcp__<server-id>__apply_sensitive_message_label",
-"mcp__<server-id>__apply_sensitive_thread_label",
-"mcp__<server-id>__batch_apply_sensitive_thread_labels"
+"deny": [
+  "mcp__<server-id>__send_message",
+  "mcp__<server-id>__reply",
+  "mcp__<server-id>__forward",
+  "mcp__<server-id>__trash_message",
+  "mcp__<server-id>__trash_thread",
+  "mcp__<server-id>__mark_message_spam",
+  "mcp__<server-id>__mark_thread_spam",
+  "mcp__<server-id>__apply_sensitive_message_label",
+  "mcp__<server-id>__apply_sensitive_thread_label",
+  "mcp__<server-id>__batch_apply_sensitive_thread_labels"
+],
+"ask": [
+  "mcp__<server-id>__create_draft",
+  "mcp__<server-id>__update_draft",
+  "mcp__<server-id>__delete_draft",
+  "Bash(spark draft *)"
+]
 ```
 
-Claude Code blocks an agent from editing its own permission rules unless the user asked for that exact change, so add them only when the user asks for it; otherwise ask the user to paste the lines in. These rules bind only Claude Code, because other agents read their own permission settings. Outside Claude Code, the connector's approval prompts are the only guard against a send, so confirm they are on before relying on them.
+Claude Code blocks an agent from editing its own permission rules unless the user asked for that exact change, so write them only when the user asks for it; otherwise give the user the lines to paste in. Each harness's reference in `/set-up-machine` says how it carries an ask row and where it can't make the user approve: name those gaps to the user, since there a saved draft stays in chat.
 
-Check in a new session that none of the ten denied tools appears among the connector's available tools, since Claude Code hides denied tools, or that `/permissions` lists all ten. Any of them still available means a rule is missing: fix it before using the connector for anything but reading.
+Check in a new session that none of the ten denied tools appears among the connector's available tools, since Claude Code hides denied tools, and that `/permissions` lists the three draft tools and `Bash(spark draft *)` under Ask. A denied tool still available, or a draft tool missing from Ask, means a rule is missing: fix it before using the connector for anything but reading.
 
 ## 4. End to end
 
-1. `create_draft` to the user's own address, then `delete_draft` with the returned `id`. Both succeed.
-2. Archive one handled email the way `SKILL.md` marks an email done, then confirm with `spark emails Inbox` about a minute later that Spark no longer lists it.
+1. When the user is there to approve, create a Gmail draft to their own address: the harness must ask the user before `create_draft` runs. Once they approve it, delete the draft the same way, which must ask them again. Skip this check when the user isn't there.
+2. Archive one handled email the user picks, the way `SKILL.md` marks an email done, then confirm with `spark emails Inbox` about a minute later that Spark no longer lists it.

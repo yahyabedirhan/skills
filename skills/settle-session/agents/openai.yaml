@@ -1,0 +1,5 @@
+interface:
+  display_name: "Settle Session"
+  short_description: "Save the work, free merged empty worktrees, and keep the session open"
+policy:
+  allow_implicit_invocation: true

@@ -51,7 +51,19 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 
 - Tools are named `mcp__<server>__<tool>`; a claude.ai connector shows as `mcp__claude_ai_<Name>__<tool>` in the CLI.
 - **List the tools:** in an empty folder, run `claude -p "List nothing." --output-format stream-json --verbose --tools "" --no-session-persistence --max-turns 1` and read the `tools` of the first event with `"type": "system", "subtype": "init"`; stop it there, before it calls the model. No output (not logged in, not installed) is a `gap`: keep the MCP entries already there.
-- Each row's `server` and `tool` regexes (case-insensitive) pick the names; each match is an exact `deny` entry, and a `found` line names them. A denied MCP tool is removed from the session.
+- Each row's `server` and `tool` regexes (case-insensitive) pick the names; each match is an exact entry in the row's list, and a `found` line names them. A denied MCP tool is removed from the session.
+- **Ask rows:** an answer of "Yes, don't ask again" writes an `allow` entry into the project's `.claude/settings.local.json`, and the user-level `ask` entry still wins over it, since ask is evaluated before allow.
+- **`approver: "user"` rows:** the [auto mode docs](https://code.claude.com/docs/en/auto-mode-config) say an ask rule is checked before the classifier and still prompts, and `dontAsk` denies every call that would prompt; the docs don't say what `bypassPermissions` does with an ask rule, or what a non-interactive `claude -p` run does. The hook reads `permission_mode` and refuses the row's calls in `auto`, `dontAsk` and `bypassPermissions`: a `gap` line for auto mode, to drop once a probe shows its ask entries reach the user, and one for `claude -p`.
+
+## Personal rows
+
+A personal row (personal-repository.md) becomes entries the way a table row of its kind does above, in the same lists, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does.
+
+- **Worked example,** an `allow` MCP-tool row with `server` `<server>` and `tool` `^read_`: each tool of the listing above that it matches becomes an exact entry in `allow`, `mcp__<server>__read_<name>`, marked `added, personal`. With no match in the listing, the row is `n/a` here, "no tool it matches in Claude Code", and nothing is written.
+- **Its tool exists** for a command row when one of its programs is on `PATH`, for an MCP-tool row when the listing above has a tool it matches, and for a file row always.
+- **It can't loosen a table row:** deny and ask are evaluated before allow, so a personal `allow` entry never overrides the table's.
+- **The Cursor CLI** unions this file's `allow` and `deny` lists, so a personal entry written here reaches it too.
+- `verify.py` checks these entries: `personal present` with the entries it found, `personal n/a` with the tool Claude Code lacks, `personal gap` for a row with no entry here (the kinds under *No entry, and a gap instead*), and `personal FAIL` when an entry is missing.
 
 ## Pre-tool hook
 
@@ -64,7 +76,7 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 
   `<script>` and the fail-open wrapping are in SKILL.md, *Wiring*.
 - **Audit:** `wired` when a match-all group runs exactly that command. A handler that runs `pre_tool_hook.py` from another path is this skill's old wiring: `removed`, with the new one `added`. Other hooks are the user's and stay.
-- **Input:** `tool_name`, `tool_input` (`command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` and `glob` for Grep), `cwd`, `session_id`.
+- **Input:** `tool_name`, `tool_input` (`command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` and `glob` for Grep), `cwd`, `session_id`, and `permission_mode` (`default`, `plan`, `acceptEdits`, `auto`, `dontAsk` or `bypassPermissions`).
 - **Answer:** a deny is `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "<the refusal>"}}` with exit 0; Claude Code shows the agent the reason. Otherwise nothing, exit 0, so the native permissions decide. It never answers `allow`, which would skip them, and leaves `ask` rows to the native `ask` list.
 - **Reports** are written when the call is submitted, before any permission prompt.
 - **Cursor runs this hook too:** it loads `~/.claude/settings.json` hooks (Claude's `PreToolUse` as `preToolUse`). The hook still refuses what it recognises there, and leaves reporting to Cursor's own hook when the payload carries `cursor_version`, so no call is reported twice.
@@ -86,7 +98,7 @@ The hook's own misses are in SKILL.md, *What it can't see*.
 
 ## What the agent sees
 
-A native refusal says `Permission to use Bash with command <command> has been denied.` or `File is in a directory that is denied by your permission settings.`, naming no rule, so the instruction reaches the agent through the shared file's rule line. The hook runs first; its refusal names each refused part, its rule, reason and instruction.
+A native refusal says `Permission to use Bash with command <command> has been denied.` or `File is in a directory that is denied by your permission settings.`, naming no rule; the shared file supplies general rejection guidance and the `rm -rf` fallback. The hook runs first; its refusal names each refused part, its rule, reason and instruction.
 
 ## Checking it
 
@@ -96,4 +108,4 @@ A native refusal says `Permission to use Bash with command <command> has been de
 - `gh api rate_limit` runs, and its line appears in the report folder.
 - Writes to `.env` and `secrets/k` with `--allowedTools Write` leave them unchanged; a Read of `sub/.env.example` works.
 - For environment rows, use fake `.env` files and a fake variable, and start the session with a scrubbed environment (`HOME`, `PATH`, `USER` and the fake variable), since a sample that gets through prints whatever the shell holds.
-- Against the real login, `claude -p "Without tools: quote your rule about rm -rf and the file it came from."` quotes the rule line from the shared file.
+- Against the real login, `claude -p "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback from the shared file.
