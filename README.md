@@ -170,7 +170,7 @@ rules.json                      each global rule once: level, reason, instructio
   ↓ one diff, one approval      added, tightened, gaps, extra rules; each file backed up, then written
   ↓ verify.py                   the samples against the hook and Codex's checker; every hook wired
 ~/.config/agents/AGENTS.md      the shared global instructions: environment defaults, rule lines, personal workflow
-~/.config/agents/source.md      the pointer to your personal repository, where your environment defaults, workflow and personal rows come from
+~/.config/agents/source.md      the pointer to your workstation repo, where your environment defaults, workflow and personal permissions come from
 pre_tool_hook.py                runs before every tool call; reads a command as the shell runs it
 Claude Code   ~/.claude/        settings.json: deny and ask entries, the hook, auto memory off; CLAUDE.md imports the shared file
 Codex         ~/.codex/         rules/set-up-machine.rules, hooks.json, AGENTS.md → shared file, memories off in config.toml

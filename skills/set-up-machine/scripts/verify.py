@@ -7,7 +7,7 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
 
 - rules: every row's `covers` samples get the row's level from the pre-tool hook
   (deny, ask or allow-and-report), and its `leaves` samples pass the row; the
-  personal repository's rows too, an `allow` row's samples passing every other row;
+  workstation repo's rows too, an `allow` row's samples passing every other row;
 - codex: each plain command sample through `codex execpolicy check` against the
   machine's Codex rules, listed as `same`, `stricter` (another rules file is
   stricter, and kept) or `differs` from the row's level (a row Codex can't
@@ -15,9 +15,9 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
 - hook: each harness found has its pre-tool hook wired to a script that exists
   (Codex's also trusted);
 - personal: the pointer, ~/.config/agents/source.md, is there, and when it names a
-  personal repository, the shared global instructions file carries that repository's
-  environment defaults and personal workflow (references/personal-repository.md);
-  and each personal row's entries in Claude Code's settings, `present`, `n/a` when
+  workstation repo, the shared global instructions file carries that repository's
+  environment defaults and personal workflow (references/workstation-repo.md);
+  and each personal permission's entries in Claude Code's settings, `present`, `n/a` when
   Claude Code lacks the row's tool, `gap` when the row has no native entry there.
 - config: declared agents/codex.toml preferences match persisted defaults;
   isolated installed-parser probes check support, while effective overrides and
@@ -280,13 +280,13 @@ def check_wiring(home: Path, codex_home: Path | None = None) -> list:
     return out
 
 
-# --- personal rows in Claude Code's settings -------------------------------------
+# --- personal permissions in Claude Code's settings ------------------------------
 
 CLAUDE_LISTS = {"deny": "deny", "ask": "ask", "allow-and-report": "allow", "allow": "allow"}
 
 
 def check_personal_entries(home: Path, rows: list) -> list:
-    """(status, text) per personal row: its entries in Claude Code's settings, as references/claude-code.md writes them.
+    """(status, text) per personal permission: its entries in Claude Code's settings, as references/claude-code.md writes them.
 
     `present` names them; with none, `gap` for a row Claude Code has no entry for, `n/a` when
     Claude Code lacks the row's tool (no MCP tool it matches, or no program on PATH), else FAIL.
@@ -389,7 +389,7 @@ def main(argv=None, stdout=None) -> int:
             line("rules", "FAIL", f"{r.rule.id}: `{r.sample}` should pass, but the row catches it")
         else:
             line("rules", "FAIL", f"{r.rule.id}: `{r.sample}` got {r.answer}, expected {r.expected}")
-    rows = f"{len(table) - len(own)} rows" + (f" and {len(own)} personal rows" if own else "")
+    rows = f"{len(table) - len(own)} rows" + (f" and {len(own)} personal permissions" if own else "")
     line("rules", "FAIL" if wrong else "ok", f"{rows}, {len(results)} samples, {len(wrong)} wrong")
     failed |= bool(wrong)
 

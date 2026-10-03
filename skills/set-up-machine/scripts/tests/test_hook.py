@@ -573,14 +573,14 @@ PERSONAL_ROWS = [
 
 
 class PersonalRowsTest(unittest.TestCase):
-    """The rows of the personal repository the pointer names, checked alongside the rule table."""
+    """The rows of the workstation repo the pointer names, checked alongside the rule table."""
 
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.home = Path(self._tmp.name).resolve()
         pointer = self.home / ".config" / "agents" / "source.md"
         pointer.parent.mkdir(parents=True)
-        pointer.write_text("# Personal repository\n\n- Repository: `owner-a/personal`\n- Clone: `~/code/personal`\n")
+        pointer.write_text("# Workstation repo\n\n- Repository: `owner-a/personal`\n- Clone: `~/code/personal`\n")
         self.permissions = self.home / "code" / "personal" / "agents" / "permissions.json"
         self.permissions.parent.mkdir(parents=True)
         self.write(PERSONAL_ROWS)
@@ -632,7 +632,7 @@ class PersonalRowsTest(unittest.TestCase):
         reason = json.loads(proc.stdout)["hookSpecificOutput"]["permissionDecisionReason"]
         self.assertIn("rm-recursive-force", reason)
         self.assertNotIn("tool-a-wipe", reason)
-        self.assertIn("personal rows skipped", proc.stderr)
+        self.assertIn("personal permissions skipped", proc.stderr)
 
     def test_a_personal_row_of_the_wrong_shape_leaves_the_rule_table_in_force(self):
         for bad in ({**PERSONAL_ROWS[0], "id": ["tool-a-wipe"]},
@@ -642,7 +642,7 @@ class PersonalRowsTest(unittest.TestCase):
             self.assertEqual(proc.returncode, 0, proc.stderr)
             reason = json.loads(proc.stdout)["hookSpecificOutput"]["permissionDecisionReason"]
             self.assertIn("rm-recursive-force", reason)
-            self.assertIn("personal rows skipped", proc.stderr)
+            self.assertIn("personal permissions skipped", proc.stderr)
 
     def test_a_personal_row_cannot_reuse_a_table_id(self):
         self.write([{**PERSONAL_ROWS[0], "id": "rm-recursive-force"}])
