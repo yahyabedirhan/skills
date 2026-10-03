@@ -178,6 +178,9 @@ def support(preferences: dict, codex: str | None) -> list:
 
 
 def audit(home: Path, folder: Path, codex: str | None = None) -> list:
+    if codex is None and not folder.exists():
+        # No Codex here: declared preferences wait for an install rather than fail every audit.
+        return [("n/a", "Codex isn't installed: no codex on PATH and no config home; declared preferences apply once it is")]
     try:
         preferences = load(home)
         if not preferences:
