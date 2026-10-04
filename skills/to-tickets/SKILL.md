@@ -44,7 +44,7 @@ Refer to a ticket by its title, never by its number alone: `#12 Add login` or `0
 
 Present the proposed breakdown as a numbered list. For each ticket, show:
 
-- **Title**: short descriptive name
+- **Title**: short descriptive name, prefixed as the *Title prefixes* section of `docs/agents/issue-tracker.md` says
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
 
