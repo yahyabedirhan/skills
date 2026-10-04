@@ -97,6 +97,8 @@ Let them edit, then take one approval for all of it. Then write:
    - [domain.md](./domain.md): domain doc consumer rules + layout
 
    For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
+
+   Give every `docs/agents/issue-tracker.md` the templates' `## Title prefixes` section, so each skill that creates an issue titles it the same way. Seed its semantic list from the areas the project's open issue titles already name, one line each with what the area covers.
 4. Run each approved rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, then update the files that named it.
 5. Run each approved move out of `docs/assets/`, then update the links to it.
 
@@ -110,7 +112,7 @@ Read every harness file the project holds, from the root down, against **set-up-
 - `overlaps`: an allow that covers a rule's command while the rule still holds. Propose narrowing it.
 - `extra` (a project deny or ask) and `gap` (what you can't judge): name each.
 
-Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it.
+Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes.
 
 The audit passes with no `weakens`. Done when it passes, or the user has chosen to keep a `weakens` entry: then it stays failed, and the report names that entry.
 
