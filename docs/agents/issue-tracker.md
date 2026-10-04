@@ -13,6 +13,27 @@ Issues, specs and tickets for this repo live as GitHub issues in `yahyabedirhan/
 - **Efforts**: every issue of an effort carries the label `effort:<effort>`; list an effort's tickets with `gh issue list --label effort:<effort>`. Create that label before the first issue that uses it, as the publish section says. `gh issue create --label` fails when the label does not exist yet.
 - Refer to an issue by its title, never by its number alone.
 
+## Title prefixes
+
+Start every issue title with one prefix, then `: ` and a capitalized title with no trailing period, for example `QA: Verify the panel on a VPS`. When more than one prefix fits, use the first one in this order:
+
+1. `QA`: manual work for the maintainer.
+2. `VPS`: work on a remote machine.
+3. A harness: `Claude` (claude.ai, cloud sessions and managed agents), `Codex`, `OpenCode`, `Cursor` or `Pi`. Claude Code is the default harness, so it gets no prefix.
+4. A semantic prefix from the list below: one area of this project.
+5. `Bug`, `Feature`, `Chore` or `Spec`: the kind of work.
+6. `Research`: a question to answer before the work starts.
+
+Write each prefix the way its maker writes it, so a skill name stays lowercase. Use a semantic prefix before a generic one when one fits.
+
+### Semantic prefixes
+
+- `Publish`: publishing the skills and making them discoverable.
+- `Workflow`: how skill changes ship and how sessions get recapped.
+- `make-explainer`: the `/make-explainer` skill.
+
+Reuse a prefix from this list before you add a new one. Add a new one when no prefix fits and the issue belongs to one tool, product, skill or workflow. Add it to this list in the same change.
+
 ## Pull requests as a triage surface
 
 **PRs as a request surface: no.**
