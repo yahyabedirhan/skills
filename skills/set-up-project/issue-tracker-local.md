@@ -22,8 +22,6 @@ The title is the ticket file's `# ` heading, after its `<NN>: ` number. Start ev
 5. `Bug`, `Feature`, `Chore` or `Spec`: the kind of work.
 6. `Research`: a question to answer before the work starts.
 
-_(For `/set-up-project`: keep the `VPS` and harness tiers only when this project maintains agent harnesses or remote machines. Otherwise drop them and renumber the list.)_
-
 Write each prefix the way its maker writes it. Use a semantic prefix before a generic one when one fits.
 
 ### Semantic prefixes
