@@ -11,6 +11,27 @@ Issues and specs for this repo live as markdown files in `.efforts/`, tracked in
 - A finished ticket gets its criteria ticked and `Status: done`, in the same commit as its work
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
+## Title prefixes
+
+The title is the ticket file's `# ` heading, after its `<NN>: ` number. Start every issue title with one prefix, then `: ` and a capitalized title with no trailing period, for example `QA: Verify the panel on a VPS`. When more than one prefix fits, use the first one in this order:
+
+1. `QA`: manual work for the maintainer.
+2. `VPS`: work on a remote machine.
+3. A harness: `Claude` (claude.ai, cloud sessions and managed agents), `Codex`, `OpenCode`, `Cursor` or `Pi`. Claude Code is the default harness, so it gets no prefix.
+4. A semantic prefix from the list below: one area of this project.
+5. `Bug`, `Feature`, `Chore` or `Spec`: the kind of work.
+6. `Research`: a question to answer before the work starts.
+
+_(For `/set-up-project`: keep the `VPS` and harness tiers only when this project maintains agent harnesses or remote machines. Otherwise drop them and renumber the list.)_
+
+Write each prefix the way its maker writes it. Use a semantic prefix before a generic one when one fits.
+
+### Semantic prefixes
+
+- `<Name>`: <the area it covers>. _(For `/set-up-project`: one line for each area of this project, seeded from its open issue titles.)_
+
+Reuse a prefix from this list before you add a new one. Add a new one when no prefix fits and the issue belongs to one tool, product, skill or workflow. Add it to this list in the same change.
+
 ## When a skill says "pick up the next ticket"
 
 Take the lowest-numbered ticket with `Status: ready-for-agent` whose "Blocked by" tickets are all `done`.
