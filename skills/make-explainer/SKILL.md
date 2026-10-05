@@ -18,5 +18,5 @@ Make a narrated explainer video about the project the user is working in. The vi
 2. **Learn the subject.** Read the project's code, docs and pull requests until you can explain what the user asked about, end to end.
 3. **Ask once.** In a single round, ask what the user wants to learn from the video, together with anything else the brief can't settle from the project. Then build the brief and script around that question rather than around everything the project contains, and go on without further check-ins, since the user wants a video, not a discussion.
 4. **Build it.** Scaffold the video, write its script, generate the voice, build the scenes, look at stills, and render, as the studio's `AGENTS.md` describes.
-   - **When a scene emphasises a card, callout or quote:** mark it with its background, a full border, or the weight or colour of its text. Give it no single-side accent border, left or any other side, since the user doesn't want those stripes in their videos.
+   - A one-sided border, such as a coloured stripe down a card's left edge, is an overused design pattern. Don't use it.
 5. **Hand it over.** Give the user the path to the rendered MP4, and `npm run dev` in the studio to preview or tweak it.
