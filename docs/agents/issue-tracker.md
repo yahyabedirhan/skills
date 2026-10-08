@@ -30,7 +30,6 @@ Write each prefix the way its maker writes it, so a skill name stays lowercase. 
 
 - `Publish`: publishing the skills and making them discoverable.
 - `Workflow`: how skill changes ship and how sessions get recapped.
-- `make-explainer`: the `/make-explainer` skill.
 
 Reuse a prefix from this list before you add a new one. Add a new one when no prefix fits and the issue belongs to one tool, product, skill or workflow. Add it to this list in the same change.
 
