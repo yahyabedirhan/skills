@@ -6,14 +6,17 @@ it is cloned, or says there is none:
     - Repository: `<owner>/<repo>`      or      - Repository: none
     - Clone: `<path>`
 
-The repository's `agents/instructions.md` holds an `## Environment defaults` table (its Role
-and Tool columns are read; any other column is notes) and a `## Personal workflow` section.
-The shared global instructions file, `~/.config/agents/AGENTS.md`, should carry those Tool
-values (`none` for a role the repository leaves out) and that workflow section's text.
+The repository's `agents/instructions.md` holds an optional `## Working agreement` and
+`## Glossary`, an `## Environment defaults` table (its Role and Tool columns are read; any
+other column is notes) followed by optional `### <tool-name> glossary` subsections, and a
+`## Personal workflow` section. The shared global instructions file,
+`~/.config/agents/AGENTS.md`, should carry those Tool values (`none` for a role the repository
+leaves out), and the text of each other part the repository has and none it lacks. The pointer
+itself fills two roles, `workstation-repo` and `path-to-workstation-repo`, as it names them.
 
 Its `agents/permissions.json` holds personal permissions in the rule table's format, which may
 also take the level `allow`; `permissions` loads them for the hook and the verify script.
-references/workstation-repo.md is the layout for agents; this module only reads it.
+references/workstation.md is the layout for agents; this module only reads it.
 """
 from __future__ import annotations
 
@@ -28,9 +31,13 @@ SHARED = Path(".config/agents/AGENTS.md")
 INSTRUCTIONS = Path("agents/instructions.md")
 PERMISSIONS = Path("agents/permissions.json")
 DEFAULTS = "## Environment defaults"
+AGREEMENT = "## Working agreement"
+GLOSSARY = "## Glossary"
+TOOL_GLOSSARIES = "tool glossaries"  # the `### ` subsections under Environment defaults
 WORKFLOW = "## Personal workflow"
 WORKFLOW_INTRO = ("Rules for how this person works that pass the team test. "
                   "Anything a project or a skill needs goes there instead.")
+POINTER_ROLES = ("workstation-repo", "path-to-workstation-repo")
 REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
@@ -42,6 +49,7 @@ class PersonalError(ValueError):
 class Pointer:
     repository: str  # `<owner>/<repo>`, or "" for none
     clone: Path | None
+    clone_text: str = ""  # the clone path as the pointer writes it, such as `~/code/setup`
 
 
 def check(home: Path) -> list:
@@ -55,12 +63,18 @@ def check(home: Path) -> list:
     instructions_path = pointer.clone / INSTRUCTIONS
     shared_path = home / SHARED
     try:
-        tools, workflow = _read_instructions(instructions_path)
+        tools, workflow, parts = _read_instructions(instructions_path)
         shared = _read(shared_path)
     except PersonalError as exc:
         return [("FAIL", str(exc))]
 
     fails = []
+    from_pointer = dict(zip(POINTER_ROLES, (pointer.repository, pointer.clone_text)))
+    for role, value in from_pointer.items():
+        if role in tools and tools[role] != value:
+            fails.append(f"`{role}` is `{tools[role]}` in {instructions_path}, but the pointer gives `{value}`: "
+                         "the pointer fills it, so leave it out of the repository")
+    tools = {**tools, **from_pointer}
     shared_tools = _tools(shared)
     if shared_tools is None:
         fails.append(f"{shared_path} has no `{DEFAULTS}` table with Role and Tool columns")
@@ -77,11 +91,28 @@ def check(home: Path) -> list:
         fails.append(f"{shared_path} has no `{WORKFLOW}` section")
     elif _drop_intro(shared_workflow) != workflow:
         fails.append(f"`{WORKFLOW}` in {shared_path} differs from {instructions_path}")
+    for name, got in _optional_parts(shared).items():
+        want = parts[name]
+        label = "the `### <tool-name> glossary` subsections" if name == TOOL_GLOSSARIES else f"`{name}`"
+        if want is None and got is not None:
+            fails.append(f"{shared_path} has {label}, which {instructions_path} doesn't")
+        elif want is not None and got is None:
+            fails.append(f"{shared_path} lacks {label} from {instructions_path}")
+        elif want != got:
+            fails.append(f"{label} in {shared_path} differs from {instructions_path}")
     if fails:
         return [("FAIL", text) for text in fails]
     lines = len(workflow.splitlines()) if workflow else 0
-    return [("ok", f"{pointer.repository} at {pointer.clone}: {len(tools)} environment defaults, "
-                   f"the personal workflow ({lines} lines) match {shared_path}")]
+    carried = [f"{len(tools)} environment defaults"]
+    if parts[AGREEMENT] is not None:
+        carried.append("the working agreement")
+    if parts[GLOSSARY] is not None:
+        carried.append("the glossary")
+    if parts[TOOL_GLOSSARIES] is not None:
+        count = sum(1 for l in parts[TOOL_GLOSSARIES].split("\n") if l.startswith("### "))
+        carried.append(f"{count} tool glossar{'y' if count == 1 else 'ies'}")
+    carried.append(f"the personal workflow ({lines} lines)")
+    return [("ok", f"{pointer.repository} at {pointer.clone}: {', '.join(carried)} match {shared_path}")]
 
 
 def permissions(home: Path, table: list) -> list:
@@ -125,7 +156,7 @@ def read_pointer(home: Path) -> Pointer:
     if not clone.startswith(("~/", "/")):
         raise PersonalError(f"{path}: the clone path `{clone}` doesn't start with `~/` or `/`")
     clone_path = Path(str(home) + clone[1:]) if clone.startswith("~/") else Path(clone)
-    return Pointer(repository, clone_path)
+    return Pointer(repository, clone_path, clone)
 
 
 def _field(text: str, name: str):
@@ -155,7 +186,16 @@ def _read_instructions(path: Path):
     workflow = _section(text, WORKFLOW)
     if workflow is None:
         raise PersonalError(f"{path} has no `{WORKFLOW}` section")
-    return {role: value for role, value in tools.items() if value != "none"}, workflow
+    return {role: value for role, value in tools.items() if value != "none"}, workflow, _optional_parts(text)
+
+
+def _optional_parts(text: str) -> dict:
+    """The working agreement, the glossary and the tool glossaries, each its text or None when absent or empty."""
+    parts = {name: _section(text, name) or None for name in (AGREEMENT, GLOSSARY)}
+    defaults = (_section(text, DEFAULTS) or "").split("\n")
+    start = next((i for i, l in enumerate(defaults) if l.startswith("### ")), None)
+    parts[TOOL_GLOSSARIES] = "\n".join(defaults[start:]).strip() or None if start is not None else None
+    return parts
 
 
 def _section(text: str, heading: str):

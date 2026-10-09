@@ -16,7 +16,10 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   (Codex's also trusted);
 - personal: the pointer, ~/.config/agents/source.md, is there, and when it names a
   workstation repo, the shared global instructions file carries that repository's
-  environment defaults and personal workflow (references/workstation-repo.md);
+  environment defaults and personal workflow, the pointer's repository and clone path
+  as the `workstation-repo` and `path-to-workstation-repo` defaults, and its working agreement, glossary and
+  tool glossaries when it has them, none of them when it doesn't
+  (references/workstation.md);
   and each personal permission's entries in Claude Code's settings, `present`, `n/a` when
   Claude Code lacks the row's tool, `gap` when the row has no native entry there.
 - config: declared agents/codex.toml preferences match persisted defaults, or `n/a`

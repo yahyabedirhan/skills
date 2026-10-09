@@ -50,3 +50,22 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 - **A missing pointer is set up through `/set-up-machine` first;** this skill never writes the pointer itself, since `/set-up-machine` owns it and asks the user once.
 - **With a pointer that records no personal repository, a personal instruction still goes in the shared file,** which is its source on such a machine, as `/set-up-machine` allows. A personal permission has no home without the repository, so the skill offers to set one up rather than write it into a harness's settings, where every audit would flag it.
 - **The user commits and pushes in their personal repository.** It is private and theirs, and other machines get the change only after the push, a pull into their clone and a rerun of `/set-up-machine`.
+
+## 2026-10-09: the user's principles and a full read of the global instructions
+
+- **A change that improves the workflow or environment is checked against the user's principles.** The skill finds them through the workstation repo's own `AGENTS.md`, not at a fixed path, so the public skill knows the workstation repo only by its role and its `agents/` contract. Routine changes, such as installing a skill, need only the team test.
+- **A change to the global instructions is shown as the whole resulting file, with each changed line marked, and waits for the user's approval.** Global instructions shape every agent, so the user wants to know every line of them. A diff alone hides how a new line reads beside the rest. The step asks for approval rather than "after they have read it", since an agent can see an approval but not a read, and for a personal change the user commits, not the agent.
+- **The global instruction layer now names the working agreement and the glossary.** This follows the new shape of the shared file in `/set-up-machine` (see its decision record, 2026-10-09).
+
+## 2026-10-09: the workstation repo is a parameter this skill owns
+
+- **`<workstation-repo>` and `<path-to-workstation-repo>` are parameters, next to `<skills-repo>`.** This reverses an earlier decision: the skill found the workstation repo only through `/set-up-machine`'s pointer, `~/.config/agents/source.md`, and declared no parameter for it. Someone who installs the public skills cannot see the user's repository. The skills must therefore name it as a parameter, say what it holds, work without one, and say how to start one.
+- **This skill owns the workstation repo, and `/set-up-machine` reads it.** Its new `references/workstation.md` says what the repository is for, its starting layout, how to start one and which file each personal change goes in. `/set-up-machine`'s reference keeps the pointer and the exact `agents/` format, and each reference links to the other instead of repeating it.
+- **The starting layout is small.** It has a `README.md`, an `AGENTS.md` that names what a maintainer reads first, and the `agents/` files. A principles file, decision records and a full glossary are optional. Decision records may hold undecided entries.
+- **A new workstation repo leaves `agents/instructions.md` to `/set-up-machine`.** That skill already creates the file from the shared file's personal parts when it is missing. One place then describes that copy, and the user approves it in the same diff that writes the pointer.
+- **A missing pointer no longer sends every change through `/set-up-machine`.** Without a workstation repo, the skill offers to start one. With one but no pointer on this machine, `/set-up-machine` writes the pointer.
+
+## 2026-10-09: write with /writing-for-agents, audit every skill change
+
+- **Every instruction and skill change is written with `/writing-for-agents`,** not only a new project skill. Global instructions and skills are read by agents on every run, so the same levers apply to each.
+- **Every skill change gets a fresh sub-agent audit,** not only a new or forked skill. The author reads what it meant to write; the auditor reads what is on disk. It uses claude-api's `prompt-audit` where the harness has it, and `/writing-for-agents` where it doesn't.

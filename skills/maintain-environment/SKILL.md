@@ -1,6 +1,6 @@
 ---
 name: maintain-environment
-description: Change what agents run with - a permission rule, a global or project instruction, or a skill (create, install, update, move, fork, publish, remove, audit, with `npx skills`) - and carry the change to every harness, machine and install. Use when the user wants a rule or instruction added or changed, asks where one belongs, wants a skill created or changed, or asks which skills they use or which name a default tool.
+description: Change what agents run with - a permission rule, a global or project instruction, or a skill (create, install, update, move, fork, publish, remove, audit, with `npx skills`) - and carry the change to every harness, machine and install. Use when the user wants a rule or instruction added or changed, asks where one belongs, wants a skill created or changed, asks which skills they use or which name a default tool, or wants a workstation repo for their personal setup.
 ---
 
 # Maintain the environment
@@ -11,6 +11,8 @@ The environment is what agents run with: permissions, global instructions, proje
 
 - `<skills-repo>`: the user's own skills repo on GitHub, as `owner/repo`.
 - `<path-to-skills-repo>`: where that repo is cloned.
+- `<workstation-repo>`: the user's own repo for their personal agent setup, usually private, as `owner/repo`.
+- `<path-to-workstation-repo>`: where that repo is cloned, e.g. `~/code/agent-setup`.
 
 ## Environment layers
 
@@ -19,7 +21,7 @@ Write each instruction, rule or piece of know-how in one place only, so changing
 | Layer | Holds | Where to write it |
 |---|---|---|
 | **Permission** | A hard rule: deny, ask, allow-and-report or, for a personal permission only, allow. | A rule for anybody is a row in `/set-up-machine`'s rule table, which `/set-up-machine` turns into each harness's native entries and the hook uses for rejection guidance. A personal permission, such as allowing a tool the user added, goes in the user's workstation repo. A project may only add allows. |
-| **Global instruction** | The user's personal workflow and environment defaults, concise permission-rejection guidance and a secrets guardrail. | The user's workstation repo, from which `/set-up-machine` writes the shared global instructions file every harness on the machine reads. The compact rules block comes from `/set-up-machine`'s `references/global-instructions.md`. |
+| **Global instruction** | The user's working agreement, glossaries, environment defaults and personal workflow, concise permission-rejection guidance and a secrets guardrail. | The user's workstation repo, from which `/set-up-machine` writes the shared global instructions file every harness on the machine reads. The compact rules block comes from `/set-up-machine`'s `references/global-instructions.md`. |
 | **Project `AGENTS.md`** | Anything a teammate needs to work on the project: its tracker, its commands, its conventions, its worktree tool. | The project's `AGENTS.md`, with a `CLAUDE.md` holding `@AGENTS.md` so Claude Code reads the same text. |
 | **Skill** | How to do a task, written for any team's tools and tracker: a value that differs between setups becomes a parameter. | A `SKILL.md` in the skills repo, or a local skill in one project. |
 | **Skill reference** | Detail only some runs need, such as one branch of the flow or one tool's specifics; anything every run needs stays in `SKILL.md`. | A file beside the `SKILL.md`. The skill's body says when to read it, and its closing `## References` section says in one line what each file covers; scripts get a `## Scripts` section the same way. |
@@ -31,7 +33,7 @@ Before settling a change, picture a teammate or contributor with a different set
 A change passes when:
 
 - nothing a teammate needs sits in the global instructions;
-- the global instructions hold only the user's personal workflow, their environment defaults, permission-rejection guidance and a secrets guardrail;
+- the global instructions hold only the user's working agreement, glossaries, environment defaults and personal workflow, permission-rejection guidance and a secrets guardrail;
 - no skill depends on the user's default tool. The user's choice of tool sits in their environment defaults, and how to use a tool sits in that tool's own skill.
 
 Flag every place a change fails the test, and move the failing part to the row of the table that fits it.
@@ -53,19 +55,21 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
 ## Steps
 
 1. Choose the layer the change belongs to, and check it against the team test.
-2. Make the change at that layer's source. For any operation on a skill, read `skill-operations.md`.
+   - **When the user asks to improve their workflow or environment:** read `AGENTS.md` in `<path-to-workstation-repo>`, and the documents it names for whoever maintains the setup, such as the user's principles. Name each principle the change conflicts with before you make it. A routine change, such as installing a skill, needs only the team test.
+2. Make the change at that layer's source, writing every instruction and skill with `/writing-for-agents`. For any operation on a skill, read `skill-operations.md`.
    - **For an installed skill:** that is its source repo, never an installed copy, which the next `npx skills update` overwrites.
    - **For a local skill:** that is the project.
-   - **For a personal change** (a personal preference, an environment default or a personal permission): that is the workstation repo the pointer `~/.config/agents/source.md` names, in its clone. `/set-up-machine`'s `references/workstation-repo.md` says which file each kind goes in. Leave the shared file's generated parts and the harness settings to `/set-up-machine`, since its next run rewrites them from the repository.
-   - **When the pointer is missing:** set one up through `/set-up-machine` first, then make the change in the repository it names.
-   - **When the pointer records no workstation repo:** write a personal instruction in the shared file itself, which is its source on such a machine. A personal permission has no home there, so offer to set up a workstation repo through `/set-up-machine`.
-3. After any skill change, run the team-test audit: grep the skills for the name of each tool in the user's environment defaults, and for "environment defaults". Skip each tool's own skill, and `/set-up-machine`, `/set-up-project` and this skill, which manage the instruction files. Judge each hit:
+   - **For a personal change** (a personal preference, an environment default or a personal permission): that is `<workstation-repo>`, in its clone at `<path-to-workstation-repo>`. Read `references/workstation.md` for which file each kind goes in.
+   - **When the user has no workstation repo:** write a personal instruction in the shared file itself, which is its source on such a machine. A personal permission has no home there, so offer to start a workstation repo. Start one, when the user asks or accepts, as `references/workstation.md` says.
+   - **When the user has one but this machine has no pointer** (`~/.config/agents/source.md`): run `/set-up-machine` first, which writes it, then make the change in the clone.
+3. When the change touches the global instructions, show the user the whole shared file as it will read after the change, with each changed line marked. Wait for their approval before the change is committed or shipped: global instructions shape every agent, so the user wants to know every line of them.
+4. After any skill change, run the team-test audit: grep the skills for the name of each tool in the user's environment defaults, and for "environment defaults". Skip each tool's own skill, and `/set-up-machine`, `/set-up-project` and this skill, which manage the instruction files. Judge each hit:
    - **When it is a default,** the skill picks the tool itself: make it a parameter, and move the tool's commands into the tool's own skill.
    - **When it is a mention,** an example such as a parameter's "e.g.", or data: keep it.
    - **When it names the environment defaults:** remove the mention. An agent that has them loaded already sees them, and one that doesn't is pointed at nothing.
-4. Ship a change to the skills repo on a branch, through a pull request opened with `/to-pr`, and stop once it is open. The user merges it or asks you to.
-5. Carry the change everywhere it applies, as the table below says. `npx skills` installs from the default branch, so the installs and updates run after the merge, in the session told the pull request merged.
-6. Report each step this session can't carry: which set-up skill or `npx skills update` still has to run, and whether it runs on this machine, on each other machine or in each project.
+5. Ship a change to the skills repo on a branch, through a pull request opened with `/to-pr`, and stop once it is open. The user merges it or asks you to.
+6. Carry the change everywhere it applies, as the table below says. `npx skills` installs from the default branch, so the installs and updates run after the merge, in the session told the pull request merged.
+7. Report each step this session can't carry: which set-up skill or `npx skills update` still has to run, and whether it runs on this machine, on each other machine or in each project.
 
 | Change | How it reaches everywhere |
 |---|---|
@@ -83,6 +87,7 @@ When the user asks what a skill costs to run, or how to make it cheaper, follow 
 
 - [skill-operations.md](skill-operations.md): the kinds of skill, and creating, installing, updating, moving, removing, forking, upgrading a fork, shipping, auditing and publishing them.
 - [efficiency-analysis.md](efficiency-analysis.md): measuring what one run of a skill costs, and making the next run cheaper.
+- [references/workstation.md](references/workstation.md): what the user's workstation repo is for, its starting layout, starting one, and which file each personal change goes in.
 
 ## Scripts
 
