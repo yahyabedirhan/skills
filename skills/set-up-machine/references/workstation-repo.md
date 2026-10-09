@@ -24,10 +24,7 @@ The clone path starts `~/` or `/`. A person with no workstation repo has `- Repo
 
 ## The repository's layout
 
-The source files sit in an `agents/` folder at the repository's root, so the rest of the repository stays free for whatever else the person keeps there. Two optional files at other paths are for whoever maintains the setup, and this skill doesn't copy them:
-
-- **`docs/north-star.md`:** the person's principles and mental model for how they work with agents, which `/maintain-environment` reads.
-- **`GLOSSARY.md`:** the full glossary. The `## Glossary` section of `agents/instructions.md` holds its core, the words every session needs.
+The source files sit in an `agents/` folder at the repository's root, so the rest of the repository stays free for whatever else the person keeps there. The skills rely on nothing else in it. The repository's own `AGENTS.md`, its project instructions, names any other document whoever maintains the setup reads, such as the person's principles or a full glossary, so those names and paths stay the person's to choose.
 
 ### `agents/instructions.md`
 
