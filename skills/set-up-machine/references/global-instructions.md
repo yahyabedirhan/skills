@@ -12,7 +12,7 @@ The file has these parts, in this order. This skill writes the heading, the rule
 2. **The rule line:** `Working agreement, glossary, environment defaults, global rules and personal workflow. Project and task instructions belong in the project or a skill.`
 3. **`## Working agreement`**, optional: how this person works with agents, as *Working agreement* below says.
 4. **`## Glossary`**, optional: the words this person and their agents share, as *Glossary* below says.
-5. **`## Environment defaults`**, with the line "What this person uses for each role. A project's own environment defaults override a row. When a row is `none`, do what its last column says.", then a table, `| Role | Tool | What it is | When none |`, one row per role below. The Tool column comes from the workstation repo, or is the user's when there is none; this skill writes the other two from the roles table below, so every skill that names a role finds its meaning and its fallback here, in context. Optional `### <Tool> glossary` subsections follow the table, such as `### Herdr glossary`, as *Tool glossaries* below says.
+5. **`## Environment defaults`**, with the line "What this person uses for each role. A project's own environment defaults override a row. When a row is `none`, do what its last column says.", then a table, `| Role | Tool | What it is | When none |`, one row per role below. The Tool column comes from the workstation repo, except the `workstation-repo` and `path-to-workstation-repo` rows, which the pointer fills, or is the user's when there is none; this skill writes the other two from the roles table below, so every skill that names a role finds its meaning and its fallback here, in context. Optional `### <Tool> glossary` subsections follow the table, such as `### Herdr glossary`, as *Tool glossaries* below says.
 6. **The generated block**, rewritten to match this template on every run:
 
    ```markdown
@@ -49,8 +49,8 @@ The one definition of each role.
 | `notification-method` | how a notification reaches this person: a command, or the harness's own tool | The harness's notification tool, else a line in the chat. |
 | `skills-repo` | this person's own skills repo, as `<owner>/<repo>` | Ask the user. |
 | `path-to-skills-repo` | where that repo is cloned | Ask the user. |
-| `workstation-repo` | this person's own repo for their personal agent setup, usually private, as `<owner>/<repo>` | Keep personal lines in the shared global instructions file. `/maintain-environment` can start a workstation repo. |
-| `path-to-workstation-repo` | where that repo is cloned | Keep personal lines in the shared global instructions file. |
+| `workstation-repo` | this person's own repo for their personal agent setup, usually private, as `<owner>/<repo>` | Keep personal lines in this file. Offer `/maintain-environment` to start a workstation repo when a change needs one. |
+| `path-to-workstation-repo` | where that repo is cloned | Keep personal lines in this file. |
 
 A value is a tool name or the exact command. This skill fills the Tool column of `workstation-repo` and `path-to-workstation-repo` from the pointer, `~/.config/agents/source.md`, as `references/workstation.md` says. A project's `AGENTS.md` may hold its own environment defaults, whose rows override these.
 
@@ -60,7 +60,7 @@ How this person and their agents work together: how they split the work, what ea
 
 ## Glossary
 
-The core words this person and their agents share, such as the names for a piece of work or a session, one short definition each. Write every definition so it holds in any harness and any session host; how a word maps onto one tool goes in that tool's glossary. A workstation repo keeps the full glossary in `GLOSSARY.md` and the core words every session needs in `agents/instructions.md`, which this skill copies here as it is.
+The core words this person and their agents share, such as the names for a piece of work or a session, one short definition each. Write every definition so it holds in any harness and any session host; how a word maps onto one tool goes in that tool's glossary. Keep here only the core words every session needs. With a workstation repo, they come from `agents/instructions.md`, which this skill copies here as it is; the repository may keep a full glossary elsewhere.
 
 ## Tool glossaries
 
@@ -80,7 +80,7 @@ A line belongs here only when it's about this person, not the work, and holds fo
 When a harness still keeps its own global file (a `~/.claude/CLAUDE.md` that isn't a link, an old `~/.codex/AGENTS.md`), move it line by line before the harness's file becomes a link:
 
 1. Choose where each line goes, using the list above: a role's row, a working agreement, glossary or personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
-2. Write each role's value and the other lines into their sections of the workstation repo's `agents/instructions.md`, or into the shared file when there is none; make each skill edit at its source, as `/maintain-environment` says.
+2. Write each role's value and the other lines into their sections of the workstation repo's `agents/instructions.md`, except the two rows the pointer fills, or into the shared file when there is none; make each skill edit at its source, as `/maintain-environment` says.
 3. Leave the harness's file holding only its link to the shared file.
 
 ## Memory

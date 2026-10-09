@@ -1,8 +1,8 @@
 # Workstation repo
 
-What this skill reads from the user's workstation repo, `<workstation-repo>`, and the pointer that finds its clone, `<path-to-workstation-repo>`. The workstation repo holds the user's personal agent setup. `/maintain-environment` owns it: its `references/workstation.md` says what the repository is for, and how to start one or change what it holds.
+What this skill reads from the user's workstation repo, and the pointer that names the repository and its clone. The workstation repo holds the user's personal agent setup. `/maintain-environment` owns it: its `references/workstation.md` says what the repository is for, and how to start one or change what it holds.
 
-The workstation repo is the source and the machine's files are output. Make a personal change in the repository and run this skill again. Leave the generated parts of the shared file, and a personal permission's entries in a harness's settings, to this skill, since the next run rewrites them.
+The workstation repo is the source and the machine's files are output: every run rewrites the generated parts of the shared file, and a personal permission's entries in each harness's settings, from the repository.
 
 **When the user has no workstation repo,** set up the machine without one. The personal parts of the shared file are then their own source, and this skill keeps them as they are. Say in the report that `/maintain-environment` can start a workstation repo.
 
@@ -22,6 +22,7 @@ Where this machine's personal agent setup comes from. Written by set-up-machine.
 The clone path starts `~/` or `/`. A person with no workstation repo has `- Repository: none` and no `Clone:` line, so the next run doesn't ask again. The pointer's two values are the Tool column of the `workstation-repo` and `path-to-workstation-repo` rows in the shared file, written as the pointer writes them, or `none`.
 
 - **When the pointer is missing:** ask the user once, in Inspect, for `<workstation-repo>` and `<path-to-workstation-repo>`, or whether they have none. The diff writes the pointer as an `added` line, the same as any other file.
+- **When the pointer records none and the user names a workstation repo:** the diff rewrites the pointer with both values as an `updated` line.
 - **When the clone path doesn't exist:** the diff clones the repository there, as an install command run before any file is written.
 
 ## The repository's layout
@@ -132,7 +133,7 @@ With a workstation repo, the shared file's personal parts are generated from `ag
 - **When the shared file holds a Tool value, or a line of another personal part, that the workstation repo lacks:** add it to the clone's `agents/instructions.md` in the same diff, before the shared file is rewritten, so nothing is lost. In the report, name the file for the user to commit and push in their own repository.
 - **When `agents/instructions.md` doesn't exist yet:** the diff creates it from the shared file's current values in the shape above.
 
-`verify.py` checks the result: a `personal` line is `ok` when the shared file carries the repository's values and sections, `none` when the pointer says there is no repository, and `FAIL` when the pointer is missing, a section differs, or the shared file has an optional section the repository lacks or lacks one it has.
+`verify.py` checks the result: a `personal` line is `ok` when the shared file carries the repository's values and sections, `none` when the pointer says there is no repository, and `FAIL` when the pointer is missing, a section differs, a `workstation-repo` or `path-to-workstation-repo` row is missing or differs from the pointer, or the shared file has an optional section the repository lacks or lacks one it has.
 
 ## Writing the personal permissions
 

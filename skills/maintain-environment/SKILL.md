@@ -12,7 +12,7 @@ The environment is what agents run with: permissions, global instructions, proje
 - `<skills-repo>`: the user's own skills repo on GitHub, as `owner/repo`.
 - `<path-to-skills-repo>`: where that repo is cloned.
 - `<workstation-repo>`: the user's own repo for their personal agent setup, usually private, as `owner/repo`.
-- `<path-to-workstation-repo>`: where that repo is cloned.
+- `<path-to-workstation-repo>`: where that repo is cloned, e.g. `~/code/agent-setup`.
 
 ## Environment layers
 
@@ -60,7 +60,7 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
    - **For an installed skill:** that is its source repo, never an installed copy, which the next `npx skills update` overwrites.
    - **For a local skill:** that is the project.
    - **For a personal change** (a personal preference, an environment default or a personal permission): that is `<workstation-repo>`, in its clone at `<path-to-workstation-repo>`. Read `references/workstation.md` for which file each kind goes in.
-   - **When the user has no workstation repo:** write a personal instruction in the shared file itself, which is its source on such a machine. A personal permission has no home there, so offer to start a workstation repo, as `references/workstation.md` says.
+   - **When the user has no workstation repo:** write a personal instruction in the shared file itself, which is its source on such a machine. A personal permission has no home there, so offer to start a workstation repo. Start one, when the user asks or accepts, as `references/workstation.md` says.
    - **When the user has one but this machine has no pointer** (`~/.config/agents/source.md`): run `/set-up-machine` first, which writes it, then make the change in the clone.
 3. When the change touches the global instructions, show the user the whole shared file as it will read after the change, with each changed line marked. Wait for their approval before the change is committed or shipped: global instructions shape every agent, so the user wants to know every line of them.
 4. After any skill change, run the team-test audit: grep the skills for the name of each tool in the user's environment defaults, and for "environment defaults". Skip each tool's own skill, and `/set-up-machine`, `/set-up-project` and this skill, which manage the instruction files. Judge each hit:
