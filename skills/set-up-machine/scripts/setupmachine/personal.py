@@ -15,7 +15,7 @@ leaves out), and the text of each other part the repository has and none it lack
 
 Its `agents/permissions.json` holds personal permissions in the rule table's format, which may
 also take the level `allow`; `permissions` loads them for the hook and the verify script.
-references/workstation-repo.md is the layout for agents; this module only reads it.
+references/workstation.md is the layout for agents; this module only reads it.
 """
 from __future__ import annotations
 

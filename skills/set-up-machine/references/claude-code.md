@@ -57,7 +57,7 @@ How to set up and audit Claude Code from the rule table. Docs: [permissions](htt
 
 ## Personal permissions
 
-A personal permission (workstation-repo.md) becomes entries the way a table row of its kind does above, in the same lists, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does.
+A personal permission (workstation.md) becomes entries the way a table row of its kind does above, in the same lists, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does.
 
 - **Worked example,** an `allow` MCP-tool row with `server` `<server>` and `tool` `^read_`: each tool of the listing above that it matches becomes an exact entry in `allow`, `mcp__<server>__read_<name>`, marked `added, personal`. With no match in the listing, the row is `n/a` here, "no tool it matches in Claude Code", and nothing is written.
 - **Its tool exists** for a command row when one of its programs is on `PATH`, for an MCP-tool row when the listing above has a tool it matches, and for a file row always.

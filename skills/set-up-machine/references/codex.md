@@ -6,7 +6,7 @@ How to set up and audit Codex from the rule table. Docs: [rules](https://learn.c
 
 ## CLI defaults
 
-When the personal source pointer names a repository, load its optional `agents/codex.toml` as `workstation-repo.md` specifies. Validate the entire file before proposing preference writes. `scripts/setupmachine/codex_config.py` supplies allowlisted parsing, a pure proposal and persisted audit; it never writes configuration. Its TOML checks require Python 3.11+; on an older Python, report the parser support gap and leave preferences unchanged.
+When the personal source pointer names a repository, load its optional `agents/codex.toml` as `workstation.md` specifies. Validate the entire file before proposing preference writes. `scripts/setupmachine/codex_config.py` supplies allowlisted parsing, a pure proposal and persisted audit; it never writes configuration. Its TOML checks require Python 3.11+; on an older Python, report the parser support gap and leave preferences unchanged.
 
 ### Installed support
 
@@ -105,7 +105,7 @@ Codex configures each MCP tool in `config.toml` ([configuration reference](https
 
 ## Personal permissions
 
-A personal permission (workstation-repo.md) becomes `prefix_rule`s the way a table row of its kind does above, in `rules/set-up-machine.rules` after the table's rules, each marked `personal`. An `allow` row gets `decision="allow"`, as an `allow-and-report` row does: the command runs outside the sandbox without a prompt.
+A personal permission (workstation.md) becomes `prefix_rule`s the way a table row of its kind does above, in `rules/set-up-machine.rules` after the table's rules, each marked `personal`. An `allow` row gets `decision="allow"`, as an `allow-and-report` row does: the command runs outside the sandbox without a prompt.
 
 - **Its tool exists** for a command row when one of its programs is on `PATH`; otherwise the row is `n/a` here. File rows, and MCP-tool rows without a tool listing, get no rule, as above: a `gap` for a `deny` or `allow-and-report` row, which the hook still enforces, and for an `allow` row, which Codex then leaves to its own approval settings.
 - **It can't loosen a table row:** the strictest matching decision wins, so a personal `allow` never overrides the table's `forbidden` or `prompt`.

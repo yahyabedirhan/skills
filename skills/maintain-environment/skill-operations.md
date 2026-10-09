@@ -36,7 +36,7 @@ After every change to an install, check that the skill's `SKILL.md` resolves thr
 ln -s ../../.agents/skills/<name> .claude/skills/<name>
 ```
 
-**Install.** `npx skills add <owner>/<repo> -s <name> -y`, with the flags above. Install a bundle of skills that name each other into one scope, so no pointer dangles. For a global skill the user wants on every machine, also add it to the workstation repo's `agents/installs.json`, so `/set-up-machine` installs it on the other machines and keeps it up to date; `/set-up-machine`'s `references/workstation-repo.md` gives the format.
+**Install.** `npx skills add <owner>/<repo> -s <name> -y`, with the flags above. Install a bundle of skills that name each other into one scope, so no pointer dangles. For a global skill the user wants on every machine, also add it to the workstation repo's `agents/installs.json`, so `/set-up-machine` installs it on the other machines and keeps it up to date; `/set-up-machine`'s `references/workstation.md` gives the format.
 
 **Update.** First diff each installed copy against its source: a difference is a hand edit the update would erase. Keep it by forking the skill, or by moving a project-specific edit into the project's `AGENTS.md`.
 

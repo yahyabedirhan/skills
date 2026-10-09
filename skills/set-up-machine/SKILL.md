@@ -13,8 +13,8 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## Steps
 
-1. **Inspect.** Find each harness on the machine, read its reference, then the non-secret configuration fields that reference needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a workstation repo, read `references/workstation-repo.md` and the repository's `agents/instructions.md`, `agents/permissions.json` and `agents/installs.json` in its clone. For Codex, inspect the optional `agents/codex.toml` as its reference directs; use one resolved config home throughout setup and verification.
-   - **When the pointer is missing:** read `references/workstation-repo.md`, then ask the user once which repository holds their personal setup and where it is cloned, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
+1. **Inspect.** Find each harness on the machine, read its reference, then the non-secret configuration fields that reference needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a workstation repo, read `references/workstation.md` and the repository's `agents/instructions.md`, `agents/permissions.json` and `agents/installs.json` in its clone. For Codex, inspect the optional `agents/codex.toml` as its reference directs; use one resolved config home throughout setup and verification.
+   - **When the pointer is missing:** read `references/workstation.md`, then ask the user once which repository holds their personal setup and where it is cloned, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
    - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
    - **When trying a change without touching the real machine:** run the steps against a copy of the home folder in the project's `.scratch/`, and check it with `verify.py --home <copy>`. Start no harness there, since it would read the real login.
 2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, declared supported Codex defaults, and the installs: every skill and command `agents/installs.json` lists for this machine, each skill up to date. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
@@ -28,7 +28,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
    - `n/a` (not applicable) for a personal permission whose tool this harness lacks, with why: nothing is written for it there.
 
    Use `removed` only for memory files, a harness's own global file whose every line is already in the shared file (it becomes a link), and this skill's own wiring that points at an old script. An entry a dropped row, the table's or a personal one, left behind is `extra`, for the user to remove.
-   - **When the workstation repo has `agents/installs.json`:** the diff holds a line per entry that applies to this machine, and an `n/a` line, with why, per entry that doesn't. The file is the whole list: install nothing it leaves out. `references/workstation-repo.md` gives the format, the checks and the commands.
+   - **When the workstation repo has `agents/installs.json`:** the diff holds a line per entry that applies to this machine, and an `n/a` line, with why, per entry that doesn't. The file is the whole list: install nothing it leaves out. `references/workstation.md` gives the format, the checks and the commands.
    - **Without the file, with a `<skills-repo>` value:** the diff installs that repo's skills globally: `npx --yes skills add <owner>/<repo> -g -a codex -a claude-code -y`, leaving out `-a claude-code` when `~/.claude/skills` is a link to `~/.agents/skills`. It's `present` once `~/.agents/.skill-lock.json` records a skill from that source. With no value, it's a `none` line.
 3. **Ask once** for one approval of the whole diff. A change after that needs a new approval.
    - **When the diff holds only `added` and `updated` installs from `agents/installs.json`:** write it without asking, since the user approved that list by writing it.
@@ -40,7 +40,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## Rule table
 
-`rules.json` holds each global rule once, by meaning, not in any harness's form. Each harness reference turns a row into that harness's entries; the hook and `verify.py` read it through `scripts/setupmachine/rules.py`, which refuses a malformed row. A workstation repo's `agents/permissions.json` holds personal permissions in the same format, which every harness, the hook and `verify.py` take alongside the table's (`references/workstation-repo.md`).
+`rules.json` holds each global rule once, by meaning, not in any harness's form. Each harness reference turns a row into that harness's entries; the hook and `verify.py` read it through `scripts/setupmachine/rules.py`, which refuses a malformed row. A workstation repo's `agents/permissions.json` holds personal permissions in the same format, which every harness, the hook and `verify.py` take alongside the table's (`references/workstation.md`).
 
 ### A row
 
@@ -116,7 +116,7 @@ Name these once in every audit:
 
 - [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, the working agreement and glossaries, what counts as personal workflow, moving a harness's own file, and why memory stays off.
 - [references/rule-table.md](references/rule-table.md): changing a row of the rule table, changing the hook's code and its tests, and adding a harness.
-- [references/workstation-repo.md](references/workstation-repo.md): the pointer, the workstation repo's layout, generating the shared file's personal parts from it, its personal permissions, and its installs list.
+- [references/workstation.md](references/workstation.md): the pointer, the workstation repo's layout, generating the shared file's personal parts from it, its personal permissions, and its installs list.
 - [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
   - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
 - One reference per harness, read for each harness found. Each says how the harness is found, where it keeps each setting, a row's native form with worked examples, the hook's wiring, and its gaps:

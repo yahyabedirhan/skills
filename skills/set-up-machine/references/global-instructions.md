@@ -32,7 +32,7 @@ The file has these parts, in this order. This skill writes the heading, the rule
 
 The personal parts are the working agreement, the glossary, the Tool column, the tool glossaries and the personal workflow. A new file gets the required parts, every role `none` and the workflow section empty, unless a workstation repo fills them. On an existing file, update the rule line, add missing required sections, role rows as `none` or columns, rewrite the What it is and When none columns from the roles table, and regenerate the block. Remove this skill's old fixed Personal workflow intro.
 
-- **With a workstation repo:** write the personal parts from it, as `references/workstation-repo.md` says. First add to the repository any line only the shared file holds, so nothing is lost. Then copy each optional section the repository has, and leave out each one it lacks.
+- **With a workstation repo:** write the personal parts from it, as `references/workstation.md` says. First add to the repository any line only the shared file holds, so nothing is lost. Then copy each optional section the repository has, and leave out each one it lacks.
 - **With none:** keep the personal parts as they are, since the shared file is their only copy. Move a part only to restore the order.
 
 If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
