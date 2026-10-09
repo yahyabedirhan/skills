@@ -1,12 +1,14 @@
 # Workstation repo
 
-Where a person's own setup lives, and the pointer that finds it.
+What this skill reads from the user's workstation repo, `<workstation-repo>`, and the pointer that finds its clone, `<path-to-workstation-repo>`. The workstation repo holds the user's personal agent setup. `/maintain-environment` owns it: its `references/workstation.md` says what the repository is for, and how to start one or change what it holds.
 
-A person keeps their personal setup in a repository of their own, which can be private: their working agreement and glossary, which tool fills each role, their personal workflow lines, their personal permissions, and what every machine installs. That repository is the source and the machine's files are output, so make a personal change there and run this skill again; never edit the generated parts of the shared file, or a personal permission's entries in a harness's settings, by hand, since the next run rewrites them. On a machine with no workstation repo, the personal parts of the shared file are their own source, and this skill keeps them as they are.
+The workstation repo is the source and the machine's files are output. Make a personal change in the repository and run this skill again. Leave the generated parts of the shared file, and a personal permission's entries in a harness's settings, to this skill, since the next run rewrites them.
+
+**When the user has no workstation repo,** set up the machine without one. The personal parts of the shared file are then their own source, and this skill keeps them as they are. Say in the report that `/maintain-environment` can start a workstation repo.
 
 ## The pointer
 
-`~/.config/agents/source.md` names the workstation repo and where it is cloned on this machine. It sits outside every repository, so it stays private by being local.
+`~/.config/agents/source.md` names `<workstation-repo>` and `<path-to-workstation-repo>` on this machine. This skill needs it to find the repository before it generates anything. It sits outside every repository, so it stays private by being local.
 
 ```markdown
 # Workstation repo
@@ -17,14 +19,14 @@ Where this machine's personal agent setup comes from. Written by set-up-machine.
 - Clone: `<path to the clone>`
 ```
 
-The clone path starts `~/` or `/`. A person with no workstation repo has `- Repository: none` and no `Clone:` line, so the next run doesn't ask again.
+The clone path starts `~/` or `/`. A person with no workstation repo has `- Repository: none` and no `Clone:` line, so the next run doesn't ask again. The pointer's two values are the Tool column of the `workstation-repo` and `path-to-workstation-repo` rows in the shared file, written as the pointer writes them, or `none`.
 
-- **When the pointer is missing:** ask the user once, in Inspect, which repository holds their personal setup and where it is cloned, or whether they have none. The diff writes the pointer as an `added` line, the same as any other file.
+- **When the pointer is missing:** ask the user once, in Inspect, for `<workstation-repo>` and `<path-to-workstation-repo>`, or whether they have none. The diff writes the pointer as an `added` line, the same as any other file.
 - **When the clone path doesn't exist:** the diff clones the repository there, as an install command run before any file is written.
 
 ## The repository's layout
 
-The source files sit in an `agents/` folder at the repository's root, so the rest of the repository stays free for whatever else the person keeps there. The skills rely on nothing else in it. The repository's own `AGENTS.md`, its project instructions, names any other document whoever maintains the setup reads, such as the person's principles or a full glossary, so those names and paths stay the person's to choose.
+This skill reads only the `agents/` folder at the repository's root. The rest of the repository is the user's, as `/maintain-environment`'s `references/workstation.md` describes.
 
 ### `agents/instructions.md`
 
@@ -59,7 +61,7 @@ The values this skill writes into the shared file, and the person's notes on the
 ```
 
 - **Working agreement** and **Glossary:** optional. Each is copied as it is into the shared file's section of the same name, up to the next `## ` heading. A section that is missing or empty is left out of the shared file.
-- **Environment defaults:** one row per role the person fills, named as in the roles table in `global-instructions.md`. Only the Role and Tool columns are read; any other column, such as Why, is notes that stay in the repository. A role left out, or given `none`, is `none` in the shared file.
+- **Environment defaults:** one row per role the person fills, named as in the roles table in `global-instructions.md`. Only the Role and Tool columns are read; any other column, such as Why, is notes that stay in the repository. A role left out, or given `none`, is `none` in the shared file. Leave out `workstation-repo` and `path-to-workstation-repo`: the pointer fills them, and `verify.py` fails a row here that differs from it.
 - **Tool glossaries:** optional `### <Tool> glossary` subsections after the table. Everything from the first `### ` heading to the next `## ` heading is copied as it is after the shared file's table. Notes between the table and that heading stay in the repository.
 - **Personal workflow:** everything under the heading, up to the next `## ` heading, is copied as it is into the shared file's Personal workflow section, including its `###` topic headings. Notes on when and how to use a tool the person added count as workflow lines.
 - Any other text in the file is notes, and stays in the repository. Check every copied line against the team test in `global-instructions.md`.
@@ -125,7 +127,7 @@ Never put a secret in the file: it is a repository, and the commands run as writ
 
 ## Writing the shared file from it
 
-With a workstation repo, the shared file's personal parts are generated from `agents/instructions.md`: the Working agreement, the Glossary, the Tool column of the Environment defaults table, the tool glossaries after it, and the Personal workflow section. Each sits in the order `global-instructions.md` gives. The rules block follows `global-instructions.md`'s compact template. The roles' What it is and When none columns still come from this skill's roles table.
+With a workstation repo, the shared file's personal parts are generated from `agents/instructions.md`: the Working agreement, the Glossary, the Tool column of the Environment defaults table except the two rows the pointer fills, the tool glossaries after it, and the Personal workflow section. Each sits in the order `global-instructions.md` gives. The rules block follows `global-instructions.md`'s compact template. The roles' What it is and When none columns still come from this skill's roles table.
 
 - **When the shared file holds a Tool value, or a line of another personal part, that the workstation repo lacks:** add it to the clone's `agents/instructions.md` in the same diff, before the shared file is rewritten, so nothing is lost. In the report, name the file for the user to commit and push in their own repository.
 - **When `agents/instructions.md` doesn't exist yet:** the diff creates it from the shared file's current values in the shape above.
