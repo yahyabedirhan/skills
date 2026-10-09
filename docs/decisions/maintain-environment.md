@@ -50,3 +50,9 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 - **A missing pointer is set up through `/set-up-machine` first;** this skill never writes the pointer itself, since `/set-up-machine` owns it and asks the user once.
 - **With a pointer that records no personal repository, a personal instruction still goes in the shared file,** which is its source on such a machine, as `/set-up-machine` allows. A personal permission has no home without the repository, so the skill offers to set one up rather than write it into a harness's settings, where every audit would flag it.
 - **The user commits and pushes in their personal repository.** It is private and theirs, and other machines get the change only after the push, a pull into their clone and a rerun of `/set-up-machine`.
+
+## 2026-10-09: the north star and a full read of the global instructions
+
+- **A change that improves the workflow or environment is checked against the workstation repo's `docs/north-star.md`, when it has one.** The north star holds the user's principles and mental model. Routine changes, such as installing a skill, need only the team test.
+- **A change to the global instructions is shown as the whole resulting file, with each changed line marked, before it ships.** Global instructions shape every agent, so the user wants to know every line of them. A diff alone hides how a new line reads beside the rest.
+- **The global instruction layer now names the working agreement and the glossary.** This follows the new shape of the shared file in `/set-up-machine` (see its decision record, 2026-10-09).
