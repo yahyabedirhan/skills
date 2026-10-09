@@ -28,7 +28,7 @@ Take a machine out of use without losing work and without leaving anything that 
    2. Take the machine off the tailnet: `tailscale logout` on the machine, then check the device is gone in the admin console.
    3. Remove it from the notification method's sender list and from `~/.ssh/config` on the user's other machines. Remove its host keys with `ssh-keygen -R <host>`.
    4. Give the user the commands that revoke its access to their accounts: its SSH key and deploy keys on GitHub (`gh ssh-key list`, then `gh ssh-key delete <id>`), and each token created for it. The rule table refuses these commands to agents, since they change who can reach the account.
-   5. Close your workspace on the machine, then remove the saved machine: `herdr machine remove <label>` for Herdr.
+   5. Close your workspace on the machine, then remove the saved machine: for Herdr, `herdr machine remove <id>`, with the 32-character id `herdr machine list` prints, since the label is refused.
 6. **Hand over the delete.** Give the user the provider's console link and say what to do: take the snapshot if the plan keeps one, then delete the server. A stopped server is still billed; only deletion ends the bill. The user confirms when it's done.
 7. **Record** the retirement, as its own change, in each file step 1 found: say the machine is retired, with the date and where its work went, and drop or mark it where a file lists machines. Close the issue that retires it.
 8. **Check** after the user deletes it: the host no longer answers SSH, and the provider's console lists no server. Report what was saved where, what was let go, and anything left for the user.
