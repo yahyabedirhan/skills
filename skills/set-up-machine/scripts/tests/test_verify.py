@@ -274,6 +274,11 @@ Rules for how this person works that pass the team test. Anything a project or a
 """
 
 WORKFLOW = "- First workflow line.\n- Second workflow line,\n  carried on."
+AGREEMENT = "- Ask before merging.\n- Report in short lines."
+GLOSSARY = "- **Effort**: one piece of work, from spec to merged pull request.\n- **Session**: one agent at work."
+TOOL_GLOSSARIES = ("### Host-a glossary\n\n- **Session**: a tab in host-a.\n\n"
+                   "### Agent-a glossary\n\n- **Session**: one agent-a conversation.")
+RULES_START = "<!-- set-up-machine:rules start"
 
 
 class PersonalHome:
@@ -404,6 +409,70 @@ class PersonalTest(PersonalHome, unittest.TestCase):
         self.personal_repository()
         code, lines = self.lines()
         self.assertRegex(lines[0], r"personal +FAIL +.*\.config/agents/AGENTS\.md doesn't exist")
+
+    def with_sections(self, text, agreement=AGREEMENT, glossary=GLOSSARY, tools=TOOL_GLOSSARIES):
+        """Text with a working agreement and a glossary before Environment defaults, and tool glossaries at its end."""
+        head, rest = text.split("## Environment defaults", 1)
+        marker = RULES_START if RULES_START in rest else "## Personal workflow"
+        defaults, tail = rest.split(marker, 1)
+        before = "".join(f"## {name}\n\n{body}\n\n" for name, body in (("Working agreement", agreement),
+                                                                         ("Glossary", glossary)) if body)
+        after = f"{tools}\n\n" if tools else ""
+        return f"{head}{before}## Environment defaults{defaults.rstrip()}\n\n{after}{marker}{tail}"
+
+    def test_the_working_agreement_glossary_and_tool_glossaries_pass_when_copied(self):
+        self.pointer()
+        self.personal_repository(self.with_sections(INSTRUCTIONS))
+        self.shared()
+        shared = self.home / ".config/agents/AGENTS.md"
+        shared.write_text(self.with_sections(shared.read_text()))
+        code, lines = self.lines()
+        self.assertEqual(len(lines), 1, lines)
+        self.assertRegex(lines[0], r"personal +ok +.*2 environment defaults, the working agreement, the glossary, "
+                                   r"2 tool glossaries, the personal workflow")
+        self.assertEqual(code, 0)
+
+    def test_a_glossary_that_differs_fails(self):
+        self.pointer()
+        self.personal_repository(self.with_sections(INSTRUCTIONS))
+        self.shared()
+        shared = self.home / ".config/agents/AGENTS.md"
+        shared.write_text(self.with_sections(shared.read_text(), glossary="- **Effort**: a word changed by hand."))
+        code, lines = self.lines()
+        self.assertEqual(len(lines), 1, lines)
+        self.assertRegex(lines[0], r"personal +FAIL +`## Glossary` in .* differs from")
+        self.assertEqual(code, 1)
+
+    def test_a_working_agreement_missing_from_the_shared_file_fails(self):
+        self.pointer()
+        self.personal_repository(self.with_sections(INSTRUCTIONS))
+        self.shared()
+        shared = self.home / ".config/agents/AGENTS.md"
+        shared.write_text(self.with_sections(shared.read_text(), agreement=None))
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*AGENTS\.md lacks `## Working agreement` from")
+        self.assertEqual(code, 1)
+
+    def test_a_section_the_personal_repository_lacks_fails(self):
+        self.pointer()
+        self.personal_repository()
+        self.shared()
+        shared = self.home / ".config/agents/AGENTS.md"
+        shared.write_text(self.with_sections(shared.read_text(), agreement=None, glossary=None))
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +.*AGENTS\.md has the `### <Tool> glossary` subsections, "
+                                   r"which .*instructions\.md doesn't")
+        self.assertEqual(code, 1)
+
+    def test_a_tool_glossary_that_differs_fails(self):
+        self.pointer()
+        self.personal_repository(self.with_sections(INSTRUCTIONS))
+        self.shared()
+        shared = self.home / ".config/agents/AGENTS.md"
+        shared.write_text(self.with_sections(shared.read_text(), tools="### Host-a glossary\n\n- **Session**: a pane."))
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"personal +FAIL +the `### <Tool> glossary` subsections in .* differs from")
+        self.assertEqual(code, 1)
 
     def test_an_instructions_file_without_its_sections_fails(self):
         self.pointer()
