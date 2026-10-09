@@ -5,7 +5,28 @@ description: Set up or audit a machine's coding-agent harnesses from one rule ta
 
 # Set up machine
 
-Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI) match three sources: the **rule table**, [`rules.json`](rules.json), which holds each global rule once as what it covers; the **shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads; and the user's **workstation repo**, `<workstation-repo>`, from which the shared file's personal parts are generated (the working agreement, the glossaries, which tool fills each role, and the personal workflow) and the **personal permissions**, permission rows each harness carries alongside the rule table's. The **pointer**, `~/.config/agents/source.md`, names the repository and its clone. Codex also takes explicitly declared CLI defaults from that repository's `agents/codex.toml`, and every machine gets the skills and commands its `agents/installs.json` lists. Each harness also runs the **pre-tool hook**, `scripts/pre_tool_hook.py`, before every tool call, and keeps its memory off. Never remove or loosen an entry the table didn't produce: it's the user's. Harness formats change, so check the docs a harness reference links before writing; where they differ, follow the docs and name the difference in your report. Running the skill again is the **audit**: the same steps, ending with a diff that changes nothing.
+Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI) match its sources. Running the skill again is the **audit**: the same steps, ending with a diff that changes nothing.
+
+## Sources
+
+- **Rule table**, [`rules.json`](rules.json): each global rule once, as what it covers.
+- **Workstation repo**, `<workstation-repo>`, found through the **pointer**, `~/.config/agents/source.md`, which names the repository and its clone:
+  - `agents/instructions.md`: the working agreement, the glossaries, which tool fills each role, and the personal workflow;
+  - `agents/permissions.json`: the **personal permissions**, rows each harness carries beside the rule table's;
+  - `agents/installs.json`: the skills and commands every machine gets;
+  - `agents/codex.toml`: Codex CLI defaults, declared explicitly.
+
+## Outputs
+
+- **Shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads; its personal parts come from `agents/instructions.md`.
+- Each harness's permission entries, from the rule table and the personal permissions.
+- The **pre-tool hook**, `scripts/pre_tool_hook.py`, run before every tool call.
+- Memory off in every harness.
+
+## Rules for every run
+
+- Keep every entry the rule table didn't produce, as it is: it's the user's.
+- Harness formats change: check the docs a harness reference links before writing. Where they differ, follow the docs and name the difference in your report.
 
 ## Parameters
 
@@ -39,7 +60,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
 6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries. For Codex, distinguish persisted defaults from effective overrides and state how subsequent sessions pick up changes.
 
-   Run `python3 <this skill>/scripts/verify.py` (Python 3.9+, standard library only; it writes nothing). It passes when it prints `rules ok`, a `hook wired` line for every harness found, a `personal ok` or `personal none` line and no `personal FAIL` line, every `codex differs` line is a row codex.md says gets no rule, and declared Codex defaults match without a `config FAIL` line, or a `config n/a` line says Codex isn't installed. Report `config gap` and `config override` lines separately; they limit what the audit proves.
+   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder, (Python 3.9+, standard library only; it writes nothing). It passes when it prints `rules ok`, a `hook wired` line for every harness found, a `personal ok` or `personal none` line and no `personal FAIL` line, every `codex differs` line is a row codex.md says gets no rule, and declared Codex defaults match without a `config FAIL` line, or a `config n/a` line says Codex isn't installed. Report `config gap` and `config override` lines separately; they limit what the audit proves.
 
 ## Rule table
 
@@ -88,7 +109,7 @@ A harness that matches a command's text catches only the spellings it lists, so 
 `scripts/pre_tool_hook.py` (Python 3.9+, standard library only) is the hook every harness runs before each tool call. It reads `rules.json`, and the personal permissions through the pointer, and checks the call:
 
 - **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
-- **allow-and-report** rows: it writes one JSON line per call to `<report folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
+- **allow-and-report** rows: it writes one JSON line per call to `<report-folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
 - **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why).
 - **allow** rows: it says nothing; the harness's native allow entries let the call run without a prompt.
 
