@@ -114,7 +114,7 @@ Name these once in every audit:
 
 ## References
 
-- [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, what counts as personal workflow, moving a harness's own file, and why memory stays off.
+- [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, the working agreement and glossaries, what counts as personal workflow, moving a harness's own file, and why memory stays off.
 - [references/rule-table.md](references/rule-table.md): changing a row of the rule table, changing the hook's code and its tests, and adding a harness.
 - [references/workstation-repo.md](references/workstation-repo.md): the pointer, the workstation repo's layout, generating the shared file's personal parts from it, its personal permissions, and its installs list.
 - [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
@@ -127,6 +127,6 @@ Name these once in every audit:
 
 ## Scripts
 
-- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine: each row's samples through the hook, and through Codex's own policy check; that the shared file carries the workstation repo's values; that Claude Code holds each personal permission's entries; and Codex defaults, installed support and override gaps at the resolved config home.
+- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine: each row's samples through the hook, and through Codex's own policy check; that the shared file carries the workstation repo's values and sections; that Claude Code holds each personal permission's entries; and Codex defaults, installed support and override gaps at the resolved config home.
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.

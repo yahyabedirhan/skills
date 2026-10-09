@@ -6,7 +6,7 @@ The shared global instructions file: its shape, its roles, and what belongs in i
 
 ## Its shape
 
-The file has these parts, in this order. This skill decides the parts and rewrites the generated block; the content outside the block is the user's.
+The file has these parts, in this order. This skill writes the heading, the rule line, the roles' What it is and When none columns, and the generated block. The personal parts, listed below the parts, are the user's.
 
 1. `# Global agent instructions`
 2. **The rule line:** `Working agreement, glossary, environment defaults, global rules and personal workflow. Project and task instructions belong in the project or a skill.`
@@ -30,10 +30,10 @@ The file has these parts, in this order. This skill decides the parts and rewrit
    Keep the rule inventory, reasons and alternatives in `rules.json`, personal permission rows and harness configuration; the hook supplies details on rejection. Add an example here only when a real session gets stuck without it. The secrets instruction covers routes that command matching cannot see.
 7. **`## Personal workflow`**, with concise rules under `###` topic headings, such as Privacy, Git and delivery, Machine access, and Research. Group and shorten rules at their source, preserving their meaning; omit empty categories.
 
-The user's parts are the working agreement, the glossary, the Tool column, the tool glossaries and the personal workflow. A new file gets the required parts, every role `none` and the workflow section empty, unless a workstation repo fills them. On an existing file, update the rule line, add missing required sections, role rows as `none` or columns, rewrite the What it is and When none columns from the roles table, and regenerate the block. Keep the parts in the order above. Remove this skill's old fixed Personal workflow intro.
+The personal parts are the working agreement, the glossary, the Tool column, the tool glossaries and the personal workflow. A new file gets the required parts, every role `none` and the workflow section empty, unless a workstation repo fills them. On an existing file, update the rule line, add missing required sections, role rows as `none` or columns, rewrite the What it is and When none columns from the roles table, and regenerate the block. Remove this skill's old fixed Personal workflow intro.
 
-- **With a workstation repo:** write the user's parts from it, as `references/workstation-repo.md` says. Copy each optional section when the repository has it, and leave it out when the repository lacks it.
-- **With none:** preserve the user's parts as they are, since they are the user's. Move a part only to restore the order.
+- **With a workstation repo:** write the personal parts from it, as `references/workstation-repo.md` says. First add to the repository any line only the shared file holds, so nothing is lost. Then copy each optional section the repository has, and leave out each one it lacks.
+- **With none:** keep the personal parts as they are, since the shared file is their only copy. Move a part only to restore the order.
 
 If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
 
@@ -58,15 +58,15 @@ How this person and their agents work together: how they split the work, what ea
 
 ## Glossary
 
-The core words this person and their agents share, such as the names for a piece of work or a session, one short definition each. Write every definition so it holds in any harness and any session host; how a word maps onto one tool goes in that tool's glossary. Keep the full glossary in the workstation repo, and copy only the core here.
+The core words this person and their agents share, such as the names for a piece of work or a session, one short definition each. Write every definition so it holds in any harness and any session host; how a word maps onto one tool goes in that tool's glossary. A workstation repo keeps the full glossary in `GLOSSARY.md` and the core words every session needs in `agents/instructions.md`, which this skill copies here as it is.
 
 ## Tool glossaries
 
-A `### <Tool> glossary` subsection maps the shared words onto one tool that fills a role, such as which `herdr` object a session is. Name it after the tool, and add one only for a tool in the Tool column. When the user changes that tool, the subsection changes with the row, and the shared glossary stays as it is.
+A `### <Tool> glossary` subsection maps the shared words onto one tool that fills a role, such as which `herdr` object a session is. Name it after the tool, and add one only for a tool in the Tool column. When the user changes that tool, rewrite or remove its subsection along with the row. Leave the shared glossary as it is, since its words hold in every tool.
 
 ## Personal workflow
 
-A line belongs here only when it's about this person, not the work: how they like reports, what they approve and what they leave to the agent, what stays out of public repositories. It passes the team test when a teammate with no global instructions loses nothing they need. The test holds for the working agreement and the glossaries too: a term a project's code or docs use goes in that project's glossary. Move a line that fails it to the first place below that fits:
+A line belongs here only when it's about this person, not the work, and holds for one kind of work: how they like reports, what they approve before a merge, what stays out of public repositories. A line that holds for every task and every tool goes in the working agreement. It passes the team test when a teammate with no global instructions loses nothing they need. The test holds for the working agreement and the glossaries too: a term a project's code or docs use goes in that project's glossary. Move a line that fails it to the first place below that fits:
 
 - a teammate needs it on this project → the project's `AGENTS.md`;
 - it's how to do a task → the skill for that task, neutral about tools;

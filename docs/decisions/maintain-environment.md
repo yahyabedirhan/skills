@@ -54,5 +54,5 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 ## 2026-10-09: the north star and a full read of the global instructions
 
 - **A change that improves the workflow or environment is checked against the workstation repo's `docs/north-star.md`, when it has one.** The north star holds the user's principles and mental model. Routine changes, such as installing a skill, need only the team test.
-- **A change to the global instructions is shown as the whole resulting file, with each changed line marked, before it ships.** Global instructions shape every agent, so the user wants to know every line of them. A diff alone hides how a new line reads beside the rest.
+- **A change to the global instructions is shown as the whole resulting file, with each changed line marked, and waits for the user's approval.** Global instructions shape every agent, so the user wants to know every line of them. A diff alone hides how a new line reads beside the rest. The step asks for approval rather than "after they have read it", since an agent can see an approval but not a read, and for a personal change the user commits, not the agent.
 - **The global instruction layer now names the working agreement and the glossary.** This follows the new shape of the shared file in `/set-up-machine` (see its decision record, 2026-10-09).

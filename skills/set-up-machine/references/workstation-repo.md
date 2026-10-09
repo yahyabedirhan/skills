@@ -2,7 +2,7 @@
 
 Where a person's own setup lives, and the pointer that finds it.
 
-A person keeps their personal setup in a repository of their own, which can be private: their working agreement and glossary, which tool fills each role, their personal workflow lines, their personal permissions, and what every machine installs. That repository is the source and the machine's files are output, so make a personal change there and run this skill again; never edit the generated parts of the shared file, or a personal permission's entries in a harness's settings, by hand, since the next run rewrites them. A machine with no workstation repo works as before: the user's parts of the shared file stay where they are.
+A person keeps their personal setup in a repository of their own, which can be private: their working agreement and glossary, which tool fills each role, their personal workflow lines, their personal permissions, and what every machine installs. That repository is the source and the machine's files are output, so make a personal change there and run this skill again; never edit the generated parts of the shared file, or a personal permission's entries in a harness's settings, by hand, since the next run rewrites them. On a machine with no workstation repo, the personal parts of the shared file are their own source, and this skill keeps them as they are.
 
 ## The pointer
 
@@ -26,7 +26,7 @@ The clone path starts `~/` or `/`. A person with no workstation repo has `- Repo
 
 The source files sit in an `agents/` folder at the repository's root, so the rest of the repository stays free for whatever else the person keeps there. Two optional files at other paths are for whoever maintains the setup, and this skill doesn't copy them:
 
-- **`docs/north-star.md`:** the person's principles and mental model for how they work with agents. `/maintain-environment` checks a change to the workflow or environment against it.
+- **`docs/north-star.md`:** the person's principles and mental model for how they work with agents, which `/maintain-environment` reads.
 - **`GLOSSARY.md`:** the full glossary. The `## Glossary` section of `agents/instructions.md` holds its core, the words every session needs.
 
 ### `agents/instructions.md`
@@ -65,7 +65,7 @@ The values this skill writes into the shared file, and the person's notes on the
 - **Environment defaults:** one row per role the person fills, named as in the roles table in `global-instructions.md`. Only the Role and Tool columns are read; any other column, such as Why, is notes that stay in the repository. A role left out, or given `none`, is `none` in the shared file.
 - **Tool glossaries:** optional `### <Tool> glossary` subsections after the table. Everything from the first `### ` heading to the next `## ` heading is copied as it is after the shared file's table. Notes between the table and that heading stay in the repository.
 - **Personal workflow:** everything under the heading, up to the next `## ` heading, is copied as it is into the shared file's Personal workflow section, including its `###` topic headings. Notes on when and how to use a tool the person added count as workflow lines.
-- Any other text in the file is notes, and stays in the repository. The working agreement, the glossaries and the workflow pass the team test that `global-instructions.md` describes, as every line in the shared file does.
+- Any other text in the file is notes, and stays in the repository. Check every copied line against the team test in `global-instructions.md`.
 
 ### `agents/permissions.json`
 
@@ -86,7 +86,7 @@ Read `codex.md` for installed-version support, preservation and override checks.
 
 ### `agents/installs.json`
 
-What each machine installs beyond the harnesses' configuration: skills, and anything else that needs a command, such as a session host's plugin or integration. With the file, it is the whole list, including the user's own skills repo, so a machine gets nothing it leaves out. Without it, the skill installs `<skills-repo>` as before.
+What each machine installs beyond the harnesses' configuration: skills, and anything else that needs a command, such as a session host's plugin or integration. With the file, it is the whole list, including the user's own skills repo, so a machine gets nothing it leaves out. Without it, the skill installs `<skills-repo>`.
 
 ```json
 {
@@ -128,9 +128,9 @@ Never put a secret in the file: it is a repository, and the commands run as writ
 
 ## Writing the shared file from it
 
-With a workstation repo, the shared file's user parts are generated from `agents/instructions.md`: the Working agreement, the Glossary, the Tool column of the Environment defaults table, the tool glossaries after it, and the Personal workflow section. Each sits in the order `global-instructions.md` gives. The rules block follows `global-instructions.md`'s compact template. The roles' What it is and When none columns still come from this skill's roles table.
+With a workstation repo, the shared file's personal parts are generated from `agents/instructions.md`: the Working agreement, the Glossary, the Tool column of the Environment defaults table, the tool glossaries after it, and the Personal workflow section. Each sits in the order `global-instructions.md` gives. The rules block follows `global-instructions.md`'s compact template. The roles' What it is and When none columns still come from this skill's roles table.
 
-- **When the shared file holds a Tool value or a line the workstation repo lacks:** add it to the clone's `agents/instructions.md` in the same diff, before the shared file is rewritten, so nothing is lost. In the report, name the file for the user to commit and push in their own repository.
+- **When the shared file holds a Tool value, or a line of another personal part, that the workstation repo lacks:** add it to the clone's `agents/instructions.md` in the same diff, before the shared file is rewritten, so nothing is lost. In the report, name the file for the user to commit and push in their own repository.
 - **When `agents/instructions.md` doesn't exist yet:** the diff creates it from the shared file's current values in the shape above.
 
 `verify.py` checks the result: a `personal` line is `ok` when the shared file carries the repository's values and sections, `none` when the pointer says there is no repository, and `FAIL` when the pointer is missing, a section differs, or the shared file has an optional section the repository lacks or lacks one it has.
