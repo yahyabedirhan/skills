@@ -73,9 +73,9 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 2. For a new skill or a fork that changes behaviour, audit it as below, and commit the fixes and the full findings to its decision record.
 3. In the pull request for an audited skill, summarise the audit in the description's notes for reviewers and link the decision record.
 
-## Auditing a new skill
+## Auditing a skill
 
-After creating or forking a skill, have a fresh sub-agent audit it, because the author reads what it meant to write and the auditor reads only what is on disk. Tell it to run `/claude-api`'s `prompt-audit` on the skill folder and report without editing, unless the user has said the auditor should make its fixes itself. Apply the fixes you accept, and say why each other finding was left.
+After any change to a skill, including creating or forking one, have a fresh sub-agent audit it, because the author reads what it meant to write and the auditor reads only what is on disk. Tell it to run `/claude-api`'s `prompt-audit` on the skill folder where the harness has it, or to audit against `/writing-for-agents` where it doesn't, and report without editing, unless the user has said the auditor should make its fixes itself. Apply the fixes you accept, and say why each other finding was left.
 
 ## Auditing usage
 

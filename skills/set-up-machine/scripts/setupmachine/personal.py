@@ -8,7 +8,7 @@ it is cloned, or says there is none:
 
 The repository's `agents/instructions.md` holds an optional `## Working agreement` and
 `## Glossary`, an `## Environment defaults` table (its Role and Tool columns are read; any
-other column is notes) followed by optional `### <Tool> glossary` subsections, and a
+other column is notes) followed by optional `### <tool-name> glossary` subsections, and a
 `## Personal workflow` section. The shared global instructions file,
 `~/.config/agents/AGENTS.md`, should carry those Tool values (`none` for a role the repository
 leaves out), and the text of each other part the repository has and none it lacks. The pointer
@@ -93,7 +93,7 @@ def check(home: Path) -> list:
         fails.append(f"`{WORKFLOW}` in {shared_path} differs from {instructions_path}")
     for name, got in _optional_parts(shared).items():
         want = parts[name]
-        label = "the `### <Tool> glossary` subsections" if name == TOOL_GLOSSARIES else f"`{name}`"
+        label = "the `### <tool-name> glossary` subsections" if name == TOOL_GLOSSARIES else f"`{name}`"
         if want is None and got is not None:
             fails.append(f"{shared_path} has {label}, which {instructions_path} doesn't")
         elif want is not None and got is None:

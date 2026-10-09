@@ -50,7 +50,7 @@ The values this skill writes into the shared file, and the person's notes on the
 |---|---|---|
 | `<role>` | `<tool>` | <reason> |
 
-### <Tool> glossary
+### <tool-name> glossary
 
 - **<term>**: <tool-definition>
 
@@ -61,12 +61,12 @@ The values this skill writes into the shared file, and the person's notes on the
 - <rule>
 ```
 
-- **Working agreement:** how this person and their agents work together, one agreement per line: `<agreement-name>` is a short label, `<agreement>` the agreement itself.
-- **Glossary:** the words this person and their agents share; each `<definition>` holds in any harness.
-- **Working agreement** and **Glossary** are optional. Each is copied as it is into the shared file's section of the same name, up to the next `## ` heading. A section that is missing or empty is left out of the shared file.
+- **Working agreement:** how this person and their agents work together, optional, one agreement per line: `<agreement-name>` is a short label, `<agreement>` the agreement itself.
+- **Glossary:** the words this person and their agents share, optional: `<term>` is the word, and its `<definition>` holds in any harness.
+- **Copying:** Each is copied as it is into the shared file's section of the same name, up to the next `## ` heading. A section that is missing or empty is left out of the shared file.
 - **Environment defaults:** one row per role the person fills, named as in the roles table in `global-instructions.md`. `<tool>` is a tool name or the exact command; `<reason>` is why this choice, kept here as a note. Only the Role and Tool columns are read; any other column, such as Why, is notes that stay in the repository. A role left out, or given `none`, is `none` in the shared file. Leave out `workstation-repo` and `path-to-workstation-repo`: the pointer fills them, and `verify.py` fails a row here that differs from it.
-- **Tool glossaries:** optional `### <Tool> glossary` subsections after the table; each `<tool-definition>` says what the term is in that tool. Everything from the first `### ` heading to the next `## ` heading is copied as it is after the shared file's table. Notes between the table and that heading stay in the repository.
-- **Personal workflow:** concise rules for how this person works, each `<rule>` under a `### <topic>` heading. Everything under the heading, up to the next `## ` heading, is copied as it is into the shared file's Personal workflow section, including its `###` topic headings. Notes on when and how to use a tool the person added count as workflow lines.
+- **Tool glossaries:** optional `### <tool-name> glossary` subsections after the table, where `<tool-name>` is the tool's name; each `<tool-definition>` says what the term is in that tool. Everything from the first `### ` heading to the next `## ` heading is copied as it is after the shared file's table. Notes between the table and that heading stay in the repository.
+- **Personal workflow:** concise rules for how this person works, each `<rule>` under a `### <topic>` heading, where `<topic>` names a group of rules. Everything under the heading, up to the next `## ` heading, is copied as it is into the shared file's Personal workflow section, including its `###` topic headings. Notes on when and how to use a tool the person added count as workflow lines.
 - Any other text in the file is notes, and stays in the repository. Check every copied line against the team test in `global-instructions.md`.
 
 ### `agents/permissions.json`
@@ -93,7 +93,7 @@ What each machine installs beyond the harnesses' configuration: skills, and anyt
 ```json
 {
   "skills": [
-    { "source": "<owner>/<skills-repo>" },
+    { "source": "<skills-repo>" },
     { "source": "<owner>/<app-repo>", "skills": ["<skill>"] }
   ],
   "ignore": ["<skill>"],
@@ -110,7 +110,7 @@ What each machine installs beyond the harnesses' configuration: skills, and anyt
 
 - **`skills`:** each entry has a `source`, a GitHub `owner/repo`, and an optional `skills` array of skill names in it. Without `skills`, the entry means every skill in the source, including one added to it later.
 - **`ignore`:** skill names a machine may have that the list leaves out on purpose, such as an experiment on one machine or a hand-made skill the lock doesn't track. Mark an installed skill on this list `ignored`, not `extra`, and never install, update or remove it, since it is the user's on that machine.
-- **`commands`:** each entry has a `name`, a `check` (`<check-command>` exits 0 when the thing is installed) and an `install` (`<install-command>` installs it). Run each as written, as a shell command in the home folder, never wrapped in `sh -c`, since the rule table's `shell-inline-command` row refuses that. Write `check` so it exits 0 only when the thing is installed and current, since the skill runs `install` whenever it fails.
+- **`commands`:** each entry has a `name`, a `check` (`<check-command>`) and an `install` (`<install-command>`). Run each as written, as a shell command in the home folder, never wrapped in `sh -c`, since the rule table's `shell-inline-command` row refuses that. Write `check` so it exits 0 only when the thing is installed and current, since the skill runs `install` whenever it fails.
 - **`target` and `os`:** optional arrays on any entry. `target` takes `local`, the machine the user sits at, and `remote`, a machine Inspect treats as remote or headless. `os` takes `macos` and `linux`. An entry applies when both match this machine; a field left out matches every machine. An entry that doesn't apply is an `n/a` line naming the field.
 - All three arrays are optional. Refuse the file, with a `gap` line and no installs from it, when it isn't valid JSON, an entry has an unknown key or misses a required one, or an `ignore` name is also one a `skills` entry installs, since a guessed entry could install the wrong thing.
 

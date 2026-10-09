@@ -494,7 +494,7 @@ class PersonalTest(PersonalHome, unittest.TestCase):
         shared = self.home / ".config/agents/AGENTS.md"
         shared.write_text(self.with_sections(shared.read_text(), agreement=None, glossary=None))
         code, lines = self.lines()
-        self.assertRegex(lines[0], r"personal +FAIL +.*AGENTS\.md has the `### <Tool> glossary` subsections, "
+        self.assertRegex(lines[0], r"personal +FAIL +.*AGENTS\.md has the `### <tool-name> glossary` subsections, "
                                    r"which .*instructions\.md doesn't")
         self.assertEqual(code, 1)
 
@@ -505,7 +505,7 @@ class PersonalTest(PersonalHome, unittest.TestCase):
         shared = self.home / ".config/agents/AGENTS.md"
         shared.write_text(self.with_sections(shared.read_text(), tools="### Host-a glossary\n\n- **Session**: a pane."))
         code, lines = self.lines()
-        self.assertRegex(lines[0], r"personal +FAIL +the `### <Tool> glossary` subsections in .* differs from")
+        self.assertRegex(lines[0], r"personal +FAIL +the `### <tool-name> glossary` subsections in .* differs from")
         self.assertEqual(code, 1)
 
     def test_an_instructions_file_without_its_sections_fails(self):

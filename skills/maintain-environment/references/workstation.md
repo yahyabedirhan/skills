@@ -20,7 +20,7 @@ It is the user's own repository, usually private, because it holds the personal 
 README.md                 what the repository is, for the user
 AGENTS.md                 for whoever maintains the setup: the documents to read first
 agents/instructions.md    ## Working agreement, ## Glossary, ## Environment defaults
-                          (the roles table, then ### <Tool> glossary subsections), ## Personal workflow
+                          (the roles table, then ### <tool-name> glossary subsections), ## Personal workflow
 agents/permissions.json   {"version": 1, "rules": []}
 agents/installs.json      every machine's installs, starting with <skills-repo>
 docs/principles.md        optional: the user's principles and a mental model of their setup

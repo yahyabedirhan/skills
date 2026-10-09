@@ -64,3 +64,8 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 - **The starting layout is small.** It has a `README.md`, an `AGENTS.md` that names what a maintainer reads first, and the `agents/` files. A principles file, decision records and a full glossary are optional. Decision records may hold undecided entries.
 - **A new workstation repo leaves `agents/instructions.md` to `/set-up-machine`.** That skill already creates the file from the shared file's personal parts when it is missing. One place then describes that copy, and the user approves it in the same diff that writes the pointer.
 - **A missing pointer no longer sends every change through `/set-up-machine`.** Without a workstation repo, the skill offers to start one. With one but no pointer on this machine, `/set-up-machine` writes the pointer.
+
+## 2026-10-09: write with /writing-for-agents, audit every skill change
+
+- **Every instruction and skill change is written with `/writing-for-agents`,** not only a new project skill. Global instructions and skills are read by agents on every run, so the same levers apply to each.
+- **Every skill change gets a fresh sub-agent audit,** not only a new or forked skill. The author reads what it meant to write; the auditor reads what is on disk. It uses claude-api's `prompt-audit` where the harness has it, and `/writing-for-agents` where it doesn't.

@@ -9,8 +9,8 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## Sources
 
-- **Rule table**, [`rules.json`](rules.json): each global rule once, as what it covers.
-- **Workstation repo**, `<workstation-repo>`, found through the **pointer**, `~/.config/agents/source.md`, which names the repository and its clone:
+- **Rule table**, [`rules.json`](rules.json).
+- **Workstation repo**, `<workstation-repo>`, found through the **pointer**, `~/.config/agents/source.md`, which names the repository and its clone. Each of these files is optional:
   - `agents/instructions.md`: the working agreement, the glossaries, which tool fills each role, and the personal workflow;
   - `agents/permissions.json`: the **personal permissions**, rows each harness carries beside the rule table's;
   - `agents/installs.json`: the skills and commands every machine gets;
@@ -21,6 +21,9 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 - **Shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads; its personal parts come from `agents/instructions.md`.
 - Each harness's permission entries, from the rule table and the personal permissions.
 - The **pre-tool hook**, `scripts/pre_tool_hook.py`, run before every tool call.
+- The **pointer**, when it is missing or records none.
+- Codex CLI defaults that `agents/codex.toml` declares.
+- The skills and commands `agents/installs.json` lists for this machine.
 - Memory off in every harness.
 
 ## Rules for every run
@@ -60,11 +63,11 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
 6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries. For Codex, distinguish persisted defaults from effective overrides and state how subsequent sessions pick up changes.
 
-   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder, (Python 3.9+, standard library only; it writes nothing). It passes when it prints `rules ok`, a `hook wired` line for every harness found, a `personal ok` or `personal none` line and no `personal FAIL` line, every `codex differs` line is a row codex.md says gets no rule, and declared Codex defaults match without a `config FAIL` line, or a `config n/a` line says Codex isn't installed. Report `config gap` and `config override` lines separately; they limit what the audit proves.
+   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. It passes when it prints `rules ok`, a `hook wired` line for every harness found, a `personal ok` or `personal none` line and no `personal FAIL` line, every `codex differs` line is a row codex.md says gets no rule, and declared Codex defaults match without a `config FAIL` line, or a `config n/a` line says Codex isn't installed. Report `config gap` and `config override` lines separately; they limit what the audit proves.
 
 ## Rule table
 
-`rules.json` holds each global rule once, by meaning, not in any harness's form. Each harness reference turns a row into that harness's entries; the hook and `verify.py` read it through `scripts/setupmachine/rules.py`, which refuses a malformed row. A workstation repo's `agents/permissions.json` holds personal permissions in the same format, which every harness, the hook and `verify.py` take alongside the table's (`references/workstation.md`).
+`rules.json` holds each global rule once, by meaning, not in any harness's form. Each harness reference turns a row into that harness's entries; the hook and `verify.py` read it through `scripts/setupmachine/rules.py`, which refuses a malformed row. A workstation repo's `agents/permissions.json` holds personal permissions in the same format, which every harness, the hook and `verify.py` take beside the table's (`references/workstation.md`).
 
 ### A row
 
@@ -121,7 +124,7 @@ Each harness reference shows its wiring with `<script>` in place of the script's
 
 The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call.
 
-The report folder is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
+`<report-folder>` is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 
 ### What it can't see
 

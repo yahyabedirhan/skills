@@ -56,7 +56,7 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
 
 1. Choose the layer the change belongs to, and check it against the team test.
    - **When the user asks to improve their workflow or environment:** read `AGENTS.md` in `<path-to-workstation-repo>`, and the documents it names for whoever maintains the setup, such as the user's principles. Name each principle the change conflicts with before you make it. A routine change, such as installing a skill, needs only the team test.
-2. Make the change at that layer's source. For any operation on a skill, read `skill-operations.md`.
+2. Make the change at that layer's source, writing every instruction and skill with `/writing-for-agents`. For any operation on a skill, read `skill-operations.md`.
    - **For an installed skill:** that is its source repo, never an installed copy, which the next `npx skills update` overwrites.
    - **For a local skill:** that is the project.
    - **For a personal change** (a personal preference, an environment default or a personal permission): that is `<workstation-repo>`, in its clone at `<path-to-workstation-repo>`. Read `references/workstation.md` for which file each kind goes in.
