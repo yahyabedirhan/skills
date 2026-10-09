@@ -49,8 +49,10 @@ The one definition of each role.
 | `notification-method` | how a notification reaches this person: a command, or the harness's own tool | The harness's notification tool, else a line in the chat. |
 | `skills-repo` | this person's own skills repo, as `<owner>/<repo>` | Ask the user. |
 | `path-to-skills-repo` | where that repo is cloned | Ask the user. |
+| `workstation-repo` | this person's own repo for their personal agent setup, usually private, as `<owner>/<repo>` | Keep personal lines in the shared global instructions file. `/maintain-environment` can start a workstation repo. |
+| `path-to-workstation-repo` | where that repo is cloned | Keep personal lines in the shared global instructions file. |
 
-A value is a tool name or the exact command. A project's `AGENTS.md` may hold its own environment defaults, whose rows override these.
+A value is a tool name or the exact command. This skill fills the Tool column of `workstation-repo` and `path-to-workstation-repo` from the pointer, `~/.config/agents/source.md`, as `references/workstation.md` says. A project's `AGENTS.md` may hold its own environment defaults, whose rows override these.
 
 ## Working agreement
 

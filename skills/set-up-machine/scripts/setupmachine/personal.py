@@ -11,7 +11,8 @@ The repository's `agents/instructions.md` holds an optional `## Working agreemen
 other column is notes) followed by optional `### <Tool> glossary` subsections, and a
 `## Personal workflow` section. The shared global instructions file,
 `~/.config/agents/AGENTS.md`, should carry those Tool values (`none` for a role the repository
-leaves out), and the text of each other part the repository has and none it lacks.
+leaves out), and the text of each other part the repository has and none it lacks. The pointer
+itself fills two roles, `workstation-repo` and `path-to-workstation-repo`, as it names them.
 
 Its `agents/permissions.json` holds personal permissions in the rule table's format, which may
 also take the level `allow`; `permissions` loads them for the hook and the verify script.
@@ -36,6 +37,7 @@ TOOL_GLOSSARIES = "tool glossaries"  # the `### ` subsections under Environment 
 WORKFLOW = "## Personal workflow"
 WORKFLOW_INTRO = ("Rules for how this person works that pass the team test. "
                   "Anything a project or a skill needs goes there instead.")
+POINTER_ROLES = ("workstation-repo", "path-to-workstation-repo")
 REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
@@ -47,6 +49,7 @@ class PersonalError(ValueError):
 class Pointer:
     repository: str  # `<owner>/<repo>`, or "" for none
     clone: Path | None
+    clone_text: str = ""  # the clone path as the pointer writes it, such as `~/code/setup`
 
 
 def check(home: Path) -> list:
@@ -66,6 +69,12 @@ def check(home: Path) -> list:
         return [("FAIL", str(exc))]
 
     fails = []
+    from_pointer = dict(zip(POINTER_ROLES, (pointer.repository, pointer.clone_text)))
+    for role, value in from_pointer.items():
+        if role in tools and tools[role] != value:
+            fails.append(f"`{role}` is `{tools[role]}` in {instructions_path}, but the pointer gives `{value}`: "
+                         "the pointer fills it, so leave it out of the repository")
+    tools = {**tools, **from_pointer}
     shared_tools = _tools(shared)
     if shared_tools is None:
         fails.append(f"{shared_path} has no `{DEFAULTS}` table with Role and Tool columns")
@@ -147,7 +156,7 @@ def read_pointer(home: Path) -> Pointer:
     if not clone.startswith(("~/", "/")):
         raise PersonalError(f"{path}: the clone path `{clone}` doesn't start with `~/` or `/`")
     clone_path = Path(str(home) + clone[1:]) if clone.startswith("~/") else Path(clone)
-    return Pointer(repository, clone_path)
+    return Pointer(repository, clone_path, clone)
 
 
 def _field(text: str, name: str):
