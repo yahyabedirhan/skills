@@ -1,6 +1,6 @@
 ---
 name: maintain-environment
-description: Change what agents run with - a permission rule, a global or project instruction, or a skill (create, install, update, move, fork, publish, remove, audit, with `npx skills`) - and carry the change to every harness, machine and install. Use when the user wants a rule or instruction added or changed, asks where one belongs, wants a skill created or changed, or asks which skills they use or which name a default tool.
+description: Change what agents run with - a permission rule, a global or project instruction, or a skill (create, install, update, move, fork, publish, remove, audit, with `npx skills`) - and carry the change to every harness, machine and install. Use when the user wants a rule or instruction added or changed, asks where one belongs, wants a skill created or changed, asks which skills they use or which name a default tool, or wants a workstation repo for their personal setup.
 ---
 
 # Maintain the environment
@@ -11,6 +11,8 @@ The environment is what agents run with: permissions, global instructions, proje
 
 - `<skills-repo>`: the user's own skills repo on GitHub, as `owner/repo`.
 - `<path-to-skills-repo>`: where that repo is cloned.
+- `<workstation-repo>`: the user's own repo for their personal agent setup, usually private, as `owner/repo`.
+- `<path-to-workstation-repo>`: where that repo is cloned.
 
 ## Environment layers
 
@@ -53,13 +55,13 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
 ## Steps
 
 1. Choose the layer the change belongs to, and check it against the team test.
-   - **When the user asks to improve their workflow or environment:** read the workstation repo's own `AGENTS.md` in its clone, and the documents it names for whoever maintains the setup, such as the user's principles. Name each principle the change conflicts with before you make it. A routine change, such as installing a skill, needs only the team test.
+   - **When the user asks to improve their workflow or environment:** read `AGENTS.md` in `<path-to-workstation-repo>`, and the documents it names for whoever maintains the setup, such as the user's principles. Name each principle the change conflicts with before you make it. A routine change, such as installing a skill, needs only the team test.
 2. Make the change at that layer's source. For any operation on a skill, read `skill-operations.md`.
    - **For an installed skill:** that is its source repo, never an installed copy, which the next `npx skills update` overwrites.
    - **For a local skill:** that is the project.
-   - **For a personal change** (a personal preference, an environment default or a personal permission): that is the workstation repo the pointer `~/.config/agents/source.md` names, in its clone. `/set-up-machine`'s `references/workstation.md` says which file each kind goes in. Leave the shared file's generated parts and the harness settings to `/set-up-machine`, since its next run rewrites them from the repository.
-   - **When the pointer is missing:** set one up through `/set-up-machine` first, then make the change in the repository it names.
-   - **When the pointer records no workstation repo:** write a personal instruction in the shared file itself, which is its source on such a machine. A personal permission has no home there, so offer to set up a workstation repo through `/set-up-machine`.
+   - **For a personal change** (a personal preference, an environment default or a personal permission): that is `<workstation-repo>`, in its clone at `<path-to-workstation-repo>`. Read `references/workstation.md` for which file each kind goes in.
+   - **When the user has no workstation repo:** write a personal instruction in the shared file itself, which is its source on such a machine. A personal permission has no home there, so offer to start a workstation repo, as `references/workstation.md` says.
+   - **When the user has one but this machine has no pointer** (`~/.config/agents/source.md`): run `/set-up-machine` first, which writes it, then make the change in the clone.
 3. When the change touches the global instructions, show the user the whole shared file as it will read after the change, with each changed line marked. Wait for their approval before the change is committed or shipped: global instructions shape every agent, so the user wants to know every line of them.
 4. After any skill change, run the team-test audit: grep the skills for the name of each tool in the user's environment defaults, and for "environment defaults". Skip each tool's own skill, and `/set-up-machine`, `/set-up-project` and this skill, which manage the instruction files. Judge each hit:
    - **When it is a default,** the skill picks the tool itself: make it a parameter, and move the tool's commands into the tool's own skill.
@@ -85,6 +87,7 @@ When the user asks what a skill costs to run, or how to make it cheaper, follow 
 
 - [skill-operations.md](skill-operations.md): the kinds of skill, and creating, installing, updating, moving, removing, forking, upgrading a fork, shipping, auditing and publishing them.
 - [efficiency-analysis.md](efficiency-analysis.md): measuring what one run of a skill costs, and making the next run cheaper.
+- [references/workstation.md](references/workstation.md): what the user's workstation repo is for, its starting layout, starting one, and which file each personal change goes in.
 
 ## Scripts
 
