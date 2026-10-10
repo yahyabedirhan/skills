@@ -15,9 +15,16 @@ Continue another session's work as a **silent reader**: read its transcript, the
 ## 1. Find the session
 
 - **When the user gives a session id:** use it.
-- **When the user gives a place,** such as "top pane" or "left tab": resolve it from this session's own place with `<session-host>`'s read-only commands, then read the session id of the agent there. In `herdr`, resolve this pane with `herdr pane current --current`, find the target with `herdr pane neighbor --pane <id> --direction <left|right|up|down>`, `herdr pane list` or `herdr tab list`, and read its `agent_session` from `herdr pane get <pane_id>`.
+- **When the user gives a place,** such as "top pane" or "left tab": start from this session's own place, find the target with the session host's read-only commands, and read the session id of the agent there.
   - **When the place is a scope,** such as "another workspace": list the agent sessions in it, leave out this session and the shell panes, and pick by title, working directory and status. Ask the user only when more than one still fits.
   - **When the host reports no session id:** take the newest transcript of that pane's harness whose working directory matches the pane's.
+
+The read-only commands per session host:
+
+- **`herdr`:**
+  1. Find this pane: `herdr pane current --current`.
+  2. Find the target pane: `herdr pane neighbor --pane <this pane> --direction <up|down|left|right>` for a neighbour, or `herdr pane list` and `herdr tab list` for one farther away.
+  3. Read the target's session id: the `agent_session` field of `herdr pane get <target pane>`.
 
 ## 2. Read the transcript
 
