@@ -8,7 +8,7 @@ should have it:
     {"name": "exa", "kind": "bundle", "source": "exa@claude-plugins-official",
      "harnesses": ["claude-code", "cursor"]}
     {"name": "docs", "kind": "mcp", "server": {"url": "https://..."}, "harnesses": ["cursor"]}
-    {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@0.38.0", "harnesses": ["pi"]}
+    {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@latest", "harnesses": ["pi"]}
 
 What each harness can take (references/workstation.md, and each harness reference's Plugins section):
 
@@ -22,7 +22,8 @@ What each harness can take (references/workstation.md, and each harness referenc
   Code's `<plugin>@<marketplace>` can't reach Pi.
 - Codex and opencode: a gap for now.
 
-`check` only reads files; the agent installs and writes, as SKILL.md says.
+`check` only reads persisted setup; the agent checks latest upstream versions, installs and writes,
+as SKILL.md says. A matching declaration does not establish the installed code's freshness.
 """
 from __future__ import annotations
 
@@ -72,6 +73,7 @@ def check(home: Path, pi_dir: Path | None = None) -> list:
     claude = _claude_plugins(home)
     pi = _Pi(pi_dir or home / ".pi/agent")
     lines = []
+    policy_gaps = []
     for entry in entries:
         name, kind = entry["name"], entry["kind"]
         tag = f"{name} ({kind})"
@@ -87,6 +89,10 @@ def check(home: Path, pi_dir: Path | None = None) -> list:
                 lines.append(_cursor(home, tag, entry, claude))
             elif harness == "pi":
                 lines.append(pi.check(tag, entry))
+                if pi.folder.is_dir() and kind == "bundle" and pi_fixed_source(entry["source"]):
+                    policy_gaps.append(("gap", f"Pi: {tag} {entry['source']} violates the latest-source policy; "
+                                         "fixed versions, ranges, non-latest channels and explicit Git refs "
+                                         "do not guarantee latest stable or the default branch; declaration is kept"))
             else:
                 lines.append(("gap", f"{label}: {tag} is listed, but set-up-machine can't deliver plugins to "
                                      f"{label} yet"))
@@ -100,7 +106,7 @@ def check(home: Path, pi_dir: Path | None = None) -> list:
             if pi_identity(source) not in listed:
                 lines.append(("extra", f"Pi: {source} is an extension in {pi.settings_path} but not in the "
                                        "plugins list"))
-    return lines
+    return lines + policy_gaps
 
 
 def load(path: Path) -> list:
@@ -196,6 +202,15 @@ def pi_identity(source: str):
     return f"git:{git[0]}/{git[1]}" if git else None
 
 
+def pi_fixed_source(source: str) -> bool:
+    """Whether a compatible Pi source constrains the latest-source installation policy."""
+    if source.startswith("npm:"):
+        match = NPM_SPEC.match(source[4:].strip())
+        return bool(match and match.group(2) not in (None, "latest"))
+    git = _git_source(source)
+    return bool(git and git[2])
+
+
 def _git_source(source: str):
     """(host, repository path, ref or None) of a Pi git source, or None for another form."""
     if source.startswith("git:"):
@@ -257,18 +272,19 @@ class _Pi:
             if stale:
                 return ("FAIL", f"Pi: {tag} {source} is an extension in {self.settings_path}, but its checkout at "
                                 f"{stale[0]} isn't at {stale[1]}; run `pi update {source}`")
-            return ("ok", f"Pi: {tag} {source} is an extension in {self.settings_path}")
+            return ("ok", f"Pi: {tag} {source} is an extension in {self.settings_path}; "
+                          "declaration matches, installed code and latest release are unverified")
         other = [p for p in self.extensions if pi_identity(p) == pi_identity(source)]
         if other:
             return ("FAIL", f"Pi: {tag} {self.settings_path} has {other[0]} instead of {source}")
         return ("FAIL", f"Pi: {tag} {source} isn't an extension in {self.settings_path}")
 
     def _stale_checkout(self, source: str):
-        """(checkout, ref) when Pi's checkout of a pinned git extension is at another commit; else None.
+        """Check legacy fixed-ref declaration consistency only, not upstream freshness.
 
-        At startup Pi installs only a missing git extension and leaves an existing checkout where it is,
-        so a changed ref needs `pi update <source>`, which fetches the ref and resets to FETCH_HEAD. An npm
-        extension needs no check: Pi reinstalls one whose version doesn't match at startup."""
+        Return (checkout, ref) when the local checkout differs from the declared Git ref.
+        Local refs and FETCH_HEAD cannot prove latest default-branch code. npm declarations
+        receive no installed-code check here."""
         git = _git_source(source)
         if not git or not git[2]:
             return None
@@ -328,7 +344,7 @@ def _claude_code(home: Path, tag: str, entry: dict, claude: dict):
         return ("FAIL", f"Claude Code: {tag} {source} isn't installed")
     if not claude[source]:
         return ("FAIL", f"Claude Code: {tag} {source} isn't enabled in ~/.claude/settings.json")
-    return ("ok", f"Claude Code: {tag} {source} is installed and enabled")
+    return ("ok", f"Claude Code: {tag} {source} is installed and enabled; declaration matches, readiness only; latest release is unverified")
 
 
 def _cursor(home: Path, tag: str, entry: dict, claude: dict):
@@ -342,7 +358,7 @@ def _cursor(home: Path, tag: str, entry: dict, claude: dict):
                             "imports bundles only from Claude Code")
         names = [cursor_server_name(source, s) for s in _bundle_servers(home, source)]
         how = f"as {', '.join(names)}" if names else "(skills only; no MCP server)"
-        return ("ok", f"Cursor: {tag} is imported from Claude Code {how}")
+        return ("ok", f"Cursor: {tag} is imported from Claude Code {how}; declaration matches, readiness only; latest release is unverified")
     path = folder / "mcp.json"
     try:
         servers = json.loads(path.read_text()).get("mcpServers", {}) if path.is_file() else {}

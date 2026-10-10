@@ -2,6 +2,28 @@
 
 The decisions behind the `set-up-machine` skill. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why. The spec is "Spec: every harness and project is set up and audited from the skills" (#49).
 
+## 2026-10-10: install latest, reproduce the setup process
+
+Reproducibility preserves selected tools, configuration, guardrails, and installation steps.
+It does not freeze machine software at recorded versions.
+Use the latest stable release for released tools.
+Use the latest default branch for repository-distributed code.
+
+Apply this policy to every selected harness, skill, plugin, package, and command-line tool.
+Keep installed versions and source commits as audit history.
+Keep historical citations, test fixtures, and application dependency lockfiles as evidence.
+
+A matching declaration proves configuration, not current installed code.
+The read-only verifier reports that distinction without downloading or modifying software.
+The agent checks upstream freshness separately during inspection.
+Report unavailable metadata as a gap, not as proof of latest.
+
+Preserve local modifications, installation channels, authentication, and unrelated settings during updates.
+Check compatibility and guardrails against the new installed version.
+Report failed checks instead of making an old version the desired state.
+
+This supersedes recommendations to prefer fixed Pi package versions or tags for machine setup.
+
 ## 2026-10-01: retain the occupied caller at settlement
 
 - **The session-host fallback keeps the caller and its occupied worktree open.** Remove the example that hands the user an own-worktree release command: it contradicts the settlement decisions in [Workflow: Make Herdr and Treehouse settlement reliable without closing topology](https://github.com/yahyabedirhan/skills/issues/123). This changes the source role guidance only; machine reconciliation remains a post-merge follow-up.

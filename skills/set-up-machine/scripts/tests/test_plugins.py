@@ -72,6 +72,9 @@ class PluginsTest(PluginsHome):
         self.assertEqual(len(lines), 2, lines)
         self.assertRegex(lines[0], r"^ok Claude Code: exa \(bundle\) exa@claude-plugins-official is installed and enabled")
         self.assertRegex(lines[1], r"^ok Cursor: exa \(bundle\) is imported from Claude Code as plugin-exa-exa")
+        for line in lines:
+            self.assertIn("declaration matches, readiness only", line)
+            self.assertIn("latest release is unverified", line)
 
     def test_a_missing_or_disabled_bundle_fails_in_both(self):
         self.installs(EXA)
@@ -137,6 +140,14 @@ class PluginsTest(PluginsHome):
         self.write(".config/agents/source.md", "# Workstation repo\n\n- Repository: none\n")
         self.assertEqual(self.lines(), [])
 
+    def test_verify_separates_persisted_checks_from_latest_versions(self):
+        self.installs(EXA)
+        self.claude_has("exa@claude-plugins-official")
+        out = io.StringIO()
+        verify.main(["--home", str(self.home), "--rules", str(TABLE), "--no-codex"], out)
+        self.assertRegex(out.getvalue(), r"freshness +gap +Latest harness, skill, plugin and tool versions")
+        self.assertIn("not remote releases", out.getvalue())
+
     def test_verify_prints_plugin_lines(self):
         self.installs(EXA)
         self.claude_has("exa@claude-plugins-official")
@@ -189,9 +200,33 @@ class PiPluginsTest(PluginsHome):
         self.installs(WEB, TOOLS)
         self.pi_has("npm:pi-web-access@0.38.0", {"source": "git:github.com/owner-a/pi-tools@v1", "skills": []})
         lines = self.lines()
-        self.assertEqual(len(lines), 2, lines)
+        self.assertEqual(len(lines), 4, lines)
         self.assertRegex(lines[0], r"^ok Pi: web \(bundle\) npm:pi-web-access@0\.38\.0 is an extension in .*\.pi/agent/settings\.json")
         self.assertRegex(lines[1], r"^ok Pi: tools \(bundle\) git:github\.com/owner-a/pi-tools@v1 is an extension in ")
+
+    def test_fixed_sources_remain_valid_but_report_policy_gaps(self):
+        for source in ("npm:pi-web-access@0.38.0", "npm:pi-web-access@^1.0",
+                       "npm:@scope-a/pi-tools@beta", "git:github.com/owner-a/pi-tools@main",
+                       "https://github.com/owner-a/pi-tools@v1"):
+            with self.subTest(source=source):
+                self.installs({**WEB, "source": source})
+                self.pi_has(source)
+                lines = self.lines()
+                self.assertTrue(lines[0].startswith("ok "), lines)
+                self.assertIn("violates the latest-source policy", lines[1])
+                self.assertIn("declaration is kept", lines[1])
+                self.assertEqual(json.loads((self.home / ".pi/agent/settings.json").read_text())["packages"], [source])
+
+    def test_moving_sources_do_not_claim_installed_code_is_latest(self):
+        for source in ("npm:pi-web-access@latest", "npm:@scope-a/pi-tools",
+                       "git:github.com/owner-a/pi-tools"):
+            self.installs({**WEB, "source": source})
+            self.pi_has(source)
+            line = self.lines()[0]
+            self.assertEqual(len(self.lines()), 1)
+            self.assertTrue(line.startswith("ok "), line)
+            self.assertIn("declaration matches", line)
+            self.assertIn("installed code and latest release are unverified", line)
 
     def test_a_missing_extension_or_another_version_fails(self):
         self.installs(WEB, TOOLS)
@@ -210,7 +245,7 @@ class PiPluginsTest(PluginsHome):
         lines = self.lines()
         self.assertIn("extra Pi: npm:@scope-a/pi-todo@2.0.0 is an extension in "
                       f"{self.home / '.pi/agent/settings.json'} but not in the plugins list", lines)
-        self.assertEqual(len(lines), 2, lines)
+        self.assertEqual(len(lines), 3, lines)
 
     def test_pi_not_set_up_is_not_applicable(self):
         import shutil
@@ -301,7 +336,8 @@ class PiPluginsTest(PluginsHome):
         out = io.StringIO()
         verify.main(["--home", str(self.home), "--rules", str(TABLE), "--no-codex", "--pi-agent-dir", str(folder)], out)
         got = [l for l in out.getvalue().splitlines() if l.startswith("plugin ")]
-        self.assertEqual(len(got), 1, got)
+        self.assertEqual(len(got), 2, got)
+        self.assertRegex(got[1], r"^plugin +gap +Pi: .*violates the latest-source policy")
         self.assertRegex(got[0], r"^plugin +ok +Pi: web \(bundle\) .*elsewhere/pi/settings\.json")
 
 
