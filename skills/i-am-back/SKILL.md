@@ -6,11 +6,13 @@ disable-model-invocation: true
 
 # I am back
 
-I'm back. Use `/show-me` to show me where the work stands since I went AFK:
+I'm back. Use `/show-me` to show me where the work stands since I went AFK, in this list:
 
-- What you did.
-- What is done.
-- What we discussed but isn't done yet, including what is still in progress.
-- The decisions you made on your own, each with its reason.
-- The decisions I need to make, each with your recommendation.
-- The next steps.
+```markdown
+## What is done
+## What is not done yet
+## Decisions agents made
+## Things you should know
+## Decisions waiting for you
+## Next steps
+```

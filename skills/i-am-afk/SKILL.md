@@ -12,4 +12,13 @@ Agents, I'm AFK for a while. I can't answer your questions or make decisions unt
 - When a choice is costly to undo, prepare it as one plan for my return: the decisions, the trade-offs and your pick. Then continue with the work it doesn't block.
 - When a step only I can do comes up, such as a login, a password or my approval, set it aside and keep moving on the rest.
 
-When nothing is left that you can do alone, end with one list: the plans for the decisions I need to make, and the steps only I can do, each with why and what it unlocks. Add anything else I need to know, such as a surprise that changed the plan.
+When nothing is left that you can do alone, end with this list:
+
+```markdown
+## What is done
+## What is not done yet
+## Decisions agents made
+## Things you should know
+## Decisions waiting for you
+## Next steps
+```
