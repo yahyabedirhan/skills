@@ -69,6 +69,26 @@ The values this skill writes into the shared file, and the person's notes on the
 - **Personal workflow:** concise rules for how this person works, each `<rule>` under a `### <topic>` heading, where `<topic>` names a group of rules. Everything under the heading, up to the next `## ` heading, is copied as it is into the shared file's Personal workflow section, including its `###` topic headings. Notes on when and how to use a tool the person added count as workflow lines.
 - Any other text in the file is notes, and stays in the repository. Check every copied line against the team test in `global-instructions.md`.
 
+### `agents/harnesses/<harness>.md`
+
+Instructions for one harness only, for what differs between harnesses: a sandbox, a missing ask list, a tool only one harness has. `<harness>` is the harness's reference name: `claude-code`, `codex`, `cursor` or `opencode`. Each file is optional.
+
+```markdown
+# <Harness> instructions
+
+<notes>
+
+## Instructions
+
+- <instruction>
+```
+
+- **Copying:** everything under `## Instructions`, up to the next `## ` heading, is copied as it is into the harness's own instructions file. Other text is notes and stays in the repository. A file with no `## Instructions` section, or an empty one, is a `FAIL`.
+- **Where it goes:** only Cursor has a file today, `~/.cursor/rules/harness-instructions.mdc` (cursor.md, *Global instructions*). Claude Code, Codex and opencode read the shared file through a link, so they have no place for it yet: a source for one of them is a `gap` line.
+- Never put a rule every harness needs here; it belongs in `agents/instructions.md`. Check every line against the team test in `global-instructions.md`.
+
+`verify.py` prints a `harness` line per file: `ok` when the generated file matches its source, `FAIL` when it is missing or differs, or when a generated file outlived its source, `n/a` when the harness isn't set up, and `gap` for a harness with no place yet, or a file of the same name the skill didn't write.
+
 ### `agents/permissions.json`
 
 The person's own permission rows, such as allowing a tool they added, or refusing a command only they want refused. It has the rule table's format, `{"version": 1, "rules": [<row>, …]}`, and each row the fields and `match` kinds of a rule-table row (SKILL.md, *Rule table*), with one more level:
