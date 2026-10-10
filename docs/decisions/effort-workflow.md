@@ -2,6 +2,12 @@
 
 The decisions behind the effort skills (`init-effort`, `orchestrating`, `orchestrate-effort`, `orchestrate-with-handoff`, `handover`, `handover-to-herdr`, `settle-effort`, `settle-session`, and the `implement`, `handoff`, `to-spec` and `to-tickets` forks they rely on). This file is for maintaining those skills and is never installed. Read it before changing any of them, and add an entry for each new decision: the date, what was decided, and why. When a decision is reversed, keep the old entry and add a new one that says so.
 
+## 2026-10-10: retarget stacked pull requests before deleting their base
+
+- **Settlement retargets stacked pull requests before it deletes a remote branch.** A stacked pull request has another pull request's branch as its base. `/settle-session` lists the open pull requests whose base is the freed branch. It retargets each one to the default branch, then deletes the remote branch. When a retarget fails, it keeps the remote branch and names it in the report.
+- **`/settle-effort` merges a stacked pull request after its base pull request.** It retargets the stacked pull request to the default branch before the base branch is deleted.
+- **The reason is a real failure.** Pull request A merged, and its head branch was deleted. Pull request B was stacked on A. The deletion closed B automatically. B could not be reopened against the default branch. The same commits had to go into a new pull request.
+
 ## 2026-10-01: reliable settlement without closing topology
 
 The specification is [Workflow: Make Herdr and Treehouse settlement reliable without closing topology](https://github.com/yahyabedirhan/skills/issues/123).
