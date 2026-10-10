@@ -33,7 +33,7 @@ Find the transcript on disk, where the session's harness stores it:
 - **Claude Code:** `~/.claude/projects/<project>/<session-id>.jsonl`, where `<project>` is the working directory with `/` and `.` turned into `-`.
 - **Codex:** under `~/.codex/sessions/`.
 
-Search the transcript rather than reading it whole: read the user's requests, the last assistant messages, the latest tool results and any open decision. Then check the working directory's branch, uncommitted changes and pull requests.
+Start with the last couple of messages, since they usually say where the session left off. Then search the rest rather than reading it whole: the user's requests, the latest tool results and any open decision. Then check the working directory's branch, uncommitted changes and pull requests.
 
 Read on until you can state the goal, what is done, what was in progress when it stopped, and the next step.
 
