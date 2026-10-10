@@ -4,11 +4,14 @@ Facts for [Research: other hosted cloud coding agents - Codex, Cursor, Copilot a
 
 Researched 2026-09-29. A follow-up on the same day used primary sources to settle the open questions of the first pass (see the [Exploration log](#exploration-log)). Every source below was read on that date. Nothing was signed up for, paid for, installed or run in any provider's cloud.
 
+**Update 10 Oct.** Cursor cloud agents ran that day. Section 2, the Cursor row of the comparison, and the open questions record what those runs showed. The other providers stay as researched in September.
+
 Evidence tags:
 
 - **[doc]** the provider's official documentation, linked in each section's source list.
 - **[src]** the provider's official public source, read through the GitHub API.
 - **[blog]** the provider's official blog or changelog.
+- **[probe]** a check on 2026-10-10. The branch results are [PR #193](https://github.com/yahyabedirhan/skills/pull/193) and [PR #194](https://github.com/yahyabedirhan/skills/pull/194). The VM numbers come from a probe that was cancelled early.
 - **Unverified** marks a claim that no primary source settles. [Open questions](#open-questions) lists each one again, with why it stays open and the check that would settle it.
 
 Two names changed recently, and the docs use the new ones:
@@ -28,7 +31,7 @@ Codex calls its tasks **cloud chats** [doc codex cloud].
 |---|---|---|---|---|---|---|---|
 | **Claude Code** | see [claude-code.md](claude-code.md) | see there | see there | see there | see there | see there | see there |
 | **Codex cloud** (§1) | OpenAI container, `universal` image (Ubuntu 24.04), 12 h cache. Size and time limit not published | Not documented for the cloud. The open-source CLI loads `$HOME/.agents/skills`. Whether cloud chats run that loader is unverified | Yes, `AGENTS.md` | Yes: PR from the web (branch name not documented). Pushes to a PR's branch when mentioned there | Yes: `codex cloud exec --env <id> [--branch b] "…"` | Watch yes (`codex cloud list --json`, `status`, `diff`, `apply`). Answer no: only the web or a `@codex` PR comment | ChatGPT Plus, $20/month |
-| **Cursor Cloud Agents** (§2) | Cursor-managed Ubuntu VM with desktop ("limited memory and CPU", no numbers), or the user's own machine as a worker. No published run cap. Long-running agents run for hours or days | Yes, `~/.cursor/skills` only, via "Sync Skills for Cloud Agents". Account User Rules apply too | Yes, `AGENTS.md`, `.cursor/rules`, repo `.cursor/hooks.json` | Yes: own `cursor/…` branch or the given branch, `autoCreatePR` | Yes: REST API (`POST /v1/agents`). The CLI's `&` hand-off is interactive only | Yes: REST API follow-up runs and an SSE stream | Pro, $20/month, plus model API prices for cloud runs |
+| **Cursor Cloud Agents** (§2) | Probed 2026-10-10: 4 vCPU, 15 GiB RAM, x86_64, Linux kernel 6.12, user `ubuntu`, outbound HTTP 200. Docs: Ubuntu VM with a desktop, or the user's own machine. Disk, run-time cap and browser screenshots unverified | Docs: `~/.cursor/skills` via "Sync Skills for Cloud Agents", and account User Rules. Which skills, User Rules and secrets loaded on 2026-10-10: unverified | Yes, `AGENTS.md`, `.cursor/rules`, repo `.cursor/hooks.json` | Yes. No ref: starts on `main`, branch `cursor/<slug>-<id>` ([#193](https://github.com/yahyabedirhan/skills/pull/193)). Existing branch: pushes directly there ([#194](https://github.com/yahyabedirhan/skills/pull/194)). Draft PR. Stayed a draft when told not to merge | Yes. Grok Bot through the signed-in Cursor account, no user API key (2026-10-10). REST `POST /v1/agents` with a user API key. The CLI's `&` hand-off is interactive only | Yes. Follow-ups can queue, steer or interrupt. Steer kept in-flight work (2026-10-10). REST API and an SSE stream | Pro, $20/month, plus model API prices. Which billing pool paid on 2026-10-10: unverified |
 | **Copilot cloud agent** (§3) | GitHub Actions runner (Ubuntu x64 or Windows), 59 min cap | No: personal skills live in the local home. Unverified whether setup steps can place them | Yes: `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md` | Yes, one `copilot/…` branch and one draft PR per task | Yes: `gh agent-task create "…" [--base b] [--follow]`, REST API, GitHub MCP `assign_copilot_to_issue` | Watch yes (`gh agent-task view --log --follow`, REST `GET …/tasks/{id}`). Steering is only on the web, so answer from a shell with a `@copilot` PR comment | Copilot Pro, $10/month plus AI credits. Actions minutes are free on public repos under the general Actions rule |
 | **opencode** (§4) | No hosted agent. Its GitHub integration runs in the repo's own Actions runner | n/a | n/a | via the Actions integration | only by commenting `/opencode` | only through the PR | — |
 | **Grok** (§5) | Grok Build: local only. Grok Bot: a general-purpose agent on a cloud computer, not a repo coding agent | n/a | n/a | not documented | not documented | not documented | Grok Bot comes with Cursor paid plans or SuperGrok |
@@ -55,6 +58,8 @@ Findings that matter most for this effort:
   - Copilot on self-hosted Actions runners [doc copilot environment].
 
   Factory's BYOM and Devin Outposts are the same idea (§6).
+
+**Update 10 Oct [probe].** Grok Bot launched Cursor cloud agents through the signed-in account, with no user API key. A follow-up can queue, steer or interrupt. Steer added new scope and kept the work already in flight. Files attached to a launch landed in `uploads/`. Section 2 has the rest, and the list of what is still unverified.
 
 ---
 
@@ -116,19 +121,31 @@ Sources [doc]: [Codex cloud](https://learn.chatgpt.com/docs/cloud) ("codex cloud
 
 Sources [doc], each read as Markdown at `<url>.md`: [Cloud Agents](https://cursor.com/docs/cloud-agent) ("cursor cloud-agent"), [Setup](https://cursor.com/docs/cloud-agent/setup) ("cursor setup"), [Capabilities](https://cursor.com/docs/cloud-agent/capabilities) ("cursor capabilities"), [Security and network](https://cursor.com/docs/cloud-agent/security-network) ("cursor network"), [Cloud Agents API](https://cursor.com/docs/cloud-agent/api/endpoints) ("cursor api"), [My Machines](https://cursor.com/docs/cloud-agent/self-hosted/my-machines) ("cursor my-machines"), [Skills](https://cursor.com/docs/skills) ("cursor skills"), [Subagents](https://cursor.com/docs/subagents), [CLI usage](https://cursor.com/docs/cli/using), [CLI parameters](https://cursor.com/docs/cli/reference/parameters), [GitHub](https://cursor.com/docs/integrations/github), [Slack](https://cursor.com/docs/integrations/slack), [iOS](https://cursor.com/docs/cloud-agent/mobile), [Models and pricing](https://cursor.com/docs/models-and-pricing). Follow-up: [Best practices](https://cursor.com/docs/cloud-agent/best-practices) ("cursor best-practices"), [Settings](https://cursor.com/docs/cloud-agent/settings) ("cursor settings"), [Rules](https://cursor.com/docs/rules), [Rules help](https://cursor.com/help/customization/rules) ("cursor rules help"), [Webhooks](https://cursor.com/docs/cloud-agent/api/webhooks). [blog] [Expanding our long-running agents research preview](https://cursor.com/blog/long-running-agents) (2026-02-12, "cursor long-running").
 
+**Checked on 2026-10-10 [probe].** Grok Bot launched cloud agents through the signed-in Cursor account. No user API key. Two runs finished. A VM probe was cancelled early. The public record of the two runs is [PR #193](https://github.com/yahyabedirhan/skills/pull/193) and [PR #194](https://github.com/yahyabedirhan/skills/pull/194).
+
+Verified that day:
+
+- **Launch.** Grok Bot started the agents. The launch used the signed-in Cursor account. It did not send a user API key.
+- **Follow-ups.** A follow-up can queue, steer or interrupt. Steer added new scope to a running agent and kept the work already in flight.
+- **Files.** Files attached to a launch landed in `uploads/`.
+- **No ref.** The agent started on `main` and named its own branch `cursor/<slug>-<id>`. PR #193 is on `cursor/probe-c1-default-branch-8284`.
+- **Existing branch.** Started from `probe/existing`, the agent pushed directly to that branch. PR #194.
+- **Pull request.** Each run opened a draft pull request. Asked not to merge, it left both open.
+- **VM.** The cancelled probe saw the default VM: 4 vCPU, 15 GiB RAM, x86_64, Linux kernel 6.12, user `ubuntu`. A request to example.com returned HTTP 200.
+
+Still unverified after that probe: the run-time cap, which skills, User Rules and secrets load, notifications, the billing pool, and browser screenshots.
+
 - **Environment.** "Cloud agents run on isolated Ubuntu machines", each an isolated VM "with a full desktop environment" [doc cursor setup; doc cursor capabilities]. Configure it in one of three ways [doc cursor setup]:
   - agent-led setup;
   - a saved snapshot;
   - a Dockerfile named in `.cursor/environment.json`. Cursor looks for it first in the repo file, then in a personal environment, then in a team environment.
 
-  Builds run the `install` script ahead of time and capture the disk state. Then `start` and `terminals` run at boot. The terminals run in a `tmux` session that you and the agent share [doc cursor setup]. "Each cloud agent runs on a default VM profile with limited memory and CPU". Enterprise can ask for more [doc cursor setup, "Resource limits"]. Cursor keeps snapshots up to 90 days after last use, and conversations indefinitely [doc cursor network, "Data retention"]. Cursor supports environments with more than one repo [doc cursor setup]. **Run time:** no cap is published. Team admins have a **Long running agents** toggle that "controls whether team members can run agents for extended durations". It doesn't yet work for multi-repo environments [doc cursor settings]. The research preview opened long-running agents to "all Ultra, Teams, and Enterprise users". It cites runs of 25, 30 and 36 hours [blog cursor long-running]. **Unverified:**
-  - exact CPU, memory and disk (only "limited memory and CPU", and "Self-serve custom resource configuration is coming soon" [doc cursor setup]);
-  - whether ordinary cloud agents on Pro stop after some time.
+  Builds run the `install` script ahead of time and capture the disk state. Then `start` and `terminals` run at boot. The terminals run in a `tmux` session that you and the agent share [doc cursor setup]. "Each cloud agent runs on a default VM profile with limited memory and CPU". Enterprise can ask for more [doc cursor setup, "Resource limits"]. Cursor keeps snapshots up to 90 days after last use, and conversations indefinitely [doc cursor network, "Data retention"]. Cursor supports environments with more than one repo [doc cursor setup]. **Run time:** no cap is published. Team admins have a **Long running agents** toggle that "controls whether team members can run agents for extended durations". It doesn't yet work for multi-repo environments [doc cursor settings]. The research preview opened long-running agents to "all Ultra, Teams, and Enterprise users". It cites runs of 25, 30 and 36 hours [blog cursor long-running]. **Update 10 Oct [probe].** A probe cancelled early saw the default VM: 4 vCPU, 15 GiB RAM, x86_64, Linux kernel 6.12, user `ubuntu`. Outbound HTTP to example.com returned 200. **Unverified:** disk size, and whether ordinary cloud agents on Pro stop after some time. Docs still say only "limited memory and CPU", and "Self-serve custom resource configuration is coming soon" [doc cursor setup]. No cap is published.
 - **Tools.** Whatever the Dockerfile or install script adds. The docs cover Docker, Tailscale and Cloudflare Tunnel. Secrets from the dashboard arrive as environment variables when the agent starts [doc cursor setup; doc cursor cloud-agent]. MCP servers [doc cursor capabilities]:
   - over HTTP (proxied, credentials never on the VM);
   - over stdio (run on the VM);
   - a built-in Cursor Cloud MCP for run diagnostics.
-- **Web and browser.** "The agent has internet access by default". Users, teams and environments can restrict it to "Default + allowlist" or "Allowlist only" [doc cursor network]. **It can drive a browser and desktop** ("computer use") and record screenshots and videos as artifacts. The user can take over its remote desktop [doc cursor capabilities]. The agent "auto-runs all terminal commands" [doc cursor network].
+- **Web and browser.** "The agent has internet access by default". Users, teams and environments can restrict it to "Default + allowlist" or "Allowlist only" [doc cursor network]. **It can drive a browser and desktop** ("computer use") and record screenshots and videos as artifacts. The user can take over its remote desktop [doc cursor capabilities]. The agent "auto-runs all terminal commands" [doc cursor network]. **Unverified [probe]:** browser screenshots. The 2026-10-10 probe did not take one. Outbound HTTP did work: example.com returned 200.
 - **What loads.** "Cloud agents read `AGENTS.md` files" [doc cursor setup]. Repo `.cursor/hooks.json` hooks run (team and enterprise hooks on Enterprise). **User hooks in `~/.cursor/hooks.json` don't**, "since cloud VMs don't have access to your local home directory" [doc cursor cloud-agent, "Hooks support"].
 
   **User skills:** "Only `~/.cursor/skills/` syncs" to Cloud Agents, after you turn on **Sync Skills for Cloud Agents**. `~/.agents/skills/` and project skills "stay local" in that sync. Project skills come with the clone [doc cursor skills, "Use personal skills with Cloud Agents"]. Locally, Cursor also loads `.claude/skills/`, `.codex/skills/` and their home equivalents [doc cursor skills]. MCP servers come from the team's configuration at `cursor.com/agents`, not from the local session [doc subagents].
@@ -138,14 +155,14 @@ Sources [doc], each read as Markdown at `<url>.md`: [Cloud Agents](https://curso
   - team rules;
   - repo rules.
 
-  Account user rules "are stored on your Cursor account" and sync. User rule *files* in `~/.cursor/rules` "stay on the machine and do not sync" [doc cursor rules help]. So only the account rules reach the cloud. (Whether the `agent` CLI applies account User Rules locally is a separate question. It is still open in [harness-capabilities.md](../harness-capabilities.md) §4.1.)
+  Account user rules "are stored on your Cursor account" and sync. User rule *files* in `~/.cursor/rules` "stay on the machine and do not sync" [doc cursor rules help]. So only the account rules reach the cloud. (Whether the `agent` CLI applies account User Rules locally is a separate question. It is still open in [harness-capabilities.md](../harness-capabilities.md) §4.1.) **Unverified [probe]:** which skills, User Rules and secrets the 2026-10-10 VM loaded. Those runs did not check.
 - **GitHub.** A Cursor admin connects the Cursor GitHub app (also GitLab, Bitbucket, Azure DevOps). You need read-write access to the repo [doc cursor cloud-agent; doc cursor github]. The agent works "on a separate branch, then push[es] changes to your repo" [doc cursor cloud-agent]. Through the API [doc cursor api, "Create An Agent"]:
   - `workOnCurrentBranch: false` (default) pushes to a new `cursor/...` branch.
   - `true` pushes straight to `startingRef` or the PR's head branch.
   - `autoCreatePR` opens a pull request.
   - `prUrl` works on an existing PR.
 
-  It automatically fixes failed GitHub Actions checks on PRs it opened (Teams only for now) [doc cursor capabilities].
+  It automatically fixes failed GitHub Actions checks on PRs it opened (Teams only for now) [doc cursor capabilities]. **Update 10 Oct [probe].** With no ref, the agent started on `main` and named `cursor/probe-c1-default-branch-8284` ([PR #193](https://github.com/yahyabedirhan/skills/pull/193), draft). Started on `probe/existing`, it pushed directly to that branch ([PR #194](https://github.com/yahyabedirhan/skills/pull/194), draft). Each run opened a draft pull request. Asked not to merge, it left the pull request open.
 - **Starting it.** Cloud agents start from these places [doc cursor cloud-agent]:
   - the iOS app and the web (`cursor.com/agents`);
   - the Cloud option of the desktop app;
@@ -153,17 +170,19 @@ Sources [doc], each read as Markdown at `<url>.md`: [Cloud Agents](https://curso
   - Linear;
   - the API.
 
-  In the `agent` CLI, a message that starts with `&` pushes the conversation to a Cloud Agent [doc cli using, "Cloud Agent handoff"]. In the desktop app, `/in-cloud` starts a cloud subagent [doc subagents]. **For a local agent, the API is the non-interactive path:** `POST https://api.cursor.com/v1/agents` with a user API key, `prompt.text`, `repos[].url`, `startingRef` and `autoCreatePR`. Optional fields are `envVars`, `mcpServers` and `model` [doc cursor api]. The API is a public beta [doc cursor api].
+  In the `agent` CLI, a message that starts with `&` pushes the conversation to a Cloud Agent [doc cli using, "Cloud Agent handoff"]. In the desktop app, `/in-cloud` starts a cloud subagent [doc subagents]. **For a local agent, the API is the non-interactive path:** `POST https://api.cursor.com/v1/agents` with a user API key, `prompt.text`, `repos[].url`, `startingRef` and `autoCreatePR`. Optional fields are `envVars`, `mcpServers` and `model` [doc cursor api]. The API is a public beta [doc cursor api]. **Update 10 Oct [probe].** Grok Bot launched agents through the signed-in Cursor account, with no user API key. Files attached to a launch landed in `uploads/`.
 - **Long work.** Subagents work in Cloud Agents. Each has its own branch and possibly its own VM [doc subagents]. **Subscriptions** let an agent end its turn and wake later, for up to 180 days. It can wake on GitHub PR activity or CI results, Slack replies, Linear changes, or a timer [doc cursor capabilities, "Subscriptions"]. Automations run cloud agents "on a schedule or in response to events from GitHub, GitLab, Slack, webhooks, Linear, and more" [doc [Automations](https://cursor.com/docs/cloud-agent/automations)].
 - **Watching and answering.** Web, desktop and iOS (push notification when a turn ends), and Slack completion messages with the PR link [doc cursor ios; doc cursor slack]. From a shell, the API gives [doc cursor api]:
   - `GET /v1/agents/{id}` and `GET …/runs/{runId}`;
   - an SSE stream `GET …/runs/{runId}/stream`, with events `status`, `assistant`, `tool_call`, `result` (with the pushed branches) and `done`;
   - **follow-ups** with `POST /v1/agents/{id}/runs`. Only one run can be active at a time, otherwise the API returns `409 agent_busy`.
 
+  **Update 10 Oct [probe].** A follow-up can queue, steer or interrupt. Steer added new scope to a running agent and kept the work already in flight. The September API page above describes one active run and a `409`. The runs that day used the three follow-up modes. Whether a notification fired for those runs is unverified. Docs describe an iOS push when a turn ends [doc cursor ios].
+
   Webhooks exist only in the legacy v0 API. They send `statusChange` events for `ERROR` or `FINISHED`. For the current API they are "coming soon" [doc cursor api; doc webhooks].
 - **Moving it.** Local to cloud: `&` in the CLI, `/in-cloud` in the app [doc cli using; doc subagents]. Cloud to local: check out the pushed branch. Artifacts and the remote desktop let you test without it [doc cursor capabilities]. **Unverified:** a documented "continue this cloud agent locally" command.
 - **Running on your own machine.** My Machines: `agent worker start` on "a laptop, devbox, or remote VM" opens an outbound connection. "the agent loop runs in Cursor's cloud, but terminal commands, file edits, browser actions, and other tool calls execute on your machine". The machine then appears in the environment picker [doc cursor my-machines]. API `env.type: "machine"` or `"pool"` targets it [doc cursor api]. This would let a Cursor Cloud Agent use the VPS's own tools and state. See #71.
-- **Cost and limits.** Cloud Agents come with Pro ($20/month), Pro Plus ($60), Ultra ($200) and Teams. They are "charged at API pricing for the selected model", and you set a spend limit on first use [doc models-and-pricing, "Plans"; doc cursor cloud-agent, "Billing"]. A paid plan is required [doc cursor cloud-agent, "Troubleshooting"].
+- **Cost and limits.** Cloud Agents come with Pro ($20/month), Pro Plus ($60), Ultra ($200) and Teams. They are "charged at API pricing for the selected model", and you set a spend limit on first use [doc models-and-pricing, "Plans"; doc cursor cloud-agent, "Billing"]. A paid plan is required [doc cursor cloud-agent, "Troubleshooting"]. **Unverified [probe]:** which billing pool the 2026-10-10 runs drew on.
 
 ---
 
@@ -392,22 +411,23 @@ Repo guidance lives in `AGENTS.md` [doc [General Skills](https://docs.openhands.
 
 The follow-up settled these, with the answer in the section named:
 
-- Cursor User Rules in the cloud: yes, account rules (§2).
-- Cursor run time: no published cap. Long-running agents run for hours or days (§2).
+- Cursor User Rules in the cloud: yes, account rules (§2). The 2026-10-10 runs did not check which rules, skills or secrets the VM loaded (item 11).
+- Cursor run time: no published cap. Long-running agents run for hours or days (§2). The 2026-10-10 probe measured CPU and memory, and did not reach a cap (item 6).
+- Cursor launch from Grok Bot, follow-up queue/steer/interrupt, files in `uploads/`, branch names, draft pull requests, and the default VM's CPU and memory (2026-10-10, §2).
 - Copilot steering from a shell: no (§3).
 - Copilot Actions minutes on a public repo: free under the general Actions rule, not restated for the agent (§3).
 - Devin's handoff, answering and pricing (§6.2).
 - Amp's sizes, run time, skills and git flow (§6.3).
 - Most of Jules, Factory and OpenHands (§6).
 
-Still open. The research searched official docs, source and changelogs for each, and they don't settle it. Each needs a sign-up, a paid plan or a cloud session, and this ticket's rules don't allow those. So they're proposed experiments for the synthesis (#74).
+Still open, apart from the Cursor items the 2026-10-10 runs settled (§2). The September research searched official docs, source and changelogs, and they don't settle the rest. Each of those needs a sign-up, a paid plan or a cloud session. So they stay proposed experiments for the synthesis (#74).
 
 1. **Codex: do user skills and MCP load in a cloud chat?** The open-source CLI would load `$HOME/.agents/skills` and `~/.codex/AGENTS.md` [src codex host_roots.rs]. But the cloud harness isn't open source, and no doc says which roots a cloud chat reads. Experiment: an environment whose setup script clones this public repo's skills into `$HOME/.agents/skills`. Then a chat that asks which skills it sees.
 2. **Codex: resources and time limit.** Not in any docs page or the full docs export. The launch post refuses automated fetches. Experiment: a chat that runs `nproc`, `free -h`, `df -h`, and a long `sleep` loop.
 3. **Codex: browser.** No doc mentions a browser for cloud chats, and the reference image installs none. Experiment: install Playwright in the setup script and ask for a screenshot.
 4. **Codex: which branch does "open a PR" create, and can a chat push to an existing branch?** PR creation happens in the closed ChatGPT backend and no doc names the branch. Experiment: one chat on a throwaway branch.
 5. **Codex and Copilot: notifications** beyond the web page and the GitHub review request. Docs don't say.
-6. **Cursor: exact VM size, and whether ordinary Pro cloud agents stop after some time.** Docs say only "limited memory and CPU" and give no cap. Experiment: an agent that reports `nproc`, `free -h` and `df -h`.
+6. **Cursor: disk size, run-time cap, and browser screenshots.** The 2026-10-10 probe was cancelled early. It saw 4 vCPU, 15 GiB RAM, x86_64, Linux kernel 6.12, user `ubuntu`, and HTTP 200 from example.com. It did not report disk, reach a run-time cap, or take a browser screenshot. Docs still publish no cap and no exact size.
 7. **Cursor: continue a cloud agent locally.** Only branch checkout is documented.
 8. **Copilot: can setup steps install personal skills** into `~/.copilot/skills` or `~/.agents/skills` on the runner and have them load? Docs place personal skills "in your local home directory" and say nothing about the runner's. Experiment: a `copilot-setup-steps.yml` that clones the skills. Then a task that asks which skills it sees.
 9. **Codex and Copilot: sub-agents inside a cloud task.** Not documented for either.
@@ -417,6 +437,8 @@ Still open. The research searched official docs, source and changelogs for each,
     - OpenHands sandbox size and follow-ups through the API.
 
     None is documented. Each is only worth a trial if the synthesis picks that agent.
+11. **Cursor: which skills, User Rules and secrets load.** Docs say account User Rules and `~/.cursor/skills` sync (§2). The 2026-10-10 runs did not check the VM.
+12. **Cursor: notifications and the billing pool.** Docs describe iOS push and API pricing (§2). The 2026-10-10 runs did not check which notification arrived, or which pool paid.
 
 ---
 
@@ -439,3 +461,4 @@ Everything ran locally on the maintainer's Mac on 2026-09-29, in this worktree o
 | `gh api` reads. `openai/codex` at `d5e6526`: `ext/skills/src/host_roots.rs`, `cloud-tasks/src/cli.rs`, `cloud-tasks-client/src/api.rs`, `backend-client/src/client.rs`, code search for skill roots. `openai/codex-universal`: README. `cli/cli`: `pkg/cmd/agent-task/` and latest release. `github/github-mcp-server`: `pkg/github/copilot.go` and code search. `club-cog/devin-handoff`: metadata, tree and README | Mac | nothing (read-only API calls) |
 | WebFetch of these pages: the Cursor long-running agents post and 2026-08-19 changelog, the GitHub changelog on code review Actions minutes, Jules FAQ, changelog and API reference, Devin's send-message API page, OpenHands pricing. The OpenAI Codex launch post returned HTTP 403. WebSearch for Codex cloud limits, Copilot Actions minutes on public repos, Copilot personal skills in the cloud and Cursor long-running agents. The results were used only to find the primary pages above. A third-party summary that said Codex publishes no limits wasn't cited | Mac | nothing |
 | Updated this file and committed it | Mac, worktree | this file |
+| Recorded the Cursor checks of 2026-10-10. Grok Bot launched agents through the signed-in account, with no user API key. Follow-ups queued, steered or interrupted, and steer kept in-flight work. Attached files landed in `uploads/`. PR #193 is `cursor/probe-c1-default-branch-8284` (no ref, started on `main`). PR #194 pushed to `probe/existing`. Both are draft and stayed open when told not to merge. A VM probe cancelled early saw 4 vCPU, 15 GiB RAM, x86_64, Linux kernel 6.12, user `ubuntu`, and HTTP 200 from example.com | This file | Section 2, the Cursor comparison row, and open questions 6, 11 and 12 |
