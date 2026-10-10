@@ -1,4 +1,4 @@
-"""Tests for the plugins setup area: the `plugins` list in agents/installs.json against each harness.
+"""Tests for the plugins setup area: the `plugins` list in setup/installs.json against each harness.
 
 python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 """
@@ -43,7 +43,7 @@ class PluginsHome(unittest.TestCase):
         return path
 
     def installs(self, *entries, **extra):
-        self.write("code/personal/agents/installs.json", {"plugins": list(entries), **extra})
+        self.write("code/personal/setup/installs.json", {"plugins": list(entries), **extra})
 
     def claude_has(self, *sources, enabled=True):
         records = {}
@@ -61,7 +61,7 @@ class PluginsHome(unittest.TestCase):
 
 class PluginsTest(PluginsHome):
     def test_no_plugins_list_says_nothing(self):
-        self.write("code/personal/agents/installs.json", {"skills": []})
+        self.write("code/personal/setup/installs.json", {"skills": []})
         self.assertEqual(self.lines(), [])
 
     def test_an_installed_and_enabled_bundle_is_ok_in_claude_code_and_imported_by_cursor(self):
@@ -172,7 +172,7 @@ class PluginsTest(PluginsHome):
     def test_a_permission_row_derives_the_tool_list(self):
         self.installs(EXA)
         self.claude_has("exa@claude-plugins-official")
-        self.write("code/personal/agents/permissions.json", {"version": 1, "rules": [{
+        self.write("code/personal/setup/permissions.json", {"version": 1, "rules": [{
             "id": "exa-agent", "level": "deny", "summary": "Exa's agent tool",
             "reason": "It spends credit.", "instruction": "Use search and fetch.",
             "match": {"server": "^exa$", "tool": "^web_search_advanced_exa$"},
