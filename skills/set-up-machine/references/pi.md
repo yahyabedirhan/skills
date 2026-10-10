@@ -4,7 +4,7 @@ How to set up and audit Pi, the `pi` coding agent (`@earendil-works/pi-coding-ag
 
 **Found** when `pi` is on `PATH` or the agent folder exists. The agent folder is `PI_CODING_AGENT_DIR`, else `~/.pi/agent`; a leading `~` in the variable means the home folder. Resolve it once, without printing the variable's value, and use that one folder for every path below, written `<agent-dir>`. For a fixture home, `verify.py --home <fixture>` uses `<fixture>/.pi/agent` and ignores the variable; pass `--pi-agent-dir <folder>` to test another layout.
 
-Leave `<agent-dir>/auth.json`, `trust.json`, `models-store.json` and `sessions/` unread and unwritten: they hold credentials, trust decisions and runtime state, never a setting this skill owns.
+Leave `<agent-dir>/auth.json`, `mcp-auth.json`, `trust.json`, `models-store.json` and `sessions/` unread and unwritten: they hold credentials, trust decisions and runtime state, never a setting this skill owns.
 
 ## Global instructions
 
@@ -33,6 +33,7 @@ The workstation repo's optional `agents/pi.json` declares Pi settings (workstati
 - A `settings.json` that is a symlink is written at its target. A file that isn't valid JSON stops the change until the user fixes it.
 - Back up the file as SKILL.md, *Back up*, says: `.pi/agent/settings.json` under the backup folder for the default folder. For an agent folder outside the home folder, name the destination in the diff, `pi/settings.json` under the backup folder.
 - A key the file no longer declares keeps its persisted value, for the user to remove.
+- A `packages` key in `agents/pi.json` is a `gap`, never compared or written: Pi packages come only from the plugins list (*Plugins*), so one file says what Pi loads. Tell the user to move each entry into `plugins`.
 - **Activation:** a new session reads the change. A running session reads it after `/reload`.
 - **Gaps:** a trusted project's `.pi/settings.json` overrides these keys, and CLI flags such as `--model` override them for one run.
 
@@ -58,7 +59,23 @@ Each personal permission is `n/a` here: "Pi has no permission entries". The hook
 
 ## Plugins
 
-A `gap`: set-up-machine doesn't deliver `plugins` entries (workstation.md) to Pi yet. Its own docs name how it takes plugins and MCP servers; until a section here says how, an entry that lists `pi` gets a `gap` line from `verify.py`.
+The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md). Docs: `packages.md` and `mcp.md`.
+
+- **A bundle** is a Pi package: extensions, skills, prompt templates and themes installed as one unit. Its entry names only `pi`, and its `source` is the package source as Pi's `settings.json` writes it: `npm:<package>@<version>`, `git:<host>/<owner>/<repo>@<ref>`, or an `https://` git URL. Prefer a version or a tag, since Pi keeps such a source pinned.
+- **Write a bundle** into the `packages` array of `<agent-dir>/settings.json`. Pi names a package by its npm name, or by its git host and repository path without the ref, so two sources can name one package at different versions.
+  - `present` when an entry is the exact source, as a string or as the `source` of an object entry. Keep an object entry as it is: its resource filters are the user's.
+  - `added` when no entry names the package: append the source.
+  - `updated` when an entry names the same package at another version or ref: replace that entry with the source.
+  - Keep every other entry and key, and write the file as *Declared defaults* says: back it up first, write a symlink at its target, and stop on invalid JSON.
+  - **Activation:** a new session installs a missing package at startup. `pi list` shows the configured packages.
+- **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `<agent-dir>/mcp.json`, keeping every other server and key. `present` when it matches, `added` when it's missing, `updated` when it differs. Back it up like `settings.json`. Pi takes server names of letters, digits, `_` and `-`.
+  - A running session reads the change after `/reload`.
+  - **Credentials:** a `headers` or `env` value names an environment variable, such as `${DOCS_TOKEN}`, never the secret itself. A server that uses OAuth needs the user's sign-in, with `pi mcp login <server>` or `/mcp` in a session; an agent never signs in. Pi keeps the tokens in `mcp-auth.json`.
+- **`verify.py`** prints a `plugin` line per Pi entry: `ok`, or `FAIL` when the package is missing or at another version, or the server is missing or differs. Pi not set up is `n/a`. A configured package the list leaves out is `extra`: kept, for the user to add to the list or remove with `pi remove <source>`. A matching server is a `gap` when `extensions` in `settings.json` holds `-builtin:mcp`, since that turns off the built-in MCP client that reads `mcp.json`.
+- **Gaps:**
+  - A trusted project's `.pi/settings.json` packages and `.pi/mcp.json` servers replace a global entry of the same package or name in that project.
+  - An extension that registers `/mcp`, such as `pi-mcp-adapter`, replaces the built-in MCP client, and Pi then ignores `mcp.json`. `verify.py` doesn't detect this.
+  - A local path isn't a source the list takes, since one path doesn't name the same package on every machine.
 
 ## Pre-tool hook
 

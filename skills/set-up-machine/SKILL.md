@@ -77,7 +77,7 @@ Shared lines first. Each harness then has its own section for the lines only tha
 - a `hook wired` line for every harness found
 - `personal ok` or `personal none`, and no `personal FAIL`
 - no `harness FAIL`; a `harness gap` names instructions for a harness this skill can't deliver to yet
-- no `plugin FAIL`; a `plugin gap` names a plugin a harness can't take from this skill yet, and `plugin extra` a Claude Code bundle the list leaves out
+- no `plugin FAIL`; a `plugin gap` names a plugin a harness can't take from this skill yet, and `plugin extra` a Claude Code bundle or a Pi package the list leaves out
 
 ### Claude Code
 
@@ -102,6 +102,7 @@ No further line. The `hook wired` line is the check. Details: [references/openco
 - When Pi's agent folder exists, `pi ok` for the `AGENTS.md` link, and a `pi same` line per key `agents/pi.json` declares, or `pi none` with no such file. A `pi FAIL` means the audit is not done.
 - Its `hook wired` line is the extension. Pi has no permission system, so the hook is its only enforcement, and the extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call. A `hook gap` line is an extension someone else wrote at the same path, left alone.
 - A `pi extra` line is a broken skill link, for the user to remove.
+- A `pi gap` for `packages` in `agents/pi.json` asks the user to move them into `plugins`, where Pi packages belong.
 
 ### Cursor
 

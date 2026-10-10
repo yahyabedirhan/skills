@@ -294,3 +294,12 @@ The maintainer asked for Pi's extensions used as Pi intends them, with parity to
 - **Each harness takes plugins its own documented way,** in a Plugins section of its reference. Claude Code installs bundles. Cursor gets bundles only by importing Claude Code's, since its CLI has no install command, and takes standalone servers in `~/.cursor/mcp.json`.
 - **Gaps, named:** a standalone MCP server in Claude Code, since checking it means reading `~/.claude.json`, which can hold tokens; and any plugin in Codex, opencode and Pi until their references say how. `verify.py` prints a `gap` line for each, rather than guessing.
 - **`verify.py` only reads files:** Claude Code's `installed_plugins.json` and `enabledPlugins`, the plugin folder's `mcp.json` for the server names Cursor shows, and `~/.cursor/mcp.json`. An enabled bundle the list leaves out is `extra`, because Cursor imports it too.
+
+## 2026-10-10: Pi plugins
+
+- **Pi takes plugins now.** The plugins setup area named Pi as a gap. Pi 1.1.0 documents both kinds, so Pi's reference has a real Plugins section, and `verify.py` checks Pi entries.
+- **A Pi bundle is a Pi package.** A Pi package holds extensions, skills, prompt templates and themes. Pi reads the list from `packages` in `<agent-dir>/settings.json`. The skill adds a missing source and replaces an entry for the same package at another version. It keeps every other entry.
+- **A Pi package source fits only an entry for Pi alone.** Its `source` is Pi's own form: `npm:`, `git:` or an `https://` git URL. Claude Code and Cursor need `<plugin>@<marketplace>`, and Pi can't install that form. So one entry can't serve both, and the validator refuses each mix. A local path isn't taken, since a path doesn't name the same package on every machine.
+- **Package identity follows Pi.** Pi treats an npm package by its name, and a git package by its host and repository path without the ref. `verify.py` uses the same identity. It prints `FAIL` for another version of a listed package, and `extra` for a configured package the list leaves out.
+- **Standalone MCP servers go in `<agent-dir>/mcp.json`,** the file Pi's built-in MCP client reads. `verify.py` compares the entry as it does for Cursor. It prints a `gap` when `-builtin:mcp` turns that client off.
+- **One source for Pi packages.** `agents/pi.json` could also declare `packages`, as a Pi setting. Two lists would disagree, so a `packages` key there is a `gap` that asks the user to move it into `plugins`. The skill neither compares nor writes it.
