@@ -113,30 +113,15 @@ A personal permission (workstation.md) becomes `prefix_rule`s the way a table ro
 
 ## Plugins
 
-Install bundles from their declared marketplace with the installed CLI. Check [developer commands](https://learn.chatgpt.com/docs/developer-commands) before writing.
+The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md). Tool lists come from `agents/permissions.json` and the rule table. Read [codex-mcp.md](codex-mcp.md) for the TOML tables and the OAuth check.
 
-1. Register a missing marketplace with `codex plugin marketplace add <owner>/<repo> --json`.
-2. Install the declared bundle with `codex plugin add <plugin>@<marketplace> --json`.
-3. Inspect its manifest for components Codex supports.
-4. Report unsupported components as gaps, even when the install succeeds.
+1. Add a missing marketplace with `codex plugin marketplace add <owner>/<repo>`.
+2. Install the bundle with `codex plugin add <plugin>@<marketplace>`.
+3. Propose the policy with `propose` from `scripts/setupmachine/harnesses/codex.py`, then apply it through the skill's backup and approval steps.
+4. For a standalone MCP server, merge `server` into `[mcp_servers.<name>]` the same way.
+5. When `require_oauth` is true, the user runs `codex mcp login <name>`. Leave the server disabled until that login is connected.
 
-Codex 0.162.1 accepts portable Claude-compatible bundles. A Claude LSP declaration or harness-specific mod API does not establish working Codex tools. Read the bundle's manifest before claiming parity.
-
-For a standalone MCP entry, merge `server` into `[mcp_servers.<name>]`. Preserve fields the entry does not declare. Authenticate through `codex mcp login <name>` when required.
-
-A bundle can declare `codex_mcp`, keyed by its server names. Merge each policy into `[plugins."<plugin>@<marketplace>".mcp_servers.<server>]`. Supported fields are `enabled`, `enabled_tools`, `disabled_tools`, `default_tools_approval_mode`, and `tools.<tool>.approval_mode`. `require_oauth` is an audit requirement, not a Codex setting.
-
-Use `scripts/setupmachine/codex_plugins.py`'s pure `propose(text, entry)` before writing. It preserves undeclared settings and comments. It keeps existing stricter tool lists. It refuses unfamiliar TOML forms instead of rewriting the file. Apply the skill's backup and approval steps to its returned diff.
-
-For `require_oauth: true`, keep the server disabled until the CLI confirms OAuth. Never test by making an anonymous tool call. Disabled servers report `unsupported` in `codex mcp list --json`. Temporarily enable the server for a listing-only check, then restore it unless authentication is confirmed. Codex 0.162.1 serializes the authenticated status as `o_auth`.
-
-On a headless machine, the browser's callback points at the wrong machine. Keep the login process running. Have the user forward the callback to the listener on the machine running Codex. Treat its URL as a secret. Never put it in repository files, logs, or shell history.
-
-`verify.py` checks configured enablement, a matching cached manifest, and each declared transport or policy field. It uses the resolved Codex home. With a CLI, it checks OAuth through `codex mcp list --json`, without reading credentials. A missing sign-in is a `gap` with the user's login command. The file audit cannot prove current-session tool discovery, account identity, credit balance, or remote catalog freshness. Verify discovery in a new session.
-
-Honor excluded features in every setup phase. Never invoke an excluded tool, including for a capability test. An exclusion is a personal choice, independent of the approval reviewer. Verify its configured restriction without calling the service. Match personal permissions against the observed server name.
-
-Official sources: [MCP configuration](https://learn.chatgpt.com/docs/extend/mcp), [developer commands](https://learn.chatgpt.com/docs/developer-commands), and [plugin formats](https://developers.openai.com/plugins/build/plugins).
+Done when `verify.py` prints `plugin ok` for the entry: the bundle is enabled, its cached manifest matches, and the derived tool list matches. A missing login is a `gap`. A new session still has to show the tools.
 
 ## Pre-tool hook
 

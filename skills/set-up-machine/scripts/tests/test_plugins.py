@@ -5,7 +5,6 @@ python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 import io
 import json
 import re
-import subprocess
 import sys
 import tempfile
 import unittest
@@ -146,6 +145,35 @@ class PluginsTest(PluginsHome):
         self.assertEqual(len(got), 2, got)
         self.assertRegex(got[0], r"^plugin +ok +Claude Code: exa")
 
+    def test_codex_mcp_is_not_a_key_and_mcp_policy_is(self):
+        self.installs({**EXA, "codex_mcp": {}})
+        self.assertIn("unknown key 'codex_mcp'", self.lines()[0])
+        self.installs({**EXA, "mcp_policy": {"approval_mode": "prompt", "require_oauth": True,
+                                             "enabled_tools": ["web_search_exa"], "disabled_tools": ["web_search_advanced_exa"]}})
+        self.claude_has("exa@claude-plugins-official")
+        self.assertTrue(any(line.startswith("FAIL ") and "derived tool list" in line for line in self.lines()), self.lines())
+        self.write(".claude/settings.json", {"enabledPlugins": {"exa@claude-plugins-official": True},
+                                             "permissions": {"allow": [], "deny": ["mcp__exa__web_search_advanced_exa"]}})
+        lines = self.lines()
+        self.assertTrue(any("deny list matches the derived tool list" in line for line in lines), lines)
+        self.assertTrue(any(line.startswith("ok Cursor:") and "derived tool list" in line for line in lines), lines)
+
+    def test_a_permission_row_derives_the_tool_list(self):
+        self.installs(EXA)
+        self.claude_has("exa@claude-plugins-official")
+        self.write("code/personal/agents/permissions.json", {"version": 1, "rules": [{
+            "id": "exa-agent", "level": "deny", "summary": "Exa's agent tool",
+            "reason": "It spends credit.", "instruction": "Use search and fetch.",
+            "match": {"server": "^exa$", "tool": "^web_search_advanced_exa$"},
+            "samples": {"covers": ["mcp__exa__web_search_advanced_exa"], "leaves": ["mcp__exa__web_search_exa"]}}]})
+        self.assertTrue(any("web_search_advanced_exa" in line and line.startswith("FAIL Claude Code:")
+                            for line in self.lines()), self.lines())
+
+    def test_each_adapter_exposes_validate_check_and_propose(self):
+        for name, adapter in plugins.ADAPTERS.items():
+            for method in ("validate", "check", "propose"):
+                self.assertTrue(callable(getattr(adapter, method)), (name, method))
+
 
 WEB = {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@0.38.0", "harnesses": ["pi"]}
 TOOLS = {"name": "tools", "kind": "bundle", "source": "git:github.com/owner-a/pi-tools@v1", "harnesses": ["pi"]}
@@ -250,44 +278,6 @@ class PiPluginsTest(PluginsHome):
         self.pi_has(extensions=["-builtin:mcp"])
         self.assertRegex(self.lines()[0], r"^gap Pi: docs \(mcp\) is in .*mcp\.json, but -builtin:mcp in .*settings\.json "
                                           r"turns off Pi's built-in MCP")
-
-    def git(self, folder, *args):
-        return subprocess.run(["git", "-C", str(folder), *args], check=True, capture_output=True, text=True).stdout.strip()
-
-    def checkout(self, *tags):
-        """Pi's checkout of owner-a/pi-tools, with one commit per tag, left at the last tag."""
-        folder = self.home / ".pi/agent/git/github.com/owner-a/pi-tools"
-        folder.mkdir(parents=True)
-        self.git(folder, "init", "-q")
-        for tag in tags:
-            self.git(folder, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q",
-                     "--allow-empty", "-m", tag)
-            self.git(folder, "-c", "user.name=t", "-c", "user.email=t@example.com", "tag", "-a", tag, "-m", tag)
-        return folder
-
-    def test_a_git_checkout_at_another_ref_fails_with_pi_update(self):
-        folder = self.checkout("v1")
-        self.installs({**TOOLS, "source": "git:github.com/owner-a/pi-tools@v2"})
-        self.pi_has("git:github.com/owner-a/pi-tools@v2")
-        self.assertRegex(self.lines()[0], r"^FAIL Pi: tools \(bundle\) .*checkout at .*pi-tools isn't at v2; "
-                                          r"run `pi update git:github\.com/owner-a/pi-tools@v2`")
-        self.git(folder, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "--allow-empty", "-m", "v2")
-        self.git(folder, "tag", "v2")
-        self.git(folder, "checkout", "-q", "v1")
-        self.assertRegex(self.lines()[0], r"^FAIL Pi: tools \(bundle\) .*isn't at v2")
-        self.git(folder, "checkout", "-q", "v2")
-        self.assertRegex(self.lines()[0], r"^ok Pi: tools \(bundle\) .* is an extension in ")
-
-    def test_a_checkout_pi_updated_through_fetch_head_is_ok(self):
-        # `pi update` runs `git fetch origin <ref>` and resets to FETCH_HEAD, so the tag can be absent locally.
-        folder = self.checkout("v1", "v2")
-        tag = self.git(folder, "rev-parse", "v2")
-        self.git(folder, "checkout", "-q", "v2")
-        self.git(folder, "tag", "-d", "v2")
-        (folder / ".git/FETCH_HEAD").write_text(f"{tag}\t\ttag 'v2' of https://github.com/owner-a/pi-tools\n")
-        self.installs({**TOOLS, "source": "git:github.com/owner-a/pi-tools@v2"})
-        self.pi_has("git:github.com/owner-a/pi-tools@v2")
-        self.assertRegex(self.lines()[0], r"^ok Pi: tools \(bundle\) ")
 
     def test_a_git_extension_not_installed_yet_is_ok(self):
         self.installs(TOOLS)

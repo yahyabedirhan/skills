@@ -8,13 +8,13 @@ from unittest.mock import patch
 from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from setupmachine import codex_plugins, plugins
+from setupmachine import plugins
 from setupmachine.codex_config import parse
+from setupmachine.harnesses import codex as codex_plugins
 
 ENTRY = {"name": "search", "kind": "bundle", "source": "search@catalog", "harnesses": ["codex"],
-         "codex_mcp": {"search": {"enabled": True, "require_oauth": True,
-             "enabled_tools": ["search", "fetch"], "disabled_tools": ["paid"],
-             "tools": {"search": {"approval_mode": "approve"}}}}}
+         "mcp_policy": {"require_oauth": True, "approval_mode": "prompt",
+             "enabled_tools": ["search", "fetch"], "disabled_tools": ["paid"]}}
 
 class CodexPluginsTest(unittest.TestCase):
     def setUp(self):
@@ -80,13 +80,12 @@ class CodexPluginsTest(unittest.TestCase):
         with self.assertRaises(codex_plugins.PluginError):
             codex_plugins.propose('note = """long\ntext"""\n', ENTRY)
         with self.assertRaises(codex_plugins.PluginError):
-            codex_plugins.validate({**ENTRY, 'codex_mcp': {'search': {'url': 'unowned'}}}, 'fixture')
+            codex_plugins.validate({**ENTRY, 'mcp_policy': {'url': 'unowned'}}, 'fixture')
 
     def test_malformed_approval_modes_report_validation_errors(self):
-        for value in ([], {}, 1, None):
-            for policy in ({"default_tools_approval_mode": value}, {"tools": {"search": {"approval_mode": value}}}):
-                with self.assertRaises(codex_plugins.PluginError):
-                    codex_plugins.validate({**ENTRY, 'codex_mcp': {'search': policy}}, 'fixture')
+        for value in ([], {}, 1, None, 'on-request'):
+            with self.assertRaises(codex_plugins.PluginError):
+                codex_plugins.validate({**ENTRY, 'mcp_policy': {'approval_mode': value}}, 'fixture')
 
     def test_scalar_owned_tables_are_refused_without_crashing_audit(self):
         text = '[plugins."search@catalog".mcp_servers]\nsearch = false\n'
@@ -131,6 +130,21 @@ class CodexPluginsTest(unittest.TestCase):
         source.write_text(json.dumps({'plugins': [ENTRY]}))
         lines = plugins.check(home, codex_home=self.folder)
         self.assertTrue(any(s == 'ok' and 'installed and enabled' in t for s, t in lines), lines)
+
+    def test_a_permission_deny_supplies_a_tool_the_policy_omits(self):
+        from setupmachine import rules as rule_table
+        path = Path(self.tmp.name) / 'permissions.json'
+        path.write_text(json.dumps({'version': 1, 'rules': [{
+            'id': 'search-agent', 'level': 'deny', 'summary': 'the agent tool',
+            'reason': 'It spends credit.', 'instruction': 'Use search and fetch.',
+            'match': {'server': '^search$', 'tool': '^agent$'},
+            'samples': {'covers': ['mcp__search__agent'], 'leaves': ['mcp__search__search']}}]}))
+        rows = rule_table.load(path, personal=True)
+        entry = {**ENTRY, 'mcp_policy': {'enabled_tools': ['search', 'fetch'], 'require_oauth': True,
+                                         'disabled_tools': ['paid']}}
+        result = codex_plugins.propose('', entry, rows)
+        tools = parse(result)['plugins']['search@catalog']['mcp_servers']['search']['disabled_tools']
+        self.assertEqual(tools, ['agent', 'paid'])
 
 if __name__ == '__main__':
     unittest.main()

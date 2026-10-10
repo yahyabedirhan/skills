@@ -320,3 +320,13 @@ The maintainer asked for Pi's extensions used as Pi intends them, with parity to
 Sources: [Codex MCP configuration](https://learn.chatgpt.com/docs/extend/mcp) and [developer commands](https://learn.chatgpt.com/docs/developer-commands).
 
 The fresh skill audit found malformed approval values, scalar owned tables, and quoted comment markers. Fix each with a regression test. Refuse malformed existing tool lists for guided review. The adapter reads configuration and OAuth metadata without invoking an MCP tool. The team test exempts this setup skill; personal plugin choices remain workstation declarations.
+
+## 2026-10-10: one plugin adapter per harness
+
+This replaces the `codex_mcp` bullet in *Codex plugins and tool policies*.
+
+- **`mcp_policy` replaces `codex_mcp`.** One object on the installs entry serves every harness. Its fields are `enabled_tools`, `disabled_tools`, `approval_mode` and `require_oauth`.
+- **Permissions are the source for tool lists.** The rule table and `agents/permissions.json` name the tools. Each adapter derives its harness list from those rows. A copy in `mcp_policy` is optional.
+- **One module per harness.** `scripts/setupmachine/harnesses/<harness>.py` exposes `validate`, `check` and `propose`. `plugins.py` holds the lookup table. Pi, Claude Code, Cursor and Codex use it.
+- **The Pi adapter does not compare a git checkout with a ref.** Pinned-package handling stays out of this code.
+- **The skill owns the Codex procedure.** `references/codex.md` gives numbered steps and a done check. TOML and OAuth details are in `references/codex-mcp.md`.
