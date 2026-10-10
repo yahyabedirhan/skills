@@ -146,7 +146,7 @@ A harness that matches a command's text catches only the spellings it lists, so 
 
 - **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
 - **allow-and-report** rows: it writes one JSON line per call to `<report-folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
-- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why).
+- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why). Cursor has no ask list at all, so there the hook refuses every ask row, `approver` or not.
 - **allow** rows: it says nothing; the harness's native allow entries let the call run without a prompt.
 
 A malformed personal file leaves the table's rows in force: the hook skips the personal permissions and `verify.py` reports the file.

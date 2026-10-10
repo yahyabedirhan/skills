@@ -211,7 +211,7 @@
         "flags": [["force-with-lease"]]
       },
       "reason": "It rewrites the remote's history, though only if no one else pushed since you fetched.",
-      "instruction": "Say in one line why the history needs rewriting, run it as its own command, and let the user approve it.",
+      "instruction": "Say in one line why the history needs rewriting, run it as its own command, and let the user approve it; where no one will be asked, stop and give the user the exact command.",
       "samples": {
         "covers": ["git push --force-with-lease", "git push origin main --force-with-lease"],
         "leaves": ["git push"]
@@ -227,7 +227,7 @@
         "flags": [["mirror"]]
       },
       "reason": "It makes the remote match the local repository, deleting every remote branch and tag that isn't here.",
-      "instruction": "Push the branches you mean by name; if the whole mirror is needed, say why in one line, run it as its own command, and let the user approve it.",
+      "instruction": "Push the branches you mean by name; if the whole mirror is needed, say why in one line, run it as its own command, and let the user approve it; where no one will be asked, stop and give the user the exact command.",
       "samples": {
         "covers": ["git push --mirror", "git push --mirror origin"],
         "leaves": ["git push origin main"]
@@ -243,7 +243,7 @@
         "flags": [["f", "force"]]
       },
       "reason": "It deletes untracked files, which git can't bring back, and with `-x` ignored ones such as `.env`.",
-      "instruction": "Run `git clean -n` first to list what would go, or move the files into `.scratch/`; if they must go, run it as its own command and let the user approve it.",
+      "instruction": "Run `git clean -n` first to list what would go, or move the files into `.scratch/`; if they must go, run it as its own command and let the user approve it; where no one will be asked, stop and give the user the exact command.",
       "samples": {
         "covers": ["git clean -f", "git clean -fdx", "git clean --force -d"],
         "leaves": ["git clean -n"]
@@ -273,7 +273,7 @@
         "subcommands": [["repo", "edit"]]
       },
       "reason": "It changes a repository's settings, such as its visibility, for everyone.",
-      "instruction": "Say in one line what changes and why, run it as its own command, and let the user approve it.",
+      "instruction": "Say in one line what changes and why, run it as its own command, and let the user approve it; where no one will be asked, stop and give the user the exact command.",
       "samples": {
         "covers": ["gh repo edit --description d"],
         "leaves": ["gh repo view"]

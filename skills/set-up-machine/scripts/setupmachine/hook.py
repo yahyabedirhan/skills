@@ -51,6 +51,7 @@ class ToolCall:
     searches: tuple = ()  # (folder, glob) pairs a search tool reads the matching files of
     report: bool = True  # False when another hook, wired for the same harness, reports this call
     unattended: str = ""  # why the harness won't ask the user about this call, when it won't
+    no_native_ask: bool = False  # the harness has no ask entry of its own, so an unattended call refuses every ask row
 
 
 @dataclass
@@ -107,7 +108,7 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
             {"deny": verdict.denials, "ask": verdict.asks, "allow-and-report": verdict.reports,
              "allow": verdict.allows}[hit.rule.level].append(hit)
     if call.unattended:
-        unasked = [h for h in verdict.asks if h.rule.approver == "user"]
+        unasked = [h for h in verdict.asks if h.rule.approver == "user" or call.no_native_ask]
         verdict.denials += [Hit(h.rule, f"{h.part} ({call.unattended}, where no one asks the user)") for h in unasked]
     if verdict.denials:
         verdict.reports, verdict.asks, verdict.allows = [], [], []
@@ -380,12 +381,13 @@ def write_opencode(denials: list) -> str:
 CURSOR_FILE_TOOLS = {"Read": "read", "Grep": "read", "Write": "write", "Delete": "write"}
 
 
-# Cursor has no native ask entry for an MCP tool, and its run modes can run commands and tools without asking.
+# Cursor has no native ask list (references/cursor.md), and its run modes can run commands and tools
+# without asking, so the hook refuses every ask row's call there.
 CURSOR_UNATTENDED = "Cursor, which can run tools without asking"
 
 
 def read_cursor(payload: dict) -> ToolCall:
-    return replace(_read_cursor(payload), unattended=CURSOR_UNATTENDED)
+    return replace(_read_cursor(payload), unattended=CURSOR_UNATTENDED, no_native_ask=True)
 
 
 def _read_cursor(payload: dict) -> ToolCall:
