@@ -8,11 +8,9 @@ disable-model-invocation: true
 
 I'm back. Use `/show-me` to show me where the work stands since I went AFK, in this list:
 
-```markdown
 ## What is done
 ## What is not done yet
 ## Decisions agents made
 ## Things you should know
 ## Decisions waiting for you
 ## Next steps
-```

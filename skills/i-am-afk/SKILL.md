@@ -14,11 +14,9 @@ Agents, I'm AFK for a while. I can't answer your questions or make decisions unt
 
 When nothing is left that you can do alone, use `/show-me` to end with this list:
 
-```markdown
 ## What is done
 ## What is not done yet
 ## Decisions agents made
 ## Things you should know
 ## Decisions waiting for you
 ## Next steps
-```
