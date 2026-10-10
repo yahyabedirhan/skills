@@ -49,20 +49,20 @@ No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it rel
 
 ## Skills
 
-- Pi discovers skills in `~/.agents/skills/` and `<agent-dir>/skills/`, follows symlinks, and loads a skill reached through two links only once, by its real path. So the skills `agents/installs.json` installs into `~/.agents/skills` reach Pi with no extra install and no `-a` flag.
+- Pi discovers skills in `~/.agents/skills/` and `<agent-dir>/skills/`, follows symlinks, and loads a skill reached through two links only once, by its real path. So the skills `setup/installs.json` installs into `~/.agents/skills` reach Pi with no extra install and no `-a` flag.
 - Older `npx skills` versions left one link per skill in `<agent-dir>/skills/`, pointing into `~/.agents/skills`. A link that resolves is harmless and `extra`. A broken link, such as one left after a skill was removed, is `extra`, for the user to remove: Pi skips it without a word.
 - A project's `.agents/skills/` loads only after the user trusts the project.
 
 ## Declared defaults
 
-The workstation repo's optional `agents/pi.json` declares Pi settings (workstation.md). Compare each key it declares with `<agent-dir>/settings.json`:
+The optional Pi `config` that the workstation repo's `setup/harnesses.json` names declares Pi settings (workstation.md). Compare each key it declares with `<agent-dir>/settings.json`:
 
 - `present, personal` when the values are equal; otherwise `updated, personal`, showing the current and the declared value.
 - Write only the declared keys, and keep every other key as it is. Pi writes runtime state into the same file, such as `lastChangelogVersion` and `deviceId`, and other tools add their own keys.
 - A `settings.json` that is a symlink is written at its target. A file that isn't valid JSON stops the change until the user fixes it.
 - Back up the file as SKILL.md, *Back up*, says: `.pi/agent/settings.json` under the backup folder for the default folder. For an agent folder outside the home folder, name the destination in the diff, `pi/settings.json` under the backup folder.
 - A key the file no longer declares keeps its persisted value, for the user to remove.
-- A `packages` key in `agents/pi.json` is a `gap`, never compared or written: Pi extensions come only from the plugins list (*Plugins*), so one file says what Pi loads. Tell the user to move each entry into `plugins`.
+- A `packages` key in the Pi `config` is a `gap`, never compared or written: Pi extensions come only from the plugins list (*Plugins*), so one file says what Pi loads. Tell the user to move each entry into `plugins`.
 - **Activation:** a new session reads the change. A running session reads it after `/reload`.
 - **Gaps:** a trusted project's `.pi/settings.json` overrides these keys, and CLI flags such as `--model` override them for one run.
 
@@ -88,7 +88,7 @@ Each personal permission is `n/a` here: "Pi has no permission entries". The hook
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md). Docs: `packages.md` and `mcp.md`.
+The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md). Docs: `packages.md` and `mcp.md`.
 
 - **A bundle** names an installable Pi package, not necessarily a repository root. The entry names only `pi`. Use `npm:<name>@latest`, a `git:<host>/<owner>/<repo>` source, or an `https://` Git URL. Review the latest source before installing or updating it. A package can expose extensions, skills, prompt templates and themes.
 - **Write a bundle** into the `packages` array of `<agent-dir>/settings.json`. Pi names an extension by its npm name, or by its git host and repository path, so two source strings can name one extension.

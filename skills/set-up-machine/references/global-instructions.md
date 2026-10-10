@@ -60,7 +60,7 @@ How this person and their agents work together: how they split the work, what ea
 
 ## Glossary
 
-The core words this person and their agents share, such as the names for a piece of work or a session, one short definition each. Write every definition so it holds in any harness and any session host; how a word maps onto one tool goes in that tool's glossary. Keep here only the core words every session needs. With a workstation repo, they come from `agents/instructions.md`, which this skill copies here as it is; the repository may keep a full glossary elsewhere.
+The core words this person and their agents share, such as the names for a piece of work or a session, one short definition each. Write every definition so it holds in any harness and any session host; how a word maps onto one tool goes in that tool's glossary. Keep here only the core words every session needs. With a workstation repo, they come from `setup/instructions.md`, which this skill copies here as it is; the repository may keep a full glossary elsewhere.
 
 ## Tool glossaries
 
@@ -80,7 +80,7 @@ A line belongs here only when it's about this person, not the work, and holds fo
 When a harness still keeps its own global file (a `~/.claude/CLAUDE.md` that isn't a link, an old `~/.codex/AGENTS.md`), move it line by line before the harness's file becomes a link:
 
 1. Choose where each line goes, using the list above: a role's row, a working agreement, glossary or personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
-2. Write each role's value and the other lines into their sections of the workstation repo's `agents/instructions.md`, except the two rows the pointer fills, or into the shared file when there is none; make each skill edit at its source, as `/maintain-environment` says.
+2. Write each role's value and the other lines into their sections of the workstation repo's `setup/instructions.md`, except the two rows the pointer fills, or into the shared file when there is none; make each skill edit at its source, as `/maintain-environment` says.
 3. Leave the harness's file holding only its link to the shared file.
 
 ## Memory

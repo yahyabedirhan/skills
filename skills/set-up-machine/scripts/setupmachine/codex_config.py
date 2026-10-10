@@ -1,7 +1,8 @@
 """Read-only Codex preference audit and a pure proposal seam for fixture verification.
 
-Only agents/codex.toml is a preference source. Proposals never write config or
-inspect profiles, project settings, managed requirements, authentication or state.
+Only the Codex config the workstation layout points at (layout.py) is a preference source.
+Proposals never write config or inspect profiles, project settings, managed requirements,
+authentication or state.
 """
 from __future__ import annotations
 
@@ -13,14 +14,13 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from . import personal
+from . import layout, personal
 
 try:
     import tomllib
 except ImportError:
     tomllib = None
 
-SOURCE = Path("agents/codex.toml")
 VALUES = {
     "sandbox_mode": ("read-only", "workspace-write", "danger-full-access"),
     "approval_policy": ("on-request", "never"),
@@ -58,13 +58,16 @@ def load(home: Path) -> dict:
         return {}  # personal.check reports missing or malformed pointers
     if not pointer.repository:
         return {}
-    path = pointer.clone / SOURCE
-    if not path.exists():
+    try:
+        path = layout.harness_file(pointer.clone, "codex", "config")
+    except layout.LayoutError as exc:
+        raise ConfigError(str(exc)) from None
+    if path is None:
         return {}
     try:
         return validate(parse(path.read_text()))
     except (OSError, UnicodeError):
-        raise ConfigError("cannot read agents/codex.toml as UTF-8 text") from None
+        raise ConfigError(f"cannot read {path.relative_to(pointer.clone).as_posix()} as UTF-8 text") from None
 
 
 def conflict(config: dict, preferences: dict) -> str | None:

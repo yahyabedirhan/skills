@@ -358,3 +358,16 @@ This replaces the `codex_mcp` bullet in *Codex plugins and tool policies*.
 - **One module per harness.** `scripts/setupmachine/harnesses/<harness>.py` exposes `validate`, `check` and `propose`. `plugins.py` holds the lookup table. Pi, Claude Code, Cursor and Codex use it.
 - **The Pi adapter does not compare a git checkout with a ref.** Pinned-package handling stays out of this code.
 - **The skill owns the Codex procedure.** `references/codex.md` gives numbered steps and a done check. The TOML and OAuth detail is a subsection at the end of that file.
+
+## 2026-10-11: the workstation's `setup/` folder and its harnesses file
+
+This replaces the `agents/` paths in the entries above. The workstation repo moved each harness's files into that harness's own folder (#195).
+
+- **`setup/` replaces `agents/`.** It is the one folder the skill relies on. It holds `instructions.md`, `permissions.json` and `installs.json` in full.
+- **`setup/harnesses.json` points at each harness's own files.** An entry takes `instructions`, `config`, or both. Paths are relative to the repository's root. So Cursor's instructions and the Codex and Pi configs can sit in their harness folders.
+- **One module knows the layout.** `scripts/setupmachine/layout.py` names the folder and the harnesses file. Every reader asks it for a path. A later layout change is then one edit.
+- **No fallback to `agents/`.** The skill pull request merges first, and the workstation pull request merges right after it. Nobody runs `/set-up-machine` between the two merges, so no machine needs the old layout.
+- **The harnesses file is strict.** It needs `version` 1. An unknown key, an unknown harness, or a path outside the repository is a `FAIL` that names the problem. A path to a missing file is a `FAIL` that names the pointer, such as `harnesses.cursor.instructions`. A guessed path could write the wrong file.
+- **The generated header names the source path.** Cursor's `harness-instructions.mdc` names the path from the harnesses file. Any header that starts with the generated prefix counts as the skill's file. So a file from the old path differs and is rewritten, and it is not left alone as someone else's.
+- **A `config` for a harness without a config reader is a `gap`.** Only Codex and Pi have one today.
+- **The state folder and `~/.config/agents/` keep their names.** The hook's report folder and the shared file are not workstation paths.

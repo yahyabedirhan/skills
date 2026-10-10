@@ -600,7 +600,7 @@ class PersonalRowsTest(unittest.TestCase):
         pointer = self.home / ".config" / "agents" / "source.md"
         pointer.parent.mkdir(parents=True)
         pointer.write_text("# Workstation repo\n\n- Repository: `owner-a/personal`\n- Clone: `~/code/personal`\n")
-        self.permissions = self.home / "code" / "personal" / "agents" / "permissions.json"
+        self.permissions = self.home / "code" / "personal" / "setup" / "permissions.json"
         self.permissions.parent.mkdir(parents=True)
         self.write(PERSONAL_ROWS)
         self.config = self.home / "hook.json"
