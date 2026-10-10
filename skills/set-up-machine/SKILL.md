@@ -1,11 +1,11 @@
 ---
 name: set-up-machine
-description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, memory kept off, declared Codex CLI defaults, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
+description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, memory kept off, declared Codex CLI and Pi defaults, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
 ---
 
 # Set up machine
 
-Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI) match its sources. Running the skill again is the **audit**: the same steps, ending with a diff that changes nothing.
+Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI, Pi) match its sources. Running the skill again is the **audit**: the same steps, ending with a diff that changes nothing.
 
 ## Sources
 
@@ -14,7 +14,8 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
   - `agents/instructions.md`: the working agreement, the glossaries, which tool fills each role, and the personal workflow;
   - `agents/permissions.json`: the **personal permissions**, rows each harness carries beside the rule table's;
   - `agents/installs.json`: the skills and commands every machine gets;
-  - `agents/codex.toml`: Codex CLI defaults, declared explicitly.
+  - `agents/codex.toml`: Codex CLI defaults, declared explicitly;
+  - `agents/pi.json`: Pi settings, declared explicitly.
 
 ## Outputs
 
@@ -23,7 +24,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 - Each harness's permission entries, from the rule table and the personal permissions.
 - The **pre-tool hook**, `scripts/pre_tool_hook.py`, run before every tool call.
 - The **pointer**, when it is missing or records none.
-- Codex CLI defaults that `agents/codex.toml` declares.
+- Codex CLI defaults that `agents/codex.toml` declares, and Pi settings that `agents/pi.json` declares.
 - The skills and commands `agents/installs.json` lists for this machine.
 - Memory off in every harness.
 
@@ -40,12 +41,12 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## Steps
 
-1. **Inspect.** Find each harness on the machine, read its reference, then the non-secret configuration fields that reference needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a workstation repo, read `references/workstation.md` and the repository's `agents/instructions.md`, `agents/permissions.json` and `agents/installs.json` in `<path-to-workstation-repo>`. For Codex, inspect the optional `agents/codex.toml` as its reference directs; use one resolved config home throughout setup and verification.
+1. **Inspect.** Find each harness on the machine, read its reference, then the non-secret configuration fields that reference needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a workstation repo, read `references/workstation.md` and the repository's `agents/instructions.md`, `agents/permissions.json` and `agents/installs.json` in `<path-to-workstation-repo>`. For Codex, inspect the optional `agents/codex.toml` as its reference directs; use one resolved config home throughout setup and verification. For Pi, do the same with `agents/pi.json` and one resolved agent folder.
    - **When the pointer is missing:** read `references/workstation.md`, then ask the user once for `<workstation-repo>` and `<path-to-workstation-repo>`, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
    - **When the pointer records no workstation repo:** set up the machine as `references/workstation.md` says for a run without one, or, when the user names one now, as it says for rewriting the pointer.
    - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
    - **When trying a change without touching the real machine:** run the steps against a copy of the home folder in the project's `.scratch/`, and check it with `verify.py --home <copy>`. Start no harness there, since it would read the real login.
-2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, declared supported Codex defaults, and the installs: every skill and command `agents/installs.json` lists for this machine, each skill up to date. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
+2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, declared supported Codex defaults, declared Pi defaults, and the installs: every skill and command `agents/installs.json` lists for this machine, each skill up to date. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
 
    Work out what each harness should hold, from `rules.json`, the personal permissions, the shared file's shape and the harness's reference, and compare it with what the machine holds. Write the whole diff: per harness and file, the exact entries or a unified diff, each line marked:
 
@@ -73,7 +74,7 @@ Shared lines first. Each harness then has its own section for the lines only tha
 ### Shared
 
 - `rules ok`
-- a `hook wired` line for every harness found
+- a `hook wired` line for every harness found, except Pi's `hook gap`
 - `personal ok` or `personal none`, and no `personal FAIL`
 - no `harness FAIL`; a `harness gap` names instructions for a harness this skill can't deliver to yet
 
@@ -92,6 +93,14 @@ No further line. The `hook wired` line is the check, and each personal permissio
 ### opencode
 
 No further line. The `hook wired` line is the check. Details: [references/opencode.md](references/opencode.md).
+
+### Pi
+
+[references/pi.md](references/pi.md)
+
+- When Pi's agent folder exists, `pi ok` for the `AGENTS.md` link, and a `pi same` line per key `agents/pi.json` declares, or `pi none` with no such file. A `pi FAIL` means the audit is not done.
+- Its `hook gap` line is expected: Pi has no permission system, and the adapter that would run the hook isn't designed yet. Name it in the report: no rule-table row applies to Pi.
+- A `pi extra` line is a broken skill link, for the user to remove.
 
 ### Cursor
 
@@ -149,7 +158,7 @@ A harness that matches a command's text catches only the spellings it lists, so 
 
 - **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
 - **allow-and-report** rows: it writes one JSON line per call to `<report-folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
-- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why). Cursor has no ask list at all, so there the hook refuses every ask row, `approver` or not.
+- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why). Cursor has no ask list at all, so there the hook refuses every ask row, `approver` or not. Pi runs no hook yet, so no row reaches it (references/pi.md).
 - **allow** rows: it says nothing; the harness's native allow entries let the call run without a prompt.
 
 A malformed personal file leaves the table's rows in force: the hook skips the personal permissions and `verify.py` reports the file.
@@ -187,6 +196,7 @@ Name these once in every audit:
   - [references/codex.md](references/codex.md): Codex.
   - [references/opencode.md](references/opencode.md): opencode.
   - [references/cursor.md](references/cursor.md): Cursor's IDE and CLI.
+  - [references/pi.md](references/pi.md): Pi, with permissions and the hook as a gap.
 
 ## Scripts
 
@@ -195,5 +205,6 @@ Name these once in every audit:
   - **Codex:** its own policy check, plus declared defaults, installed support and override gaps at the resolved config home.
   - **opencode:** the hook wiring only.
   - **Cursor:** Auto-review and the sandbox, as [references/cursor.md](references/cursor.md) describes.
+  - **Pi:** the instructions link, declared defaults and broken skill links, with the hook as a gap, at the resolved agent folder.
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
