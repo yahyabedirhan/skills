@@ -101,10 +101,6 @@ class PluginsTest(PluginsHome):
         self.installs(MCP)
         self.assertRegex(self.lines()[0], r"^n/a Cursor: docs \(mcp\) .*not set up here")
 
-    def test_the_layout_takes_the_same_harness_names_as_the_plugins_list(self):
-        from setupmachine import layout
-        self.assertEqual(set(layout.HARNESS_NAMES), set(plugins.LABELS))
-
     def test_harnesses_without_delivery_are_gaps(self):
         self.installs({**MCP, "harnesses": ["opencode", "claude-code"]})
         lines = self.lines()

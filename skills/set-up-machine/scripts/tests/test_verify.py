@@ -774,6 +774,8 @@ class HarnessInstructionsTest(PersonalHome, unittest.TestCase):
             "not json": (None, r"setup/harnesses\.json isn't valid JSON"),
             "no version": ({"harnesses": {}}, r"setup/harnesses\.json has no `version`"),
             "another version": ({"version": 2, "harnesses": {}}, r"unsupported version 2"),
+            "float version": ({"version": 1.0, "harnesses": {}}, r"unsupported version 1\.0"),
+            "boolean version": ({"version": True, "harnesses": {}}, r"unsupported version True"),
             "unknown top key": ({"version": 1, "harnesses": {}, "extra": 1}, r"unknown key 'extra'"),
             "unknown harness key": ({"version": 1, "harnesses": {"cursor": {"rules": CURSOR_PATH}}},
                                     r"unknown key `harnesses\.cursor\.rules`"),
@@ -820,6 +822,8 @@ class HarnessInstructionsTest(PersonalHome, unittest.TestCase):
         self.assertEqual(code, 0)
 
     def test_a_harness_without_delivery_yet_is_a_gap(self):
+        self.write("code/personal/harnesses/codex-cli/instructions.md", "Codex.\n")
+        self.write("code/personal/harnesses/opencode/config/opencode.json", "{}\n")
         self.harnesses({"codex": {"instructions": "harnesses/codex-cli/instructions.md"},
                         "opencode": {"config": "harnesses/opencode/config/opencode.json"}})
         code, lines = self.harness_lines()
@@ -828,6 +832,13 @@ class HarnessInstructionsTest(PersonalHome, unittest.TestCase):
         self.assertRegex(lines[1], r"harness +gap +opencode: .*opencode\.json is its config, but set-up-machine "
                                    r"can't deliver a config to opencode yet")
         self.assertEqual(len(lines), 2, lines)
+
+    def test_a_missing_file_for_a_harness_without_delivery_fails(self):
+        self.harnesses({"codex": {"instructions": "harnesses/codex-cli/instructions.md"}})
+        code, lines = self.harness_lines()
+        self.assertRegex(lines[0], r"harness +FAIL +codex: .*`harnesses\.codex\.instructions` points at "
+                                   r".*harnesses/codex-cli/instructions\.md, which doesn't exist")
+        self.assertEqual(code, 1)
 
     def test_a_harness_with_only_config_gives_cursor_nothing(self):
         self.harnesses({"pi": {"config": "harnesses/pi/config/settings.json"}})

@@ -14,7 +14,7 @@ Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CL
   - `setup/instructions.md`: the working agreement, the glossaries, which tool fills each role, and the personal workflow;
   - `setup/permissions.json`: the **personal permissions**, rows each harness carries beside the rule table's;
   - `setup/installs.json`: the skills, plugins and commands every machine gets;
-  - `setup/harnesses.json`: where each harness's own files are in the repository: its instructions, and its declared defaults (`config`), today Codex CLI defaults and Pi settings.
+  - `setup/harnesses.json`: where each harness's instructions and declared defaults are. Today only Codex and Pi have declared defaults.
 
 ## Outputs
 

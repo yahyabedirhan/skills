@@ -8,15 +8,16 @@ it is cloned, or says there is none:
 
 layout.py names each file the repository holds. Its instructions file holds an optional
 `## Working agreement` and `## Glossary`, an `## Environment defaults` table (its Role and
-Tool columns are read; any other column is notes) followed by optional `### <tool-name> glossary` subsections, and a
-`## Personal workflow` section. The shared global instructions file,
-`~/.config/agents/AGENTS.md`, should carry those Tool values (`none` for a role the repository
-leaves out), and the text of each other part the repository has and none it lacks. The pointer
-itself fills two roles, `workstation-repo` and `path-to-workstation-repo`, as it names them.
+Tool columns are read; any other column is notes) followed by optional
+`### <tool-name> glossary` subsections, and a `## Personal workflow` section. The shared global
+instructions file, `~/.config/agents/AGENTS.md`, should carry those Tool values (`none` for a
+role the repository leaves out), and the text of each other part the repository has and none
+it lacks. The pointer itself fills two roles, `workstation-repo` and `path-to-workstation-repo`,
+as it names them.
 
-Its optional harnesses file can point at a harness's own instructions, for that harness only: the text
-under `## Instructions` goes into that harness's own generated file (`HARNESS_FILES`), and
-`check_harnesses` compares the two.
+Its optional harnesses file can point at a harness's own instructions, for that harness only:
+the text under `## Instructions` goes into that harness's own generated file (`HARNESS_FILES`),
+and `check_harnesses` compares the two.
 
 Its permissions file holds personal permissions in the rule table's format, which may
 also take the level `allow`; `permissions` loads them for the hook and the verify script.
@@ -155,13 +156,19 @@ def check_harnesses(home: Path) -> list:
     except layout.LayoutError as exc:
         return [("FAIL", str(exc))]
     lines = []
+    undelivered = {"instructions": ("has instructions", "them", HARNESS_FILES),
+                   "config": ("is its config", "a config", CONFIG_READERS)}
     for harness, files in pointed.items():
-        if "instructions" in files and harness not in HARNESS_FILES:
-            lines.append(("gap", f"{harness}: {files['instructions']} has instructions, but set-up-machine "
-                                 f"can't deliver them to {harness} yet"))
-        if "config" in files and harness not in CONFIG_READERS:
-            lines.append(("gap", f"{harness}: {files['config']} is its config, but set-up-machine "
-                                 f"can't deliver a config to {harness} yet"))
+        for kind, (what, thing, delivered) in undelivered.items():
+            if kind not in files or harness in delivered:
+                continue
+            try:
+                path = layout.harness_file(pointer.clone, harness, kind)
+            except layout.LayoutError as exc:
+                lines.append(("FAIL", f"{harness}: {exc}"))
+                continue
+            lines.append(("gap", f"{harness}: {path} {what}, but set-up-machine "
+                                 f"can't deliver {thing} to {harness} yet"))
     for harness, (rel, label, marker) in HARNESS_FILES.items():
         target = home / rel
         written = target.read_text() if target.is_file() else None

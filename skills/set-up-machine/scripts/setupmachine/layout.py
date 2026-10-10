@@ -24,7 +24,8 @@ INSTRUCTIONS = FOLDER / "instructions.md"
 PERMISSIONS = FOLDER / "permissions.json"
 INSTALLS = FOLDER / "installs.json"
 HARNESSES = FOLDER / "harnesses.json"
-HARNESS_NAMES = ("claude-code", "codex", "cursor", "opencode", "pi")  # the same names as plugins.LABELS
+HARNESS_LABELS = {"claude-code": "Claude Code", "cursor": "Cursor", "codex": "Codex", "opencode": "opencode", "pi": "Pi"}
+HARNESS_NAMES = tuple(sorted(HARNESS_LABELS))
 KINDS = ("instructions", "config")
 KEYS = ("version", "harnesses")
 
@@ -77,7 +78,7 @@ def harness_files(clone: Path) -> dict:
             raise LayoutError(f"{path}: unknown key {key!r}; it takes {', '.join(KEYS)}")
     if "version" not in data:
         raise LayoutError(f"{path} has no `version`; add \"version\": 1")
-    if data["version"] != 1 or isinstance(data["version"], bool):
+    if type(data["version"]) is not int or data["version"] != 1:
         raise LayoutError(f"{path}: unsupported version {data['version']!r}; it takes 1")
     harnesses = data.get("harnesses", {})
     if not isinstance(harnesses, dict):

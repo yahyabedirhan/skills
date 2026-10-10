@@ -38,7 +38,7 @@ from .personal import PersonalError, permissions, read_pointer
 
 KINDS = ("bundle", "mcp")
 KEYS = {"name", "kind", "source", "marketplace", "server", "harnesses", "os", "mcp_policy"}
-LABELS = {"claude-code": "Claude Code", "cursor": "Cursor", "codex": "Codex", "opencode": "opencode", "pi": "Pi"}
+LABELS = layout.HARNESS_LABELS
 OSES = {"macos": "darwin", "linux": "linux"}
 SOURCE = re.compile(r"^[A-Za-z0-9_.-]+@[A-Za-z0-9_.-]+$")
 MARKETPLACE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
