@@ -5,7 +5,6 @@ python3 -m unittest discover -s skills/set-up-machine/scripts/tests
 import io
 import json
 import re
-import subprocess
 import sys
 import tempfile
 import unittest
@@ -72,6 +71,9 @@ class PluginsTest(PluginsHome):
         self.assertEqual(len(lines), 2, lines)
         self.assertRegex(lines[0], r"^ok Claude Code: exa \(bundle\) exa@claude-plugins-official is installed and enabled")
         self.assertRegex(lines[1], r"^ok Cursor: exa \(bundle\) is imported from Claude Code as plugin-exa-exa")
+        for line in lines:
+            self.assertIn("declaration matches, readiness only", line)
+            self.assertIn("latest release is unverified", line)
 
     def test_a_missing_or_disabled_bundle_fails_in_both(self):
         self.installs(EXA)
@@ -137,6 +139,14 @@ class PluginsTest(PluginsHome):
         self.write(".config/agents/source.md", "# Workstation repo\n\n- Repository: none\n")
         self.assertEqual(self.lines(), [])
 
+    def test_verify_separates_persisted_checks_from_latest_versions(self):
+        self.installs(EXA)
+        self.claude_has("exa@claude-plugins-official")
+        out = io.StringIO()
+        verify.main(["--home", str(self.home), "--rules", str(TABLE), "--no-codex"], out)
+        self.assertRegex(out.getvalue(), r"freshness +gap +Latest harness, skill, plugin and tool versions")
+        self.assertIn("not remote releases", out.getvalue())
+
     def test_verify_prints_plugin_lines(self):
         self.installs(EXA)
         self.claude_has("exa@claude-plugins-official")
@@ -147,8 +157,8 @@ class PluginsTest(PluginsHome):
         self.assertRegex(got[0], r"^plugin +ok +Claude Code: exa")
 
 
-WEB = {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@0.38.0", "harnesses": ["pi"]}
-TOOLS = {"name": "tools", "kind": "bundle", "source": "git:github.com/owner-a/pi-tools@v1", "harnesses": ["pi"]}
+WEB = {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@latest", "harnesses": ["pi"]}
+TOOLS = {"name": "tools", "kind": "bundle", "source": "git:github.com/owner-a/pi-tools", "harnesses": ["pi"]}
 
 
 class PiPluginsTest(PluginsHome):
@@ -162,8 +172,8 @@ class PiPluginsTest(PluginsHome):
         self.write(".pi/agent/settings.json", {"defaultModel": "model-a", "packages": list(extensions), **extra})
 
     def test_a_pi_extension_source_is_valid_only_on_an_entry_for_pi_alone(self):
-        for source in ("npm:pi-web-access@0.38.0", "npm:@scope-a/pi-tools", "git:github.com/owner-a/pi-tools@v1",
-                       "https://github.com/owner-a/pi-tools@v1"):
+        for source in ("npm:pi-web-access@latest", "npm:@scope-a/pi-tools", "git:github.com/owner-a/pi-tools",
+                       "https://github.com/owner-a/pi-tools"):
             self.installs({**WEB, "source": source})
             self.assertFalse(any(l.startswith("FAIL ") and "plugins[0]" in l for l in self.lines()), source)
         for entry, message in (({**WEB, "harnesses": ["pi", "claude-code"]}, "fits only an entry whose only harness is pi"),
@@ -180,35 +190,46 @@ class PiPluginsTest(PluginsHome):
             self.assertIn(message, lines[0])
 
     def test_the_same_pi_extension_twice_is_refused(self):
-        self.installs(WEB, {**WEB, "name": "web-again", "source": "npm:pi-web-access@0.39.0"})
+        self.installs(WEB, {**WEB, "name": "web-again", "source": "npm:pi-web-access"})
         lines = self.lines()
         self.assertEqual(len(lines), 1, lines)
         self.assertIn("names the same Pi extension as plugins[0]", lines[0])
 
     def test_an_extension_in_settings_is_ok_as_a_string_or_an_object(self):
         self.installs(WEB, TOOLS)
-        self.pi_has("npm:pi-web-access@0.38.0", {"source": "git:github.com/owner-a/pi-tools@v1", "skills": []})
+        self.pi_has("npm:pi-web-access@latest", {"source": "git:github.com/owner-a/pi-tools", "skills": []})
         lines = self.lines()
         self.assertEqual(len(lines), 2, lines)
-        self.assertRegex(lines[0], r"^ok Pi: web \(bundle\) npm:pi-web-access@0\.38\.0 is an extension in .*\.pi/agent/settings\.json")
-        self.assertRegex(lines[1], r"^ok Pi: tools \(bundle\) git:github\.com/owner-a/pi-tools@v1 is an extension in ")
+        self.assertRegex(lines[0], r"^ok Pi: web \(bundle\) npm:pi-web-access@latest is an extension in .*\.pi/agent/settings\.json")
+        self.assertRegex(lines[1], r"^ok Pi: tools \(bundle\) git:github\.com/owner-a/pi-tools is an extension in ")
+
+    def test_moving_sources_do_not_claim_installed_code_is_latest(self):
+        for source in ("npm:pi-web-access@latest", "npm:@scope-a/pi-tools",
+                       "git:github.com/owner-a/pi-tools"):
+            self.installs({**WEB, "source": source})
+            self.pi_has(source)
+            line = self.lines()[0]
+            self.assertEqual(len(self.lines()), 1)
+            self.assertTrue(line.startswith("ok "), line)
+            self.assertIn("declaration matches", line)
+            self.assertIn("installed code and latest release are unverified", line)
 
     def test_a_missing_extension_or_another_version_fails(self):
         self.installs(WEB, TOOLS)
-        self.pi_has("npm:pi-web-access@0.37.0", "https://github.com/owner-a/pi-tools.git@v2")
+        self.pi_has("npm:pi-web-access", "https://github.com/owner-a/pi-tools.git")
         lines = self.lines()
-        self.assertRegex(lines[0], r"^FAIL Pi: web \(bundle\) .*has npm:pi-web-access@0\.37\.0 instead of npm:pi-web-access@0\.38\.0")
-        self.assertRegex(lines[1], r"^FAIL Pi: tools \(bundle\) .*has https://github\.com/owner-a/pi-tools\.git@v2 instead")
+        self.assertRegex(lines[0], r"^FAIL Pi: web \(bundle\) .*has npm:pi-web-access instead of npm:pi-web-access@latest")
+        self.assertRegex(lines[1], r"^FAIL Pi: tools \(bundle\) .*has https://github\.com/owner-a/pi-tools\.git instead")
         self.pi_has()
-        self.assertRegex(self.lines()[0], r"^FAIL Pi: web \(bundle\) npm:pi-web-access@0\.38\.0 isn't an extension in .*settings\.json")
+        self.assertRegex(self.lines()[0], r"^FAIL Pi: web \(bundle\) npm:pi-web-access@latest isn't an extension in .*settings\.json")
         (self.home / ".pi/agent/settings.json").unlink()
-        self.assertRegex(self.lines()[0], r"^FAIL Pi: web \(bundle\) npm:pi-web-access@0\.38\.0 isn't an extension in ")
+        self.assertRegex(self.lines()[0], r"^FAIL Pi: web \(bundle\) npm:pi-web-access@latest isn't an extension in ")
 
     def test_a_configured_extension_the_list_leaves_out_is_extra(self):
         self.installs(WEB)
-        self.pi_has("npm:pi-web-access@0.38.0", "npm:@scope-a/pi-todo@2.0.0")
+        self.pi_has("npm:pi-web-access@latest", "npm:@scope-a/pi-todo")
         lines = self.lines()
-        self.assertIn("extra Pi: npm:@scope-a/pi-todo@2.0.0 is an extension in "
+        self.assertIn("extra Pi: npm:@scope-a/pi-todo is an extension in "
                       f"{self.home / '.pi/agent/settings.json'} but not in the plugins list", lines)
         self.assertEqual(len(lines), 2, lines)
 
@@ -225,7 +246,7 @@ class PiPluginsTest(PluginsHome):
         import shutil
         shutil.rmtree(self.home / ".pi")
         folder = self.home / "elsewhere/pi"
-        self.write("elsewhere/pi/settings.json", {"packages": ["npm:pi-web-access@0.38.0"]})
+        self.write("elsewhere/pi/settings.json", {"packages": ["npm:pi-web-access@latest"]})
         self.installs(WEB)
         lines = [f"{s} {t}" for s, t in plugins.check(self.home, folder)]
         self.assertRegex(lines[0], r"^ok Pi: web \(bundle\) .* is an extension in " + re.escape(f"{folder}/settings.json"))
@@ -251,44 +272,6 @@ class PiPluginsTest(PluginsHome):
         self.assertRegex(self.lines()[0], r"^gap Pi: docs \(mcp\) is in .*mcp\.json, but -builtin:mcp in .*settings\.json "
                                           r"turns off Pi's built-in MCP")
 
-    def git(self, folder, *args):
-        return subprocess.run(["git", "-C", str(folder), *args], check=True, capture_output=True, text=True).stdout.strip()
-
-    def checkout(self, *tags):
-        """Pi's checkout of owner-a/pi-tools, with one commit per tag, left at the last tag."""
-        folder = self.home / ".pi/agent/git/github.com/owner-a/pi-tools"
-        folder.mkdir(parents=True)
-        self.git(folder, "init", "-q")
-        for tag in tags:
-            self.git(folder, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q",
-                     "--allow-empty", "-m", tag)
-            self.git(folder, "-c", "user.name=t", "-c", "user.email=t@example.com", "tag", "-a", tag, "-m", tag)
-        return folder
-
-    def test_a_git_checkout_at_another_ref_fails_with_pi_update(self):
-        folder = self.checkout("v1")
-        self.installs({**TOOLS, "source": "git:github.com/owner-a/pi-tools@v2"})
-        self.pi_has("git:github.com/owner-a/pi-tools@v2")
-        self.assertRegex(self.lines()[0], r"^FAIL Pi: tools \(bundle\) .*checkout at .*pi-tools isn't at v2; "
-                                          r"run `pi update git:github\.com/owner-a/pi-tools@v2`")
-        self.git(folder, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "--allow-empty", "-m", "v2")
-        self.git(folder, "tag", "v2")
-        self.git(folder, "checkout", "-q", "v1")
-        self.assertRegex(self.lines()[0], r"^FAIL Pi: tools \(bundle\) .*isn't at v2")
-        self.git(folder, "checkout", "-q", "v2")
-        self.assertRegex(self.lines()[0], r"^ok Pi: tools \(bundle\) .* is an extension in ")
-
-    def test_a_checkout_pi_updated_through_fetch_head_is_ok(self):
-        # `pi update` runs `git fetch origin <ref>` and resets to FETCH_HEAD, so the tag can be absent locally.
-        folder = self.checkout("v1", "v2")
-        tag = self.git(folder, "rev-parse", "v2")
-        self.git(folder, "checkout", "-q", "v2")
-        self.git(folder, "tag", "-d", "v2")
-        (folder / ".git/FETCH_HEAD").write_text(f"{tag}\t\ttag 'v2' of https://github.com/owner-a/pi-tools\n")
-        self.installs({**TOOLS, "source": "git:github.com/owner-a/pi-tools@v2"})
-        self.pi_has("git:github.com/owner-a/pi-tools@v2")
-        self.assertRegex(self.lines()[0], r"^ok Pi: tools \(bundle\) ")
-
     def test_a_git_extension_not_installed_yet_is_ok(self):
         self.installs(TOOLS)
         self.pi_has(TOOLS["source"])
@@ -296,7 +279,7 @@ class PiPluginsTest(PluginsHome):
 
     def test_verify_prints_pi_plugin_lines_for_the_agent_folder_it_resolves(self):
         folder = self.home / "elsewhere/pi"
-        self.write("elsewhere/pi/settings.json", {"packages": ["npm:pi-web-access@0.38.0"]})
+        self.write("elsewhere/pi/settings.json", {"packages": ["npm:pi-web-access@latest"]})
         self.installs(WEB)
         out = io.StringIO()
         verify.main(["--home", str(self.home), "--rules", str(TABLE), "--no-codex", "--pi-agent-dir", str(folder)], out)

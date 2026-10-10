@@ -2,6 +2,28 @@
 
 The decisions behind the `set-up-machine` skill. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why. The spec is "Spec: every harness and project is set up and audited from the skills" (#49).
 
+## 2026-10-10: install latest, reproduce the setup process
+
+Reproducibility preserves selected tools, configuration, guardrails, and installation steps.
+It does not freeze machine software at recorded versions.
+Use the latest stable release for released tools.
+Use the latest default branch for repository-distributed code.
+
+Apply this policy to every selected harness, skill, plugin, package, and command-line tool.
+Keep installed versions and source commits as audit history.
+Keep historical citations, test fixtures, and application dependency lockfiles as evidence.
+
+A matching declaration proves configuration, not current installed code.
+The read-only verifier reports that distinction without downloading or modifying software.
+The agent checks upstream freshness separately during inspection.
+Report unavailable metadata as a gap, not as proof of latest.
+
+Preserve local modifications, installation channels, authentication, and unrelated settings during updates.
+Check compatibility and guardrails against the new installed version.
+Report failed checks instead of making an old version the desired state.
+
+This supersedes recommendations to prefer fixed Pi package versions or tags for machine setup.
+
 ## 2026-10-01: retain the occupied caller at settlement
 
 - **The session-host fallback keeps the caller and its occupied worktree open.** Remove the example that hands the user an own-worktree release command: it contradicts the settlement decisions in [Workflow: Make Herdr and Treehouse settlement reliable without closing topology](https://github.com/yahyabedirhan/skills/issues/123). This changes the source role guidance only; machine reconciliation remains a post-merge follow-up.
@@ -304,4 +326,10 @@ The maintainer asked for Pi's extensions used as Pi intends them, with parity to
 - **Extension identity follows Pi.** Pi treats an npm source by its name, and a git source by its host and repository path without the ref. `verify.py` uses the same identity. It prints `FAIL` for another version of a listed extension, and `extra` for a configured extension the list leaves out.
 - **A changed git ref needs `pi update`.** At startup Pi installs only a missing extension, and reinstalls an npm one whose version doesn't match. It leaves an existing git checkout at its old ref: a live change from `@v0.1.0` to `@v0.2.0` stayed at `v0.1.0` until `pi update <source>` ran. `verify.py` compares the checkout's `HEAD` with the ref, read-only through `git rev-parse`. It also reads `FETCH_HEAD`, since `pi update` fetches the ref and resets to it without a local tag. A checkout at another commit is a `FAIL` that names the `pi update` command.
 - **Standalone MCP servers go in `<agent-dir>/mcp.json`,** the file Pi's built-in MCP client reads. `verify.py` compares the entry as it does for Cursor. It prints a `gap` when `-builtin:mcp` turns that client off.
+
+## 2026-10-10: no pinned packages
+
+- **Setup does not handle a pinned package.** Every source installs latest. Recorded versions are history only. The maintainer has no pinned-package use case.
+- **The verifier does not detect a pin.** It prints no policy gap for a fixed source. It does not compare a git checkout with a declared ref. It does not advise `pi update` for a pin.
+- **This replaces** the *Pi plugins* bullet "A changed git ref needs `pi update`".
 - **One source for Pi extensions.** `agents/pi.json` could also declare `packages`, as a Pi setting. Two lists would disagree, so a `packages` key there is a `gap` that asks the user to move it into `plugins`. The skill neither compares nor writes it.

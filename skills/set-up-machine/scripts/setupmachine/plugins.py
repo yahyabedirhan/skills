@@ -8,7 +8,7 @@ should have it:
     {"name": "exa", "kind": "bundle", "source": "exa@claude-plugins-official",
      "harnesses": ["claude-code", "cursor"]}
     {"name": "docs", "kind": "mcp", "server": {"url": "https://..."}, "harnesses": ["cursor"]}
-    {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@0.38.0", "harnesses": ["pi"]}
+    {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@latest", "harnesses": ["pi"]}
 
 What each harness can take (references/workstation.md, and each harness reference's Plugins section):
 
@@ -22,13 +22,13 @@ What each harness can take (references/workstation.md, and each harness referenc
   Code's `<plugin>@<marketplace>` can't reach Pi.
 - Codex and opencode: a gap for now.
 
-`check` only reads files; the agent installs and writes, as SKILL.md says.
+`check` only reads persisted setup; the agent checks latest upstream versions, installs and writes,
+as SKILL.md says. A matching declaration does not establish the installed code's freshness.
 """
 from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -253,41 +253,12 @@ class _Pi:
         if self.error:
             return ("FAIL", f"Pi: {tag} can't be checked; {self.error}")
         if source in self.extensions:
-            stale = self._stale_checkout(source)
-            if stale:
-                return ("FAIL", f"Pi: {tag} {source} is an extension in {self.settings_path}, but its checkout at "
-                                f"{stale[0]} isn't at {stale[1]}; run `pi update {source}`")
-            return ("ok", f"Pi: {tag} {source} is an extension in {self.settings_path}")
+            return ("ok", f"Pi: {tag} {source} is an extension in {self.settings_path}; "
+                          "declaration matches, installed code and latest release are unverified")
         other = [p for p in self.extensions if pi_identity(p) == pi_identity(source)]
         if other:
             return ("FAIL", f"Pi: {tag} {self.settings_path} has {other[0]} instead of {source}")
         return ("FAIL", f"Pi: {tag} {source} isn't an extension in {self.settings_path}")
-
-    def _stale_checkout(self, source: str):
-        """(checkout, ref) when Pi's checkout of a pinned git extension is at another commit; else None.
-
-        At startup Pi installs only a missing git extension and leaves an existing checkout where it is,
-        so a changed ref needs `pi update <source>`, which fetches the ref and resets to FETCH_HEAD. An npm
-        extension needs no check: Pi reinstalls one whose version doesn't match at startup."""
-        git = _git_source(source)
-        if not git or not git[2]:
-            return None
-        folder = self.folder / "git" / git[0] / git[1]
-        head = _rev(folder, "HEAD")
-        if not head:
-            return None  # not installed yet, or unreadable: a new session installs a missing one
-        ref = git[2]
-        target = None
-        try:
-            for record in (folder / ".git/FETCH_HEAD").read_text().splitlines():
-                sha, _, note = record.partition("\t")
-                if f"'{ref}'" in note:
-                    target = _rev(folder, f"{sha}^{{commit}}")
-                    break
-        except OSError:
-            pass
-        target = target or _rev(folder, f"{ref}^{{commit}}")
-        return None if target == head else (folder, ref)
 
     def _server(self, tag: str, entry: dict):
         path = self.folder / "mcp.json"
@@ -305,18 +276,6 @@ class _Pi:
         return ("ok", f"Pi: {tag} is in {path}")
 
 
-def _rev(folder: Path, name: str):
-    """The commit a name resolves to in a git checkout, read-only; None when it doesn't resolve."""
-    if not (folder / ".git").exists():
-        return None
-    try:
-        done = subprocess.run(["git", "-C", str(folder), "rev-parse", "--verify", "--quiet", name],
-                              capture_output=True, text=True, timeout=10)
-    except (OSError, subprocess.SubprocessError):
-        return None
-    return done.stdout.strip() or None if done.returncode == 0 else None
-
-
 def _claude_code(home: Path, tag: str, entry: dict, claude: dict):
     if not (home / ".claude").is_dir():
         return ("n/a", f"Claude Code: {tag} isn't checked; Claude Code is not set up here")
@@ -328,7 +287,7 @@ def _claude_code(home: Path, tag: str, entry: dict, claude: dict):
         return ("FAIL", f"Claude Code: {tag} {source} isn't installed")
     if not claude[source]:
         return ("FAIL", f"Claude Code: {tag} {source} isn't enabled in ~/.claude/settings.json")
-    return ("ok", f"Claude Code: {tag} {source} is installed and enabled")
+    return ("ok", f"Claude Code: {tag} {source} is installed and enabled; declaration matches, readiness only; latest release is unverified")
 
 
 def _cursor(home: Path, tag: str, entry: dict, claude: dict):
@@ -342,7 +301,7 @@ def _cursor(home: Path, tag: str, entry: dict, claude: dict):
                             "imports bundles only from Claude Code")
         names = [cursor_server_name(source, s) for s in _bundle_servers(home, source)]
         how = f"as {', '.join(names)}" if names else "(skills only; no MCP server)"
-        return ("ok", f"Cursor: {tag} is imported from Claude Code {how}")
+        return ("ok", f"Cursor: {tag} is imported from Claude Code {how}; declaration matches, readiness only; latest release is unverified")
     path = folder / "mcp.json"
     try:
         servers = json.loads(path.read_text()).get("mcpServers", {}) if path.is_file() else {}

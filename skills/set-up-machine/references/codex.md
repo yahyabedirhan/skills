@@ -52,7 +52,7 @@ A block a tool wrote into the old file becomes the upstream skill it came from, 
 |---|---|---|
 | `<!-- context7 -->` … `<!-- context7 -->` | `find-docs` | `npx --yes skills add upstash/context7 -s find-docs -g -a codex [-a claude-code] -y` |
 
-Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. It's `present` once `~/.agents/skills/find-docs/SKILL.md` exists. The block's advice to run `ctx7` outside the sandbox needs no line: an `allow` rule for `npx ctx7@latest` does that, and is `extra` where the machine has it.
+Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. Compare its installed folder hash with the source's latest default branch before marking it `present` (workstation.md, *A skill*). File existence alone proves presence, not freshness. The block's advice to run `ctx7` outside the sandbox needs no line: an `allow` rule for `npx ctx7@latest` does that, and is `extra` where the machine has it.
 
 ## Memory
 

@@ -5,7 +5,7 @@ description: Set up or audit a machine's coding-agent harnesses from one rule ta
 
 # Set up machine
 
-Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cursor's IDE and CLI, Pi) match its sources. Running the skill again is the **audit**: the same steps, ending with a diff that changes nothing.
+Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CLI, Pi) from its sources. Install or update each selected tool to the latest available version. Running the skill again is the **audit**: check configuration and freshness, then propose any required updates.
 
 ## Sources
 
@@ -30,6 +30,9 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## Rules for every run
 
+- Reproduce installation choices, configuration and steps, not a snapshot of software versions. Use the latest stable release, or the latest default branch for repository-distributed code. Apply this to harnesses, skills, plugins, packages and command-line tools.
+- Record installed versions and source commits as audit evidence, not future installation targets. Keep historical citations and dependency lockfiles separate from machine setup choices.
+- Check the current upstream source before calling an installation up to date. A matching declaration or an existing executable proves presence only. Report unavailable freshness checks as `gap`.
 - Keep every entry the rule table didn't produce, as it is: it's the user's.
 - Harness formats change: check the docs a harness reference links before writing. Where they differ, follow the docs and name the difference in your report.
 
@@ -41,16 +44,16 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
 ## Steps
 
-1. **Inspect.** Find each harness on the machine, read its reference, then the non-secret configuration fields that reference needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a workstation repo, read `references/workstation.md` and the repository's `agents/instructions.md`, `agents/permissions.json` and `agents/installs.json` in `<path-to-workstation-repo>`. For Codex, inspect the optional `agents/codex.toml` as its reference directs; use one resolved config home throughout setup and verification. For Pi, do the same with `agents/pi.json` and one resolved agent folder.
+1. **Inspect.** Find each selected harness and tool, compare its installed version with the latest source, and read its current documentation. Preserve its installation channel. Read each harness reference, then the non-secret configuration fields it needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a workstation repo, read `references/workstation.md` and the repository's `agents/instructions.md`, `agents/permissions.json` and `agents/installs.json` in `<path-to-workstation-repo>`. For Codex, inspect the optional `agents/codex.toml` as its reference directs; use one resolved config home throughout setup and verification. For Pi, do the same with `agents/pi.json` and one resolved agent folder.
    - **When the pointer is missing:** read `references/workstation.md`, then ask the user once for `<workstation-repo>` and `<path-to-workstation-repo>`, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
    - **When the pointer records no workstation repo:** set up the machine as `references/workstation.md` says for a run without one, or, when the user names one now, as it says for rewriting the pointer.
    - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
    - **When trying a change without touching the real machine:** run the steps against a copy of the home folder in the project's `.scratch/`, and check it with `verify.py --home <copy>`. Start no harness there, since it would read the real login.
-2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, declared supported Codex defaults, declared Pi defaults, and the installs: every skill and command `agents/installs.json` lists for this machine, each skill up to date. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
+2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, declared supported Codex defaults, declared Pi defaults, and the installs: every skill and command `agents/installs.json` lists for this machine, each selected installation up to date. Include harness upgrades and plugin updates, not only missing installs. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
 
    Work out what each harness should hold, from `rules.json`, the personal permissions, the shared file's shape and the harness's reference, and compare it with what the machine holds. Write the whole diff: per harness and file, the exact entries or a unified diff, each line marked:
 
-   - `added`, `tightened` (a stricter entry added where it wins), `removed`, `updated` (an installed skill behind its source);
+   - `added`, `tightened` (a stricter entry added where it wins), `removed`, `updated` (an installed harness, skill, plugin or tool behind its latest source);
    - `present`, `wired` (the hook), `found` (the MCP tools a row matched);
    - `stricter` (the machine is stricter than the table: kept), `extra` (neither the table's nor a personal permission's: kept), `ignored` (an installed skill `agents/installs.json` leaves out on purpose: kept, never installed or removed), `gap` (what the harness can't express), `none` (no such feature);
    - `personal` beside the mark of every entry a personal permission produced (`added, personal`; `present, personal`), so the user can tell those entries from the table's and never reads them as `extra`;
@@ -58,14 +61,14 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 
    Use `removed` only for memory files, a harness's own global file whose every line is already in the shared file (it becomes a link), and this skill's own wiring that points at an old script. An entry a dropped row, the table's or a personal one, left behind is `extra`, for the user to remove.
    - **When the workstation repo has `agents/installs.json`:** the diff holds a line per entry that applies to this machine, and an `n/a` line, with why, per entry that doesn't. The file is the whole list: install nothing it leaves out. `references/workstation.md` gives the format, the checks and the commands.
-   - **Without the file, with a `<skills-repo>` value:** the diff installs that repo's skills globally: `npx --yes skills add <owner>/<repo> -g -a codex -a claude-code -y`, leaving out `-a claude-code` when `~/.claude/skills` is a link to `~/.agents/skills`. It's `present` once `~/.agents/.skill-lock.json` records a skill from that source. With no value, it's a `none` line.
+   - **Without the file, with a `<skills-repo>` value:** the diff installs that repo's skills globally: `npx --yes skills add <owner>/<repo> -g -a codex -a claude-code -y`, leaving out `-a claude-code` when `~/.claude/skills` is a link to `~/.agents/skills`. Compare the installed skill hashes with the source's latest default branch, as `references/workstation.md` describes. Presence in the lock file alone does not prove freshness. With no value, it's a `none` line.
 3. **Ask once** for one approval of the whole diff. A change after that needs a new approval.
    - **When the diff holds only `added` and `updated` installs from `agents/installs.json`:** write it without asking, since the user approved that list by writing it.
 4. **Back up** every file the diff changes or removes. Before writing any file, copy each one into `~/.config/agents/backups/<UTC time as YYYYmmddTHHMMSSZ>/`, at its path relative to the home folder (`.claude/settings.json`). Copy a symlink as a link.
-5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
-6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
+5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, stop subsequent writes and report what changed before the failure. Check configuration and guardrail compatibility after upgrades; report failures rather than making an old snapshot the desired state. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
+6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no pending `added`, `updated`, `tightened` or `removed` line, and no unreported freshness gap. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
 
-   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when [What verify must show](#what-verify-must-show) passes. Report `config gap` and `config override` lines separately; they limit what the audit proves.
+   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when [What verify must show](#what-verify-must-show) passes. Report `config gap` and `config override` lines separately; they limit what the audit proves. The verifier checks persisted configuration, not current upstream releases. Complete the separate freshness checks from Inspect before reporting that every installation is latest.
 
 ## What verify must show
 

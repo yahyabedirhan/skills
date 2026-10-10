@@ -27,7 +27,7 @@ An extension that ships with Pi and loads by default, such as `builtin:mcp`, `bu
 
 **Package**:
 The unit Pi installs and shares: an npm package, a git repository or a folder that bundles extensions, skills, prompt templates and themes. The `packages` setting lists them; `pi install`, `pi list`, `pi update` and `pi remove` manage them. A package is the box; what it adds is usually one or more extensions.
-_In this skill_: a package is listed in the `plugins` setup area as a `bundle` for `pi` and called an **extension**, after what it adds. "Package" stays the name of Pi's `packages` setting and its commands.
+_In this skill_: list an installable package in the `plugins` setup area as a `bundle` for `pi`. Name its executable add-on code an extension.
 
 **Skill, prompt template, theme**:
 The other resources a package or the agent folder can hold: a skill is a `SKILL.md` folder, a prompt template a reusable `/command` prompt, a theme the terminal colors.
@@ -90,21 +90,21 @@ Each personal permission is `n/a` here: "Pi has no permission entries". The hook
 
 The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md). Docs: `packages.md` and `mcp.md`.
 
-- **A bundle** is a Pi extension: everything Pi loads from the user or from others, installed as one unit with its tools, skills, prompt templates and themes. Pi delivers extensions through its `packages` setting. The entry names only `pi`, and its `source` is the Pi extension source as Pi's `settings.json` writes it: `npm:<name>@<version>`, `git:<host>/<owner>/<repo>@<ref>`, or an `https://` git URL. Prefer a version or a tag, since Pi keeps such a source pinned.
-- **Write a bundle** into the `packages` array of `<agent-dir>/settings.json`. Pi names an extension by its npm name, or by its git host and repository path without the ref, so two sources can name one extension at different versions.
-  - `present` when an entry is the exact source, as a string or as the `source` of an object entry. Keep an object entry as it is: its resource filters are the user's.
+- **A bundle** names an installable Pi package, not necessarily a repository root. The entry names only `pi`. Use `npm:<name>@latest`, a `git:<host>/<owner>/<repo>` source, or an `https://` Git URL. Review the latest source before installing or updating it. A package can expose extensions, skills, prompt templates and themes.
+- **Write a bundle** into the `packages` array of `<agent-dir>/settings.json`. Pi names an extension by its npm name, or by its git host and repository path, so two source strings can name one extension.
+  - A matching declaration proves configuration only. Use `present` for the installation only after comparing its installed code with the latest source. Keep object entries and their resource filters.
   - `added` when no entry names the extension: append the source.
-  - `updated` when an entry names the same extension at another version or ref: replace that entry with the source.
+  - `updated` when an entry names the same extension with a different source: replace that entry with the source.
   - Keep every other entry and key, and write the file as *Declared defaults* says: back it up first, write a symlink at its target, and stop on invalid JSON.
-  - **Activation:** a new session installs a missing extension at startup, and reinstalls an npm one whose version differs. It leaves an existing git checkout at its old ref, so after an `updated` git entry run `pi update <source>` with the new source. `pi list` shows the configured extensions.
+  - **Update and activation:** use the installed Pi's documented package update command for selected packages even when their declarations match. Pi 1.1.0 uses `pi update --extensions`; `pi update` updates the managed harness itself. Startup and `pi list` do not prove freshness. Reload or restart after checking installed versions against current upstream metadata.
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `<agent-dir>/mcp.json`, keeping every other server and key. `present` when it matches, `added` when it's missing, `updated` when it differs. Back it up like `settings.json`. Pi takes server names of letters, digits, `_` and `-`.
   - A running session reads the change after `/reload`.
   - **Credentials:** a `headers` or `env` value names an environment variable, such as `${DOCS_TOKEN}`, never the secret itself. A server that uses OAuth needs the user's sign-in, with `pi mcp login <server>` or `/mcp` in a session; an agent never signs in. Pi keeps the tokens in `mcp-auth.json`.
-- **`verify.py`** prints a `plugin` line per Pi entry: `ok`, or `FAIL` when the extension is missing or at another version, or the server is missing or differs. A pinned git extension is also a `FAIL` when its checkout in `<agent-dir>/git/<host>/<owner>/<repo>` is at another commit than its ref; the line names the `pi update <source>` that fixes it. Pi not set up is `n/a`. A configured extension the list leaves out is `extra`: kept, for the user to add to the list or remove with `pi remove <source>`. A matching server is a `gap` when `extensions` in `settings.json` holds `-builtin:mcp`, since that turns off the built-in MCP client that reads `mcp.json`.
+- **`verify.py`** checks declarations, not remote freshness. It reports missing or different declarations as `FAIL`. A matching source still needs a current-source check before setup is complete. Pi not set up is `n/a`. An unlisted package is `extra`, kept for the user. A matching server is a `gap` when `-builtin:mcp` disables Pi's built-in client.
 - **Gaps:**
   - A trusted project's `.pi/settings.json` `packages` and `.pi/mcp.json` servers replace a global entry of the same extension or name in that project.
   - An extension that registers `/mcp`, such as `pi-mcp-adapter`, replaces the built-in MCP client, and Pi then ignores `mcp.json`. `verify.py` doesn't detect this.
-  - A local path isn't a source the list takes, since one path doesn't name the same extension on every machine.
+  - The structured list does not yet take local package paths. For independent directory packages, retain a clone on each machine, update it to latest default-branch code without discarding local work, and install each package directory by its resolved absolute path. Record the commit deployed as history only. Report the missing structured verification support; never replace independent packages with an overlapping root bundle.
 
 ## Pre-tool hook
 

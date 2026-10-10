@@ -862,7 +862,7 @@ class PiTest(unittest.TestCase):
 
     def test_extensions_declared_in_pi_json_are_a_gap_for_the_plugins_list(self):
         self.link()
-        self.workstation({"defaultModel": "model-a", "packages": ["npm:pi-web-access@0.38.0"]})
+        self.workstation({"defaultModel": "model-a", "packages": ["npm:pi-web-access@latest"]})
         self.write(".pi/agent/settings.json", {"defaultModel": "model-a", "packages": []})
         code, lines = self.lines()
         self.assertTrue(any(re.match(r"pi +gap +Pi: agents/pi\.json declares packages; Pi extensions belong in the plugins list, so move "
