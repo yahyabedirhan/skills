@@ -29,7 +29,6 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -73,7 +72,6 @@ def check(home: Path, pi_dir: Path | None = None) -> list:
     claude = _claude_plugins(home)
     pi = _Pi(pi_dir or home / ".pi/agent")
     lines = []
-    policy_gaps = []
     for entry in entries:
         name, kind = entry["name"], entry["kind"]
         tag = f"{name} ({kind})"
@@ -89,10 +87,6 @@ def check(home: Path, pi_dir: Path | None = None) -> list:
                 lines.append(_cursor(home, tag, entry, claude))
             elif harness == "pi":
                 lines.append(pi.check(tag, entry))
-                if pi.folder.is_dir() and kind == "bundle" and pi_fixed_source(entry["source"]):
-                    policy_gaps.append(("gap", f"Pi: {tag} {entry['source']} violates the latest-source policy; "
-                                         "fixed versions, ranges, non-latest channels and explicit Git refs "
-                                         "do not guarantee latest stable or the default branch; declaration is kept"))
             else:
                 lines.append(("gap", f"{label}: {tag} is listed, but set-up-machine can't deliver plugins to "
                                      f"{label} yet"))
@@ -106,7 +100,7 @@ def check(home: Path, pi_dir: Path | None = None) -> list:
             if pi_identity(source) not in listed:
                 lines.append(("extra", f"Pi: {source} is an extension in {pi.settings_path} but not in the "
                                        "plugins list"))
-    return lines + policy_gaps
+    return lines
 
 
 def load(path: Path) -> list:
@@ -202,15 +196,6 @@ def pi_identity(source: str):
     return f"git:{git[0]}/{git[1]}" if git else None
 
 
-def pi_fixed_source(source: str) -> bool:
-    """Whether a compatible Pi source constrains the latest-source installation policy."""
-    if source.startswith("npm:"):
-        match = NPM_SPEC.match(source[4:].strip())
-        return bool(match and match.group(2) not in (None, "latest"))
-    git = _git_source(source)
-    return bool(git and git[2])
-
-
 def _git_source(source: str):
     """(host, repository path, ref or None) of a Pi git source, or None for another form."""
     if source.startswith("git:"):
@@ -268,42 +253,12 @@ class _Pi:
         if self.error:
             return ("FAIL", f"Pi: {tag} can't be checked; {self.error}")
         if source in self.extensions:
-            stale = self._stale_checkout(source)
-            if stale:
-                return ("FAIL", f"Pi: {tag} {source} is an extension in {self.settings_path}, but its checkout at "
-                                f"{stale[0]} isn't at {stale[1]}; run `pi update {source}`")
             return ("ok", f"Pi: {tag} {source} is an extension in {self.settings_path}; "
                           "declaration matches, installed code and latest release are unverified")
         other = [p for p in self.extensions if pi_identity(p) == pi_identity(source)]
         if other:
             return ("FAIL", f"Pi: {tag} {self.settings_path} has {other[0]} instead of {source}")
         return ("FAIL", f"Pi: {tag} {source} isn't an extension in {self.settings_path}")
-
-    def _stale_checkout(self, source: str):
-        """Check legacy fixed-ref declaration consistency only, not upstream freshness.
-
-        Return (checkout, ref) when the local checkout differs from the declared Git ref.
-        Local refs and FETCH_HEAD cannot prove latest default-branch code. npm declarations
-        receive no installed-code check here."""
-        git = _git_source(source)
-        if not git or not git[2]:
-            return None
-        folder = self.folder / "git" / git[0] / git[1]
-        head = _rev(folder, "HEAD")
-        if not head:
-            return None  # not installed yet, or unreadable: a new session installs a missing one
-        ref = git[2]
-        target = None
-        try:
-            for record in (folder / ".git/FETCH_HEAD").read_text().splitlines():
-                sha, _, note = record.partition("\t")
-                if f"'{ref}'" in note:
-                    target = _rev(folder, f"{sha}^{{commit}}")
-                    break
-        except OSError:
-            pass
-        target = target or _rev(folder, f"{ref}^{{commit}}")
-        return None if target == head else (folder, ref)
 
     def _server(self, tag: str, entry: dict):
         path = self.folder / "mcp.json"
@@ -319,18 +274,6 @@ class _Pi:
             return ("gap", f"Pi: {tag} is in {path}, but -builtin:mcp in {self.settings_path} turns off Pi's "
                            "built-in MCP, which reads that file")
         return ("ok", f"Pi: {tag} is in {path}")
-
-
-def _rev(folder: Path, name: str):
-    """The commit a name resolves to in a git checkout, read-only; None when it doesn't resolve."""
-    if not (folder / ".git").exists():
-        return None
-    try:
-        done = subprocess.run(["git", "-C", str(folder), "rev-parse", "--verify", "--quiet", name],
-                              capture_output=True, text=True, timeout=10)
-    except (OSError, subprocess.SubprocessError):
-        return None
-    return done.stdout.strip() or None if done.returncode == 0 else None
 
 
 def _claude_code(home: Path, tag: str, entry: dict, claude: dict):

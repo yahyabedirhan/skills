@@ -326,4 +326,10 @@ The maintainer asked for Pi's extensions used as Pi intends them, with parity to
 - **Extension identity follows Pi.** Pi treats an npm source by its name, and a git source by its host and repository path without the ref. `verify.py` uses the same identity. It prints `FAIL` for another version of a listed extension, and `extra` for a configured extension the list leaves out.
 - **A changed git ref needs `pi update`.** At startup Pi installs only a missing extension, and reinstalls an npm one whose version doesn't match. It leaves an existing git checkout at its old ref: a live change from `@v0.1.0` to `@v0.2.0` stayed at `v0.1.0` until `pi update <source>` ran. `verify.py` compares the checkout's `HEAD` with the ref, read-only through `git rev-parse`. It also reads `FETCH_HEAD`, since `pi update` fetches the ref and resets to it without a local tag. A checkout at another commit is a `FAIL` that names the `pi update` command.
 - **Standalone MCP servers go in `<agent-dir>/mcp.json`,** the file Pi's built-in MCP client reads. `verify.py` compares the entry as it does for Cursor. It prints a `gap` when `-builtin:mcp` turns that client off.
+
+## 2026-10-10: no pinned packages
+
+- **Setup does not handle a pinned package.** Every source installs latest. Recorded versions are history only. The maintainer has no pinned-package use case.
+- **The verifier does not detect a pin.** It prints no policy gap for a fixed source. It does not compare a git checkout with a declared ref. It does not advise `pi update` for a pin.
+- **This replaces** the *Pi plugins* bullet "A changed git ref needs `pi update`".
 - **One source for Pi extensions.** `agents/pi.json` could also declare `packages`, as a Pi setting. Two lists would disagree, so a `packages` key there is a `gap` that asks the user to move it into `plugins`. The skill neither compares nor writes it.
