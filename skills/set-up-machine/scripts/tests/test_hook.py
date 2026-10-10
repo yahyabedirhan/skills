@@ -315,6 +315,24 @@ class UserApprovalTest(unittest.TestCase):
         call = hook.read_opencode({"tool": "bash", "args": {"command": "git push --force-with-lease"}})
         self.assertEqual(hook.decide(call, TABLE, HOME).denials, [])
 
+    def test_cursor_refuses_every_ask_row(self):
+        # Cursor has no native ask list, so an ask row the hook leaves alone would run unasked.
+        for command, rule in (("git push --force-with-lease", "git-push-force-with-lease"),
+                              ("git push --mirror origin", "git-push-mirror"),
+                              ("git clean -fd", "git-clean-force"),
+                              ("gh repo edit --description d", "gh-repo-edit")):
+            call = hook.read_cursor({"hook_event_name": "beforeShellExecution", "command": command, "cwd": CWD})
+            v = hook.decide(call, TABLE, HOME)
+            self.assertEqual(([h.rule.id for h in v.denials], v.asks), ([rule], []), command)
+            self.assertIn("where no one asks the user", v.denials[0].part, command)
+        call = hook.read_cursor({"hook_event_name": "beforeShellExecution", "command": "git clean -n", "cwd": CWD})
+        self.assertEqual(hook.decide(call, TABLE, HOME).denials, [])
+
+    def test_claude_code_still_asks_for_ask_rows_in_auto_mode(self):
+        payload = {"tool_name": "Bash", "tool_input": {"command": "git clean -f"}, "permission_mode": "auto", "cwd": CWD}
+        v = hook.decide(hook.read_claude_code(payload), TABLE, HOME)
+        self.assertEqual(([h.rule.id for h in v.asks], v.denials), (["git-clean-force"], []))
+
 
 class ReviewFindingsTest(unittest.TestCase):
     """The final branch review's findings on the hook."""
