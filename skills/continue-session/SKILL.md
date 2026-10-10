@@ -6,9 +6,7 @@ argument-hint: "<session id> or its place, such as \"top pane\", \"right tab\" o
 
 # Continue session
 
-Continue another session's work as a **silent reader**: read its transcript, then do the work in this session. The other session often holds a long uncached history, and any input to it re-sends that whole history.
-
-Only read the other session. Send it no text, keys, prompts or messages, and leave it unresumed, since each of those wakes it.
+Continue another session's work as a **silent reader**: read its transcript, then do the work in this session. Send the other session no text, keys, prompts or messages, and leave it unresumed: any input wakes it and re-sends its long, uncached history.
 
 ## Parameters
 
@@ -23,7 +21,7 @@ Only read the other session. Send it no text, keys, prompts or messages, and lea
 
 ## 2. Read the transcript
 
-Find the transcript on disk: Claude Code keeps it at `~/.claude/projects/<project>/<session-id>.jsonl`, with `/` and `.` in the working directory turned into `-`, and Codex under `~/.codex/sessions/`. For another harness, find where it stores its sessions. Search the transcript rather than reading it whole: read the user's requests, the last assistant messages, the latest tool results and any open decision. Then check the working directory's branch, uncommitted changes and pull requests.
+Find the transcript on disk: Claude Code keeps it at `~/.claude/projects/<project>/<session-id>.jsonl`, with `/` and `.` in the working directory turned into `-`, and Codex under `~/.codex/sessions/`. Search the transcript rather than reading it whole: read the user's requests, the last assistant messages, the latest tool results and any open decision. Then check the working directory's branch, uncommitted changes and pull requests.
 
 Read on until you can state the goal, what is done, what was in progress when it stopped, and the next step.
 
