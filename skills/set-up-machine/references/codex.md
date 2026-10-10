@@ -52,7 +52,7 @@ A block a tool wrote into the old file becomes the upstream skill it came from, 
 |---|---|---|
 | `<!-- context7 -->` … `<!-- context7 -->` | `find-docs` | `npx --yes skills add upstash/context7 -s find-docs -g -a codex [-a claude-code] -y` |
 
-Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. It's `present` once `~/.agents/skills/find-docs/SKILL.md` exists. The block's advice to run `ctx7` outside the sandbox needs no line: an `allow` rule for `npx ctx7@latest` does that, and is `extra` where the machine has it.
+Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. Compare its installed folder hash with the source's latest default branch before marking it `present` (workstation.md, *A skill*). File existence alone proves presence, not freshness. The block's advice to run `ctx7` outside the sandbox needs no line: an `allow` rule for `npx ctx7@latest` does that, and is `extra` where the machine has it.
 
 ## Memory
 
@@ -121,7 +121,7 @@ The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md
 4. For a standalone MCP server, merge `server` into `[mcp_servers.<name>]` the same way.
 5. When `require_oauth` is true, the user runs `codex mcp login <name>`. Leave the server disabled until that login is connected.
 
-Done when `verify.py` prints `plugin ok` for the entry: the bundle is enabled, its cached manifest matches, and the derived tool list matches. A missing login is a `gap`. A new session still has to show the tools.
+Done when `verify.py` prints `plugin ok` for the entry: the bundle is enabled, its cached manifest matches, and the derived tool list matches. Compare the installed plugin with the current marketplace source before calling it up to date, since `plugin ok` checks persisted setup and not the latest release. A missing login is a `gap`. A new session still has to show the tools.
 
 ## Pre-tool hook
 

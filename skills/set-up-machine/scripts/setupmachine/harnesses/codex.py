@@ -143,7 +143,8 @@ class Codex:
                     pass
             if enabled is not True or not valid:
                 return [("FAIL", f"Codex: {tag} {source} is missing, disabled or has no valid installed manifest")]
-            out.append(("ok", f"Codex: {tag} {source} is installed and enabled; server sign-in is checked separately"))
+            out.append(("ok", f"Codex: {tag} {source} is installed and enabled; declaration matches, readiness only; "
+                               "latest release is unverified; server sign-in is checked separately"))
         for parts, wanted in _targets(shaped, chosen):
             for table, key, value in _leaves(parts, wanted):
                 have = _get(self.config, table).get(key)

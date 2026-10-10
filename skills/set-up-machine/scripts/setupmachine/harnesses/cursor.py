@@ -28,7 +28,7 @@ def check(ctx, tag: str, entry: dict) -> list:
                              "imports bundles only from Claude Code")]
         names = [server_name(source, s) for s in claude.bundle_servers(home, source)]
         how = f"as {', '.join(names)}" if names else "(skills only; no MCP server)"
-        lines = [("ok", f"Cursor: {tag} is imported from Claude Code {how}")]
+        lines = [("ok", f"Cursor: {tag} is imported from Claude Code {how}; declaration matches, readiness only; latest release is unverified")]
         lines.extend(_tool_lines(home, tag, entry, policy.effective(entry, ctx.rules)))
         return lines
     path = folder / "mcp.json"

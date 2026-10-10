@@ -502,6 +502,8 @@ def main(argv=None, stdout=None) -> int:
     for status, text in codex_config.audit(home, codex_home, codex):
         line("config", status, text)
         failed |= status == "FAIL"
+    line("freshness", "gap", "Latest harness, skill, plugin and tool versions need separate upstream checks; "
+         "this verifier checks persisted setup, not remote releases")
     return 1 if failed else 0
 
 

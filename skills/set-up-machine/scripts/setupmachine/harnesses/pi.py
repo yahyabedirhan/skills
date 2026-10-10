@@ -146,7 +146,8 @@ class State:
         if self.error:
             return ("FAIL", f"Pi: {tag} can't be checked; {self.error}")
         if source in self.extensions:
-            return ("ok", f"Pi: {tag} {source} is an extension in {self.settings_path}")
+            return ("ok", f"Pi: {tag} {source} is an extension in {self.settings_path}; "
+                          "declaration matches, installed code and latest release are unverified")
         other = [item for item in self.extensions if identity(item) == identity(source)]
         if other:
             return ("FAIL", f"Pi: {tag} {self.settings_path} has {other[0]} instead of {source}")

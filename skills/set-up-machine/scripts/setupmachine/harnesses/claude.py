@@ -56,7 +56,7 @@ def check(ctx, tag: str, entry: dict) -> list:
         return [("FAIL", f"Claude Code: {tag} {source} isn't installed")]
     if not known[source]:
         return [("FAIL", f"Claude Code: {tag} {source} isn't enabled in ~/.claude/settings.json")]
-    lines = [("ok", f"Claude Code: {tag} {source} is installed and enabled")]
+    lines = [("ok", f"Claude Code: {tag} {source} is installed and enabled; declaration matches, readiness only; latest release is unverified")]
     lines.extend(_tool_lines(home, tag, entry, policy.effective(entry, ctx.rules)))
     return lines
 

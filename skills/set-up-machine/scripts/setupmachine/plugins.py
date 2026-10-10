@@ -8,7 +8,7 @@ should have it:
      "harnesses": ["claude-code", "cursor"],
      "mcp_policy": {"require_oauth": true, "approval_mode": "prompt"}}
     {"name": "docs", "kind": "mcp", "server": {"url": "https://..."}, "harnesses": ["cursor"]}
-    {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@0.38.0", "harnesses": ["pi"]}
+    {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@latest", "harnesses": ["pi"]}
 
 `mcp_policy` is optional and harness-neutral. Its fields are `enabled_tools`, `disabled_tools`,
 `approval_mode` and `require_oauth`. Tool exclusions come from the rule table and
@@ -18,7 +18,9 @@ What each harness can take is in references/workstation.md and that harness's Pl
 One adapter per harness lives in `harnesses/<harness>.py` and exposes validate, check and propose.
 This module dispatches through ADAPTERS. opencode has no adapter yet.
 
-`check` inspects files and read-only CLI metadata; the agent installs and writes, as SKILL.md says.
+`check` reads persisted setup and read-only CLI metadata. It does not establish freshness.
+The agent checks latest upstream versions, installs and writes, as SKILL.md says.
+A matching declaration does not establish the installed code's freshness.
 """
 from __future__ import annotations
 
