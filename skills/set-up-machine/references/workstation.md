@@ -71,7 +71,7 @@ The values this skill writes into the shared file, and the person's notes on the
 
 ### `agents/harnesses/<harness>.md`
 
-Instructions for one harness only, for what differs between harnesses: a sandbox, a missing ask list, a tool only one harness has. `<harness>` is the harness's reference name: `claude-code`, `codex`, `cursor` or `opencode`. Each file is optional.
+Instructions for one harness only, for what differs between harnesses: a sandbox, a missing ask list, a tool only one harness has. `<harness>` is the harness's reference name: `claude-code`, `codex`, `cursor`, `opencode` or `pi`. Each file is optional.
 
 ```markdown
 # <Harness> instructions
@@ -84,7 +84,7 @@ Instructions for one harness only, for what differs between harnesses: a sandbox
 ```
 
 - **Copying:** everything under `## Instructions`, up to the next `## ` heading, is copied as it is into the harness's own instructions file. Other text is notes and stays in the repository. A file with no `## Instructions` section, or an empty one, is a `FAIL`.
-- **Where it goes:** only Cursor has a file today, `~/.cursor/rules/harness-instructions.mdc` (cursor.md, *Global instructions*). Claude Code, Codex and opencode read the shared file through a link, so they have no place for it yet: a source for one of them is a `gap` line.
+- **Where it goes:** only Cursor has a file today, `~/.cursor/rules/harness-instructions.mdc` (cursor.md, *Global instructions*). Claude Code, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: a source for one of them is a `gap` line.
 - Never put a rule every harness needs here; it belongs in `agents/instructions.md`. Check every line against the team test in `global-instructions.md`.
 
 `verify.py` prints a `harness` line per file: `ok` when the generated file matches its source, `FAIL` when it is missing or differs, or when a generated file outlived its source, `n/a` when the harness isn't set up, and `gap` for a harness with no place yet, or a file of the same name the skill didn't write.
@@ -105,6 +105,23 @@ Keep explicitly chosen Codex CLI defaults in this private file. Use only the top
 Validate the keys and values before proposing any write. Reject unknown keys, nested tables and unsupported values with an explicit gap; this file is an allowlist, not a copy of Codex's whole configuration. Keep credentials, model providers, project trust, profiles, hook state and runtime state in their existing homes. Existing memory and hook ownership remains with this skill's Codex adapter.
 
 Read `codex.md` for installed-version support, preservation and override checks. Mark each declared preference `personal` in the diff. Keep chosen values and this repository's identity and clone path out of public reports, issues, pull requests and fixtures; use synthetic values there.
+
+### `agents/pi.json`
+
+Keep explicitly chosen Pi settings in this private file: a JSON object of top-level keys from Pi's settings reference, such as `defaultProvider`, `defaultModel`, `defaultThinkingLevel` and `enableInstallTelemetry`. Each key is optional. A missing file or omitted key declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
+
+```json
+{
+  "defaultThinkingLevel": "<level>",
+  "enableInstallTelemetry": false
+}
+```
+
+- Declare only preferences. Leave out runtime state Pi writes itself, such as `deviceId` and `lastChangelogVersion`, and keep credentials, trust decisions and sessions in Pi's own files.
+- A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
+- Read `pi.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
+
+`verify.py` prints a `pi` line per declared key: `same` when `settings.json` holds the declared value, `FAIL` when it's missing or differs, and `none` with no file. It never prints the values.
 
 ### `agents/installs.json`
 
