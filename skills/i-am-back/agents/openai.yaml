@@ -1,0 +1,5 @@
+interface:
+  display_name: "I Am Back"
+  short_description: "Show me what happened while I was away"
+policy:
+  allow_implicit_invocation: false
