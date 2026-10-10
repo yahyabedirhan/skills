@@ -750,7 +750,7 @@ if __name__ == "__main__":
 
 
 class PiTest(unittest.TestCase):
-    """Pi's instructions link, its declared defaults from agents/pi.json, and its hook gap."""
+    """Pi's instructions link, its declared defaults from agents/pi.json, and its extension."""
 
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
@@ -760,6 +760,7 @@ class PiTest(unittest.TestCase):
         self.shared.parent.mkdir(parents=True)
         self.shared.write_text("# Global agent instructions\n")
         self.agent.mkdir(parents=True)
+        self.extension()
 
     def tearDown(self):
         self._tmp.cleanup()
@@ -769,6 +770,12 @@ class PiTest(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text if isinstance(text, str) else json.dumps(text))
         return path
+
+    def extension(self, command=None):
+        """The extension set-up-machine writes, running the hook script."""
+        template = (SCRIPTS.parent / "references" / "pi-extension.ts").read_text()
+        command = command or ["python3", str(HOOK), "--harness", "pi"]
+        return self.write(".pi/agent/extensions/set-up-machine.ts", template.replace("__HOOK_COMMAND__", json.dumps(command)))
 
     def link(self, target="../../.config/agents/AGENTS.md"):
         (self.agent / "AGENTS.md").symlink_to(target)
@@ -783,7 +790,8 @@ class PiTest(unittest.TestCase):
         return code, [l for l in out.splitlines() if l.startswith("pi ")]
 
     def test_no_agent_folder_is_not_set_up(self):
-        self.agent.rmdir()
+        import shutil
+        shutil.rmtree(self.agent)
         no_personal_repository(self.home)
         code, lines = self.lines()
         self.assertEqual(len(lines), 1)
@@ -892,13 +900,38 @@ class PiTest(unittest.TestCase):
         self.assertIn("gone is a broken link", extra[0])
         self.assertEqual(code, 0)
 
-    def test_the_hook_is_a_gap_not_a_failure(self):
+    def hook_line(self):
+        code, out = run("--home", str(self.home), "--rules", str(TABLE), "--no-codex")
+        return code, [l for l in out.splitlines() if l.startswith("hook") and "Pi" in l][0]
+
+    def test_the_extension_wires_the_hook(self):
         no_personal_repository(self.home)
         self.link()
-        code, out = run("--home", str(self.home), "--rules", str(TABLE), "--no-codex")
-        hook = [l for l in out.splitlines() if l.startswith("hook") and "Pi" in l]
-        self.assertRegex(hook[0], r"hook +gap +Pi: no pre-tool hook")
-        self.assertEqual(code, 0, out)
+        code, line = self.hook_line()
+        self.assertRegex(line, r"hook +wired +Pi: .*extensions/set-up-machine\.ts -> .*pre_tool_hook\.py")
+        self.assertEqual(code, 0, line)
+
+    def test_a_missing_extension_or_script_fails(self):
+        no_personal_repository(self.home)
+        self.link()
+        (self.agent / "extensions" / "set-up-machine.ts").unlink()
+        code, line = self.hook_line()
+        self.assertRegex(line, r"hook +FAIL +Pi: no extension at ")
+        self.assertEqual(code, 1)
+        self.extension(["python3", "/gone/pre_tool_hook.py", "--harness", "pi"])
+        code, line = self.hook_line()
+        self.assertRegex(line, r"hook +FAIL +Pi: .*doesn't exist")
+        self.extension(["python3", str(HOOK), "--harness", "opencode"])
+        code, line = self.hook_line()
+        self.assertRegex(line, r"hook +FAIL +Pi: .*doesn't run the pre-tool hook with --harness pi")
+
+    def test_someone_elses_extension_is_a_gap_left_alone(self):
+        no_personal_repository(self.home)
+        self.link()
+        self.write(".pi/agent/extensions/set-up-machine.ts", "export default function (pi) {}\n")
+        code, line = self.hook_line()
+        self.assertRegex(line, r"hook +gap +Pi: .*wasn't written by set-up-machine")
+        self.assertEqual(code, 0, line)
 
     def test_actual_home_honors_the_agent_dir_variable_without_printing_it(self):
         from unittest.mock import patch
