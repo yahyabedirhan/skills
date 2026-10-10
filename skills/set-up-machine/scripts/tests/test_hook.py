@@ -722,5 +722,100 @@ class WiredCommandTest(unittest.TestCase):
         self.assertEqual((proc.returncode, proc.stdout), (0, ""))
 
 
+class PiTest(unittest.TestCase):
+    """What set-up-machine's Pi extension sends, and the one JSON line it gets back."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self._tmp.name).resolve()
+        self.config = self.dir / "hook.json"
+        self.config.write_text(json.dumps({"report_dir": str(self.dir / "reports")}))
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def payload(self, tool, has_ui=True, **args):
+        return {"toolName": tool, "input": args, "cwd": CWD, "sessionId": "s1", "hasUI": has_ui}
+
+    def decide(self, tool, has_ui=True, **args):
+        return hook.decide(hook.read_pi(self.payload(tool, has_ui, **args)), TABLE, HOME)
+
+    def answer(self, payload):
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, {"HOME": str(self.dir)}):
+            code = hook.main(["--harness", "pi", "--config", str(self.config)], io.StringIO(json.dumps(payload)), out,
+                             now=datetime(2026, 10, 10, tzinfo=timezone.utc))
+        self.assertEqual(code, 0)
+        self.assertEqual(out.getvalue().count("\n"), 1, out.getvalue())
+        return json.loads(out.getvalue())
+
+    def test_built_in_tools_are_read(self):
+        call = hook.read_pi(self.payload("bash", command="rm -rf x", timeout=5))
+        self.assertEqual((call.tool, call.command, call.cwd, call.session), ("bash", "rm -rf x", CWD, "s1"))
+        self.assertEqual(hook.read_pi(self.payload("powershell", command="ls")).command, "ls")
+        for tool, access in (("read", "read"), ("edit", "write"), ("write", "write"), ("ls", "read")):
+            self.assertEqual(hook.read_pi(self.payload(tool, path="a.txt")).files, (("a.txt", access),), tool)
+        self.assertEqual(hook.read_pi(self.payload("grep", pattern="x", path="src", glob="*.env")).searches, (("src", "*.env"),))
+        self.assertEqual(hook.read_pi(self.payload("find", pattern=".env*")).searches, (("", ".env*"),))
+        self.assertIsNone(hook.read_pi(self.payload("read", command="rm -rf x")).command)
+
+    def test_deny_rows_refuse(self):
+        self.assertEqual([h.rule.id for h in self.decide("bash", command="rm -rf .scratch/x").denials], ["rm-recursive-force"])
+        self.assertEqual([h.rule.id for h in self.decide("read", path=".env").denials], ["env-files-read"])
+        self.assertEqual(self.decide("read", path=".env.example").denials, [])
+        self.assertIn("env-files-read", [h.rule.id for h in self.decide("find", pattern="*.env").denials])
+        self.assertEqual([h.rule.id for h in self.decide("mcp__claude_ai_Gmail__send_message").denials], ["mail-send"])
+        answer = self.answer(self.payload("bash", command="ls && rm -rf x"))
+        self.assertEqual(list(answer), ["block"])
+        self.assertIn("`rm -rf x`", answer["block"])
+        self.assertNotIn("`ls`", answer["block"])
+
+    def test_ask_rows_are_asked_with_a_ui(self):
+        v = self.decide("bash", command="git push --force-with-lease origin x")
+        self.assertEqual(([h.rule.id for h in v.asks], v.denials), (["git-push-force-with-lease"], []))
+        answer = self.answer(self.payload("bash", command="git push --force-with-lease origin x"))
+        self.assertEqual(list(answer), ["ask"])
+        self.assertIn("`git push --force-with-lease origin x`", answer["ask"])
+        self.assertIn("git-push-force-with-lease", answer["ask"])
+        self.assertIn("The agent's instruction:", answer["ask"])
+
+    def test_ask_rows_are_refused_without_a_ui(self):
+        for has_ui in (False, None):
+            payload = self.payload("bash", command="git push --force-with-lease origin x")
+            payload["hasUI"] = has_ui
+            answer = self.answer(payload)
+            self.assertEqual(list(answer), ["block"], has_ui)
+            self.assertIn("Pi without a UI, where no one asks the user", answer["block"])
+
+    def test_user_approver_rows_are_asked_like_any_other(self):
+        v = self.decide("mcp__claude_ai_Gmail__create_draft")
+        self.assertEqual(([h.rule.id for h in v.asks], v.denials), (["mail-draft-write"], []))
+        self.assertEqual([h.rule.id for h in self.decide("mcp__claude_ai_Gmail__create_draft", has_ui=False).denials],
+                         ["mail-draft-write"])
+
+    def test_nested_codemode_calls(self):
+        # The outer call carries a script, not a command; each nested call arrives as a plain tool call.
+        outer = hook.read_pi(self.payload("codemode", code='await tools.bash({command: "rm -rf x"})'))
+        self.assertEqual((outer.command, outer.files), (None, ()))
+        self.assertEqual(self.answer(self.payload("codemode", code='await tools.bash({command: "rm -rf x"})')), {})
+        nested = {**self.payload("bash", command="rm -rf x"), "parentToolCallId": "call_1"}
+        self.assertEqual(list(self.answer(nested)), ["block"])
+
+    def test_an_ordinary_call_gets_an_empty_answer_and_a_reported_one_a_report(self):
+        self.assertEqual(self.answer(self.payload("bash", command="ls -la")), {})
+        self.assertFalse((self.dir / "reports").exists())
+        self.assertEqual(self.answer(self.payload("bash", command="gh api rate_limit")), {})
+        [log] = list((self.dir / "reports").iterdir())
+        line = json.loads(log.read_text())
+        self.assertEqual((line["harness"], line["session"], line["rules"]), ("pi", "s1", ["gh-api-secrets"]))
+
+    def test_other_payload_shapes_never_crash(self):
+        for payload in ({}, {"toolName": 3, "input": "x"}, {"toolName": "bash", "input": {"command": None}},
+                        {"toolName": "read", "input": {"path": 7}}):
+            self.assertEqual(self.answer(payload), {}, payload)
+        self.assertEqual(hook.write_claude_code([], asks=["x"]), "")
+        self.assertEqual(hook.write_cursor([], asks=["x"]), "{}\n")
+
+
 if __name__ == "__main__":
     unittest.main()
