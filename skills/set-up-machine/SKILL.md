@@ -99,7 +99,7 @@ No further line. The `hook wired` line is the check. Details: [references/openco
 [references/pi.md](references/pi.md)
 
 - When Pi's agent folder exists, `pi ok` for the `AGENTS.md` link, and a `pi same` line per key `agents/pi.json` declares, or `pi none` with no such file. A `pi FAIL` means the audit is not done.
-- Its `hook wired` line is the extension. Pi has no permission system, so the hook is its only enforcement: name in the report that a missing `python3` or script leaves Pi with no guardrail. A `hook gap` line is an extension someone else wrote at the same path, left alone.
+- Its `hook wired` line is the extension. Pi has no permission system, so the hook is its only enforcement, and the extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call. A `hook gap` line is an extension someone else wrote at the same path, left alone.
 - A `pi extra` line is a broken skill link, for the user to remove.
 
 ### Cursor
@@ -167,7 +167,7 @@ A malformed personal file leaves the table's rows in force: the hook skips the p
 
 Each harness reference shows its wiring with `<script>` in place of the script's path. Replace it with the absolute path of `scripts/pre_tool_hook.py` in the installed skill (under `~/.agents/skills` or `~/.claude/skills`), never in a checkout or worktree, which can be deleted. If there is no installed copy, name the gap.
 
-The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call.
+The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call. Pi is the exception: it has no native entries underneath, so its extension fails closed and refuses each call the hook can't check (references/pi.md).
 
 `<report-folder>` is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 
