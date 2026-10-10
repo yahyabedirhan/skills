@@ -16,9 +16,10 @@ What each harness can take (references/workstation.md, and each harness referenc
   checking them means reading ~/.claude.json, which can hold tokens.
 - Cursor: bundles by importing Claude Code's enabled plugins, and standalone MCP servers in
   ~/.cursor/mcp.json.
-- Pi: bundles as Pi packages in <agent-dir>/settings.json `packages`, and standalone MCP servers in
-  <agent-dir>/mcp.json. A Pi bundle's `source` is Pi's package source (`npm:...`, `git:...` or an
-  https git URL), so its entry names only `pi`; Claude Code's `<plugin>@<marketplace>` can't reach Pi.
+- Pi: bundles as Pi extensions, which Pi delivers through its <agent-dir>/settings.json `packages`
+  setting, and standalone MCP servers in <agent-dir>/mcp.json. A Pi bundle's `source` is a Pi
+  extension source (`npm:...`, `git:...` or an https git URL), so its entry names only `pi`; Claude
+  Code's `<plugin>@<marketplace>` can't reach Pi.
 - Codex and opencode: a gap for now.
 
 `check` only reads files; the agent installs and writes, as SKILL.md says.
@@ -27,6 +28,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -43,7 +45,7 @@ MARKETPLACE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 NPM_SPEC = re.compile(r"^(@?[^@]+(?:/[^@]+)?)(?:@(.+))?$")  # Pi's parseNpmSpec
 NPM_NAME = re.compile(r"^(@[A-Za-z0-9_.~-]+/)?[A-Za-z0-9_.~-]+$")
 PI_SERVER = re.compile(r"^[A-Za-z0-9_-]+$")
-PI_SOURCE_FORMS = "npm:<package>[@<version>], git:<host>/<owner>/<repo>[@<ref>] or https://<host>/<owner>/<repo>[@<ref>]"
+PI_SOURCE_FORMS = "npm:<name>[@<version>], git:<host>/<owner>/<repo>[@<ref>] or https://<host>/<owner>/<repo>[@<ref>]"
 
 
 class PluginsError(ValueError):
@@ -94,9 +96,9 @@ def check(home: Path, pi_dir: Path | None = None) -> list:
                                    "Cursor imports it too"))
     if pi.folder.is_dir() and pi.error is None:
         listed = {pi_identity(e["source"]) for e in entries if e["kind"] == "bundle" and "pi" in e["harnesses"]}
-        for source in pi.packages:
+        for source in pi.extensions:
             if pi_identity(source) not in listed:
-                lines.append(("extra", f"Pi: {source} is in the packages of {pi.settings_path} but not in the "
+                lines.append(("extra", f"Pi: {source} is an extension in {pi.settings_path} but not in the "
                                        "plugins list"))
     return lines
 
@@ -113,7 +115,7 @@ def load(path: Path) -> list:
     if not isinstance(entries, list):
         raise PluginsError(f"{path}: `plugins` must be a list")
     seen = set()
-    pi_packages = {}
+    pi_extensions = {}
     for i, entry in enumerate(entries):
         where = f"{path}: plugins[{i}]"
         if not isinstance(entry, dict):
@@ -142,19 +144,19 @@ def load(path: Path) -> list:
             source = entry.get("source") if isinstance(entry.get("source"), str) else ""
             identity = pi_identity(source)
             if SOURCE.match(source) and "pi" in harnesses:
-                raise PluginsError(f"{where}: Pi takes a bundle only by its Pi package source; give Pi its own entry")
+                raise PluginsError(f"{where}: Pi takes a bundle only by its Pi extension source; give Pi its own entry")
             if identity is not None and harnesses != ["pi"]:
-                raise PluginsError(f"{where}: a Pi package source fits only an entry whose only harness is pi; "
+                raise PluginsError(f"{where}: a Pi extension source fits only an entry whose only harness is pi; "
                                    "give the other harnesses their own entry")
             if harnesses == ["pi"]:
-                # A Pi bundle is a Pi package, named the way Pi's settings.json `packages` names it.
+                # A Pi bundle is a Pi extension, named the way Pi's settings.json `packages` names it.
                 if identity is None:
-                    raise PluginsError(f"{where}: source must be a Pi package source: {PI_SOURCE_FORMS}")
+                    raise PluginsError(f"{where}: source must be a Pi extension source: {PI_SOURCE_FORMS}")
                 if "marketplace" in entry:
-                    raise PluginsError(f"{where}: a Pi package takes no marketplace")
-                if identity in pi_packages:
-                    raise PluginsError(f"{where}: names the same Pi package as plugins[{pi_packages[identity]}]")
-                pi_packages[identity] = i
+                    raise PluginsError(f"{where}: a Pi extension takes no marketplace")
+                if identity in pi_extensions:
+                    raise PluginsError(f"{where}: names the same Pi extension as plugins[{pi_extensions[identity]}]")
+                pi_extensions[identity] = i
             else:
                 if not SOURCE.match(source):
                     raise PluginsError(f"{where}: source must be <plugin>@<marketplace>")
@@ -182,14 +184,20 @@ def cursor_server_name(source: str, server: str) -> str:
 
 
 def pi_identity(source: str):
-    """The package a Pi package source names, as Pi 1.1.0 identifies it, or None for another form.
+    """The extension a Pi extension source names, as Pi 1.1.0 identifies it, or None for another form.
 
-    Pi treats two sources with one identity as the same package: an npm package by its name, a git
-    package by host and repository path without the ref (core/package-manager.js, getPackageIdentity).
-    Local paths aren't taken, since one path doesn't name the same package on every machine."""
+    Pi treats two sources with one identity as the same extension: an npm source by its name, a git
+    source by host and repository path without the ref (core/package-manager.js, getPackageIdentity).
+    Local paths aren't taken, since one path doesn't name the same extension on every machine."""
     if source.startswith("npm:"):
         match = NPM_SPEC.match(source[4:].strip())
         return f"npm:{match.group(1)}" if match and NPM_NAME.match(match.group(1)) else None
+    git = _git_source(source)
+    return f"git:{git[0]}/{git[1]}" if git else None
+
+
+def _git_source(source: str):
+    """(host, repository path, ref or None) of a Pi git source, or None for another form."""
     if source.startswith("git:"):
         url = source[4:].strip()
     elif source.startswith("https://"):
@@ -203,53 +211,83 @@ def pi_identity(source: str):
         host, path = url[4:].split(":", 1)
     else:
         host, _, path = url.partition("/")
-    path = path.lstrip("/").split("@", 1)[0]
+    path, _, ref = path.lstrip("/").partition("@")
     path = path[:-4] if path.endswith(".git") else path
     segments = path.split("/")
     if not host or "." not in host or len(segments) < 2 or not all(segments) or ".." in segments:
         return None
-    return f"git:{host.lower()}/{path}"
+    return host.lower(), path, ref or None
 
 
 class _Pi:
-    """Pi's agent folder: the packages in its settings.json and the servers in its mcp.json."""
+    """Pi's agent folder: the extensions in its settings.json `packages` and the servers in its mcp.json."""
 
     def __init__(self, folder: Path):
         self.folder = folder
         self.settings_path = folder / "settings.json"
         self.error = None
-        self.packages, self.extensions = [], []
+        self.extensions, self.builtins = [], []
         try:
             settings = json.loads(self.settings_path.read_text()) if self.settings_path.exists() else {}
         except (OSError, UnicodeError, ValueError):
             self.error = f"{self.settings_path} isn't valid JSON"
             return
         if not isinstance(settings, dict) or not isinstance(settings.get("packages", []), list):
-            self.error = f"{self.settings_path} has no list of packages"
+            self.error = f"{self.settings_path} has no list in packages"
             return
         for item in settings.get("packages", []):
             source = item.get("source") if isinstance(item, dict) else item  # the object form filters resources
             if isinstance(source, str):
-                self.packages.append(source)
-        extensions = settings.get("extensions", [])
-        self.extensions = extensions if isinstance(extensions, list) else []
+                self.extensions.append(source)
+        builtins = settings.get("extensions", [])  # the setting that can turn off builtin:mcp
+        self.builtins = builtins if isinstance(builtins, list) else []
 
     def check(self, tag: str, entry: dict):
         if not self.folder.is_dir():
             return ("n/a", f"Pi: {tag} isn't checked; Pi is not set up here")
         if entry["kind"] == "bundle":
-            return self._package(tag, entry["source"])
+            return self._extension(tag, entry["source"])
         return self._server(tag, entry)
 
-    def _package(self, tag: str, source: str):
+    def _extension(self, tag: str, source: str):
         if self.error:
             return ("FAIL", f"Pi: {tag} can't be checked; {self.error}")
-        if source in self.packages:
-            return ("ok", f"Pi: {tag} {source} is in {self.settings_path}")
-        other = [p for p in self.packages if pi_identity(p) == pi_identity(source)]
+        if source in self.extensions:
+            stale = self._stale_checkout(source)
+            if stale:
+                return ("FAIL", f"Pi: {tag} {source} is an extension in {self.settings_path}, but its checkout at "
+                                f"{stale[0]} isn't at {stale[1]}; run `pi update {source}`")
+            return ("ok", f"Pi: {tag} {source} is an extension in {self.settings_path}")
+        other = [p for p in self.extensions if pi_identity(p) == pi_identity(source)]
         if other:
             return ("FAIL", f"Pi: {tag} {self.settings_path} has {other[0]} instead of {source}")
-        return ("FAIL", f"Pi: {tag} {source} isn't in the packages of {self.settings_path}")
+        return ("FAIL", f"Pi: {tag} {source} isn't an extension in {self.settings_path}")
+
+    def _stale_checkout(self, source: str):
+        """(checkout, ref) when Pi's checkout of a pinned git extension is at another commit; else None.
+
+        At startup Pi installs only a missing git extension and leaves an existing checkout where it is,
+        so a changed ref needs `pi update <source>`, which fetches the ref and resets to FETCH_HEAD. An npm
+        extension needs no check: Pi reinstalls one whose version doesn't match at startup."""
+        git = _git_source(source)
+        if not git or not git[2]:
+            return None
+        folder = self.folder / "git" / git[0] / git[1]
+        head = _rev(folder, "HEAD")
+        if not head:
+            return None  # not installed yet, or unreadable: a new session installs a missing one
+        ref = git[2]
+        target = None
+        try:
+            for record in (folder / ".git/FETCH_HEAD").read_text().splitlines():
+                sha, _, note = record.partition("\t")
+                if f"'{ref}'" in note:
+                    target = _rev(folder, f"{sha}^{{commit}}")
+                    break
+        except OSError:
+            pass
+        target = target or _rev(folder, f"{ref}^{{commit}}")
+        return None if target == head else (folder, ref)
 
     def _server(self, tag: str, entry: dict):
         path = self.folder / "mcp.json"
@@ -261,10 +299,22 @@ class _Pi:
             return ("FAIL", f"Pi: {tag} has no entry in {path}")
         if servers[entry["name"]] != entry["server"]:
             return ("FAIL", f"Pi: {tag} entry in {path} differs from installs.json")
-        if "-builtin:mcp" in self.extensions:
+        if "-builtin:mcp" in self.builtins:
             return ("gap", f"Pi: {tag} is in {path}, but -builtin:mcp in {self.settings_path} turns off Pi's "
                            "built-in MCP, which reads that file")
         return ("ok", f"Pi: {tag} is in {path}")
+
+
+def _rev(folder: Path, name: str):
+    """The commit a name resolves to in a git checkout, read-only; None when it doesn't resolve."""
+    if not (folder / ".git").exists():
+        return None
+    try:
+        done = subprocess.run(["git", "-C", str(folder), "rev-parse", "--verify", "--quiet", name],
+                              capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return done.stdout.strip() or None if done.returncode == 0 else None
 
 
 def _claude_code(home: Path, tag: str, entry: dict, claude: dict):

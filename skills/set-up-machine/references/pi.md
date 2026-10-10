@@ -16,7 +16,7 @@ Leave `<agent-dir>/auth.json`, `mcp-auth.json`, `trust.json`, `models-store.json
 
 ## Memory
 
-No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it reloads only when the user resumes one. Install no persistent-memory package or extension, since memory stays off in every harness (global-instructions.md).
+No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it reloads only when the user resumes one. Install no persistent-memory extension, since memory stays off in every harness (global-instructions.md).
 
 ## Skills
 
@@ -33,7 +33,7 @@ The workstation repo's optional `agents/pi.json` declares Pi settings (workstati
 - A `settings.json` that is a symlink is written at its target. A file that isn't valid JSON stops the change until the user fixes it.
 - Back up the file as SKILL.md, *Back up*, says: `.pi/agent/settings.json` under the backup folder for the default folder. For an agent folder outside the home folder, name the destination in the diff, `pi/settings.json` under the backup folder.
 - A key the file no longer declares keeps its persisted value, for the user to remove.
-- A `packages` key in `agents/pi.json` is a `gap`, never compared or written: Pi packages come only from the plugins list (*Plugins*), so one file says what Pi loads. Tell the user to move each entry into `plugins`.
+- A `packages` key in `agents/pi.json` is a `gap`, never compared or written: Pi extensions come only from the plugins list (*Plugins*), so one file says what Pi loads. Tell the user to move each entry into `plugins`.
 - **Activation:** a new session reads the change. A running session reads it after `/reload`.
 - **Gaps:** a trusted project's `.pi/settings.json` overrides these keys, and CLI flags such as `--model` override them for one run.
 
@@ -61,21 +61,21 @@ Each personal permission is `n/a` here: "Pi has no permission entries". The hook
 
 The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md). Docs: `packages.md` and `mcp.md`.
 
-- **A bundle** is a Pi package: extensions, skills, prompt templates and themes installed as one unit. Its entry names only `pi`, and its `source` is the package source as Pi's `settings.json` writes it: `npm:<package>@<version>`, `git:<host>/<owner>/<repo>@<ref>`, or an `https://` git URL. Prefer a version or a tag, since Pi keeps such a source pinned.
-- **Write a bundle** into the `packages` array of `<agent-dir>/settings.json`. Pi names a package by its npm name, or by its git host and repository path without the ref, so two sources can name one package at different versions.
+- **A bundle** is a Pi extension: everything Pi loads from the user or from others, installed as one unit with its tools, skills, prompt templates and themes. Pi delivers extensions through its `packages` setting. The entry names only `pi`, and its `source` is the Pi extension source as Pi's `settings.json` writes it: `npm:<name>@<version>`, `git:<host>/<owner>/<repo>@<ref>`, or an `https://` git URL. Prefer a version or a tag, since Pi keeps such a source pinned.
+- **Write a bundle** into the `packages` array of `<agent-dir>/settings.json`. Pi names an extension by its npm name, or by its git host and repository path without the ref, so two sources can name one extension at different versions.
   - `present` when an entry is the exact source, as a string or as the `source` of an object entry. Keep an object entry as it is: its resource filters are the user's.
-  - `added` when no entry names the package: append the source.
-  - `updated` when an entry names the same package at another version or ref: replace that entry with the source.
+  - `added` when no entry names the extension: append the source.
+  - `updated` when an entry names the same extension at another version or ref: replace that entry with the source.
   - Keep every other entry and key, and write the file as *Declared defaults* says: back it up first, write a symlink at its target, and stop on invalid JSON.
-  - **Activation:** a new session installs a missing package at startup. `pi list` shows the configured packages.
+  - **Activation:** a new session installs a missing extension at startup, and reinstalls an npm one whose version differs. It leaves an existing git checkout at its old ref, so after an `updated` git entry run `pi update <source>` with the new source. `pi list` shows the configured extensions.
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `<agent-dir>/mcp.json`, keeping every other server and key. `present` when it matches, `added` when it's missing, `updated` when it differs. Back it up like `settings.json`. Pi takes server names of letters, digits, `_` and `-`.
   - A running session reads the change after `/reload`.
   - **Credentials:** a `headers` or `env` value names an environment variable, such as `${DOCS_TOKEN}`, never the secret itself. A server that uses OAuth needs the user's sign-in, with `pi mcp login <server>` or `/mcp` in a session; an agent never signs in. Pi keeps the tokens in `mcp-auth.json`.
-- **`verify.py`** prints a `plugin` line per Pi entry: `ok`, or `FAIL` when the package is missing or at another version, or the server is missing or differs. Pi not set up is `n/a`. A configured package the list leaves out is `extra`: kept, for the user to add to the list or remove with `pi remove <source>`. A matching server is a `gap` when `extensions` in `settings.json` holds `-builtin:mcp`, since that turns off the built-in MCP client that reads `mcp.json`.
+- **`verify.py`** prints a `plugin` line per Pi entry: `ok`, or `FAIL` when the extension is missing or at another version, or the server is missing or differs. A pinned git extension is also a `FAIL` when its checkout in `<agent-dir>/git/<host>/<owner>/<repo>` is at another commit than its ref; the line names the `pi update <source>` that fixes it. Pi not set up is `n/a`. A configured extension the list leaves out is `extra`: kept, for the user to add to the list or remove with `pi remove <source>`. A matching server is a `gap` when `extensions` in `settings.json` holds `-builtin:mcp`, since that turns off the built-in MCP client that reads `mcp.json`.
 - **Gaps:**
-  - A trusted project's `.pi/settings.json` packages and `.pi/mcp.json` servers replace a global entry of the same package or name in that project.
+  - A trusted project's `.pi/settings.json` `packages` and `.pi/mcp.json` servers replace a global entry of the same extension or name in that project.
   - An extension that registers `/mcp`, such as `pi-mcp-adapter`, replaces the built-in MCP client, and Pi then ignores `mcp.json`. `verify.py` doesn't detect this.
-  - A local path isn't a source the list takes, since one path doesn't name the same package on every machine.
+  - A local path isn't a source the list takes, since one path doesn't name the same extension on every machine.
 
 ## Pre-tool hook
 
@@ -96,8 +96,8 @@ None: Pi has no approval prompts to automate.
 
 - **The only layer:** Pi has no native rules underneath, so the extension fails closed: while `python3` or the script is missing, or the hook fails, Pi refuses every tool call until `/set-up-machine` repairs it. `pi --no-extensions` starts a session without the hook in the meantime. The containment Pi offers beyond the hook is the operating system's: a container, a virtual machine or a separate user (`docs/security.md`, `docs/containerization.md`). Name this once in every audit.
 - **Started without extensions:** `pi --no-extensions` (`-ne`) skips the extension. Explicit `-e <path>` extensions still load.
-- **Handlers after the hook can change the call:** a `tool_call` handler can change `event.input`, and the first handler that blocks wins. Pi 1.1.0 runs the handlers in load order: `-e` extensions first, then a trusted project's extensions (its `.pi/settings.json` entries, then `.pi/extensions/`), then the global settings' entries, then `<agent-dir>/extensions/`, then packages' extensions, then built-in ones. So a package or built-in extension runs after the hook and could change a call the hook already passed. Pi offers no way to run last or to check the final input before the tool runs. A project extension runs before the hook: the hook sees what it changed.
-- **Child sessions without extensions:** a package that starts child sessions in the same process can start them with extensions off, and the hook doesn't run there. The `pi-subagents` package (0.77.0) does this for foreground children; its setting `subagents.defaultSubagentOnlyExtensions`, listing the extension's path, loads it there. Check each such package. A child without a UI gets ask rows refused.
+- **Handlers after the hook can change the call:** a `tool_call` handler can change `event.input`, and the first handler that blocks wins. Pi 1.1.0 runs the handlers in load order: `-e` extensions first, then a trusted project's extensions (its `.pi/settings.json` entries, then `.pi/extensions/`), then the global settings' entries, then `<agent-dir>/extensions/`, then the extensions from `packages`, then built-in ones. So an extension from `packages`, or a built-in one, runs after the hook and could change a call the hook already passed. Pi offers no way to run last or to check the final input before the tool runs. A project extension runs before the hook: the hook sees what it changed.
+- **Child sessions without extensions:** an extension that starts child sessions in the same process can start them with extensions off, and the hook doesn't run there. The `pi-subagents` extension (0.77.0) does this for foreground children; its setting `subagents.defaultSubagentOnlyExtensions`, listing the hook extension's path, loads it there. Check each such extension. A child without a UI gets ask rows refused.
 - **The user's own commands:** `!` commands (`user_bash`) aren't tool calls, so the hook doesn't see them, as in Claude Code.
 - The hook's own misses are in SKILL.md, *What it can't see*.
 
