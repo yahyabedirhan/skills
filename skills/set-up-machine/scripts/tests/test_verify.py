@@ -217,8 +217,45 @@ class WiringTest(unittest.TestCase):
         self.assertRegex(lines[0], r"hook +FAIL +Cursor: .*preToolUse")
         events["preToolUse"] = [{"command": command, "timeout": 10, "matcher": "^(Write|Delete|Grep)$"}]
         self.write(".cursor/hooks.json", {"version": 1, "hooks": events})
+        self.write(".cursor/cli-config.json", {
+            "version": 1, "editor": {"vimMode": False},
+            "permissions": {"allow": [], "deny": ["Shell(rm -rf)"]},
+            "approvalMode": "auto-review",
+            "sandbox": {"mode": "enabled", "networkAccess": "user_config_with_defaults"}})
         code, lines = self.lines("Cursor")
         self.assertRegex(lines[0], r"hook +wired +Cursor")
+        self.assertEqual(code, 0)
+
+    def cursor_lines(self):
+        code, out = run("--home", str(self.home), "--rules", str(TABLE), "--no-codex")
+        return code, [line for line in out.splitlines() if line.startswith("cursor")]
+
+    def test_cursor_without_a_folder_is_not_set_up(self):
+        code, lines = self.cursor_lines()
+        self.assertRegex(lines[0], r"cursor +none +Cursor: not set up here")
+        self.assertEqual(code, 0)
+
+    def test_cursor_run_mode_must_be_auto_review_with_the_sandbox(self):
+        self.write(".cursor/cli-config.json", {"version": 1, "permissions": {"allow": [], "deny": []}})
+        code, lines = self.cursor_lines()
+        self.assertEqual(code, 1)
+        self.assertRegex(lines[0], r"cursor +FAIL +Cursor: .*lacks approvalMode auto-review, sandbox.mode enabled")
+
+        self.write(".cursor/cli-config.json", {"approvalMode": "allowlist", "sandbox": {"mode": "enabled"}})
+        code, lines = self.cursor_lines()
+        self.assertRegex(lines[0], r"lacks approvalMode auto-review")
+        self.assertNotIn("sandbox.mode enabled", lines[0])
+
+        self.write(".cursor/cli-config.json", {"approvalMode": "auto-review", "sandbox": "enabled"})
+        code, lines = self.cursor_lines()
+        self.assertRegex(lines[0], r"lacks sandbox.mode enabled")
+        self.assertNotIn("approvalMode auto-review", lines[0])
+
+        self.write(".cursor/cli-config.json", {
+            "approvalMode": "auto-review", "model": {"modelId": "example"},
+            "sandbox": {"mode": "enabled", "networkAccess": "user_config_with_defaults"}})
+        code, lines = self.cursor_lines()
+        self.assertRegex(lines[0], r"cursor +ok +Cursor: .*approvalMode auto-review and sandbox.mode enabled")
 
     def test_the_script_runs_as_a_command(self):
         import subprocess

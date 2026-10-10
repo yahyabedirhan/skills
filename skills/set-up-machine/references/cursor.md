@@ -38,6 +38,15 @@ No memory feature: a `none` line.
 - **Gap:** a project's `.cursor/cli.json` replaces these lists, so `"deny": []` there empties them. A project can only add to the Claude settings lists, and the hook still refuses the deny rows.
 - **The IDE** reads neither file and has no user-level deny list: its hard blocks are hooks.
 
+## Run mode
+
+Auto-review with the sandbox on is the mode this skill sets for anyone who has Cursor. Allowlisted calls run. Other shell commands run in the sandbox when they can. A call that cannot use the sandbox goes to the classifier. The deny list still refuses: Auto-review does not replace it.
+
+- **Files:** the same `~/.cursor/cli-config.json`. Set `approvalMode` to `auto-review` and `sandbox.mode` to `enabled`. Keep every other key, including `sandbox.networkAccess` when it is already set. Add `"version": 1` to a new file. Docs: [run modes](https://cursor.com/docs/agent/security/run-modes), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
+- **Audit:** `verify.py` prints `cursor ok` when both are set, and `cursor FAIL` when `~/.cursor` exists and either is missing or different. No `~/.cursor` is `cursor none`.
+- **Linux:** the sandbox needs kernel 6.2 or newer with Landlock, and unprivileged user namespaces. On a remote machine or the standalone CLI, the user installs the AppArmor package the run-modes doc names; it needs root. When the sandbox cannot be created, Cursor asks before each command: a `gap`.
+- **Steering:** leave `~/.cursor/permissions.json` `autoRun` to the user. `block_instructions` steer the classifier in plain English. The rule table and the hook are the enforcement, and a second prose list of the same calls would drift from them.
+
 ## Personal permissions
 
 A personal permission (workstation.md) becomes CLI entries the way a table row of its kind does above, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does, and an `ask` row is a `gap`.
@@ -78,6 +87,7 @@ A native CLI deny: `Permission denied: Command blocked by permissions configurat
 `cursor-agent -p --trust --force` in a throwaway folder, with `CURSOR_CONFIG_DIR` at a trial `.cursor` and `CURSOR_DATA_DIR` at a scratch folder. `CURSOR_CONFIG_DIR` moves only `cli-config.json`: `hooks.json`, `mcp.json` and `~/.claude/settings.json` are always read from the real home, so a trial puts them in the folder (`.cursor/hooks.json`, `.cursor/mcp.json`, and `.claude/settings.json` at the folder's git root).
 
 - `rm -rf x`, `git push --force <remote> main` and `gh repo delete owner/x` return the native refusal, once from the trial `cli-config.json` and once, with its deny list emptied, from a `.claude/settings.json` holding the Claude Code lists.
+- With `approvalMode` `auto-review`, `sandbox.mode` `enabled` and without `--force`, those three commands return the same native refusal. `--auto-review` and `--sandbox enabled` set that mode for one run. The command is `agent` (the install script also links `cursor-agent`).
 - With the hooks as `.cursor/hooks.json` and no deny list, `rm -rf x`, `bash -lc 'rm -fr x'`, a read of `.env` and a fake stdio MCP server's `send_message` (with `--approve-mcps`) are refused by the hook; `gh api rate_limit` runs and gets a report line.
 - From a folder inside the trial home, `cursor-agent -p --mode ask "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback.
 - **IDE,** after the live setup: Customize > Hooks lists the four handlers, and asking the agent to run `rm -rf x` or to send a mail is refused with the hook's message.
