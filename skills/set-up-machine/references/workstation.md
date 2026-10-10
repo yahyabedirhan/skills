@@ -117,7 +117,7 @@ Keep explicitly chosen Pi settings in this private file: a JSON object of top-le
 }
 ```
 
-- Leave out `packages`: Pi extensions go in `plugins` in `agents/installs.json`, and a `packages` key here is a `gap`.
+- **No extension list here.** Pi extensions go in `plugins` in `agents/installs.json`. A copy of Pi's `packages` setting in this file is a `gap`.
 - Declare only preferences. Leave out runtime state Pi writes itself, such as `deviceId` and `lastChangelogVersion`, and keep credentials, trust decisions and sessions in Pi's own files.
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
 - Read `pi.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
