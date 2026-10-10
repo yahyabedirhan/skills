@@ -305,3 +305,18 @@ The maintainer asked for Pi's extensions used as Pi intends them, with parity to
 - **A changed git ref needs `pi update`.** At startup Pi installs only a missing extension, and reinstalls an npm one whose version doesn't match. It leaves an existing git checkout at its old ref: a live change from `@v0.1.0` to `@v0.2.0` stayed at `v0.1.0` until `pi update <source>` ran. `verify.py` compares the checkout's `HEAD` with the ref, read-only through `git rev-parse`. It also reads `FETCH_HEAD`, since `pi update` fetches the ref and resets to it without a local tag. A checkout at another commit is a `FAIL` that names the `pi update` command.
 - **Standalone MCP servers go in `<agent-dir>/mcp.json`,** the file Pi's built-in MCP client reads. `verify.py` compares the entry as it does for Cursor. It prints a `gap` when `-builtin:mcp` turns that client off.
 - **One source for Pi extensions.** `agents/pi.json` could also declare `packages`, as a Pi setting. Two lists would disagree, so a `packages` key there is a `gap` that asks the user to move it into `plugins`. The skill neither compares nor writes it.
+
+## 2026-10-10: Codex plugins and tool policies
+
+- **Deliver Codex plugins from the installs list.** Install portable bundles through Codex's marketplace commands. Compare standalone MCP entries against the resolved config home.
+- **Declare bundled MCP policies in `codex_mcp`.** Keep personal tool choices in the workstation. Keep the delivery mechanism in this skill.
+- **Preserve unrelated TOML.** Generate a pure proposal before applying the approved diff. Keep stricter tool lists. Refuse unfamiliar syntax.
+- **Check OAuth through the CLI.** Read no credential files. Report a missing sign-in as a gap. Keep required-authentication servers disabled until sign-in succeeds.
+- **Use the actual CLI status.** Codex 0.162.1 reports authenticated OAuth as `o_auth`. Disabled servers report `unsupported`.
+- **Distinguish installation from tool parity.** A cached manifest proves an installed bundle. It does not prove supported components or live tool discovery.
+- **Honor excluded tools without live probes.** Keep exclusions independent of the approval reviewer. Check their configuration without invoking the service.
+- **Validation:** Run synthetic-home tests for policy drift, custom config homes, authentication status, and preservation. Check repeat proposals produce no changes.
+
+Sources: [Codex MCP configuration](https://learn.chatgpt.com/docs/extend/mcp) and [developer commands](https://learn.chatgpt.com/docs/developer-commands).
+
+The fresh skill audit found malformed approval values, scalar owned tables, and quoted comment markers. Fix each with a regression test. Refuse malformed existing tool lists for guided review. The adapter reads configuration and OAuth metadata without invoking an MCP tool. The team test exempts this setup skill; personal plugin choices remain workstation declarations.

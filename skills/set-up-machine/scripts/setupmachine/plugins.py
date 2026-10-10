@@ -20,9 +20,10 @@ What each harness can take (references/workstation.md, and each harness referenc
   setting, and standalone MCP servers in <agent-dir>/mcp.json. A Pi bundle's `source` is a Pi
   extension source (`npm:...`, `git:...` or an https git URL), so its entry names only `pi`; Claude
   Code's `<plugin>@<marketplace>` can't reach Pi.
-- Codex and opencode: a gap for now.
+- Codex: local marketplace bundles and standalone MCP servers, with declared MCP tool policies.
+- opencode: a gap for now.
 
-`check` only reads files; the agent installs and writes, as SKILL.md says.
+`check` inspects files and read-only CLI metadata; the agent installs and writes, as SKILL.md says.
 """
 from __future__ import annotations
 
@@ -34,10 +35,11 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from .personal import PersonalError, read_pointer
+from . import codex_plugins
 
 INSTALLS = Path("agents/installs.json")
 KINDS = ("bundle", "mcp")
-KEYS = {"name", "kind", "source", "marketplace", "server", "harnesses", "os"}
+KEYS = {"name", "kind", "source", "marketplace", "server", "harnesses", "os", "codex_mcp"}
 LABELS = {"claude-code": "Claude Code", "cursor": "Cursor", "codex": "Codex", "opencode": "opencode", "pi": "Pi"}
 OSES = {"macos": "darwin", "linux": "linux"}
 SOURCE = re.compile(r"^[A-Za-z0-9_.-]+@[A-Za-z0-9_.-]+$")
@@ -52,7 +54,7 @@ class PluginsError(ValueError):
     pass
 
 
-def check(home: Path, pi_dir: Path | None = None) -> list:
+def check(home: Path, pi_dir: Path | None = None, codex_home: Path | None = None, codex: str | None = None) -> list:
     """(status, text) lines for the plugins list; none when there is no list to check.
 
     pi_dir is Pi's agent folder, as verify.py resolves it; home/.pi/agent when not given."""
@@ -71,6 +73,7 @@ def check(home: Path, pi_dir: Path | None = None) -> list:
         return []
     claude = _claude_plugins(home)
     pi = _Pi(pi_dir or home / ".pi/agent")
+    codex_state = codex_plugins.Codex(codex_home or home / ".codex", codex)
     lines = []
     for entry in entries:
         name, kind = entry["name"], entry["kind"]
@@ -85,6 +88,8 @@ def check(home: Path, pi_dir: Path | None = None) -> list:
                 lines.append(_claude_code(home, tag, entry, claude))
             elif harness == "cursor":
                 lines.append(_cursor(home, tag, entry, claude))
+            elif harness == "codex":
+                lines.extend(codex_state.check(tag, entry))
             elif harness == "pi":
                 lines.append(pi.check(tag, entry))
             else:
@@ -172,6 +177,10 @@ def load(path: Path) -> list:
                 raise PluginsError(f"{where}: an mcp entry takes server, not source or marketplace")
             if "pi" in harnesses and not PI_SERVER.match(name):
                 raise PluginsError(f"{where}: Pi takes server names of letters, digits, _ and -")
+        try:
+            codex_plugins.validate(entry, where)
+        except codex_plugins.PluginError as exc:
+            raise PluginsError(str(exc)) from None
         oses = entry.get("os")
         if oses is not None and (not isinstance(oses, list) or any(o not in OSES for o in oses)):
             raise PluginsError(f"{where}: os takes macos and linux")

@@ -100,9 +100,9 @@ class PluginsTest(PluginsHome):
         self.assertRegex(self.lines()[0], r"^n/a Cursor: docs \(mcp\) .*not set up here")
 
     def test_harnesses_without_delivery_are_gaps(self):
-        self.installs({**MCP, "harnesses": ["codex", "opencode", "claude-code"]})
+        self.installs({**MCP, "harnesses": ["opencode", "claude-code"]})
         lines = self.lines()
-        for label in ("Codex", "opencode"):
+        for label in ("opencode",):
             self.assertTrue(any(l.startswith(f"gap {label}: docs (mcp)") for l in lines), (label, lines))
         self.assertTrue(any(l.startswith("gap Claude Code: docs (mcp)") for l in lines), lines)
 
