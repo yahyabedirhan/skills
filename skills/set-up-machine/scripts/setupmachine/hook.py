@@ -515,6 +515,7 @@ def main(argv=None, stdin=None, stdout=None, now=None) -> int:
     read, write = HARNESSES[args.harness]
 
     # A hook that fails never blocks the call: the harness's native deny rules stay underneath.
+    # Pi has none, so its extension refuses the call when the hook exits non-zero (references/pi.md).
     try:
         payload = json.loads(stdin.read() or "{}")
         call = read(payload if isinstance(payload, dict) else {})

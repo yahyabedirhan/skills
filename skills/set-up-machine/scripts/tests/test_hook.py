@@ -6,6 +6,7 @@ import io
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -815,6 +816,92 @@ class PiTest(unittest.TestCase):
             self.assertEqual(self.answer(payload), {}, payload)
         self.assertEqual(hook.write_claude_code([], asks=["x"]), "")
         self.assertEqual(hook.write_cursor([], asks=["x"]), "{}\n")
+
+
+# Loads the rendered extension as a module, gives it a stand-in for Pi, and prints what its
+# tool_call handler returns, with the dialogs it opened. argv: module, event JSON, ctx JSON.
+EXTENSION_DRIVER = """
+const [mod, eventJson, ctxJson] = process.argv.slice(2);
+const { default: factory } = await import(mod);
+const handlers = {}, emitted = [], dialogs = [];
+factory({ on: (name, fn) => (handlers[name] = fn), events: { emit: (name, data) => emitted.push([name, data]) } });
+const spec = JSON.parse(ctxJson);
+const ctx = {
+  cwd: spec.cwd, hasUI: spec.hasUI, sessionManager: { getSessionId: () => "s1" },
+  ui: {
+    notify: (message, type) => dialogs.push(["notify", type]),
+    select: async (title, options) => { dialogs.push(["select", options]); return spec.pick === "enter" ? options[0] : spec.pick; },
+    confirm: async () => { throw new Error("confirm puts the cursor on Yes"); },
+  },
+};
+const result = await handlers.tool_call(JSON.parse(eventJson), ctx);
+console.log(JSON.stringify({ result: result ?? null, emitted, dialogs }));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node isn't installed")
+class PiExtensionTest(unittest.TestCase):
+    """The extension template, run under node against the real hook script."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self._tmp.name).resolve()
+        self.config = self.dir / "hook.json"
+        self.config.write_text(json.dumps({"report_dir": str(self.dir / "reports")}))
+        (self.dir / "driver.mjs").write_text(EXTENSION_DRIVER)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def run_extension(self, command, tool="bash", has_ui=True, pick=None, script=None, python=sys.executable, **args):
+        script = str(script or SCRIPTS / "pre_tool_hook.py")
+        argv = [python, script, "--harness", "pi", "--config", str(self.config)]
+        template = (SCRIPTS.parent / "references" / "pi-extension.ts").read_text()
+        module = self.dir / "set-up-machine.mjs"
+        module.write_text(template.replace("__HOOK_COMMAND__", json.dumps(argv)))
+        event = {"toolName": tool, "input": {"command": command, **args} if command else args, "toolCallId": "c1"}
+        ctx = {"cwd": str(self.dir), "hasUI": has_ui, "pick": pick}
+        proc = subprocess.run(["node", str(self.dir / "driver.mjs"), str(module), json.dumps(event), json.dumps(ctx)],
+                              capture_output=True, text=True, timeout=60, env={**os.environ, "HOME": str(self.dir)})
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        return json.loads(proc.stdout)
+
+    def test_a_denied_call_is_blocked_and_an_ordinary_one_runs(self):
+        out = self.run_extension("rm -rf .scratch/x")
+        self.assertTrue(out["result"]["block"])
+        self.assertIn("rm-recursive-force", out["result"]["reason"])
+        self.assertIsNone(self.run_extension("ls")["result"])
+
+    def test_an_ask_row_asks_with_no_first(self):
+        out = self.run_extension("git push --force-with-lease origin x", pick="enter")
+        self.assertTrue(out["result"]["block"])
+        self.assertIn("the user declined", out["result"]["reason"])
+        [select] = [d for d in out["dialogs"] if d[0] == "select"]
+        self.assertTrue(select[1][0].startswith("No"), select)
+        self.assertEqual([e[1]["active"] for e in out["emitted"]], [True, False])
+        self.assertIsNone(self.run_extension("git push --force-with-lease origin x", pick="Yes, allow this call")["result"])
+        self.assertTrue(self.run_extension("git push --force-with-lease origin x", pick=None)["result"]["block"])  # Escape
+
+    def test_an_ask_row_without_a_ui_is_refused_unasked(self):
+        out = self.run_extension("git push --force-with-lease origin x", has_ui=False)
+        self.assertIn("Pi without a UI", out["result"]["reason"])
+        self.assertEqual(out["dialogs"], [])
+
+    def test_it_fails_closed(self):
+        for script, why in ((self.dir / "gone" / "pre_tool_hook.py", "its script is missing"),):
+            out = self.run_extension("ls", script=script)
+            self.assertTrue(out["result"]["block"])
+            self.assertIn(why, out["result"]["reason"])
+            self.assertIn("/set-up-machine", out["result"]["reason"])
+        out = self.run_extension("ls", python=str(self.dir / "no-such-python"))
+        self.assertIn("can't start", out["result"]["reason"])
+        for body, why in (("import sys; sys.exit(3)", "exited with code 3"), ("print('not json')", "isn't JSON"),
+                          ("print('[1]')", "isn't a JSON object")):
+            fake = self.dir / "pre_tool_hook.py"
+            fake.write_text(body + "\n")
+            out = self.run_extension("ls", script=fake)
+            self.assertTrue(out["result"]["block"], body)
+            self.assertIn(why, out["result"]["reason"], body)
 
 
 if __name__ == "__main__":
