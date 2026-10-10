@@ -111,6 +111,10 @@ A personal permission (workstation.md) becomes `prefix_rule`s the way a table ro
 - **It can't loosen a table row:** the strictest matching decision wins, so a personal `allow` never overrides the table's `forbidden` or `prompt`.
 - The `justification` takes the table's form and ends `(set-up-machine personal rule <id>)`, so the agent can tell a personal rule from the table's.
 
+## Plugins
+
+A `gap`: set-up-machine doesn't deliver `plugins` entries (workstation.md) to Codex yet. Its own docs name how it takes plugins and MCP servers; until a section here says how, an entry that lists `codex` gets a `gap` line from `verify.py`.
+
 ## Pre-tool hook
 
 - **Wiring:** one match-all group in `hooks.json` (keep the user's groups):

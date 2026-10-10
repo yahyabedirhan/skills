@@ -1,6 +1,6 @@
 ---
 name: set-up-machine
-description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, memory kept off, declared Codex CLI and Pi defaults, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
+description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, memory kept off, declared Codex CLI and Pi defaults, the plugins each harness gets, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
 ---
 
 # Set up machine
@@ -13,7 +13,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 - **Workstation repo**, `<workstation-repo>`, found through the **pointer**, `~/.config/agents/source.md`, which names the repository and its clone. Each of these files is optional:
   - `agents/instructions.md`: the working agreement, the glossaries, which tool fills each role, and the personal workflow;
   - `agents/permissions.json`: the **personal permissions**, rows each harness carries beside the rule table's;
-  - `agents/installs.json`: the skills and commands every machine gets;
+  - `agents/installs.json`: the skills, plugins and commands every machine gets;
   - `agents/codex.toml`: Codex CLI defaults, declared explicitly;
   - `agents/pi.json`: Pi settings, declared explicitly.
 
@@ -25,7 +25,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 - The **pre-tool hook**, `scripts/pre_tool_hook.py`, run before every tool call.
 - The **pointer**, when it is missing or records none.
 - Codex CLI defaults that `agents/codex.toml` declares, and Pi settings that `agents/pi.json` declares.
-- The skills and commands `agents/installs.json` lists for this machine.
+- The skills and commands `agents/installs.json` lists for this machine, and its **plugins** in each harness it names: the plugins setup area, a plugin bundle or a standalone MCP server per entry.
 - Memory off in every harness.
 
 ## Rules for every run
@@ -77,6 +77,7 @@ Shared lines first. Each harness then has its own section for the lines only tha
 - a `hook wired` line for every harness found
 - `personal ok` or `personal none`, and no `personal FAIL`
 - no `harness FAIL`; a `harness gap` names instructions for a harness this skill can't deliver to yet
+- no `plugin FAIL`; a `plugin gap` names a plugin a harness can't take from this skill yet, and `plugin extra` a Claude Code bundle the list leaves out
 
 ### Claude Code
 
@@ -200,7 +201,7 @@ Name these once in every audit:
 
 ## Scripts
 
-- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine. Shared checks: each row's samples through the hook, and the shared file against the workstation repo. Harness checks:
+- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine. Shared checks: each row's samples through the hook, the shared file against the workstation repo, and the `plugins` list against each harness it names. Harness checks:
   - **Claude Code:** each personal permission's entries.
   - **Codex:** its own policy check, plus declared defaults, installed support and override gaps at the resolved config home.
   - **opencode:** the hook wiring only.

@@ -56,6 +56,10 @@ No native entry. Pi reads MCP servers from `<agent-dir>/mcp.json` and names thei
 
 Each personal permission is `n/a` here: "Pi has no permission entries". The hook applies a personal `deny`, `ask` or `allow-and-report` row as it applies a table row. A personal `allow` row needs nothing: Pi runs every call the hook lets through.
 
+## Plugins
+
+A `gap`: set-up-machine doesn't deliver `plugins` entries (workstation.md) to Pi yet. Its own docs name how it takes plugins and MCP servers; until a section here says how, an entry that lists `pi` gets a `gap` line from `verify.py`.
+
 ## Pre-tool hook
 
 - **Wiring:** the extension `<agent-dir>/extensions/set-up-machine.ts`, which Pi loads from its global extension folder. Write it from [pi-extension.ts](pi-extension.ts), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "pi"]` (`<script>` as in SKILL.md, *Wiring*). Its `tool_call` handler runs before every tool call, built-in, extension and MCP. Calls that `codemode` scripts make with `tools.<name>(…)` reach it one by one, as nested calls.

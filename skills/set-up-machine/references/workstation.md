@@ -125,7 +125,7 @@ Keep explicitly chosen Pi settings in this private file: a JSON object of top-le
 
 ### `agents/installs.json`
 
-What each machine installs beyond the harnesses' configuration: skills, and anything else that needs a command, such as a session host's plugin or integration. With the file, it is the whole list, including the user's own skills repo, so a machine gets nothing it leaves out. Without it, the skill installs `<skills-repo>`.
+What each machine installs beyond the harnesses' configuration: skills, plugins, and anything else that needs a command, such as a session host's integration. With the file, it is the whole list, including the user's own skills repo, so a machine gets nothing it leaves out. Without it, the skill installs `<skills-repo>`.
 
 ```json
 {
@@ -134,6 +134,21 @@ What each machine installs beyond the harnesses' configuration: skills, and anyt
     { "source": "<owner>/<app-repo>", "skills": ["<skill>"] }
   ],
   "ignore": ["<skill>"],
+  "plugins": [
+    {
+      "name": "<plugin>",
+      "kind": "bundle",
+      "source": "<plugin>@<marketplace>",
+      "marketplace": "<owner>/<repo>",
+      "harnesses": ["claude-code", "cursor"]
+    },
+    {
+      "name": "<server>",
+      "kind": "mcp",
+      "server": { "url": "<url>" },
+      "harnesses": ["cursor"]
+    }
+  ],
   "commands": [
     {
       "name": "<plugin>",
@@ -147,9 +162,14 @@ What each machine installs beyond the harnesses' configuration: skills, and anyt
 
 - **`skills`:** each entry has a `source`, a GitHub `owner/repo`, and an optional `skills` array of skill names in it. Without `skills`, the entry means every skill in the source, including one added to it later.
 - **`ignore`:** skill names a machine may have that the list leaves out on purpose, such as an experiment on one machine or a hand-made skill the lock doesn't track. Mark an installed skill on this list `ignored`, not `extra`, and never install, update or remove it, since it is the user's on that machine.
+- **`plugins`:** what each harness plugs in for new tools, the plugins setup area. An entry has a `name`, a `kind` and the `harnesses` that should have it (`claude-code`, `cursor`, `codex`, `opencode`, `pi`).
+  - `kind: "bundle"`: a plugin installed as one unit with its MCP servers, skills and hooks. `source` is `<plugin>@<marketplace>`, as Claude Code names it. `marketplace` is the GitHub `<owner>/<repo>` to add first, for a marketplace Claude Code doesn't know yet.
+  - `kind: "mcp"`: a standalone MCP server. `server` is the entry the harness's config takes, with a `url`, or a `command` and its `args`.
+  - An optional `os` works as below; `target` isn't taken, since `verify.py` can't tell a remote machine from a local one.
+  - Each harness reference's **Plugins** section says how it gets each kind, or names the gap.
 - **`commands`:** each entry has a `name`, a `check` (`<check-command>`) and an `install` (`<install-command>`). Run each as written, as a shell command in the home folder, never wrapped in `sh -c`, since the rule table's `shell-inline-command` row refuses that. Write `check` so it exits 0 only when the thing is installed and current, since the skill runs `install` whenever it fails.
 - **`target` and `os`:** optional arrays on any entry. `target` takes `local`, the machine the user sits at, and `remote`, a machine Inspect treats as remote or headless. `os` takes `macos` and `linux`. An entry applies when both match this machine; a field left out matches every machine. An entry that doesn't apply is an `n/a` line naming the field.
-- All three arrays are optional. Refuse the file, with a `gap` line and no installs from it, when it isn't valid JSON, an entry has an unknown key or misses a required one, or an `ignore` name is also one a `skills` entry installs, since a guessed entry could install the wrong thing.
+- All four arrays are optional. Refuse the file, with a `gap` line and no installs from it, when it isn't valid JSON, an entry has an unknown key or misses a required one, or an `ignore` name is also one a `skills` entry installs, since a guessed entry could install the wrong thing.
 
 Check each entry that applies, then put what's missing in the diff:
 
@@ -161,6 +181,8 @@ Check each entry that applies, then put what's missing in the diff:
   - **When a skill's name is already installed from another source,** a lock entry with that name and a different `source`, **or two entries in the file both provide it:** mark it `gap`, name both sources, and install nothing for that name. The lock holds one skill per name, so `npx skills add` would silently replace the other source's copy on every machine. The user resolves it by dropping one source, or by naming skills so the two no longer overlap.
   - **When a listed skill's name matches a harness's built-in slash command:** add a `gap` line naming the harness and the command, and still install it. One of the two may hide the other in that harness, which the user should know about, but the skill is theirs to keep.
   - `extra` for an installed skill in the lock that no entry provides and `ignore` doesn't name: kept, for the user to add to the file, add to `ignore` or remove.
+- **A plugin:** for each harness the entry names, do what that harness reference's **Plugins** section says. `verify.py` prints a `plugin` line per entry and harness: `ok`, `FAIL` (missing, disabled or different), `n/a` (the harness isn't set up, or another `os`), `gap` (the harness can't take that kind yet) and `extra` (a bundle Claude Code has enabled that the list leaves out, which Cursor imports too). A malformed list is one `FAIL` line, and nothing from it is installed.
+  - Move a `commands` entry that installs a Claude Code plugin into `plugins`; the same plugin in both is installed twice.
 - **A command:** `present` when `check` exits 0; otherwise `added`, and Write runs `install`, then `check` again. A `check` that still fails after `install` is a failed install: report it.
 
 Never put a secret in the file: it is a repository, and the commands run as written. A command that needs a credential reads it from where the tool already keeps it.

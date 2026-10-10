@@ -65,6 +65,14 @@ A personal permission (workstation.md) becomes entries the way a table row of it
 - **The Cursor CLI** unions this file's `allow` and `deny` lists, so a personal entry written here reaches it too.
 - `verify.py` checks these entries: `personal present` with the entries it found, `personal n/a` with the tool Claude Code lacks, `personal gap` for a row with no entry here (the kinds under *No entry, and a gap instead*), and `personal FAIL` when an entry is missing.
 
+## Plugins
+
+The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md).
+
+- **A bundle:** `added` when `~/.claude/plugins/installed_plugins.json` lacks its `source`. Install it with `claude plugin install <source>`, after `claude plugin marketplace add <marketplace>` when the entry names a marketplace Claude Code doesn't list (`claude plugin marketplace list`). Installing enables it in `~/.claude/settings.json` (`enabledPlugins`); one set to `false` there is a `FAIL`, which the user decides on. `present` when it is installed and enabled. Docs: [plugins](https://code.claude.com/docs/en/plugins).
+- **A standalone MCP server:** a `gap`. Claude Code keeps user-scope servers in `~/.claude.json`, beside data that can hold tokens, so `verify.py` doesn't read it. Prefer a bundle.
+- **An enabled bundle the list leaves out** is `extra`: kept, for the user to add or turn off. Cursor imports every enabled bundle too (cursor.md, *Plugins*).
+
 ## Pre-tool hook
 
 - **Wiring:** one match-all group in `hooks.PreToolUse`:

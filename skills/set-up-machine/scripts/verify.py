@@ -55,7 +55,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import commands, codex_config, hook, personal, pi_config, rules as rule_table  # noqa: E402
+from setupmachine import commands, codex_config, hook, personal, plugins, pi_config, rules as rule_table  # noqa: E402
 
 HOOK_SCRIPT = "pre_tool_hook.py"
 CURSOR_EVENTS = ("beforeShellExecution", "beforeMCPExecution", "beforeReadFile", "preToolUse")
@@ -495,6 +495,9 @@ def main(argv=None, stdout=None) -> int:
         failed |= status == "FAIL"
     for status, text in personal.check_harnesses(home):
         line("harness", status, text)
+        failed |= status == "FAIL"
+    for status, text in plugins.check(home):
+        line("plugin", status, text)
         failed |= status == "FAIL"
     for status, text in codex_config.audit(home, codex_home, codex):
         line("config", status, text)
