@@ -1,6 +1,6 @@
 # Pi
 
-How to set up and audit Pi, the `pi` coding agent (`@earendil-works/pi-coding-agent`). Docs: the `docs/` folder of the installed package, chiefly `configuration.md`, `settings.md`, `skills.md`, `extensions.md` and `security.md`. Checked against Pi 1.1.0 and its `dist/` source.
+How to set up and audit Pi, the `pi` coding agent (`@earendil-works/pi-coding-agent`). Docs: the `docs/` folder of the installed package, chiefly `configuration.md`, `settings.md`, `skills.md`, `extensions.md`, `cli.md` and `security.md`. Checked against Pi 1.1.0 and its `dist/` source.
 
 **Found** when `pi` is on `PATH` or the agent folder exists. The agent folder is `PI_CODING_AGENT_DIR`, else `~/.pi/agent`; a leading `~` in the variable means the home folder. Resolve it once, without printing the variable's value, and use that one folder for every path below, written `<agent-dir>`. For a fixture home, `verify.py --home <fixture>` uses `<fixture>/.pi/agent` and ignores the variable; pass `--pi-agent-dir <folder>` to test another layout.
 
@@ -38,29 +38,34 @@ The workstation repo's optional `agents/pi.json` declares Pi settings (workstati
 
 ## Permissions
 
-`gap`: Pi has no permission system. It asks for no approval before a tool call (`docs/security.md`), and has no deny, ask or allow list. No rule-table row applies to Pi, the table's or a personal one: name every row once as `gap` in Pi's section, not one line per row.
+Pi has no permission system. It asks for no approval before a tool call (`docs/security.md`), and has no deny, ask or allow list. The pre-tool hook, wired through an extension, is the only enforcement: it refuses deny rows, asks the user for ask rows in Pi's confirm dialog, and reports allow-and-report rows. Write no native entry for any row.
 
 ## Command rows
 
-`gap`, as in *Permissions*.
+No native entry. The hook checks the `command` of the `bash` and `powershell` tools. It reads a PowerShell command as a POSIX shell command, so a PowerShell spelling can slip past a row: a `gap` line on Windows.
 
 ## File rows
 
-`gap`, as in *Permissions*.
+No native entry. The hook checks the `path` of `read`, `edit`, `write` and `ls`, and the search glob of `grep` (`glob`) and `find` (`pattern`).
 
 ## MCP-tool rows
 
-`gap`, as in *Permissions*. Pi reads MCP servers from `<agent-dir>/mcp.json`.
+No native entry. Pi reads MCP servers from `<agent-dir>/mcp.json` and names their tools `mcp__<server>__<tool>`, the name the rows match, so the hook checks them as they are.
 
 ## Personal permissions
 
-Each personal permission is `n/a` here: "Pi has no permission entries".
+Each personal permission is `n/a` here: "Pi has no permission entries". The hook applies a personal `deny`, `ask` or `allow-and-report` row as it applies a table row. A personal `allow` row needs nothing: Pi runs every call the hook lets through.
 
 ## Pre-tool hook
 
-`gap`: not wired. The way in exists: an extension in `<agent-dir>/extensions/` can register `pi.on("tool_call", …)` and return `{ block: true, reason }` to stop a call, and a handler that throws blocks the call too (`docs/extensions.md`). The adapter that would run `pre_tool_hook.py` there isn't designed yet, so write nothing and name the gap: no enforcement in Pi yet, and the rule table doesn't apply.
-
-Other extensions in `<agent-dir>/extensions/`, such as a session host's integration, are the user's: leave them.
+- **Wiring:** the extension `<agent-dir>/extensions/set-up-machine.ts`, which Pi loads from its global extension folder. Write it from [pi-extension.ts](pi-extension.ts), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "pi"]` (`<script>` as in SKILL.md, *Wiring*). Its `tool_call` handler runs before every tool call, built-in, extension and MCP. Calls that `codemode` scripts make with `tools.<name>(…)` reach it one by one, as nested calls.
+- **Fails open:** when the script is gone, can't start, exits non-zero, prints anything but a JSON object or takes over 10 seconds, the extension lets the call through. It catches every error itself, since Pi blocks a call whose `tool_call` handler throws. Once the hook names an ask row, a failure to show the dialog refuses the call instead.
+- **Audit:** `wired` when the file is the template with the current command. A file there without the template's first line is someone else's: a `gap`, left alone. An extension with an old command is rewritten.
+- **Input:** `{"toolName", "input", "cwd", "sessionId", "hasUI"}`. `input` holds the tool's arguments: `command` for `bash` and `powershell`; `path` for the file tools; `pattern`, `path` and `glob` for `grep`; `pattern` (a glob) and `path` for `find`. The outer `codemode` call carries its script in `input.code`, which the hook doesn't read as a command.
+- **Answer:** always one JSON line. `{"block": "<refusal>"}` becomes `{ block: true, reason }`, and Pi gives the agent the reason as the tool's result. `{"ask": "<question>"}` names each ask row's part, reason and instruction. `{}` lets the call run.
+- **Asking:** with a UI (`ctx.hasUI`, true in the TUI and in RPC mode), the extension shows a notice, then Pi's Yes/No dialog with the question. Yes runs the call. No blocks it, and the agent reads that the user declined. Print and JSON mode have no UI, so the hook refuses every ask row there, `approver: "user"` or not. The dialog's cursor starts on Yes.
+- **Herdr:** while the dialog waits, the extension emits `herdr:blocked` on Pi's event bus. Herdr's Pi integration (version 9) listens for it and shows the pane as `blocked`, so the user gets Herdr's notice. Without that integration nothing listens, and the event does nothing.
+- Other extensions in `<agent-dir>/extensions/`, such as a session host's integration, are the user's: leave them.
 
 ## Auto mode
 
@@ -68,20 +73,37 @@ None: Pi has no approval prompts to automate.
 
 ## Gaps
 
-Until the adapter exists, Pi runs every tool call with the user's own permissions. The containment it has is the operating system's: a container, a virtual machine or a separate user (`docs/security.md`, `docs/containerization.md`). Name this once in every audit.
+- **The only layer:** Pi has no native rules underneath. While `python3` or the script is missing, or the hook fails, every call runs with the user's own permissions. The containment Pi offers is the operating system's: a container, a virtual machine or a separate user (`docs/security.md`, `docs/containerization.md`). Name this once in every audit.
+- **Started without extensions:** `pi --no-extensions` (`-ne`) skips the extension. Explicit `-e <path>` extensions still load.
+- **Handlers after the hook can change the call:** a `tool_call` handler can change `event.input`, and the first handler that blocks wins. Pi 1.1.0 runs the handlers in load order: `-e` extensions first, then a trusted project's extensions (its `.pi/settings.json` entries, then `.pi/extensions/`), then the global settings' entries, then `<agent-dir>/extensions/`, then packages' extensions, then built-in ones. So a package or built-in extension runs after the hook and could change a call the hook already passed. Pi offers no way to run last or to check the final input before the tool runs. A project extension runs before the hook: the hook sees what it changed.
+- **Child sessions without extensions:** a package that starts child sessions in the same process can start them with extensions off, and the hook doesn't run there. The `pi-subagents` package (0.77.0) does this for foreground children; its setting `subagents.defaultSubagentOnlyExtensions`, listing the extension's path, loads it there. Check each such package. A child without a UI gets ask rows refused.
+- **The user's own commands:** `!` commands (`user_bash`) aren't tool calls, so the hook doesn't see them, as in Claude Code.
+- The hook's own misses are in SKILL.md, *What it can't see*.
 
 ## What the agent sees
 
-No refusal: Pi refuses nothing on the rule table's behalf. The shared file still gives the agent the rule lines and the rejection guidance, as guidance only.
+A refused call's tool result is the hook's refusal: each refused part, its rule, reason and instruction. For an ask row the user declined, the result starts `Refused: the user declined this call when the pre-tool hook asked.`, followed by the question. A refused nested call fails the `codemode` script with the same text. The shared file also gives the agent the rule lines and the rejection guidance.
 
 ## Checking it
 
-`verify.py` prints a `pi` line for the link, one per declared default, and one per broken skill link. To see Pi read the setup, start it in a sandbox:
+`verify.py` prints a `pi` line for the link, one per declared default, one per broken skill link, and a `hook` line for the extension. To see Pi read the setup, start it in a sandbox:
 
 1. Make a sandbox folder, with a fresh agent folder in it. Copy `settings.json` and recreate the `AGENTS.md` link there. Copy no credential, trust or session file.
 2. Run `PI_CODING_AGENT_DIR=<sandbox agent folder> pi` from an empty folder in the sandbox.
-   - Result: the startup `[Context]` section lists the sandbox's `AGENTS.md`.
+   - Result: the startup `[Context]` section lists the sandbox's `AGENTS.md`, and `[Extensions]` lists `set-up-machine.ts` once you copy the extension in.
 3. Quit Pi, then read the sandbox's `settings.json`.
    - Result: the declared keys hold their values, and every other key is still there.
 
 With no login in the sandbox, Pi still starts and shows the listing. It creates its own empty `auth.json` and `sessions/` in the sandbox, and adds `lastChangelogVersion` to its `settings.json`.
+
+A live model turn needs the login, so check the hook with the real agent folder and the extension loaded for one run only:
+
+1. Write the template to a file in a throwaway folder outside any git repository, with the command `["python3", "<script>", "--harness", "pi", "--config", "<temp hook.json>"]`. The temporary `hook.json` holds a `report_dir` in the throwaway folder.
+2. From that folder, run `pi --no-session -e <file> --mode json "<prompt>"` for each sample below. Read the `tool_execution_end` events. Use targets that don't exist, so nothing is lost if the hook fails.
+   - `rm -rf .scratch/does-not-exist`: Result: refused with rule `rm-recursive-force`'s reason.
+   - `git push --force-with-lease origin x`: Result: refused, naming `Pi without a UI`.
+   - A `read` of `.env`: Result: refused with rule `env-files-read`. A model may decline to try; say the file doesn't exist and the run tests the guardrail.
+   - `gh api rate_limit`: Result: it runs, and the report folder gets a line with `"harness": "pi"`.
+   - With `--tools +codemode`, a script calling `tools.bash` with `rm -rf .scratch/does-not-exist`: Result: the nested call is refused, and the script fails with the refusal.
+3. In the TUI, `pi --no-session -e <file>`, ask for the `git push --force-with-lease origin x` again.
+   - Result: a notice and the dialog appear, and Herdr shows the pane as `blocked`. No refuses the call, and Yes runs it.
