@@ -198,14 +198,14 @@ Name these once in every audit:
   - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
 - One reference per harness, read for each harness found. Each says how the harness is found, where it keeps each setting, a row's native form with worked examples, the hook's wiring, and its gaps:
   - [references/claude-code.md](references/claude-code.md): Claude Code.
-  - [references/codex.md](references/codex.md): Codex.
+  - [references/codex.md](references/codex.md): Codex. Its *Codex MCP* section holds the TOML and OAuth detail.
   - [references/opencode.md](references/opencode.md): opencode.
   - [references/cursor.md](references/cursor.md): Cursor's IDE and CLI.
   - [references/pi.md](references/pi.md): Pi, whose only enforcement is the hook's extension.
 
 ## Scripts
 
-- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine. Shared checks: each row's samples through the hook, the shared file against the workstation repo, and the `plugins` list against each harness it names. Harness checks:
+- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine. Shared checks: each row's samples through the hook, the shared file against the workstation repo, and the `plugins` list against each harness it names. `scripts/setupmachine/plugins.py` dispatches that list through `scripts/setupmachine/harnesses/<harness>.py`. Each adapter exposes `validate`, `check` and `propose`. Harness checks:
   - **Claude Code:** each personal permission's entries.
   - **Codex:** its own policy check, plus declared defaults, installed support and override gaps at the resolved config home.
   - **opencode:** the hook wiring only.

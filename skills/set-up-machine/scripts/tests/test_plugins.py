@@ -102,9 +102,9 @@ class PluginsTest(PluginsHome):
         self.assertRegex(self.lines()[0], r"^n/a Cursor: docs \(mcp\) .*not set up here")
 
     def test_harnesses_without_delivery_are_gaps(self):
-        self.installs({**MCP, "harnesses": ["codex", "opencode", "claude-code"]})
+        self.installs({**MCP, "harnesses": ["opencode", "claude-code"]})
         lines = self.lines()
-        for label in ("Codex", "opencode"):
+        for label in ("opencode",):
             self.assertTrue(any(l.startswith(f"gap {label}: docs (mcp)") for l in lines), (label, lines))
         self.assertTrue(any(l.startswith("gap Claude Code: docs (mcp)") for l in lines), lines)
 
@@ -155,6 +155,35 @@ class PluginsTest(PluginsHome):
         got = [l for l in out.getvalue().splitlines() if l.startswith("plugin ")]
         self.assertEqual(len(got), 2, got)
         self.assertRegex(got[0], r"^plugin +ok +Claude Code: exa")
+
+    def test_codex_mcp_is_not_a_key_and_mcp_policy_is(self):
+        self.installs({**EXA, "codex_mcp": {}})
+        self.assertIn("unknown key 'codex_mcp'", self.lines()[0])
+        self.installs({**EXA, "mcp_policy": {"approval_mode": "prompt", "require_oauth": True,
+                                             "enabled_tools": ["web_search_exa"], "disabled_tools": ["web_search_advanced_exa"]}})
+        self.claude_has("exa@claude-plugins-official")
+        self.assertTrue(any(line.startswith("FAIL ") and "derived tool list" in line for line in self.lines()), self.lines())
+        self.write(".claude/settings.json", {"enabledPlugins": {"exa@claude-plugins-official": True},
+                                             "permissions": {"allow": [], "deny": ["mcp__exa__web_search_advanced_exa"]}})
+        lines = self.lines()
+        self.assertTrue(any("deny list matches the derived tool list" in line for line in lines), lines)
+        self.assertTrue(any(line.startswith("ok Cursor:") and "derived tool list" in line for line in lines), lines)
+
+    def test_a_permission_row_derives_the_tool_list(self):
+        self.installs(EXA)
+        self.claude_has("exa@claude-plugins-official")
+        self.write("code/personal/agents/permissions.json", {"version": 1, "rules": [{
+            "id": "exa-agent", "level": "deny", "summary": "Exa's agent tool",
+            "reason": "It spends credit.", "instruction": "Use search and fetch.",
+            "match": {"server": "^exa$", "tool": "^web_search_advanced_exa$"},
+            "samples": {"covers": ["mcp__exa__web_search_advanced_exa"], "leaves": ["mcp__exa__web_search_exa"]}}]})
+        self.assertTrue(any("web_search_advanced_exa" in line and line.startswith("FAIL Claude Code:")
+                            for line in self.lines()), self.lines())
+
+    def test_each_adapter_exposes_validate_check_and_propose(self):
+        for name, adapter in plugins.ADAPTERS.items():
+            for method in ("validate", "check", "propose"):
+                self.assertTrue(callable(getattr(adapter, method)), (name, method))
 
 
 WEB = {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@latest", "harnesses": ["pi"]}

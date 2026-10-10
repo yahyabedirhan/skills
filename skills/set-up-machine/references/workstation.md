@@ -141,7 +141,13 @@ What each machine installs beyond the harnesses' configuration: skills, plugins,
       "kind": "bundle",
       "source": "<plugin>@<marketplace>",
       "marketplace": "<owner>/<repo>",
-      "harnesses": ["claude-code", "cursor"]
+      "harnesses": ["claude-code", "cursor", "codex"],
+      "mcp_policy": {
+        "enabled_tools": ["<tool>"],
+        "disabled_tools": ["<tool>"],
+        "approval_mode": "prompt",
+        "require_oauth": true
+      }
     },
     {
       "name": "<pi-extension>",
@@ -170,7 +176,9 @@ What each machine installs beyond the harnesses' configuration: skills, plugins,
 - **`skills`:** each entry has a `source`, a GitHub `owner/repo`, and an optional `skills` array of skill names in it. Without `skills`, the entry means every skill in the source, including one added to it later.
 - **`ignore`:** skill names a machine may have that the list leaves out on purpose, such as an experiment on one machine or a hand-made skill the lock doesn't track. Mark an installed skill on this list `ignored`, not `extra`, and never install, update or remove it, since it is the user's on that machine.
 - **`plugins`:** what each harness plugs in for new tools, the plugins setup area. An entry has a `name`, a `kind` and the `harnesses` that should have it (`claude-code`, `cursor`, `codex`, `opencode`, `pi`).
-  - `kind: "bundle"`: a plugin installed as one unit with its MCP servers, skills and hooks. `source` is `<plugin>@<marketplace>`, as Claude Code names it. `marketplace` is the GitHub `<owner>/<repo>` to add first, for a marketplace Claude Code doesn't know yet.
+  - `kind: "bundle"`: a plugin installed as one unit with its MCP servers, skills and hooks. `source` is `<plugin>@<marketplace>`, as Claude Code and Codex name it. `marketplace` is the GitHub `<owner>/<repo>` to add first, for a marketplace the harness does not know yet.
+  - `mcp_policy` is optional and the same object for every harness on the entry. Its fields are `enabled_tools`, `disabled_tools`, `approval_mode` (`auto`, `prompt`, `writes` or `approve`) and `require_oauth`. `require_oauth` asks for a sign-in check. It is not a setting the harness stores. Credentials never enter the list.
+  - Tool lists come from `agents/permissions.json` and the rule table. A deny or allow row that names this entry's server supplies the tools. Leave `enabled_tools` and `disabled_tools` unset when a row already names the tool. The adapters derive each harness's list from those rows.
   - A Pi bundle names an installable package and only the `pi` harness. Use `npm:<name>@latest`, `git:<host>/<owner>/<repo>`, or an `https://` Git URL. It takes no `marketplace`. Refuse a Pi source on an entry that names another harness, and a `<plugin>@<marketplace>` source on one that names `pi`, since no harness takes both forms. Refuse two entries for the same Pi extension.
   - `kind: "mcp"`: a standalone MCP server. `server` is the entry the harness's config takes, with a `url`, or a `command` and its `args`.
   - An optional `os` works as below; `target` isn't taken, since `verify.py` can't tell a remote machine from a local one.

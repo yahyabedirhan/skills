@@ -333,3 +333,28 @@ The maintainer asked for Pi's extensions used as Pi intends them, with parity to
 - **The verifier does not detect a pin.** It prints no policy gap for a fixed source. It does not compare a git checkout with a declared ref. It does not advise `pi update` for a pin.
 - **This replaces** the *Pi plugins* bullet "A changed git ref needs `pi update`".
 - **One source for Pi extensions.** `agents/pi.json` could also declare `packages`, as a Pi setting. Two lists would disagree, so a `packages` key there is a `gap` that asks the user to move it into `plugins`. The skill neither compares nor writes it.
+
+## 2026-10-10: Codex plugins and tool policies
+
+- **Deliver Codex plugins from the installs list.** Install portable bundles through Codex's marketplace commands. Compare standalone MCP entries against the resolved config home.
+- **Declare bundled MCP policies in `codex_mcp`.** Keep personal tool choices in the workstation. Keep the delivery mechanism in this skill.
+- **Preserve unrelated TOML.** Generate a pure proposal before applying the approved diff. Keep stricter tool lists. Refuse unfamiliar syntax.
+- **Check OAuth through the CLI.** Read no credential files. Report a missing sign-in as a gap. Keep required-authentication servers disabled until sign-in succeeds.
+- **Use the actual CLI status.** Codex 0.162.1 reports authenticated OAuth as `o_auth`. Disabled servers report `unsupported`.
+- **Distinguish installation from tool parity.** A cached manifest proves an installed bundle. It does not prove supported components or live tool discovery.
+- **Honor excluded tools without live probes.** Keep exclusions independent of the approval reviewer. Check their configuration without invoking the service.
+- **Validation:** Run synthetic-home tests for policy drift, custom config homes, authentication status, and preservation. Check repeat proposals produce no changes.
+
+Sources: [Codex MCP configuration](https://learn.chatgpt.com/docs/extend/mcp) and [developer commands](https://learn.chatgpt.com/docs/developer-commands).
+
+The fresh skill audit found malformed approval values, scalar owned tables, and quoted comment markers. Fix each with a regression test. Refuse malformed existing tool lists for guided review. The adapter reads configuration and OAuth metadata without invoking an MCP tool. The team test exempts this setup skill; personal plugin choices remain workstation declarations.
+
+## 2026-10-10: one plugin adapter per harness
+
+This replaces the `codex_mcp` bullet in *Codex plugins and tool policies*.
+
+- **`mcp_policy` replaces `codex_mcp`.** One object on the installs entry serves every harness. Its fields are `enabled_tools`, `disabled_tools`, `approval_mode` and `require_oauth`.
+- **Permissions are the source for tool lists.** The rule table and `agents/permissions.json` name the tools. Each adapter derives its harness list from those rows. A copy in `mcp_policy` is optional.
+- **One module per harness.** `scripts/setupmachine/harnesses/<harness>.py` exposes `validate`, `check` and `propose`. `plugins.py` holds the lookup table. Pi, Claude Code, Cursor and Codex use it.
+- **The Pi adapter does not compare a git checkout with a ref.** Pinned-package handling stays out of this code.
+- **The skill owns the Codex procedure.** `references/codex.md` gives numbered steps and a done check. The TOML and OAuth detail is a subsection at the end of that file.

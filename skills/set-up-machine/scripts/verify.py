@@ -496,7 +496,7 @@ def main(argv=None, stdout=None) -> int:
     for status, text in personal.check_harnesses(home):
         line("harness", status, text)
         failed |= status == "FAIL"
-    for status, text in plugins.check(home, pi_dir):
+    for status, text in plugins.check(home, pi_dir, codex_home, codex, table + own):
         line("plugin", status, private(text))
         failed |= status == "FAIL"
     for status, text in codex_config.audit(home, codex_home, codex):
