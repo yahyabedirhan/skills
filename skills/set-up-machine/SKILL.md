@@ -61,9 +61,29 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
    - **When the diff holds only `added` and `updated` installs from `agents/installs.json`:** write it without asking, since the user approved that list by writing it.
 4. **Back up** every file the diff changes or removes. Before writing any file, copy each one into `~/.config/agents/backups/<UTC time as YYYYmmddTHHMMSSZ>/`, at its path relative to the home folder (`.claude/settings.json`). Copy a symlink as a link.
 5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
-6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries. For Codex, distinguish persisted defaults from effective overrides and state how subsequent sessions pick up changes.
+6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
 
-   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. It passes when it prints `rules ok`, a `hook wired` line for every harness found, a `personal ok` or `personal none` line and no `personal FAIL` line, every `codex differs` line is a row codex.md says gets no rule, and declared Codex defaults match without a `config FAIL` line, or a `config n/a` line says Codex isn't installed. Report `config gap` and `config override` lines separately; they limit what the audit proves.
+   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when the shared lines are present and no harness section below fails. Report `config gap` and `config override` lines separately; they limit what the audit proves.
+
+   **Shared**
+
+   - `rules ok`
+   - a `hook wired` line for every harness found
+   - `personal ok` or `personal none`, and no `personal FAIL`
+
+   **Claude Code.** No further line. The `hook wired` line is the check, and each personal permission is `present`, `n/a` or `gap` on the `personal` lines.
+
+   **Codex.** [references/codex.md](references/codex.md)
+
+   - Every `codex differs` line is a row that reference says gets no rule.
+   - Declared defaults match with no `config FAIL` line, or a `config n/a` line says Codex isn't installed.
+   - In the report, distinguish persisted defaults from effective overrides, and state how a later session picks the change up.
+
+   **opencode.** No further line. The `hook wired` line is the check.
+
+   **Cursor.** [references/cursor.md](references/cursor.md)
+
+   - When `~/.cursor` exists, `cursor ok`: Auto-review, with the sandbox on. `cursor FAIL` means the audit is not done. No `~/.cursor` is `cursor none`. The keys, the Linux sandbox gap and what the skill leaves in `permissions.json` are in that reference.
 
 ## Rule table
 
@@ -154,6 +174,10 @@ Name these once in every audit:
 
 ## Scripts
 
-- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine: each row's samples through the hook, and through Codex's own policy check; that the shared file carries the workstation repo's values and sections; that Claude Code holds each personal permission's entries; and Codex defaults, installed support and override gaps at the resolved config home.
+- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine. Shared checks: each row's samples through the hook, and the shared file against the workstation repo. Harness checks:
+  - **Claude Code:** each personal permission's entries.
+  - **Codex:** its own policy check, plus declared defaults, installed support and override gaps at the resolved config home.
+  - **opencode:** the hook wiring only.
+  - **Cursor:** Auto-review and the sandbox, as [references/cursor.md](references/cursor.md) describes.
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.

@@ -28,8 +28,10 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   managed constraints remain explicit gaps. --codex-home selects the same folder
   for configuration, rules and hooks. The real home honors CODEX_HOME privately;
   fixture --home folders ignore ambient CODEX_HOME unless --codex-home is given.
+- cursor: when ~/.cursor exists, cli-config.json has approvalMode auto-review and
+  sandbox.mode enabled (references/cursor.md). Otherwise `none`.
 
-Exits 1 when a rules, hook, personal or config line fails. --codex-trust-hash prints the
+Exits 1 when a rules, hook, personal, config or cursor line fails. --codex-trust-hash prints the
 `trusted_hash` Codex records for a PreToolUse hook running COMMAND with matcher
 `*` and timeout 10. Python 3.9+, standard library only.
 """
@@ -272,6 +274,29 @@ HARNESSES = (
 )
 
 
+def check_cursor_run_mode(home: Path) -> list:
+    """(status, text) for Cursor's run mode: auto-review, with the sandbox enabled.
+
+    `none` when Cursor isn't set up. `ok` when both keys are set. `FAIL` when
+    ~/.cursor exists and either key is missing or different. Other keys are kept.
+    """
+    folder = home / ".cursor"
+    if not folder.is_dir():
+        return [("none", "Cursor: not set up here (no ~/.cursor)")]
+    path = folder / "cli-config.json"
+    data = _json(path) or {}
+    sandbox = data.get("sandbox")
+    sandbox_mode = sandbox.get("mode") if isinstance(sandbox, dict) else None
+    missing = []
+    if data.get("approvalMode") != "auto-review":
+        missing.append("approvalMode auto-review")
+    if sandbox_mode != "enabled":
+        missing.append("sandbox.mode enabled")
+    if missing:
+        return [("FAIL", f"Cursor: {path} lacks {', '.join(missing)}")]
+    return [("ok", f"Cursor: {path} has approvalMode auto-review and sandbox.mode enabled")]
+
+
 def check_wiring(home: Path, codex_home: Path | None = None) -> list:
     """(status, text) per harness: wired, FAIL, or none when the harness isn't set up here."""
     out = []
@@ -415,6 +440,10 @@ def main(argv=None, stdout=None) -> int:
 
     for status, text in check_wiring(home, codex_home):
         line("hook", status, text.replace(str(codex_home), "<Codex config home>") if custom_home else text)
+        failed |= status == "FAIL"
+
+    for status, text in check_cursor_run_mode(home):
+        line("cursor", status, text)
         failed |= status == "FAIL"
 
     for status, text in personal.check(home) + own_lines + check_personal_entries(home, own):
