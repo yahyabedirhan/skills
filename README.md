@@ -82,6 +82,8 @@ The Origin column names the upstream commit each fork was copied from, so a late
 |---|---|---|
 | [show-me](skills/show-me/SKILL.md) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks, or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`ca7c808`](https://github.com/humanlayer/skills/tree/ca7c808/plugins/show-me/skills/show-me) (MIT, see `skills/show-me/LICENSE.humanlayer`). Changes: no Mermaid views, so every view renders as plain text; agents can still load it, where upstream made it user-invocable only in `bba9d13`, because `orchestrate-effort` uses it to show the plan. |
 | [show-me-artifact](skills/show-me-artifact/SKILL.md) | Publishes a visual report or a set of decisions as a private Claude artifact, a hosted page read later or on another device, with show-me's principles: one page per topic, self-contained decision cards with a marked recommendation, and a data file plus generator when the page is republished to the same URL. Claude only; elsewhere it falls back to show-me's local HTML file. | Original. Builds on show-me, which it loads for the principles. |
+| [i-am-afk](skills/i-am-afk/SKILL.md) | Tells the agents you're away: they keep working on their own, make the reversible choices themselves, prepare costly ones as a plan for your return, and end with the decisions, steps and news that need you. You start it with `/i-am-afk`. | Original. |
+| [i-am-back](skills/i-am-back/SKILL.md) | Tells the agents you're back and has them use show-me to show what they did, what is done and still open, the decisions they made and the ones left for you, and the next steps. You start it with `/i-am-back`. | Original. Builds on show-me. |
 
 ### Agent setup
 
@@ -147,6 +149,8 @@ show-me            explains the current topic
   pseudocode · call tree · file tree · diff block · one focused HTML page
 show-me-artifact   a report or decision set to read later, as a hosted page
   status first · progress · item tree · tables · decision cards → republished to the same URL
+i-am-afk           you're away: work on alone, keep your part for the end
+i-am-back          you're back: show-me what happened, what's done and what needs you
 ```
 
 ### Agent setup
