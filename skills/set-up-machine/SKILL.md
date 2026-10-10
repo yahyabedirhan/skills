@@ -63,27 +63,40 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, write nothing and report it. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
 6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no `added`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
 
-   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when the shared lines are present and no harness section below fails. Report `config gap` and `config override` lines separately; they limit what the audit proves.
+   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when [What verify must show](#what-verify-must-show) passes. Report `config gap` and `config override` lines separately; they limit what the audit proves.
 
-   **Shared**
+## What verify must show
 
-   - `rules ok`
-   - a `hook wired` line for every harness found
-   - `personal ok` or `personal none`, and no `personal FAIL`
+Shared lines first. Each harness then has its own section for the lines only that harness adds. A harness with no section of its own is done when its `hook wired` line is present.
 
-   **Claude Code.** No further line. The `hook wired` line is the check, and each personal permission is `present`, `n/a` or `gap` on the `personal` lines.
+### Shared
 
-   **Codex.** [references/codex.md](references/codex.md)
+- `rules ok`
+- a `hook wired` line for every harness found
+- `personal ok` or `personal none`, and no `personal FAIL`
 
-   - Every `codex differs` line is a row that reference says gets no rule.
-   - Declared defaults match with no `config FAIL` line, or a `config n/a` line says Codex isn't installed.
-   - In the report, distinguish persisted defaults from effective overrides, and state how a later session picks the change up.
+### Claude Code
 
-   **opencode.** No further line. The `hook wired` line is the check.
+No further line. The `hook wired` line is the check, and each personal permission is `present`, `n/a` or `gap` on the `personal` lines. Details: [references/claude-code.md](references/claude-code.md).
 
-   **Cursor.** [references/cursor.md](references/cursor.md)
+### Codex
 
-   - When `~/.cursor` exists, `cursor ok`: Auto-review, with the sandbox on. `cursor FAIL` means the audit is not done. No `~/.cursor` is `cursor none`. The keys, the Linux sandbox gap and what the skill leaves in `permissions.json` are in that reference.
+[references/codex.md](references/codex.md)
+
+- Every `codex differs` line is a row that reference says gets no rule.
+- Declared defaults match with no `config FAIL` line, or a `config n/a` line says Codex isn't installed.
+- In the report, distinguish persisted defaults from effective overrides, and state how a later session picks the change up.
+
+### opencode
+
+No further line. The `hook wired` line is the check. Details: [references/opencode.md](references/opencode.md).
+
+### Cursor
+
+[references/cursor.md](references/cursor.md)
+
+- When `~/.cursor` exists, `cursor ok`: Auto-review, with the sandbox on. `cursor FAIL` means the audit is not done. No `~/.cursor` is `cursor none`.
+- The keys, the Linux sandbox gap and what the skill leaves in `permissions.json` are in that reference.
 
 ## Rule table
 
