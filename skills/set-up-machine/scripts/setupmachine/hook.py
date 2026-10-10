@@ -11,15 +11,17 @@ checks it against the rule table, and answers in the harness's own format:
 - **ask:** the verdict names the ask rows a call hits (verify checks them), but the
   hook says nothing for them: the harness's native ask entries do the asking. A row
   with `approver: "user"` is refused instead when the call shows the harness won't
-  ask the user, such as Claude Code in bypassPermissions mode;
+  ask the user, such as Claude Code in bypassPermissions mode. A harness with no ask
+  entries of its own but a way to ask (Pi's extension) gets the ask rows in the answer,
+  and its wiring asks the user;
 - **allow**, a personal permission's level: the verdict names them for verify too, and the
   hook says nothing, so the harness's native allow entries let the call run.
 
 The rows are the rule table's, plus the personal permissions of the repository that
 `~/.config/agents/source.md` names (personal.py).
 
-Each harness has a reader (its payload -> ToolCall) and a writer (the denials
--> what it prints), in HARNESSES. The report folder comes from the hook's
+Each harness has a reader (its payload -> ToolCall) and a writer (the denials,
+and the ask hits for a writer that asks -> what it prints), in HARNESSES. The report folder comes from the hook's
 configuration file, `~/.config/agents/hook.json` by default.
 """
 from __future__ import annotations
@@ -281,7 +283,7 @@ def _search(args: dict, folder_key: str, glob_key: str) -> tuple:
     return ((folder if isinstance(folder, str) else "", glob),)
 
 
-def write_claude_code(denials: list) -> str:
+def write_claude_code(denials: list, asks=()) -> str:
     if not denials:
         return ""
     return json.dumps({
@@ -371,7 +373,7 @@ def read_opencode(payload: dict) -> ToolCall:
     )
 
 
-def write_opencode(denials: list) -> str:
+def write_opencode(denials: list, asks=()) -> str:
     """The refusal as plain text: the plugin throws it, and opencode gives the agent the message as the tool's error."""
     return refusal(denials) + "\n" if denials else ""
 
@@ -418,7 +420,7 @@ def _read_cursor(payload: dict) -> ToolCall:
     return ToolCall(tool=tool, command=command or None, files=files, cwd=cwd, session=session, searches=searches)
 
 
-def write_cursor(denials: list) -> str:
+def write_cursor(denials: list, asks=()) -> str:
     """Cursor always gets a JSON answer: a deny, or `{}`, which leaves the call to its own
     permissions. The CLI shows the agent `user_message`; `agent_message` carries the same text."""
     if not denials:
@@ -427,11 +429,76 @@ def write_cursor(denials: list) -> str:
     return json.dumps({"permission": "deny", "user_message": reason, "agent_message": reason}) + "\n"
 
 
+# Pi's built-in tools that take a path: the input field holding it, and the access it means.
+PI_FILE_TOOLS = {
+    "read": ("path", "read"),
+    "edit": ("path", "write"),
+    "write": ("path", "write"),
+    "grep": ("path", "read"),
+    "find": ("path", "read"),
+    "ls": ("path", "read"),
+}
+# Pi's shell tools: the input field `command` holds the command.
+PI_SHELL_TOOLS = ("bash", "powershell")
+# Without a UI (print and json mode, or a child session started without one) no one can answer the extension's question.
+PI_UNATTENDED = "Pi without a UI"
+
+
+def read_pi(payload: dict) -> ToolCall:
+    """What set-up-machine's Pi extension sends from `tool_call`: `toolName`, `input` (the
+    tool's arguments), `cwd`, `sessionId` and `hasUI`. MCP tools keep their
+    `mcp__<server>__<tool>` names. `codemode`'s script (`input.code`) isn't read: each tool
+    call the script makes reaches the extension as its own `tool_call`."""
+    tool = payload.get("toolName") if isinstance(payload.get("toolName"), str) else ""
+    args = payload.get("input") if isinstance(payload.get("input"), dict) else {}
+    command = args.get("command") if tool in PI_SHELL_TOOLS else None
+    files = []
+    if tool in PI_FILE_TOOLS:
+        key, access = PI_FILE_TOOLS[tool]
+        if isinstance(args.get(key), str) and args[key]:
+            files.append((args[key], access))
+    searches = ()
+    if tool == "grep":
+        searches = _search(args, "path", "glob")
+    elif tool == "find":
+        searches = _search(args, "path", "pattern")
+    return ToolCall(
+        tool=tool,
+        command=command if isinstance(command, str) else None,
+        files=tuple(files),
+        searches=searches,
+        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
+        session=payload.get("sessionId") if isinstance(payload.get("sessionId"), str) else "",
+        unattended="" if payload.get("hasUI") is True else PI_UNATTENDED,
+        no_native_ask=True,  # Pi has no permission system: the extension does the asking
+    )
+
+
+def asking(asks: list) -> str:
+    """The question the Pi extension puts to the user for a call that hits ask rows."""
+    lines = ["The global rule table asks you before this call runs. Allow it?"]
+    for hit in asks:
+        r = hit.rule
+        lines.append(f"- `{hit.part}`: ask rule {r.id} ({_plain(r.summary)}). {r.reason} The agent's instruction: {r.instruction}")
+    return "\n".join(lines)
+
+
+def write_pi(denials: list, asks=()) -> str:
+    """Always one JSON line: `{"block": <refusal>}`, `{"ask": <question>}`, or `{}`.
+    The extension returns a block to Pi, which gives the agent the reason as the tool's result."""
+    if denials:
+        return json.dumps({"block": refusal(denials)}) + "\n"
+    if asks:
+        return json.dumps({"ask": asking(list(asks))}) + "\n"
+    return "{}\n"
+
+
 HARNESSES = {
     "claude-code": (read_claude_code, write_claude_code),
     "codex": (read_codex, write_claude_code),  # Codex reads the same deny answer as Claude Code
     "opencode": (read_opencode, write_opencode),
     "cursor": (read_cursor, write_cursor),
+    "pi": (read_pi, write_pi),
 }
 
 
@@ -448,6 +515,7 @@ def main(argv=None, stdin=None, stdout=None, now=None) -> int:
     read, write = HARNESSES[args.harness]
 
     # A hook that fails never blocks the call: the harness's native deny rules stay underneath.
+    # Pi has none, so its extension refuses the call when the hook exits non-zero (references/pi.md).
     try:
         payload = json.loads(stdin.read() or "{}")
         call = read(payload if isinstance(payload, dict) else {})
@@ -477,5 +545,5 @@ def main(argv=None, stdin=None, stdout=None, now=None) -> int:
         except (ValueError, OSError) as exc:
             print(f"set-up-machine hook: couldn't write the report: {exc}", file=sys.stderr)
             return 1
-    stdout.write(write([]))
+    stdout.write(write([], verdict.asks))
     return 0

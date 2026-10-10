@@ -13,7 +13,7 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   stricter, and kept) or `differs` from the row's level (a row Codex can't
   express, in references/codex.md, or a mistake to fix);
 - hook: each harness found has its pre-tool hook wired to a script that exists
-  (Codex's also trusted); Pi's is a gap until its adapter is designed;
+  (Codex's also trusted); Pi's extension is a gap when someone else wrote it;
 - personal: the pointer, ~/.config/agents/source.md, is there, and when it names a
   workstation repo, the shared global instructions file carries that repository's
   environment defaults and personal workflow, the pointer's repository and clone path
@@ -270,9 +270,26 @@ def _cursor(home: Path, folder: Path):
     return ("wired", f"Cursor: {path} -> {', '.join(str(s) for s in sorted(scripts))} on all four events")
 
 
+PI_EXTENSION_HEADER = "// set-up-machine: the pre-tool hook, as a Pi extension."
+
+
 def _pi(home: Path, folder: Path):
-    return ("gap", "Pi: no pre-tool hook; Pi has no permission system and its extension adapter isn't designed "
-                   "yet, so the rule table doesn't apply (references/pi.md)")
+    path = folder / "extensions" / "set-up-machine.ts"
+    try:
+        text = path.read_text()
+    except OSError:
+        return ("FAIL", f"Pi: no extension at {path}; Pi has no permission system, so nothing enforces the rule table")
+    if not text.startswith(PI_EXTENSION_HEADER):
+        return ("gap", f"Pi: {path} wasn't written by set-up-machine; left alone, so the hook isn't wired (references/pi.md)")
+    m = re.search(r"^const COMMAND = (\[.*\]);$", text, re.M)
+    try:
+        command = json.loads(m.group(1)) if m else []
+    except ValueError:
+        command = []
+    script = _script(shlex.join(command), "pi", home) if command else None
+    if script is None:
+        return ("FAIL", f"Pi: {path} doesn't run the pre-tool hook with --harness pi")
+    return _script_line("Pi", path, script)
 
 
 HARNESSES = (

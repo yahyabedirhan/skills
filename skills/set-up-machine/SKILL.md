@@ -74,7 +74,7 @@ Shared lines first. Each harness then has its own section for the lines only tha
 ### Shared
 
 - `rules ok`
-- a `hook wired` line for every harness found, except Pi's `hook gap`
+- a `hook wired` line for every harness found
 - `personal ok` or `personal none`, and no `personal FAIL`
 - no `harness FAIL`; a `harness gap` names instructions for a harness this skill can't deliver to yet
 
@@ -99,7 +99,7 @@ No further line. The `hook wired` line is the check. Details: [references/openco
 [references/pi.md](references/pi.md)
 
 - When Pi's agent folder exists, `pi ok` for the `AGENTS.md` link, and a `pi same` line per key `agents/pi.json` declares, or `pi none` with no such file. A `pi FAIL` means the audit is not done.
-- Its `hook gap` line is expected: Pi has no permission system, and the adapter that would run the hook isn't designed yet. Name it in the report: no rule-table row applies to Pi.
+- Its `hook wired` line is the extension. Pi has no permission system, so the hook is its only enforcement, and the extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call. A `hook gap` line is an extension someone else wrote at the same path, left alone.
 - A `pi extra` line is a broken skill link, for the user to remove.
 
 ### Cursor
@@ -158,7 +158,7 @@ A harness that matches a command's text catches only the spellings it lists, so 
 
 - **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
 - **allow-and-report** rows: it writes one JSON line per call to `<report-folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
-- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why). Cursor has no ask list at all, so there the hook refuses every ask row, `approver` or not. Pi runs no hook yet, so no row reaches it (references/pi.md).
+- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why). Cursor has no ask list at all, so there the hook refuses every ask row, `approver` or not. Pi has no ask list either, but its extension can ask: with a UI, the hook names the ask rows and the extension asks the user in Pi's dialog; without one, the hook refuses every ask row (references/pi.md).
 - **allow** rows: it says nothing; the harness's native allow entries let the call run without a prompt.
 
 A malformed personal file leaves the table's rows in force: the hook skips the personal permissions and `verify.py` reports the file.
@@ -167,7 +167,7 @@ A malformed personal file leaves the table's rows in force: the hook skips the p
 
 Each harness reference shows its wiring with `<script>` in place of the script's path. Replace it with the absolute path of `scripts/pre_tool_hook.py` in the installed skill (under `~/.agents/skills` or `~/.claude/skills`), never in a checkout or worktree, which can be deleted. If there is no installed copy, name the gap.
 
-The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call.
+The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call. Pi is the exception: it has no native entries underneath, so its extension fails closed and refuses each call the hook can't check (references/pi.md).
 
 `<report-folder>` is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 
@@ -196,7 +196,7 @@ Name these once in every audit:
   - [references/codex.md](references/codex.md): Codex.
   - [references/opencode.md](references/opencode.md): opencode.
   - [references/cursor.md](references/cursor.md): Cursor's IDE and CLI.
-  - [references/pi.md](references/pi.md): Pi, with permissions and the hook as a gap.
+  - [references/pi.md](references/pi.md): Pi, whose only enforcement is the hook's extension.
 
 ## Scripts
 
@@ -205,6 +205,7 @@ Name these once in every audit:
   - **Codex:** its own policy check, plus declared defaults, installed support and override gaps at the resolved config home.
   - **opencode:** the hook wiring only.
   - **Cursor:** Auto-review and the sandbox, as [references/cursor.md](references/cursor.md) describes.
-  - **Pi:** the instructions link, declared defaults and broken skill links, with the hook as a gap, at the resolved agent folder.
+  - **Pi:** the instructions link, declared defaults, broken skill links and the hook's extension, at the resolved agent folder.
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
+- [references/pi-extension.ts](references/pi-extension.ts): the Pi extension that calls the hook and asks the user for ask rows.
