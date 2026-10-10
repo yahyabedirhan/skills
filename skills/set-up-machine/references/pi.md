@@ -38,7 +38,7 @@ The workstation repo's optional `agents/pi.json` declares Pi settings (workstati
 
 ## Permissions
 
-Pi has no permission system. It asks for no approval before a tool call (`docs/security.md`), and has no deny, ask or allow list. The pre-tool hook, wired through an extension, is the only enforcement: it refuses deny rows, asks the user for ask rows in Pi's confirm dialog, and reports allow-and-report rows. Write no native entry for any row.
+Pi has no permission system. It asks for no approval before a tool call (`docs/security.md`), and has no deny, ask or allow list. The pre-tool hook, wired through an extension, is the only enforcement: it refuses deny rows, asks the user for ask rows in a Pi dialog, and reports allow-and-report rows. Write no native entry for any row.
 
 ## Command rows
 
@@ -59,12 +59,12 @@ Each personal permission is `n/a` here: "Pi has no permission entries". The hook
 ## Pre-tool hook
 
 - **Wiring:** the extension `<agent-dir>/extensions/set-up-machine.ts`, which Pi loads from its global extension folder. Write it from [pi-extension.ts](pi-extension.ts), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "pi"]` (`<script>` as in SKILL.md, *Wiring*). Its `tool_call` handler runs before every tool call, built-in, extension and MCP. Calls that `codemode` scripts make with `tools.<name>(…)` reach it one by one, as nested calls.
-- **Fails open:** when the script is gone, can't start, exits non-zero, prints anything but a JSON object or takes over 10 seconds, the extension lets the call through. It catches every error itself, since Pi blocks a call whose `tool_call` handler throws. Once the hook names an ask row, a failure to show the dialog refuses the call instead.
+- **Fails closed:** Pi has no native rules underneath, so a call the hook can't check is refused. When the script is gone, `python3` can't start, the hook exits non-zero, prints anything but a JSON object or takes over 10 seconds, the extension blocks the call. The agent reads that the guardrail is unavailable and that the user should run `/set-up-machine`. The hook exits non-zero on a call it can't read, a rule table it can't load, and a report line it can't write. The extension catches its own errors and turns them into the same refusal.
 - **Audit:** `wired` when the file is the template with the current command. A file there without the template's first line is someone else's: a `gap`, left alone. An extension with an old command is rewritten.
 - **Input:** `{"toolName", "input", "cwd", "sessionId", "hasUI"}`. `input` holds the tool's arguments: `command` for `bash` and `powershell`; `path` for the file tools; `pattern`, `path` and `glob` for `grep`; `pattern` (a glob) and `path` for `find`. The outer `codemode` call carries its script in `input.code`, which the hook doesn't read as a command.
 - **Answer:** always one JSON line. `{"block": "<refusal>"}` becomes `{ block: true, reason }`, and Pi gives the agent the reason as the tool's result. `{"ask": "<question>"}` names each ask row's part, reason and instruction. `{}` lets the call run.
-- **Asking:** with a UI (`ctx.hasUI`, true in the TUI and in RPC mode), the extension shows a notice, then Pi's Yes/No dialog with the question. Yes runs the call. No blocks it, and the agent reads that the user declined. Print and JSON mode have no UI, so the hook refuses every ask row there, `approver: "user"` or not. The dialog's cursor starts on Yes.
-- **Herdr:** while the dialog waits, the extension emits `herdr:blocked` on Pi's event bus. Herdr's Pi integration (version 9) listens for it and shows the pane as `blocked`, so the user gets Herdr's notice. Without that integration nothing listens, and the event does nothing.
+- **Asking:** with a UI (`ctx.hasUI`, true in the TUI and in RPC mode), the extension shows a notice, then a `ctx.ui.select` dialog with the question and two answers, No first. Pi's `ctx.ui.confirm` is the same dialog with Yes first, so `select` puts the cursor on the safe answer: Enter refuses, and so does Escape. Yes runs the call. No blocks it, and the agent reads that the user declined. Print and JSON mode have no UI, so the hook refuses every ask row there, `approver: "user"` or not.
+- **Session host:** while a dialog waits, Pi reports `blocked` to the terminal itself (OSC 7501). A session host's own Pi integration can report a state of its own instead. Herdr's (version 9) reported `working`, so the user got no notice. It listens for a `herdr:blocked` event on Pi's event bus, so the extension emits that event around the dialog, and Herdr then shows the pane as `blocked`. Without that integration nothing listens, and the event does nothing.
 - Other extensions in `<agent-dir>/extensions/`, such as a session host's integration, are the user's: leave them.
 
 ## Auto mode
@@ -73,7 +73,7 @@ None: Pi has no approval prompts to automate.
 
 ## Gaps
 
-- **The only layer:** Pi has no native rules underneath. While `python3` or the script is missing, or the hook fails, every call runs with the user's own permissions. The containment Pi offers is the operating system's: a container, a virtual machine or a separate user (`docs/security.md`, `docs/containerization.md`). Name this once in every audit.
+- **The only layer:** Pi has no native rules underneath, so the extension fails closed: while `python3` or the script is missing, or the hook fails, Pi refuses every tool call until `/set-up-machine` repairs it. `pi --no-extensions` starts a session without the hook in the meantime. The containment Pi offers beyond the hook is the operating system's: a container, a virtual machine or a separate user (`docs/security.md`, `docs/containerization.md`). Name this once in every audit.
 - **Started without extensions:** `pi --no-extensions` (`-ne`) skips the extension. Explicit `-e <path>` extensions still load.
 - **Handlers after the hook can change the call:** a `tool_call` handler can change `event.input`, and the first handler that blocks wins. Pi 1.1.0 runs the handlers in load order: `-e` extensions first, then a trusted project's extensions (its `.pi/settings.json` entries, then `.pi/extensions/`), then the global settings' entries, then `<agent-dir>/extensions/`, then packages' extensions, then built-in ones. So a package or built-in extension runs after the hook and could change a call the hook already passed. Pi offers no way to run last or to check the final input before the tool runs. A project extension runs before the hook: the hook sees what it changed.
 - **Child sessions without extensions:** a package that starts child sessions in the same process can start them with extensions off, and the hook doesn't run there. The `pi-subagents` package (0.77.0) does this for foreground children; its setting `subagents.defaultSubagentOnlyExtensions`, listing the extension's path, loads it there. Check each such package. A child without a UI gets ask rows refused.
@@ -82,7 +82,7 @@ None: Pi has no approval prompts to automate.
 
 ## What the agent sees
 
-A refused call's tool result is the hook's refusal: each refused part, its rule, reason and instruction. For an ask row the user declined, the result starts `Refused: the user declined this call when the pre-tool hook asked.`, followed by the question. A refused nested call fails the `codemode` script with the same text. The shared file also gives the agent the rule lines and the rejection guidance.
+A refused call's tool result is the hook's refusal: each refused part, its rule, reason and instruction. For an ask row the user declined, the result starts `Refused: the user declined this call when the pre-tool hook asked.`, followed by the question. When the hook can't check the call, the result starts `Refused: the pre-tool hook couldn't check this call`, says why, and asks the agent to stop and have the user run `/set-up-machine`. A refused nested call fails the `codemode` script with the same text. The shared file also gives the agent the rule lines and the rejection guidance.
 
 ## Checking it
 
@@ -99,11 +99,16 @@ With no login in the sandbox, Pi still starts and shows the listing. It creates 
 A live model turn needs the login, so check the hook with the real agent folder and the extension loaded for one run only:
 
 1. Write the template to a file in a throwaway folder outside any git repository, with the command `["python3", "<script>", "--harness", "pi", "--config", "<temp hook.json>"]`. The temporary `hook.json` holds a `report_dir` in the throwaway folder.
-2. From that folder, run `pi --no-session -e <file> --mode json "<prompt>"` for each sample below. Read the `tool_execution_end` events. Use targets that don't exist, so nothing is lost if the hook fails.
+2. From that folder, run `pi --no-session -e <file> --mode json "<prompt>"` for each sample below. Read the `tool_execution_end` events. Use targets that don't exist, so nothing is lost if the hook lets a call through.
    - `rm -rf .scratch/does-not-exist`: Result: refused with rule `rm-recursive-force`'s reason.
    - `git push --force-with-lease origin x`: Result: refused, naming `Pi without a UI`.
    - A `read` of `.env`: Result: refused with rule `env-files-read`. A model may decline to try; say the file doesn't exist and the run tests the guardrail.
    - `gh api rate_limit`: Result: it runs, and the report folder gets a line with `"harness": "pi"`.
    - With `--tools +codemode`, a script calling `tools.bash` with `rm -rf .scratch/does-not-exist`: Result: the nested call is refused, and the script fails with the refusal.
+   - With the command's script path changed to one that doesn't exist, `ls`: Result: refused, saying the hook couldn't check the call.
 3. In the TUI, `pi --no-session -e <file>`, ask for the `git push --force-with-lease origin x` again.
-   - Result: a notice and the dialog appear, and Herdr shows the pane as `blocked`. No refuses the call, and Yes runs it.
+   - Result: a notice and the dialog appear, with the cursor on No. Under Herdr with its Pi integration, the pane shows `blocked`.
+4. Press Enter.
+   - Result: the call is refused as declined.
+5. Ask again, move to Yes and press Enter.
+   - Result: the call runs.
