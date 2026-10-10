@@ -6,6 +6,35 @@ How to set up and audit Pi, the `pi` coding agent (`@earendil-works/pi-coding-ag
 
 Leave `<agent-dir>/auth.json`, `mcp-auth.json`, `trust.json`, `models-store.json` and `sessions/` unread and unwritten: they hold credentials, trust decisions and runtime state, never a setting this skill owns.
 
+## Words
+
+Pi's own terms, as its docs use them. Every Pi document that follows this skill uses them the same way.
+
+**Agent folder** (`<agent-dir>`):
+Where Pi keeps its user-level files: `settings.json`, the context file, `extensions/`, `skills/`, and runtime state. `~/.pi/agent` unless `PI_CODING_AGENT_DIR` says otherwise.
+
+**Settings**:
+`<agent-dir>/settings.json` for the user, and `.pi/settings.json` for a project, which loads only once the project is trusted. Defaults, resource paths and the `packages` list live here.
+
+**Context file**:
+An `AGENTS.md` (or `CLAUDE.md`) Pi adds to the prompt, from the agent folder and from each folder up from the working one.
+
+**Extension**:
+A TypeScript module that adds executable behavior to Pi: tools, commands, shortcuts, event handlers such as `tool_call`, model providers, session state or terminal UI. It runs inside Pi with Pi's operating-system permissions. Pi loads extensions from `<agent-dir>/extensions/`, from a trusted project's `.pi/extensions/`, and from packages. This skill's pre-tool hook is one, `<agent-dir>/extensions/set-up-machine.ts`.
+
+**Built-in extension**:
+An extension that ships with Pi and loads by default, such as `builtin:mcp`, `builtin:codemode` and `builtin:tool-search`. `-builtin:<name>` in the `extensions` setting turns one off.
+
+**Package**:
+The unit Pi installs and shares: an npm package, a git repository or a folder that bundles extensions, skills, prompt templates and themes. The `packages` setting lists them; `pi install`, `pi list`, `pi update` and `pi remove` manage them. A package is the box; what it adds is usually one or more extensions.
+_In this skill_: a package is listed in the `plugins` setup area as a `bundle` for `pi` and called an **extension**, after what it adds. "Package" stays the name of Pi's `packages` setting and its commands.
+
+**Skill, prompt template, theme**:
+The other resources a package or the agent folder can hold: a skill is a `SKILL.md` folder, a prompt template a reusable `/command` prompt, a theme the terminal colors.
+
+**Project trust**:
+Whether Pi loads a project's own `.pi` settings and resources. Context files load either way. Trust is not a guardrail: it doesn't limit tool calls.
+
 ## Global instructions
 
 - Pi loads one context file from `<agent-dir>`, the first that exists of `AGENTS.override.md`, `AGENTS.md`, `AGENTS.MD`, `CLAUDE.md` and `CLAUDE.MD`. It then adds one from each folder from the working folder up. It follows a symlink and skips a broken one. It doesn't follow `@` imports.
