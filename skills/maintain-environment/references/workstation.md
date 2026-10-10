@@ -52,6 +52,7 @@ Make each personal change in the clone at `<path-to-workstation-repo>`:
 - a personal permission: `agents/permissions.json`;
 - a harness default the user chose: `agents/codex.toml` for Codex, `agents/pi.json` for Pi;
 - a skill or a command every machine installs: `agents/installs.json`;
+- a plugin, a bundle or a standalone MCP server, and the harnesses that get it: `plugins` in `agents/installs.json`;
 - the reason behind a choice: a decision record, or the Why column of the Environment defaults table in `agents/instructions.md`.
 
 Leave the shared file's generated parts and the harness settings to `/set-up-machine`, since its next run rewrites them. The user commits and pushes the change. Each machine then pulls it into its clone and runs `/set-up-machine`.

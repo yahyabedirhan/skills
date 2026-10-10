@@ -70,6 +70,14 @@ A personal permission (workstation.md) becomes CLI entries the way a table row o
 - **It can't loosen a table row:** deny wins over allow.
 - **The IDE** has no allow list: an `allow` row is a `gap` there, left to the IDE's own approval settings.
 
+## Plugins
+
+The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md).
+
+- **A bundle:** Cursor's CLI imports Claude Code's installed and enabled plugins (*Permissions*, *Claude Code plugins Cursor imports*), and has no install command of its own. So a bundle reaches Cursor only through Claude Code: `present` when Claude Code has it installed and enabled, whether or not the entry lists `claude-code`; otherwise a `FAIL` naming the Claude Code install. Its MCP servers show up as `plugin-<plugin>-<server>`, from the plugin folder's `mcp.json` or `.mcp.json`.
+- **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `~/.cursor/mcp.json`, keeping every other key ([MCP](https://cursor.com/docs/context/mcp)). `present` when it matches, `added` when it's missing, `updated` when it differs. A global server needs no approval; one in a project's `.cursor/mcp.json` waits for `agent mcp enable`.
+- **Sign-in:** a server that uses OAuth keeps its sign-in per project folder (`~/.cursor/projects/<folder>/mcp-auth.json`). The user signs in from a session; an agent never does. On a headless machine the callback goes to `localhost:8787` there, which the user finishes with `curl` or an SSH tunnel.
+
 ## Pre-tool hook
 
 - **Wiring:** `~/.cursor/hooks.json`, read by the IDE and the CLI, which a project can't turn off. One handler on four events, since each call reaches exactly one of them and nothing is reported twice (keep the user's handlers):
