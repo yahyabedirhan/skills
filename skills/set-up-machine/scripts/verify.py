@@ -449,6 +449,9 @@ def main(argv=None, stdout=None) -> int:
     for status, text in personal.check(home) + own_lines + check_personal_entries(home, own):
         line("personal", status, text)
         failed |= status == "FAIL"
+    for status, text in personal.check_harnesses(home):
+        line("harness", status, text)
+        failed |= status == "FAIL"
     for status, text in codex_config.audit(home, codex_home, codex):
         line("config", status, text)
         failed |= status == "FAIL"

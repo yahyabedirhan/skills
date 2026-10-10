@@ -48,6 +48,7 @@ Start a workstation repo when the user asks for one. Offer to start one when a c
 Make each personal change in the clone at `<path-to-workstation-repo>`:
 
 - a working agreement, glossary, environment default or personal workflow line: `agents/instructions.md`. Leave out the `workstation-repo` and `path-to-workstation-repo` rows: the pointer fills them, so change either value by running `/set-up-machine`, which rewrites the pointer;
+- an instruction only one harness needs, such as a limit of its sandbox: `agents/harnesses/<harness>.md`, under `## Instructions`;
 - a personal permission: `agents/permissions.json`;
 - a skill or a command every machine installs: `agents/installs.json`;
 - the reason behind a choice: a decision record, or the Why column of the Environment defaults table in `agents/instructions.md`.

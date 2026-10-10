@@ -19,6 +19,7 @@ Make every coding-agent harness on the machine (Claude Code, Codex, opencode, Cu
 ## Outputs
 
 - **Shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads; its personal parts come from `agents/instructions.md`.
+- **Harness instructions**, for a harness that has its own `agents/harnesses/<harness>.md` in the workstation repo: today Cursor's `~/.cursor/rules/harness-instructions.mdc` (references/workstation.md).
 - Each harness's permission entries, from the rule table and the personal permissions.
 - The **pre-tool hook**, `scripts/pre_tool_hook.py`, run before every tool call.
 - The **pointer**, when it is missing or records none.
@@ -74,6 +75,7 @@ Shared lines first. Each harness then has its own section for the lines only tha
 - `rules ok`
 - a `hook wired` line for every harness found
 - `personal ok` or `personal none`, and no `personal FAIL`
+- no `harness FAIL`; a `harness gap` names instructions for a harness this skill can't deliver to yet
 
 ### Claude Code
 
@@ -97,6 +99,7 @@ No further line. The `hook wired` line is the check. Details: [references/openco
 
 - When `~/.cursor` exists, `cursor ok`: Auto-review, with the sandbox on. `cursor FAIL` means the audit is not done. No `~/.cursor` is `cursor none`.
 - The keys, the Linux sandbox gap and what the skill leaves in `permissions.json` are in that reference.
+- With `agents/harnesses/cursor.md` in the workstation repo, `harness ok` for `~/.cursor/rules/harness-instructions.mdc`.
 
 ## Rule table
 
