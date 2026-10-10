@@ -357,4 +357,4 @@ This replaces the `codex_mcp` bullet in *Codex plugins and tool policies*.
 - **Permissions are the source for tool lists.** The rule table and `agents/permissions.json` name the tools. Each adapter derives its harness list from those rows. A copy in `mcp_policy` is optional.
 - **One module per harness.** `scripts/setupmachine/harnesses/<harness>.py` exposes `validate`, `check` and `propose`. `plugins.py` holds the lookup table. Pi, Claude Code, Cursor and Codex use it.
 - **The Pi adapter does not compare a git checkout with a ref.** Pinned-package handling stays out of this code.
-- **The skill owns the Codex procedure.** `references/codex.md` gives numbered steps and a done check. TOML and OAuth details are in `references/codex-mcp.md`.
+- **The skill owns the Codex procedure.** `references/codex.md` gives numbered steps and a done check. The TOML and OAuth detail is a subsection at the end of that file.

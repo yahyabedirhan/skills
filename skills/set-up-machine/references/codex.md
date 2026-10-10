@@ -113,7 +113,7 @@ A personal permission (workstation.md) becomes `prefix_rule`s the way a table ro
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md). Tool lists come from `agents/permissions.json` and the rule table. Read [codex-mcp.md](codex-mcp.md) for the TOML tables and the OAuth check.
+The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md). Tool lists come from `agents/permissions.json` and the rule table. Read *Codex MCP* at the end of this file when an entry has `mcp_policy`, a standalone server, or `require_oauth`.
 
 1. Add a missing marketplace with `codex plugin marketplace add <owner>/<repo>`.
 2. Install the bundle with `codex plugin add <plugin>@<marketplace>`.
@@ -160,3 +160,27 @@ A forbidden rule: `` exec_command failed: … `/bin/zsh -lc 'rm -fr x'` rejected
 - **Hook trust:** `codex app-server` with `CODEX_HOME` at the folder, then `hooks/list` for a throwaway folder: the group is `trusted`.
 - **A session without a login:** `codex exec` with `CODEX_HOME` and `HOME` at a trial home and a `model_providers` entry pointing at a local stand-in that answers the Responses API with one `exec_command` (or `apply_patch`) call; the next request's `function_call_output` is what the agent read. With `--disable hooks` it shows the rule's justification, and with hooks on the hook's refusal.
 - **Instructions:** `codex debug prompt-input hello` in a throwaway folder shows the shared file's rejection guidance, and no Context7 block.
+
+## Codex MCP
+
+Read this when an entry has `mcp_policy`, a standalone server, or `require_oauth`. Docs: [MCP configuration](https://learn.chatgpt.com/docs/extend/mcp), [developer commands](https://learn.chatgpt.com/docs/developer-commands), [plugin formats](https://developers.openai.com/plugins/build/plugins).
+
+The server id is the entry's `name`.
+
+- Write a bundle's policy in `[plugins."<plugin>@<marketplace>".mcp_servers.<name>]`.
+- Write a standalone server's `server` object in `[mcp_servers.<name>]`, with the policy keys beside it.
+- Write `enabled_tools` and `disabled_tools` under those names. Write `approval_mode` as `default_tools_approval_mode`. Do not write `require_oauth`: it is only an audit flag.
+
+Take tool names from `agents/permissions.json` and the rule table (workstation.md). `propose` unions those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
+
+`propose(text, entry)` in `scripts/setupmachine/harnesses/codex.py` returns the TOML and writes nothing. It keeps undeclared keys and comments, because the file holds choices this skill does not own. It keeps a stricter tool list already in the file: more disabled tools, or a shorter enabled list. It refuses an unfamiliar TOML form instead of rewriting the file. Apply the skill's backup and approval steps to the diff it returns.
+
+When `require_oauth` is true, keep the server disabled until `codex mcp login <name>` shows the server connected. Never test the exclusion by calling the tool. A disabled server reports `unsupported` in `codex mcp list --json`. Enable it only for that listing, then restore the disabled state unless the login is connected. Codex 0.162.1 reports a connected login as `o_auth`.
+
+On a headless machine, the browser callback opens on the wrong machine. Leave the login process running. The user forwards the callback to the listener on the machine that runs Codex. Treat that URL as a secret. Never put it in a repository, a log, or shell history.
+
+`verify.py` reads the resolved Codex home. With a CLI it reads `codex mcp list --json` and no credential file. A missing login is a `gap` that names the login command. The file check does not prove which tools the current session can see.
+
+Codex 0.162.1 accepts a portable Claude-compatible bundle. A Claude LSP declaration or a harness-specific mod API does not establish working Codex tools. Read the bundle's manifest before claiming parity. Report an unsupported component as a gap even when the install succeeds.
+
+Never call an excluded tool, including as a capability test. The exclusion comes from the permission row. It does not depend on the approval reviewer.
