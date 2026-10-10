@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """set-up-machine's pre-tool hook. A harness runs it before each tool call, with the call on stdin.
 
-usage: pre_tool_hook.py [--harness claude-code|codex|opencode] [--config FILE] [--rules FILE]
+usage: pre_tool_hook.py [--harness claude-code|codex|opencode|cursor|pi] [--config FILE] [--rules FILE]
 
 It refuses a call that any deny row of the rule table, or of the personal
 repository's permissions file that ~/.config/agents/source.md names, covers, naming each
