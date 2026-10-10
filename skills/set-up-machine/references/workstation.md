@@ -117,6 +117,7 @@ Keep explicitly chosen Pi settings in this private file: a JSON object of top-le
 }
 ```
 
+- **No extension list here.** Pi extensions go in `plugins` in `agents/installs.json`. A copy of Pi's `packages` setting in this file is a `gap`.
 - Declare only preferences. Leave out runtime state Pi writes itself, such as `deviceId` and `lastChangelogVersion`, and keep credentials, trust decisions and sessions in Pi's own files.
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
 - Read `pi.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
@@ -143,10 +144,16 @@ What each machine installs beyond the harnesses' configuration: skills, plugins,
       "harnesses": ["claude-code", "cursor"]
     },
     {
+      "name": "<pi-extension>",
+      "kind": "bundle",
+      "source": "npm:<pi-extension>@<version>",
+      "harnesses": ["pi"]
+    },
+    {
       "name": "<server>",
       "kind": "mcp",
       "server": { "url": "<url>" },
-      "harnesses": ["cursor"]
+      "harnesses": ["cursor", "pi"]
     }
   ],
   "commands": [
@@ -164,6 +171,7 @@ What each machine installs beyond the harnesses' configuration: skills, plugins,
 - **`ignore`:** skill names a machine may have that the list leaves out on purpose, such as an experiment on one machine or a hand-made skill the lock doesn't track. Mark an installed skill on this list `ignored`, not `extra`, and never install, update or remove it, since it is the user's on that machine.
 - **`plugins`:** what each harness plugs in for new tools, the plugins setup area. An entry has a `name`, a `kind` and the `harnesses` that should have it (`claude-code`, `cursor`, `codex`, `opencode`, `pi`).
   - `kind: "bundle"`: a plugin installed as one unit with its MCP servers, skills and hooks. `source` is `<plugin>@<marketplace>`, as Claude Code names it. `marketplace` is the GitHub `<owner>/<repo>` to add first, for a marketplace Claude Code doesn't know yet.
+  - A Pi extension is a bundle whose only harness is `pi`. Its `source` is a Pi extension source, as Pi's `packages` setting takes it: `npm:<name>[@<version>]`, `git:<host>/<owner>/<repo>[@<ref>]` or `https://<host>/<owner>/<repo>[@<ref>]`. It takes no `marketplace`. Refuse a Pi source on an entry that names another harness, and a `<plugin>@<marketplace>` source on one that names `pi`, since no harness takes both forms. Refuse two entries for the same Pi extension.
   - `kind: "mcp"`: a standalone MCP server. `server` is the entry the harness's config takes, with a `url`, or a `command` and its `args`.
   - An optional `os` works as below; `target` isn't taken, since `verify.py` can't tell a remote machine from a local one.
   - Each harness reference's **Plugins** section says how it gets each kind, or names the gap.
@@ -181,7 +189,7 @@ Check each entry that applies, then put what's missing in the diff:
   - **When a skill's name is already installed from another source,** a lock entry with that name and a different `source`, **or two entries in the file both provide it:** mark it `gap`, name both sources, and install nothing for that name. The lock holds one skill per name, so `npx skills add` would silently replace the other source's copy on every machine. The user resolves it by dropping one source, or by naming skills so the two no longer overlap.
   - **When a listed skill's name matches a harness's built-in slash command:** add a `gap` line naming the harness and the command, and still install it. One of the two may hide the other in that harness, which the user should know about, but the skill is theirs to keep.
   - `extra` for an installed skill in the lock that no entry provides and `ignore` doesn't name: kept, for the user to add to the file, add to `ignore` or remove.
-- **A plugin:** for each harness the entry names, do what that harness reference's **Plugins** section says. `verify.py` prints a `plugin` line per entry and harness: `ok`, `FAIL` (missing, disabled or different), `n/a` (the harness isn't set up, or another `os`), `gap` (the harness can't take that kind yet) and `extra` (a bundle Claude Code has enabled that the list leaves out, which Cursor imports too). A malformed list is one `FAIL` line, and nothing from it is installed.
+- **A plugin:** for each harness the entry names, do what that harness reference's **Plugins** section says. `verify.py` prints a `plugin` line per entry and harness: `ok`, `FAIL` (missing, disabled or different), `n/a` (the harness isn't set up, or another `os`), `gap` (the harness can't take that kind yet) and `extra` (a bundle Claude Code has enabled that the list leaves out, which Cursor imports too, or an extension Pi's `settings.json` lists that the list leaves out). A malformed list is one `FAIL` line, and nothing from it is installed.
   - Move a `commands` entry that installs a Claude Code plugin into `plugins`; the same plugin in both is installed twice.
 - **A command:** `present` when `check` exits 0; otherwise `added`, and Write runs `install`, then `check` again. A `check` that still fails after `install` is a failed install: report it.
 

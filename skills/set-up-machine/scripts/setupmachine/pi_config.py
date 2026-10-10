@@ -3,7 +3,7 @@
 The agent folder is PI_CODING_AGENT_DIR, else ~/.pi/agent; verify.py resolves it. The
 workstation repo's optional agents/pi.json, found through the pointer, declares Pi settings
 keys; only those keys are compared with <agent-dir>/settings.json, and their values are never
-printed. auth.json, trust.json and sessions are never read. references/pi.md is the layout.
+printed. A `packages` key there is a gap: Pi extensions belong in the plugins list (plugins.py). auth.json, trust.json and sessions are never read. references/pi.md is the layout.
 """
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from . import personal
 
 SOURCE = Path("agents/pi.json")
 DEFAULT_DIR = Path(".pi/agent")
+PLUGIN_KEYS = ("packages",)  # Pi extensions come from the plugins list in agents/installs.json, not agents/pi.json
 
 
 class ConfigError(ValueError):
@@ -91,7 +92,10 @@ def defaults(home: Path, folder: Path) -> list:
         return [("FAIL", f"Pi: {path} isn't a JSON object")]
     out = []
     for key, value in declared.items():
-        if key in settings and type(settings[key]) is type(value) and settings[key] == value:
+        if key in PLUGIN_KEYS:
+            out.append(("gap", f"Pi: agents/pi.json declares {key}; Pi extensions belong in the plugins list, so move "
+                               "each one into `plugins` in agents/installs.json (references/pi.md, Plugins)"))
+        elif key in settings and type(settings[key]) is type(value) and settings[key] == value:
             out.append(("same", f"Pi: {key} in {path} matches agents/pi.json"))
         else:
             out.append(("FAIL", f"Pi: {key} in {path} is missing or differs from agents/pi.json"))

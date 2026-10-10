@@ -860,6 +860,15 @@ class PiTest(unittest.TestCase):
         self.assertFalse(any("model-a" in l or "model-b" in l for l in lines))
         self.assertEqual(code, 1)
 
+    def test_extensions_declared_in_pi_json_are_a_gap_for_the_plugins_list(self):
+        self.link()
+        self.workstation({"defaultModel": "model-a", "packages": ["npm:pi-web-access@0.38.0"]})
+        self.write(".pi/agent/settings.json", {"defaultModel": "model-a", "packages": []})
+        code, lines = self.lines()
+        self.assertTrue(any(re.match(r"pi +gap +Pi: agents/pi\.json declares packages; Pi extensions belong in the plugins list, so move "
+                                     r"each one into `plugins` in agents/installs\.json", l) for l in lines), lines)
+        self.assertFalse(any("packages" in l and re.match(r"pi +(FAIL|same) ", l) for l in lines), lines)
+
     def test_settings_read_through_a_symlink(self):
         self.link()
         self.workstation({"defaultModel": "model-a"})
