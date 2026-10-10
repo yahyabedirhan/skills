@@ -260,3 +260,9 @@ The spec is #111.
 - **Only the `## Instructions` section is copied.** The rest of the file is notes, the same as in `agents/instructions.md`.
 - **Cursor first.** Cursor reads every `~/.cursor/rules/*.mdc` with `alwaysApply: true`, so a second generated rule file adds the lines without touching the shared file. Claude Code, Codex and opencode read the shared file through a link, so each needs its own way in. Until then, a source for one of them is a `gap` line.
 - **`verify.py` compares the generated file with its source**, the same as the shared file: a `harness` line per file.
+
+## 2026-10-10: Cursor's entries for the Claude Code plugins it imports
+
+- **Cursor's CLI imports Claude Code's plugins,** their skills and MCP servers included. A plugin's server is `plugin-<plugin>-<server>` there, and `cursor-agent mcp list` can't list it, so the old listing step found nothing and a row like a personal Exa allow left Cursor asking, or a headless run rejecting the call.
+- **Claude Code's tool listing supplies the tools.** The two names differ only in `_` and `-`, so each matched `mcp__plugin_<plugin>_<server>__<tool>` becomes `Mcp(plugin-<plugin>-<server>:<tool>)`. Tested on Linux with `agent` 2026.10.01: with the entry, Exa's search ran without a prompt; without it, the call asked.
+- **Only the skills import is in Cursor's docs.** The plugin import sits behind a switch Cursor controls, so the reference treats it as a fact to check, not a promise.
