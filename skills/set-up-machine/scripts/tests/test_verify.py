@@ -747,3 +747,177 @@ class HarnessInstructionsTest(PersonalHome, unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PiTest(unittest.TestCase):
+    """Pi's instructions link, its declared defaults from agents/pi.json, and its hook gap."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.home = Path(self._tmp.name).resolve()
+        self.agent = self.home / ".pi" / "agent"
+        self.shared = self.home / ".config" / "agents" / "AGENTS.md"
+        self.shared.parent.mkdir(parents=True)
+        self.shared.write_text("# Global agent instructions\n")
+        self.agent.mkdir(parents=True)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def write(self, rel, text):
+        path = self.home / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text if isinstance(text, str) else json.dumps(text))
+        return path
+
+    def link(self, target="../../.config/agents/AGENTS.md"):
+        (self.agent / "AGENTS.md").symlink_to(target)
+
+    def workstation(self, declared=None):
+        self.write(".config/agents/source.md", "- Repository: `owner-a/personal`\n- Clone: `~/code/personal`\n")
+        if declared is not None:
+            self.write("code/personal/agents/pi.json", declared)
+
+    def lines(self, *extra):
+        code, out = run("--home", str(self.home), "--rules", str(TABLE), "--no-codex", *extra)
+        return code, [l for l in out.splitlines() if l.startswith("pi ")]
+
+    def test_no_agent_folder_is_not_set_up(self):
+        self.agent.rmdir()
+        no_personal_repository(self.home)
+        code, lines = self.lines()
+        self.assertEqual(len(lines), 1)
+        self.assertRegex(lines[0], r"pi +none +Pi: not set up here")
+        self.assertEqual(code, 0)
+
+    def test_the_link_to_the_shared_file_passes(self):
+        no_personal_repository(self.home)
+        self.link()
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"pi +ok +Pi: .*AGENTS\.md -> .*\.config/agents/AGENTS\.md")
+        self.assertEqual(code, 0)
+
+    def test_a_missing_or_broken_link_fails(self):
+        no_personal_repository(self.home)
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"pi +FAIL +Pi: no .*AGENTS\.md; link it to the shared file: \.\./\.\./\.config/agents/AGENTS\.md")
+        self.assertEqual(code, 1)
+        self.link("../../nowhere/AGENTS.md")
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"pi +FAIL +Pi: .*AGENTS\.md is a broken link")
+        self.assertEqual(code, 1)
+
+    def test_a_file_set_up_machine_did_not_write_is_a_gap(self):
+        no_personal_repository(self.home)
+        self.write(".pi/agent/AGENTS.md", "# my own\n")
+        code, lines = self.lines()
+        self.assertRegex(lines[0], r"pi +gap +Pi: .*AGENTS\.md isn't a link to the shared file")
+        self.assertEqual(code, 0)
+
+    def test_an_override_file_is_a_gap_beside_the_link(self):
+        no_personal_repository(self.home)
+        self.link()
+        self.write(".pi/agent/AGENTS.override.md", "# override\n")
+        code, lines = self.lines()
+        self.assertTrue(any(re.search(r"pi +gap +Pi: .*AGENTS\.override\.md .*instead of the shared file", l) for l in lines), lines)
+        self.assertTrue(any(re.search(r"pi +ok ", l) for l in lines), lines)
+        self.assertEqual(code, 0)
+
+    def test_the_link_for_an_agent_folder_elsewhere_is_computed_from_it(self):
+        no_personal_repository(self.home)
+        folder = self.home / "elsewhere" / "pi"
+        folder.mkdir(parents=True)
+        code, lines = self.lines("--pi-agent-dir", str(folder))
+        self.assertRegex(lines[0], r"link it to the shared file: \.\./\.\./\.config/agents/AGENTS\.md")
+        (folder / "AGENTS.md").symlink_to("../../.config/agents/AGENTS.md")
+        code, lines = self.lines("--pi-agent-dir", str(folder))
+        self.assertRegex(lines[0], r"pi +ok ")
+
+    def test_declared_defaults_match_settings_and_other_keys_are_ignored(self):
+        self.link()
+        self.workstation({"defaultThinkingLevel": "high", "enableInstallTelemetry": False})
+        self.write(".pi/agent/settings.json", {"defaultThinkingLevel": "high", "enableInstallTelemetry": False,
+                                               "deviceId": "runtime-state", "lastChangelogVersion": "1.1.0"})
+        _, lines = self.lines()
+        same = [l for l in lines if re.match(r"pi +same ", l)]
+        self.assertEqual(len(same), 2, lines)
+        self.assertFalse(any("deviceId" in l or "runtime-state" in l for l in lines))
+
+    def test_a_declared_default_that_differs_fails_without_printing_values(self):
+        self.link()
+        self.workstation({"defaultModel": "model-a"})
+        self.write(".pi/agent/settings.json", {"defaultModel": "model-b"})
+        code, lines = self.lines()
+        self.assertTrue(any(re.match(r"pi +FAIL +Pi: defaultModel in .*settings\.json is missing or differs", l) for l in lines), lines)
+        self.assertFalse(any("model-a" in l or "model-b" in l for l in lines))
+        self.assertEqual(code, 1)
+
+    def test_settings_read_through_a_symlink(self):
+        self.link()
+        self.workstation({"defaultModel": "model-a"})
+        target = self.write("dotfiles/pi-settings.json", {"defaultModel": "model-a"})
+        (self.agent / "settings.json").symlink_to(target)
+        _, lines = self.lines()
+        self.assertTrue(any(re.match(r"pi +same +Pi: defaultModel", l) for l in lines), lines)
+
+    def test_no_declared_defaults_says_none(self):
+        self.link()
+        self.workstation()
+        _, lines = self.lines()  # the personal check fails here: the fixture has no agents/instructions.md
+        self.assertTrue(any(re.match(r"pi +none +Pi: no declared defaults", l) for l in lines), lines)
+        self.assertFalse(any(re.match(r"pi +FAIL ", l) for l in lines), lines)
+
+    def test_a_declared_file_that_is_not_an_object_or_settings_that_are_not_json_fail(self):
+        self.link()
+        self.workstation(["defaultModel"])
+        code, lines = self.lines()
+        self.assertTrue(any(re.match(r"pi +FAIL +.*agents/pi\.json", l) for l in lines), lines)
+        self.assertEqual(code, 1)
+        self.write("code/personal/agents/pi.json", {"defaultModel": "model-a"})
+        self.write(".pi/agent/settings.json", "{not json")
+        code, lines = self.lines()
+        self.assertTrue(any(re.match(r"pi +FAIL +Pi: .*settings\.json isn't valid JSON", l) for l in lines), lines)
+        self.assertEqual(code, 1)
+
+    def test_a_broken_skill_link_is_extra(self):
+        no_personal_repository(self.home)
+        self.link()
+        (self.agent / "skills").mkdir()
+        (self.agent / "skills" / "gone").symlink_to("../../../.agents/skills/gone")
+        (self.home / ".agents" / "skills" / "kept").mkdir(parents=True)
+        (self.agent / "skills" / "kept").symlink_to("../../../.agents/skills/kept")
+        code, lines = self.lines()
+        extra = [l for l in lines if re.match(r"pi +extra ", l)]
+        self.assertEqual(len(extra), 1, lines)
+        self.assertIn("gone is a broken link", extra[0])
+        self.assertEqual(code, 0)
+
+    def test_the_hook_is_a_gap_not_a_failure(self):
+        no_personal_repository(self.home)
+        self.link()
+        code, out = run("--home", str(self.home), "--rules", str(TABLE), "--no-codex")
+        hook = [l for l in out.splitlines() if l.startswith("hook") and "Pi" in l]
+        self.assertRegex(hook[0], r"hook +gap +Pi: no pre-tool hook")
+        self.assertEqual(code, 0, out)
+
+    def test_actual_home_honors_the_agent_dir_variable_without_printing_it(self):
+        from unittest.mock import patch
+        no_personal_repository(self.home)
+        folder = self.home / "custom-pi"
+        folder.mkdir()
+        (folder / "AGENTS.md").symlink_to(os.path.relpath(self.shared, folder))
+        out = io.StringIO()
+        with patch.object(Path, "home", return_value=self.home), patch.dict(os.environ, {"PI_CODING_AGENT_DIR": str(folder)}):
+            verify.main(["--home", str(self.home), "--rules", str(TABLE), "--no-codex"], out)
+        lines = [l for l in out.getvalue().splitlines() if l.startswith("pi")]
+        self.assertRegex(lines[0], r"pi +ok ")
+        self.assertIn("<Pi agent dir>", out.getvalue())
+        self.assertNotIn(str(folder), out.getvalue())
+
+    def test_a_fixture_home_ignores_the_agent_dir_variable(self):
+        from unittest.mock import patch
+        no_personal_repository(self.home)
+        self.link()
+        with patch.dict(os.environ, {"PI_CODING_AGENT_DIR": str(self.home / "ambient")}):
+            _, lines = self.lines()
+        self.assertRegex(lines[0], r"pi +ok ")

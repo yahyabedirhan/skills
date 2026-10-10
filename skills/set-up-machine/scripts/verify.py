@@ -2,7 +2,7 @@
 """set-up-machine's check that the rules work on this machine. It writes nothing.
 
 usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
-                 [--codex-home DIR]
+                 [--codex-home DIR] [--pi-agent-dir DIR]
        verify.py --codex-trust-hash COMMAND
 
 - rules: every row's `covers` samples get the row's level from the pre-tool hook
@@ -13,7 +13,7 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   stricter, and kept) or `differs` from the row's level (a row Codex can't
   express, in references/codex.md, or a mistake to fix);
 - hook: each harness found has its pre-tool hook wired to a script that exists
-  (Codex's also trusted);
+  (Codex's also trusted); Pi's is a gap until its adapter is designed;
 - personal: the pointer, ~/.config/agents/source.md, is there, and when it names a
   workstation repo, the shared global instructions file carries that repository's
   environment defaults and personal workflow, the pointer's repository and clone path
@@ -28,10 +28,14 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   managed constraints remain explicit gaps. --codex-home selects the same folder
   for configuration, rules and hooks. The real home honors CODEX_HOME privately;
   fixture --home folders ignore ambient CODEX_HOME unless --codex-home is given.
+- pi: when Pi's agent folder exists, its AGENTS.md is a link to the shared file, each
+  key agents/pi.json declares matches settings.json, and no skill link is broken
+  (references/pi.md). The real home honors PI_CODING_AGENT_DIR privately; fixture
+  --home folders use HOME/.pi/agent unless --pi-agent-dir is given.
 - cursor: when ~/.cursor exists, cli-config.json has approvalMode auto-review and
   sandbox.mode enabled (references/cursor.md). Otherwise `none`.
 
-Exits 1 when a rules, hook, personal, config or cursor line fails. --codex-trust-hash prints the
+Exits 1 when a rules, hook, personal, config, pi or cursor line fails. --codex-trust-hash prints the
 `trusted_hash` Codex records for a PreToolUse hook running COMMAND with matcher
 `*` and timeout 10. Python 3.9+, standard library only.
 """
@@ -51,7 +55,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import commands, codex_config, hook, personal, rules as rule_table  # noqa: E402
+from setupmachine import commands, codex_config, hook, personal, pi_config, rules as rule_table  # noqa: E402
 
 HOOK_SCRIPT = "pre_tool_hook.py"
 CURSOR_EVENTS = ("beforeShellExecution", "beforeMCPExecution", "beforeReadFile", "preToolUse")
@@ -266,11 +270,17 @@ def _cursor(home: Path, folder: Path):
     return ("wired", f"Cursor: {path} -> {', '.join(str(s) for s in sorted(scripts))} on all four events")
 
 
+def _pi(home: Path, folder: Path):
+    return ("gap", "Pi: no pre-tool hook; Pi has no permission system and its extension adapter isn't designed "
+                   "yet, so the rule table doesn't apply (references/pi.md)")
+
+
 HARNESSES = (
     ("Claude Code", ".claude", _claude_code),
     ("Codex", ".codex", _codex),
     ("opencode", ".config/opencode", _opencode),
     ("Cursor", ".cursor", _cursor),
+    ("Pi", ".pi/agent", _pi),
 )
 
 
@@ -297,11 +307,12 @@ def check_cursor_run_mode(home: Path) -> list:
     return [("ok", f"Cursor: {path} has approvalMode auto-review and sandbox.mode enabled")]
 
 
-def check_wiring(home: Path, codex_home: Path | None = None) -> list:
-    """(status, text) per harness: wired, FAIL, or none when the harness isn't set up here."""
+def check_wiring(home: Path, codex_home: Path | None = None, pi_dir: Path | None = None) -> list:
+    """(status, text) per harness: wired, FAIL, gap, or none when the harness isn't set up here."""
+    homes = {"Codex": codex_home, "Pi": pi_dir}
     out = []
     for label, rel, check in HARNESSES:
-        folder = (codex_home or home / rel) if label == "Codex" else home / rel
+        folder = homes.get(label) or home / rel
         if not folder.is_dir():
             out.append(("none", f"{label}: not set up here (no ~/{rel})"))
         else:
@@ -382,6 +393,7 @@ def main(argv=None, stdout=None) -> int:
     parser.add_argument("--rules", type=Path, default=rule_table.DEFAULT_TABLE)
     parser.add_argument("--codex", help="the codex program (default: codex on PATH)")
     parser.add_argument("--codex-home", type=Path, help="Codex config home; fixtures default to HOME/.codex")
+    parser.add_argument("--pi-agent-dir", type=Path, help="Pi agent folder; fixtures default to HOME/.pi/agent")
     parser.add_argument("--no-codex", action="store_true", help="skip Codex execpolicy and isolated config-parser checks")
     parser.add_argument("--codex-trust-hash", metavar="COMMAND", help="print Codex's trusted_hash for this hook command")
     args = parser.parse_args(argv)
@@ -398,6 +410,17 @@ def main(argv=None, stdout=None) -> int:
     # actual home, use only this explicitly authorized nonsecret path metadata.
     custom_home = os.environ.get("CODEX_HOME") if home == Path.home().resolve() and args.codex_home is None else None
     codex_home = (args.codex_home or (Path(custom_home) if custom_home else home / ".codex")).expanduser().resolve()
+    custom_pi = os.environ.get("PI_CODING_AGENT_DIR") if home == Path.home().resolve() and args.pi_agent_dir is None else None
+    pi_dir = (args.pi_agent_dir or (Path(custom_pi) if custom_pi else home / pi_config.DEFAULT_DIR)).expanduser().resolve()
+
+    def private(text):
+        """The text with each environment-chosen folder named, not printed."""
+        if custom_home:
+            text = text.replace(str(codex_home), "<Codex config home>")
+        if custom_pi:
+            text = text.replace(str(pi_dir), "<Pi agent dir>")
+        return text
+
     failed = False
     try:
         table = rule_table.load(args.rules)
@@ -438,8 +461,12 @@ def main(argv=None, stdout=None) -> int:
     elif not args.no_codex:
         line("codex", "skipped", "codex isn't on PATH; from a non-login shell, such as one without nvm loaded, pass --codex PATH")
 
-    for status, text in check_wiring(home, codex_home):
-        line("hook", status, text.replace(str(codex_home), "<Codex config home>") if custom_home else text)
+    for status, text in check_wiring(home, codex_home, pi_dir):
+        line("hook", status, private(text))
+        failed |= status == "FAIL"
+
+    for status, text in pi_config.audit(home, pi_dir):
+        line("pi", status, private(text))
         failed |= status == "FAIL"
 
     for status, text in check_cursor_run_mode(home):
