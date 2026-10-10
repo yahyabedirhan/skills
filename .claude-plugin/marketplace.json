@@ -20,14 +20,14 @@
         "./handoff",
         "./handover",
         "./handover-to-herdr",
-        "./continue-session",
         "./treehouse",
         "./implement",
         "./to-spec",
         "./to-tickets",
         "./to-pr",
         "./settle-effort",
-        "./settle-session"
+        "./settle-session",
+        "./continue-session"
       ],
       "dependencies": [
         "show-me"
