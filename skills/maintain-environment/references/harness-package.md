@@ -1,5 +1,5 @@
 # Harness package
 
-Add a new harness as one package in `/set-up-machine`. The agent adds no second registration list, so the package stays the only registration.
+Add a new harness as one package in `/set-up-machine`. Add no second registration list. The package then stays the only registration.
 
-The package contract is Spec: Give each harness one package (https://github.com/yahyabedirhan/skills/issues/200).
+Read the package contract in Spec: Give each harness one package at https://github.com/yahyabedirhan/skills/issues/200.

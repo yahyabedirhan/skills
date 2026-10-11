@@ -72,5 +72,5 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 
 ## 2026-10-11: one shape for the references (#201)
 
-- **A document that only some runs need lives in `references/`.** The skill body keeps the run. Skill operations and efficiency analysis moved there. Their words stayed the same.
-- **A new harness is one package in `/set-up-machine`.** `references/harness-package.md` states that rule. The agent adds no second registration list. The file points at Spec: Give each harness one package. It copies no package contract. It names no file layout.
+- **A document that only some runs need lives in `references/`.** The skill body keeps the steps every run needs. Skill operations and efficiency analysis moved there. Their words stayed the same. Two places for those files let an agent add a harness in the wrong place.
+- **A new harness is one package in `/set-up-machine`.** `references/harness-package.md` states that rule. The agent adds no second registration list. The file points at Spec: Give each harness one package. That spec owns the package contract. This file names no file layout.
