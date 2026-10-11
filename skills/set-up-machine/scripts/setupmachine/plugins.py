@@ -1,4 +1,4 @@
-"""The plugins setup area: the `plugins` list in the workstation repo's agents/installs.json.
+"""The plugins setup area: the `plugins` list in the workstation repo's installs file (layout.py).
 
 A plugin is a plugin bundle (MCP servers, skills and hooks installed as one unit, such as
 `exa@claude-plugins-official`) or a standalone MCP server. Each entry names the harnesses that
@@ -11,8 +11,8 @@ should have it:
     {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@latest", "harnesses": ["pi"]}
 
 `mcp_policy` is optional and harness-neutral. Its fields are `enabled_tools`, `disabled_tools`,
-`approval_mode` and `require_oauth`. Tool exclusions come from the rule table and
-`agents/permissions.json`; each adapter derives its list from those rows.
+`approval_mode` and `require_oauth`. Tool exclusions come from the rule table and the
+personal permissions; each adapter derives its list from those rows.
 
 What each harness can take is in references/workstation.md and that harness's Plugins section.
 One adapter per harness lives in `harnesses/<harness>.py` and exposes validate, check and propose.
@@ -29,16 +29,16 @@ import re
 import sys
 from pathlib import Path
 
+from . import layout
 from . import rules as rule_table
 from .harnesses import claude, codex, cursor, pi
 from .harnesses import policy
 from .harnesses.errors import PluginsError
 from .personal import PersonalError, permissions, read_pointer
 
-INSTALLS = Path("agents/installs.json")
 KINDS = ("bundle", "mcp")
 KEYS = {"name", "kind", "source", "marketplace", "server", "harnesses", "os", "mcp_policy"}
-LABELS = {"claude-code": "Claude Code", "cursor": "Cursor", "codex": "Codex", "opencode": "opencode", "pi": "Pi"}
+LABELS = layout.HARNESS_LABELS
 OSES = {"macos": "darwin", "linux": "linux"}
 SOURCE = re.compile(r"^[A-Za-z0-9_.-]+@[A-Za-z0-9_.-]+$")
 MARKETPLACE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
@@ -76,7 +76,7 @@ def check(home: Path, pi_dir: Path | None = None, codex_home: Path | None = None
         return []
     if not pointer.repository:
         return []
-    path = pointer.clone / INSTALLS
+    path = layout.installs(pointer.clone)
     try:
         entries = load(path)
     except PluginsError as exc:

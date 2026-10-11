@@ -67,7 +67,7 @@ A personal permission (workstation.md) becomes entries the way a table row of it
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md).
+The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md).
 
 - **A bundle:** `added` when `~/.claude/plugins/installed_plugins.json` lacks its `source`. Install it with `claude plugin install <source>`, after `claude plugin marketplace add <marketplace>` when the entry names a marketplace Claude Code doesn't list (`claude plugin marketplace list`). Installing enables it in `~/.claude/settings.json` (`enabledPlugins`); one set to `false` there is a `FAIL`, which the user decides on. Installed and enabled proves readiness only, not freshness. Mark it `present` only after comparing installed code with the latest marketplace source. Docs: [plugins](https://code.claude.com/docs/en/plugins).
 - **Freshness:** inspect the selected marketplace source and the plugin's installed version or commit. Update only that marketplace with `claude plugin marketplace update <marketplace-name>`. Update only the selected plugin with `claude plugin update <source> --scope user`, then compare its installed code again. Report an unresolved freshness check as `gap`. Do not run broad updates or reinstall bundles to force freshness.

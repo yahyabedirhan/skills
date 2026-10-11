@@ -77,7 +77,7 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
 | A personal change | Have the user commit and push it in their workstation repo, then pull it into the clone and rerun `/set-up-machine` on each machine. |
 | A global instruction with no workstation repo | Rerun `/set-up-machine` on each machine; every harness reads the one shared file. |
 | A project instruction or project permission | Commit it in the project. For a standard every project shares, change `/set-up-project` instead and rerun it in each project. |
-| A skill in a source repo | Ship it; after the merge, `npx skills update <name>` in every scope that installs it, on every machine. A machine whose workstation repo lists the skill in `agents/installs.json` also gets the update from a `/set-up-machine` run. |
+| A skill in a source repo | Ship it; after the merge, `npx skills update <name>` in every scope that installs it, on every machine. A machine whose workstation repo lists the skill in `setup/installs.json` also gets the update from a `/set-up-machine` run. |
 | A local skill | Commit it with the project. |
 | A set-up skill itself | Treat it as a skill change first, then rerun that set-up skill wherever it applies. |
 

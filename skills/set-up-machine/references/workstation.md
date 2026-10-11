@@ -27,9 +27,9 @@ The clone path starts `~/` or `/`. A person with no workstation repo has `- Repo
 
 ## The repository's layout
 
-This skill reads only the `agents/` folder at the repository's root. The rest of the repository is the user's, as `/maintain-environment`'s `references/workstation.md` describes.
+This skill reads only the `setup/` folder at the repository's root, and the files `setup/harnesses.json` points at. The rest of the repository is the user's, as `/maintain-environment`'s `references/workstation.md` describes. `scripts/setupmachine/layout.py` is the one module that names these paths; every other script asks it. There is no fallback to an older layout: a file outside `setup/` that `setup/harnesses.json` doesn't point at is never read.
 
-### `agents/instructions.md`
+### `setup/instructions.md`
 
 The values this skill writes into the shared file, and the person's notes on them:
 
@@ -69,9 +69,31 @@ The values this skill writes into the shared file, and the person's notes on the
 - **Personal workflow:** concise rules for how this person works, each `<rule>` under a `### <topic>` heading, where `<topic>` names a group of rules. Everything under the heading, up to the next `## ` heading, is copied as it is into the shared file's Personal workflow section, including its `###` topic headings. Notes on when and how to use a tool the person added count as workflow lines.
 - Any other text in the file is notes, and stays in the repository. Check every copied line against the team test in `global-instructions.md`.
 
-### `agents/harnesses/<harness>.md`
+### `setup/harnesses.json`
 
-Instructions for one harness only, for what differs between harnesses: a sandbox, a missing ask list, a tool only one harness has. `<harness>` is the harness's reference name: `claude-code`, `codex`, `cursor`, `opencode` or `pi`. Each file is optional.
+Where each harness's own files are in the repository, so that each can sit in that harness's folder:
+
+```json
+{
+  "version": 1,
+  "harnesses": {
+    "<harness>": {"instructions": "<path>", "config": "<path>"}
+  }
+}
+```
+
+- **`version`:** required, and `1`.
+- **`harnesses`:** one entry per harness that has a file of its own. `<harness>` is the harness's reference name, as in `installs.json`: `claude-code`, `codex`, `cursor`, `opencode` or `pi`. An entry takes `instructions`, `config`, or both. A harness with nothing to point at has no entry.
+- **`<path>`:** relative to the repository's root, such as `harnesses/cursor/instructions.md`. It stays inside the repository: an absolute path, a path through `..` out of the repository, or a link that leads out of it is refused.
+- **`instructions`:** the harness's instructions file, below.
+- **`config`:** the harness's declared defaults: a Codex config or a Pi config, below. A `config` for another harness is a `gap` line, since set-up-machine has no config reader for it.
+- **Without the file,** no harness has instructions or declared defaults of its own.
+- **A file that isn't valid JSON, lacks `version`, has an unknown key or harness, or a path outside the repository** is a `FAIL` that names the problem, and nothing it points at is read or written.
+- **A path to a file that doesn't exist** is a `FAIL` that names the pointer, such as `harnesses.cursor.instructions`, and the path it gives.
+
+### A harness's instructions file
+
+The file `setup/harnesses.json` points at with a harness's `instructions`. It holds instructions for that harness only, for what differs between harnesses: a sandbox, a missing ask list, a tool only one harness has.
 
 ```markdown
 # <Harness> instructions
@@ -84,12 +106,12 @@ Instructions for one harness only, for what differs between harnesses: a sandbox
 ```
 
 - **Copying:** everything under `## Instructions`, up to the next `## ` heading, is copied as it is into the harness's own instructions file. Other text is notes and stays in the repository. A file with no `## Instructions` section, or an empty one, is a `FAIL`.
-- **Where it goes:** only Cursor has a file today, `~/.cursor/rules/harness-instructions.mdc` (cursor.md, *Global instructions*). Claude Code, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: a source for one of them is a `gap` line.
-- Never put a rule every harness needs here; it belongs in `agents/instructions.md`. Check every line against the team test in `global-instructions.md`.
+- **Where it goes:** only Cursor has a file today, `~/.cursor/rules/harness-instructions.mdc` (cursor.md, *Global instructions*). Its header names the path `setup/harnesses.json` gives. Claude Code, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line.
+- Never put a rule every harness needs here; it belongs in `setup/instructions.md`. Check every line against the team test in `global-instructions.md`.
 
-`verify.py` prints a `harness` line per file: `ok` when the generated file matches its source, `FAIL` when it is missing or differs, or when a generated file outlived its source, `n/a` when the harness isn't set up, and `gap` for a harness with no place yet, or a file of the same name the skill didn't write.
+`verify.py` prints a `harness` line per file: `ok` when the generated file matches its source, `FAIL` when it is missing or differs, when a generated file outlived its source, or when `setup/harnesses.json` is malformed or points at a missing file, `n/a` when the harness isn't set up, and `gap` for a harness with no place yet, or a file of the same name the skill didn't write. A generated file whose header names another path, such as one from before the source moved, differs, and the diff rewrites it.
 
-### `agents/permissions.json`
+### `setup/permissions.json`
 
 The person's own permission rows, such as allowing a tool they added, or refusing a command only they want refused. It has the rule table's format, `{"version": 1, "rules": [<row>, …]}`, and each row the fields and `match` kinds of a rule-table row (SKILL.md, *Rule table*), with one more level:
 
@@ -98,17 +120,17 @@ The person's own permission rows, such as allowing a tool they added, or refusin
 
 The checks are the rule table's, through `scripts/setupmachine/rules.py`: a malformed row is refused, and so is an id the rule table already uses. A personal permission can't loosen a table row: an `allow` row whose sample a table row denies or asks for fails `verify.py`. No file means no personal permissions.
 
-### `agents/codex.toml`
+### A Codex config
 
-Keep explicitly chosen Codex CLI defaults in this private file. Use only the top-level keys `sandbox_mode`, `approval_policy` and `approvals_reviewer`; each is optional. A missing file or omitted key declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
+The file `setup/harnesses.json` points at with `codex`'s `config`, such as `harnesses/codex-cli/config/config.toml`. Keep explicitly chosen Codex CLI defaults in this private file. Use only the top-level keys `sandbox_mode`, `approval_policy` and `approvals_reviewer`; each is optional. No `config` entry, or an omitted key, declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
 
 Validate the keys and values before proposing any write. Reject unknown keys, nested tables and unsupported values with an explicit gap; this file is an allowlist, not a copy of Codex's whole configuration. Keep credentials, model providers, project trust, profiles, hook state and runtime state in their existing homes. Existing memory and hook ownership remains with this skill's Codex adapter.
 
 Read `codex.md` for installed-version support, preservation and override checks. Mark each declared preference `personal` in the diff. Keep chosen values and this repository's identity and clone path out of public reports, issues, pull requests and fixtures; use synthetic values there.
 
-### `agents/pi.json`
+### A Pi config
 
-Keep explicitly chosen Pi settings in this private file: a JSON object of top-level keys from Pi's settings reference, such as `defaultProvider`, `defaultModel`, `defaultThinkingLevel` and `enableInstallTelemetry`. Each key is optional. A missing file or omitted key declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
+The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harnesses/pi/config/settings.json`. Keep explicitly chosen Pi settings in this private file: a JSON object of top-level keys from Pi's settings reference, such as `defaultProvider`, `defaultModel`, `defaultThinkingLevel` and `enableInstallTelemetry`. Each key is optional. No `config` entry, or an omitted key, declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
 
 ```json
 {
@@ -117,14 +139,14 @@ Keep explicitly chosen Pi settings in this private file: a JSON object of top-le
 }
 ```
 
-- **No extension list here.** Pi extensions go in `plugins` in `agents/installs.json`. A copy of Pi's `packages` setting in this file is a `gap`.
+- **No extension list here.** Pi extensions go in `plugins` in `setup/installs.json`. A copy of Pi's `packages` setting in this file is a `gap`.
 - Declare only preferences. Leave out runtime state Pi writes itself, such as `deviceId` and `lastChangelogVersion`, and keep credentials, trust decisions and sessions in Pi's own files.
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
 - Read `pi.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
 
-`verify.py` prints a `pi` line per declared key: `same` when `settings.json` holds the declared value, `FAIL` when it's missing or differs, and `none` with no file. It never prints the values.
+`verify.py` prints a `pi` line per declared key: `same` when `settings.json` holds the declared value, `FAIL` when it's missing or differs, and `none` with no `config` entry. It never prints the values.
 
-### `agents/installs.json`
+### `setup/installs.json`
 
 What each machine installs beyond the harnesses' configuration: skills, plugins, and anything else that needs a command, such as a session host's integration. With the file, it is the whole list, including the user's own skills repo, so a machine gets nothing it leaves out. Without it, the skill installs `<skills-repo>`.
 
@@ -178,7 +200,7 @@ What each machine installs beyond the harnesses' configuration: skills, plugins,
 - **`plugins`:** what each harness plugs in for new tools, the plugins setup area. An entry has a `name`, a `kind` and the `harnesses` that should have it (`claude-code`, `cursor`, `codex`, `opencode`, `pi`).
   - `kind: "bundle"`: a plugin installed as one unit with its MCP servers, skills and hooks. `source` is `<plugin>@<marketplace>`, as Claude Code and Codex name it. `marketplace` is the GitHub `<owner>/<repo>` to add first, for a marketplace the harness does not know yet.
   - `mcp_policy` is optional and the same object for every harness on the entry. Its fields are `enabled_tools`, `disabled_tools`, `approval_mode` (`auto`, `prompt`, `writes` or `approve`) and `require_oauth`. `require_oauth` asks for a sign-in check. It is not a setting the harness stores. Credentials never enter the list.
-  - Tool lists come from `agents/permissions.json` and the rule table. A deny or allow row that names this entry's server supplies the tools. Leave `enabled_tools` and `disabled_tools` unset when a row already names the tool. The adapters derive each harness's list from those rows.
+  - Tool lists come from `setup/permissions.json` and the rule table. A deny or allow row that names this entry's server supplies the tools. Leave `enabled_tools` and `disabled_tools` unset when a row already names the tool. The adapters derive each harness's list from those rows.
   - A Pi bundle names an installable package and only the `pi` harness. Use `npm:<name>@latest`, `git:<host>/<owner>/<repo>`, or an `https://` Git URL. It takes no `marketplace`. Refuse a Pi source on an entry that names another harness, and a `<plugin>@<marketplace>` source on one that names `pi`, since no harness takes both forms. Refuse two entries for the same Pi extension.
   - `kind: "mcp"`: a standalone MCP server. `server` is the entry the harness's config takes, with a `url`, or a `command` and its `args`.
   - An optional `os` works as below; `target` isn't taken, since `verify.py` can't tell a remote machine from a local one.
@@ -205,10 +227,10 @@ Never put a secret in the file: it is a repository, and the commands run as writ
 
 ## Writing the shared file from it
 
-With a workstation repo, the shared file's personal parts are generated from `agents/instructions.md`: the Working agreement, the Glossary, the Tool column of the Environment defaults table except the two rows the pointer fills, the tool glossaries after it, and the Personal workflow section. Each sits in the order `global-instructions.md` gives. The rules block follows `global-instructions.md`'s compact template. The roles' What it is and When none columns still come from this skill's roles table.
+With a workstation repo, the shared file's personal parts are generated from `setup/instructions.md`: the Working agreement, the Glossary, the Tool column of the Environment defaults table except the two rows the pointer fills, the tool glossaries after it, and the Personal workflow section. Each sits in the order `global-instructions.md` gives. The rules block follows `global-instructions.md`'s compact template. The roles' What it is and When none columns still come from this skill's roles table.
 
-- **When the shared file holds a Tool value, or a line of another personal part, that the workstation repo lacks:** add it to the clone's `agents/instructions.md` in the same diff, before the shared file is rewritten, so nothing is lost. In the report, name the file for the user to commit and push in their own repository.
-- **When `agents/instructions.md` doesn't exist yet:** the diff creates it from the shared file's current values in the shape above.
+- **When the shared file holds a Tool value, or a line of another personal part, that the workstation repo lacks:** add it to the clone's `setup/instructions.md` in the same diff, before the shared file is rewritten, so nothing is lost. In the report, name the file for the user to commit and push in their own repository.
+- **When `setup/instructions.md` doesn't exist yet:** the diff creates it from the shared file's current values in the shape above.
 
 `verify.py` checks the result: a `personal` line is `ok` when the shared file carries the repository's values and sections, `none` when the pointer says there is no repository, and `FAIL` when the pointer is missing, a section differs, a `workstation-repo` or `path-to-workstation-repo` row is missing or differs from the pointer, or the shared file has an optional section the repository lacks or lacks one it has.
 
@@ -218,7 +240,7 @@ Turn each personal permission into each harness's entries the way that harness's
 
 - **Only where its tool exists:** a command row applies where one of its programs is on `PATH`; an MCP-tool row in a harness that lists a tool it matches, by the listing that harness's reference gives; a file row in every harness. Elsewhere it's an `n/a` line naming the missing tool, and nothing is written there, since an entry for a tool the harness lacks only adds noise.
 - **Rejection guidance:** keep personal permissions' details in the permission file and harness entries. The hook supplies their reasons and alternatives; do not append them to the shared file's compact rules block. Notes on when to use a tool belong in the personal workflow.
-- **When the machine holds an `extra` entry that is the person's own choice,** such as an allow for a tool they added by hand: propose it as a personal permission in the clone's `agents/permissions.json` in the same diff, so the next machine gets it too, and name the file in the report for the user to commit there.
+- **When the machine holds an `extra` entry that is the person's own choice,** such as an allow for a tool they added by hand: propose it as a personal permission in the clone's `setup/permissions.json` in the same diff, so the next machine gets it too, and name the file in the report for the user to commit there.
 - **When a personal permission is removed:** the entries it left behind are `extra`, for the user to remove.
 
 `verify.py` runs each personal permission's samples through the hook with the table's, fails a malformed file, and checks Claude Code's settings: `personal present` names a row's entries, `personal n/a` says which tool Claude Code lacks, `personal gap` is a row with no native entry there, and `personal FAIL` an entry missing. The other harnesses' entries are compared in the diff.

@@ -1,9 +1,11 @@
 """Read-only audit of Pi's agent folder: the instructions link, declared defaults and skill links.
 
 The agent folder is PI_CODING_AGENT_DIR, else ~/.pi/agent; verify.py resolves it. The
-workstation repo's optional agents/pi.json, found through the pointer, declares Pi settings
-keys; only those keys are compared with <agent-dir>/settings.json, and their values are never
-printed. A `packages` key there is a gap: Pi extensions belong in the plugins list (plugins.py). auth.json, trust.json and sessions are never read. references/pi.md is the layout.
+workstation repo, found through the pointer, can point at a Pi config from its harnesses file
+(layout.py). That config declares Pi settings keys; only those keys are compared with
+<agent-dir>/settings.json, and their values are never printed. A `packages` key
+there is a gap: Pi extensions belong in the plugins list (plugins.py). auth.json, trust.json and
+sessions are never read. references/pi.md is the layout.
 """
 from __future__ import annotations
 
@@ -11,35 +13,40 @@ import json
 import os
 from pathlib import Path
 
-from . import personal
+from . import layout, personal
 
-SOURCE = Path("agents/pi.json")
 DEFAULT_DIR = Path(".pi/agent")
-PLUGIN_KEYS = ("packages",)  # Pi extensions come from the plugins list in agents/installs.json, not agents/pi.json
+PLUGIN_KEYS = ("packages",)  # Pi extensions come from the plugins list in the installs file, not the Pi config
 
 
 class ConfigError(ValueError):
     pass
 
 
-def load(home: Path) -> dict:
-    """The declared Pi settings, or {} when there is no workstation repo or no agents/pi.json."""
+def load(home: Path) -> tuple:
+    """(the declared Pi settings, the source's path relative to the repo), or ({}, None) with no source.
+
+    No source when there is no workstation repo or the layout points at no Pi config.
+    """
     try:
         pointer = personal.read_pointer(home)
     except personal.PersonalError:
-        return {}  # personal.check reports a missing or malformed pointer
+        return {}, None  # personal.check reports a missing or malformed pointer
     if not pointer.repository:
-        return {}
-    path = pointer.clone / SOURCE
-    if not path.exists():
-        return {}
+        return {}, None
+    try:
+        path = layout.harness_file(pointer.clone, "pi", "config")
+    except layout.LayoutError as exc:
+        raise ConfigError(str(exc)) from None
+    if path is None:
+        return {}, None
     try:
         data = json.loads(path.read_text())
     except (OSError, UnicodeError, ValueError):
         raise ConfigError(f"{path} isn't valid JSON") from None
     if not isinstance(data, dict):
         raise ConfigError(f"{path} must be a JSON object of Pi settings keys")
-    return data
+    return data, path.relative_to(pointer.clone).as_posix()
 
 
 def audit(home: Path, folder: Path) -> list:
@@ -78,11 +85,13 @@ def skill_links(folder: Path) -> list:
 
 def defaults(home: Path, folder: Path) -> list:
     try:
-        declared = load(home)
+        declared, source = load(home)
     except ConfigError as exc:
         return [("FAIL", str(exc))]
+    if source is None:
+        return [("none", f"Pi: no declared defaults ({layout.HARNESSES} in the workstation repo points at no Pi config)")]
     if not declared:
-        return [("none", "Pi: no declared defaults (no agents/pi.json in the workstation repo)")]
+        return [("none", f"Pi: no declared defaults ({source} declares no keys)")]
     path = folder / "settings.json"
     try:
         settings = json.loads(path.read_text()) if path.exists() else {}  # read_text follows a symlink
@@ -93,10 +102,10 @@ def defaults(home: Path, folder: Path) -> list:
     out = []
     for key, value in declared.items():
         if key in PLUGIN_KEYS:
-            out.append(("gap", f"Pi: agents/pi.json declares {key}; Pi extensions belong in the plugins list, so move "
-                               "each one into `plugins` in agents/installs.json (references/pi.md, Plugins)"))
+            out.append(("gap", f"Pi: {source} declares {key}; Pi extensions belong in the plugins list, so move "
+                               f"each one into `plugins` in {layout.INSTALLS} (references/pi.md, Plugins)"))
         elif key in settings and type(settings[key]) is type(value) and settings[key] == value:
-            out.append(("same", f"Pi: {key} in {path} matches agents/pi.json"))
+            out.append(("same", f"Pi: {key} in {path} matches {source}"))
         else:
-            out.append(("FAIL", f"Pi: {key} in {path} is missing or differs from agents/pi.json"))
+            out.append(("FAIL", f"Pi: {key} in {path} is missing or differs from {source}"))
     return out

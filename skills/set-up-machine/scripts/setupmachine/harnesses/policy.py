@@ -1,7 +1,7 @@
 """The neutral `mcp_policy` object on an installs.json plugin entry.
 
 Fields are `enabled_tools`, `disabled_tools`, `approval_mode` and `require_oauth`.
-Tool exclusions come from the rule table and `agents/permissions.json`. This module
+Tool exclusions come from the rule table and the personal permissions. This module
 derives those lists and unions them with anything the entry still declares.
 """
 from __future__ import annotations

@@ -36,7 +36,8 @@ class ConfigurationTest(unittest.TestCase):
         return path
 
     def source(self, text=None):
-        return self.write("personal/agents/codex.toml", text or '\n'.join(f'{key} = "{value}"' for key, value in PREFERENCES.items()))
+        self.write("personal/setup/harnesses.json", json.dumps({"version": 1, "harnesses": {"codex": {"config": "harnesses/codex-cli/config/config.toml"}}}))
+        return self.write("personal/harnesses/codex-cli/config/config.toml", text or '\n'.join(f'{key} = "{value}"' for key, value in PREFERENCES.items()))
 
     def test_fresh_setup_repeat_audit_and_missing_reviewer_drift(self):
         self.source()
@@ -78,6 +79,25 @@ class ConfigurationTest(unittest.TestCase):
         self.source('approval_policy = "on-request"')
         self.assertEqual(config.load(self.home), {"approval_policy": "on-request"})
         self.assertEqual(config.propose('model = "example"\n', {}), 'model = "example"\n')
+
+    def test_a_harnesses_file_without_codex_declares_nothing_and_the_old_folder_is_not_read(self):
+        self.write("personal/setup/harnesses.json", json.dumps({"version": 1, "harnesses": {"cursor": {"instructions": "x.md"}}}))
+        self.write("personal/agents/codex.toml", 'approval_policy = "on-request"')
+        self.assertEqual(config.load(self.home), {})
+
+    def test_a_pointer_to_a_missing_config_fails_and_names_the_pointer(self):
+        self.source().unlink()
+        lines = config.audit(self.home, self.folder)
+        self.assertEqual(lines[0][0], "FAIL")
+        self.assertRegex(lines[0][1], r"setup/harnesses\.json: `harnesses\.codex\.config` points at "
+                                      r".*harnesses/codex-cli/config/config\.toml, which doesn't exist")
+
+    def test_a_malformed_harnesses_file_fails_the_audit(self):
+        self.source()
+        self.write("personal/setup/harnesses.json", json.dumps({"version": 1, "harnesses": {"codex": {"config": "/etc/codex.toml"}}}))
+        lines = config.audit(self.home, self.folder)
+        self.assertEqual(lines[0][0], "FAIL")
+        self.assertIn("outside the repo", lines[0][1])
 
     def test_invalid_input_rejected_without_echoing_values(self):
         for text in ('model = "PRIVATE_SENTINEL"', 'approval_policy = "untrusted"', 'approval_policy = "on-failure"',

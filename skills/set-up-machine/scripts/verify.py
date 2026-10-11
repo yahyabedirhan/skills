@@ -22,14 +22,16 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   (references/workstation.md);
   and each personal permission's entries in Claude Code's settings, `present`, `n/a` when
   Claude Code lacks the row's tool, `gap` when the row has no native entry there.
-- config: declared agents/codex.toml preferences match persisted defaults, or `n/a`
+- harness: each harness's own instructions, from the files the workstation repo's
+  harnesses file points at, match the file set-up-machine generates (layout.py);
+- config: declared Codex config preferences match persisted defaults, or `n/a`
   when Codex isn't installed (no codex on PATH and no config home);
   isolated installed-parser probes check support, while effective overrides and
   managed constraints remain explicit gaps. --codex-home selects the same folder
   for configuration, rules and hooks. The real home honors CODEX_HOME privately;
   fixture --home folders ignore ambient CODEX_HOME unless --codex-home is given.
 - pi: when Pi's agent folder exists, its AGENTS.md is a link to the shared file, each
-  key agents/pi.json declares matches settings.json, and no skill link is broken
+  key the declared Pi config sets matches settings.json, and no skill link is broken
   (references/pi.md). The real home honors PI_CODING_AGENT_DIR privately; fixture
   --home folders use HOME/.pi/agent unless --pi-agent-dir is given.
 - cursor: when ~/.cursor exists, cli-config.json has approvalMode auto-review and

@@ -6,7 +6,7 @@ How to set up and audit Codex from the rule table. Docs: [rules](https://learn.c
 
 ## CLI defaults
 
-When the personal source pointer names a repository, load its optional `agents/codex.toml` as `workstation.md` specifies. Validate the entire file before proposing preference writes. `scripts/setupmachine/codex_config.py` supplies allowlisted parsing, a pure proposal and persisted audit; it never writes configuration. Its TOML checks require Python 3.11+; on an older Python, report the parser support gap and leave preferences unchanged.
+When the personal source pointer names a repository, load the optional Codex `config` that its `setup/harnesses.json` names, as `workstation.md` specifies. Validate the entire file before proposing preference writes. `scripts/setupmachine/codex_config.py` supplies allowlisted parsing, a pure proposal and persisted audit; it never writes configuration. Its TOML checks require Python 3.11+; on an older Python, report the parser support gap and leave preferences unchanged.
 
 ### Installed support
 
@@ -113,7 +113,7 @@ A personal permission (workstation.md) becomes `prefix_rule`s the way a table ro
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `agents/installs.json` (workstation.md). Tool lists come from `agents/permissions.json` and the rule table. Read *Codex MCP* at the end of this file when an entry has `mcp_policy`, a standalone server, or `require_oauth`.
+The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md). Tool lists come from `setup/permissions.json` and the rule table. Read *Codex MCP* at the end of this file when an entry has `mcp_policy`, a standalone server, or `require_oauth`.
 
 1. Add a missing marketplace with `codex plugin marketplace add <owner>/<repo>`.
 2. Install the bundle with `codex plugin add <plugin>@<marketplace>`.
@@ -171,7 +171,7 @@ The server id is the entry's `name`.
 - Write a standalone server's `server` object in `[mcp_servers.<name>]`, with the policy keys beside it.
 - Write `enabled_tools` and `disabled_tools` under those names. Write `approval_mode` as `default_tools_approval_mode`. Do not write `require_oauth`: it is only an audit flag.
 
-Take tool names from `agents/permissions.json` and the rule table (workstation.md). `propose` unions those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
+Take tool names from `setup/permissions.json` and the rule table (workstation.md). `propose` unions those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
 
 `propose(text, entry)` in `scripts/setupmachine/harnesses/codex.py` returns the TOML and writes nothing. It keeps undeclared keys and comments, because the file holds choices this skill does not own. It keeps a stricter tool list already in the file: more disabled tools, or a shorter enabled list. It refuses an unfamiliar TOML form instead of rewriting the file. Apply the skill's backup and approval steps to the diff it returns.
 

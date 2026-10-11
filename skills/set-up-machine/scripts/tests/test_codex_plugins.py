@@ -125,7 +125,7 @@ class CodexPluginsTest(unittest.TestCase):
         pointer = home / '.config/agents/source.md'
         pointer.parent.mkdir(parents=True)
         pointer.write_text('- Repository: `fixture/workstation`\n- Clone: `~/workstation`\n')
-        source = home / 'workstation/agents/installs.json'
+        source = home / 'workstation/setup/installs.json'
         source.parent.mkdir(parents=True)
         source.write_text(json.dumps({'plugins': [ENTRY]}))
         lines = plugins.check(home, codex_home=self.folder)
