@@ -88,7 +88,7 @@ When the user asks what a skill costs to run, or how to make it cheaper, follow 
 
 - [references/skill-operations.md](references/skill-operations.md): the kinds of skill, and creating, installing, updating, moving, removing, forking, upgrading a fork, shipping, auditing and publishing them.
 - [references/efficiency-analysis.md](references/efficiency-analysis.md): measuring what one run of a skill costs, and making the next run cheaper.
-- [references/harness-setup.md](references/harness-setup.md): adding a new harness as one harness setup in `/set-up-machine`, with no second registration list.
+- [references/harness-setup.md](references/harness-setup.md): adding a new harness as one harness setup in `/set-up-machine`, and why that setup is the only registration.
 - [references/workstation.md](references/workstation.md): what the user's workstation repo is for, its starting layout, starting one, and which file each personal change goes in.
 
 ## Scripts
