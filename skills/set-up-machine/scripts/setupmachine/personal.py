@@ -44,8 +44,8 @@ WORKFLOW_INTRO = ("Rules for how this person works that pass the team test. "
                   "Anything a project or a skill needs goes there instead.")
 POINTER_ROLES = ("workstation-repo", "path-to-workstation-repo")
 HARNESS_SECTION = "## Instructions"
-# The harnesses whose config a reader of its own audits: codex_config.py and pi_config.py.
-CONFIG_READERS = ("codex", "pi")
+# Codex's config reader. A harness setup that exposes `declared_defaults` audits its own config.
+CONFIG_READERS = ("codex",)
 REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
@@ -123,22 +123,32 @@ def check(home: Path) -> list:
     return [("ok", f"{pointer.repository} at {pointer.clone}: {', '.join(carried)} match {shared_path}")]
 
 
-def _audited_harnesses() -> set:
-    """Harness ids whose harness setup audits the generated instructions it writes.
-
-    Any harness setup with `audit` is not enough: Claude Code audits its wiring and still
-    has no generated instructions file, so a pointer at those stays a gap.
-    """
+def _setups_with(operation: str) -> set:
+    """Harness ids whose harness setup exposes this operation."""
     from . import harness_setups
-    return {setup.id for setup in harness_setups.load() if callable(getattr(setup, "instructions", None))}
+    return {setup.id for setup in harness_setups.load() if callable(getattr(setup, operation, None))}
+
+
+def _audited_harnesses() -> set:
+    """Harness ids whose harness setup writes generated instructions (`instructions`)."""
+    return _setups_with("instructions")
+
+
+def _config_readers() -> set:
+    """Harness ids whose declared config is already audited.
+
+    Codex stays in the old table. A harness setup exposes `declared_defaults` once it audits its own.
+    """
+    return set(CONFIG_READERS) | _setups_with("declared_defaults")
 
 
 def check_harnesses(home: Path) -> list:
     """(status, text) lines for harness files no harness setup delivers yet.
 
     `FAIL` when the harnesses file is malformed or points at a missing file. `gap` when it
-    points at instructions or a config set-up-machine can't deliver yet. A harness setup audits
-    the generated instructions it writes, so those lines are not repeated here.
+    points at instructions or a config set-up-machine can't deliver yet. A harness setup with
+    `instructions` audits the generated file it writes. A harness setup with `declared_defaults`
+    audits its declared config. Those lines are not repeated here.
     """
     try:
         pointer = read_pointer(home)
@@ -152,7 +162,7 @@ def check_harnesses(home: Path) -> list:
         return [("FAIL", str(exc))]
     lines = []
     undelivered = {"instructions": ("has instructions", "them", _audited_harnesses()),
-                   "config": ("is its config", "a config", CONFIG_READERS)}
+                   "config": ("is its config", "a config", _config_readers())}
     for harness, files in pointed.items():
         for kind, (what, thing, delivered) in undelivered.items():
             if kind not in files or harness in delivered:

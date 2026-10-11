@@ -58,7 +58,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import codex_config, harness_setups, hook, personal, plugins, pi_config, rules as rule_table  # noqa: E402
+from setupmachine import codex_config, harness_setups, hook, personal, plugins, rules as rule_table  # noqa: E402
 
 CODEX_DECISION = {"forbidden": "deny", "prompt": "ask", "allow": "allow-and-report"}
 SHELL_SYNTAX = set(";&|<>$`()\n")
@@ -220,50 +220,35 @@ def _toml_trust(config: Path, key: str):
     return None
 
 
-PI_EXTENSION_HEADER = "// set-up-machine: the pre-tool hook, as a Pi extension."
-
-
-def _pi(home: Path, folder: Path):
-    path = folder / "extensions" / "set-up-machine.ts"
-    try:
-        text = path.read_text()
-    except OSError:
-        return ("FAIL", f"Pi: no extension at {path}; Pi has no permission system, so nothing enforces the rule table")
-    if not text.startswith(PI_EXTENSION_HEADER):
-        return ("gap", f"Pi: {path} wasn't written by set-up-machine; left alone, so the hook isn't wired (references/pi.md)")
-    m = re.search(r"^const COMMAND = (\[.*\]);$", text, re.M)
-    try:
-        command = json.loads(m.group(1)) if m else []
-    except ValueError:
-        command = []
-    script = _script(shlex.join(command), "pi", home) if command else None
-    if script is None:
-        return ("FAIL", f"Pi: {path} doesn't run the pre-tool hook with --harness pi")
-    return _script_line("Pi", path, script)
-
-
 HARNESSES = (
     ("Codex", ".codex", _codex),
-    ("Pi", ".pi/agent", _pi),
 )
 
 
-def harness_setup_audits(home: Path, rows=None) -> list:
+def harness_setup_audits(home: Path, **context) -> list:
     """`(channel, status, text)` from every discovered harness setup.
 
-    A harness setup whose audit takes the personal rows receives the ones the rules check
-    loaded. Hook lines from these harness setups print after the old wiring table.
+    Keyword arguments are passed when that audit names them. An argument keyed by the
+    harness id is that setup's agent folder, passed as `folder`. Hook lines from these
+    harness setups print after the old wiring table. This function does not sort them.
     """
     lines = []
     for setup in harness_setups.load():
         audit = getattr(setup, "audit", None)
         if not callable(audit):
             continue
-        if rows is not None and "rows" in inspect.signature(audit).parameters:
-            lines.extend(audit(home, rows))
-        else:
-            lines.extend(audit(home))
+        lines.extend(audit(home, **_audit_kwargs(audit, setup.id, context)))
     return lines
+
+
+def _audit_kwargs(audit, setup_id: str, context: dict) -> dict:
+    params = inspect.signature(audit).parameters
+    if any(param.kind == inspect.Parameter.VAR_KEYWORD for param in params.values()):
+        return context
+    chosen = {key: value for key, value in context.items() if key in params}
+    if setup_id in context and "folder" in params and "folder" not in chosen:
+        chosen["folder"] = context[setup_id]
+    return chosen
 
 
 def check_wiring(home: Path, codex_home: Path | None = None, pi_dir: Path | None = None) -> list:
@@ -306,7 +291,7 @@ def main(argv=None, stdout=None) -> int:
     custom_home = os.environ.get("CODEX_HOME") if home == Path.home().resolve() and args.codex_home is None else None
     codex_home = (args.codex_home or (Path(custom_home) if custom_home else home / ".codex")).expanduser().resolve()
     custom_pi = os.environ.get("PI_CODING_AGENT_DIR") if home == Path.home().resolve() and args.pi_agent_dir is None else None
-    pi_dir = (args.pi_agent_dir or (Path(custom_pi) if custom_pi else home / pi_config.DEFAULT_DIR)).expanduser().resolve()
+    pi_dir = (args.pi_agent_dir or (Path(custom_pi) if custom_pi else home / ".pi/agent")).expanduser().resolve()
 
     def private(text):
         """The text with each environment-chosen folder named, not printed."""
@@ -363,17 +348,13 @@ def main(argv=None, stdout=None) -> int:
     elif not args.no_codex:
         line("codex", "skipped", "codex isn't on PATH; from a non-login shell, such as one without nvm loaded, pass --codex PATH")
 
-    audited = harness_setup_audits(home, own)
+    audited = harness_setup_audits(home, rows=own, pi=pi_dir)
     emit("hook", check_wiring(home, codex_home, pi_dir), redact=True)
     emit("hook", [(status, text) for channel, status, text in audited if channel == "hook"], redact=True)
 
-    for status, text in pi_config.audit(home, pi_dir):
-        line("pi", status, private(text))
-        failed |= status == "FAIL"
-
     for channel, status, text in audited:
         if channel not in ("hook", "harness", "personal"):
-            line(channel, status, text)
+            line(channel, status, private(text))
             failed |= status == "FAIL"
 
     for status, text in personal.check(home) + own_lines:

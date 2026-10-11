@@ -294,73 +294,18 @@ def read_codex(payload: dict) -> ToolCall:
     )
 
 
-# Pi's built-in tools that take a path: the input field holding it, and the access it means.
-PI_FILE_TOOLS = {
-    "read": ("path", "read"),
-    "edit": ("path", "write"),
-    "write": ("path", "write"),
-    "grep": ("path", "read"),
-    "find": ("path", "read"),
-    "ls": ("path", "read"),
-}
-# Pi's shell tools: the input field `command` holds the command.
-PI_SHELL_TOOLS = ("bash", "powershell")
-# Without a UI (print and json mode, or a child session started without one) no one can answer the extension's question.
-PI_UNATTENDED = "Pi without a UI"
-
-
 def read_pi(payload: dict) -> ToolCall:
-    """What set-up-machine's Pi extension sends from `tool_call`: `toolName`, `input` (the
-    tool's arguments), `cwd`, `sessionId` and `hasUI`. MCP tools keep their
-    `mcp__<server>__<tool>` names. `codemode`'s script (`input.code`) isn't read: each tool
-    call the script makes reaches the extension as its own `tool_call`."""
-    tool = payload.get("toolName") if isinstance(payload.get("toolName"), str) else ""
-    args = payload.get("input") if isinstance(payload.get("input"), dict) else {}
-    command = args.get("command") if tool in PI_SHELL_TOOLS else None
-    files = []
-    if tool in PI_FILE_TOOLS:
-        key, access = PI_FILE_TOOLS[tool]
-        if isinstance(args.get(key), str) and args[key]:
-            files.append((args[key], access))
-    searches = ()
-    if tool == "grep":
-        searches = _search(args, "path", "glob")
-    elif tool == "find":
-        searches = _search(args, "path", "pattern")
-    return ToolCall(
-        tool=tool,
-        command=command if isinstance(command, str) else None,
-        files=tuple(files),
-        searches=searches,
-        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
-        session=payload.get("sessionId") if isinstance(payload.get("sessionId"), str) else "",
-        unattended="" if payload.get("hasUI") is True else PI_UNATTENDED,
-        no_native_ask=True,  # Pi has no permission system: the extension does the asking
-    )
-
-
-def asking(asks: list) -> str:
-    """The question the Pi extension puts to the user for a call that hits ask rows."""
-    lines = ["The global rule table asks you before this call runs. Allow it?"]
-    for hit in asks:
-        r = hit.rule
-        lines.append(f"- `{hit.part}`: ask rule {r.id} ({_plain(r.summary)}). {r.reason} The agent's instruction: {r.instruction}")
-    return "\n".join(lines)
+    """Pi's hook payload, read by its harness setup."""
+    return harness_io()["pi"][0](payload)
 
 
 def write_pi(denials: list, asks=()) -> str:
-    """Always one JSON line: `{"block": <refusal>}`, `{"ask": <question>}`, or `{}`.
-    The extension returns a block to Pi, which gives the agent the reason as the tool's result."""
-    if denials:
-        return json.dumps({"block": refusal(denials)}) + "\n"
-    if asks:
-        return json.dumps({"ask": asking(list(asks))}) + "\n"
-    return "{}\n"
+    """Pi's hook answer, written by its harness setup."""
+    return harness_io()["pi"][1](denials, asks)
 
 
 HARNESSES = {
     "codex": (read_codex, write_claude_code),  # Codex reads the same deny answer as Claude Code
-    "pi": (read_pi, write_pi),
 }
 
 
