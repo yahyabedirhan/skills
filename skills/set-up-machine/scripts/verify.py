@@ -228,20 +228,6 @@ def _toml_trust(config: Path, key: str):
     return None
 
 
-def _opencode(home: Path, folder: Path):
-    path = folder / "plugins" / "set-up-machine.js"
-    try:
-        text = path.read_text()
-    except OSError:
-        return ("FAIL", f"opencode: no plugin at {path}")
-    m = re.search(r"^const COMMAND = (\[.*\]);$", text, re.M)
-    command = json.loads(m.group(1)) if m else []
-    script = _script(shlex.join(command), "opencode", home) if command else None
-    if script is None:
-        return ("FAIL", f"opencode: {path} doesn't run the pre-tool hook with --harness opencode")
-    return _script_line("opencode", path, script)
-
-
 PI_EXTENSION_HEADER = "// set-up-machine: the pre-tool hook, as a Pi extension."
 
 
@@ -267,7 +253,6 @@ def _pi(home: Path, folder: Path):
 HARNESSES = (
     ("Claude Code", ".claude", _claude_code),
     ("Codex", ".codex", _codex),
-    ("opencode", ".config/opencode", _opencode),
     ("Pi", ".pi/agent", _pi),
 )
 

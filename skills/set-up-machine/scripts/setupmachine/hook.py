@@ -339,61 +339,6 @@ def read_codex(payload: dict) -> ToolCall:
     )
 
 
-# opencode's built-in tools that take a path: the argument holding it, and the access it means.
-OPENCODE_FILE_TOOLS = {
-    "read": ("filePath", "read"),
-    "grep": ("path", "read"),
-    "glob": ("path", "read"),
-    "list": ("path", "read"),
-    "edit": ("filePath", "write"),
-    "write": ("filePath", "write"),
-}
-# Its other built-in tools. Every other tool is an MCP tool, named `<server>_<tool>`.
-OPENCODE_BUILTINS = {
-    "invalid", "question", "bash", "task", "webfetch", "websearch", "todowrite", "todoread", "skill", "lsp",
-    "codesearch", "apply_patch", "patch", "plan_enter", "plan_exit", *OPENCODE_FILE_TOOLS,
-}
-# opencode's auto-approve (`--auto`, or its toggle) answers ask entries for the user, and the plugin can't tell it's on.
-OPENCODE_UNATTENDED = "opencode, whose auto-approve can answer for the user"
-
-
-def read_opencode(payload: dict) -> ToolCall:
-    """What set-up-machine's opencode plugin sends from `tool.execute.before`:
-    `tool`, `sessionID`, `args` (the tool's arguments) and `directory` (the session's folder)."""
-    tool = payload.get("tool") if isinstance(payload.get("tool"), str) else ""
-    args = payload.get("args") if isinstance(payload.get("args"), dict) else {}
-    directory = payload.get("directory") if isinstance(payload.get("directory"), str) else ""
-    command, workdir = args.get("command"), args.get("workdir")
-    files = []
-    if tool in OPENCODE_FILE_TOOLS:
-        key, access = OPENCODE_FILE_TOOLS[tool]
-        if isinstance(args.get(key), str) and args[key]:
-            files.append((args[key], access))
-    patch = args.get("patchText")
-    if isinstance(patch, str):
-        files += [(m.group(2), "write") for m in PATCH_FILE.finditer(patch)]
-    searches = _search(args, "path", "include") if tool == "grep" else ()
-    mcp_names = ()
-    if tool not in OPENCODE_BUILTINS:
-        # Either part of `<server>_<tool>` may hold `_`, so every split is a candidate.
-        mcp_names = tuple(f"mcp__{tool[:i]}__{tool[i + 1:]}" for i in range(1, len(tool) - 1) if tool[i] == "_")
-    return ToolCall(
-        tool=tool,
-        command=command if isinstance(command, str) else None,
-        files=tuple(files),
-        cwd=os.path.join(directory, workdir) if isinstance(workdir, str) and workdir else directory,
-        session=payload.get("sessionID") if isinstance(payload.get("sessionID"), str) else "",
-        mcp_names=mcp_names,
-        unattended=OPENCODE_UNATTENDED,
-        searches=searches,
-    )
-
-
-def write_opencode(denials: list, asks=()) -> str:
-    """The refusal as plain text: the plugin throws it, and opencode gives the agent the message as the tool's error."""
-    return refusal(denials) + "\n" if denials else ""
-
-
 # Pi's built-in tools that take a path: the input field holding it, and the access it means.
 PI_FILE_TOOLS = {
     "read": ("path", "read"),
@@ -461,7 +406,6 @@ def write_pi(denials: list, asks=()) -> str:
 HARNESSES = {
     "claude-code": (read_claude_code, write_claude_code),
     "codex": (read_codex, write_claude_code),  # Codex reads the same deny answer as Claude Code
-    "opencode": (read_opencode, write_opencode),
     "pi": (read_pi, write_pi),
 }
 
@@ -475,6 +419,16 @@ def harness_io() -> dict:
         if callable(read) and callable(write):
             found[setup.id] = (read, write)
     return found
+
+
+def read_opencode(payload: dict) -> ToolCall:
+    """opencode's hook payload, read by its harness setup."""
+    return harness_io()["opencode"][0](payload)
+
+
+def write_opencode(denials: list, asks=()) -> str:
+    """opencode's hook answer, written by its harness setup."""
+    return harness_io()["opencode"][1](denials, asks)
 
 
 def read_cursor(payload: dict) -> ToolCall:
