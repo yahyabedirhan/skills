@@ -247,48 +247,10 @@ def write_report(folder: Path, call: ToolCall, hits: list, harness: str, now: da
 
 # --- harnesses ------------------------------------------------------------------
 
-# Claude Code's file tools: the input field holding the path, and the access it means.
-CLAUDE_CODE_FILE_TOOLS = {
-    "Read": ("file_path", "read"),
-    "Grep": ("path", "read"),
-    "Edit": ("file_path", "write"),
-    "MultiEdit": ("file_path", "write"),
-    "Write": ("file_path", "write"),
-    "NotebookEdit": ("notebook_path", "write"),
-}
-
-
-# Claude Code's permission modes in which an ask entry doesn't reach the user: dontAsk denies it,
-# bypassPermissions isn't documented to keep it, and auto mode stays in until a probe shows its ask entries reach the user.
-CLAUDE_CODE_UNATTENDED = {mode: f"Claude Code's {mode} mode" for mode in ("auto", "dontAsk", "bypassPermissions")}
-
 
 def read_claude_code(payload: dict) -> ToolCall:
-    """Claude Code's PreToolUse input. Other shapes that reach the same hook (Cursor runs
-    Claude Code's hooks too) are read as far as they fit: any `command` string, top level
-    or in `tool_input`, is checked as a shell command. Under Cursor (its payload carries
-    `cursor_version`) a call is still refused, but reporting it is left to the hook wired
-    in Cursor's own hooks.json, so no call is reported twice."""
-    tool = payload.get("tool_name") if isinstance(payload.get("tool_name"), str) else ""
-    tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
-    command = tool_input.get("command", payload.get("command"))
-    files = []
-    field_name, access = CLAUDE_CODE_FILE_TOOLS.get(tool, ("file_path", "read"))
-    for key in {field_name, "file_path"}:
-        value = tool_input.get(key)
-        if isinstance(value, str) and value:
-            files.append((value, access))
-    searches = _search(tool_input, "path", "glob") if tool == "Grep" else ()
-    return ToolCall(
-        tool=tool,
-        command=command if isinstance(command, str) else None,
-        files=tuple(files),
-        searches=searches,
-        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
-        session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
-        report="cursor_version" not in payload,
-        unattended="" if "cursor_version" in payload else CLAUDE_CODE_UNATTENDED.get(payload.get("permission_mode"), ""),
-    )
+    """Claude Code's hook payload, read by its harness setup."""
+    return harness_io()["claude-code"][0](payload)
 
 
 def _search(args: dict, folder_key: str, glob_key: str) -> tuple:
@@ -300,15 +262,8 @@ def _search(args: dict, folder_key: str, glob_key: str) -> tuple:
 
 
 def write_claude_code(denials: list, asks=()) -> str:
-    if not denials:
-        return ""
-    return json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": refusal(denials),
-        }
-    }) + "\n"
+    """Claude Code's hook answer, written by its harness setup. Codex uses the same answer."""
+    return harness_io()["claude-code"][1](denials, asks)
 
 
 # apply_patch's file headers; each names a file the patch writes.
@@ -404,7 +359,6 @@ def write_pi(denials: list, asks=()) -> str:
 
 
 HARNESSES = {
-    "claude-code": (read_claude_code, write_claude_code),
     "codex": (read_codex, write_claude_code),  # Codex reads the same deny answer as Claude Code
     "pi": (read_pi, write_pi),
 }

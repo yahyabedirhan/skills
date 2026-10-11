@@ -2,9 +2,7 @@
 
 It copies the operations Cursor established: `id`, `label`, `present`, `audit`, `read`, and `write`.
 opencode takes no plugins yet, so it omits `validate`, `check`, and `propose`.
-`audit` returns `(channel, status, text)` for the hook wiring. When the harnesses file
-points at instructions, it returns the same gap the shared checker used to print, because
-opencode has no generated instructions file yet. The printed hook word stays `hook`.
+`audit` returns `(channel, status, text)` for the hook wiring. The printed hook word stays `hook`.
 """
 from __future__ import annotations
 
@@ -14,7 +12,6 @@ import re
 import shlex
 from pathlib import Path
 
-from .. import layout, personal
 from ..hook import PATCH_FILE, ToolCall, _search, command_script, refusal
 
 id = "opencode"
@@ -46,10 +43,8 @@ def present(home: Path) -> bool:
 
 
 def audit(home: Path) -> list:
-    """`(channel, status, text)` for opencode's hook wiring, and for instructions it can't take yet."""
-    lines = [("hook", *_wiring(home))]
-    lines.extend(("harness", status, text) for status, text in _instructions(home))
-    return lines
+    """`(channel, status, text)` for opencode's hook wiring."""
+    return [("hook", *_wiring(home))]
 
 
 def read(payload: dict) -> ToolCall:
@@ -105,28 +100,3 @@ def _wiring(home: Path):
     if not script.is_file():
         return ("FAIL", f"{label}: {path} runs {script}, which doesn't exist")
     return ("wired", f"{label}: {path} -> {script}")
-
-
-def _instructions(home: Path) -> list:
-    """`(status, text)` when the harnesses file points at instructions opencode can't take yet.
-
-    A malformed harnesses file is the shared reader's line, so this returns nothing for it.
-    """
-    try:
-        pointer = personal.read_pointer(home)
-    except personal.PersonalError:
-        return []
-    if not pointer.repository:
-        return []
-    try:
-        pointed = layout.harness_files(pointer.clone)
-    except layout.LayoutError:
-        return []
-    if "instructions" not in pointed.get(id, {}):
-        return []
-    try:
-        path = layout.harness_file(pointer.clone, id, "instructions")
-    except layout.LayoutError as exc:
-        return [("FAIL", f"{id}: {exc}")]
-    return [("gap", f"{id}: {path} has instructions, but set-up-machine "
-                    f"can't deliver them to {id} yet")]

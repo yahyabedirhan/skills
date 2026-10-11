@@ -45,6 +45,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
 import json
 import os
 import re
@@ -57,7 +58,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import commands, codex_config, harness_setups, hook, personal, plugins, pi_config, rules as rule_table  # noqa: E402
+from setupmachine import codex_config, harness_setups, hook, personal, plugins, pi_config, rules as rule_table  # noqa: E402
 
 CODEX_DECISION = {"forbidden": "deny", "prompt": "ask", "allow": "allow-and-report"}
 SHELL_SYNTAX = set(";&|<>$`()\n")
@@ -184,15 +185,6 @@ def _script_line(label: str, where: Path, script: Path, extra: str = ""):
     return ("wired", f"{label}: {where} -> {script}{extra}")
 
 
-def _claude_code(home: Path, folder: Path):
-    path = folder / "settings.json"
-    for _, _, matcher, command, _ in _pre_tool_commands(_json(path) or {}):
-        script = _script(command, "claude-code", home)
-        if script and matcher in ("*", "", None):
-            return _script_line("Claude Code", path, script)
-    return ("FAIL", f"Claude Code: no pre-tool hook for every tool in {path}")
-
-
 def _codex(home: Path, folder: Path):
     path = folder / "hooks.json"
     config = (folder / "config.toml")
@@ -251,18 +243,25 @@ def _pi(home: Path, folder: Path):
 
 
 HARNESSES = (
-    ("Claude Code", ".claude", _claude_code),
     ("Codex", ".codex", _codex),
     ("Pi", ".pi/agent", _pi),
 )
 
 
-def harness_setup_audits(home: Path) -> list:
-    """`(channel, status, text)` from every discovered harness setup."""
+def harness_setup_audits(home: Path, rows=None) -> list:
+    """`(channel, status, text)` from every discovered harness setup.
+
+    A harness setup whose audit takes the personal rows receives the ones the rules check
+    loaded. Hook lines from these harness setups print after the old wiring table.
+    """
     lines = []
     for setup in harness_setups.load():
         audit = getattr(setup, "audit", None)
-        if callable(audit):
+        if not callable(audit):
+            continue
+        if rows is not None and "rows" in inspect.signature(audit).parameters:
+            lines.extend(audit(home, rows))
+        else:
             lines.extend(audit(home))
     return lines
 
@@ -278,70 +277,6 @@ def check_wiring(home: Path, codex_home: Path | None = None, pi_dir: Path | None
         else:
             out.append(check(home, folder))
     return out
-
-
-# --- personal permissions in Claude Code's settings ------------------------------
-
-CLAUDE_LISTS = {"deny": "deny", "ask": "ask", "allow-and-report": "allow", "allow": "allow"}
-
-
-def check_personal_entries(home: Path, rows: list) -> list:
-    """(status, text) per personal permission: its entries in Claude Code's settings, as references/claude-code.md writes them.
-
-    `present` names them; with none, `gap` for a row Claude Code has no entry for, `n/a` when
-    Claude Code lacks the row's tool (no MCP tool it matches, or no program on PATH), else FAIL.
-    """
-    folder = home / ".claude"
-    if not rows or not folder.is_dir():
-        return []
-    path = folder / "settings.json"
-    permissions = (_json(path) or {}).get("permissions")
-    permissions = permissions if isinstance(permissions, dict) else {}
-    out = []
-    for rule in rows:
-        name = CLAUDE_LISTS[rule.level]
-        listed = permissions.get(name) if isinstance(permissions.get(name), list) else []
-        entries = [e for e in listed if isinstance(e, str) and _claude_entry_of(rule, e, home)]
-        label = f"Claude Code: {rule.id} ({rule.level}, personal)"
-        if entries:
-            out.append(("present", f"{label}: {', '.join(entries)} in {path}"))
-        elif rule.kind == "command" and (rule.bare or rule.flags_only or rule.variables or rule.files):
-            out.append(("gap", f"{label}: Claude Code has no entry for this kind of command row; the hook covers "
-                               "deny and allow-and-report rows"))
-        elif rule.kind == "mcp-tool":
-            out.append(("n/a", f"{label}: no MCP tool in {path} matches it, so it's written only once Claude Code "
-                               "lists a tool it matches"))
-        elif rule.kind == "command" and not any(shutil.which(p) for p in rule.programs):
-            out.append(("n/a", f"{label}: {', '.join(rule.programs)} isn't on PATH, so there's no tool to write it for"))
-        else:
-            out.append(("FAIL", f"{label}: no entry in permissions.{name} of {path}"))
-    return out
-
-
-def _claude_entry_of(rule, entry: str, home: Path) -> bool:
-    """Whether a Claude Code permission entry is one this row produces: what the entry names, the row covers."""
-    if rule.kind == "mcp-tool":
-        return bool(rule_table.matching_tools(rule, [entry]))
-    m = re.fullmatch(r"(Bash|Read|Edit|Write)\((.+)\)", entry, re.S)
-    if not m:
-        return False
-    tool, inner = m.groups()
-    if rule.kind == "command":
-        if tool != "Bash":
-            return False
-        argvs = commands.simple_commands(re.sub(r"(:\*| \*)$", "", inner))
-        return len(argvs) == 1 and commands.covers(rule, argvs[0])
-    if tool not in (("Read",) if rule.access == "read" else ("Edit", "Write")):
-        return False
-    cwd = str(home / "project")
-    if inner.startswith("//"):
-        path = inner[1:]
-    elif inner.startswith("~/") or inner.startswith("**/"):
-        path = inner
-    else:
-        path = f"{cwd}/{inner[2:] if inner.startswith('./') else inner}"
-    path = str(home) + path[1:] if path.startswith("~/") else path
-    return any(rule_table.glob_regex(g, cwd, home).match(path) for g in rule.paths)
 
 
 # --- the report -------------------------------------------------------------------
@@ -428,7 +363,7 @@ def main(argv=None, stdout=None) -> int:
     elif not args.no_codex:
         line("codex", "skipped", "codex isn't on PATH; from a non-login shell, such as one without nvm loaded, pass --codex PATH")
 
-    audited = harness_setup_audits(home)
+    audited = harness_setup_audits(home, own)
     emit("hook", check_wiring(home, codex_home, pi_dir), redact=True)
     emit("hook", [(status, text) for channel, status, text in audited if channel == "hook"], redact=True)
 
@@ -437,13 +372,14 @@ def main(argv=None, stdout=None) -> int:
         failed |= status == "FAIL"
 
     for channel, status, text in audited:
-        if channel not in ("hook", "harness"):
+        if channel not in ("hook", "harness", "personal"):
             line(channel, status, text)
             failed |= status == "FAIL"
 
-    for status, text in personal.check(home) + own_lines + check_personal_entries(home, own):
+    for status, text in personal.check(home) + own_lines:
         line("personal", status, text)
         failed |= status == "FAIL"
+    emit("personal", [(status, text) for channel, status, text in audited if channel == "personal"])
     emit("harness", personal.check_harnesses(home))
     emit("harness", [(status, text) for channel, status, text in audited if channel == "harness"])
     for status, text in plugins.check(home, pi_dir, codex_home, codex, table + own):

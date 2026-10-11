@@ -16,7 +16,8 @@ personal permissions; each adapter derives its list from those rows.
 
 What each harness can take is in references/workstation.md and that harness's Plugins section.
 A discovered harness setup that exposes validate, check and propose is that harness's adapter.
-ADAPTERS holds the harnesses that have not moved. opencode has no adapter yet.
+ADAPTERS holds the harnesses that have not moved. Claude Code's adapter is its harness setup.
+opencode has no adapter yet.
 
 `check` reads persisted setup and read-only CLI metadata. It does not establish freshness.
 The agent checks latest upstream versions, installs and writes, as SKILL.md says.
@@ -45,7 +46,6 @@ SOURCE = re.compile(r"^[A-Za-z0-9_.-]+@[A-Za-z0-9_.-]+$")
 MARKETPLACE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 ADAPTERS = {
-    "claude-code": claude,
     "pi": pi,
     "codex": codex,
 }

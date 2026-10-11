@@ -124,9 +124,13 @@ def check(home: Path) -> list:
 
 
 def _audited_harnesses() -> set:
-    """Harness ids whose harness setup audits that harness, including its generated instructions."""
+    """Harness ids whose harness setup audits the generated instructions it writes.
+
+    Any harness setup with `audit` is not enough: Claude Code audits its wiring and still
+    has no generated instructions file, so a pointer at those stays a gap.
+    """
     from . import harness_setups
-    return {setup.id for setup in harness_setups.load() if callable(getattr(setup, "audit", None))}
+    return {setup.id for setup in harness_setups.load() if callable(getattr(setup, "instructions", None))}
 
 
 def check_harnesses(home: Path) -> list:
