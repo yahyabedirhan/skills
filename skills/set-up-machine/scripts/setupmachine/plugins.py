@@ -15,8 +15,8 @@ should have it:
 personal permissions; each adapter derives its list from those rows.
 
 What each harness can take is in references/workstation.md and that harness's Plugins section.
-One adapter per harness lives in `harnesses/<harness>.py` and exposes validate, check and propose.
-This module dispatches through ADAPTERS. opencode has no adapter yet.
+A discovered package that exposes validate, check and propose is that harness's adapter.
+ADAPTERS holds the harnesses that have not moved. opencode has no adapter yet.
 
 `check` reads persisted setup and read-only CLI metadata. It does not establish freshness.
 The agent checks latest upstream versions, installs and writes, as SKILL.md says.
@@ -30,8 +30,9 @@ import sys
 from pathlib import Path
 
 from . import layout
+from . import packages
 from . import rules as rule_table
-from .harnesses import claude, codex, cursor, pi
+from .harnesses import claude, codex, pi
 from .harnesses import policy
 from .harnesses.errors import PluginsError
 from .personal import PersonalError, permissions, read_pointer
@@ -45,10 +46,17 @@ MARKETPLACE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 ADAPTERS = {
     "claude-code": claude,
-    "cursor": cursor,
     "pi": pi,
     "codex": codex,
 }
+
+
+def adapter_for(harness: str):
+    """The package that adapts this harness, or the old table while that harness has not moved."""
+    for pkg in packages.load():
+        if pkg.id == harness and callable(getattr(pkg, "check", None)):
+            return pkg
+    return ADAPTERS.get(harness)
 
 
 class Context:
@@ -95,7 +103,7 @@ def check(home: Path, pi_dir: Path | None = None, codex_home: Path | None = None
             lines.append(("n/a", f"{name}: for {', '.join(oses)} only"))
             continue
         for harness in entry["harnesses"]:
-            adapter = ADAPTERS.get(harness)
+            adapter = adapter_for(harness)
             if adapter is None:
                 label = LABELS[harness]
                 lines.append(("gap", f"{label}: {tag} is listed, but set-up-machine can't deliver plugins to "
@@ -166,7 +174,7 @@ def load(path: Path) -> list:
                 raise PluginsError(f"{where}: an mcp entry takes server, not source or marketplace")
             pi.validate(entry, where, pi_seen, i)
         for harness in harnesses:
-            adapter = ADAPTERS.get(harness)
+            adapter = adapter_for(harness)
             if adapter is not None and adapter is not pi:
                 adapter.validate(entry, where)
         oses = entry.get("os")

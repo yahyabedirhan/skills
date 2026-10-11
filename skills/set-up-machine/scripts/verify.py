@@ -57,10 +57,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import commands, codex_config, hook, personal, plugins, pi_config, rules as rule_table  # noqa: E402
+from setupmachine import commands, codex_config, hook, packages, personal, plugins, pi_config, rules as rule_table  # noqa: E402
 
-HOOK_SCRIPT = "pre_tool_hook.py"
-CURSOR_EVENTS = ("beforeShellExecution", "beforeMCPExecution", "beforeReadFile", "preToolUse")
 CODEX_DECISION = {"forbidden": "deny", "prompt": "ask", "allow": "allow-and-report"}
 SHELL_SYNTAX = set(";&|<>$`()\n")
 STRICTNESS = {"allow-and-report": 0, "ask": 1, "deny": 2}
@@ -164,14 +162,7 @@ def _json(path: Path):
 
 def _script(command: str, harness: str, home: Path):
     """The hook script a wired command runs, when it runs it for this harness; else None."""
-    try:
-        words = shlex.split(command)
-    except ValueError:
-        return None
-    script = next((w for w in words if w.endswith(HOOK_SCRIPT)), None)
-    if script is None or f"--harness {harness}" not in " ".join(words):
-        return None
-    return Path(str(home) + script[1:]) if script.startswith("~/") else Path(script)
+    return hook.command_script(command, harness, home)
 
 
 def _pre_tool_commands(settings: dict) -> list:
@@ -251,27 +242,6 @@ def _opencode(home: Path, folder: Path):
     return _script_line("opencode", path, script)
 
 
-def _cursor(home: Path, folder: Path):
-    path = folder / "hooks.json"
-    hooks = (_json(path) or {}).get("hooks")
-    hooks = hooks if isinstance(hooks, dict) else {}
-    missing, scripts = [], set()
-    for event in CURSOR_EVENTS:
-        found = [_script(h["command"], "cursor", home) for h in hooks.get(event) or []
-                 if isinstance(h, dict) and isinstance(h.get("command"), str)]
-        found = [s for s in found if s]
-        if found:
-            scripts.add(found[0])
-        else:
-            missing.append(event)
-    if missing:
-        return ("FAIL", f"Cursor: {path} has no pre-tool hook on {', '.join(missing)}")
-    gone = [s for s in scripts if not s.is_file()]
-    if gone:
-        return ("FAIL", f"Cursor: {path} runs {gone[0]}, which doesn't exist")
-    return ("wired", f"Cursor: {path} -> {', '.join(str(s) for s in sorted(scripts))} on all four events")
-
-
 PI_EXTENSION_HEADER = "// set-up-machine: the pre-tool hook, as a Pi extension."
 
 
@@ -298,32 +268,18 @@ HARNESSES = (
     ("Claude Code", ".claude", _claude_code),
     ("Codex", ".codex", _codex),
     ("opencode", ".config/opencode", _opencode),
-    ("Cursor", ".cursor", _cursor),
     ("Pi", ".pi/agent", _pi),
 )
 
 
-def check_cursor_run_mode(home: Path) -> list:
-    """(status, text) for Cursor's run mode: auto-review, with the sandbox enabled.
-
-    `none` when Cursor isn't set up. `ok` when both keys are set. `FAIL` when
-    ~/.cursor exists and either key is missing or different. Other keys are kept.
-    """
-    folder = home / ".cursor"
-    if not folder.is_dir():
-        return [("none", "Cursor: not set up here (no ~/.cursor)")]
-    path = folder / "cli-config.json"
-    data = _json(path) or {}
-    sandbox = data.get("sandbox")
-    sandbox_mode = sandbox.get("mode") if isinstance(sandbox, dict) else None
-    missing = []
-    if data.get("approvalMode") != "auto-review":
-        missing.append("approvalMode auto-review")
-    if sandbox_mode != "enabled":
-        missing.append("sandbox.mode enabled")
-    if missing:
-        return [("FAIL", f"Cursor: {path} lacks {', '.join(missing)}")]
-    return [("ok", f"Cursor: {path} has approvalMode auto-review and sandbox.mode enabled")]
+def package_audits(home: Path) -> list:
+    """`(channel, status, text)` from every discovered harness package."""
+    lines = []
+    for pkg in packages.load():
+        audit = getattr(pkg, "audit", None)
+        if callable(audit):
+            lines.extend(audit(home))
+    return lines
 
 
 def check_wiring(home: Path, codex_home: Path | None = None, pi_dir: Path | None = None) -> list:
@@ -441,6 +397,13 @@ def main(argv=None, stdout=None) -> int:
         return text
 
     failed = False
+
+    def emit(channel, rows, redact=False):
+        nonlocal failed
+        for status, text in rows:
+            line(channel, status, private(text) if redact else text)
+            failed |= status == "FAIL"
+
     try:
         table = rule_table.load(args.rules)
     except rule_table.RuleTableError as exc:
@@ -480,24 +443,24 @@ def main(argv=None, stdout=None) -> int:
     elif not args.no_codex:
         line("codex", "skipped", "codex isn't on PATH; from a non-login shell, such as one without nvm loaded, pass --codex PATH")
 
-    for status, text in check_wiring(home, codex_home, pi_dir):
-        line("hook", status, private(text))
-        failed |= status == "FAIL"
+    audited = package_audits(home)
+    emit("hook", check_wiring(home, codex_home, pi_dir), redact=True)
+    emit("hook", [(status, text) for channel, status, text in audited if channel == "hook"], redact=True)
 
     for status, text in pi_config.audit(home, pi_dir):
         line("pi", status, private(text))
         failed |= status == "FAIL"
 
-    for status, text in check_cursor_run_mode(home):
-        line("cursor", status, text)
-        failed |= status == "FAIL"
+    for channel, status, text in audited:
+        if channel not in ("hook", "harness"):
+            line(channel, status, text)
+            failed |= status == "FAIL"
 
     for status, text in personal.check(home) + own_lines + check_personal_entries(home, own):
         line("personal", status, text)
         failed |= status == "FAIL"
-    for status, text in personal.check_harnesses(home):
-        line("harness", status, text)
-        failed |= status == "FAIL"
+    emit("harness", personal.check_harnesses(home))
+    emit("harness", [(status, text) for channel, status, text in audited if channel == "harness"])
     for status, text in plugins.check(home, pi_dir, codex_home, codex, table + own):
         line("plugin", status, private(text))
         failed |= status == "FAIL"
