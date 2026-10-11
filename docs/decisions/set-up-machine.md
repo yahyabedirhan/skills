@@ -2,6 +2,10 @@
 
 The decisions behind the `set-up-machine` skill. This file is for maintaining it and is never installed. Add an entry for each new decision: the date, what was decided, and why. The spec is "Spec: every harness and project is set up and audited from the skills" (#49).
 
+## 2026-10-11: the Cursor CLI command is cursor-agent
+
+- **Checks and steps run `cursor-agent`.** The name `agent` belongs to another CLI. A step that runs `agent` can start the wrong program, so this skill uses `cursor-agent` for MCP enable and for the headless checks.
+
 ## 2026-10-10: install latest, reproduce the setup process
 
 Reproducibility preserves selected tools, configuration, guardrails, and installation steps.
