@@ -110,7 +110,7 @@ No further line. The `hook wired` line is the check. Details: [references/openco
 
 [references/cursor.md](references/cursor.md)
 
-- When `~/.cursor` exists, `cursor ok`: Auto-review, with the sandbox on. `cursor FAIL` means the audit is not done. No `~/.cursor` is `cursor none`.
+- When `~/.cursor` exists, `cursor ok`: Auto-review, with the sandbox on, and `cursor ok` when `~/.cursor/rules/global-instructions.mdc` matches the shared file. `cursor FAIL` means the audit is not done. A copy without the generated comment is `cursor gap`. No `~/.cursor` is `cursor none`.
 - The keys, the Linux sandbox gap and what the skill leaves in `permissions.json` are in that reference.
 - When `setup/harnesses.json` names Cursor's `instructions`, `harness ok` for `~/.cursor/rules/harness-instructions.mdc`.
 

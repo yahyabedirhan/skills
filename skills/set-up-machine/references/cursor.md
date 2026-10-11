@@ -18,7 +18,7 @@ How to set up and audit Cursor, its IDE agent and the `cursor-agent` CLI, from t
   <the shared file, as it will be after this run>
   ```
 
-  Refresh it whenever the shared file changes. A `global-instructions.mdc` without that comment is someone else's: a `gap`, left alone.
+  Refresh it whenever the shared file changes. A `global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. `verify.py` prints `cursor ok` when the copy matches the shared file, `cursor FAIL` when the file is missing or differs, and `cursor gap` when the file lacks this comment.
 - **Harness instructions:** when the workstation repo's `setup/harnesses.json` names Cursor's `instructions` (workstation.md), `~/.cursor/rules/harness-instructions.mdc` holds what only Cursor needs, written exactly like this:
 
   ```markdown
