@@ -1,5 +1,5 @@
-# Harness package
+# Harness setup
 
-Add a new harness as one package in `/set-up-machine`. Add no second registration list. The package then stays the only registration.
+Add a new harness as one harness setup in `/set-up-machine`. Add no second registration list. The harness setup then stays the only registration.
 
-Read the package contract in Spec: Give each harness one package at https://github.com/yahyabedirhan/skills/issues/200.
+Read the harness setup contract in Spec: Give each harness one harness setup at https://github.com/yahyabedirhan/skills/issues/200.

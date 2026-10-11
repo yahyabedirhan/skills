@@ -18,8 +18,8 @@ Read both issues in full. The spec is the design. Do not redesign it.
 
 ## Decisions already made
 
-- This pull request does not move harness code. That work is Spec: Give each harness one package, https://github.com/yahyabedirhan/skills/issues/200, on branch `chore/harness-packages`.
-- The new reference points at that spec. It does not copy the package contract and it does not describe today's scattered checks.
+- This pull request does not move harness code. That work is Spec: Give each harness one harness setup, https://github.com/yahyabedirhan/skills/issues/200, on branch `chore/harness-packages`.
+- The new reference points at that spec. It does not copy the harness setup contract and it does not describe today's scattered checks.
 - Keep the current words of the skill operations document and the efficiency analysis document. Move them. Do not rewrite them.
 - The maintainer is away. Decide an open question inside this design and list it in the pull request. Do not send the other session a prompt.
 

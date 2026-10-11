@@ -60,7 +60,7 @@ Before any skill uses a new role, add it to `/set-up-machine`'s roles table, wit
    - **For an installed skill:** that is its source repo, never an installed copy, which the next `npx skills update` overwrites.
    - **For a local skill:** that is the project.
    - **For a personal change** (a personal preference, an environment default or a personal permission): that is `<workstation-repo>`, in its clone at `<path-to-workstation-repo>`. Read `references/workstation.md` for which file each kind goes in.
-   - **When the change adds a harness:** read `references/harness-package.md`.
+   - **When the change adds a harness:** read `references/harness-setup.md`.
    - **When the user has no workstation repo:** write a personal instruction in the shared file itself, which is its source on such a machine. A personal permission has no home there, so offer to start a workstation repo. Start one, when the user asks or accepts, as `references/workstation.md` says.
    - **When the user has one but this machine has no pointer** (`~/.config/agents/source.md`): run `/set-up-machine` first, which writes it, then make the change in the clone.
 3. When the change touches the global instructions, show the user the whole shared file as it will read after the change, with each changed line marked. Wait for their approval before the change is committed or shipped: global instructions shape every agent, so the user wants to know every line of them.
@@ -88,7 +88,7 @@ When the user asks what a skill costs to run, or how to make it cheaper, follow 
 
 - [references/skill-operations.md](references/skill-operations.md): the kinds of skill, and creating, installing, updating, moving, removing, forking, upgrading a fork, shipping, auditing and publishing them.
 - [references/efficiency-analysis.md](references/efficiency-analysis.md): measuring what one run of a skill costs, and making the next run cheaper.
-- [references/harness-package.md](references/harness-package.md): adding a new harness as one package in `/set-up-machine`, with no second registration list.
+- [references/harness-setup.md](references/harness-setup.md): adding a new harness as one harness setup in `/set-up-machine`, with no second registration list.
 - [references/workstation.md](references/workstation.md): what the user's workstation repo is for, its starting layout, starting one, and which file each personal change goes in.
 
 ## Scripts
