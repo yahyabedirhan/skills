@@ -4,6 +4,13 @@ How to set up and audit Cursor, its IDE agent and the `cursor-agent` CLI, from t
 
 **Found** when `~/.cursor/` exists or `cursor-agent` or `cursor` is on `PATH`.
 
+## What verify must show
+
+Two `cursor` lines when `~/.cursor` exists. No `~/.cursor` is one `cursor none` line.
+
+- **Run mode:** `cursor ok` when Auto-review is on and the sandbox is on. `cursor FAIL` when `~/.cursor` exists and either key is missing or different.
+- **Global instructions copy:** `cursor ok` when `~/.cursor/rules/global-instructions.mdc` matches the shared file. `cursor FAIL` when that copy is missing or differs. A copy without the generated comment is `cursor gap`, left alone, and that line does not fail the audit.
+
 ## Global instructions
 
 - Both read **user rule files**, `~/.cursor/rules/*.mdc`: the IDE in every project, the CLI by walking up from its working folder, so only inside the home folder. An `.mdc` file reaches every chat only with `alwaysApply: true` frontmatter, and `@file` in a rule is a context reference, not an include.
@@ -18,7 +25,7 @@ How to set up and audit Cursor, its IDE agent and the `cursor-agent` CLI, from t
   <the shared file, as it will be after this run>
   ```
 
-  Refresh it whenever the shared file changes. A `global-instructions.mdc` without that comment is someone else's: a `gap`, left alone.
+  Refresh it whenever the shared file changes. A `global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The audit lines are under *What verify must show*.
 - **Harness instructions:** when the workstation repo's `setup/harnesses.json` names Cursor's `instructions` (workstation.md), `~/.cursor/rules/harness-instructions.mdc` holds what only Cursor needs, written exactly like this:
 
   ```markdown
@@ -59,7 +66,7 @@ No memory feature: a `none` line.
 Auto-review with the sandbox on is the mode this skill sets for anyone who has Cursor. Allowlisted calls run. Other shell commands run in the sandbox when they can. A call that cannot use the sandbox goes to the classifier. The deny list still refuses: Auto-review does not replace it.
 
 - **Files:** the same `~/.cursor/cli-config.json`. Set `approvalMode` to `auto-review` and `sandbox.mode` to `enabled`. Keep every other key, including `sandbox.networkAccess` when it is already set. Add `"version": 1` to a new file. Docs: [run modes](https://cursor.com/docs/agent/security/run-modes), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
-- **Audit:** `verify.py` prints `cursor ok` when both are set, and `cursor FAIL` when `~/.cursor` exists and either is missing or different. No `~/.cursor` is `cursor none`.
+- **Audit:** the lines under *What verify must show*.
 - **Linux:** the sandbox needs kernel 6.2 or newer with Landlock, and unprivileged user namespaces. On a remote machine or the standalone CLI, the user installs the AppArmor package the run-modes doc names; it needs root. When the sandbox cannot be created, Cursor asks before each command: a `gap`.
 - **Steering:** leave `~/.cursor/permissions.json` `autoRun` to the user. `block_instructions` steer the classifier in plain English. The rule table and the hook are the enforcement, and a second prose list of the same calls would drift from them.
 

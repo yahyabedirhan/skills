@@ -110,8 +110,7 @@ No further line. The `hook wired` line is the check. Details: [references/openco
 
 [references/cursor.md](references/cursor.md)
 
-- When `~/.cursor` exists, `cursor ok`: Auto-review, with the sandbox on. `cursor FAIL` means the audit is not done. No `~/.cursor` is `cursor none`.
-- The keys, the Linux sandbox gap and what the skill leaves in `permissions.json` are in that reference.
+- The `cursor` lines in that reference's *What verify must show*. A `cursor FAIL` means the audit is not done.
 - When `setup/harnesses.json` names Cursor's `instructions`, `harness ok` for `~/.cursor/rules/harness-instructions.mdc`.
 
 ## Rule table
@@ -208,7 +207,7 @@ Name these once in every audit:
   - **Claude Code:** each personal permission's entries.
   - **Codex:** its own policy check, plus declared defaults, installed support and override gaps at the resolved config home.
   - **opencode:** the hook wiring only.
-  - **Cursor:** Auto-review and the sandbox, as [references/cursor.md](references/cursor.md) describes.
+  - **Cursor:** the run mode and the global instructions copy, as [references/cursor.md](references/cursor.md) describes.
   - **Pi:** the instructions link, declared defaults, broken skill links and the hook's extension, at the resolved agent folder.
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
