@@ -69,3 +69,8 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 
 - **Every instruction and skill change is written with `/writing-for-agents`,** not only a new project skill. Global instructions and skills are read by agents on every run, so the same levers apply to each.
 - **Every skill change gets a fresh sub-agent audit,** not only a new or forked skill. The author reads what it meant to write; the auditor reads what is on disk. It uses claude-api's `prompt-audit` where the harness has it, and `/writing-for-agents` where it doesn't.
+
+## 2026-10-11: one shape for the references (#201)
+
+- **A document that only some runs need lives in `references/`.** The skill body keeps the run. Skill operations and efficiency analysis moved there. Their words stayed the same.
+- **A new harness is one package in `/set-up-machine`.** `references/harness-package.md` states that rule. The agent adds no second registration list. The file points at Spec: Give each harness one package. It copies no package contract. It names no file layout.
