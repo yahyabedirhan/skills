@@ -8,4 +8,4 @@ A registration list is a list of harness names kept beside the harness setups. T
 
 Add no second registration list. Leave the harness name off every other list. The harness setup stays the only registration. A second list is a second copy of the names. The copy goes stale.
 
-Read the harness setup contract in Spec: Give each harness one harness setup at https://github.com/yahyabedirhan/skills/issues/200.
+Read the harness setup contract in `/set-up-machine`, in `scripts/setupmachine/harness_setups/__init__.py`.
