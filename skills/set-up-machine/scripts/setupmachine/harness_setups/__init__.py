@@ -1,4 +1,4 @@
-"""Discovered harness setups. One module here is one harness.
+"""Discovered harness setups. One module here is the only registration for one harness.
 
 The verifier, the hook, and the plugin checker load every module in this folder.
 They do not keep a list of harness names. A harness setup exposes the operations it needs:

@@ -374,16 +374,23 @@ This replaces the `agents/` paths in the entries above. The workstation repo mov
 
 ## 2026-10-11: one harness setup per harness
 
-A harness setup is one harness.
-It holds that harness's reference, its audit, and its hook translation.
-When the harness takes plugins, the same setup holds the plugin adapter.
+Set-up-machine used to register one harness in several lists.
+The verifier had a wiring table.
+The hook had a reader table.
+The plugin checker had an adapter table.
+The skill body repeated that harness's audit lines.
+An agent who added a harness had to edit all of those places.
 
-The verifier discovers harness setups.
-The hook discovers the same setups.
-The plugin checker discovers the same setups.
-None of them keeps a list of harness names.
-Add a harness as one module under `scripts/setupmachine/harness_setups/`.
-Do not add a second registration list.
+A harness setup is the single registration for one harness.
+The module holds that harness's audit and its hook translation.
+When the harness takes plugins, the same module holds the plugin adapter.
+The harness's reference states that harness's audit lines.
+
+The verifier loads every module in `scripts/setupmachine/harness_setups/`.
+The hook loads the same modules.
+The plugin checker loads the same modules.
+Add a harness by adding one module in that folder.
+Do not also add the harness to a list of names.
 
 Printed audit lines stay the same.
 A `FAIL` still fails the run.
