@@ -720,7 +720,7 @@ class HarnessInstructionsTest(PersonalHome, unittest.TestCase):
         self.assertRegex(lines[0], r"harness +ok +Cursor: .*harness-instructions\.mdc matches .*harnesses/cursor/instructions\.md")
 
     def test_the_text_cursor_should_get_is_the_instructions_section_only(self):
-        from setupmachine.packages import cursor
+        from setupmachine.harness_setups import cursor
         self.assertEqual(cursor.harness_rule(CURSOR_SOURCE, CURSOR_PATH), CURSOR_RULE)
 
     def test_the_header_names_the_path_the_harnesses_file_gives(self):

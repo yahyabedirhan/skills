@@ -15,7 +15,7 @@ should have it:
 personal permissions; each adapter derives its list from those rows.
 
 What each harness can take is in references/workstation.md and that harness's Plugins section.
-A discovered package that exposes validate, check and propose is that harness's adapter.
+A discovered harness setup that exposes validate, check and propose is that harness's adapter.
 ADAPTERS holds the harnesses that have not moved. opencode has no adapter yet.
 
 `check` reads persisted setup and read-only CLI metadata. It does not establish freshness.
@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 
 from . import layout
-from . import packages
+from . import harness_setups
 from . import rules as rule_table
 from .harnesses import claude, codex, pi
 from .harnesses import policy
@@ -52,10 +52,10 @@ ADAPTERS = {
 
 
 def adapter_for(harness: str):
-    """The package that adapts this harness, or the old table while that harness has not moved."""
-    for pkg in packages.load():
-        if pkg.id == harness and callable(getattr(pkg, "check", None)):
-            return pkg
+    """The harness setup that adapts this harness, or the old table while that harness has not moved."""
+    for setup in harness_setups.load():
+        if setup.id == harness and callable(getattr(setup, "check", None)):
+            return setup
     return ADAPTERS.get(harness)
 
 

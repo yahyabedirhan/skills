@@ -16,7 +16,7 @@ it lacks. The pointer itself fills two roles, `workstation-repo` and `path-to-wo
 as it names them.
 
 Its optional harnesses file can point at a harness's own instructions, for that harness only:
-the text under `## Instructions` is what that harness's package audits.
+the text under `## Instructions` is what that harness setup audits.
 `check_harnesses` reports a malformed harnesses file, and a gap when that file points
 at instructions or a config that nothing delivers yet.
 
@@ -124,16 +124,16 @@ def check(home: Path) -> list:
 
 
 def _audited_harnesses() -> set:
-    """Harness ids whose package audits that harness, including its generated instructions."""
-    from . import packages
-    return {pkg.id for pkg in packages.load() if callable(getattr(pkg, "audit", None))}
+    """Harness ids whose harness setup audits that harness, including its generated instructions."""
+    from . import harness_setups
+    return {setup.id for setup in harness_setups.load() if callable(getattr(setup, "audit", None))}
 
 
 def check_harnesses(home: Path) -> list:
-    """(status, text) lines for harness files no package delivers yet.
+    """(status, text) lines for harness files no harness setup delivers yet.
 
     `FAIL` when the harnesses file is malformed or points at a missing file. `gap` when it
-    points at instructions or a config set-up-machine can't deliver yet. A package audits
+    points at instructions or a config set-up-machine can't deliver yet. A harness setup audits
     the generated instructions it writes, so those lines are not repeated here.
     """
     try:

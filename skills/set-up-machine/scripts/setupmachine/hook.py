@@ -22,7 +22,7 @@ The rows are the rule table's, plus the personal permissions of the repository t
 
 Each harness has a reader (its payload -> ToolCall) and a writer (the denials,
 and the ask hits for a writer that asks -> what it prints). HARNESSES holds the
-harnesses that have not moved. A discovered package supplies the rest. The report
+harnesses that have not moved. A discovered harness setup supplies the rest. The report
 folder comes from the hook's configuration file, `~/.config/agents/hook.json` by default.
 """
 from __future__ import annotations
@@ -467,23 +467,23 @@ HARNESSES = {
 
 
 def harness_io() -> dict:
-    """Reader and writer per harness: the old table, then each package that runs the hook."""
+    """Reader and writer per harness: the old table, then each harness setup that runs the hook."""
     found = dict(HARNESSES)
-    from . import packages
-    for pkg in packages.load():
-        read, write = getattr(pkg, "read", None), getattr(pkg, "write", None)
+    from . import harness_setups
+    for setup in harness_setups.load():
+        read, write = getattr(setup, "read", None), getattr(setup, "write", None)
         if callable(read) and callable(write):
-            found[pkg.id] = (read, write)
+            found[setup.id] = (read, write)
     return found
 
 
 def read_cursor(payload: dict) -> ToolCall:
-    """Cursor's hook payload, read by its package."""
+    """Cursor's hook payload, read by its harness setup."""
     return harness_io()["cursor"][0](payload)
 
 
 def write_cursor(denials: list, asks=()) -> str:
-    """Cursor's hook answer, written by its package."""
+    """Cursor's hook answer, written by its harness setup."""
     return harness_io()["cursor"][1](denials, asks)
 
 

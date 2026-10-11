@@ -1,4 +1,4 @@
-"""Cursor's package. It audits Cursor, translates one hook payload, and adapts one plugin entry.
+"""Cursor's harness setup. It audits Cursor, translates one hook payload, and adapts one plugin entry.
 
 A later harness copies these operations: `id`, `label`, `present`, `audit`, `read`, `write`,
 and, when that harness takes plugins, `validate`, `check`, and `propose`. `audit` returns

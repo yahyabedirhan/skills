@@ -57,7 +57,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import commands, codex_config, hook, packages, personal, plugins, pi_config, rules as rule_table  # noqa: E402
+from setupmachine import commands, codex_config, harness_setups, hook, personal, plugins, pi_config, rules as rule_table  # noqa: E402
 
 CODEX_DECISION = {"forbidden": "deny", "prompt": "ask", "allow": "allow-and-report"}
 SHELL_SYNTAX = set(";&|<>$`()\n")
@@ -272,11 +272,11 @@ HARNESSES = (
 )
 
 
-def package_audits(home: Path) -> list:
-    """`(channel, status, text)` from every discovered harness package."""
+def harness_setup_audits(home: Path) -> list:
+    """`(channel, status, text)` from every discovered harness setup."""
     lines = []
-    for pkg in packages.load():
-        audit = getattr(pkg, "audit", None)
+    for setup in harness_setups.load():
+        audit = getattr(setup, "audit", None)
         if callable(audit):
             lines.extend(audit(home))
     return lines
@@ -443,7 +443,7 @@ def main(argv=None, stdout=None) -> int:
     elif not args.no_codex:
         line("codex", "skipped", "codex isn't on PATH; from a non-login shell, such as one without nvm loaded, pass --codex PATH")
 
-    audited = package_audits(home)
+    audited = harness_setup_audits(home)
     emit("hook", check_wiring(home, codex_home, pi_dir), redact=True)
     emit("hook", [(status, text) for channel, status, text in audited if channel == "hook"], redact=True)
 
