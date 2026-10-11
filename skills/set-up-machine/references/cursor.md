@@ -108,6 +108,12 @@ A native CLI deny: `Permission denied: Command blocked by permissions configurat
 
 ## Checking it
 
+This harness's setup is `scripts/setupmachine/harness_setups/cursor.py`.
+
+- When `~/.cursor` exists, `cursor ok`: Auto-review, with the sandbox on. `cursor FAIL` means the audit is not done. No `~/.cursor` is `cursor none`.
+- The keys, the Linux sandbox gap, and what the skill leaves in `permissions.json` are in this reference.
+- When `setup/harnesses.json` names Cursor's `instructions`, `harness ok` for `~/.cursor/rules/harness-instructions.mdc`.
+
 `cursor-agent -p --trust --force` in a throwaway folder, with `CURSOR_CONFIG_DIR` at a trial `.cursor` and `CURSOR_DATA_DIR` at a scratch folder. `CURSOR_CONFIG_DIR` moves only `cli-config.json`: `hooks.json`, `mcp.json` and `~/.claude/settings.json` are always read from the real home, so a trial puts them in the folder (`.cursor/hooks.json`, `.cursor/mcp.json`, and `.claude/settings.json` at the folder's git root).
 
 - `rm -rf x`, `git push --force <remote> main` and `gh repo delete owner/x` return the native refusal, once from the trial `cli-config.json` and once, with its deny list emptied, from a `.claude/settings.json` holding the Claude Code lists.

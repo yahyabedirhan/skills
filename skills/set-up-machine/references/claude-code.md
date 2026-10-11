@@ -111,6 +111,10 @@ A native refusal says `Permission to use Bash with command <command> has been de
 
 ## Checking it
 
+This harness's setup is `scripts/setupmachine/harness_setups/claude.py`.
+
+The `hook wired` line is the check. Each personal permission is `present`, `n/a`, or `gap` on the `personal` lines. A `plugin extra` line names a Claude Code bundle the installs list leaves out.
+
 `verify.py` checks the rows against the hook and that the hook is wired. To see Claude Code itself enforce them, in a throwaway folder with `--setting-sources project,local --settings <a copy of settings.json>`:
 
 - `claude -p "Run exactly: rm -fr x" --allowedTools Bash` leaves `x` and quotes the hook's refusal; allowing `Bash` proves a rule refused it. With a settings file holding only `hooks`, `bash -lc "rm -rf x"` is refused too, which proves the hook.

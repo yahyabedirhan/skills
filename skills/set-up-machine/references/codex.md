@@ -156,6 +156,12 @@ A forbidden rule: `` exec_command failed: … `/bin/zsh -lc 'rm -fr x'` rejected
 
 ## Checking it
 
+This harness's setup is `scripts/setupmachine/harness_setups/codex.py`.
+
+- Every `codex differs` line is a row this reference says gets no rule.
+- Declared defaults match with no `config FAIL` line, or a `config n/a` line says Codex isn't installed.
+- In the report, distinguish persisted defaults from effective overrides, and state how a later session picks the change up.
+
 - `verify.py` runs each plain command sample through `codex execpolicy check --resolve-host-executables --rules <each rules file> -- <argv>`. A `differs` line should be a row this file says gets no rule; any other is a mistake in the rules file. The check doesn't unwrap `bash -lc`.
 - **Hook trust:** `codex app-server` with `CODEX_HOME` at the folder, then `hooks/list` for a throwaway folder: the group is `trusted`.
 - **A session without a login:** `codex exec` with `CODEX_HOME` and `HOME` at a trial home and a `model_providers` entry pointing at a local stand-in that answers the Responses API with one `exec_command` (or `apply_patch`) call; the next request's `function_call_output` is what the agent read. With `--disable hooks` it shows the rule's justification, and with hooks on the hook's refusal.
