@@ -21,9 +21,9 @@ The rows are the rule table's, plus the personal permissions of the repository t
 `~/.config/agents/source.md` names (personal.py).
 
 Each harness has a reader (its payload -> ToolCall) and a writer (the denials,
-and the ask hits for a writer that asks -> what it prints). HARNESSES holds the
-harnesses that have not moved. A discovered harness setup supplies the rest. The report
-folder comes from the hook's configuration file, `~/.config/agents/hook.json` by default.
+and the ask hits for a writer that asks -> what it prints). A discovered harness setup
+supplies both. The report folder comes from the hook's configuration file,
+`~/.config/agents/hook.json` by default.
 """
 from __future__ import annotations
 
@@ -285,12 +285,9 @@ def write_pi(denials: list, asks=()) -> str:
     return harness_io()["pi"][1](denials, asks)
 
 
-HARNESSES = {}
-
-
 def harness_io() -> dict:
-    """Reader and writer per harness: the old table, then each harness setup that runs the hook."""
-    found = dict(HARNESSES)
+    """Reader and writer per harness, from each harness setup that runs the hook."""
+    found = {}
     from . import harness_setups
     for setup in harness_setups.load():
         read, write = getattr(setup, "read", None), getattr(setup, "write", None)

@@ -181,9 +181,12 @@ class PluginsTest(PluginsHome):
                             for line in self.lines()), self.lines())
 
     def test_each_adapter_exposes_validate_check_and_propose(self):
-        for name, adapter in plugins.ADAPTERS.items():
+        from setupmachine import harness_setups
+        found = [setup for setup in harness_setups.load() if callable(getattr(setup, "check", None))]
+        self.assertTrue(found)
+        for setup in found:
             for method in ("validate", "check", "propose"):
-                self.assertTrue(callable(getattr(adapter, method)), (name, method))
+                self.assertTrue(callable(getattr(setup, method)), (setup.id, method))
 
 
 WEB = {"name": "web", "kind": "bundle", "source": "npm:pi-web-access@latest", "harnesses": ["pi"]}

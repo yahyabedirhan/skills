@@ -16,8 +16,7 @@ personal permissions; each adapter derives its list from those rows.
 
 What each harness can take is in references/workstation.md and that harness's Plugins section.
 A discovered harness setup that exposes validate, check and propose is that harness's adapter.
-ADAPTERS holds the harnesses that have not moved. Claude Code's adapter is its harness setup.
-Codex's adapter is its harness setup. opencode has no adapter yet.
+opencode has no adapter yet.
 
 `check` reads persisted setup and read-only CLI metadata. It does not establish freshness.
 The agent checks latest upstream versions, installs and writes, as SKILL.md says.
@@ -41,20 +40,25 @@ from .personal import PersonalError, permissions, read_pointer
 
 KINDS = ("bundle", "mcp")
 KEYS = {"name", "kind", "source", "marketplace", "server", "harnesses", "os", "mcp_policy"}
-LABELS = layout.HARNESS_LABELS
 OSES = {"macos": "darwin", "linux": "linux"}
 SOURCE = re.compile(r"^[A-Za-z0-9_.-]+@[A-Za-z0-9_.-]+$")
 MARKETPLACE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
-ADAPTERS = {}
+
+def _setup(harness: str):
+    """The discovered harness setup with this id, or None."""
+    for setup in harness_setups.load():
+        if setup.id == harness:
+            return setup
+    return None
 
 
 def adapter_for(harness: str):
-    """The harness setup that adapts this harness, or the old table while that harness has not moved."""
-    for setup in harness_setups.load():
-        if setup.id == harness and callable(getattr(setup, "check", None)):
-            return setup
-    return ADAPTERS.get(harness)
+    """The harness setup that adapts this harness, when it takes plugins."""
+    setup = _setup(harness)
+    if setup is not None and callable(getattr(setup, "check", None)):
+        return setup
+    return None
 
 
 def _records_seen(validate) -> bool:
@@ -135,7 +139,7 @@ def check(home: Path, pi_dir: Path | None = None, codex_home: Path | None = None
         for harness in entry["harnesses"]:
             adapter = adapter_for(harness)
             if adapter is None:
-                label = LABELS[harness]
+                label = _setup(harness).label
                 lines.append(("gap", f"{label}: {tag} is listed, but set-up-machine can't deliver plugins to "
                                      f"{label} yet"))
                 continue
@@ -184,7 +188,7 @@ def load(path: Path) -> list:
         if not isinstance(harnesses, list) or not harnesses:
             raise PluginsError(f"{where}: harnesses can't be empty")
         for harness in harnesses:
-            if harness not in LABELS:
+            if _setup(harness) is None:
                 raise PluginsError(f"{where}: unknown harness {harness!r}")
         policy.validate(entry, where)
         if kind == "bundle":

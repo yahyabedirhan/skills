@@ -50,9 +50,15 @@ def audit(home: Path, codex_home: Path | None = None, codex: str | None = None,
     lines = [_wiring(home, folder)]
     if not no_codex:
         lines.extend(_execpolicy(rules or [], home, codex, folder))
-    for status, text in codex_config.audit(home, folder, codex):
+    for status, text in declared_defaults(home, folder, codex):
         lines.append(("config", status, text))
     return lines
+
+
+def declared_defaults(home: Path, folder: Path | None = None, codex: str | None = None) -> list:
+    """`(status, text)` for Codex's declared defaults. The shared module uses this to see
+    that a Codex config from the harnesses file is already audited."""
+    return codex_config.audit(home, folder or (home / HOME_DIR), codex)
 
 
 def trust_hash(command: str, matcher: str = "*", timeout: int = 10) -> str:

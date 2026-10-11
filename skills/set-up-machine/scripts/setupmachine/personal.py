@@ -44,8 +44,6 @@ WORKFLOW_INTRO = ("Rules for how this person works that pass the team test. "
                   "Anything a project or a skill needs goes there instead.")
 POINTER_ROLES = ("workstation-repo", "path-to-workstation-repo")
 HARNESS_SECTION = "## Instructions"
-# Codex's config reader. A harness setup that exposes `declared_defaults` audits its own config.
-CONFIG_READERS = ("codex",)
 REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
@@ -135,12 +133,8 @@ def _audited_harnesses() -> set:
 
 
 def _config_readers() -> set:
-    """Harness ids whose declared config is already audited.
-
-    Codex's harness setup audits its config inside `audit`, so it stays listed here.
-    A harness setup exposes `declared_defaults` once that is how it audits its own.
-    """
-    return set(CONFIG_READERS) | _setups_with("declared_defaults")
+    """Harness ids whose harness setup audits declared config (`declared_defaults`)."""
+    return _setups_with("declared_defaults")
 
 
 def check_harnesses(home: Path) -> list:

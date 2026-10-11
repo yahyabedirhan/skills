@@ -1,5 +1,4 @@
-"""Harness adapters for the plugins setup area that have not moved into a harness setup.
+"""Shared plugin helpers that a harness setup reads.
 
-plugins.py dispatches through a lookup table. Claude Code keeps the install record and deny
-matching here, because Cursor's harness setup reads them.
+Claude Code keeps the install record and deny matching here, because Cursor's harness setup reads them.
 """

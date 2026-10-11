@@ -119,15 +119,12 @@ def codex_trust_hash(command: str, matcher: str = "*", timeout: int = 10) -> str
     return codex_setup.trust_hash(command, matcher, timeout)
 
 
-HARNESSES = ()
-
-
 def harness_setup_audits(home: Path, **context) -> list:
     """`(channel, status, text)` from every discovered harness setup.
 
     Keyword arguments are passed when that audit names them. An argument keyed by the
-    harness id is that setup's agent folder, passed as `folder`. Hook lines from these
-    harness setups print after the old wiring table. This function does not sort them.
+    harness id is that setup's agent folder, passed as `folder`. This function does not
+    sort the lines.
     """
     lines = []
     for setup in harness_setups.load():
@@ -146,19 +143,6 @@ def _audit_kwargs(audit, setup_id: str, context: dict) -> dict:
     if setup_id in context and "folder" in params and "folder" not in chosen:
         chosen["folder"] = context[setup_id]
     return chosen
-
-
-def check_wiring(home: Path, codex_home: Path | None = None, pi_dir: Path | None = None) -> list:
-    """(status, text) per harness: wired, FAIL, gap, or none when the harness isn't set up here."""
-    homes = {"Codex": codex_home, "Pi": pi_dir}
-    out = []
-    for label, rel, check in HARNESSES:
-        folder = homes.get(label) or home / rel
-        if not folder.is_dir():
-            out.append(("none", f"{label}: not set up here (no ~/{rel})"))
-        else:
-            out.append(check(home, folder))
-    return out
 
 
 # --- the report -------------------------------------------------------------------
@@ -232,7 +216,6 @@ def main(argv=None, stdout=None) -> int:
     codex = None if args.no_codex else (args.codex or shutil.which("codex"))
     audited = harness_setup_audits(
         home, rows=own, pi=pi_dir, codex_home=codex_home, codex=codex, rules=table, no_codex=args.no_codex)
-    emit("hook", check_wiring(home, codex_home, pi_dir), redact=True)
     emit("hook", [(status, text) for channel, status, text in audited if channel == "hook"], redact=True)
 
     for channel, status, text in audited:
