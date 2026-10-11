@@ -4,7 +4,7 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 
 ## 2026-10-11: the Cursor CLI command is cursor-agent
 
-- **Checks and steps run `cursor-agent`.** Cursor's installer also links `agent`, and Cursor's docs still say `agent`. Another CLI uses that name. A step that runs `agent` can start the wrong program, so this skill uses `cursor-agent` for MCP enable and for the headless checks.
+- **Checks and steps run `cursor-agent`.** The name `agent` belongs to another CLI. A step that runs `agent` can start the wrong program, so this skill uses `cursor-agent` for MCP enable and for the headless checks.
 
 ## 2026-10-10: install latest, reproduce the setup process
 
