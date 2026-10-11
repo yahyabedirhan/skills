@@ -1,18 +1,124 @@
-"""Codex plugin adapter: validate, check and propose. It never reads credential stores or writes."""
+"""Codex's harness setup. It audits Codex, translates one hook payload, and adapts one plugin entry.
+
+It uses the operations Cursor established: `id`, `label`, `present`, `audit`, `read`, `write`,
+`validate`, `check`, and `propose`. `audit` returns `(channel, status, text)` for the hook
+wiring, the execpolicy comparison, and the declared defaults. The printed words stay
+`hook`, `codex`, `config`, and `plugin`. Instructions Codex cannot take yet stay a gap
+on the shared checker.
+"""
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import os
 import re
+import shlex
 import subprocess
 from pathlib import Path
 
-from ..codex_config import parse, ConfigError
-from . import policy
-from .errors import PluginsError
+from .. import codex_config
+from ..codex_config import ConfigError, parse
+from ..harnesses import policy
+from ..harnesses.errors import PluginsError
+from ..hook import PATCH_FILE, ToolCall, command_script, write_claude_code
+
+id = "codex"
+label = "Codex"
+HOME_DIR = Path(".codex")
+DECISION = {"forbidden": "deny", "prompt": "ask", "allow": "allow-and-report"}
+SHELL_SYNTAX = set(";&|<>$`()\n")
+STRICTNESS = {"allow-and-report": 0, "ask": 1, "deny": 2}
 
 PluginError = PluginsError
+
+
+def present(home: Path) -> bool:
+    """Whether Codex is set up on this machine: `~/.codex` exists."""
+    return (home / HOME_DIR).is_dir()
+
+
+def audit(home: Path, codex_home: Path | None = None, codex: str | None = None,
+          rules: list | None = None, no_codex: bool = False) -> list:
+    """`(channel, status, text)` for Codex's wiring, execpolicy, and defaults.
+
+    `codex` is the program path. `codex_home` is the resolved config home, including `CODEX_HOME`
+    when the verifier honored it. `no_codex` skips the execpolicy lines. The config check still
+    runs, and a missing program skips its parser probe.
+    """
+    folder = codex_home or (home / HOME_DIR)
+    lines = [_wiring(home, folder)]
+    if not no_codex:
+        lines.extend(_execpolicy(rules or [], home, codex, folder))
+    for status, text in codex_config.audit(home, folder, codex):
+        lines.append(("config", status, text))
+    return lines
+
+
+def trust_hash(command: str, matcher: str = "*", timeout: int = 10) -> str:
+    """The hash Codex records when a PreToolUse command hook is trusted in /hooks: sha256 over the
+    canonical JSON of the hook's identity (codex-rs/hooks, discovery)."""
+    identity = {
+        "event_name": "pre_tool_use",
+        "matcher": matcher,
+        "hooks": [{"type": "command", "command": command, "timeout": timeout, "async": False}],
+    }
+    text = json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return "sha256:" + hashlib.sha256(text.encode()).hexdigest()
+
+
+def check_codex(table: list, home: Path, codex: str, codex_home: Path | None = None) -> list:
+    """(row, sample, Codex's decision as a level or "no match") for each plain command sample."""
+    rules_dir = (codex_home or home / HOME_DIR) / "rules"
+    files = sorted(rules_dir.glob("*.rules")) if rules_dir.is_dir() else []
+    if not files:
+        return []
+    out = []
+    for rule in table:
+        if rule.kind != "command":
+            continue
+        for sample in rule.covers:
+            if SHELL_SYNTAX & set(sample):
+                continue  # a compound isn't one argv
+            argv = [codex, "execpolicy", "check", "--resolve-host-executables"]
+            for f in files:
+                argv += ["--rules", str(f)]
+            done = subprocess.run(argv + ["--", *shlex.split(sample)], capture_output=True, text=True, timeout=60)
+            try:
+                decision = json.loads(done.stdout or "{}").get("decision")
+            except ValueError:
+                decision = None
+            out.append((rule, sample, DECISION.get(decision, "no match")))
+    return out
+
+
+def read(payload: dict) -> ToolCall:
+    """Codex's PreToolUse input: `tool_name` is `Bash` for the shell tools (the command as
+    the model wrote it, before Codex wraps it in `<shell> -lc`), `apply_patch` for file
+    edits (`tool_input.command` holds the patch), or `mcp__<server>__<tool>`."""
+    tool = payload.get("tool_name") if isinstance(payload.get("tool_name"), str) else ""
+    tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
+    command = tool_input.get("command")
+    command = command if isinstance(command, str) else None
+    files = ()
+    if tool == "apply_patch":
+        files = tuple((m.group(2), "write") for m in PATCH_FILE.finditer(command or ""))
+        command = None
+    return ToolCall(
+        tool=tool,
+        command=command,
+        files=files,
+        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
+        session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
+        # Codex reports `bypassPermissions` when its approval policy is never. An automatic
+        # reviewer doesn't show in the payload: references/codex.md names that gap.
+        unattended="Codex with approval policy never" if payload.get("permission_mode") == "bypassPermissions" else "",
+    )
+
+
+def write(denials: list, asks=()) -> str:
+    """Codex's hook answer: the same deny JSON Claude Code prints."""
+    return write_claude_code(denials, asks)
 
 
 def validate(entry: dict, where: str):
@@ -226,4 +332,92 @@ def _trailing_comment(line):
             quote = char
         elif not quote and char == "#":
             return line[i:].rstrip("\r\n")
+    return None
+
+
+def _wiring(home: Path, folder: Path):
+    """`(channel, status, text)` for Codex's pre-tool hook, including its trust hash."""
+    if not folder.is_dir():
+        return ("hook", "none", f"{label}: not set up here (no ~/{HOME_DIR})")
+    path = folder / "hooks.json"
+    config = folder / "config.toml"
+    for g, h, matcher, command, timeout in _pre_tool_commands(_json(path) or {}):
+        script = command_script(command, id, home)
+        if not (script and matcher in ("*", "", None)):
+            continue
+        status, text = _script_line(path, script)
+        if status != "wired":
+            return ("hook", status, text)
+        key = f"{path}:pre_tool_use:{g}:{h}"
+        if _toml_trust(config, key) != trust_hash(command, matcher or "*", timeout):
+            return ("hook", "FAIL", f"{label}: the hook in {path} is not trusted: config.toml needs "
+                    f"[hooks.state.\"{key}\"] trusted_hash = \"{trust_hash(command, matcher or '*', timeout)}\"")
+        return ("hook", status, text + ", trusted")
+    return ("hook", "FAIL", f"{label}: no pre-tool hook for every tool in {path}")
+
+
+def _execpolicy(table: list, home: Path, codex: str | None, folder: Path) -> list:
+    if not codex:
+        return [("codex", "skipped", "codex isn't on PATH; from a non-login shell, such as one without nvm loaded, pass --codex PATH")]
+    checked = check_codex(table, home, codex, folder)
+    if not checked:
+        return [("codex", "skipped", "no rules files in the resolved Codex config home's rules folder")]
+    lines = []
+    for rule, sample, level in checked:
+        want = "allow-and-report" if rule.level == "allow" else rule.level  # Codex has one allow decision
+        shown = _decision(level)
+        if level == want:
+            lines.append(("codex", "same", f"{rule.id}: {sample} -> {shown}"))
+        elif STRICTNESS.get(level, -1) > STRICTNESS[want]:
+            lines.append(("codex", "stricter", f"{rule.id}: {sample} -> {shown}, the row is {rule.level}"))
+        else:
+            lines.append(("codex", "differs", f"{rule.id}: {sample} -> {shown}, the row is {rule.level}"))
+    return lines
+
+
+def _decision(level: str) -> str:
+    return {v: k for k, v in DECISION.items()}.get(level, level)
+
+
+def _json(path: Path):
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _pre_tool_commands(settings: dict) -> list:
+    """(group index, handler index, matcher, command, timeout) for every PreToolUse command handler."""
+    hooks = settings.get("hooks") if isinstance(settings.get("hooks"), dict) else {}
+    groups = hooks.get("PreToolUse") if isinstance(hooks.get("PreToolUse"), list) else []
+    out = []
+    for g, group in enumerate(groups):
+        handlers = group.get("hooks") if isinstance(group, dict) and isinstance(group.get("hooks"), list) else []
+        for h, handler in enumerate(handlers):
+            if isinstance(handler, dict) and isinstance(handler.get("command"), str):
+                out.append((g, h, group.get("matcher"), handler["command"], handler.get("timeout", 10)))
+    return out
+
+
+def _script_line(where: Path, script: Path):
+    if not script.is_file():
+        return ("FAIL", f"{label}: {where} runs {script}, which doesn't exist")
+    return ("wired", f"{label}: {where} -> {script}")
+
+
+def _toml_trust(config: Path, key: str):
+    try:
+        lines = config.read_text().split("\n")
+    except OSError:
+        return None
+    header = f"[hooks.state.{json.dumps(key)}]"
+    for i, line in enumerate(lines):
+        if line.strip() == header:
+            for body in lines[i + 1:]:
+                if body.lstrip().startswith("["):
+                    break
+                m = re.match(r'^\s*trusted_hash\s*=\s*"([^"]*)"', body)
+                if m:
+                    return m.group(1)
     return None

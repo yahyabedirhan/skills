@@ -44,14 +44,9 @@ Exits 1 when a rules, hook, personal, config, pi or cursor line fails. --codex-t
 from __future__ import annotations
 
 import argparse
-import hashlib
 import inspect
-import json
 import os
-import re
-import shlex
 import shutil
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -59,10 +54,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from setupmachine import codex_config, harness_setups, hook, personal, plugins, rules as rule_table  # noqa: E402
-
-CODEX_DECISION = {"forbidden": "deny", "prompt": "ask", "allow": "allow-and-report"}
-SHELL_SYNTAX = set(";&|<>$`()\n")
-STRICTNESS = {"allow-and-report": 0, "ask": 1, "deny": 2}
 
 
 @dataclass
@@ -115,114 +106,20 @@ def _holds(verdict, rule) -> bool:
 
 def check_codex(table: list, home: Path, codex: str, codex_home: Path | None = None) -> list:
     """(row, sample, Codex's decision as a level or "no match") for each plain command sample."""
-    rules_dir = (codex_home or home / ".codex") / "rules"
-    files = sorted(rules_dir.glob("*.rules")) if rules_dir.is_dir() else []
-    if not files:
-        return []
-    out = []
-    for rule in table:
-        if rule.kind != "command":
-            continue
-        for sample in rule.covers:
-            if SHELL_SYNTAX & set(sample):
-                continue  # a compound isn't one argv
-            argv = [codex, "execpolicy", "check", "--resolve-host-executables"]
-            for f in files:
-                argv += ["--rules", str(f)]
-            done = subprocess.run(argv + ["--", *shlex.split(sample)], capture_output=True, text=True, timeout=60)
-            try:
-                decision = json.loads(done.stdout or "{}").get("decision")
-            except ValueError:
-                decision = None
-            out.append((rule, sample, CODEX_DECISION.get(decision, "no match")))
-    return out
+    from setupmachine.harness_setups import codex as codex_setup
+    return codex_setup.check_codex(table, home, codex, codex_home)
 
 
 # --- hook wiring ------------------------------------------------------------------
 
 
 def codex_trust_hash(command: str, matcher: str = "*", timeout: int = 10) -> str:
-    """The hash Codex records when a PreToolUse command hook is trusted in /hooks: sha256 over the
-    canonical JSON of the hook's identity (codex-rs/hooks, discovery)."""
-    identity = {
-        "event_name": "pre_tool_use",
-        "matcher": matcher,
-        "hooks": [{"type": "command", "command": command, "timeout": timeout, "async": False}],
-    }
-    text = json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return "sha256:" + hashlib.sha256(text.encode()).hexdigest()
+    """The hash Codex records when a PreToolUse command hook is trusted in /hooks."""
+    from setupmachine.harness_setups import codex as codex_setup
+    return codex_setup.trust_hash(command, matcher, timeout)
 
 
-def _json(path: Path):
-    try:
-        data = json.loads(path.read_text())
-    except (OSError, ValueError):
-        return None
-    return data if isinstance(data, dict) else None
-
-
-def _script(command: str, harness: str, home: Path):
-    """The hook script a wired command runs, when it runs it for this harness; else None."""
-    return hook.command_script(command, harness, home)
-
-
-def _pre_tool_commands(settings: dict) -> list:
-    """(group index, handler index, matcher, command) for every PreToolUse command handler."""
-    hooks = settings.get("hooks") if isinstance(settings.get("hooks"), dict) else {}
-    groups = hooks.get("PreToolUse") if isinstance(hooks.get("PreToolUse"), list) else []
-    out = []
-    for g, group in enumerate(groups):
-        handlers = group.get("hooks") if isinstance(group, dict) and isinstance(group.get("hooks"), list) else []
-        for h, handler in enumerate(handlers):
-            if isinstance(handler, dict) and isinstance(handler.get("command"), str):
-                out.append((g, h, group.get("matcher"), handler["command"], handler.get("timeout", 10)))
-    return out
-
-
-def _script_line(label: str, where: Path, script: Path, extra: str = ""):
-    if not script.is_file():
-        return ("FAIL", f"{label}: {where} runs {script}, which doesn't exist")
-    return ("wired", f"{label}: {where} -> {script}{extra}")
-
-
-def _codex(home: Path, folder: Path):
-    path = folder / "hooks.json"
-    config = (folder / "config.toml")
-    for g, h, matcher, command, timeout in _pre_tool_commands(_json(path) or {}):
-        script = _script(command, "codex", home)
-        if not (script and matcher in ("*", "", None)):
-            continue
-        status, text = _script_line("Codex", path, script)
-        if status != "wired":
-            return status, text
-        key = f"{path}:pre_tool_use:{g}:{h}"
-        if _toml_trust(config, key) != codex_trust_hash(command, matcher or "*", timeout):
-            return ("FAIL", f"Codex: the hook in {path} is not trusted: config.toml needs "
-                            f"[hooks.state.\"{key}\"] trusted_hash = \"{codex_trust_hash(command, matcher or '*', timeout)}\"")
-        return status, text + ", trusted"
-    return ("FAIL", f"Codex: no pre-tool hook for every tool in {path}")
-
-
-def _toml_trust(config: Path, key: str):
-    try:
-        lines = config.read_text().split("\n")
-    except OSError:
-        return None
-    header = f"[hooks.state.{json.dumps(key)}]"
-    for i, line in enumerate(lines):
-        if line.strip() == header:
-            for body in lines[i + 1:]:
-                if body.lstrip().startswith("["):
-                    break
-                m = re.match(r'^\s*trusted_hash\s*=\s*"([^"]*)"', body)
-                if m:
-                    return m.group(1)
-    return None
-
-
-HARNESSES = (
-    ("Codex", ".codex", _codex),
-)
+HARNESSES = ()
 
 
 def harness_setup_audits(home: Path, **context) -> list:
@@ -333,22 +230,8 @@ def main(argv=None, stdout=None) -> int:
     failed |= bool(wrong)
 
     codex = None if args.no_codex else (args.codex or shutil.which("codex"))
-    if codex:
-        checked = check_codex(table, home, codex, codex_home)
-        if not checked:
-            line("codex", "skipped", "no rules files in the resolved Codex config home's rules folder")
-        for rule, sample, level in checked:
-            want = "allow-and-report" if rule.level == "allow" else rule.level  # Codex has one allow decision
-            if level == want:
-                line("codex", "same", f"{rule.id}: {sample} -> {_decision(level)}")
-            elif STRICTNESS.get(level, -1) > STRICTNESS[want]:
-                line("codex", "stricter", f"{rule.id}: {sample} -> {_decision(level)}, the row is {rule.level}")
-            else:
-                line("codex", "differs", f"{rule.id}: {sample} -> {_decision(level)}, the row is {rule.level}")
-    elif not args.no_codex:
-        line("codex", "skipped", "codex isn't on PATH; from a non-login shell, such as one without nvm loaded, pass --codex PATH")
-
-    audited = harness_setup_audits(home, rows=own, pi=pi_dir)
+    audited = harness_setup_audits(
+        home, rows=own, pi=pi_dir, codex_home=codex_home, codex=codex, rules=table, no_codex=args.no_codex)
     emit("hook", check_wiring(home, codex_home, pi_dir), redact=True)
     emit("hook", [(status, text) for channel, status, text in audited if channel == "hook"], redact=True)
 
@@ -366,16 +249,9 @@ def main(argv=None, stdout=None) -> int:
     for status, text in plugins.check(home, pi_dir, codex_home, codex, table + own):
         line("plugin", status, private(text))
         failed |= status == "FAIL"
-    for status, text in codex_config.audit(home, codex_home, codex):
-        line("config", status, text)
-        failed |= status == "FAIL"
     line("freshness", "gap", "Latest harness, skill, plugin and tool versions need separate upstream checks; "
          "this verifier checks persisted setup, not remote releases")
     return 1 if failed else 0
-
-
-def _decision(level: str) -> str:
-    return {v: k for k, v in CODEX_DECISION.items()}.get(level, level)
 
 
 if __name__ == "__main__":

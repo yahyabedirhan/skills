@@ -271,27 +271,8 @@ PATCH_FILE = re.compile(r"^\*\*\* (Add File|Update File|Delete File|Move to): (.
 
 
 def read_codex(payload: dict) -> ToolCall:
-    """Codex's PreToolUse input: `tool_name` is `Bash` for the shell tools (the command as
-    the model wrote it, before Codex wraps it in `<shell> -lc`), `apply_patch` for file
-    edits (`tool_input.command` holds the patch), or `mcp__<server>__<tool>`."""
-    tool = payload.get("tool_name") if isinstance(payload.get("tool_name"), str) else ""
-    tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
-    command = tool_input.get("command")
-    command = command if isinstance(command, str) else None
-    files = ()
-    if tool == "apply_patch":
-        files = tuple((m.group(2), "write") for m in PATCH_FILE.finditer(command or ""))
-        command = None
-    return ToolCall(
-        tool=tool,
-        command=command,
-        files=files,
-        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
-        session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
-        # Codex reports `bypassPermissions` when its approval policy is never. An automatic
-        # reviewer doesn't show in the payload: references/codex.md names that gap.
-        unattended="Codex with approval policy never" if payload.get("permission_mode") == "bypassPermissions" else "",
-    )
+    """Codex's hook payload, read by its harness setup."""
+    return harness_io()["codex"][0](payload)
 
 
 def read_pi(payload: dict) -> ToolCall:
@@ -304,9 +285,7 @@ def write_pi(denials: list, asks=()) -> str:
     return harness_io()["pi"][1](denials, asks)
 
 
-HARNESSES = {
-    "codex": (read_codex, write_claude_code),  # Codex reads the same deny answer as Claude Code
-}
+HARNESSES = {}
 
 
 def harness_io() -> dict:

@@ -855,10 +855,11 @@ class HarnessInstructionsTest(PersonalHome, unittest.TestCase):
         self.harnesses({"codex": {"instructions": "harnesses/codex-cli/instructions.md"},
                         "opencode": {"config": "harnesses/opencode/config/opencode.json"}})
         code, lines = self.harness_lines()
-        self.assertRegex(lines[0], r"harness +gap +codex: .*harnesses/codex-cli/instructions\.md has instructions, "
-                                   r"but set-up-machine can't deliver them to codex yet")
-        self.assertRegex(lines[1], r"harness +gap +opencode: .*opencode\.json is its config, but set-up-machine "
-                                   r"can't deliver a config to opencode yet")
+        text = "\n".join(lines)
+        self.assertRegex(text, r"harness +gap +codex: .*harnesses/codex-cli/instructions\.md has instructions, "
+                               r"but set-up-machine can't deliver them to codex yet")
+        self.assertRegex(text, r"harness +gap +opencode: .*opencode\.json is its config, but set-up-machine "
+                               r"can't deliver a config to opencode yet")
         self.assertEqual(len(lines), 2, lines)
 
     def test_a_missing_file_for_a_harness_without_delivery_fails(self):

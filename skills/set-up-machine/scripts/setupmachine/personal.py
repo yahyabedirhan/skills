@@ -137,7 +137,8 @@ def _audited_harnesses() -> set:
 def _config_readers() -> set:
     """Harness ids whose declared config is already audited.
 
-    Codex stays in the old table. A harness setup exposes `declared_defaults` once it audits its own.
+    Codex's harness setup audits its config inside `audit`, so it stays listed here.
+    A harness setup exposes `declared_defaults` once that is how it audits its own.
     """
     return set(CONFIG_READERS) | _setups_with("declared_defaults")
 

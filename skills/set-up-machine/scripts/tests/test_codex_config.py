@@ -161,8 +161,11 @@ class ConfigurationTest(unittest.TestCase):
         text = f'[hooks.state."{hooks}:pre_tool_use:0:0"]\ntrusted_hash = "{verify.codex_trust_hash(command)}"\n'
         self.write("custom-codex/config.toml", config.propose(text, PREFERENCES))
         self.write("custom-codex/rules/example.rules", "fixture")
-        self.assertEqual([status for status, text in verify.check_wiring(self.home, self.folder) if text.startswith("Codex")], ["wired"])
-        with patch.object(verify.subprocess, "run") as run:
+        wired = io.StringIO()
+        verify.main(["--home", str(self.home), "--codex-home", str(self.folder), "--no-codex"], wired)
+        self.assertRegex(wired.getvalue(), r"hook +wired +Codex")
+        from setupmachine.harness_setups import codex as codex_pkg
+        with patch.object(codex_pkg.subprocess, "run") as run:
             run.return_value.stdout = '{"decision":"forbidden"}'
             verify.check_codex(verify.rule_table.load(), self.home, "codex", self.folder)
             self.assertTrue(all(str(self.folder / "rules/example.rules") in call.args[0] for call in run.call_args_list))
