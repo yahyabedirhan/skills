@@ -1622,7 +1622,7 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 
 ## 2026-10-11: one module knows the workstation layout (#195)
 
-- **Status:** accepted
+- **Status:** replaced by [2026-10-12: one explicit list of harnesses](#2026-10-12-one-explicit-list-of-harnesses)
 - **Context:** Many readers need workstation paths.
 - **Options:** None considered.
 - **Choice and why:** `scripts/setupmachine/layout.py` names the folder and the harnesses file. Every reader asks it for a path.
@@ -1654,10 +1654,87 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 
 ## 2026-10-11: one harness setup per harness
 
-- **Status:** accepted
+- **Status:** replaced by [2026-10-12: one explicit list of harnesses](#2026-10-12-one-explicit-list-of-harnesses)
 - **Context:** The skill registered one harness in several lists: the verifier's wiring table, the hook's reader table, the plugin checker's adapter table, and the skill body's audit lines. Adding a harness meant editing all of them. This replaces [2026-09-29: each harness adds a reader and a writer to hook.HARNESSES](#2026-09-29-each-harness-adds-a-reader-and-a-writer-to-hookharnesses-54) and [2026-10-10: one plugin module per harness](#2026-10-10-one-plugin-module-per-harness).
 - **Options:** None considered.
 - **Choice and why:** A harness setup is the single registration for one harness. Its module holds the harness's audit, its hook translation and, when it takes plugins, its plugin adapter. The verifier, the hook and the plugin checker load every module in `scripts/setupmachine/harness_setups/`. A new harness is one new module, with no list of names to edit.
 - **Consequences:**
   - Printed audit lines stay the same. A `FAIL` still fails the run, and a `gap` still leaves it passing.
   - The skill body states the run. Each harness reference states that harness's lines. Each rule-row field is described once, in `references/rule-table.md`.
+
+## 2026-10-12: the agent writes the setup; scripts only enforce and check
+
+- **Status:** accepted
+- **Context:** About 200 lines of Python could write harness files (`propose`), but only the tests called them, and the maintainer wants the agent to do the writing.
+- **Options:** Keep a script that writes the setup: it repeats what the references say and goes stale when a harness changes its format.
+- **Choice and why:** The agent writes every harness file by following the harness references. Two scripts stay: the pre-tool hook, which enforces, and the verifier, which checks.
+- **Consequences:** The file-writing code is gone. A harness format change touches its reference and its check only.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-12: the verifier prints one harness by setup-area table
+
+- **Status:** accepted
+- **Context:** The maintainer could not tell what `verify.py` checked. It printed about a dozen channels and thirteen status words, and it never checked skills or memory.
+- **Options:** Keep the channel lines: they mix outcomes with mechanics, and only `FAIL` mattered.
+- **Choice and why:** A `setup` line, a `rules` line, then one table: a row per harness, a column per setup area (instructions, guardrails, sandbox, plugins, skills). A cell is `ok`, `FAIL`, `gap` or `n/a`, the worst of its checks. Exit 1 on any `FAIL`.
+- **Consequences:** set-up-project depends only on the exit code. Skills are now checked: each listed skill needs a `SKILL.md` in a folder the harness reads.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-12: one explicit list of harnesses
+
+- **Status:** accepted
+- **Context:** This replaces the harness setups found by folder discovery, and `layout.py`'s own list of harness labels. Discovery used attribute checks and `inspect.signature`, which the maintainer could not follow, and a second list existed anyway.
+- **Options:** Folder discovery: it hides the registration and needed function inspection.
+- **Choice and why:** `ALL` in `scripts/setupmachine/harnesses/__init__.py` names every harness. Each module has the same names: `ID`, `LABEL`, `present`, `read`, `write`, and one `check_<area>` per setup area.
+- **Consequences:** Adding a harness is one module, one line in `ALL` and one reference.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-12: no unit tests in the repo
+
+- **Status:** accepted
+- **Context:** The repo held 255 unit tests, many on wording, plumbing or code only the tests called.
+- **Options:** Keep the tests: they pinned details the maintainer did not want, and doubled the code to read.
+- **Choice and why:** Delete `scripts/tests/`. A maintainer writes throwaway tests in `.scratch/` while changing a script. The rule samples, which the verifier runs through the hook on every machine, are the check that stays.
+- **Consequences:** A refactor of the hook needs a throwaway comparison against the old behaviour, as this one had.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-12: the verifier needs no network and no harness CLI
+
+- **Status:** accepted
+- **Context:** The old verifier started Codex in a temp home to probe its config parser, ran `codex execpolicy` and `codex mcp list`, and printed a fixed freshness line.
+- **Options:** Keep the probes: they never failed the run, and they made it slow and hard to read.
+- **Choice and why:** The verifier reads installed files only. Upstream versions and sign-ins are the agent's checks in Inspect.
+- **Consequences:** A Codex OAuth sign-in is not verified.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-12: Pi's declared settings sit in its sandbox column
+
+- **Status:** accepted
+- **Context:** Pi has no sandbox, and its declared settings (models, packages) set none of the five areas.
+- **Options:** A sixth column: the setup areas are five, and the glossary defines them.
+- **Choice and why:** Check them in the sandbox column, the column Pi has no other use for.
+- **Consequences:** The column name fits Pi's settings loosely. Revisit when Pi gets a sandbox.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-12: plugin names are unique per harness
+
+- **Status:** accepted
+- **Context:** The workstation's installs list has two `exa` entries, a Claude Code bundle and a Pi server, and the old checker refused the file.
+- **Options:** Unique names per file: it refuses a real setup.
+- **Choice and why:** A name may repeat when the entries name different harnesses.
+- **Consequences:** None open.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.

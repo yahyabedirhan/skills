@@ -55,7 +55,7 @@ skills/set-up-machine/
         ├── commands.py         # read shell text the way the shell runs it
         ├── hook.py             # decide(call, rows) → deny, ask, report or nothing
         ├── workstation.py      # the pointer, the setup/ files, the generated shared file
-        ├── checks.py           # shared helpers the harness checks use: read JSON, compare files
+        ├── checks.py           # Cell, Context and the helpers every harness check shares
         └── harnesses/
             ├── __init__.py     # ALL: the one list of harnesses
             └── <harness>.py    # one harness: paths, read/write hook payload, check per area
@@ -71,7 +71,7 @@ skills/set-up-machine/
 | `write(denials, asks)` | the harness's answer to the hook |
 | `check_instructions(ctx)` … `check_skills(ctx)` | one `Cell(status, detail)` per setup area |
 
-**Statuses:** `ok`, `FAIL`, `gap` (the harness can't do it, or the check can't see it), `n/a` (the area does not apply). Only `FAIL` sets exit code 1.
+**Statuses:** `ok`, `FAIL`, `gap` (the harness can't do it, or the check can't see it), `n/a` (the area does not apply). Only `FAIL` sets exit code 1. A cell is the worst of its checks: `FAIL`, then `gap`, then `ok`. Pi has no sandbox, so its declared settings are checked in its sandbox column. `verify.py --codex-trust-hash COMMAND` prints the hash Codex needs to trust the hook, since `references/codex.md` gives it to the user.
 
 ## Implementation (traced)
 
