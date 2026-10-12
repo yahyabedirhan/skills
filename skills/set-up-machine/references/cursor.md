@@ -141,4 +141,5 @@ To see Cursor itself enforce the rows, run `cursor-agent -p --trust --force` in 
 - With the hooks as `.cursor/hooks.json`, `git clean -f -n` and `git push --force-with-lease` are refused by the hook, naming rules `git-clean-force` and `git-push-force-with-lease`.
 - With the hooks as `.cursor/hooks.json` and no deny list, `rm -rf x`, `bash -lc 'rm -fr x'`, a read of `.env` and a fake stdio MCP server's `send_message` (with `--approve-mcps`) are refused by the hook; `gh api rate_limit` runs and gets a report line.
 - From a folder inside the trial home, `cursor-agent -p --mode ask "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback.
+- `cursor-agent mcp list` doesn't show the plugin servers Cursor imports from Claude Code. To see them, ask a live session to list the MCP servers it can call (live-check.md).
 - **IDE,** after the live setup: Customize > Hooks lists the four handlers, and asking the agent to run `rm -rf x` or to send a mail is refused with the hook's message.

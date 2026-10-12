@@ -338,7 +338,7 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 
 ## 2026-09-29: write rows also write Write(**/…) entries (#64)
 
-- **Status:** accepted
+- **Status:** replaced by [2026-10-12: Claude Code gets no Write(...) entries](#2026-10-12-claude-code-gets-no-write-entries)
 - **Context:** The Cursor CLI checks `Write` against absolute paths, so it never matches `./`.
 - **Options:** None considered.
 - **Choice and why:** Write rows also write `Write(**/…)` entries for the Cursor CLI. They keep the plain globs with no exception, since Cursor's globs have only `*` (#57 confirmed it).
@@ -1738,3 +1738,23 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 
 ### References
 - [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-12: Claude Code gets no Write(...) entries
+
+- **Status:** accepted
+- **Context:** Replaces "write rows also write Write(**/…) entries". In a live check, Claude Code 2.1.296 warned at startup for each `Write(...)` deny in `~/.claude/settings.json`: file permission checks match only `Edit(...)` rules.
+- **Options:** Keep the `Write(**/…)` entries for the Cursor CLI: it already gets its own `Write(...)` entries in `cli-config.json`, and the warning shows in every session.
+- **Choice and why:** Write rows become `Edit(...)` entries only. An existing `Write(...)` entry is this skill's own outdated wiring, so it is `removed`.
+- **Consequences:** The startup warning goes away. The verifier counts a `Write(...)` entry in Claude Code's settings for no personal permission.
+
+## 2026-10-12: opencode's reasoning variant is checked live
+
+- **Status:** accepted
+- **Context:** A declared opencode config set `reasoningEffort` `high`, but the TUI ran `medium`. The TUI restores a per-model variant from `~/.local/state/opencode/model.json` and submits it, which beats the config, even `agent.build.variant`.
+- **Options:** Have the verifier read or write the TUI state file: it is opencode's runtime state, not config, and it changes whenever the user picks a variant.
+- **Choice and why:** Declare `agent.build.variant` beside the model, and name the upstream bug as a gap. The live check reads the variant from the TUI status line. On a mismatch, the variant is switched once in the TUI (ctrl+t), which updates the remembered state.
+- **Consequences:** The verifier checks only the config file. The gap closes when upstream fixes the bug.
+
+### References
+- [anomalyco/opencode#38363](https://github.com/anomalyco/opencode/issues/38363): the TUI's remembered variant beats the config.
+- [anomalyco/opencode#13718](https://github.com/anomalyco/opencode/issues/13718): the same for `agent.build.variant`.

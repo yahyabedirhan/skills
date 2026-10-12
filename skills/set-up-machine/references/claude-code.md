@@ -45,7 +45,7 @@ Found when `~/.claude/` exists or `claude` is on `PATH`. Every setting below liv
 ### File rows
 
 - A `read` row becomes `Read(<path>)`, a `write` row `Edit(<path>)`. Project paths get `./` (`./**/.env`), `~/` paths stay as they are, and an absolute path gets a second `/` (`Read(//proc/**/environ)`), because Claude Code reads `/path` as relative to the settings file. A path with no `/` after the `./` matches at any depth, as in `.gitignore`: `Read(./.env.*)` refuses `sub/.env.local` too. A `Read` deny also blocks edits.
-- **`Write(...)` is never checked by Claude Code** (it warns at startup), but the Cursor CLI checks it on its own file tools, against absolute paths. So a `write` row also gets plain `Write(**/<glob>)` entries (`Write(**/.env)`), with no exception, since Cursor's globs know only `*`. An old `Write(./…)` entry is `extra`: neither harness uses it.
+- **Only `Edit(...)`, never `Write(...)`.** Claude Code never checks a `Write(...)` deny, and warns at startup for each one: "Use Edit(**/.env) instead (Edit rules cover all file-editing tools)". The Cursor CLI gets its `Write(...)` entries in its own `cli-config.json` (cursor.md, *Permissions*). An existing `Write(...)` entry, such as `Write(**/.env)` from an older run, is this skill's own outdated wiring: `removed`.
 - **No negation.** Globs have positive character classes only (`[!e]` lists `!` and `e`), matched case-insensitively on macOS. So an `except` of literal names becomes the globs around them. For `**/.env.*` minus `.env.example`, `.env.sample` and `.env.template`:
   - each name the literals start with but none of them is: `.env.`, `.env.e`, `.env.ex`, … `.env.exampl`, `.env.s`, … `.env.templat`;
   - after each of those, a class of every letter (both cases), digit, `_` and `.` except the literals' next letters, then `*`: `.env.[0-9A-DF-RU-Za-df-ru-z_.]*` (not `e`, `s`, `t`), `.env.exa[0-9A-LN-Za-ln-z_.]*` (not `m`);
@@ -145,6 +145,6 @@ The verifier doesn't report an enabled bundle the list leaves out: find those in
 
 - `claude -p "Run exactly: rm -fr x" --allowedTools Bash` leaves `x` and quotes the hook's refusal; allowing `Bash` proves a rule refused it. With a settings file holding only `hooks`, `bash -lc "rm -rf x"` is refused too, which proves the hook.
 - `gh api rate_limit` runs, and its line appears in the report folder.
-- Writes to `.env` and `secrets/k` with `--allowedTools Write` leave them unchanged; a Read of `sub/.env.example` works.
+- Writes to `.env` and `secrets/k` with `--allowedTools Write` leave them unchanged, and the session starts with no warning about a `Write(...)` rule; a Read of `sub/.env.example` works.
 - For environment rows, use fake `.env` files and a fake variable, and start the session with a scrubbed environment (`HOME`, `PATH`, `USER` and the fake variable), since a sample that gets through prints whatever the shell holds.
 - Against the real login, `claude -p "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback from the shared file.

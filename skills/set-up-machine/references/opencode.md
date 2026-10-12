@@ -78,6 +78,8 @@ opencode reads skills from `~/.config/opencode/skills`, `~/.claude/skills` and `
 When `setup/harnesses.json` names an opencode `config` (workstation.md, *A declared config*), merge each key it sets, such as `model` (`<provider>/<model>`), into the global config file *Permissions* names: the last of `config.json`, `opencode.json` and `opencode.jsonc` that exists, else a new `opencode.json`. In an `opencode.jsonc`, change only the declared keys' lines and keep its comments. Keep every other key. Mark each key `present, personal` or `updated, personal`.
 
 - **Activation:** a new session reads it. A project's `opencode.json` and the `--model` flag override it.
+- **Variant:** declare `agent.build.variant` beside `model`, set to the reasoning effort the model's options name, such as `high`.
+- **Gap:** the TUI remembers a variant per model in `~/.local/state/opencode/model.json` and submits it, which beats the config, even `agent.build.variant` (upstream [#38363](https://github.com/anomalyco/opencode/issues/38363), [#13718](https://github.com/anomalyco/opencode/issues/13718)). The live check reads the variant from the TUI status line. On a mismatch, the user, or the agent through the session host, switches the variant once in the TUI with ctrl+t, which updates the remembered state. The verifier checks only the config file.
 
 ## Hook wiring
 
