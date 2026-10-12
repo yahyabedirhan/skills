@@ -10,13 +10,13 @@ The decisions behind the `show-me-diagram` skill. This file is for maintaining i
 - **Choice and why:** A new skill that loads `diagram-design`, names the profile and picks the type. The build rules stay in `diagram-design`.
 - **Consequences:** `show-me` stays close to upstream. The skill needs `diagram-design` installed, which the workstation repo's install list does.
 
-## 2026-10-12: the profile comes from the profiles index
+## 2026-10-12: the profiles ship with the skill
 
 - **Status:** accepted
-- **Context:** The maintainer keeps his profiles in the workstation repo, with an `index.md` that marks the default, copied to `$HOME/.diagram-design/profiles/`.
-- **Options:** Name one profile file: a new default or a second profile would mean a change here.
-- **Choice and why:** Use the profile the user names, otherwise the default the index lists, so adding a profile changes only the index.
-- **Consequences:** None.
+- **Context:** The maintainer's Cursor Dark profile first lived in his workstation repo, copied by hand to `$HOME/.diagram-design/profiles/`.
+- **Options:** Keep them in the workstation repo: anyone who installs the skill alone gets no profile, and each new machine needs a manual copy.
+- **Choice and why:** Keep the profiles in `profiles/` in the skill, with an `index.md` that marks the default and defines the shape. The skill uses the profile the user names, otherwise the default, so adding a profile changes only that folder.
+- **Consequences:** The skill reads the profile directly and leaves diagram-design's install and profile library unchanged.
 
 ## 2026-10-12: model-invoked, no plugin entry yet
 
