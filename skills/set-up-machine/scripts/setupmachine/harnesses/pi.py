@@ -1,0 +1,137 @@
+"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area (references/pi.md).
+
+Every path is under Pi's agent folder: `PI_CODING_AGENT_DIR`, else `~/.pi/agent` (`agent_dir`).
+Pi has no permission system, so the hook, run through an extension, is its only guardrail.
+Pi has no sandbox either: its sandbox column checks the declared Pi settings instead, the one
+piece of declared config Pi takes.
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import shlex
+from pathlib import Path
+
+from ..checks import Cell, cell, dig, link_problem, na, read_json, skill_problems, wiring_problem
+from ..hook import ToolCall, plain, refusal, search_pair
+
+ID, LABEL = "pi", "Pi"
+EXTENSION_HEADER = "// set-up-machine: the pre-tool hook, as a Pi extension."
+# Pi's built-in tools that take a path: the input field holding it, and the access it means.
+FILE_TOOLS = {"read": "read", "edit": "write", "write": "write", "grep": "read", "find": "read", "ls": "read"}
+SEARCH_GLOB = {"grep": "glob", "find": "pattern"}
+
+
+def agent_dir(home: Path) -> Path:
+    """Pi's agent folder. Only the real home honors PI_CODING_AGENT_DIR; a fixture home uses its own."""
+    custom = os.environ.get("PI_CODING_AGENT_DIR") if home == Path.home().resolve() else None
+    return (Path(custom) if custom else home / ".pi/agent").expanduser().resolve()
+
+
+def present(home: Path) -> bool:
+    return agent_dir(home).is_dir()
+
+
+# --- the hook ------------------------------------------------------------------------------
+
+
+def read(payload: dict) -> ToolCall:
+    """What the Pi extension sends from `tool_call`: `toolName`, `input`, `cwd`, `sessionId` and `hasUI`.
+    Without a UI no one can answer an ask, so the call is unattended."""
+    tool = payload.get("toolName") if isinstance(payload.get("toolName"), str) else ""
+    args = payload.get("input") if isinstance(payload.get("input"), dict) else {}
+    command = args.get("command") if tool in ("bash", "powershell") else None
+    path = args.get("path")
+    return ToolCall(
+        tool=tool, command=command if isinstance(command, str) else None,
+        files=((path, FILE_TOOLS[tool]),) if tool in FILE_TOOLS and isinstance(path, str) and path else (),
+        searches=search_pair(args, "path", SEARCH_GLOB[tool]) if tool in SEARCH_GLOB else (),
+        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
+        session=payload.get("sessionId") if isinstance(payload.get("sessionId"), str) else "",
+        unattended="" if payload.get("hasUI") is True else "Pi without a UI",
+        no_native_ask=True)  # the extension does the asking
+
+
+def write(denials: list, asks=()) -> str:
+    """Always one JSON line: `{"block": …}`, `{"ask": …}` (the question the extension asks), or `{}`."""
+    if denials:
+        return json.dumps({"block": refusal(denials)}) + "\n"
+    if asks:
+        lines = ["The global rule table asks you before this call runs. Allow it?"]
+        lines += [f"- `{h.part}`: ask rule {h.rule.id} ({plain(h.rule.summary)}). {h.rule.reason} "
+                  f"The agent's instruction: {h.rule.instruction}" for h in asks]
+        return json.dumps({"ask": "\n".join(lines)}) + "\n"
+    return "{}\n"
+
+
+# --- the checks ----------------------------------------------------------------------------
+
+
+def check_instructions(ctx) -> Cell:
+    """AGENTS.md links to the shared file, and no override file wins over it. Pi has no memory feature."""
+    problems = [link_problem(ctx, ctx.pi_dir / "AGENTS.md")]
+    if (ctx.pi_dir / "AGENTS.override.md").exists():
+        problems.append(("gap", "AGENTS.override.md in Pi's agent folder is read instead of AGENTS.md"))
+    if ctx.setup.file(ID, "instructions"):
+        problems.append(("gap", "setup/harnesses.json names instructions for Pi, which has no place for them"))
+    return cell([p for p in problems if p])
+
+
+def check_guardrails(ctx) -> Cell:
+    """The set-up-machine extension runs the hook. With no native rules, personal permissions need no entry."""
+    path = ctx.pi_dir / "extensions/set-up-machine.ts"
+    if not path.is_file():
+        return cell([("FAIL", f"no extension at {ctx.show(path)}; nothing enforces the rule table in Pi")])
+    text = path.read_text()
+    if not text.startswith(EXTENSION_HEADER):
+        return cell([("gap", f"{ctx.show(path)} wasn't written by set-up-machine; left alone")])
+    match = re.search(r"^const COMMAND = (\[.*\]);$", text, re.M)
+    command = shlex.join(json.loads(match.group(1))) if match else None
+    return cell([p for p in [wiring_problem(ctx, path, command, ID)] if p])
+
+
+def check_sandbox(ctx) -> Cell:
+    """Pi has no sandbox. This column checks each key the declared Pi config sets against settings.json."""
+    source = ctx.setup.file(ID, "config")
+    if source is None:
+        return na("Pi has no sandbox, and setup/harnesses.json names no Pi config")
+    declared, settings = read_json(source), read_json(ctx.pi_dir / "settings.json")
+    if declared is None or settings is None:
+        return cell([("FAIL", f"{ctx.show(source)} or Pi's settings.json isn't a JSON object")])
+    problems = [("gap", f"{source.name} declares packages; move Pi extensions into installs.json plugins")
+                if key == "packages" else ("FAIL", f"{key} in Pi's settings.json differs from {source.name}")
+                for key, value in declared.items() if key == "packages" or settings.get(key) != value]
+    return cell(problems)
+
+
+def check_plugins(ctx) -> Cell:
+    """A bundle is in settings.json `packages`; an MCP server is in mcp.json, with Pi's MCP client on."""
+    entries = ctx.setup.plugins(ID)
+    if not entries:
+        return na("installs.json lists no plugin for Pi")
+    settings = read_json(ctx.pi_dir / "settings.json") or {}
+    packages = {_unversioned(p.get("source") if isinstance(p, dict) else p) for p in settings.get("packages") or []}
+    servers = dig(read_json(ctx.pi_dir / "mcp.json") or {}, "mcpServers") or {}
+    problems = []
+    for entry in entries:
+        if entry["kind"] == "bundle" and _unversioned(entry["source"]) not in packages:
+            problems.append(("FAIL", f"{entry['source']} isn't in packages of Pi's settings.json"))
+        elif entry["kind"] == "mcp" and servers.get(entry["name"]) != entry["server"]:
+            problems.append(("FAIL", f"{entry['name']} is missing or differs in Pi's mcp.json"))
+        elif entry["kind"] == "mcp" and "-builtin:mcp" in (settings.get("extensions") or []):
+            problems.append(("gap", f"{entry['name']}: -builtin:mcp turns off the MCP client that reads mcp.json"))
+    return cell(problems)
+
+
+def check_skills(ctx) -> Cell:
+    return cell(skill_problems(ctx, [ctx.home / ".agents/skills", ctx.pi_dir / "skills"]))
+
+
+def _unversioned(source) -> str:
+    """A package source without its `@<version>` or `@<ref>`, as Pi names one extension:
+    `npm:pi-web-access@0.38.0` and `npm:pi-web-access@latest` are the same extension."""
+    if not isinstance(source, str):
+        return ""
+    head, at, tail = source.rpartition("@")
+    return head if at and "/" not in tail and not head.endswith(":") else source

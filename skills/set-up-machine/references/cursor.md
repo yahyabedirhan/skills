@@ -2,17 +2,13 @@
 
 How to set up and audit Cursor, its IDE agent and the `cursor-agent` CLI, from the rule table. Docs: [rules](https://cursor.com/help/customization/rules.md), [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [hooks](https://cursor.com/docs/hooks.md). Background: the repo's `docs/research/harness-capabilities.md`, section 4, and probes of `cursor-agent` 2026.09.18.
 
-**Found** when `~/.cursor/` exists or `cursor-agent` or `cursor` is on `PATH`.
+## Found
 
-## What verify must show
+Found when `~/.cursor/` exists or `cursor-agent` or `cursor` is on `PATH`.
 
-Two `cursor` lines when `~/.cursor` exists, and a `harness` line when Cursor has its own instructions. No `~/.cursor` is one `cursor none` line.
+## Instructions
 
-- **Run mode:** `cursor ok` when Auto-review is on and the sandbox is on. `cursor FAIL` when `~/.cursor` exists and either key is missing or different.
-- **Global instructions copy:** `cursor ok` when `~/.cursor/rules/global-instructions.mdc` matches the shared file. `cursor FAIL` when that copy is missing or differs. A copy without the generated comment is `cursor gap`, left alone, and that line does not fail the audit.
-- **Harness instructions:** when `setup/harnesses.json` names Cursor's `instructions`, `harness ok` for `~/.cursor/rules/harness-instructions.mdc`.
-
-## Global instructions
+### Global instructions
 
 - Both read **user rule files**, `~/.cursor/rules/*.mdc`: the IDE in every project, the CLI by walking up from its working folder, so only inside the home folder. An `.mdc` file reaches every chat only with `alwaysApply: true` frontmatter, and `@file` in a rule is a context reference, not an include.
 - So `~/.cursor/rules/global-instructions.mdc` is a **copy** of the shared file:
@@ -26,7 +22,7 @@ Two `cursor` lines when `~/.cursor` exists, and a `harness` line when Cursor has
   <the shared file, as it will be after this run>
   ```
 
-  Refresh it whenever the shared file changes. A `global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The audit lines are under *What verify must show*.
+  Refresh it whenever the shared file changes. A `global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The verifier checks it (*Checking it*).
 - **Harness instructions:** when the workstation repo's `setup/harnesses.json` names Cursor's `instructions` (workstation.md), `~/.cursor/rules/harness-instructions.mdc` holds what only Cursor needs, written exactly like this:
 
   ```markdown
@@ -44,11 +40,13 @@ Two `cursor` lines when `~/.cursor` exists, and a `harness` line when Cursor has
 - Any other `.mdc` there is `extra`: its lines belong in the shared file, or in Cursor's instructions file when only Cursor needs them.
 - **Gaps:** a CLI session whose working folder is outside the home folder gets no global instructions. Account User Rules (Customize > Rules) live on the Cursor account, out of reach and invisible to the audit.
 
-## Memory
+### Memory
 
 No memory feature: a `none` line.
 
-## Permissions (CLI only)
+## Guardrails
+
+### Permissions (CLI only)
 
 - **Files:** `~/.cursor/cli-config.json`, key `permissions` with the lists `deny` and `allow` (add `"version": 1` to a new file). The CLI rewrites the rest of the file itself; keep every other key. It also unions in the `allow` and `deny` lists of `~/.claude/settings.json`, and **skips that file unless it has both lists** (claude-code.md keeps an `allow` there).
 - **Matching:** a glob knows only `*`, which matches anything, `/` and spaces included; every other character is literal (no `?`, classes or `**` of its own). `Shell(<prefix>)` matches the prefix alone and followed by a space and anything; `Shell(<prefix>:)` the prefix alone; `Shell(<cmd>:<args>)` a one-word command with arguments matching the glob. Deny wins over allow.
@@ -62,16 +60,7 @@ No memory feature: a `none` line.
 - **Gap:** a project's `.cursor/cli.json` replaces these lists, so `"deny": []` there empties them. A project can only add to the Claude settings lists, and the hook still refuses the deny rows.
 - **The IDE** reads neither file and has no user-level deny list: its hard blocks are hooks.
 
-## Run mode
-
-Auto-review with the sandbox on is the mode this skill sets for anyone who has Cursor. Allowlisted calls run. Other shell commands run in the sandbox when they can. A call that cannot use the sandbox goes to the classifier. The deny list still refuses: Auto-review does not replace it.
-
-- **Files:** the same `~/.cursor/cli-config.json`. Set `approvalMode` to `auto-review` and `sandbox.mode` to `enabled`. Keep every other key, including `sandbox.networkAccess` when it is already set. Add `"version": 1` to a new file. Docs: [run modes](https://cursor.com/docs/agent/security/run-modes), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
-- **Audit:** the lines under *What verify must show*.
-- **Linux:** the sandbox needs kernel 6.2 or newer with Landlock, and unprivileged user namespaces. On a remote machine or the standalone CLI, the user installs the AppArmor package the run-modes doc names; it needs root. When the sandbox cannot be created, Cursor asks before each command: a `gap`.
-- **Steering:** leave `~/.cursor/permissions.json` `autoRun` to the user. `block_instructions` steer the classifier in plain English. The rule table and the hook are the enforcement, and a second prose list of the same calls would drift from them.
-
-## Personal permissions
+### Personal permissions
 
 A personal permission (workstation.md) becomes CLI entries the way a table row of its kind does above, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does, and the hook refuses an `ask` row's calls, as it does a table row's.
 
@@ -79,6 +68,19 @@ A personal permission (workstation.md) becomes CLI entries the way a table row o
 - **Covered already:** the CLI unions the Claude Code lists, so a personal entry written to `~/.claude/settings.json` that covers this one makes it `present, personal`.
 - **It can't loosen a table row:** deny wins over allow.
 - **The IDE** has no allow list: an `allow` row is a `gap` there, left to the IDE's own approval settings.
+
+### What the agent sees
+
+A native CLI deny: `Permission denied: Command blocked by permissions configuration` or `Write permission denied:`, naming no rule; the copied global instructions supply general rejection guidance and the `rm -rf` fallback. A hook deny: `Rejected: Command execution was blocked by a hook: Refused by the pre-tool hook, …` ("File read" or "MCP tool execution" for those events).
+
+## Sandbox
+
+Auto-review with the sandbox on is the mode this skill sets for anyone who has Cursor. Allowlisted calls run. Other shell commands run in the sandbox when they can. A call that cannot use the sandbox goes to the classifier. The deny list still refuses: Auto-review does not replace it.
+
+- **Files:** the same `~/.cursor/cli-config.json`. Set `approvalMode` to `auto-review` and `sandbox.mode` to `enabled`. Keep every other key, including `sandbox.networkAccess` when it is already set. Add `"version": 1` to a new file. Docs: [run modes](https://cursor.com/docs/agent/security/run-modes), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
+- **Audit:** the verifier's `sandbox` cell (*Checking it*).
+- **Linux:** the sandbox needs kernel 6.2 or newer with Landlock, and unprivileged user namespaces. On a remote machine or the standalone CLI, the user installs the AppArmor package the run-modes doc names; it needs root. When the sandbox cannot be created, Cursor asks before each command: a `gap`.
+- **Steering:** leave `~/.cursor/permissions.json` `autoRun` to the user. `block_instructions` steer the classifier in plain English. The rule table and the hook are the enforcement, and a second prose list of the same calls would drift from them.
 
 ## Plugins
 
@@ -88,7 +90,11 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `~/.cursor/mcp.json`, keeping every other key ([MCP](https://cursor.com/docs/context/mcp)). `present` when it matches, `added` when it's missing, `updated` when it differs. A global server needs no approval; one in a project's `.cursor/mcp.json` waits for `cursor-agent mcp enable`.
 - **Sign-in:** a server that uses OAuth keeps its sign-in per project folder (`~/.cursor/projects/<folder>/mcp-auth.json`). The user signs in from a session; an agent never does. On a headless machine the callback goes to `localhost:8787` there, which the user finishes with `curl` or an SSH tunnel.
 
-## Pre-tool hook
+## Skills
+
+Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills](https://cursor.com/docs/skills.md)). Skills installed into `~/.agents/skills` reach it with no extra install. Cursor doesn't copy `~/.agents/skills` to Cloud Agents or remote SSH sessions. Install each skill as workstation.md, *A skill*, says.
+
+## Hook wiring
 
 - **Wiring:** `~/.cursor/hooks.json`, read by the IDE and the CLI, which a project can't turn off. One handler on four events, since each call reaches exactly one of them and nothing is reported twice (keep the user's handlers):
 
@@ -104,23 +110,23 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 - **Audit:** `wired` when all four events run exactly that command; `verify.py` checks it. A handler running `pre_tool_hook.py` from another path is old wiring: `removed`.
 - **Input:** `beforeShellExecution` has `command` and `cwd` (often empty; the hook falls back to `workspace_roots[0]`); `beforeMCPExecution` has `mcp_server_name` and `tool_name`; `beforeReadFile` has `file_path`; `preToolUse` has `tool_name` and `tool_input.file_path` (or `path`, `glob`). The session is `conversation_id`.
 - **Answer:** always JSON. A deny is `{"permission": "deny", "user_message": …, "agent_message": …}`, both the refusal; the CLI shows the agent `user_message`. Otherwise `{}`, which leaves the call to Cursor's permissions. The hook isn't `failClosed`: a crash or timeout lets the call through, and in the IDE nothing native is left underneath (a `gap`).
-- **Claude Code's hook runs here too** (claude-code.md, *Pre-tool hook*): it refuses what it recognises and leaves the report to this one.
+- **Claude Code's hook runs here too** (claude-code.md, *Hook wiring*): it refuses what it recognises and leaves the report to this one.
 
 ## Gaps
 
 The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses (SKILL.md, *What it can't see*).
 
-## What the agent sees
-
-A native CLI deny: `Permission denied: Command blocked by permissions configuration` or `Write permission denied:`, naming no rule; the copied global instructions supply general rejection guidance and the `rm -rf` fallback. A hook deny: `Rejected: Command execution was blocked by a hook: Refused by the pre-tool hook, …` ("File read" or "MCP tool execution" for those events).
-
 ## Checking it
 
-This harness's setup is `scripts/setupmachine/harness_setups/cursor.py`.
+The verifier's Cursor row, from `scripts/setupmachine/harnesses/cursor.py`:
 
-The audit lines are under *What verify must show*.
+- **instructions:** `~/.cursor/rules/global-instructions.mdc` is the header above the shared file, byte for byte. When `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` matches its source too. A missing or stale copy is `FAIL`, and so is a generated `harness-instructions.mdc` whose source is gone. A file without the generated comment is a `gap`, left alone.
+- **guardrails:** all four events in `~/.cursor/hooks.json` run an existing `pre_tool_hook.py` with `--harness cursor`. Each personal deny or allow row has its entry in `cli-config.json` or in Claude Code's lists, which the CLI unions.
+- **sandbox:** `cli-config.json` has `approvalMode` `auto-review` and `sandbox.mode` `enabled`.
+- **plugins:** each bundle is installed and enabled in Claude Code. Each standalone server is in `~/.cursor/mcp.json`, equal to its entry.
+- **skills:** each listed skill is in `~/.agents/skills` or `~/.cursor/skills`.
 
-`cursor-agent -p --trust --force` in a throwaway folder, with `CURSOR_CONFIG_DIR` at a trial `.cursor` and `CURSOR_DATA_DIR` at a scratch folder. `CURSOR_CONFIG_DIR` moves only `cli-config.json`: `hooks.json`, `mcp.json` and `~/.claude/settings.json` are always read from the real home, so a trial puts them in the folder (`.cursor/hooks.json`, `.cursor/mcp.json`, and `.claude/settings.json` at the folder's git root).
+To see Cursor itself enforce the rows, run `cursor-agent -p --trust --force` in a throwaway folder, with `CURSOR_CONFIG_DIR` at a trial `.cursor` and `CURSOR_DATA_DIR` at a scratch folder. `CURSOR_CONFIG_DIR` moves only `cli-config.json`: `hooks.json`, `mcp.json` and `~/.claude/settings.json` are always read from the real home, so a trial puts them in the folder (`.cursor/hooks.json`, `.cursor/mcp.json`, and `.claude/settings.json` at the folder's git root).
 
 - `rm -rf x`, `git push --force <remote> main` and `gh repo delete owner/x` return the native refusal, once from the trial `cli-config.json` and once, with its deny list emptied, from a `.claude/settings.json` holding the Claude Code lists.
 - With `approvalMode` `auto-review`, `sandbox.mode` `enabled` and without `--force`, those three commands return the same native refusal. `--auto-review` and `--sandbox enabled` set that mode for one run. Run that check, and every other Cursor CLI step here, as `cursor-agent`.

@@ -2,11 +2,13 @@
 
 How to set up and audit Pi, the `pi` coding agent (`@earendil-works/pi-coding-agent`). Docs: the `docs/` folder of the installed package, chiefly `configuration.md`, `settings.md`, `skills.md`, `extensions.md`, `cli.md` and `security.md`. Checked against Pi 1.1.0 and its `dist/` source.
 
-**Found** when `pi` is on `PATH` or the agent folder exists. The agent folder is `PI_CODING_AGENT_DIR`, else `~/.pi/agent`; a leading `~` in the variable means the home folder. Resolve it once, without printing the variable's value, and use that one folder for every path below, written `<agent-dir>`. For a fixture home, `verify.py --home <fixture>` uses `<fixture>/.pi/agent` and ignores the variable; pass `--pi-agent-dir <folder>` to test another layout.
+## Found
+
+Found when `pi` is on `PATH` or the agent folder exists. The agent folder is `PI_CODING_AGENT_DIR`, else `~/.pi/agent`; a leading `~` in the variable means the home folder. Resolve it once, without printing the variable's value, and use that one folder for every path below, written `<agent-dir>`. For a fixture home, `verify.py --home <fixture>` uses `<fixture>/.pi/agent` and ignores the variable.
 
 Leave `<agent-dir>/auth.json`, `mcp-auth.json`, `trust.json`, `models-store.json` and `sessions/` unread and unwritten: they hold credentials, trust decisions and runtime state, never a setting this skill owns.
 
-## Words
+### Words
 
 Pi's own terms, as its docs use them. Every Pi document that follows this skill uses them the same way.
 
@@ -35,7 +37,9 @@ The other resources a package or the agent folder can hold: a skill is a `SKILL.
 **Project trust**:
 Whether Pi loads a project's own `.pi` settings and resources. Context files load either way. Trust is not a guardrail: it doesn't limit tool calls.
 
-## Global instructions
+## Instructions
+
+### Global instructions
 
 - Pi loads one context file from `<agent-dir>`, the first that exists of `AGENTS.override.md`, `AGENTS.md`, `AGENTS.MD`, `CLAUDE.md` and `CLAUDE.MD`. It then adds one from each folder from the working folder up. It follows a symlink and skips a broken one. It doesn't follow `@` imports.
 - `<agent-dir>/AGENTS.md` becomes a **relative symlink to the shared file**. For the default folder it's `../../.config/agents/AGENTS.md`. For another folder, compute the path from `<agent-dir>` to `~/.config/agents/AGENTS.md`. It's `present` once it's that link.
@@ -43,17 +47,45 @@ Whether Pi loads a project's own `.pi` settings and resources. Context files loa
 - An `AGENTS.override.md` in `<agent-dir>` is kept and `extra`, with a `gap`: Pi reads it instead of the link. A `CLAUDE.md` there with no `AGENTS.md` is read until the link exists; once the link is written it's `extra`, never read.
 - `--no-context-files` (`-nc`) starts a session without any context file: a `gap` line.
 
-## Memory
+### Memory
 
 No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it reloads only when the user resumes one. Install no persistent-memory extension, since memory stays off in every harness (global-instructions.md).
 
-## Skills
+## Guardrails
 
-- Pi discovers skills in `~/.agents/skills/` and `<agent-dir>/skills/`, follows symlinks, and loads a skill reached through two links only once, by its real path. So the skills `setup/installs.json` installs into `~/.agents/skills` reach Pi with no extra install and no `-a` flag.
-- Older `npx skills` versions left one link per skill in `<agent-dir>/skills/`, pointing into `~/.agents/skills`. A link that resolves is harmless and `extra`. A broken link, such as one left after a skill was removed, is `extra`, for the user to remove: Pi skips it without a word.
-- A project's `.agents/skills/` loads only after the user trusts the project.
+### Permissions
 
-## Declared defaults
+Pi has no permission system. It asks for no approval before a tool call (`docs/security.md`), and has no deny, ask or allow list. The pre-tool hook, wired through an extension, is the only enforcement: it refuses deny rows, asks the user for ask rows in a Pi dialog, and reports allow-and-report rows. Write no native entry for any row.
+
+### Command rows
+
+No native entry. The hook checks the `command` of the `bash` and `powershell` tools. It reads a PowerShell command as a POSIX shell command, so a PowerShell spelling can slip past a row: a `gap` line on Windows.
+
+### File rows
+
+No native entry. The hook checks the `path` of `read`, `edit`, `write` and `ls`, and the search glob of `grep` (`glob`) and `find` (`pattern`).
+
+### MCP-tool rows
+
+No native entry. Pi reads MCP servers from `<agent-dir>/mcp.json` and names their tools `mcp__<server>__<tool>`, the name the rows match, so the hook checks them as they are.
+
+### Personal permissions
+
+Each personal permission is `n/a` here: "Pi has no permission entries". The hook applies a personal `deny`, `ask` or `allow-and-report` row as it applies a table row. A personal `allow` row needs nothing: Pi runs every call the hook lets through.
+
+### Auto mode
+
+None: Pi has no approval prompts to automate.
+
+### What the agent sees
+
+A refused call's tool result is the hook's refusal: each refused part, its rule, reason and instruction. For an ask row the user declined, the result starts `Refused: the user declined this call when the pre-tool hook asked.`, followed by the question. When the hook can't check the call, the result starts `Refused: the pre-tool hook couldn't check this call`, says why, and asks the agent to stop and have the user run `/set-up-machine`. A refused nested call fails the `codemode` script with the same text. The shared file also gives the agent the rule lines and the rejection guidance.
+
+## Sandbox
+
+Pi has no sandbox and no approval setting. Its declared settings are the one declared config Pi takes, so the verifier's `sandbox` cell checks them.
+
+### Declared defaults
 
 The optional Pi `config` that the workstation repo's `setup/harnesses.json` names declares Pi settings (workstation.md). Compare each key it declares with `<agent-dir>/settings.json`:
 
@@ -65,26 +97,6 @@ The optional Pi `config` that the workstation repo's `setup/harnesses.json` name
 - A `packages` key in the Pi `config` is a `gap`, never compared or written: Pi extensions come only from the plugins list (*Plugins*), so one file says what Pi loads. Tell the user to move each entry into `plugins`.
 - **Activation:** a new session reads the change. A running session reads it after `/reload`.
 - **Gaps:** a trusted project's `.pi/settings.json` overrides these keys, and CLI flags such as `--model` override them for one run.
-
-## Permissions
-
-Pi has no permission system. It asks for no approval before a tool call (`docs/security.md`), and has no deny, ask or allow list. The pre-tool hook, wired through an extension, is the only enforcement: it refuses deny rows, asks the user for ask rows in a Pi dialog, and reports allow-and-report rows. Write no native entry for any row.
-
-## Command rows
-
-No native entry. The hook checks the `command` of the `bash` and `powershell` tools. It reads a PowerShell command as a POSIX shell command, so a PowerShell spelling can slip past a row: a `gap` line on Windows.
-
-## File rows
-
-No native entry. The hook checks the `path` of `read`, `edit`, `write` and `ls`, and the search glob of `grep` (`glob`) and `find` (`pattern`).
-
-## MCP-tool rows
-
-No native entry. Pi reads MCP servers from `<agent-dir>/mcp.json` and names their tools `mcp__<server>__<tool>`, the name the rows match, so the hook checks them as they are.
-
-## Personal permissions
-
-Each personal permission is `n/a` here: "Pi has no permission entries". The hook applies a personal `deny`, `ask` or `allow-and-report` row as it applies a table row. A personal `allow` row needs nothing: Pi runs every call the hook lets through.
 
 ## Plugins
 
@@ -100,13 +112,19 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `<agent-dir>/mcp.json`, keeping every other server and key. `present` when it matches, `added` when it's missing, `updated` when it differs. Back it up like `settings.json`. Pi takes server names of letters, digits, `_` and `-`.
   - A running session reads the change after `/reload`.
   - **Credentials:** a `headers` or `env` value names an environment variable, such as `${DOCS_TOKEN}`, never the secret itself. A server that uses OAuth needs the user's sign-in, with `pi mcp login <server>` or `/mcp` in a session; an agent never signs in. Pi keeps the tokens in `mcp-auth.json`.
-- **`verify.py`** prints a `plugin` line per Pi entry. It checks the declaration, not remote freshness. `ok` when the declaration matches. `FAIL` when the extension is missing or names another source, or the server is missing or differs. A matching source still needs a current-source check before setup is complete. Pi not set up is `n/a`. A configured extension the list leaves out is `extra`: kept, for the user to add to the list or remove with `pi remove <source>`. A matching server is a `gap` when `extensions` in `settings.json` holds `-builtin:mcp`, since that turns off the built-in MCP client that reads `mcp.json`. The adapter does not compare a git checkout with a ref.
+- **The verifier's `plugins` cell** checks the declaration, not remote freshness. It is `FAIL` when a bundle's package is missing from `packages`, compared without its `@<version>` or `@<ref>`, or when a server is missing or differs. A matching server is a `gap` when `extensions` in `settings.json` holds `-builtin:mcp`, since that turns off the built-in MCP client that reads `mcp.json`. A matching source still needs a current-source check before setup is complete. A configured extension the list leaves out is `extra` in the diff: kept, for the user to add to the list or remove with `pi remove <source>`. The verifier does not compare a git checkout with a ref.
 - **Gaps:**
   - A trusted project's `.pi/settings.json` `packages` and `.pi/mcp.json` servers replace a global entry of the same extension or name in that project.
-  - An extension that registers `/mcp`, such as `pi-mcp-adapter`, replaces the built-in MCP client, and Pi then ignores `mcp.json`. `verify.py` doesn't detect this.
+  - An extension that registers `/mcp`, such as `pi-mcp-adapter`, replaces the built-in MCP client, and Pi then ignores `mcp.json`. The verifier doesn't detect this.
   - The structured list does not yet take local package paths. For independent directory packages, retain a clone on each machine, update it to latest default-branch code without discarding local work, and install each package directory by its resolved absolute path. Record the commit deployed as history only. Report the missing structured verification support; never replace independent packages with an overlapping root bundle.
 
-## Pre-tool hook
+## Skills
+
+- Pi discovers skills in `~/.agents/skills/` and `<agent-dir>/skills/`, follows symlinks, and loads a skill reached through two links only once, by its real path. So the skills `setup/installs.json` installs into `~/.agents/skills` reach Pi with no extra install and no `-a` flag.
+- Older `npx skills` versions left one link per skill in `<agent-dir>/skills/`, pointing into `~/.agents/skills`. A link that resolves is harmless and `extra`. A broken link, such as one left after a skill was removed, is `extra`, for the user to remove: Pi skips it without a word.
+- A project's `.agents/skills/` loads only after the user trusts the project.
+
+## Hook wiring
 
 - **Wiring:** the extension `<agent-dir>/extensions/set-up-machine.ts`, which Pi loads from its global extension folder. Write it from [pi-extension.ts](pi-extension.ts), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "pi"]` (`<script>` as in SKILL.md, *Wiring*). Its `tool_call` handler runs before every tool call, built-in, extension and MCP. Calls that `codemode` scripts make with `tools.<name>(…)` reach it one by one, as nested calls.
 - **Fails closed:** Pi has no native rules underneath, so a call the hook can't check is refused. When the script is gone, `python3` can't start, the hook exits non-zero, prints anything but a JSON object or takes over 10 seconds, the extension blocks the call. The agent reads that the guardrail is unavailable and that the user should run `/set-up-machine`. The hook exits non-zero on a call it can't read, a rule table it can't load, and a report line it can't write. The extension catches its own errors and turns them into the same refusal.
@@ -117,10 +135,6 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 - **Session host:** while a dialog waits, Pi reports `blocked` to the terminal itself (OSC 7501). A session host's own Pi integration can report a state of its own instead. Herdr's (version 9) reported `working`, so the user got no notice. It listens for a `herdr:blocked` event on Pi's event bus, so the extension emits that event around the dialog, and Herdr then shows the pane as `blocked`. Without that integration nothing listens, and the event does nothing.
 - Other extensions in `<agent-dir>/extensions/`, such as a session host's integration, are the user's: leave them.
 
-## Auto mode
-
-None: Pi has no approval prompts to automate.
-
 ## Gaps
 
 - **The only layer:** Pi has no native rules underneath, so the extension fails closed: while `python3` or the script is missing, or the hook fails, Pi refuses every tool call until `/set-up-machine` repairs it. `pi --no-extensions` starts a session without the hook in the meantime. The containment Pi offers beyond the hook is the operating system's: a container, a virtual machine or a separate user (`docs/security.md`, `docs/containerization.md`). Name this once in every audit.
@@ -130,20 +144,17 @@ None: Pi has no approval prompts to automate.
 - **The user's own commands:** `!` commands (`user_bash`) aren't tool calls, so the hook doesn't see them, as in Claude Code.
 - The hook's own misses are in SKILL.md, *What it can't see*.
 
-## What the agent sees
-
-A refused call's tool result is the hook's refusal: each refused part, its rule, reason and instruction. For an ask row the user declined, the result starts `Refused: the user declined this call when the pre-tool hook asked.`, followed by the question. When the hook can't check the call, the result starts `Refused: the pre-tool hook couldn't check this call`, says why, and asks the agent to stop and have the user run `/set-up-machine`. A refused nested call fails the `codemode` script with the same text. The shared file also gives the agent the rule lines and the rejection guidance.
-
 ## Checking it
 
-This harness's setup is `scripts/setupmachine/harness_setups/pi.py`.
+The verifier's Pi row, from `scripts/setupmachine/harnesses/pi.py`, reads the resolved agent folder:
 
-- When Pi's agent folder exists, `pi ok` for the `AGENTS.md` link, and a `pi same` line per key the Pi `config` declares, or `pi none` when `setup/harnesses.json` names no such file. A `pi FAIL` means the audit is not done.
-- Its `hook wired` line is the extension. Pi has no permission system, so the hook is its only enforcement, and the extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call. A `hook gap` line is an extension someone else wrote at the same path, left alone.
-- A `pi extra` line is a broken skill link, for the user to remove.
-- A `pi gap` for `packages` in the Pi `config` asks the user to move them into `plugins`, where Pi extensions belong.
+- **instructions:** `<agent-dir>/AGENTS.md` is a link to the shared file. An `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Pi in `setup/harnesses.json`.
+- **guardrails:** `<agent-dir>/extensions/set-up-machine.ts` runs an existing `pre_tool_hook.py` with `--harness pi`. No extension is `FAIL`, since nothing else enforces the rule table in Pi. A file there without the template's first line is someone else's: a `gap`, left alone. Pi has no native rules, so personal permissions need no entry. The extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call.
+- **sandbox:** Pi has no sandbox, so this cell checks the declared Pi settings: each key the Pi `config` declares holds the same value in `settings.json`. A `packages` key there is a `gap`, which asks the user to move it into `plugins`. `n/a` without a Pi `config`.
+- **plugins:** as *Plugins* says.
+- **skills:** each listed skill is in `~/.agents/skills` or `<agent-dir>/skills`.
 
-`verify.py` prints a `pi` line for the link, one per declared default, one per broken skill link, and a `hook` line for the extension. To see Pi read the setup, start it in a sandbox:
+The verifier doesn't report broken skill links: list them in the diff as `extra` (*Skills*). To see Pi read the setup, start it in a sandbox:
 
 1. Make a sandbox folder, with a fresh agent folder in it. Copy `settings.json` and recreate the `AGENTS.md` link there. Copy no credential, trust or session file.
 2. Run `PI_CODING_AGENT_DIR=<sandbox agent folder> pi` from an empty folder in the sandbox.

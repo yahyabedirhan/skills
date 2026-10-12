@@ -2,49 +2,19 @@
 
 How to set up and audit Codex from the rule table. Docs: [rules](https://learn.chatgpt.com/docs/agent-configuration/rules), [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [hooks](https://learn.chatgpt.com/docs/hooks), [memories](https://learn.chatgpt.com/docs/customization/memories), and the `openai/codex` source where the docs are silent. Background: the repo's `docs/research/harness-capabilities.md`, section 2.
 
-**Found** when the resolved Codex config home exists or `codex` is on `PATH`; a fresh install makes the folder only on first start. Resolve the non-secret `CODEX_HOME` internally, falling back to `~/.codex`, without printing its environment value. Use that one folder for `config.toml`, instructions, profiles, rules, hooks and trust checks. Every relative Codex path below is under it. For a fixture home, pass `verify.py --home <fixture>`; it uses `<fixture>/.codex` and ignores ambient `CODEX_HOME`. Pass `--codex-home <fixture config folder>` when testing a different layout.
+## Found
 
-## CLI defaults
+Found when the resolved Codex config home exists or `codex` is on `PATH`; a fresh install makes the folder only on first start. Resolve the non-secret `CODEX_HOME` internally, falling back to `~/.codex`, without printing its environment value. Use that one folder for `config.toml`, instructions, profiles, rules, hooks and trust checks. Every relative Codex path below is under it. For a fixture home, pass `verify.py --home <fixture>`; it uses `<fixture>/.codex` and ignores ambient `CODEX_HOME`.
 
-When the personal source pointer names a repository, load the optional Codex `config` that its `setup/harnesses.json` names, as `workstation.md` specifies. Validate the entire file before proposing preference writes. `scripts/setupmachine/codex_config.py` supplies allowlisted parsing, a pure proposal and persisted audit; it never writes configuration. Its TOML checks require Python 3.11+; on an older Python, report the parser support gap and leave preferences unchanged.
+## Instructions
 
-### Installed support
-
-Check `codex --version`, current help and the [official configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) for each declared key and value. Use the installed CLI's configuration schema or a synthetic configuration check with one invalid-value negative control per declared key, without authentication or secrets. The checker uses an isolated temporary config home for `codex features list`; it must accept the declared value and reject its negative control. A successful parse alone is insufficient: unknown keys and some conflicts may be ignored. Report unsupported keys, values or an unavailable validation mechanism as gaps and leave those preferences unchanged.
-
-The inspected CLI was 0.159.3 on 2026-10-01. That snapshot supported:
-
-| Key | Values accepted for this source |
-|---|---|
-| `sandbox_mode` | `read-only`, `workspace-write`, `danger-full-access` |
-| `approval_policy` | `on-request`, `never` |
-| `approvals_reviewer` | `user`, `auto_review` |
-
-Treat the snapshot as evidence to recheck, not a permanent version gate. Explicit `untrusted` is unsupported and `on-failure` deprecated in this version. Codex also supports granular approval policies, but this initial private source accepts scalar policies only. Report a granular source as unsupported; preserve an existing granular target policy and report the need for review.
-
-### Propose and apply
-
-Compare each declared preference with its top-level persisted value in `config.toml`. Mark matches `present, personal` and show the exact current and proposed entries for each safe difference, marked `personal`. Mark a stricter replacement `tightened` only when its ordering is established; report drift as a failed audit. Omitted keys remain user-managed. Compose preference edits with this adapter's existing memory and hook trust edits in the same proposed diff. `propose(text, preferences)` returns proposed TOML without writing and raises `ConfigError` for preservation or support gaps; its fixture tests exercise fresh setup, preservation and repeat audit. Then use the skill's approval and backup steps before writing. When the config home is outside the user's home, include an explicit destination under the backup folder in the diff and preserve that config home's relative paths there, so the backup does not escape its folder or collide with another file.
-
-Preserve unrelated keys, comments, profiles, hooks, rules and TOML sections. Keep an existing stricter sandbox restriction or enforced constraint and report `stricter` or `gap`; do not infer that every difference between approval policies can be ordered. Report policy conflicts whose effect cannot be established. Leave unfamiliar or uneditable TOML syntax unchanged and name the gap instead of rewriting the whole file.
-
-**When `default_permissions` conflicts with a proposed legacy sandbox key:** preserve the permission configuration and report the incompatibility. The [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference#configtoml) forbids `default_permissions` together with `sandbox_mode` or `[sandbox_workspace_write]`; setup does not silently migrate between permission models. Inspect applicable enforced requirements through documented non-secret configuration fields, and report restrictions that prevent the preference from taking effect.
-
-### Overrides and activation
-
-Report persisted defaults separately from effective settings. The [official precedence order](https://learn.chatgpt.com/docs/config-file/config-basic#configuration-precedence) is CLI flags and `--config`, trusted project config from the nearest project outward, the selected profile, user config, cloud defaults, system config and built-in defaults. The [managed configuration guide](https://learn.chatgpt.com/docs/enterprise/managed-configuration#admin-enforced-requirements-requirementstoml) describes enforced requirements that constrain the result separately. Identify observed overrides without claiming every layer was verified; cloud settings, active CLI arguments and existing session state and MDM requirements may be unavailable to a file audit.
-
-Read profile and trusted-project configuration only when needed to check declared defaults, using non-secret fields and reporting inaccessible layers as unverified. Preserve profile files. The [advanced configuration guide](https://learn.chatgpt.com/docs/config-file/config-advanced) places profiles in separate `<name>.config.toml` files under the config home; legacy inline `[profiles]` and top-level `profile` are unsupported from 0.134.0 and must be reported rather than migrated.
-
-Explain that persisted changes affect subsequent sessions. Keep running sessions open; the user can start a new session or adjust permissions through `/permissions` where that installed version supports it. `auto_review` routes eligible `on-request` or granular approvals to a reviewer; it keeps sandbox boundaries and does not guarantee approval. A matching persisted reviewer is not proof that an existing session or every approval uses it.
-
-## Global instructions
+### Global instructions
 
 - Codex reads `AGENTS.md` in every session and follows a symlink; it has no imports. It becomes a **symlink to the shared file**, `~/.config/agents/AGENTS.md`.
 - Link it only once nothing in the old file would be lost: each line (headings aside) is already in the shared file, or sits in a known block below. Every other line is `extra`, with a `gap` saying Codex still reads its own file; move those lines first (global-instructions.md, *Moving a harness's file*), then run again. The old file is `removed` (backed up).
 - A non-empty `AGENTS.override.md` is read instead of `AGENTS.md`: a `gap`, left alone.
 
-### Blocks that become a skill
+#### Blocks that become a skill
 
 A block a tool wrote into the old file becomes the upstream skill it came from, installed globally before any file is written:
 
@@ -54,12 +24,14 @@ A block a tool wrote into the old file becomes the upstream skill it came from, 
 
 Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. Compare its installed folder hash with the source's latest default branch before marking it `present` (workstation.md, *A skill*). File existence alone proves presence, not freshness. The block's advice to run `ctx7` outside the sandbox needs no line: an `allow` rule for `npx ctx7@latest` does that, and is `extra` where the machine has it.
 
-## Memory
+### Memory
 
 - Local memories are off by default and write `memories/`. Set `memories = false` in the `[features]` table of `config.toml` (or tighten `features.memories = …` where the file uses the dotted form), editing only that line; list every file under `memories/` as `removed`. A `features = { … }` inline table is edited by the user.
 - **Gap:** a trusted project's `.codex/config.toml` can set `memories = true` and win; only a system `requirements.toml` pins it.
 
-## Rules
+## Guardrails
+
+### Rules
 
 - **File:** `rules/set-up-machine.rules`, this skill's own, written whole from the table and the personal permissions every run. Codex loads every `*.rules` file in `rules/` and applies the **strictest** matching decision, so the user's files (`default.rules`, where "always allow" choices land) are read and compared, never written.
 - **Levels:** `deny` → `forbidden`, `ask` → `prompt`, `allow-and-report` → `allow` (runs outside the sandbox without a prompt; the hook reports).
@@ -72,7 +44,7 @@ Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. 
   The `justification` is `<reason> Instead: <instruction> (set-up-machine rule <id>)` (no `Instead:` for ask and allow-and-report rows); Codex shows it to the agent on a refusal.
 - **Compared with the other files:** `tightened` where another file is looser (the strictest wins, so this file's rule takes over), `stricter` where every case is stricter there (kept; the user removes it by hand), `extra` for a rule no row covers. A narrower rule a row covers (`rm -rf /`) isn't extra.
 
-## Command rows
+### Command rows
 
 - `prefix_rule` matches the argv word by word from the start; an element is one word or a list of alternatives. Codex resolves an absolute program path to its basename, so `/bin/rm` needs no rule.
 - **Flags:** one rule with the clustered one-letter flags as alternatives (`["rm", ["-rf", "-Rf", "-fr", "-fR"]]`), and, when a row has two or more flag groups, one rule per order of the groups, each group its spellings (`["rm", ["-r", "-R", "--recursive"], ["-f", "--force"]]` and the reverse). A single group is one element of its spellings: `["git", "push", ["-f", "--force"]]`.
@@ -85,11 +57,11 @@ Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. 
 
 The hook enforces each of these, since it sees the command before Codex wraps it.
 
-## File rows
+### File rows
 
 Codex has no file rules: it reads through the shell and writes through the shell and `apply_patch`. The hook refuses `apply_patch` edits to a row's paths (its `Add File`, `Update File`, `Delete File` and `Move to` headers); a shell read or write gets through, a `gap` per row.
 
-## MCP-tool rows
+### MCP-tool rows
 
 Codex configures each MCP tool in `config.toml` ([configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference); the `openai/codex` source at `2685e3a`, `codex-rs/config/src/mcp_types.rs` and `types.rs`). A connector such as Gmail or Google Calendar is an **app**, under `[apps.<app-id>]`; any other server is under `[mcp_servers.<server-id>]`. Match each row's `server` regex against those IDs and its `tool` regex against the tool names a session lists; with no tool listing, a matching row is a `gap` and the hook still matches `mcp__<server>__<tool>` when a tool is called.
 
@@ -103,7 +75,7 @@ Codex configures each MCP tool in `config.toml` ([configuration reference](https
 - **`codex exec`:** it runs with approval policy `never`. A `prompt` tool is then refused, except under a full-access, disabled or external permission profile (such as `danger-full-access`), where it runs without asking; only `disabled_tools` or `enabled = false` stop it there. The hook reads `permission_mode`, which Codex sets to `bypassPermissions` under `never`, and refuses `approver: "user"` rows.
 - `approval_mode = "approve"` runs a tool without asking: on a tool a `deny` or `ask` row matches, it's looser than the table, so tighten it.
 
-## Personal permissions
+### Personal permissions
 
 A personal permission (workstation.md) becomes `prefix_rule`s the way a table row of its kind does above, in `rules/set-up-machine.rules` after the table's rules, each marked `personal`. An `allow` row gets `decision="allow"`, as an `allow-and-report` row does: the command runs outside the sandbox without a prompt.
 
@@ -111,19 +83,85 @@ A personal permission (workstation.md) becomes `prefix_rule`s the way a table ro
 - **It can't loosen a table row:** the strictest matching decision wins, so a personal `allow` never overrides the table's `forbidden` or `prompt`.
 - The `justification` takes the table's form and ends `(set-up-machine personal rule <id>)`, so the agent can tell a personal rule from the table's.
 
+### What the agent sees
+
+A forbidden rule: `` exec_command failed: … `/bin/zsh -lc 'rm -fr x'` rejected: <justification> ``. The hook, which runs first: its refusal, naming each refused part, its rule, reason and instruction.
+
+## Sandbox
+
+When the personal source pointer names a repository, load the optional Codex `config` that its `setup/harnesses.json` names, as `workstation.md` specifies. Validate the entire file before proposing preference writes. The verifier compares each declared key with `config.toml` in its `sandbox` cell. It reads TOML with Python 3.11's `tomllib`; on an older Python the cell is a `gap`.
+
+### Installed support
+
+Check `codex --version`, current help and the [official configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) for each declared key and value. Use the installed CLI's configuration schema or a synthetic configuration check with one invalid-value negative control per declared key, without authentication or secrets. Run `codex features list` with `CODEX_HOME` at a temporary config home, once holding the declared value and once an invalid one: the first must succeed and the second must fail on that key. A successful parse alone is insufficient: unknown keys and some conflicts may be ignored. Report unsupported keys, values or an unavailable validation mechanism as gaps and leave those preferences unchanged.
+
+The inspected CLI was 0.159.3 on 2026-10-01. That snapshot supported:
+
+| Key | Values accepted for this source |
+|---|---|
+| `sandbox_mode` | `read-only`, `workspace-write`, `danger-full-access` |
+| `approval_policy` | `on-request`, `never` |
+| `approvals_reviewer` | `user`, `auto_review` |
+
+Treat the snapshot as evidence to recheck, not a permanent version gate. Explicit `untrusted` is unsupported and `on-failure` deprecated in this version. Codex also supports granular approval policies, but this initial private source accepts scalar policies only. Report a granular source as unsupported; preserve an existing granular target policy and report the need for review.
+
+### Propose and apply
+
+Compare each declared preference with its top-level persisted value in `config.toml`. Mark matches `present, personal` and show the exact current and proposed entries for each safe difference, marked `personal`. Mark a stricter replacement `tightened` only when its ordering is established; report drift as a failed audit. Omitted keys remain user-managed. Put preference edits in the same diff as the memory and hook trust edits. When the config home is outside the user's home, include an explicit destination under the backup folder in the diff and preserve that config home's relative paths there, so the backup does not escape its folder or collide with another file.
+
+Preserve unrelated keys, comments, profiles, hooks, rules and TOML sections. Keep an existing stricter sandbox restriction or enforced constraint and report `stricter` or `gap`; do not infer that every difference between approval policies can be ordered. Report policy conflicts whose effect cannot be established. Leave unfamiliar or uneditable TOML syntax unchanged and name the gap instead of rewriting the whole file.
+
+**When `default_permissions` conflicts with a proposed legacy sandbox key:** preserve the permission configuration and report the incompatibility. The [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference#configtoml) forbids `default_permissions` together with `sandbox_mode` or `[sandbox_workspace_write]`; setup does not silently migrate between permission models. Inspect applicable enforced requirements through documented non-secret configuration fields, and report restrictions that prevent the preference from taking effect.
+
+### Overrides and activation
+
+Report persisted defaults separately from effective settings. The [official precedence order](https://learn.chatgpt.com/docs/config-file/config-basic#configuration-precedence) is CLI flags and `--config`, trusted project config from the nearest project outward, the selected profile, user config, cloud defaults, system config and built-in defaults. The [managed configuration guide](https://learn.chatgpt.com/docs/enterprise/managed-configuration#admin-enforced-requirements-requirementstoml) describes enforced requirements that constrain the result separately. Identify observed overrides without claiming every layer was verified; cloud settings, active CLI arguments and existing session state and MDM requirements may be unavailable to a file audit.
+
+Read profile and trusted-project configuration only when needed to check declared defaults, using non-secret fields and reporting inaccessible layers as unverified. Preserve profile files. The [advanced configuration guide](https://learn.chatgpt.com/docs/config-file/config-advanced) places profiles in separate `<name>.config.toml` files under the config home; legacy inline `[profiles]` and top-level `profile` are unsupported from 0.134.0 and must be reported rather than migrated.
+
+Explain that persisted changes affect subsequent sessions. Keep running sessions open; the user can start a new session or adjust permissions through `/permissions` where that installed version supports it. `auto_review` routes eligible `on-request` or granular approvals to a reviewer; it keeps sandbox boundaries and does not guarantee approval. A matching persisted reviewer is not proof that an existing session or every approval uses it.
+
 ## Plugins
 
-The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md). Tool lists come from `setup/permissions.json` and the rule table. Read *Codex MCP* at the end of this file when an entry has `mcp_policy`, a standalone server, or `require_oauth`.
+The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md). Tool lists come from `setup/permissions.json` and the rule table. Read *Codex MCP* below when an entry has `mcp_policy`, a standalone server, or `require_oauth`.
 
 1. Add a missing marketplace with `codex plugin marketplace add <owner>/<repo>`.
 2. Install the bundle with `codex plugin add <plugin>@<marketplace>`.
-3. Propose the policy with `propose` from `scripts/setupmachine/harness_setups/codex.py`, then apply it through the skill's backup and approval steps.
+3. Write the policy as *Codex MCP* says, through the skill's backup and approval steps.
 4. For a standalone MCP server, merge `server` into `[mcp_servers.<name>]` the same way.
 5. When `require_oauth` is true, the user runs `codex mcp login <name>`. Leave the server disabled until that login is connected.
 
-Done when `verify.py` prints `plugin ok` for the entry: the bundle is enabled, its cached manifest matches, and the derived tool list matches. Compare the installed plugin with the current marketplace source before calling it up to date, since `plugin ok` checks persisted setup and not the latest release. A missing login is a `gap`. A new session still has to show the tools.
+The verifier's `plugins` cell checks that the bundle is enabled in `config.toml` and has a cached manifest, and that a standalone server has its `[mcp_servers.<name>]` table. Check the derived tool list and the login yourself, since the verifier doesn't. Compare the installed plugin with the current marketplace source before calling it up to date. A missing login is a `gap`. A new session still has to show the tools.
 
-## Pre-tool hook
+### Codex MCP
+
+Read this when an entry has `mcp_policy`, a standalone server, or `require_oauth`. Docs: [MCP configuration](https://learn.chatgpt.com/docs/extend/mcp), [developer commands](https://learn.chatgpt.com/docs/developer-commands), [plugin formats](https://developers.openai.com/plugins/build/plugins).
+
+The server id is the entry's `name`.
+
+- Write a bundle's policy in `[plugins."<plugin>@<marketplace>".mcp_servers.<name>]`.
+- Write a standalone server's `server` object in `[mcp_servers.<name>]`, with the policy keys beside it.
+- Write `enabled_tools` and `disabled_tools` under those names. Write `approval_mode` as `default_tools_approval_mode`. Do not write `require_oauth`: it is only an audit flag.
+
+Take tool names from `setup/permissions.json` and the rule table (workstation.md). Union those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
+
+Keep undeclared keys and comments, because the file holds choices this skill does not own. Keep a stricter tool list already in the file: more disabled tools, or a shorter enabled list. Leave an unfamiliar TOML form unchanged and name the gap, instead of rewriting the file. Apply the skill's backup and approval steps to the diff.
+
+When `require_oauth` is true, keep the server disabled until `codex mcp login <name>` shows the server connected. Never test the exclusion by calling the tool. A disabled server reports `unsupported` in `codex mcp list --json`. Enable it only for that listing, then restore the disabled state unless the login is connected. Codex 0.162.1 reports a connected login as `o_auth`.
+
+On a headless machine, the browser callback opens on the wrong machine. Leave the login process running. The user forwards the callback to the listener on the machine that runs Codex. Treat that URL as a secret. Never put it in a repository, a log, or shell history.
+
+Check the login with `codex mcp list --json`, which reads no credential file. A missing login is a `gap` that names the login command. A file check does not prove which tools the current session can see.
+
+Codex 0.162.1 accepts a portable Claude-compatible bundle. A Claude LSP declaration or a harness-specific mod API does not establish working Codex tools. Read the bundle's manifest before claiming parity. Report an unsupported component as a gap even when the install succeeds.
+
+Never call an excluded tool, including as a capability test. The exclusion comes from the permission row. It does not depend on the approval reviewer.
+
+## Skills
+
+Codex reads user skills from `~/.agents/skills`, where `npx skills add … -a codex` installs them, and from `skills/` in the Codex config home. Install each skill as workstation.md, *A skill*, says.
+
+## Hook wiring
 
 - **Wiring:** one match-all group in `hooks.json` (keep the user's groups):
 
@@ -150,43 +188,19 @@ Done when `verify.py` prints `plugin ok` for the entry: the bundle is enabled, i
 
 Rules alone let through flags after the operands (`git push origin main --force`), options before a subcommand (`git -C dir push --force`), and anything that isn't a plain chain of words. The hook closes them for deny and allow-and-report rows, so list them only for `ask` rows, beside the rows above that get no rule. The hook's own misses are in SKILL.md, *What it can't see*.
 
-## What the agent sees
-
-A forbidden rule: `` exec_command failed: … `/bin/zsh -lc 'rm -fr x'` rejected: <justification> ``. The hook, which runs first: its refusal, naming each refused part, its rule, reason and instruction.
-
 ## Checking it
 
-This harness's setup is `scripts/setupmachine/harness_setups/codex.py`.
+The verifier's Codex row, from `scripts/setupmachine/harnesses/codex.py`, reads the resolved Codex config home:
 
-- Every `codex differs` line is a row this reference says gets no rule.
-- Declared defaults match with no `config FAIL` line, or a `config n/a` line says Codex isn't installed.
-- In the report, distinguish persisted defaults from effective overrides, and state how a later session picks the change up.
+- **instructions:** `AGENTS.md` is a link to the shared file, and `memories` is `false` in `[features]`. A non-empty `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Codex in `setup/harnesses.json`.
+- **guardrails:** a match-all `PreToolUse` group in `hooks.json` runs an existing `pre_tool_hook.py` with `--harness codex`, and `config.toml` holds its current `trusted_hash`. Each personal command row that gets a rule has `(set-up-machine personal rule <id>)` in `rules/set-up-machine.rules`.
+- **sandbox:** each key the declared Codex config sets has the same value in `config.toml`. `n/a` without a declared config.
+- **plugins:** as *Plugins* says.
+- **skills:** each listed skill is in `~/.agents/skills` or `skills/` in the config home.
 
-- `verify.py` runs each plain command sample through `codex execpolicy check --resolve-host-executables --rules <each rules file> -- <argv>`. A `differs` line should be a row this file says gets no rule; any other is a mistake in the rules file. The check doesn't unwrap `bash -lc`.
+The TOML checks need Python 3.11+; on an older Python they are `gap`. The verifier doesn't run `codex execpolicy`. In the report, distinguish persisted defaults from effective overrides, and state how a later session picks the change up. To check Codex itself:
+
+- **Rules:** `codex execpolicy check --resolve-host-executables --rules <each rules file> -- <argv>` for a plain command sample gives the row's decision. A different one should be a row this file says gets no rule; any other is a mistake in the rules file. The check doesn't unwrap `bash -lc`.
 - **Hook trust:** `codex app-server` with `CODEX_HOME` at the folder, then `hooks/list` for a throwaway folder: the group is `trusted`.
 - **A session without a login:** `codex exec` with `CODEX_HOME` and `HOME` at a trial home and a `model_providers` entry pointing at a local stand-in that answers the Responses API with one `exec_command` (or `apply_patch`) call; the next request's `function_call_output` is what the agent read. With `--disable hooks` it shows the rule's justification, and with hooks on the hook's refusal.
 - **Instructions:** `codex debug prompt-input hello` in a throwaway folder shows the shared file's rejection guidance, and no Context7 block.
-
-## Codex MCP
-
-Read this when an entry has `mcp_policy`, a standalone server, or `require_oauth`. Docs: [MCP configuration](https://learn.chatgpt.com/docs/extend/mcp), [developer commands](https://learn.chatgpt.com/docs/developer-commands), [plugin formats](https://developers.openai.com/plugins/build/plugins).
-
-The server id is the entry's `name`.
-
-- Write a bundle's policy in `[plugins."<plugin>@<marketplace>".mcp_servers.<name>]`.
-- Write a standalone server's `server` object in `[mcp_servers.<name>]`, with the policy keys beside it.
-- Write `enabled_tools` and `disabled_tools` under those names. Write `approval_mode` as `default_tools_approval_mode`. Do not write `require_oauth`: it is only an audit flag.
-
-Take tool names from `setup/permissions.json` and the rule table (workstation.md). `propose` unions those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
-
-`propose(text, entry)` in `scripts/setupmachine/harness_setups/codex.py` returns the TOML and writes nothing. It keeps undeclared keys and comments, because the file holds choices this skill does not own. It keeps a stricter tool list already in the file: more disabled tools, or a shorter enabled list. It refuses an unfamiliar TOML form instead of rewriting the file. Apply the skill's backup and approval steps to the diff it returns.
-
-When `require_oauth` is true, keep the server disabled until `codex mcp login <name>` shows the server connected. Never test the exclusion by calling the tool. A disabled server reports `unsupported` in `codex mcp list --json`. Enable it only for that listing, then restore the disabled state unless the login is connected. Codex 0.162.1 reports a connected login as `o_auth`.
-
-On a headless machine, the browser callback opens on the wrong machine. Leave the login process running. The user forwards the callback to the listener on the machine that runs Codex. Treat that URL as a secret. Never put it in a repository, a log, or shell history.
-
-`verify.py` reads the resolved Codex home. With a CLI it reads `codex mcp list --json` and no credential file. A missing login is a `gap` that names the login command. The file check does not prove which tools the current session can see.
-
-Codex 0.162.1 accepts a portable Claude-compatible bundle. A Claude LSP declaration or a harness-specific mod API does not establish working Codex tools. Read the bundle's manifest before claiming parity. Report an unsupported component as a gap even when the install succeeds.
-
-Never call an excluded tool, including as a capability test. The exclusion comes from the permission row. It does not depend on the approval reviewer.

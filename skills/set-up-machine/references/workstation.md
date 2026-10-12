@@ -1,6 +1,6 @@
 # Workstation repo
 
-What this skill reads from the user's workstation repo, and the pointer that names the repository and its clone. The workstation repo holds the user's personal agent setup. `/maintain-environment` owns it: its `references/workstation.md` says what the repository is for, and how to start one or change what it holds.
+What this skill reads from the user's workstation repo, and the pointer that names the repository and its clone. The workstation repo holds the user's personal agent setup. `/maintain-environment` starts one: its `references/workstation.md` covers starting a workstation repo. After that, the repository's own `DESIGN.md` says where each thing lives and how to change it.
 
 The workstation repo is the source and the machine's files are output: every run rewrites the generated parts of the shared file, and a personal permission's entries in each harness's settings, from the repository.
 
@@ -27,7 +27,7 @@ The clone path starts `~/` or `/`. A person with no workstation repo has `- Repo
 
 ## The repository's layout
 
-This skill reads only the `setup/` folder at the repository's root, and the files `setup/harnesses.json` points at. The rest of the repository is the user's, as `/maintain-environment`'s `references/workstation.md` describes. `scripts/setupmachine/layout.py` is the one module that names these paths; every other script asks it. There is no fallback to an older layout: a file outside `setup/` that `setup/harnesses.json` doesn't point at is never read.
+This skill reads only the `setup/` folder at the repository's root, and the files `setup/harnesses.json` points at. The rest of the repository is the user's, as `/maintain-environment`'s `references/workstation.md` describes. `scripts/setupmachine/workstation.py` is the one module that reads these paths. There is no fallback to an older layout: a file outside `setup/` that `setup/harnesses.json` doesn't point at is never read.
 
 ### `setup/instructions.md`
 
@@ -109,7 +109,7 @@ The file `setup/harnesses.json` points at with a harness's `instructions`. It ho
 - **Where it goes:** only Cursor has a file today, `~/.cursor/rules/harness-instructions.mdc` (cursor.md, *Global instructions*). Its header names the path `setup/harnesses.json` gives. Claude Code, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line.
 - Never put a rule every harness needs here; it belongs in `setup/instructions.md`. Check every line against the team test in `global-instructions.md`.
 
-`verify.py` prints a `harness` line per file: `ok` when the generated file matches its source, `FAIL` when it is missing or differs, when a generated file outlived its source, or when `setup/harnesses.json` is malformed or points at a missing file, `n/a` when the harness isn't set up, and `gap` for a harness with no place yet, or a file of the same name the skill didn't write. A generated file whose header names another path, such as one from before the source moved, differs, and the diff rewrites it.
+`verify.py` checks this file in the harness's `instructions` cell: `ok` when the generated file matches its source; `FAIL` when it is missing or differs, or when a generated file outlived its source; `gap` for a harness with no place yet, or a file of the same name the skill didn't write. A malformed `setup/harnesses.json`, or one that points at a missing file, fails the `setup` line. A generated file whose header names another path, such as one from before the source moved, differs, and the diff rewrites it.
 
 ### `setup/permissions.json`
 
@@ -144,7 +144,7 @@ The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harness
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
 - Read `pi.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
 
-`verify.py` prints a `pi` line per declared key: `same` when `settings.json` holds the declared value, `FAIL` when it's missing or differs, and `none` with no `config` entry. It never prints the values.
+`verify.py` checks each declared key in Pi's `sandbox` cell, since Pi has no sandbox of its own: `ok` when `settings.json` holds every declared value, `FAIL` when one is missing or differs, and `n/a` with no `config` entry. It never prints the values.
 
 ### `setup/installs.json`
 
@@ -197,7 +197,7 @@ What each machine installs beyond the harnesses' configuration: skills, plugins,
 
 - **`skills`:** each entry has a `source`, a GitHub `owner/repo`, and an optional `skills` array of skill names in it. Without `skills`, the entry means every skill in the source, including one added to it later.
 - **`ignore`:** skill names a machine may have that the list leaves out on purpose, such as an experiment on one machine or a hand-made skill the lock doesn't track. Mark an installed skill on this list `ignored`, not `extra`, and never install, update or remove it, since it is the user's on that machine.
-- **`plugins`:** what each harness plugs in for new tools, the plugins setup area. An entry has a `name`, a `kind` and the `harnesses` that should have it (`claude-code`, `cursor`, `codex`, `opencode`, `pi`).
+- **`plugins`:** what each harness plugs in for new tools, the plugins setup area. An entry has a `name`, a `kind` and the `harnesses` that should have it (`claude-code`, `cursor`, `codex`, `opencode`, `pi`). Two entries may share a `name` when they name different harnesses, such as an `exa` bundle for Claude Code and an `exa` server for Pi; each harness gets a name once.
   - `kind: "bundle"`: a plugin installed as one unit with its MCP servers, skills and hooks. `source` is `<plugin>@<marketplace>`, as Claude Code and Codex name it. `marketplace` is the GitHub `<owner>/<repo>` to add first, for a marketplace the harness does not know yet.
   - `mcp_policy` is optional and the same object for every harness on the entry. Its fields are `enabled_tools`, `disabled_tools`, `approval_mode` (`auto`, `prompt`, `writes` or `approve`) and `require_oauth`. `require_oauth` asks for a sign-in check. It is not a setting the harness stores. Credentials never enter the list.
   - Tool lists come from `setup/permissions.json` and the rule table. A deny or allow row that names this entry's server supplies the tools. Leave `enabled_tools` and `disabled_tools` unset when a row already names the tool. The adapters derive each harness's list from those rows.
@@ -219,7 +219,7 @@ Check each entry that applies, then put what's missing in the diff:
   - **When a skill's name is already installed from another source,** a lock entry with that name and a different `source`, **or two entries in the file both provide it:** mark it `gap`, name both sources, and install nothing for that name. The lock holds one skill per name, so `npx skills add` would silently replace the other source's copy on every machine. The user resolves it by dropping one source, or by naming skills so the two no longer overlap.
   - **When a listed skill's name matches a harness's built-in slash command:** add a `gap` line naming the harness and the command, and still install it. One of the two may hide the other in that harness, which the user should know about, but the skill is theirs to keep.
   - `extra` for an installed skill in the lock that no entry provides and `ignore` doesn't name: kept, for the user to add to the file, add to `ignore` or remove.
-- **A plugin:** compare its installed code with the latest package or marketplace source, then follow the harness reference's **Plugins** section. A matching configuration source is not a freshness check. `verify.py` prints a `plugin` line per entry and harness: `ok`, `FAIL` (missing, disabled or different), `n/a` (the harness isn't set up, or another `os`), `gap` (the harness can't take that kind yet) and `extra` (a bundle Claude Code has enabled that the list leaves out, which Cursor imports too, or an extension Pi's `settings.json` lists that the list leaves out). A malformed list is one `FAIL` line, and nothing from it is installed.
+- **A plugin:** compare its installed code with the latest package or marketplace source, then follow the harness reference's **Plugins** section. A matching configuration source is not a freshness check. `verify.py` checks each entry in the `plugins` cell of each harness it names: `FAIL` when it is missing, disabled or different, `gap` when the harness can't take that kind yet, and `n/a` when no entry applies to the harness on this OS. A malformed list fails the `setup` line, and nothing from it is installed.
   - Move a `commands` entry that installs a Claude Code plugin into `plugins`; the same plugin in both is installed twice.
 - **A command:** run its readiness `check` and compare its version with current upstream metadata. Use `added` when absent, `updated` when outdated, and `present` only when both checks pass. Use the documented updater for an existing installation, preserving its channel. Report unavailable freshness evidence as `gap`. Run readiness and freshness checks again after installation or update. Configuration-only commands need no software version comparison.
 
@@ -232,7 +232,7 @@ With a workstation repo, the shared file's personal parts are generated from `se
 - **When the shared file holds a Tool value, or a line of another personal part, that the workstation repo lacks:** add it to the clone's `setup/instructions.md` in the same diff, before the shared file is rewritten, so nothing is lost. In the report, name the file for the user to commit and push in their own repository.
 - **When `setup/instructions.md` doesn't exist yet:** the diff creates it from the shared file's current values in the shape above.
 
-`verify.py` checks the result: a `personal` line is `ok` when the shared file carries the repository's values and sections, `none` when the pointer says there is no repository, and `FAIL` when the pointer is missing, a section differs, a `workstation-repo` or `path-to-workstation-repo` row is missing or differs from the pointer, or the shared file has an optional section the repository lacks or lacks one it has.
+`verify.py` checks the result on its `setup` line: `ok` when the shared file carries the repository's values and sections, `n/a` when the pointer says there is no repository, and `FAIL` when the pointer is missing, a section differs, a `workstation-repo` or `path-to-workstation-repo` row is missing or differs from the pointer, or the shared file has an optional section the repository lacks or lacks one it has.
 
 ## Writing the personal permissions
 
@@ -243,4 +243,4 @@ Turn each personal permission into each harness's entries the way that harness's
 - **When the machine holds an `extra` entry that is the person's own choice,** such as an allow for a tool they added by hand: propose it as a personal permission in the clone's `setup/permissions.json` in the same diff, so the next machine gets it too, and name the file in the report for the user to commit there.
 - **When a personal permission is removed:** the entries it left behind are `extra`, for the user to remove.
 
-`verify.py` runs each personal permission's samples through the hook with the table's, fails a malformed file, and checks Claude Code's settings: `personal present` names a row's entries, `personal n/a` says which tool Claude Code lacks, `personal gap` is a row with no native entry there, and `personal FAIL` an entry missing. The other harnesses' entries are compared in the diff.
+`verify.py` runs each personal permission's samples through the hook with the table's on its `rules` line, and fails the `setup` line for a malformed file. Each harness's `guardrails` cell is `FAIL` when a personal permission lacks its native entry there. It skips a row whose tool the harness lacks, an MCP-tool row (its entries wait for a tool listing), and a kind of command row no native entry can express.

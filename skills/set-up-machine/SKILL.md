@@ -65,21 +65,35 @@ Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CL
    - **When the diff holds only `added` and `updated` installs from `setup/installs.json`:** write it without asking, since the user approved that list by writing it.
 4. **Back up** every file the diff changes or removes. Before writing any file, copy each one into `~/.config/agents/backups/<UTC time as YYYYmmddTHHMMSSZ>/`, at its path relative to the home folder (`.claude/settings.json`). Copy a symlink as a link.
 5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, stop subsequent writes and report what changed before the failure. Check configuration and guardrail compatibility after upgrades; report failures rather than making an old snapshot the desired state. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
-6. **Verify** with `scripts/verify.py`, then inspect again until the diff changes nothing: no pending `added`, `updated`, `tightened` or `removed` line, and no unreported freshness gap. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
+6. **Verify** with `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when [What verify must show](#what-verify-must-show) holds. Then inspect again until the diff changes nothing: no pending `added`, `updated`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
 
-   Run `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when [What verify must show](#what-verify-must-show) passes. Report `config gap` and `config override` lines separately; they limit what the audit proves. The verifier checks persisted configuration, not current upstream releases. Complete the separate freshness checks from Inspect before reporting that every installation is latest.
+   The verifier checks persisted configuration, not upstream releases. Complete the freshness checks from Inspect before you report that every installation is the latest.
 
 ## What verify must show
 
-Shared lines first. Then read the reference for each harness that is present. That reference states the lines only that harness adds. A harness whose reference adds no line is done when its `hook wired` line is present.
+Two global lines, then one table, then one detail line per `FAIL` and `gap` cell:
 
-### Shared
+```text
+setup  ok    <owner>/<repo>: the shared file matches setup/instructions.md
+rules  ok    38 rows and 2 personal permissions, 197 samples
 
-- `rules ok`
-- a `hook wired` line for every harness found
-- `personal ok` or `personal none`, and no `personal FAIL`
-- no `harness FAIL`. A `harness gap` names instructions this skill cannot deliver yet. The harness reference states that line.
-- no `plugin FAIL`. A `plugin gap` or `plugin extra` is stated in that harness's reference.
+harness      instructions  guardrails    sandbox       plugins       skills
+Claude Code  ok            ok            n/a           ok            ok
+Cursor       FAIL          ok            ok            ok            ok
+
+FAIL  Cursor instructions: ~/.cursor/rules/global-instructions.mdc is stale; generate it again
+```
+
+- **`setup`:** the pointer and every `setup/` file are readable, and the shared file carries what `setup/instructions.md` generates. `n/a` when the pointer says there is no workstation repo.
+- **`rules`:** every sample of every rule-table row and personal permission gets its row's answer from the hook.
+- **A row per harness present.** Each cell is `ok`, `FAIL`, `gap` (the harness can't do it, or the check can't see it) or `n/a` (the area doesn't apply). The columns:
+  - `instructions`: the harness reads the shared file, its own instructions from `setup/harnesses.json` when named, and memory is off;
+  - `guardrails`: the hook is wired to an installed script, and each personal permission has its native entry where the harness has native rules;
+  - `sandbox`: the harness's declared sandbox and approval settings (Pi's declared settings);
+  - `plugins`: each `setup/installs.json` plugin for this harness is installed and enabled;
+  - `skills`: each skill `setup/installs.json` lists is in a folder this harness reads skills from.
+
+The run passes when no line or cell is `FAIL`; the verifier then exits 0. Report each `gap` line. Each harness reference's *Checking it* section says what its row checks.
 
 ## Rule table
 
@@ -120,11 +134,11 @@ Name these once in every audit:
 ## References
 
 - [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, the working agreement and glossaries, what counts as personal workflow, moving a harness's own file, and why memory stays off.
-- [references/rule-table.md](references/rule-table.md): changing a row of the rule table, changing the hook's code and its tests, and adding a harness.
+- [references/rule-table.md](references/rule-table.md): a row's fields, its `match` kinds, and the spellings a harness needs.
 - [references/workstation.md](references/workstation.md): what this skill reads from the workstation repo: the pointer, the `setup/` files, the files `setup/harnesses.json` points at, and their format, generating the shared file's personal parts and the personal permissions from them, the installs list, and the run without one.
 - [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
   - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
-- One reference per harness, read for each harness found. Each says how the harness is found, where it keeps each setting, a row's native form with worked examples, the hook's wiring, and its gaps:
+- One reference per harness, read for each harness found. Each has the same headings: Found, Instructions, Guardrails, Sandbox, Plugins, Skills, Hook wiring, Gaps, Checking it.
   - [references/claude-code.md](references/claude-code.md): Claude Code.
   - [references/codex.md](references/codex.md): Codex. Its *Codex MCP* section holds the TOML and OAuth detail.
   - [references/opencode.md](references/opencode.md): opencode.
@@ -133,7 +147,8 @@ Name these once in every audit:
 
 ## Scripts
 
-- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine. Shared checks: each row's samples through the hook, the shared file against the workstation repo, each harness's own instructions against the file `setup/harnesses.json` names, and the `plugins` list. Every script finds the workstation repo's files through `scripts/setupmachine/layout.py`. The verifier, the hook, and the plugin checker discover harness setups in `scripts/setupmachine/harness_setups/`. A harness setup that takes plugins exposes `validate`, `check`, and `propose`. Each harness reference states that harness's audit lines.
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
+- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder. `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command (references/codex.md).
+- `scripts/setupmachine/`: the modules both scripts use. `harnesses/__init__.py` lists every harness in `ALL`, and each harness has one module there.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
 - [references/pi-extension.ts](references/pi-extension.ts): the Pi extension that calls the hook and asks the user for ask rows.

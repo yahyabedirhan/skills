@@ -1,6 +1,6 @@
 # Rule table
 
-How to change the rule table, `rules.json`, and the pre-tool hook that reads it. This file describes each row field once. `SKILL.md` points here.
+The format of a row of the rule table, `rules.json`, and of a personal permission: its fields, its `match` kinds, and the spellings a harness that matches text needs. This file describes each field once.
 
 ## A row
 
@@ -39,15 +39,3 @@ A harness that matches a command's text catches only the spellings it lists, so 
 - **Flags:** a one-letter name is a short flag (`-r`), a longer one a long flag (`--recursive`). Every order of the groups, every spelling in each group, as separate words; and, when every group has a one-letter name, the one-letter names clustered in every order (`-rf`, `-fr`, `-Rf`, `-fR`).
 - **Order:** program, then subcommand words, then flags, then operands (`git push --force`, `chmod -R 777`).
 - **`find`'s options** (`-delete`) are one-dash words written after the path, so no prefix entry catches them: a command row on `find` gets no native entry, a gap the hook covers on every harness.
-
-## Changing a row
-
-Edit a row, or add one with its samples, then run `python3 <this skill>/scripts/verify.py --no-codex` until `rules ok`, and the unit tests below. The change reaches a machine when `/set-up-machine` runs there again. When the hook would read a row differently from what the row means, change the hook first, writing its test first in `scripts/tests/test_hook.py`.
-
-## Changing the hook's code
-
-Run the tests with `python3 -m unittest discover -s <this skill>/scripts/tests`. `scripts/tests/linux/run.sh <repo> <output folder>` runs them and `verify.py` in a fresh Linux container.
-
-## Adding a harness
-
-Add one harness setup under `scripts/setupmachine/harness_setups/`. Give it an `id` and a `label`. Copy the operations Cursor's harness setup defines. Those are `present`, `audit`, and `read` and `write` when the harness runs the hook. Add `validate`, `check`, and `propose` when the harness takes plugins. Write one reference with the same headings as [Claude Code's](claude-code.md). State that harness's audit lines in the reference. Do not add a second list of harness names. The verifier, the hook, and the plugin checker discover the new module.
