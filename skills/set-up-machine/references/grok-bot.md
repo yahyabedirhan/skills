@@ -18,7 +18,7 @@ Grok Bot loads no instructions file. Neither `~/.config/agents/AGENTS.md` nor a 
 
 Still write the shared file, as every run does: the `setup` line checks it.
 
-- **Apply:** write each instruction as one short fact, in the source's words, in its scope. When the agent can't write memory itself, give the user the list, split by scope, and wait until they confirm. Then write the lock (*Reconcile*).
+- **Apply:** write each instruction as one short fact, in the source's words, in its scope. When the agent can't write memory itself, give the user the list, split by scope, and wait until they confirm. Then write the lock and the applied log entry (*Reconcile*).
 - **Keep each fact to one instruction.** A fact that names a file to read, such as the shared file, holds one line, not the file.
 
 ### Reconcile
@@ -36,6 +36,7 @@ at `~/.local/state/agents/grok-bot-instructions-lock.json`. To bring memory up t
 2. Map each changed line to a fact: an added line is **add**, a changed line is **rewrite** of the fact the lock lists for it, a removed line is **forget** that fact. User scope for `setup/instructions.md`, agent scope for Grok Bot's own file.
 3. Apply each one, or give the user the list and wait until they confirm.
 4. Rewrite the lock with the new `sha`, the date and every fact now applied.
+5. Append one entry to the workstation repo's applied log for this harness, when it has one: the date, the source `sha`, each fact added, rewritten or forgotten per scope, and the Auto-review rules handed to the user. Never edit an earlier entry. The lock is the state; the log is its history.
 
 A fact in memory that the lock doesn't list is the user's: keep it, and name it as `extra` when you see it.
 
