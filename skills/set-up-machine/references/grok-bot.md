@@ -20,8 +20,12 @@ The lock is `~/.local/state/agents/grok-bot-instructions-lock.json`:
 
 ```json
 {"sha": "<workstation commit>", "date": "<YYYY-MM-DD>",
- "sources": {"setup/instructions.md": ["<fact as written>"], "<grok-bot instructions path>": ["<fact as written>"]}}
+ "sources": {"setup/instructions.md": ["<fact as written>"]},
+ "agents": {"<agent name>": {"sha": "<workstation commit>", "date": "<YYYY-MM-DD>",
+                             "facts": ["<fact as written>"], "profile": "<description as set>"}}}
 ```
+
+The box is shared, so one lock holds user memory and an entry per agent. Each agent applies its own entry: it writes its agent-scope facts and profile, then adds or rewrites only its entry. Facts may be tailored to the agent's job, as long as the entry holds the exact text written. The applied state page has one agent section per entry.
 
 The **applied state page** is the workstation repo's `harnesses/grok-bot/applied.md`, when it exists: the lock's commit and date, each exact fact by scope, the profile and the Auto-review rules status. Its history is its git log. It names the commit its instructions came from, which is always earlier than the commit that holds the page. When the sources are unchanged, move the lock to a later commit, such as a merge, without rewriting the page; don't open a pull request only to match the hashes.
 
@@ -35,7 +39,7 @@ You may merge or reword lines into facts. The lock and the applied state page al
 4. Turn each line under `## Instructions` of Grok Bot's file into a fact, and write each in agent scope.
 5. Set the profile's title and description from that file's notes.
 6. When you can't write memory or the profile, give the user the facts by scope and wait until they confirm the exact texts written.
-7. Write the lock with the commit, the date and each exact fact.
+7. Write the lock with the commit, the date and each exact user fact, and this agent's entry. An agent joining later writes only its entry.
 8. Rewrite the applied state page to match the lock, with the profile and the Auto-review rules status.
 9. Give the user the Auto-review rules text (*Guardrails*) and each user-only step: rules to paste, connectors, secrets, rulesets.
 
@@ -46,7 +50,7 @@ Run it when the verifier's instructions cell says stale.
 1. Run `git -C <path-to-workstation-repo> diff <lock sha>..HEAD -- setup/instructions.md <grok-bot instructions path>`.
 2. Map each changed line: added is **add**; changed is **rewrite** of the lock's fact for it; removed is **forget** that fact. User scope for `setup/instructions.md`, agent scope for Grok Bot's file.
 3. Apply each with the memory tool, finding an old fact by its exact lock text. Or give the user the list and wait until they confirm.
-4. Rewrite the lock with the new commit, the date and every fact now applied.
+4. Rewrite the lock: the top commit and user facts for a user-scope change, this agent's entry for an agent-scope change. Every agent reconciles its own entry.
 5. Rewrite the applied state page to match the lock.
 
 ### Audit

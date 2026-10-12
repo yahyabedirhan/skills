@@ -21,7 +21,8 @@ ID, LABEL = "grok-bot", "Grok Bot"
 FOLDER = Path("agent-data/workflows")
 # Like ~/.agents/.skill-lock.json: {"skills": {name: {"source", "skillPath", "skillFolderHash"}}}.
 LOCK = Path(".local/state/agents/grok-bot-skill-lock.json")
-# {"sha", "date", "sources": {"<path in the workstation repo>": ["<fact>", …]}}: what memory holds, and from which commit.
+# {"sha", "date", "sources": {"setup/instructions.md": [fact]}, "agents": {name: {"sha", "date", "facts", "profile"}}}:
+# what user memory and each agent's memory hold, and from which commit. The box is shared, so one lock holds every agent.
 INSTRUCTIONS_LOCK = Path(".local/state/agents/grok-bot-instructions-lock.json")
 
 
@@ -64,14 +65,21 @@ def check_instructions(ctx) -> Cell:
     if not lock or not isinstance(lock.get("sha"), str):
         return Cell("gap", [f"no {ctx.show(lock_path)}: write the facts into memory, then the lock and the applied state page "
                             "(references/grok-bot.md, *First-time apply*)"])
+    agents = lock.get("agents") if isinstance(lock.get("agents"), dict) else {}
     problems = []
     for source in sources(ctx):
         relative = source.relative_to(ctx.setup.clone).as_posix()
-        then = subprocess.run(["git", "-C", str(ctx.setup.clone), "show", f"{lock['sha']}:{relative}"],
-                              capture_output=True, text=True)
-        if then.returncode != 0 or then.stdout != source.read_text():
-            problems.append(("FAIL", f"stale: {relative} changed since {lock['sha'][:7]}; reconcile memory "
-                                     "(references/grok-bot.md, *Reconcile*)"))
+        # User memory follows the lock's own commit; each agent's memory follows its entry's commit.
+        own = relative != "setup/instructions.md" and agents
+        shas = {name: entry.get("sha") for name, entry in agents.items() if isinstance(entry, dict)} if own \
+            else {"": lock["sha"]}
+        for name, sha in shas.items():
+            then = subprocess.run(["git", "-C", str(ctx.setup.clone), "show", f"{sha}:{relative}"],
+                                  capture_output=True, text=True) if isinstance(sha, str) else None
+            if then is None or then.returncode != 0 or then.stdout != source.read_text():
+                who = f" for agent {name}" if name else ""
+                problems.append(("FAIL", f"stale: {relative} changed since {str(sha)[:7]}{who}; reconcile memory "
+                                         "(references/grok-bot.md, *Reconcile*)"))
     return cell(problems)
 
 
