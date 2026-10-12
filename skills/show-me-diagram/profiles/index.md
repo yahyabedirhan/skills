@@ -8,6 +8,7 @@ The diagram-design profiles this skill ships. A profile is a saved set of choice
 | Navy Blue | [navy-blue.md](navy-blue.md) | a calm dark diagram for slides or a README |
 | Shipyard Green | [shipyard-green.md](shipyard-green.md) | anything about Shipyard or my agent work, in its icon's olive green |
 | Parchment | [parchment.md](parchment.md) | a story or a process, on warm paper |
+| Graphite | [graphite.md](graphite.md) | a crafted dark diagram in the look of the Swift Lab, Shipyard and skills logos: folded white paper on granite |
 
 ## The shape of a profile
 
