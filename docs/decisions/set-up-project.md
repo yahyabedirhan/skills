@@ -143,3 +143,14 @@ The decisions behind the `set-up-project` skill. This file is for maintaining it
 - **Options:** None considered.
 - **Choice and why:** Accept both forms. Both give Claude Code the same text, since it skips `AGENTS.md` when `CLAUDE.md` exists.
 - **Consequences:** The intro, the draft and the `AGENTS.md` seed now say the same thing.
+
+## 2026-10-12: the machine check depends only on the verifier's exit code
+
+- **Status:** accepted
+- **Context:** Step 1 explained Codex line names (`differs`, `same`, `stricter`, `skipped`), so it broke whenever set-up-machine's output changed.
+- **Options:** None considered.
+- **Choice and why:** A pass is exit code 0 from set-up-machine's verifier; otherwise run set-up-machine first.
+- **Consequences:** set-up-machine can change what it prints without an edit here.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.

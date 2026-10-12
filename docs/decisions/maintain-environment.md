@@ -347,3 +347,36 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 - **Options:** None considered.
 - **Choice and why:** The reference says who would write a second list, and why one harness setup is enough.
 - **Consequences:** None.
+
+## 2026-10-12: route each change to a source and its guide
+
+- **Status:** accepted
+- **Context:** The skill repeated the workstation layout, the setup file formats and the delivery rules, so every change to the workstation repo or to set-up-machine needed an edit here too.
+- **Options:** Keep the full layer table and workstation reference: it drifts each time either source changes.
+- **Choice and why:** One table names each change's source and that source's guide: the workstation repo's `DESIGN.md`, a skill's design in `docs/design/`, or a project's `AGENTS.md`. The skill repeats nothing a guide says.
+- **Consequences:** A change to the workstation layout or to set-up-machine needs no edit here.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-12: delete the harness-setup reference
+
+- **Status:** accepted
+- **Context:** `references/harness-setup.md` told an agent how to add a harness to set-up-machine, with the rule "add no second registration list". The maintainer could not tell why this skill held that rule.
+- **Options:** Rewrite it in plainer words: it would still repeat set-up-machine's own design.
+- **Choice and why:** Delete it. Adding a harness belongs to set-up-machine's design in `docs/design/set-up-machine.md`.
+- **Consequences:** None open.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-12: the workstation reference covers only starting a repo
+
+- **Status:** accepted
+- **Context:** `references/workstation.md` listed which file each personal change goes in, which the workstation repo's own `DESIGN.md` also says.
+- **Options:** None considered.
+- **Choice and why:** Keep what the repo is for, a minimal starting layout and how to start one. After that, the repo's `DESIGN.md` is the guide, and set-up-machine's `references/workstation.md` defines the `setup/` formats.
+- **Consequences:** None open.
+
+### References
+- [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
