@@ -9,10 +9,10 @@ from __future__ import annotations
 import json
 import os
 import re
-import shlex
 from pathlib import Path
 
-from ..checks import Cell, cell, link_problem, na, personal_problems, read_json, skill_problems, wiring_problem
+from ..checks import (Cell, cell, link_problem, na, on_path, personal_problems, read_json, skill_problems,
+                      template_problem)
 from ..hook import PATCH_FILE, ToolCall, refusal, search_pair
 
 ID, LABEL = "opencode", "opencode"
@@ -27,7 +27,7 @@ LEVELS = {"deny": "deny", "ask": "ask", "allow": "allow"}
 
 
 def present(home: Path) -> bool:
-    return (home / FOLDER).is_dir()
+    return (home / FOLDER).is_dir() or on_path(home, "opencode")
 
 
 # --- the hook ------------------------------------------------------------------------------
@@ -73,12 +73,13 @@ def check_instructions(ctx) -> Cell:
 def check_guardrails(ctx) -> Cell:
     """The plugin runs the hook; personal permissions are patterns in the config's `permission` key."""
     plugin = ctx.home / FOLDER / "plugins/set-up-machine.js"
-    text = plugin.read_text() if plugin.is_file() else ""
-    match = re.search(r"^const COMMAND = (\[.*\]);$", text, re.M)
-    command = shlex.join(json.loads(match.group(1))) if match else None
-    problems = [wiring_problem(ctx, plugin, command, ID)] if text else [("FAIL", f"no plugin at {ctx.show(plugin)}")]
+    problems = [template_problem(ctx, plugin, "opencode-plugin.js", ID) if plugin.is_file() else
+                ("FAIL", f"no plugin at {ctx.show(plugin)}")]
     config = _config_path(ctx.home)
-    lists = _native_lists((read_json(config) or {}).get("permission"))
+    data = _read_config(config)
+    if data is None:
+        return cell([p for p in problems if p] + [("FAIL", f"{ctx.show(config)} isn't a valid JSON object")])
+    lists = _native_lists(data.get("permission"))
     return cell([p for p in problems if p] + personal_problems(ctx, lists, config))
 
 
@@ -109,13 +110,34 @@ def _config_path(home: Path) -> Path:
     return found[-1] if found else home / FOLDER / "opencode.json"
 
 
+def _read_config(path: Path):
+    """The config file as read_json reads it; a .jsonc file loses its comments and trailing commas first."""
+    if path.suffix != ".jsonc":
+        return read_json(path)
+    try:
+        data = json.loads(_jsonc_as_json(path.read_text()))
+    except FileNotFoundError:
+        return {}
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _jsonc_as_json(text: str) -> str:
+    """JSONC as JSON: `//` and `/* */` comments, then commas before `}` or `]`, removed outside strings."""
+    def outside_strings(pattern, text):
+        return re.sub(rf'"(?:\\.|[^"\\])*"|{pattern}', lambda m: m.group(0) if m.group(0)[0] == '"' else " ",
+                      text, flags=re.S)
+    return outside_strings(r",(?=\s*[}\]])", outside_strings(r"//[^\n]*|/\*.*?\*/", text))
+
+
 def _native_lists(permission) -> dict:
     """The `permission` key as deny, ask and allow lists of (kind, text) entries."""
     lists = {name: [] for name in LEVELS}
     for tool, value in (permission if isinstance(permission, dict) else {}).items():
         patterns = value if isinstance(value, dict) else {"*": value}
         for pattern, level in patterns.items():
-            if level not in lists:
+            if not isinstance(level, str) or level not in lists:
                 continue
             if tool == "bash":
                 lists[level].append(("command", re.sub(r" \*$", "", pattern)))

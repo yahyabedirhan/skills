@@ -179,7 +179,7 @@ Codex reads user skills from `~/.agents/skills`, where `npx skills add … -a co
   ```
 
   Indexes count from 0 in `hooks.json`'s `PreToolUse` list and that group's `hooks`. Get the hash with `python3 <this skill>/scripts/verify.py --codex-trust-hash '<command>'`: sha256 over the canonical JSON (sorted keys, no spaces) of the hook's identity, `{"event_name": "pre_tool_use", "matcher": "*", "hooks": [{"type": "command", "command": <command>, "timeout": 10, "async": false}]}`. It covers the command, not the script's content, so updating the skill in place keeps the trust; a changed command needs a new entry, and the old one is `removed`.
-- **Audit:** `wired` when the group runs exactly that command and its trust entry holds the current hash; `verify.py` checks both. `[features] hooks = false` in `config.toml` turns every hook off: a `gap`, left to the user.
+- **Audit:** `wired` when the group runs exactly that command and its trust entry holds the current hash; `verify.py` checks both. `[features] hooks = false` in `config.toml` turns every hook off, so the hook never runs: `verify.py` fails guardrails. Name it and leave the change to the user.
 - **Input:** `tool_name` is `Bash` for the shell tools, with `tool_input.command` as the model wrote it (before the `-lc` wrapper); `apply_patch`, with the patch in `tool_input.command`; or `mcp__<server>__<tool>`. Also `cwd`, `session_id` and `permission_mode`: `bypassPermissions` when the approval policy is `never`, otherwise `default`. Nothing in it shows the reviewer.
 - **Answer:** the same as Claude Code's (`permissionDecision: "deny"` with the reason). Codex passes it on as `Command blocked by PreToolUse hook: <reason>. Command: <command>`.
 - **Gap:** a trusted project's `.codex/config.toml` can set `[features] hooks = false`; the rules still hold.
@@ -193,7 +193,7 @@ Rules alone let through flags after the operands (`git push origin main --force`
 The verifier's Codex row, from `scripts/setupmachine/harnesses/codex.py`, reads the resolved Codex config home:
 
 - **instructions:** `AGENTS.md` is a link to the shared file, and `memories` is `false` in `[features]`. A non-empty `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Codex in `setup/harnesses.json`.
-- **guardrails:** a match-all `PreToolUse` group in `hooks.json` runs an existing `pre_tool_hook.py` with `--harness codex`, and `config.toml` holds its current `trusted_hash`. Each personal command row that gets a rule has `(set-up-machine personal rule <id>)` in `rules/set-up-machine.rules`.
+- **guardrails:** a match-all `PreToolUse` group in `hooks.json` runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness codex`, `config.toml` holds its current `trusted_hash`, and `[features] hooks` isn't `false`. Each personal command row that gets a rule has `(set-up-machine personal rule <id>)` in `rules/set-up-machine.rules`.
 - **sandbox:** each key the declared Codex config sets has the same value in `config.toml`. `n/a` without a declared config.
 - **plugins:** as *Plugins* says.
 - **skills:** each listed skill is in `~/.agents/skills` or `skills/` in the config home.

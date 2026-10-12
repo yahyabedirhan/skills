@@ -112,6 +112,21 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
     return verdict
 
 
+# --- reading a payload (shared by the harness modules) ------------------------
+
+
+def search_pair(args: dict, folder_key: str, glob_key: str) -> tuple:
+    """A search tool's (folder, glob) pair, when its arguments name a glob."""
+    glob, folder = args.get(glob_key), args.get(folder_key)
+    if not isinstance(glob, str) or not glob:
+        return ()
+    return ((folder if isinstance(folder, str) else "", glob),)
+
+
+# apply_patch's file headers; each names a file the patch writes.
+PATCH_FILE = re.compile(r"^\*\*\* (Add File|Update File|Delete File|Move to): (.+?)\s*$", re.M)
+
+
 # --- file rows ----------------------------------------------------------------
 
 
@@ -173,18 +188,6 @@ def refusal(denials: list) -> str:
         r = hit.rule
         lines.append(f"- `{hit.part}`: denied by rule {r.id} ({plain(r.summary)}). {r.reason} Instead: {r.instruction}")
     return "\n".join(lines)
-
-
-def search_pair(args: dict, folder_key: str, glob_key: str) -> tuple:
-    """A search tool's (folder, glob) pair, when its arguments name a glob."""
-    glob, folder = args.get(glob_key), args.get(folder_key)
-    if not isinstance(glob, str) or not glob:
-        return ()
-    return ((folder if isinstance(folder, str) else "", glob),)
-
-
-# apply_patch's file headers; each names a file the patch writes.
-PATCH_FILE = re.compile(r"^\*\*\* (Add File|Update File|Delete File|Move to): (.+?)\s*$", re.M)
 
 
 def plain(summary: str) -> str:

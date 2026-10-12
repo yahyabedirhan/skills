@@ -13,7 +13,8 @@ from dataclasses import replace
 from pathlib import Path
 
 from . import claude_code
-from ..checks import (Cell, any_wired_problem, cell, dig, na, personal_problems, read_json, skill_problems)
+from ..checks import (Cell, any_wired_problem, as_list, cell, dig, na, on_path, personal_problems, read_json,
+                      skill_problems)
 from ..hook import ToolCall, refusal, search_pair
 from ..workstation import HARNESS_SECTION, section
 
@@ -27,7 +28,7 @@ FILE_TOOLS = {"Read": "read", "Grep": "read", "Write": "write", "Delete": "write
 
 
 def present(home: Path) -> bool:
-    return (home / FOLDER).is_dir()
+    return (home / FOLDER).is_dir() or on_path(home, "cursor-agent", "cursor")
 
 
 # --- the hook ------------------------------------------------------------------------------
@@ -40,7 +41,8 @@ def read(payload: dict) -> ToolCall:
         return source.get(key) if isinstance(source.get(key), str) else ""
 
     roots = payload.get("workspace_roots")
-    call = ToolCall(tool="", cwd=text("cwd") or (roots[0] if isinstance(roots, list) and roots else ""),
+    root = roots[0] if isinstance(roots, list) and roots and isinstance(roots[0], str) else ""
+    call = ToolCall(tool="", cwd=text("cwd") or root,
                     session=text("conversation_id") or text("session_id"),
                     unattended="Cursor, which can run tools without asking", no_native_ask=True)
     event = text("hook_event_name")
@@ -91,10 +93,11 @@ def check_instructions(ctx) -> Cell:
 def check_guardrails(ctx) -> Cell:
     """Each of the four events runs the hook; personal permissions are in the CLI's lists or Claude Code's."""
     path = ctx.home / FOLDER / "hooks.json"
-    hooks = dig(read_json(path) or {}, "hooks") or {}
+    hooks = dig(read_json(path) or {}, "hooks")
+    hooks = hooks if isinstance(hooks, dict) else {}
     problems = []
     for event in EVENTS:
-        commands = [h.get("command") for h in hooks.get(event) or [] if isinstance(h, dict)]
+        commands = [h.get("command") for h in as_list(hooks.get(event)) if isinstance(h, dict)]
         problem = any_wired_problem(ctx, path, commands, ID)
         if problem:
             problems.append((problem[0], f"{event}: {problem[1]}"))

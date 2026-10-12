@@ -66,7 +66,7 @@ skills/set-up-machine/
 | Name | What it is |
 |---|---|
 | `ID`, `LABEL` | `"cursor"`, `"Cursor"` |
-| `present(home)` | whether the harness is set up here |
+| `present(home)` | its folder exists, or its CLI is on `PATH` |
 | `read(payload)` | the hook payload as one `ToolCall` |
 | `write(denials, asks)` | the harness's answer to the hook |
 | `check_instructions(ctx)` … `check_skills(ctx)` | one `Cell(status, detail)` per setup area |

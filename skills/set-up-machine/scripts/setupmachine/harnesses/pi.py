@@ -9,15 +9,12 @@ from __future__ import annotations
 
 import json
 import os
-import re
-import shlex
 from pathlib import Path
 
-from ..checks import Cell, cell, dig, link_problem, na, read_json, skill_problems, wiring_problem
+from ..checks import Cell, cell, dig, link_problem, na, on_path, read_json, skill_problems, template_problem
 from ..hook import ToolCall, plain, refusal, search_pair
 
 ID, LABEL = "pi", "Pi"
-EXTENSION_HEADER = "// set-up-machine: the pre-tool hook, as a Pi extension."
 # Pi's built-in tools that take a path: the input field holding it, and the access it means.
 FILE_TOOLS = {"read": "read", "edit": "write", "write": "write", "grep": "read", "find": "read", "ls": "read"}
 SEARCH_GLOB = {"grep": "glob", "find": "pattern"}
@@ -30,7 +27,7 @@ def agent_dir(home: Path) -> Path:
 
 
 def present(home: Path) -> bool:
-    return agent_dir(home).is_dir()
+    return agent_dir(home).is_dir() or on_path(home, "pi")
 
 
 # --- the hook ------------------------------------------------------------------------------
@@ -83,12 +80,7 @@ def check_guardrails(ctx) -> Cell:
     path = ctx.pi_dir / "extensions/set-up-machine.ts"
     if not path.is_file():
         return cell([("FAIL", f"no extension at {ctx.show(path)}; nothing enforces the rule table in Pi")])
-    text = path.read_text()
-    if not text.startswith(EXTENSION_HEADER):
-        return cell([("gap", f"{ctx.show(path)} wasn't written by set-up-machine; left alone")])
-    match = re.search(r"^const COMMAND = (\[.*\]);$", text, re.M)
-    command = shlex.join(json.loads(match.group(1))) if match else None
-    return cell([p for p in [wiring_problem(ctx, path, command, ID)] if p])
+    return cell([p for p in [template_problem(ctx, path, "pi-extension.ts", ID)] if p])
 
 
 def check_sandbox(ctx) -> Cell:

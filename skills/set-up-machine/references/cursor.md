@@ -121,7 +121,7 @@ The rows with no entry above, the ask rows, the exceptions the CLI refuses, the 
 The verifier's Cursor row, from `scripts/setupmachine/harnesses/cursor.py`:
 
 - **instructions:** `~/.cursor/rules/global-instructions.mdc` is the header above the shared file, byte for byte. When `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` matches its source too. A missing or stale copy is `FAIL`, and so is a generated `harness-instructions.mdc` whose source is gone. A file without the generated comment is a `gap`, left alone.
-- **guardrails:** all four events in `~/.cursor/hooks.json` run an existing `pre_tool_hook.py` with `--harness cursor`. Each personal deny or allow row has its entry in `cli-config.json` or in Claude Code's lists, which the CLI unions.
+- **guardrails:** all four events in `~/.cursor/hooks.json` run the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness cursor`. Each personal deny or allow row has its entry in `cli-config.json` or in Claude Code's lists, which the CLI unions.
 - **sandbox:** `cli-config.json` has `approvalMode` `auto-review` and `sandbox.mode` `enabled`.
 - **plugins:** each bundle is installed and enabled in Claude Code. Each standalone server is in `~/.cursor/mcp.json`, equal to its entry.
 - **skills:** each listed skill is in `~/.agents/skills` or `~/.cursor/skills`.

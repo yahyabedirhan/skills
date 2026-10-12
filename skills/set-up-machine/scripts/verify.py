@@ -13,7 +13,8 @@ It reads the machine and writes nothing. The steps:
      file (~/.config/agents/AGENTS.md) carries what setup/instructions.md generates;
    - rules: every sample of every rule-table row and personal permission gets its row's
      answer from the hook's decision.
-3. Print one table: a row per harness present, a column per setup area (instructions,
+3. Print one table: a row per harness found (its folder exists, or its CLI is on PATH; a --home
+   copy counts only its folders), a column per setup area (instructions,
    guardrails, sandbox, plugins, skills), each cell ok, FAIL, gap or n/a.
 4. Print one detail line per FAIL and gap cell.
 5. Exit 1 when any line or cell is FAIL.

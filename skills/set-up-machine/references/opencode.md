@@ -96,7 +96,7 @@ The hook's own misses are in SKILL.md, *What it can't see*.
 The verifier's opencode row, from `scripts/setupmachine/harnesses/opencode.py`:
 
 - **instructions:** `~/.config/opencode/AGENTS.md` is a link to the shared file. An `instructions` entry for opencode in `setup/harnesses.json` is a `gap`.
-- **guardrails:** `plugins/set-up-machine.js` runs an existing `pre_tool_hook.py` with `--harness opencode`. Each personal permission has its pattern in the config file's `permission` key, at its level, except the rows *Personal permissions* leaves out.
+- **guardrails:** `plugins/set-up-machine.js` runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness opencode`, and the file is [opencode-plugin.js](opencode-plugin.js) but for its `COMMAND` line; one that differs otherwise, or whose `COMMAND` isn't a JSON list, is `FAIL`. A file there without the template's first line is someone else's: a `gap`, left alone. Each personal permission has its pattern in the config file's `permission` key (an `opencode.jsonc` is read without its comments and trailing commas; a file that still isn't JSON is `FAIL`), at its level, except the rows *Personal permissions* leaves out.
 - **sandbox:** `n/a`.
 - **plugins:** each entry for opencode is a `gap`; no entry is `n/a`.
 - **skills:** each listed skill is in `~/.config/opencode/skills`, `~/.claude/skills` or `~/.agents/skills`.

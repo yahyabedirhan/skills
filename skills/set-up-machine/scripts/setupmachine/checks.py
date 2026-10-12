@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shlex
 import shutil
 from dataclasses import dataclass, field
@@ -30,7 +31,12 @@ except ImportError:
     tomllib = None
 
 HOOK_SCRIPT = "pre_tool_hook.py"
+REFERENCES = Path(__file__).resolve().parents[2] / "references"
+# The line of a generated hook file that names the hook command; the template holds a placeholder there.
+COMMAND_LINE = re.compile(r"^const COMMAND = (.*);$", re.M)
 LOCK = Path(".agents/.skill-lock.json")
+# Where an installed skill lives; the hook is wired to its copy there (SKILL.md, *Wiring*).
+INSTALLED_SKILLS = (".agents/skills", ".claude/skills")
 # Which native list a personal permission's entries go to, by the row's level.
 LISTS = {"deny": "deny", "ask": "ask", "allow-and-report": "allow", "allow": "allow"}
 
@@ -101,6 +107,16 @@ def dig(data, *keys):
     return data
 
 
+def as_list(value) -> list:
+    """A JSON value as a list: itself when it is one, else empty."""
+    return value if isinstance(value, list) else []
+
+
+def on_path(home: Path, *names: str) -> bool:
+    """Whether one of the CLIs is on PATH. Only the real home counts it; a fixture home has only its folders."""
+    return home == Path.home().resolve() and any(shutil.which(name) for name in names)
+
+
 def link_problem(ctx: Context, link: Path):
     """A problem when `link` isn't a symlink to the shared file; None when it is."""
     if link.is_symlink() and link.resolve() == ctx.shared.resolve():
@@ -123,13 +139,37 @@ def hook_script(command: str, harness: str, home: Path):
 
 
 def wiring_problem(ctx: Context, where: Path, command, harness: str):
-    """A problem when `command` doesn't run an existing hook script for this harness; None when it does."""
+    """A problem when `command` doesn't run an existing hook script, in the installed skill, for this
+    harness; None when it does. A checkout or worktree can be deleted, so it doesn't count."""
     script = hook_script(command, harness, ctx.home) if isinstance(command, str) else None
     if script is None:
         return ("FAIL", f"{ctx.show(where)} doesn't run the pre-tool hook with --harness {harness}")
+    installed = [ctx.home / folder for folder in INSTALLED_SKILLS]
+    if not any(Path(os.path.normpath(script)).is_relative_to(folder) for folder in installed):
+        return ("FAIL", f"{ctx.show(where)} is wired to {ctx.show(script)}, which is not the installed skill")
     if not script.is_file():
         return ("FAIL", f"{ctx.show(where)} runs {ctx.show(script)}, which doesn't exist")
     return None
+
+
+def template_problem(ctx: Context, path: Path, template: str, harness: str):
+    """A problem when a generated hook file (Pi's extension, opencode's plugin) isn't its template
+    with a command that runs the hook; None when it is. A file without the template's first line
+    is someone else's: a gap. The caller reports a missing file."""
+    want = (REFERENCES / template).read_text()
+    text = path.read_text()
+    if not text.startswith(want.split("\n", 1)[0]):
+        return ("gap", f"{ctx.show(path)} wasn't written by set-up-machine; left alone")
+    match = COMMAND_LINE.search(text)
+    try:
+        words = json.loads(match.group(1)) if match else None
+    except ValueError:
+        words = None
+    if not isinstance(words, list) or not all(isinstance(w, str) for w in words):
+        return ("FAIL", f"{ctx.show(path)} has no `const COMMAND = [...]` line holding a JSON list of words")
+    if COMMAND_LINE.sub("const COMMAND = __HOOK_COMMAND__;", text, count=1) != want:
+        return ("FAIL", f"{ctx.show(path)} differs from references/{template}; write it again from the template")
+    return wiring_problem(ctx, path, shlex.join(words), harness)
 
 
 def any_wired_problem(ctx: Context, where: Path, commands: list, harness: str):
@@ -146,7 +186,8 @@ def skill_problems(ctx: Context, folders: list) -> list:
     An entry naming skills wants each name. An entry without names wants every skill
     `~/.agents/.skill-lock.json` records from that source, and at least one.
     """
-    lock = (read_json(ctx.home / LOCK) or {}).get("skills", {})
+    lock = (read_json(ctx.home / LOCK) or {}).get("skills")
+    lock = {n: rec for n, rec in lock.items() if isinstance(rec, dict)} if isinstance(lock, dict) else {}
     problems = []
     for entry in ctx.setup.installs.get("skills", []):
         source = entry["source"]

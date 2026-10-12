@@ -10,8 +10,8 @@ import json
 import re
 from pathlib import Path
 
-from ..checks import (Cell, any_wired_problem, cell, dig, link_problem, na, personal_problems, read_json,
-                      skill_problems)
+from ..checks import (Cell, any_wired_problem, as_list, cell, dig, link_problem, na, on_path, personal_problems,
+                      read_json, skill_problems)
 from ..hook import ToolCall, refusal, search_pair
 
 ID, LABEL = "claude-code", "Claude Code"
@@ -25,7 +25,7 @@ UNATTENDED = ("auto", "dontAsk", "bypassPermissions")
 
 
 def present(home: Path) -> bool:
-    return (home / FOLDER).is_dir()
+    return (home / FOLDER).is_dir() or on_path(home, "claude")
 
 
 # --- the hook ------------------------------------------------------------------------------
@@ -73,15 +73,17 @@ def check_instructions(ctx) -> Cell:
 
 
 def check_guardrails(ctx) -> Cell:
-    """A match-all PreToolUse group runs the hook, and each personal permission has its entry."""
+    """A match-all PreToolUse group runs the hook, hooks are on, and each personal permission has its entry."""
     path = ctx.home / FOLDER / "settings.json"
     settings = read_json(path)
     if settings is None:
         return cell([("FAIL", f"{ctx.show(path)} isn't valid JSON")])
-    groups = [g for g in dig(settings, "hooks", "PreToolUse") or [] if isinstance(g, dict)]
+    groups = [g for g in as_list(dig(settings, "hooks", "PreToolUse")) if isinstance(g, dict)]
     commands = [h.get("command") for g in groups if g.get("matcher") in ("*", "", None)
-                for h in g.get("hooks", []) if isinstance(h, dict)]
+                for h in as_list(g.get("hooks")) if isinstance(h, dict)]
     problems = [any_wired_problem(ctx, path, commands, ID)]
+    if settings.get("disableAllHooks") is True:
+        problems.append(("FAIL", f"{ctx.show(path)} sets disableAllHooks, so the hook never runs"))
     return cell([p for p in problems if p] + personal_problems(ctx, native_lists(settings), path))
 
 

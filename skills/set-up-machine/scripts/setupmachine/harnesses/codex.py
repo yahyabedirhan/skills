@@ -14,8 +14,8 @@ from pathlib import Path
 
 from . import claude_code
 from .. import checks
-from ..checks import (Cell, any_wired_problem, cell, dig, link_problem, na, native_command_row, read_json,
-                      read_toml, skill_problems, wiring_problem)
+from ..checks import (Cell, any_wired_problem, as_list, cell, dig, link_problem, na, native_command_row, on_path,
+                      read_json, read_toml, skill_problems, wiring_problem)
 from ..hook import PATCH_FILE, ToolCall
 
 ID, LABEL = "codex", "Codex"
@@ -31,7 +31,7 @@ def config_home(home: Path) -> Path:
 
 
 def present(home: Path) -> bool:
-    return config_home(home).is_dir()
+    return config_home(home).is_dir() or on_path(home, "codex")
 
 
 # --- the hook ------------------------------------------------------------------------------
@@ -88,12 +88,17 @@ def check_instructions(ctx) -> Cell:
 def check_guardrails(ctx) -> Cell:
     """A match-all PreToolUse group runs the hook and is trusted; personal command rows are in the rules file."""
     path = ctx.codex_home / "hooks.json"
-    groups = dig(read_json(path) or {}, "hooks", "PreToolUse") or []
+    groups = as_list(dig(read_json(path) or {}, "hooks", "PreToolUse"))
     handlers = [(g, h, group.get("matcher"), handler.get("command"), handler.get("timeout", 10))
                 for g, group in enumerate(groups) if isinstance(group, dict) and group.get("matcher") in ("*", "", None)
-                for h, handler in enumerate(group.get("hooks", [])) if isinstance(handler, dict)]
+                for h, handler in enumerate(as_list(group.get("hooks"))) if isinstance(handler, dict)]
     wired = [h for h in handlers if wiring_problem(ctx, path, h[3], ID) is None]
     problems = [] if wired else [any_wired_problem(ctx, path, [h[3] for h in handlers], ID)]
+    config, problem = _toml(ctx, ctx.codex_home / "config.toml")
+    if problem:
+        problems.append(problem)
+    elif dig(config, "features", "hooks") is False:
+        problems.append(("FAIL", "config.toml turns hooks off: [features] hooks = false, so the hook never runs"))
     if wired:
         g, h, matcher, command, timeout = wired[0]
         key, want = f"{path}:pre_tool_use:{g}:{h}", trust_hash(command, matcher or "*", timeout)
