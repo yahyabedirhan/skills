@@ -5,7 +5,7 @@ write(denials, asks) for the hook; and check_instructions, check_guardrails, che
 check_plugins, check_skills and check_config, each taking the run's context and returning a Cell.
 To add a harness, write its module and its reference, then add it here.
 """
-from . import claude_code, codex, cursor, opencode, pi
+from . import claude_code, codex, cursor, grok_bot, opencode, pi
 
-ALL = (claude_code, codex, cursor, opencode, pi)
+ALL = (claude_code, codex, cursor, grok_bot, opencode, pi)
 BY_ID = {h.ID: h for h in ALL}

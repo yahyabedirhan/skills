@@ -27,8 +27,12 @@ EVENTS = ("beforeShellExecution", "beforeMCPExecution", "beforeReadFile", "preTo
 FILE_TOOLS = {"Read": "read", "Grep": "read", "Write": "write", "Delete": "write"}
 
 
+# What Cursor's IDE or CLI writes. A bare ~/.cursor isn't Cursor: another app may make one.
+MARKS = ("cli-config.json", "argv.json", "hooks.json", "mcp.json", "rules", "extensions")
+
+
 def present(home: Path) -> bool:
-    return (home / FOLDER).is_dir() or on_path(home, "cursor-agent", "cursor")
+    return any((home / FOLDER / mark).exists() for mark in MARKS) or on_path(home, "cursor-agent", "cursor")
 
 
 # --- the hook ------------------------------------------------------------------------------

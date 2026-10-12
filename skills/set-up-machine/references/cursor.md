@@ -4,7 +4,7 @@ How to set up and audit Cursor, its IDE agent and the `cursor-agent` CLI, from t
 
 ## Found
 
-Found when `~/.cursor/` exists or `cursor-agent` or `cursor` is on `PATH`.
+Found when `~/.cursor/` holds a file or folder the IDE or CLI writes (`cli-config.json`, `argv.json`, `hooks.json`, `mcp.json`, `rules/` or `extensions/`), or `cursor-agent` or `cursor` is on `PATH`. A bare `~/.cursor/` isn't Cursor: another app, such as Grok Bot, can make one.
 
 ## Instructions
 

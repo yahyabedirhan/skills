@@ -5,7 +5,7 @@ description: Set up or audit a machine's coding-agent harnesses from one rule ta
 
 # Set up machine
 
-Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CLI, Pi) from its sources. Install or update each selected tool to the latest available version. Running the skill again is the **audit**: check configuration and freshness, then propose any required updates.
+Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CLI, Pi, Grok Bot) from its sources. Install or update each selected tool to the latest available version. Running the skill again is the **audit**: check configuration and freshness, then propose any required updates.
 
 ## Sources
 
@@ -150,6 +150,7 @@ Name these once in every audit:
   - [references/opencode.md](references/opencode.md): opencode.
   - [references/cursor.md](references/cursor.md): Cursor's IDE and CLI.
   - [references/pi.md](references/pi.md): Pi, whose only enforcement is the hook's extension.
+  - [references/grok-bot.md](references/grok-bot.md): Grok Bot, whose app owns approvals, model, connectors and memory, so only its skills are written.
 
 ## Scripts
 
