@@ -135,7 +135,7 @@ The hook's own misses are in SKILL.md, *What it can't see*.
 The verifier's Claude Code row, from `scripts/setupmachine/harnesses/claude_code.py`:
 
 - **instructions:** `~/.claude/CLAUDE.md` is a link to the shared file, and `autoMemoryEnabled` is `false`. An `instructions` entry for Claude Code in `setup/harnesses.json` is a `gap`.
-- **guardrails:** a match-all `PreToolUse` group runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness claude-code`, `disableAllHooks` isn't `true`, and each personal permission has its entry (*Personal permissions*).
+- **guardrails:** a match-all `PreToolUse` group runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness claude-code`, `disableAllHooks` isn't `true`, no `deny`, `ask` or `allow` list holds a `Write(...)` entry (*File rows*: old wiring, `removed`), and each personal permission has its entry (*Personal permissions*).
 - **sandbox:** `n/a`.
 - **plugins:** each bundle is in `installed_plugins.json` and enabled in `enabledPlugins`. A standalone MCP server is a `gap`.
 - **skills:** each listed skill is in `~/.claude/skills`.
