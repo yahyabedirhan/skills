@@ -34,7 +34,7 @@ Every green is a shade of the icon's `#7a8a48`.
 
 | Role | Family | Weight |
 |---|---|---|
-| `title` | Cabin Sketch | 700 |
+| `title` | Fraunces (default) or Lora | 600, normal tracking |
 | `node-name` | Inter | 600 |
 | `sublabel` | JetBrains Mono | 400 |
 | `callout` | Inter | 400 |
