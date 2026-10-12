@@ -18,6 +18,7 @@ SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
 
 import verify  # noqa: E402
+from setupmachine.harness_setups import cursor as cursor_setup  # noqa: E402
 
 HOOK = SCRIPTS / "pre_tool_hook.py"
 TABLE = SCRIPTS.parent / "rules.json"
@@ -234,6 +235,11 @@ class WiringTest(unittest.TestCase):
             "sandbox": {"mode": "enabled", "networkAccess": "user_config_with_defaults"}})
         code, lines = self.lines("Cursor")
         self.assertRegex(lines[0], r"hook +wired +Cursor")
+        body = "# Global agent instructions\n\nRule.\n"
+        self.write(".config/agents/AGENTS.md", body)
+        self.write(".cursor/rules/global-instructions.mdc", cursor_setup.COPY_HEADER + body)
+        code, lines = self.lines("Cursor")
+        self.assertRegex(lines[0], r"hook +wired +Cursor")
         self.assertEqual(code, 0)
 
     def cursor_lines(self):
@@ -266,6 +272,36 @@ class WiringTest(unittest.TestCase):
             "sandbox": {"mode": "enabled", "networkAccess": "user_config_with_defaults"}})
         code, lines = self.cursor_lines()
         self.assertRegex(lines[0], r"cursor +ok +Cursor: .*approvalMode auto-review and sandbox.mode enabled")
+
+    def test_the_global_instructions_copy_must_match_the_shared_file(self):
+        command = wired(HOOK, "cursor")
+        events = {e: [{"command": command, "timeout": 10}] for e in
+                  ("beforeShellExecution", "beforeMCPExecution", "beforeReadFile")}
+        events["preToolUse"] = [{"command": command, "timeout": 10, "matcher": "^(Write|Delete|Grep)$"}]
+        self.write(".cursor/hooks.json", {"version": 1, "hooks": events})
+        self.write(".cursor/cli-config.json", {
+            "approvalMode": "auto-review",
+            "sandbox": {"mode": "enabled"}})
+        code, lines = self.cursor_lines()
+        self.assertEqual(code, 1)
+        self.assertRegex(lines[1], r"cursor +FAIL +Cursor: .*global-instructions\.mdc doesn't exist")
+
+        body = "# Global agent instructions\n\nCurrent.\n"
+        self.write(".config/agents/AGENTS.md", body)
+        self.write(".cursor/rules/global-instructions.mdc", cursor_setup.COPY_HEADER + body)
+        code, lines = self.cursor_lines()
+        self.assertEqual(code, 0, lines)
+        self.assertRegex(lines[1], r"cursor +ok +Cursor: .*global-instructions\.mdc matches")
+
+        self.write(".cursor/rules/global-instructions.mdc", cursor_setup.COPY_HEADER + "Stale.\n")
+        code, lines = self.cursor_lines()
+        self.assertEqual(code, 1)
+        self.assertRegex(lines[1], r"cursor +FAIL +Cursor: .*global-instructions\.mdc differs")
+
+        self.write(".cursor/rules/global-instructions.mdc", "---\nalwaysApply: true\n---\nMine.\n")
+        code, lines = self.cursor_lines()
+        self.assertEqual(code, 0, lines)
+        self.assertRegex(lines[1], r"cursor +gap +Cursor: .*wasn't written by set-up-machine")
 
     def test_the_script_runs_as_a_command(self):
         import subprocess

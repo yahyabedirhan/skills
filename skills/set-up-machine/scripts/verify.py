@@ -34,8 +34,10 @@ usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
   key the declared Pi config sets matches settings.json, and no skill link is broken
   (references/pi.md). The real home honors PI_CODING_AGENT_DIR privately; fixture
   --home folders use HOME/.pi/agent unless --pi-agent-dir is given.
-- cursor: when ~/.cursor exists, cli-config.json has approvalMode auto-review and
-  sandbox.mode enabled (references/cursor.md). Otherwise `none`.
+- cursor: when ~/.cursor exists, cli-config.json has approvalMode auto-review and sandbox.mode enabled.
+  ~/.cursor/rules/global-instructions.mdc is a copy of the shared file (references/cursor.md).
+  Otherwise `none`.
+  A copy without the generated comment is a gap.
 
 Exits 1 when a rules, hook, personal, config, pi or cursor line fails. --codex-trust-hash prints the
 `trusted_hash` Codex records for a PreToolUse hook running COMMAND with matcher

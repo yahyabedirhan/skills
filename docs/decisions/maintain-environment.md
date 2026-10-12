@@ -69,3 +69,9 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 
 - **Every instruction and skill change is written with `/writing-for-agents`,** not only a new project skill. Global instructions and skills are read by agents on every run, so the same levers apply to each.
 - **Every skill change gets a fresh sub-agent audit,** not only a new or forked skill. The author reads what it meant to write; the auditor reads what is on disk. It uses claude-api's `prompt-audit` where the harness has it, and `/writing-for-agents` where it doesn't.
+
+## 2026-10-11: one shape for the references (#201)
+
+- **A document that only some runs need lives in `references/`.** The skill body keeps the steps every run needs. Skill operations and efficiency analysis moved there. Their words stayed the same. Two places for those files let an agent add a harness in the wrong place.
+- **A new harness is one harness setup in `/set-up-machine`.** `references/harness-setup.md` states that rule. The agent adds no second registration list. The file points at `/set-up-machine`'s `scripts/setupmachine/harness_setups/__init__.py`. That module owns the harness setup contract. This file names no file layout. The name is harness setup because a Pi package is already an installable package.
+- **`references/harness-setup.md` defines the words in its own rule.** The bare rule named a registration list. It did not say what that list is. The reference now says who would write a second list. It also says why one harness setup is enough.
