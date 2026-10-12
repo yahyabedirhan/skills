@@ -17,3 +17,5 @@ Before writing or changing a skill, read `docs/decisions/skill-writing.md`: the 
 ### Writing docs
 
 Before writing or changing anything under `docs/` (research, guides, decision records, agent docs), read `docs/decisions/technical-writing.md`: a light version of ASD-STE100 for every sentence, and one folder per research topic.
+
+A decision entry has five fields, as `docs/decisions/index.md` shows. Before changing `maintain-environment`, `set-up-machine` or `set-up-project`, read its design in `docs/design/`.

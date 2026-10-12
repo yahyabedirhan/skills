@@ -1,29 +1,24 @@
-"""The basic pre-tool hook: deny and allow-and-report rows, checked before a tool call runs.
+"""The pre-tool hook's decision: what the rule rows say about one tool call.
 
-A harness hands the hook one tool call; the hook reads it into a `ToolCall`,
-checks it against the rule table, and answers in the harness's own format:
+pre_tool_hook.py reads a harness's payload into a `ToolCall` (each harness module
+knows its own payload), then calls `decide` here. `decide` returns a `Verdict`:
 
-- **deny:** any part of the call a deny row covers refuses the whole call, and
-  the answer names each refused part with its rule's reason and instruction;
-- **allow-and-report:** otherwise, a call an allow-and-report row covers gets one
-  line in the report folder, and the hook says nothing, so the harness's own
-  permissions decide;
-- **ask:** the verdict names the ask rows a call hits (verify checks them), but the
-  hook says nothing for them: the harness's native ask entries do the asking. A row
-  with `approver: "user"` is refused instead when the call shows the harness won't
-  ask the user, such as Claude Code in bypassPermissions mode. A harness with no ask
-  entries of its own but a way to ask (Pi's extension) gets the ask rows in the answer,
-  and its wiring asks the user;
-- **allow**, a personal permission's level: the verdict names them for verify too, and the
-  hook says nothing, so the harness's native allow entries let the call run.
+- **deny:** any part of the call a deny row covers refuses the whole call. The answer
+  names each refused part with its rule's reason and instruction (`refusal`).
+- **allow-and-report:** a call such a row covers gets one line in the report folder
+  (`write_report`). The hook says nothing else, so the harness's own permissions decide.
+- **ask:** the verdict names the ask rows a call hits, and the harness's native ask
+  entries do the asking. A row with `approver: "user"` is refused instead when the call
+  shows that no one will ask the user, such as Claude Code in bypassPermissions mode.
+  A harness with no ask list (Cursor, Pi) gets every ask row refused when unattended.
+- **allow**, a personal permission's level: named in the verdict, and the hook says nothing.
 
-The rows are the rule table's, plus the personal permissions of the repository that
-`~/.config/agents/source.md` names (personal.py).
+The steps of `decide`: split a shell command into the simple commands the shell runs
+(commands.py), collect the files the call reads or writes, match every row against the
+commands, files and MCP tool name, then sort the hits by level.
 
-Each harness has a reader (its payload -> ToolCall) and a writer (the denials,
-and the ask hits for a writer that asks -> what it prints). A discovered harness setup
-supplies both. The report folder comes from the hook's configuration file,
-`~/.config/agents/hook.json` by default.
+The report folder is `report_dir` in `~/.config/agents/hook.json`, or
+`~/.local/state/agents/reports` by default.
 """
 from __future__ import annotations
 
@@ -32,12 +27,11 @@ import json
 import os
 import re
 import shlex
-import sys
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
-from . import commands, personal, rules as rule_table
+from . import commands, rules as rule_table
 
 CONFIG_PATH = "~/.config/agents/hook.json"
 DEFAULT_REPORT_DIR = "~/.local/state/agents/reports"
@@ -118,6 +112,21 @@ def decide(call: ToolCall, table: list, home: Path) -> Verdict:
     return verdict
 
 
+# --- reading a payload (shared by the harness modules) ------------------------
+
+
+def search_pair(args: dict, folder_key: str, glob_key: str) -> tuple:
+    """A search tool's (folder, glob) pair, when its arguments name a glob."""
+    glob, folder = args.get(glob_key), args.get(folder_key)
+    if not isinstance(glob, str) or not glob:
+        return ()
+    return ((folder if isinstance(folder, str) else "", glob),)
+
+
+# apply_patch's file headers; each names a file the patch writes.
+PATCH_FILE = re.compile(r"^\*\*\* (Add File|Update File|Delete File|Move to): (.+?)\s*$", re.M)
+
+
 # --- file rows ----------------------------------------------------------------
 
 
@@ -170,21 +179,6 @@ def operand_files(argv: list) -> list:
 # --- what the agent reads -------------------------------------------------------
 
 
-HOOK_SCRIPT_NAME = "pre_tool_hook.py"
-
-
-def command_script(command: str, harness: str, home: Path):
-    """The hook script a wired command runs, when it runs it for this harness; else None."""
-    try:
-        words = shlex.split(command)
-    except ValueError:
-        return None
-    script = next((w for w in words if w.endswith(HOOK_SCRIPT_NAME)), None)
-    if script is None or f"--harness {harness}" not in " ".join(words):
-        return None
-    return Path(str(home) + script[1:]) if script.startswith("~/") else Path(script)
-
-
 def refusal(denials: list) -> str:
     lines = [
         "Refused by the pre-tool hook, from the global rule table. Nothing in this call ran. "
@@ -192,11 +186,12 @@ def refusal(denials: list) -> str:
     ]
     for hit in denials:
         r = hit.rule
-        lines.append(f"- `{hit.part}`: denied by rule {r.id} ({_plain(r.summary)}). {r.reason} Instead: {r.instruction}")
+        lines.append(f"- `{hit.part}`: denied by rule {r.id} ({plain(r.summary)}). {r.reason} Instead: {r.instruction}")
     return "\n".join(lines)
 
 
-def _plain(summary: str) -> str:
+def plain(summary: str) -> str:
+    """A rule's summary without backticks, for a message shown to the agent or the user."""
     return summary.replace("`", "")
 
 
@@ -243,122 +238,3 @@ def write_report(folder: Path, call: ToolCall, hits: list, harness: str, now: da
     with os.fdopen(fd, "a") as f:
         f.write(json.dumps(line, ensure_ascii=False) + "\n")
     return path
-
-
-# --- harnesses ------------------------------------------------------------------
-
-
-def read_claude_code(payload: dict) -> ToolCall:
-    """Claude Code's hook payload, read by its harness setup."""
-    return harness_io()["claude-code"][0](payload)
-
-
-def _search(args: dict, folder_key: str, glob_key: str) -> tuple:
-    """A search tool's (folder, glob) pair, when it names a glob."""
-    glob, folder = args.get(glob_key), args.get(folder_key)
-    if not isinstance(glob, str) or not glob:
-        return ()
-    return ((folder if isinstance(folder, str) else "", glob),)
-
-
-def write_claude_code(denials: list, asks=()) -> str:
-    """Claude Code's hook answer, written by its harness setup. Codex uses the same answer."""
-    return harness_io()["claude-code"][1](denials, asks)
-
-
-# apply_patch's file headers; each names a file the patch writes.
-PATCH_FILE = re.compile(r"^\*\*\* (Add File|Update File|Delete File|Move to): (.+?)\s*$", re.M)
-
-
-def read_codex(payload: dict) -> ToolCall:
-    """Codex's hook payload, read by its harness setup."""
-    return harness_io()["codex"][0](payload)
-
-
-def read_pi(payload: dict) -> ToolCall:
-    """Pi's hook payload, read by its harness setup."""
-    return harness_io()["pi"][0](payload)
-
-
-def write_pi(denials: list, asks=()) -> str:
-    """Pi's hook answer, written by its harness setup."""
-    return harness_io()["pi"][1](denials, asks)
-
-
-def harness_io() -> dict:
-    """Reader and writer per harness, from each harness setup that runs the hook."""
-    found = {}
-    from . import harness_setups
-    for setup in harness_setups.load():
-        read, write = getattr(setup, "read", None), getattr(setup, "write", None)
-        if callable(read) and callable(write):
-            found[setup.id] = (read, write)
-    return found
-
-
-def read_opencode(payload: dict) -> ToolCall:
-    """opencode's hook payload, read by its harness setup."""
-    return harness_io()["opencode"][0](payload)
-
-
-def write_opencode(denials: list, asks=()) -> str:
-    """opencode's hook answer, written by its harness setup."""
-    return harness_io()["opencode"][1](denials, asks)
-
-
-def read_cursor(payload: dict) -> ToolCall:
-    """Cursor's hook payload, read by its harness setup."""
-    return harness_io()["cursor"][0](payload)
-
-
-def write_cursor(denials: list, asks=()) -> str:
-    """Cursor's hook answer, written by its harness setup."""
-    return harness_io()["cursor"][1](denials, asks)
-
-
-def main(argv=None, stdin=None, stdout=None, now=None) -> int:
-    import argparse
-
-    readers = harness_io()
-    parser = argparse.ArgumentParser(description="set-up-machine's pre-tool hook: reads one tool call on stdin.")
-    parser.add_argument("--harness", choices=sorted(readers), default="claude-code")
-    parser.add_argument("--config", type=Path, default=Path(CONFIG_PATH).expanduser(),
-                        help=f"the hook's configuration (default: {CONFIG_PATH})")
-    parser.add_argument("--rules", type=Path, default=rule_table.DEFAULT_TABLE)
-    args = parser.parse_args(argv)
-    stdin, stdout = stdin or sys.stdin, stdout or sys.stdout
-    read, write = readers[args.harness]
-
-    # A hook that fails never blocks the call: the harness's native deny rules stay underneath.
-    # Pi has none, so its extension refuses the call when the hook exits non-zero (references/pi.md).
-    try:
-        payload = json.loads(stdin.read() or "{}")
-        call = read(payload if isinstance(payload, dict) else {})
-        table = rule_table.load(args.rules)
-    except (ValueError, OSError) as exc:
-        print(f"set-up-machine hook: {exc}", file=sys.stderr)
-        return 1
-    # A broken personal file leaves the rule table's rows in force; verify.py reports it.
-    # Catch everything here: a crash would let the call through without the table's rows.
-    try:
-        table = table + personal.permissions(Path.home(), table)
-    except Exception as exc:
-        print(f"set-up-machine hook: personal permissions skipped: {exc}", file=sys.stderr)
-    try:
-        verdict = decide(call, table, Path.home())
-    except (ValueError, OSError) as exc:
-        print(f"set-up-machine hook: {exc}", file=sys.stderr)
-        return 1
-    if verdict.denials:
-        stdout.write(write(verdict.denials))
-        return 0
-    if verdict.reports and call.report:
-        try:
-            config = load_config(args.config)
-            write_report(report_dir(config, args.config), call, verdict.reports, args.harness,
-                         now or datetime.now(timezone.utc))
-        except (ValueError, OSError) as exc:
-            print(f"set-up-machine hook: couldn't write the report: {exc}", file=sys.stderr)
-            return 1
-    stdout.write(write([], verdict.asks))
-    return 0

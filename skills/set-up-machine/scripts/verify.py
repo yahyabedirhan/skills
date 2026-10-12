@@ -1,242 +1,137 @@
 #!/usr/bin/env python3
-"""set-up-machine's check that the rules work on this machine. It writes nothing.
+"""set-up-machine's verifier: did every harness on this machine get what the workstation repo's setup/ asks for?
 
-usage: verify.py [--home DIR] [--rules FILE] [--codex PATH | --no-codex]
-                 [--codex-home DIR] [--pi-agent-dir DIR]
+usage: verify.py [--home DIR] [--rules FILE]
        verify.py --codex-trust-hash COMMAND
 
-- rules: every row's `covers` samples get the row's level from the pre-tool hook
-  (deny, ask or allow-and-report), and its `leaves` samples pass the row; the
-  workstation repo's rows too, an `allow` row's samples passing every other row;
-- codex: each plain command sample through `codex execpolicy check` against the
-  machine's Codex rules, listed as `same`, `stricter` (another rules file is
-  stricter, and kept) or `differs` from the row's level (a row Codex can't
-  express, in references/codex.md, or a mistake to fix);
-- hook: each harness found has its pre-tool hook wired to a script that exists
-  (Codex's also trusted); Pi's extension is a gap when someone else wrote it;
-- personal: the pointer, ~/.config/agents/source.md, is there, and when it names a
-  workstation repo, the shared global instructions file carries that repository's
-  environment defaults and personal workflow, the pointer's repository and clone path
-  as the `workstation-repo` and `path-to-workstation-repo` defaults, and its working agreement, glossary and
-  tool glossaries when it has them, none of them when it doesn't
-  (references/workstation.md);
-  and each personal permission's entries in Claude Code's settings, `present`, `n/a` when
-  Claude Code lacks the row's tool, `gap` when the row has no native entry there.
-- harness: each harness's own instructions, from the files the workstation repo's
-  harnesses file points at, match the file set-up-machine generates (layout.py);
-- config: declared Codex config preferences match persisted defaults, or `n/a`
-  when Codex isn't installed (no codex on PATH and no config home);
-  isolated installed-parser probes check support, while effective overrides and
-  managed constraints remain explicit gaps. --codex-home selects the same folder
-  for configuration, rules and hooks. The real home honors CODEX_HOME privately;
-  fixture --home folders ignore ambient CODEX_HOME unless --codex-home is given.
-- pi: when Pi's agent folder exists, its AGENTS.md is a link to the shared file, each
-  key the declared Pi config sets matches settings.json, and no skill link is broken
-  (references/pi.md). The real home honors PI_CODING_AGENT_DIR privately; fixture
-  --home folders use HOME/.pi/agent unless --pi-agent-dir is given.
-- cursor: when ~/.cursor exists, cli-config.json has approvalMode auto-review and sandbox.mode enabled.
-  ~/.cursor/rules/global-instructions.mdc is a copy of the shared file (references/cursor.md).
-  Otherwise `none`.
-  A copy without the generated comment is a gap.
+It reads the machine and writes nothing. The steps:
 
-Exits 1 when a rules, hook, personal, config, pi or cursor line fails. --codex-trust-hash prints the
-`trusted_hash` Codex records for a PreToolUse hook running COMMAND with matcher
-`*` and timeout 10. Python 3.9+, standard library only.
+1. Load the rule table and the workstation repo's setup/ files, through the pointer
+   (~/.config/agents/source.md).
+2. Print two global lines:
+   - setup: the pointer and setup/ files are readable, and the shared global instructions
+     file (~/.config/agents/AGENTS.md) carries what setup/instructions.md generates;
+   - rules: every sample of every rule-table row and personal permission gets its row's
+     answer from the hook's decision.
+3. Print one table: a row per harness found (its folder exists, or its CLI is on PATH; a --home
+   copy counts only its folders), a column per setup area (instructions,
+   guardrails, sandbox, plugins, skills), each cell ok, FAIL, gap or n/a.
+4. Print one detail line per FAIL and gap cell.
+5. Exit 1 when any line or cell is FAIL.
+
+--codex-trust-hash prints the trusted_hash Codex needs in config.toml for a hook running
+COMMAND (references/codex.md). Python 3.9+, standard library only.
 """
 from __future__ import annotations
 
 import argparse
-import inspect
-import os
-import shutil
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import codex_config, harness_setups, hook, personal, plugins, rules as rule_table  # noqa: E402
+from setupmachine import checks, hook, rules, workstation  # noqa: E402
+from setupmachine.harnesses import ALL, codex, pi  # noqa: E402
+
+AREAS = ("instructions", "guardrails", "sandbox", "plugins", "skills")
 
 
-@dataclass
-class Result:
-    rule: object
-    sample: str
-    expected: str  # the row's level, or "pass" for a near miss
-    answer: str  # the row's level when the hook's verdict holds the row, else "allow" (or "pass");
-    # for an allow row, "allow" when it holds the row and no other row asks or denies, else "no match" or that level
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Check every harness against the workstation repo's setup/.")
+    parser.add_argument("--home", type=Path, default=Path.home(), help="the home folder to check (default: $HOME)")
+    parser.add_argument("--rules", type=Path, default=rules.DEFAULT_TABLE)
+    parser.add_argument("--codex-trust-hash", metavar="COMMAND", help="print Codex's trusted_hash for this hook command")
+    args = parser.parse_args()
+    if args.codex_trust_hash is not None:
+        print(codex.trust_hash(args.codex_trust_hash))
+        return 0
+    home = args.home.expanduser().resolve()
+    try:
+        table = rules.load(args.rules)
+    except rules.RuleTableError as exc:
+        print(f"rules  FAIL  {exc}")
+        return 1
+    setup = workstation.load(home, table, [h.ID for h in ALL])
+    ctx = checks.Context(home, setup, table + setup.rows, codex.config_home(home), pi.agent_dir(home))
+
+    failed = global_line("setup", *setup_line(ctx), home)
+    failed |= global_line("rules", *rules_line(ctx, len(table)), home)
+    rows = [(h.LABEL, [getattr(h, f"check_{area}")(ctx) for area in AREAS]) for h in ALL if h.present(home)]
+    print_table(rows)
+    return 1 if failed or any(c.status == "FAIL" for _, cells in rows for c in cells) else 0
 
 
-# --- the rule table against the hook ------------------------------------------
+def setup_line(ctx) -> tuple:
+    """(status, text): the pointer and setup/ files, and the shared file against setup/instructions.md."""
+    setup = ctx.setup
+    if setup.problems:
+        return "FAIL", "; ".join(setup.problems)
+    if not setup.repository:
+        return "n/a", "the pointer says there is no workstation repo, so the shared file is its own source"
+    problems = workstation.shared_file_problems(setup, ctx.home)
+    if problems:
+        return "FAIL", "; ".join(problems)
+    return "ok", f"{setup.repository}: the shared file matches setup/instructions.md"
 
 
-def check_rules(table: list, home: Path) -> list:
-    """Every sample of every row, the rule table's and the personal ones, through the hook's decision, as Results."""
-    cwd = str(home / "project")
-    results = []
-    for rule in table:
-        for sample in rule.covers:
-            verdict = _verdict(rule, sample, table, home, cwd)
-            hit = _holds(verdict, rule)
-            if rule.level == "allow":
-                answer = verdict.answer if verdict.answer != "allow" else "allow" if hit else "no match"
-            else:
-                answer = rule.level if hit else "allow"
-            results.append(Result(rule, sample, rule.level, answer))
-        for sample in rule.leaves:
-            hit = _holds(_verdict(rule, sample, table, home, cwd), rule)
-            results.append(Result(rule, sample, "pass", "caught" if hit else "pass"))
-    return results
+def rules_line(ctx, table_size: int) -> tuple:
+    """(status, text): each sample through hook.decide gets its row's answer."""
+    wrong, count = [], 0
+    for row in ctx.rows:
+        for sample in row.covers:
+            count += 1
+            verdict = decide(row, sample, ctx)
+            got = _answer(verdict, row)
+            if got != row.level:
+                wrong.append(f"{row.id}: `{sample}` got {got}, expected {row.level}")
+        for sample in row.leaves:
+            count += 1
+            if _holds(decide(row, sample, ctx), row):
+                wrong.append(f"{row.id}: `{sample}` should pass, but the row catches it")
+    personal = len(ctx.rows) - table_size
+    text = f"{table_size} rows" + (f" and {personal} personal permissions" if personal else "") + f", {count} samples"
+    return ("FAIL", f"{text}; " + "; ".join(wrong)) if wrong else ("ok", text)
 
 
-def _verdict(rule, sample: str, table: list, home: Path, cwd: str):
-    if rule.kind == "file":
-        call = hook.ToolCall(tool="Read" if rule.access == "read" else "Write", files=((sample, rule.access),), cwd=cwd)
-    elif rule.kind == "mcp-tool":
+def decide(row, sample: str, ctx):
+    """The hook's verdict on one sample, as the call a row of its kind would see."""
+    cwd = str(ctx.home / "project")
+    if row.kind == "file":
+        call = hook.ToolCall(tool="Read" if row.access == "read" else "Write", files=((sample, row.access),), cwd=cwd)
+    elif row.kind == "mcp-tool":
         call = hook.ToolCall(tool=sample, cwd=cwd)
     else:
         call = hook.ToolCall(tool="Bash", command=sample, cwd=cwd)
-    return hook.decide(call, table, home)
+    return hook.decide(call, ctx.rows, ctx.home)
 
 
-def _holds(verdict, rule) -> bool:
-    return any(h.rule.id == rule.id for h in verdict.denials + verdict.asks + verdict.reports + verdict.allows)
+def _holds(verdict, row) -> bool:
+    return any(hit.rule.id == row.id for hit in verdict.denials + verdict.asks + verdict.reports + verdict.allows)
 
 
-# --- Codex's own checker --------------------------------------------------------
+def _answer(verdict, row) -> str:
+    """The row's level when the verdict holds it. An allow row also needs no other row to ask or deny."""
+    if not _holds(verdict, row):
+        return "no match"
+    return verdict.answer if row.level == "allow" else row.level
 
 
-def check_codex(table: list, home: Path, codex: str, codex_home: Path | None = None) -> list:
-    """(row, sample, Codex's decision as a level or "no match") for each plain command sample."""
-    from setupmachine.harness_setups import codex as codex_setup
-    return codex_setup.check_codex(table, home, codex, codex_home)
+def global_line(name: str, status: str, text: str, home: Path) -> bool:
+    print(f"{name:<6} {status:<5} {text.replace(str(home) + '/', '~/')}")
+    return status == "FAIL"
 
 
-# --- hook wiring ------------------------------------------------------------------
-
-
-def codex_trust_hash(command: str, matcher: str = "*", timeout: int = 10) -> str:
-    """The hash Codex records when a PreToolUse command hook is trusted in /hooks."""
-    from setupmachine.harness_setups import codex as codex_setup
-    return codex_setup.trust_hash(command, matcher, timeout)
-
-
-def harness_setup_audits(home: Path, **context) -> list:
-    """`(channel, status, text)` from every discovered harness setup.
-
-    Keyword arguments are passed when that audit names them. An argument keyed by the
-    harness id is that setup's agent folder, passed as `folder`. This function does not
-    sort the lines.
-    """
-    lines = []
-    for setup in harness_setups.load():
-        audit = getattr(setup, "audit", None)
-        if not callable(audit):
-            continue
-        lines.extend(audit(home, **_audit_kwargs(audit, setup.id, context)))
-    return lines
-
-
-def _audit_kwargs(audit, setup_id: str, context: dict) -> dict:
-    params = inspect.signature(audit).parameters
-    if any(param.kind == inspect.Parameter.VAR_KEYWORD for param in params.values()):
-        return context
-    chosen = {key: value for key, value in context.items() if key in params}
-    if setup_id in context and "folder" in params and "folder" not in chosen:
-        chosen["folder"] = context[setup_id]
-    return chosen
-
-
-# --- the report -------------------------------------------------------------------
-
-
-def main(argv=None, stdout=None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--home", type=Path, default=Path.home(), help="the home folder to check (default: $HOME)")
-    parser.add_argument("--rules", type=Path, default=rule_table.DEFAULT_TABLE)
-    parser.add_argument("--codex", help="the codex program (default: codex on PATH)")
-    parser.add_argument("--codex-home", type=Path, help="Codex config home; fixtures default to HOME/.codex")
-    parser.add_argument("--pi-agent-dir", type=Path, help="Pi agent folder; fixtures default to HOME/.pi/agent")
-    parser.add_argument("--no-codex", action="store_true", help="skip Codex execpolicy and isolated config-parser checks")
-    parser.add_argument("--codex-trust-hash", metavar="COMMAND", help="print Codex's trusted_hash for this hook command")
-    args = parser.parse_args(argv)
-    out = stdout or sys.stdout
-
-    def line(check, status, text):
-        out.write(f"{check:<8} {status:<8} {text}\n")
-
-    if args.codex_trust_hash is not None:
-        out.write(codex_trust_hash(args.codex_trust_hash) + "\n")
-        return 0
-    home = args.home.expanduser().resolve()
-    # Fixture homes must never follow the caller's real CODEX_HOME. For the
-    # actual home, use only this explicitly authorized nonsecret path metadata.
-    custom_home = os.environ.get("CODEX_HOME") if home == Path.home().resolve() and args.codex_home is None else None
-    codex_home = (args.codex_home or (Path(custom_home) if custom_home else home / ".codex")).expanduser().resolve()
-    custom_pi = os.environ.get("PI_CODING_AGENT_DIR") if home == Path.home().resolve() and args.pi_agent_dir is None else None
-    pi_dir = (args.pi_agent_dir or (Path(custom_pi) if custom_pi else home / ".pi/agent")).expanduser().resolve()
-
-    def private(text):
-        """The text with each environment-chosen folder named, not printed."""
-        if custom_home:
-            text = text.replace(str(codex_home), "<Codex config home>")
-        if custom_pi:
-            text = text.replace(str(pi_dir), "<Pi agent dir>")
-        return text
-
-    failed = False
-
-    def emit(channel, rows, redact=False):
-        nonlocal failed
-        for status, text in rows:
-            line(channel, status, private(text) if redact else text)
-            failed |= status == "FAIL"
-
-    try:
-        table = rule_table.load(args.rules)
-    except rule_table.RuleTableError as exc:
-        line("rules", "FAIL", str(exc))
-        return 1
-    own_lines = []
-    try:
-        own = personal.permissions(home, table)
-    except ValueError as exc:  # RuleTableError, or a file that isn't UTF-8 text
-        own, own_lines = [], [("FAIL", str(exc))]
-    table = table + own
-
-    results = check_rules(table, home)
-    wrong = [r for r in results if r.answer != r.expected]
-    for r in wrong:
-        if r.expected == "pass":
-            line("rules", "FAIL", f"{r.rule.id}: `{r.sample}` should pass, but the row catches it")
-        else:
-            line("rules", "FAIL", f"{r.rule.id}: `{r.sample}` got {r.answer}, expected {r.expected}")
-    rows = f"{len(table) - len(own)} rows" + (f" and {len(own)} personal permissions" if own else "")
-    line("rules", "FAIL" if wrong else "ok", f"{rows}, {len(results)} samples, {len(wrong)} wrong")
-    failed |= bool(wrong)
-
-    codex = None if args.no_codex else (args.codex or shutil.which("codex"))
-    audited = harness_setup_audits(
-        home, rows=own, pi=pi_dir, codex_home=codex_home, codex=codex, rules=table, no_codex=args.no_codex)
-    emit("hook", [(status, text) for channel, status, text in audited if channel == "hook"], redact=True)
-
-    for channel, status, text in audited:
-        if channel not in ("hook", "harness", "personal"):
-            line(channel, status, private(text))
-            failed |= status == "FAIL"
-
-    for status, text in personal.check(home) + own_lines:
-        line("personal", status, text)
-        failed |= status == "FAIL"
-    emit("personal", [(status, text) for channel, status, text in audited if channel == "personal"])
-    emit("harness", personal.check_harnesses(home))
-    emit("harness", [(status, text) for channel, status, text in audited if channel == "harness"])
-    for status, text in plugins.check(home, pi_dir, codex_home, codex, table + own):
-        line("plugin", status, private(text))
-        failed |= status == "FAIL"
-    line("freshness", "gap", "Latest harness, skill, plugin and tool versions need separate upstream checks; "
-         "this verifier checks persisted setup, not remote releases")
-    return 1 if failed else 0
+def print_table(rows: list):
+    if not rows:
+        print("\nNo harness is set up on this machine.")
+        return
+    width = max(len("harness"), *(len(label) for label, _ in rows)) + 2
+    print("\n" + "harness".ljust(width) + "".join(area.ljust(14) for area in AREAS).rstrip())
+    for label, cells in rows:
+        print(label.ljust(width) + "".join(c.status.ljust(14) for c in cells).rstrip())
+    details = [f"{c.status:<4}  {label} {area}: {'; '.join(c.details)}" for label, cells in rows
+               for area, c in zip(AREAS, cells) if c.status in ("FAIL", "gap")]
+    print("\n" + "\n".join(details) if details else "", end="\n" if details else "")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Decisions: low-level-design
 
-The decisions behind the `low-level-design` skill. This file is for maintaining the skill and is never installed. Read it before changing the skill, and add an entry for each new decision: the date, what was decided, and why. When a decision is reversed, keep the old entry and add a new one that says so.
+The decisions behind the `low-level-design` skill. This file is for maintaining the skill and is never installed. Read it before changing the skill. Entries follow the shape in [index.md](index.md).
 
 ## Maintaining
 
@@ -14,9 +14,34 @@ To add a newly transcribed lesson, add one reference:
 
 Problem walkthroughs (design a parking lot) are examples of the framework, not concepts; add them only when the user asks.
 
-## 2026-09-30
+## 2026-09-30: the delivery framework stays in SKILL.md
 
-- **The delivery framework stays in `SKILL.md`,** as the Hello Interview lesson lays it out; an audit had moved the stages' detail into `references/delivery-stages.md`, and the maintainer restored it. Only `references/session-purposes.md` holds how each kind of session runs.
-- **The maintainer's notes move out of the skill.** `MAINTAINING.md` sat in the skill's folder, where every install copied it; it is now the *Maintaining* section of this file.
-- **A new design is described in `SKILL.md` itself;** `references/session-purposes.md` covers only the other purposes. Its new-design section was never read, because the skill sent only the other purposes to it.
-- **The session purposes are back in `SKILL.md` too.** `references/session-purposes.md` held how explaining, redesigning and deciding one thing run, 22 lines that repeated the purpose line in `SKILL.md` and that explaining sessions always read. `references/` now holds only the concept lessons. The maintainer asked for it, alongside the same move in `/system-design`.
+- **Status:** accepted
+- **Context:** An audit had moved the stages' detail into `references/delivery-stages.md`.
+- **Options:** Keep the stages in a reference: the maintainer wants the framework in the skill, as the Hello Interview lesson lays it out.
+- **Choice and why:** The maintainer restored the stages to `SKILL.md`.
+- **Consequences:** At the time, only `references/session-purposes.md` held how each kind of session runs. That later moved back too; see [2026-09-30: the session purposes are back in SKILL.md](#2026-09-30-the-session-purposes-are-back-in-skillmd).
+
+## 2026-09-30: the maintainer's notes move out of the skill
+
+- **Status:** accepted
+- **Context:** `MAINTAINING.md` sat in the skill's folder, where every install copied it.
+- **Options:** None considered.
+- **Choice and why:** The notes are now the *Maintaining* section of this file, which is never installed.
+- **Consequences:** Installs no longer carry the notes.
+
+## 2026-09-30: a new design is described in SKILL.md itself
+
+- **Status:** replaced by [2026-09-30: the session purposes are back in SKILL.md](#2026-09-30-the-session-purposes-are-back-in-skillmd)
+- **Context:** `references/session-purposes.md` had a new-design section that was never read, because the skill sent only the other purposes to it.
+- **Options:** None considered.
+- **Choice and why:** Describe a new design in `SKILL.md`. `references/session-purposes.md` covers only the other purposes.
+- **Consequences:** The other purposes still lived in a reference.
+
+## 2026-09-30: the session purposes are back in SKILL.md
+
+- **Status:** accepted
+- **Context:** This replaces [2026-09-30: a new design is described in SKILL.md itself](#2026-09-30-a-new-design-is-described-in-skillmd-itself). `references/session-purposes.md` held how explaining, redesigning and deciding one thing run. Its 22 lines repeated the purpose line in `SKILL.md`, and explaining sessions always read it.
+- **Options:** None considered.
+- **Choice and why:** Move every session purpose into `SKILL.md`. The maintainer asked for it, alongside the same move in `/system-design`.
+- **Consequences:** `references/` now holds only the concept lessons.
