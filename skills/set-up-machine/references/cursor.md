@@ -94,6 +94,13 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 
 Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills](https://cursor.com/docs/skills.md)). Skills installed into `~/.agents/skills` reach it with no extra install. Cursor doesn't copy `~/.agents/skills` to Cloud Agents or remote SSH sessions. Install each skill as workstation.md, *A skill*, says.
 
+## Config
+
+When `setup/harnesses.json` names a Cursor `config` (workstation.md, *A declared config*), merge each key it sets, such as `hasChangedDefaultModel`, `model` and `selectedModel`, into `~/.cursor/cli-config.json`, the file that holds the CLI's permissions and run mode too. Write each declared key whole, keep every other key, and add `"version": 1` to a new file. Mark each key `present, personal` or `updated, personal`.
+
+- **Drift:** the CLI rewrites these keys itself when the user picks another model in it, so the `config` cell then fails. Ask the user whether to change the declared file or the machine; don't overwrite the choice silently.
+- **Activation:** a new `cursor-agent` session reads it. The IDE keeps its own model choice, which this file doesn't set.
+
 ## Hook wiring
 
 - **Wiring:** `~/.cursor/hooks.json`, read by the IDE and the CLI, which a project can't turn off. One handler on four events, since each call reaches exactly one of them and nothing is reported twice (keep the user's handlers):
@@ -125,6 +132,7 @@ The verifier's Cursor row, from `scripts/setupmachine/harnesses/cursor.py`:
 - **sandbox:** `cli-config.json` has `approvalMode` `auto-review` and `sandbox.mode` `enabled`.
 - **plugins:** each bundle is installed and enabled in Claude Code. Each standalone server is in `~/.cursor/mcp.json`, equal to its entry.
 - **skills:** each listed skill is in `~/.agents/skills` or `~/.cursor/skills`.
+- **config:** each key the declared Cursor config sets has the same value in `cli-config.json`; a nested object, such as `selectedModel`, must match as a whole. `n/a` without a declared config.
 
 To see Cursor itself enforce the rows, run `cursor-agent -p --trust --force` in a throwaway folder, with `CURSOR_CONFIG_DIR` at a trial `.cursor` and `CURSOR_DATA_DIR` at a scratch folder. `CURSOR_CONFIG_DIR` moves only `cli-config.json`: `hooks.json`, `mcp.json` and `~/.claude/settings.json` are always read from the real home, so a trial puts them in the folder (`.cursor/hooks.json`, `.cursor/mcp.json`, and `.claude/settings.json` at the folder's git root).
 

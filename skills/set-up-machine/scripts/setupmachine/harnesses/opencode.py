@@ -1,8 +1,8 @@
 """opencode: its hook payload, and the check of each setup area (references/opencode.md).
 
 Its global folder is `~/.config/opencode`. The hook runs through a plugin there, and the
-permissions are the `permission` key of its config file. set-up-machine delivers no plugins
-entries to opencode yet, so that area is a gap.
+permissions and the declared config's keys are in its config file. set-up-machine delivers
+no plugins entries to opencode yet, so that area is a gap.
 """
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ import os
 import re
 from pathlib import Path
 
-from ..checks import (Cell, cell, link_problem, na, on_path, personal_problems, read_json, skill_problems,
-                      template_problem)
+from ..checks import (Cell, cell, json_config_cell, link_problem, na, on_path, personal_problems, read_json,
+                      skill_problems, template_problem)
 from ..hook import PATCH_FILE, ToolCall, refusal, search_pair
 
 ID, LABEL = "opencode", "opencode"
@@ -97,6 +97,12 @@ def check_plugins(ctx) -> Cell:
 def check_skills(ctx) -> Cell:
     folders = [ctx.home / FOLDER / "skills", ctx.home / ".claude/skills", ctx.home / ".agents/skills"]
     return cell(skill_problems(ctx, folders))
+
+
+def check_config(ctx) -> Cell:
+    """Each key the declared opencode config sets, such as `model`, has its value in the config file
+    opencode reads last (an opencode.jsonc read without its comments)."""
+    return json_config_cell(ctx, ID, LABEL, _config_path(ctx.home), read=_read_config)
 
 
 def _mcp_names(tool: str) -> tuple:

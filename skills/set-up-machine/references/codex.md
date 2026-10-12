@@ -89,7 +89,7 @@ A forbidden rule: `` exec_command failed: … `/bin/zsh -lc 'rm -fr x'` rejected
 
 ## Sandbox
 
-When the personal source pointer names a repository, load the optional Codex `config` that its `setup/harnesses.json` names, as `workstation.md` specifies. Validate the entire file before proposing preference writes. The verifier compares each declared key with `config.toml` in its `sandbox` cell. It reads TOML with Python 3.11's `tomllib`; on an older Python the cell is a `gap`.
+When the personal source pointer names a repository, load the optional Codex `config` that its `setup/harnesses.json` names, as `workstation.md` specifies. Validate the entire file before proposing preference writes. This section covers every key it declares: the sandbox and approval keys here, and the model keys of *Config*. The verifier compares `sandbox_mode`, `approval_policy` and `approvals_reviewer` with `config.toml` in its `sandbox` cell, and the other declared keys in its `config` cell. It reads TOML with Python 3.11's `tomllib`; on an older Python both cells are a `gap`.
 
 ### Installed support
 
@@ -102,6 +102,8 @@ The inspected CLI was 0.159.3 on 2026-10-01. That snapshot supported:
 | `sandbox_mode` | `read-only`, `workspace-write`, `danger-full-access` |
 | `approval_policy` | `on-request`, `never` |
 | `approvals_reviewer` | `user`, `auto_review` |
+| `model` | a model the installed CLI offers |
+| `model_reasoning_effort` | a level the installed CLI accepts for that model |
 
 Treat the snapshot as evidence to recheck, not a permanent version gate. Explicit `untrusted` is unsupported and `on-failure` deprecated in this version. Codex also supports granular approval policies, but this initial private source accepts scalar policies only. Report a granular source as unsupported; preserve an existing granular target policy and report the need for review.
 
@@ -161,6 +163,10 @@ Never call an excluded tool, including as a capability test. The exclusion comes
 
 Codex reads user skills from `~/.agents/skills`, where `npx skills add … -a codex` installs them, and from `skills/` in the Codex config home. Install each skill as workstation.md, *A skill*, says.
 
+## Config
+
+The declared Codex config's `model` and `model_reasoning_effort` (workstation.md, *A Codex config*) are top-level keys of `config.toml`. Check, propose and write them as *Sandbox* says: *Installed support*, *Propose and apply*, and *Overrides and activation*, where a profile or a trusted project's `model` can win. The verifier's `config` cell checks them.
+
 ## Hook wiring
 
 - **Wiring:** one match-all group in `hooks.json` (keep the user's groups):
@@ -194,9 +200,10 @@ The verifier's Codex row, from `scripts/setupmachine/harnesses/codex.py`, reads 
 
 - **instructions:** `AGENTS.md` is a link to the shared file, and `memories` is `false` in `[features]`. A non-empty `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Codex in `setup/harnesses.json`.
 - **guardrails:** a match-all `PreToolUse` group in `hooks.json` runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness codex`, `config.toml` holds its current `trusted_hash`, and `[features] hooks` isn't `false`. Each personal command row that gets a rule has `(set-up-machine personal rule <id>)` in `rules/set-up-machine.rules`.
-- **sandbox:** each key the declared Codex config sets has the same value in `config.toml`. `n/a` without a declared config.
+- **sandbox:** each of `sandbox_mode`, `approval_policy` and `approvals_reviewer` the declared Codex config sets has the same value in `config.toml`. `n/a` without a declared config, or when it sets none of them.
 - **plugins:** as *Plugins* says.
 - **skills:** each listed skill is in `~/.agents/skills` or `skills/` in the config home.
+- **config:** each other key the declared Codex config sets, such as `model`, has the same value in `config.toml`. `n/a` without a declared config, or when it sets only sandbox keys.
 
 The TOML checks need Python 3.11+; on an older Python they are `gap`. The verifier doesn't run `codex execpolicy`. In the report, distinguish persisted defaults from effective overrides, and state how a later session picks the change up. To check Codex itself:
 

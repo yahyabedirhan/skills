@@ -14,8 +14,9 @@ It reads the machine and writes nothing. The steps:
    - rules: every sample of every rule-table row and personal permission gets its row's
      answer from the hook's decision.
 3. Print one table: a row per harness found (its folder exists, or its CLI is on PATH; a --home
-   copy counts only its folders), a column per setup area (instructions,
-   guardrails, sandbox, plugins, skills), each cell ok, FAIL, gap or n/a.
+   copy counts only its folders), a column per setup area (instructions, guardrails, sandbox,
+   plugins, skills) and a last one, config, for the keys setup/harnesses.json declares, such as
+   a default model. Each cell is ok, FAIL, gap or n/a.
 4. Print one detail line per FAIL and gap cell.
 5. Exit 1 when any line or cell is FAIL.
 
@@ -33,7 +34,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from setupmachine import checks, hook, rules, workstation  # noqa: E402
 from setupmachine.harnesses import ALL, codex, pi  # noqa: E402
 
-AREAS = ("instructions", "guardrails", "sandbox", "plugins", "skills")
+# The table's columns: the five setup areas, then the declared config, which is none of them.
+AREAS = ("instructions", "guardrails", "sandbox", "plugins", "skills", "config")
 
 
 def main() -> int:

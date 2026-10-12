@@ -96,6 +96,12 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 
 Claude Code reads skills from `~/.claude/skills`. When that folder is a link to `~/.agents/skills`, every skill installed there reaches Claude Code: install without `-a claude-code`, since the CLI would link the folder into itself. Otherwise add `-a claude-code` to each install command. Install each skill as workstation.md, *A skill*, says.
 
+## Config
+
+When `setup/harnesses.json` names a Claude Code `config` (workstation.md, *A declared config*), merge each key it sets, such as `model` and `effortLevel`, into `~/.claude/settings.json`, as that file's other keys are written: back it up, write through a symlink at its target, and keep every key the declared file doesn't name, including the hooks and permission lists this skill writes. Mark each key `present, personal` or `updated, personal`.
+
+- **Activation:** a new session reads it. `/model` in a running session, the `--model` flag, the `ANTHROPIC_MODEL` environment variable and a project's `.claude/settings.json` override it: name an override you find as a `gap`.
+
 ## Hook wiring
 
 - **Wiring:** one match-all group in `hooks.PreToolUse`:
@@ -133,6 +139,7 @@ The verifier's Claude Code row, from `scripts/setupmachine/harnesses/claude_code
 - **sandbox:** `n/a`.
 - **plugins:** each bundle is in `installed_plugins.json` and enabled in `enabledPlugins`. A standalone MCP server is a `gap`.
 - **skills:** each listed skill is in `~/.claude/skills`.
+- **config:** each key the declared Claude Code config sets has the same value in `~/.claude/settings.json`. `n/a` without a declared config.
 
 The verifier doesn't report an enabled bundle the list leaves out: find those in the diff. To see Claude Code itself enforce the rows, in a throwaway folder with `--setting-sources project,local --settings <a copy of settings.json>`:
 
