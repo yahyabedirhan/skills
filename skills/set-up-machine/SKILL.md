@@ -150,12 +150,12 @@ Name these once in every audit:
   - [references/opencode.md](references/opencode.md): opencode.
   - [references/cursor.md](references/cursor.md): Cursor's IDE and CLI.
   - [references/pi.md](references/pi.md): Pi, whose only enforcement is the hook's extension.
-  - [references/grok-bot.md](references/grok-bot.md): Grok Bot, whose app owns approvals, model, connectors and memory, so only its skills are written.
+  - [references/grok-bot.md](references/grok-bot.md): Grok Bot, whose instructions live in memory and whose permissions, connectors, secrets and routines live in the app.
 
 ## Scripts
 
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
-- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`. `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command (references/codex.md).
+- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`. `--grok-bot-rules` prints the rule table and personal permissions as Grok Bot's Auto-review rules (references/grok-bot.md). `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command (references/codex.md).
 - `scripts/setupmachine/`: the modules both scripts use. `harnesses/__init__.py` lists every harness in `ALL`, and each harness has one module there.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
 - [references/pi-extension.ts](references/pi-extension.ts): the Pi extension that calls the hook and asks the user for ask rows.

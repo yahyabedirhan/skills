@@ -32,7 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from setupmachine import checks, hook, rules, workstation  # noqa: E402
-from setupmachine.harnesses import ALL, codex, pi  # noqa: E402
+from setupmachine.harnesses import ALL, codex, grok_bot, pi  # noqa: E402
 
 # The table's columns: the five setup areas, then the declared config, which is none of them.
 AREAS = ("instructions", "guardrails", "sandbox", "plugins", "skills", "config")
@@ -42,6 +42,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Check every harness against the workstation repo's setup/.")
     parser.add_argument("--home", type=Path, default=Path.home(), help="the home folder to check (default: $HOME)")
     parser.add_argument("--rules", type=Path, default=rules.DEFAULT_TABLE)
+    parser.add_argument("--grok-bot-rules", action="store_true",
+                        help="print the rule table and personal permissions as Grok Bot Auto-review rules")
     parser.add_argument("--codex-trust-hash", metavar="COMMAND", help="print Codex's trusted_hash for this hook command")
     args = parser.parse_args()
     if args.codex_trust_hash is not None:
@@ -55,6 +57,9 @@ def main() -> int:
         return 1
     setup = workstation.load(home, table, [h.ID for h in ALL])
     ctx = checks.Context(home, setup, table + setup.rows, codex.config_home(home), pi.agent_dir(home))
+    if args.grok_bot_rules:
+        print(grok_bot.review_rules(ctx.rows), end="")
+        return 0
 
     failed = global_line("setup", *setup_line(ctx), home)
     failed |= global_line("rules", *rules_line(ctx, len(table)), home)

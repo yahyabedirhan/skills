@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import subprocess
 from pathlib import Path
 
 from ..checks import Cell, cell, na, read_json
@@ -19,6 +21,8 @@ ID, LABEL = "grok-bot", "Grok Bot"
 FOLDER = Path("agent-data/workflows")
 # Like ~/.agents/.skill-lock.json: {"skills": {name: {"source", "skillPath", "skillFolderHash"}}}.
 LOCK = Path(".local/state/agents/grok-bot-skill-lock.json")
+# {"sha", "date", "sources": {"<path in the workstation repo>": ["<fact>", …]}}: what memory holds, and from which commit.
+INSTRUCTIONS_LOCK = Path(".local/state/agents/grok-bot-instructions-lock.json")
 
 
 def present(home: Path) -> bool:
@@ -51,9 +55,31 @@ def write(denials: list, asks=()) -> str:
 
 
 def check_instructions(ctx) -> Cell:
-    """Grok Bot loads no instructions file: the user writes the lines into its memory, which no file shows."""
-    return Cell("gap", ["Grok Bot loads no instructions file; the shared file's lines go into its memory "
-                        "by hand, and the check can't see memory (references/grok-bot.md)"])
+    """The facts in memory came from the current instructions sources. Memory itself can't be read, so
+    the check compares the sources at the commit the lock records with the sources now."""
+    if not ctx.setup.repository:
+        return Cell("gap", ["no workstation repo: the check can't see memory"])
+    lock_path = ctx.home / INSTRUCTIONS_LOCK
+    lock = read_json(lock_path)
+    if not lock or not isinstance(lock.get("sha"), str):
+        return Cell("gap", [f"no {ctx.show(lock_path)}: write the facts into memory, then the lock "
+                            "(references/grok-bot.md, *Reconcile*)"])
+    problems = []
+    for source in sources(ctx):
+        relative = source.relative_to(ctx.setup.clone).as_posix()
+        then = subprocess.run(["git", "-C", str(ctx.setup.clone), "show", f"{lock['sha']}:{relative}"],
+                              capture_output=True, text=True)
+        if then.returncode != 0 or then.stdout != source.read_text():
+            problems.append(("FAIL", f"stale: {relative} changed since {lock['sha'][:7]}; reconcile memory "
+                                     "(references/grok-bot.md, *Reconcile*)"))
+    return cell(problems)
+
+
+def sources(ctx) -> list:
+    """The files memory facts come from: setup/instructions.md for user memory, and Grok Bot's own
+    instructions from setup/harnesses.json for agent memory."""
+    files = [ctx.setup.clone / "setup/instructions.md", ctx.setup.file(ID, "instructions")]
+    return [f for f in files if f is not None and f.is_file()]
 
 
 def check_guardrails(ctx) -> Cell:
@@ -66,11 +92,14 @@ def check_sandbox(ctx) -> Cell:
 
 
 def check_plugins(ctx) -> Cell:
-    """A connector is added in the app, so a listed one is a gap the user confirms there."""
-    entries = ctx.setup.plugins(ID)
-    if not entries:
-        return na("installs.json lists no plugin for Grok Bot; connectors are added in the app")
-    return Cell("gap", [f"{e['name']}: add and check it in the app's connectors; no file shows it" for e in entries])
+    """A connector is added in the app, so each one installs.json or the declared config names is a
+    gap the user confirms there."""
+    names = [e["name"] for e in ctx.setup.plugins(ID)] + [n for n in _declared(ctx).get("connectors", [])
+                                                          if isinstance(n, str)]
+    if not names:
+        return na("no connector is declared for Grok Bot; connectors are added in the app")
+    return Cell("gap", [f"{name}: add it and check its sign-in in the app's connectors; no file shows it"
+                        for name in dict.fromkeys(names)])
 
 
 def check_skills(ctx) -> Cell:
@@ -97,9 +126,53 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    if ctx.setup.file(ID, "config") is not None:
-        return Cell("gap", ["Grok Bot's model is picked in the app; a declared config can't be written"])
-    return na("setup/harnesses.json names no Grok Bot config")
+    """The declared config's `secrets` are set as environment variables, by name only; `connectors`
+    are checked in the plugins column; `routines` live in the app."""
+    source = ctx.setup.file(ID, "config")
+    if source is None:
+        return na("setup/harnesses.json names no Grok Bot config")
+    declared = _declared(ctx)
+    if not declared:
+        return Cell("FAIL", [f"{ctx.show(source)} isn't a JSON object"])
+    problems = []
+    for key in declared:
+        if key not in KEYS:
+            problems.append(("gap", f"{source.name}: `{key}` has no Grok Bot setting; it is set in the app"))
+    secrets = [s for s in declared.get("secrets", []) if isinstance(s, str)]
+    if secrets and ctx.home != Path.home().resolve():
+        problems.append(("gap", "secrets are checked only in the real home, where the app sets them"))
+    elif secrets:
+        missing = [s for s in secrets if not os.environ.get(s)]  # the name only: a value is never read out
+        if missing:
+            problems.append(("FAIL", f"secret {', '.join(missing)} is not set; add it in the app's secrets"))
+    if declared.get("routines"):
+        problems.append(("gap", f"{len(declared['routines'])} routines: check each in the app; no file shows them"))
+    return cell(problems)
+
+
+# The keys a declared Grok Bot config may set (references/grok-bot.md, *Config*).
+KEYS = ("secrets", "connectors", "routines")
+
+
+def _declared(ctx) -> dict:
+    source = ctx.setup.file(ID, "config")
+    data = read_json(source) if source is not None else {}
+    return data if isinstance(data, dict) else {}
+
+
+def review_rules(rows) -> str:
+    """The rule table and the personal permissions as Auto-review rules, for the user to paste in the app."""
+    groups = {"deny": "Block", "ask": "Ask the user first", "allow-and-report": "Allow", "allow": "Allow"}
+    lines = []
+    for title in ("Block", "Ask the user first", "Allow"):
+        picked = [r for r in rows if groups[r.level] == title]
+        if not picked:
+            continue
+        lines.append(f"{title}:")
+        lines += [f"- {r.summary}. {r.reason} Instead: {r.instruction}" if r.level in ("deny", "ask")
+                  else f"- {r.summary}. {r.reason}" for r in picked]
+        lines.append("")
+    return "\n".join(lines)
 
 
 def tree_hash(folder: Path) -> str:
