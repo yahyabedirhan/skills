@@ -138,12 +138,13 @@ def native_lists(settings: dict) -> dict:
 
 
 def _entry(entry):
-    """`Bash(rm -rf *)` -> ("command", "rm -rf"); `Read(./.env)` -> ("path", "./.env"); `mcp__…` as is."""
+    """`Bash(rm -rf *)` -> ("command", "rm -rf"); `Read(./.env)` -> ("path", "./.env"); `mcp__…` as is.
+    A `Write(...)` entry counts for nothing: Claude Code never checks it (references/claude-code.md)."""
     if not isinstance(entry, str):
         return None
     if entry.startswith("mcp__"):
         return ("mcp", entry)
-    match = re.fullmatch(r"(Bash|Read|Edit|Write)\((.+)\)", entry, re.S)
+    match = re.fullmatch(r"(Bash|Read|Edit)\((.+)\)", entry, re.S)
     if not match:
         return None
     tool, inner = match.groups()
