@@ -63,7 +63,7 @@ def check_instructions(ctx) -> Cell:
     lock = read_json(lock_path)
     if not lock or not isinstance(lock.get("sha"), str):
         return Cell("gap", [f"no {ctx.show(lock_path)}: write the facts into memory, then the lock "
-                            "(references/grok-bot.md, *Reconcile*)"])
+                            "(references/grok-bot.md, *First-time apply*)"])
     problems = []
     for source in sources(ctx):
         relative = source.relative_to(ctx.setup.clone).as_posix()

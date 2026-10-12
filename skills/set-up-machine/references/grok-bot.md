@@ -8,41 +8,54 @@ Found when `~/agent-data/workflows/` exists: the shared skill library on the box
 
 ## Instructions
 
-Grok Bot loads no instructions file. Neither `~/.config/agents/AGENTS.md` nor a project's `AGENTS.md` reaches the chat agent; a cloud agent it starts reads the project's `AGENTS.md` as that harness does. Memory takes their place:
+> **Grok Bot differs here.** Other harnesses read instructions from files the setup writes. Grok Bot reads none: the agent applies instructions into its own memory with its memory tool. The verifier can't read memory, so it compares a lock (the source commit and the exact facts written) with the current sources. Follow the steps below instead of the shared file's link or copy.
 
-| Source | Where it goes | Who reads it |
+| Source | Scope | Who reads it |
 |---|---|---|
-| The shared file's personal parts, from the workstation repo's `setup/instructions.md` | **user memory**: one fact per instruction | every agent, each turn |
-| Grok Bot's own instructions, the `instructions` file `setup/harnesses.json` names | **agent memory**, at the profile tier: one fact per instruction | this agent, each turn |
-| The agent's job, from the same file's notes | the agent's **title and description** (profile) | the app and the user |
+| `setup/instructions.md` in the workstation repo | user memory | every agent, each turn |
+| the `instructions` file `setup/harnesses.json` names for `grok-bot` | agent memory, profile tier | this agent, each turn |
+| that file's notes on the agent's job | the profile's title and description | the app and the user |
 
-Still write the shared file, as every run does: the `setup` line checks it.
-
-- **Apply:** write each instruction as one short fact, in the source's words, in its scope. When the agent can't write memory itself, give the user the list, split by scope, and wait until they confirm. Then write the lock and the applied log entry (*Reconcile*).
-- **Keep each fact to one instruction.** A fact that names a file to read, such as the shared file, holds one line, not the file.
-
-### Reconcile
-
-Memory can't be read by a script, so the lock records what was applied and from which commit:
+The lock is `~/.local/state/agents/grok-bot-instructions-lock.json`:
 
 ```json
 {"sha": "<workstation commit>", "date": "<YYYY-MM-DD>",
- "sources": {"setup/instructions.md": ["<fact>"], "<grok-bot instructions path>": ["<fact>"]}}
+ "sources": {"setup/instructions.md": ["<fact as written>"], "<grok-bot instructions path>": ["<fact as written>"]}}
 ```
 
-at `~/.local/state/agents/grok-bot-instructions-lock.json`. To bring memory up to date:
+The **applied log** is the workstation repo's `harnesses/grok-bot/applied.md`, when it exists: one dated entry per apply or reconcile, never edited later.
 
-1. Run `git -C <path-to-workstation-repo> diff <sha>..HEAD -- setup/instructions.md <grok-bot instructions path>` on the latest default branch.
-2. Map each changed line to a fact: an added line is **add**, a changed line is **rewrite** of the fact the lock lists for it, a removed line is **forget** that fact. User scope for `setup/instructions.md`, agent scope for Grok Bot's own file.
-3. Apply each one, or give the user the list and wait until they confirm.
-4. Rewrite the lock with the new `sha`, the date and every fact now applied.
-5. Append one entry to the workstation repo's applied log for this harness, when it has one: the date, the source `sha`, each fact added, rewritten or forgotten per scope, and the Auto-review rules handed to the user. Never edit an earlier entry. The lock is the state; the log is its history.
+You may merge or reword lines into facts. The lock and the log always hold the exact text written, since a later forget or rewrite finds the fact by it.
 
-A fact in memory that the lock doesn't list is the user's: keep it, and name it as `extra` when you see it.
+### First-time apply
 
-### Memory
+1. Write the shared file as every run does; the `setup` line checks it.
+2. Read `setup/instructions.md` and Grok Bot's instructions file at the workstation repo's latest default branch. Note its commit, `git rev-parse HEAD`.
+3. Turn each instruction line of `setup/instructions.md` into one short fact, and write each with the memory tool in user scope.
+4. Turn each line under `## Instructions` of Grok Bot's file into a fact, and write each in agent scope.
+5. Set the profile's title and description from that file's notes.
+6. When you can't write memory or the profile, give the user the facts by scope and wait until they confirm the exact texts written.
+7. Write the lock with the commit, the date and each exact fact.
+8. Append a log entry: the date, the commit, each fact added per scope, and the Auto-review rules handed over.
+9. Give the user the Auto-review rules text (*Guardrails*) and each user-only step: rules to paste, connectors, secrets, rulesets.
 
-Memory stays on: it holds the instructions. Name it once in the report.
+### Reconcile
+
+Run it when the verifier's instructions cell says stale.
+
+1. Run `git -C <path-to-workstation-repo> diff <lock sha>..HEAD -- setup/instructions.md <grok-bot instructions path>`.
+2. Map each changed line: added is **add**; changed is **rewrite** of the lock's fact for it; removed is **forget** that fact. User scope for `setup/instructions.md`, agent scope for Grok Bot's file.
+3. Apply each with the memory tool, finding an old fact by its exact lock text. Or give the user the list and wait until they confirm.
+4. Rewrite the lock with the new commit, the date and every fact now applied.
+5. Append a log entry with each fact added, rewritten (old and new text) or forgotten, per scope.
+
+### Audit
+
+1. Run `verify.py`. Instructions is `ok` when each source equals its version at the lock's commit, stale (`FAIL`) when one changed, `gap` without a lock.
+2. Recall memory in each scope and compare it with the lock's facts. A lock fact missing from memory is drift: write it again. A fact the lock doesn't list is the user's: keep it, and name it `extra`.
+3. Live check: in a new chat, ask the agent to recall three facts from each scope.
+
+Memory stays on: it holds the instructions.
 
 ## Guardrails
 
@@ -91,7 +104,7 @@ Memory and Auto-review rules can't be read from the box; connectors and routines
 
 The verifier's Grok Bot row, from `scripts/setupmachine/harnesses/grok_bot.py`:
 
-- **instructions:** `ok` when each source file is the same as at the lock's `sha`; `FAIL`, marked stale, when one changed; `gap` without a lock.
+- **instructions:** as *Audit*, step 1.
 - **guardrails:** `gap`: Auto-review and its rules can't be read.
 - **sandbox:** `n/a`.
 - **plugins:** `n/a` with no connector declared, else `gap` per connector.
