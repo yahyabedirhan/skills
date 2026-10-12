@@ -23,7 +23,7 @@ The lock is `~/.local/state/agents/grok-bot-instructions-lock.json`:
  "sources": {"setup/instructions.md": ["<fact as written>"], "<grok-bot instructions path>": ["<fact as written>"]}}
 ```
 
-The **applied state page** is the workstation repo's `harnesses/grok-bot/applied.md`, when it exists: the lock's commit and date, each exact fact by scope, the profile and the Auto-review rules status. Its history is its git log.
+The **applied state page** is the workstation repo's `harnesses/grok-bot/applied.md`, when it exists: the lock's commit and date, each exact fact by scope, the profile and the Auto-review rules status. Its history is its git log. It names the commit its instructions came from, which is always earlier than the commit that holds the page. When the sources are unchanged, move the lock to a later commit, such as a merge, without rewriting the page; don't open a pull request only to match the hashes.
 
 You may merge or reword lines into facts. The lock and the applied state page always hold the exact text written, since a later forget or rewrite finds the fact by it.
 
