@@ -40,4 +40,4 @@ The decisions behind the `show-me-diagram` skill. This file is for maintaining i
 - **Context:** The maintainer wants diagrams for his personal website in the look of the Swift Lab, Shipyard and skills logos. Those logos show folded white paper on a dark granite tile.
 - **Options:** Re-skin Cursor Dark: its serif title and orange accent don't match the logos.
 - **Choice and why:** A new profile, Graphite. It takes the logos' grey palette and the tile's gradient and double rim. White replaces the orange accent. Only the focal nodes and arrows fold, so the folds keep the accent's role. The fonts are geometric sans faces with no serif, to match the crisp folds.
-- **Consequences:** The profile adds one role, `shade`, for the folded faces. Upstream has no such role, so the profile says where to use it.
+- **Consequences:** The profile adds three roles that upstream lacks: `shade` for the folded faces, `fold-muted` for secondary text on a folded node, and `line` for node outlines. A first build of three diagrams showed the gaps. Two rules came from it: the diagram itself is the tile, and label masks take the tile's gradient.
