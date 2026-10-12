@@ -6,8 +6,8 @@ The diagram-design profiles this skill ships. A profile is a saved set of choice
 |---|---|---|
 | Cursor Dark (default) | [cursor-dark.md](cursor-dark.md) | any diagram, read in a dark editor |
 | Navy Blue | [navy-blue.md](navy-blue.md) | a calm dark diagram for slides or a README |
-| Chalky Green | [chalky-green.md](chalky-green.md) | a concept explained as if on a classroom board |
-| Sketchbook | [sketchbook.md](sketchbook.md) | a story or process drawn by hand on paper |
+| Shipyard Green | [shipyard-green.md](shipyard-green.md) | anything about Shipyard or my agent work, in its icon's olive green |
+| Parchment | [parchment.md](parchment.md) | a story or a process, on warm paper |
 
 ## The shape of a profile
 

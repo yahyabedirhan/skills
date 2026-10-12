@@ -24,7 +24,7 @@ The decisions behind the `show-me-diagram` skill. This file is for maintaining i
 - **Context:** A profile copied as a full upstream style guide was 246 lines, mostly restated upstream rules. Explainer Studio had the same problem with styles and replaced them with layers, each with options, and presets that pick one option per layer.
 - **Options:** Full upstream style guides: long, and they drift from upstream.
 - **Choice and why:** A profile picks one option per layer, from what the diagram is to how it looks: diagram types, diagram style, look, palette, typography. It names upstream types, variants and roles, and leaves the rest to upstream defaults. The shape lives only in `profiles/index.md`.
-- **Consequences:** Profiles are short and comparable. Cursor Dark is the default; Navy Blue, Chalky Green and Sketchbook ship beside it.
+- **Consequences:** Profiles are short and comparable. Cursor Dark is the default; Navy Blue, Shipyard Green and Parchment ship beside it.
 
 ## 2026-10-12: model-invoked, no plugin entry yet
 

@@ -1,6 +1,6 @@
-# Profile: Sketchbook
+# Profile: Parchment
 
-Warm paper with a dark pen line and red and gold accents, after Explainer Studio's sketchbook preset (its paper-blueprint look). For a story or a process.
+Warm parchment paper, dark ink and a red accent, after the paper in Explainer Studio's paper-blueprint look. For a story or a process.
 
 ## Diagram types
 
@@ -8,11 +8,11 @@ Flowchart, Process, User journey, Loop, Timeline, Swimlane.
 
 ## Diagram style
 
-Minimal light, with Sketchy.
+Minimal light.
 
 ## Look
 
-Low density. Strokes 1.4, corners 6. Red for the focal node, gold only for a second highlight.
+Upstream defaults. Red only on the 1 or 2 focal nodes.
 
 ## Palette
 
@@ -35,6 +35,6 @@ The accent is Explainer Studio's red `#d9533f`, darkened to clear 4.5:1 as text 
 | Role | Family | Weight |
 |---|---|---|
 | `title` | Kalam | 700 |
-| `node-name` | Patrick Hand | 400 |
+| `node-name` | Inter | 600 |
 | `sublabel` | IBM Plex Mono | 400 |
-| `callout` | Kalam | 400 |
+| `callout` | Inter | 400 |
