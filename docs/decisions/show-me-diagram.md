@@ -33,3 +33,11 @@ The decisions behind the `show-me-diagram` skill. This file is for maintaining i
 - **Options:** None considered.
 - **Choice and why:** Keep a description, and add no `agents/openai.yaml` or plugin entry.
 - **Consequences:** Add a plugin entry once it has been used.
+
+## 2026-10-12: a Graphite profile in the logos' origami look
+
+- **Status:** accepted
+- **Context:** The maintainer wants diagrams for his personal website in the look of the Swift Lab, Shipyard and skills logos. Those logos show folded white paper on a dark granite tile.
+- **Options:** Re-skin Cursor Dark: its serif title and orange accent don't match the logos.
+- **Choice and why:** A new profile, Graphite. It takes the logos' grey palette and the tile's gradient and double rim. White replaces the orange accent. Only the focal nodes and arrows fold, so the folds keep the accent's role. The fonts are geometric sans faces with no serif, to match the crisp folds.
+- **Consequences:** The profile adds one role, `shade`, for the folded faces. Upstream has no such role, so the profile says where to use it.
