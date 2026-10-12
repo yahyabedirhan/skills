@@ -10,7 +10,7 @@ from types import SimpleNamespace
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from setupmachine import plugins
 from setupmachine.codex_config import parse
-from setupmachine.harnesses import codex as codex_plugins
+from setupmachine.harness_setups import codex as codex_plugins
 
 ENTRY = {"name": "search", "kind": "bundle", "source": "search@catalog", "harnesses": ["codex"],
          "mcp_policy": {"require_oauth": True, "approval_mode": "prompt",

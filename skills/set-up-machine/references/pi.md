@@ -136,6 +136,13 @@ A refused call's tool result is the hook's refusal: each refused part, its rule,
 
 ## Checking it
 
+This harness's setup is `scripts/setupmachine/harness_setups/pi.py`.
+
+- When Pi's agent folder exists, `pi ok` for the `AGENTS.md` link, and a `pi same` line per key the Pi `config` declares, or `pi none` when `setup/harnesses.json` names no such file. A `pi FAIL` means the audit is not done.
+- Its `hook wired` line is the extension. Pi has no permission system, so the hook is its only enforcement, and the extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call. A `hook gap` line is an extension someone else wrote at the same path, left alone.
+- A `pi extra` line is a broken skill link, for the user to remove.
+- A `pi gap` for `packages` in the Pi `config` asks the user to move them into `plugins`, where Pi extensions belong.
+
 `verify.py` prints a `pi` line for the link, one per declared default, one per broken skill link, and a `hook` line for the extension. To see Pi read the setup, start it in a sandbox:
 
 1. Make a sandbox folder, with a fresh agent folder in it. Copy `settings.json` and recreate the `AGENTS.md` link there. Copy no credential, trust or session file.

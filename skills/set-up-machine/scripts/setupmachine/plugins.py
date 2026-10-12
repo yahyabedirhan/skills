@@ -15,8 +15,8 @@ should have it:
 personal permissions; each adapter derives its list from those rows.
 
 What each harness can take is in references/workstation.md and that harness's Plugins section.
-One adapter per harness lives in `harnesses/<harness>.py` and exposes validate, check and propose.
-This module dispatches through ADAPTERS. opencode has no adapter yet.
+A discovered harness setup that exposes validate, check and propose is that harness's adapter.
+opencode has no adapter yet.
 
 `check` reads persisted setup and read-only CLI metadata. It does not establish freshness.
 The agent checks latest upstream versions, installs and writes, as SKILL.md says.
@@ -24,31 +24,73 @@ A matching declaration does not establish the installed code's freshness.
 """
 from __future__ import annotations
 
+import inspect
 import json
 import re
 import sys
 from pathlib import Path
 
 from . import layout
+from . import harness_setups
 from . import rules as rule_table
-from .harnesses import claude, codex, cursor, pi
+from .harnesses import claude
 from .harnesses import policy
 from .harnesses.errors import PluginsError
 from .personal import PersonalError, permissions, read_pointer
 
 KINDS = ("bundle", "mcp")
 KEYS = {"name", "kind", "source", "marketplace", "server", "harnesses", "os", "mcp_policy"}
-LABELS = layout.HARNESS_LABELS
 OSES = {"macos": "darwin", "linux": "linux"}
 SOURCE = re.compile(r"^[A-Za-z0-9_.-]+@[A-Za-z0-9_.-]+$")
 MARKETPLACE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
-ADAPTERS = {
-    "claude-code": claude,
-    "cursor": cursor,
-    "pi": pi,
-    "codex": codex,
-}
+
+def _setup(harness: str):
+    """The discovered harness setup with this id, or None."""
+    for setup in harness_setups.load():
+        if setup.id == harness:
+            return setup
+    return None
+
+
+def adapter_for(harness: str):
+    """The harness setup that adapts this harness, when it takes plugins."""
+    setup = _setup(harness)
+    if setup is not None and callable(getattr(setup, "check", None)):
+        return setup
+    return None
+
+
+def _records_seen(validate) -> bool:
+    """Whether this validator tracks one identity across entries, as Pi's extension sources do."""
+    return callable(validate) and "seen" in inspect.signature(validate).parameters
+
+
+def _skips_marketplace(harnesses: list) -> bool:
+    """A bundle whose every harness tracks extension identity uses that harness's source form.
+
+    The marketplace `<plugin>@<marketplace>` check does not apply to it.
+    """
+    if not harnesses:
+        return False
+    for name in harnesses:
+        adapter = adapter_for(name)
+        if adapter is None or not _records_seen(getattr(adapter, "validate", None)):
+            return False
+    return True
+
+
+def _seen_validators() -> list:
+    """`(validate, seen)` for each harness setup whose validator takes a shared `seen` map.
+
+    Those run on every entry. A validator without `seen` runs only for a harness the entry names.
+    """
+    found = []
+    for setup in harness_setups.load():
+        validate = getattr(setup, "validate", None)
+        if _records_seen(validate):
+            found.append((validate, {}))
+    return found
 
 
 class Context:
@@ -95,9 +137,9 @@ def check(home: Path, pi_dir: Path | None = None, codex_home: Path | None = None
             lines.append(("n/a", f"{name}: for {', '.join(oses)} only"))
             continue
         for harness in entry["harnesses"]:
-            adapter = ADAPTERS.get(harness)
+            adapter = adapter_for(harness)
             if adapter is None:
-                label = LABELS[harness]
+                label = _setup(harness).label
                 lines.append(("gap", f"{label}: {tag} is listed, but set-up-machine can't deliver plugins to "
                                      f"{label} yet"))
                 continue
@@ -106,7 +148,10 @@ def check(home: Path, pi_dir: Path | None = None, codex_home: Path | None = None
         if not any(entry["kind"] == "bundle" and entry["source"] == source for entry in entries):
             lines.append(("extra", f"Claude Code: {source} is enabled but not in the plugins list; "
                                    "Cursor imports it too"))
-    lines.extend(pi.extras(ctx, entries))
+    for setup in harness_setups.load():
+        extras = getattr(setup, "extras", None)
+        if callable(extras):
+            lines.extend(extras(ctx, entries))
     return lines
 
 
@@ -122,7 +167,7 @@ def load(path: Path) -> list:
     if not isinstance(entries, list):
         raise PluginsError(f"{path}: `plugins` must be a list")
     seen = set()
-    pi_seen = {}
+    seen_validators = _seen_validators()
     for i, entry in enumerate(entries):
         where = f"{path}: plugins[{i}]"
         if not isinstance(entry, dict):
@@ -143,15 +188,16 @@ def load(path: Path) -> list:
         if not isinstance(harnesses, list) or not harnesses:
             raise PluginsError(f"{where}: harnesses can't be empty")
         for harness in harnesses:
-            if harness not in LABELS:
+            if _setup(harness) is None:
                 raise PluginsError(f"{where}: unknown harness {harness!r}")
         policy.validate(entry, where)
         if kind == "bundle":
             if "server" in entry:
                 raise PluginsError(f"{where}: a bundle takes no server")
             source = entry.get("source") if isinstance(entry.get("source"), str) else ""
-            pi.validate(entry, where, pi_seen, i)
-            if harnesses != ["pi"]:
+            for validate, bag in seen_validators:
+                validate(entry, where, bag, i)
+            if not _skips_marketplace(harnesses):
                 if not SOURCE.match(source):
                     raise PluginsError(f"{where}: source must be <plugin>@<marketplace>")
                 market = entry.get("marketplace")
@@ -164,10 +210,11 @@ def load(path: Path) -> list:
                 raise PluginsError(f"{where}: server needs url or command")
             if "source" in entry or "marketplace" in entry:
                 raise PluginsError(f"{where}: an mcp entry takes server, not source or marketplace")
-            pi.validate(entry, where, pi_seen, i)
+            for validate, bag in seen_validators:
+                validate(entry, where, bag, i)
         for harness in harnesses:
-            adapter = ADAPTERS.get(harness)
-            if adapter is not None and adapter is not pi:
+            adapter = adapter_for(harness)
+            if adapter is not None and not _records_seen(getattr(adapter, "validate", None)):
                 adapter.validate(entry, where)
         oses = entry.get("os")
         if oses is not None and (not isinstance(oses, list) or any(item not in OSES for item in oses)):

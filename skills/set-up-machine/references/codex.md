@@ -117,7 +117,7 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 
 1. Add a missing marketplace with `codex plugin marketplace add <owner>/<repo>`.
 2. Install the bundle with `codex plugin add <plugin>@<marketplace>`.
-3. Propose the policy with `propose` from `scripts/setupmachine/harnesses/codex.py`, then apply it through the skill's backup and approval steps.
+3. Propose the policy with `propose` from `scripts/setupmachine/harness_setups/codex.py`, then apply it through the skill's backup and approval steps.
 4. For a standalone MCP server, merge `server` into `[mcp_servers.<name>]` the same way.
 5. When `require_oauth` is true, the user runs `codex mcp login <name>`. Leave the server disabled until that login is connected.
 
@@ -156,6 +156,12 @@ A forbidden rule: `` exec_command failed: … `/bin/zsh -lc 'rm -fr x'` rejected
 
 ## Checking it
 
+This harness's setup is `scripts/setupmachine/harness_setups/codex.py`.
+
+- Every `codex differs` line is a row this reference says gets no rule.
+- Declared defaults match with no `config FAIL` line, or a `config n/a` line says Codex isn't installed.
+- In the report, distinguish persisted defaults from effective overrides, and state how a later session picks the change up.
+
 - `verify.py` runs each plain command sample through `codex execpolicy check --resolve-host-executables --rules <each rules file> -- <argv>`. A `differs` line should be a row this file says gets no rule; any other is a mistake in the rules file. The check doesn't unwrap `bash -lc`.
 - **Hook trust:** `codex app-server` with `CODEX_HOME` at the folder, then `hooks/list` for a throwaway folder: the group is `trusted`.
 - **A session without a login:** `codex exec` with `CODEX_HOME` and `HOME` at a trial home and a `model_providers` entry pointing at a local stand-in that answers the Responses API with one `exec_command` (or `apply_patch`) call; the next request's `function_call_output` is what the agent read. With `--disable hooks` it shows the rule's justification, and with hooks on the hook's refusal.
@@ -173,7 +179,7 @@ The server id is the entry's `name`.
 
 Take tool names from `setup/permissions.json` and the rule table (workstation.md). `propose` unions those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
 
-`propose(text, entry)` in `scripts/setupmachine/harnesses/codex.py` returns the TOML and writes nothing. It keeps undeclared keys and comments, because the file holds choices this skill does not own. It keeps a stricter tool list already in the file: more disabled tools, or a shorter enabled list. It refuses an unfamiliar TOML form instead of rewriting the file. Apply the skill's backup and approval steps to the diff it returns.
+`propose(text, entry)` in `scripts/setupmachine/harness_setups/codex.py` returns the TOML and writes nothing. It keeps undeclared keys and comments, because the file holds choices this skill does not own. It keeps a stricter tool list already in the file: more disabled tools, or a shorter enabled list. It refuses an unfamiliar TOML form instead of rewriting the file. Apply the skill's backup and approval steps to the diff it returns.
 
 When `require_oauth` is true, keep the server disabled until `codex mcp login <name>` shows the server connected. Never test the exclusion by calling the tool. A disabled server reports `unsupported` in `codex mcp list --json`. Enable it only for that listing, then restore the disabled state unless the login is connected. Codex 0.162.1 reports a connected login as `o_auth`.
 

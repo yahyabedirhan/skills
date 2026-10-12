@@ -21,8 +21,9 @@ The rows are the rule table's, plus the personal permissions of the repository t
 `~/.config/agents/source.md` names (personal.py).
 
 Each harness has a reader (its payload -> ToolCall) and a writer (the denials,
-and the ask hits for a writer that asks -> what it prints), in HARNESSES. The report folder comes from the hook's
-configuration file, `~/.config/agents/hook.json` by default.
+and the ask hits for a writer that asks -> what it prints). A discovered harness setup
+supplies both. The report folder comes from the hook's configuration file,
+`~/.config/agents/hook.json` by default.
 """
 from __future__ import annotations
 
@@ -32,7 +33,7 @@ import os
 import re
 import shlex
 import sys
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -169,6 +170,21 @@ def operand_files(argv: list) -> list:
 # --- what the agent reads -------------------------------------------------------
 
 
+HOOK_SCRIPT_NAME = "pre_tool_hook.py"
+
+
+def command_script(command: str, harness: str, home: Path):
+    """The hook script a wired command runs, when it runs it for this harness; else None."""
+    try:
+        words = shlex.split(command)
+    except ValueError:
+        return None
+    script = next((w for w in words if w.endswith(HOOK_SCRIPT_NAME)), None)
+    if script is None or f"--harness {harness}" not in " ".join(words):
+        return None
+    return Path(str(home) + script[1:]) if script.startswith("~/") else Path(script)
+
+
 def refusal(denials: list) -> str:
     lines = [
         "Refused by the pre-tool hook, from the global rule table. Nothing in this call ran. "
@@ -231,48 +247,10 @@ def write_report(folder: Path, call: ToolCall, hits: list, harness: str, now: da
 
 # --- harnesses ------------------------------------------------------------------
 
-# Claude Code's file tools: the input field holding the path, and the access it means.
-CLAUDE_CODE_FILE_TOOLS = {
-    "Read": ("file_path", "read"),
-    "Grep": ("path", "read"),
-    "Edit": ("file_path", "write"),
-    "MultiEdit": ("file_path", "write"),
-    "Write": ("file_path", "write"),
-    "NotebookEdit": ("notebook_path", "write"),
-}
-
-
-# Claude Code's permission modes in which an ask entry doesn't reach the user: dontAsk denies it,
-# bypassPermissions isn't documented to keep it, and auto mode stays in until a probe shows its ask entries reach the user.
-CLAUDE_CODE_UNATTENDED = {mode: f"Claude Code's {mode} mode" for mode in ("auto", "dontAsk", "bypassPermissions")}
-
 
 def read_claude_code(payload: dict) -> ToolCall:
-    """Claude Code's PreToolUse input. Other shapes that reach the same hook (Cursor runs
-    Claude Code's hooks too) are read as far as they fit: any `command` string, top level
-    or in `tool_input`, is checked as a shell command. Under Cursor (its payload carries
-    `cursor_version`) a call is still refused, but reporting it is left to the hook wired
-    in Cursor's own hooks.json, so no call is reported twice."""
-    tool = payload.get("tool_name") if isinstance(payload.get("tool_name"), str) else ""
-    tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
-    command = tool_input.get("command", payload.get("command"))
-    files = []
-    field_name, access = CLAUDE_CODE_FILE_TOOLS.get(tool, ("file_path", "read"))
-    for key in {field_name, "file_path"}:
-        value = tool_input.get(key)
-        if isinstance(value, str) and value:
-            files.append((value, access))
-    searches = _search(tool_input, "path", "glob") if tool == "Grep" else ()
-    return ToolCall(
-        tool=tool,
-        command=command if isinstance(command, str) else None,
-        files=tuple(files),
-        searches=searches,
-        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
-        session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
-        report="cursor_version" not in payload,
-        unattended="" if "cursor_version" in payload else CLAUDE_CODE_UNATTENDED.get(payload.get("permission_mode"), ""),
-    )
+    """Claude Code's hook payload, read by its harness setup."""
+    return harness_io()["claude-code"][0](payload)
 
 
 def _search(args: dict, folder_key: str, glob_key: str) -> tuple:
@@ -284,15 +262,8 @@ def _search(args: dict, folder_key: str, glob_key: str) -> tuple:
 
 
 def write_claude_code(denials: list, asks=()) -> str:
-    if not denials:
-        return ""
-    return json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": refusal(denials),
-        }
-    }) + "\n"
+    """Claude Code's hook answer, written by its harness setup. Codex uses the same answer."""
+    return harness_io()["claude-code"][1](denials, asks)
 
 
 # apply_patch's file headers; each names a file the patch writes.
@@ -300,219 +271,63 @@ PATCH_FILE = re.compile(r"^\*\*\* (Add File|Update File|Delete File|Move to): (.
 
 
 def read_codex(payload: dict) -> ToolCall:
-    """Codex's PreToolUse input: `tool_name` is `Bash` for the shell tools (the command as
-    the model wrote it, before Codex wraps it in `<shell> -lc`), `apply_patch` for file
-    edits (`tool_input.command` holds the patch), or `mcp__<server>__<tool>`."""
-    tool = payload.get("tool_name") if isinstance(payload.get("tool_name"), str) else ""
-    tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
-    command = tool_input.get("command")
-    command = command if isinstance(command, str) else None
-    files = ()
-    if tool == "apply_patch":
-        files = tuple((m.group(2), "write") for m in PATCH_FILE.finditer(command or ""))
-        command = None
-    return ToolCall(
-        tool=tool,
-        command=command,
-        files=files,
-        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
-        session=payload.get("session_id") if isinstance(payload.get("session_id"), str) else "",
-        # Codex reports `bypassPermissions` when its approval policy is never. An automatic
-        # reviewer doesn't show in the payload: references/codex.md names that gap.
-        unattended="Codex with approval policy never" if payload.get("permission_mode") == "bypassPermissions" else "",
-    )
-
-
-# opencode's built-in tools that take a path: the argument holding it, and the access it means.
-OPENCODE_FILE_TOOLS = {
-    "read": ("filePath", "read"),
-    "grep": ("path", "read"),
-    "glob": ("path", "read"),
-    "list": ("path", "read"),
-    "edit": ("filePath", "write"),
-    "write": ("filePath", "write"),
-}
-# Its other built-in tools. Every other tool is an MCP tool, named `<server>_<tool>`.
-OPENCODE_BUILTINS = {
-    "invalid", "question", "bash", "task", "webfetch", "websearch", "todowrite", "todoread", "skill", "lsp",
-    "codesearch", "apply_patch", "patch", "plan_enter", "plan_exit", *OPENCODE_FILE_TOOLS,
-}
-# opencode's auto-approve (`--auto`, or its toggle) answers ask entries for the user, and the plugin can't tell it's on.
-OPENCODE_UNATTENDED = "opencode, whose auto-approve can answer for the user"
-
-
-def read_opencode(payload: dict) -> ToolCall:
-    """What set-up-machine's opencode plugin sends from `tool.execute.before`:
-    `tool`, `sessionID`, `args` (the tool's arguments) and `directory` (the session's folder)."""
-    tool = payload.get("tool") if isinstance(payload.get("tool"), str) else ""
-    args = payload.get("args") if isinstance(payload.get("args"), dict) else {}
-    directory = payload.get("directory") if isinstance(payload.get("directory"), str) else ""
-    command, workdir = args.get("command"), args.get("workdir")
-    files = []
-    if tool in OPENCODE_FILE_TOOLS:
-        key, access = OPENCODE_FILE_TOOLS[tool]
-        if isinstance(args.get(key), str) and args[key]:
-            files.append((args[key], access))
-    patch = args.get("patchText")
-    if isinstance(patch, str):
-        files += [(m.group(2), "write") for m in PATCH_FILE.finditer(patch)]
-    searches = _search(args, "path", "include") if tool == "grep" else ()
-    mcp_names = ()
-    if tool not in OPENCODE_BUILTINS:
-        # Either part of `<server>_<tool>` may hold `_`, so every split is a candidate.
-        mcp_names = tuple(f"mcp__{tool[:i]}__{tool[i + 1:]}" for i in range(1, len(tool) - 1) if tool[i] == "_")
-    return ToolCall(
-        tool=tool,
-        command=command if isinstance(command, str) else None,
-        files=tuple(files),
-        cwd=os.path.join(directory, workdir) if isinstance(workdir, str) and workdir else directory,
-        session=payload.get("sessionID") if isinstance(payload.get("sessionID"), str) else "",
-        mcp_names=mcp_names,
-        unattended=OPENCODE_UNATTENDED,
-        searches=searches,
-    )
-
-
-def write_opencode(denials: list, asks=()) -> str:
-    """The refusal as plain text: the plugin throws it, and opencode gives the agent the message as the tool's error."""
-    return refusal(denials) + "\n" if denials else ""
-
-
-# Cursor sends each hook event its own payload (references/cursor.md). preToolUse is wired
-# only for the tools the other events don't cover: writes, deletes and searches.
-CURSOR_FILE_TOOLS = {"Read": "read", "Grep": "read", "Write": "write", "Delete": "write"}
-
-
-# Cursor has no native ask list (references/cursor.md), and its run modes can run commands and tools
-# without asking, so the hook refuses every ask row's call there.
-CURSOR_UNATTENDED = "Cursor, which can run tools without asking"
-
-
-def read_cursor(payload: dict) -> ToolCall:
-    return replace(_read_cursor(payload), unattended=CURSOR_UNATTENDED, no_native_ask=True)
-
-
-def _read_cursor(payload: dict) -> ToolCall:
-    def text(key, source=payload):
-        value = source.get(key)
-        return value if isinstance(value, str) else ""
-
-    event = text("hook_event_name")
-    roots = payload.get("workspace_roots")
-    cwd = text("cwd") or (roots[0] if isinstance(roots, list) and roots and isinstance(roots[0], str) else "")
-    session = text("conversation_id") or text("session_id")
-    if event == "beforeShellExecution":
-        return ToolCall(tool="Shell", command=text("command") or None, cwd=cwd, session=session)
-    if event == "beforeMCPExecution":
-        server, tool = text("mcp_server_name"), text("tool_name")
-        return ToolCall(tool=f"mcp__{server}__{tool}" if server and tool else tool, cwd=cwd, session=session)
-    if event == "beforeReadFile":
-        path = text("file_path")
-        return ToolCall(tool="Read", files=((path, "read"),) if path else (), cwd=cwd, session=session)
-    tool = text("tool_name")
-    tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
-    files = ()
-    if tool in CURSOR_FILE_TOOLS:
-        path = text("file_path", tool_input) or text("path", tool_input)
-        files = ((path, CURSOR_FILE_TOOLS[tool]),) if path else ()
-    command = text("command", tool_input) if tool == "Shell" else ""
-    searches = _search(tool_input, "path", "glob") if tool == "Grep" else ()
-    return ToolCall(tool=tool, command=command or None, files=files, cwd=cwd, session=session, searches=searches)
-
-
-def write_cursor(denials: list, asks=()) -> str:
-    """Cursor always gets a JSON answer: a deny, or `{}`, which leaves the call to its own
-    permissions. The CLI shows the agent `user_message`; `agent_message` carries the same text."""
-    if not denials:
-        return "{}\n"
-    reason = refusal(denials)
-    return json.dumps({"permission": "deny", "user_message": reason, "agent_message": reason}) + "\n"
-
-
-# Pi's built-in tools that take a path: the input field holding it, and the access it means.
-PI_FILE_TOOLS = {
-    "read": ("path", "read"),
-    "edit": ("path", "write"),
-    "write": ("path", "write"),
-    "grep": ("path", "read"),
-    "find": ("path", "read"),
-    "ls": ("path", "read"),
-}
-# Pi's shell tools: the input field `command` holds the command.
-PI_SHELL_TOOLS = ("bash", "powershell")
-# Without a UI (print and json mode, or a child session started without one) no one can answer the extension's question.
-PI_UNATTENDED = "Pi without a UI"
+    """Codex's hook payload, read by its harness setup."""
+    return harness_io()["codex"][0](payload)
 
 
 def read_pi(payload: dict) -> ToolCall:
-    """What set-up-machine's Pi extension sends from `tool_call`: `toolName`, `input` (the
-    tool's arguments), `cwd`, `sessionId` and `hasUI`. MCP tools keep their
-    `mcp__<server>__<tool>` names. `codemode`'s script (`input.code`) isn't read: each tool
-    call the script makes reaches the extension as its own `tool_call`."""
-    tool = payload.get("toolName") if isinstance(payload.get("toolName"), str) else ""
-    args = payload.get("input") if isinstance(payload.get("input"), dict) else {}
-    command = args.get("command") if tool in PI_SHELL_TOOLS else None
-    files = []
-    if tool in PI_FILE_TOOLS:
-        key, access = PI_FILE_TOOLS[tool]
-        if isinstance(args.get(key), str) and args[key]:
-            files.append((args[key], access))
-    searches = ()
-    if tool == "grep":
-        searches = _search(args, "path", "glob")
-    elif tool == "find":
-        searches = _search(args, "path", "pattern")
-    return ToolCall(
-        tool=tool,
-        command=command if isinstance(command, str) else None,
-        files=tuple(files),
-        searches=searches,
-        cwd=payload.get("cwd") if isinstance(payload.get("cwd"), str) else "",
-        session=payload.get("sessionId") if isinstance(payload.get("sessionId"), str) else "",
-        unattended="" if payload.get("hasUI") is True else PI_UNATTENDED,
-        no_native_ask=True,  # Pi has no permission system: the extension does the asking
-    )
-
-
-def asking(asks: list) -> str:
-    """The question the Pi extension puts to the user for a call that hits ask rows."""
-    lines = ["The global rule table asks you before this call runs. Allow it?"]
-    for hit in asks:
-        r = hit.rule
-        lines.append(f"- `{hit.part}`: ask rule {r.id} ({_plain(r.summary)}). {r.reason} The agent's instruction: {r.instruction}")
-    return "\n".join(lines)
+    """Pi's hook payload, read by its harness setup."""
+    return harness_io()["pi"][0](payload)
 
 
 def write_pi(denials: list, asks=()) -> str:
-    """Always one JSON line: `{"block": <refusal>}`, `{"ask": <question>}`, or `{}`.
-    The extension returns a block to Pi, which gives the agent the reason as the tool's result."""
-    if denials:
-        return json.dumps({"block": refusal(denials)}) + "\n"
-    if asks:
-        return json.dumps({"ask": asking(list(asks))}) + "\n"
-    return "{}\n"
+    """Pi's hook answer, written by its harness setup."""
+    return harness_io()["pi"][1](denials, asks)
 
 
-HARNESSES = {
-    "claude-code": (read_claude_code, write_claude_code),
-    "codex": (read_codex, write_claude_code),  # Codex reads the same deny answer as Claude Code
-    "opencode": (read_opencode, write_opencode),
-    "cursor": (read_cursor, write_cursor),
-    "pi": (read_pi, write_pi),
-}
+def harness_io() -> dict:
+    """Reader and writer per harness, from each harness setup that runs the hook."""
+    found = {}
+    from . import harness_setups
+    for setup in harness_setups.load():
+        read, write = getattr(setup, "read", None), getattr(setup, "write", None)
+        if callable(read) and callable(write):
+            found[setup.id] = (read, write)
+    return found
+
+
+def read_opencode(payload: dict) -> ToolCall:
+    """opencode's hook payload, read by its harness setup."""
+    return harness_io()["opencode"][0](payload)
+
+
+def write_opencode(denials: list, asks=()) -> str:
+    """opencode's hook answer, written by its harness setup."""
+    return harness_io()["opencode"][1](denials, asks)
+
+
+def read_cursor(payload: dict) -> ToolCall:
+    """Cursor's hook payload, read by its harness setup."""
+    return harness_io()["cursor"][0](payload)
+
+
+def write_cursor(denials: list, asks=()) -> str:
+    """Cursor's hook answer, written by its harness setup."""
+    return harness_io()["cursor"][1](denials, asks)
 
 
 def main(argv=None, stdin=None, stdout=None, now=None) -> int:
     import argparse
 
+    readers = harness_io()
     parser = argparse.ArgumentParser(description="set-up-machine's pre-tool hook: reads one tool call on stdin.")
-    parser.add_argument("--harness", choices=sorted(HARNESSES), default="claude-code")
+    parser.add_argument("--harness", choices=sorted(readers), default="claude-code")
     parser.add_argument("--config", type=Path, default=Path(CONFIG_PATH).expanduser(),
                         help=f"the hook's configuration (default: {CONFIG_PATH})")
     parser.add_argument("--rules", type=Path, default=rule_table.DEFAULT_TABLE)
     args = parser.parse_args(argv)
     stdin, stdout = stdin or sys.stdin, stdout or sys.stdout
-    read, write = HARNESSES[args.harness]
+    read, write = readers[args.harness]
 
     # A hook that fails never blocks the call: the harness's native deny rules stay underneath.
     # Pi has none, so its extension refuses the call when the hook exits non-zero (references/pi.md).

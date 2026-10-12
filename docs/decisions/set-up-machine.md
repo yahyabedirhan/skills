@@ -363,7 +363,7 @@ This replaces the `codex_mcp` bullet in *Codex plugins and tool policies*.
 
 - **`mcp_policy` replaces `codex_mcp`.** One object on the installs entry serves every harness. Its fields are `enabled_tools`, `disabled_tools`, `approval_mode` and `require_oauth`.
 - **Permissions are the source for tool lists.** The rule table and `agents/permissions.json` name the tools. Each adapter derives its harness list from those rows. A copy in `mcp_policy` is optional.
-- **One module per harness.** `scripts/setupmachine/harnesses/<harness>.py` exposes `validate`, `check` and `propose`. `plugins.py` holds the lookup table. Pi, Claude Code, Cursor and Codex use it.
+- **One module per harness.** Each harness setup exposes `validate`, `check` and `propose` when that harness takes plugins. Discovery loads them. This is replaced by the 2026-10-11 harness setup entry.
 - **The Pi adapter does not compare a git checkout with a ref.** Pinned-package handling stays out of this code.
 - **The skill owns the Codex procedure.** `references/codex.md` gives numbered steps and a done check. The TOML and OAuth detail is a subsection at the end of that file.
 
@@ -379,3 +379,35 @@ This replaces the `agents/` paths in the entries above. The workstation repo mov
 - **The generated header names the source path.** Cursor's `harness-instructions.mdc` names the path from the harnesses file. Any header that starts with the generated prefix counts as the skill's file. So a file from the old path differs and is rewritten. It is not left alone as someone else's.
 - **A `config` for a harness without a config reader is a `gap`.** Only Codex and Pi have one today.
 - **The state folder and `~/.config/agents/` keep their names.** The hook's report folder and the shared file are not workstation paths.
+
+## 2026-10-11: one harness setup per harness
+
+Set-up-machine used to register one harness in several lists.
+The verifier had a wiring table.
+The hook had a reader table.
+The plugin checker had an adapter table.
+The skill body repeated that harness's audit lines.
+An agent who added a harness had to edit all of those places.
+
+A harness setup is the single registration for one harness.
+The module holds that harness's audit and its hook translation.
+When the harness takes plugins, the same module holds the plugin adapter.
+The harness's reference states that harness's audit lines.
+
+The verifier loads every module in `scripts/setupmachine/harness_setups/`.
+The hook loads the same modules.
+The plugin checker loads the same modules.
+Add a harness by adding one module in that folder.
+Do not also add the harness to a list of names.
+
+Printed audit lines stay the same.
+A `FAIL` still fails the run.
+A `gap` still leaves the run passing.
+
+This replaces the `hook.HARNESSES` registration from the 2026-09-29 pre-tool hook decision.
+This replaces the plugin lookup table from the 2026-10-10 plugin adapter decision.
+
+The skill body states the run.
+Each harness reference states that harness's lines.
+Each rule-row field is described once, in `references/rule-table.md`.
+

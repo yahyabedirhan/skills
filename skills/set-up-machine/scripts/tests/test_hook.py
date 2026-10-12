@@ -375,6 +375,19 @@ class ReviewFindingsTest(unittest.TestCase):
         call = hook.read_opencode({"tool": "grep", "args": {"pattern": "T", "path": "app", "include": "*.env"},
                                    "directory": CWD})
         self.assertTrue(hook.decide(call, TABLE, HOME).denials)
+
+    def test_opencode_answers_a_denial_in_plain_text(self):
+        from setupmachine.harness_setups import opencode
+        call = opencode.read({"tool": "bash", "args": {"command": "rm -rf x"}})
+        denials = hook.decide(call, TABLE, HOME).denials
+        answer = opencode.write(denials)
+        self.assertIn("Refused by the pre-tool hook", answer)
+        self.assertIn("`rm -rf x`", answer)
+        self.assertIn("rm-recursive-force", answer)
+        self.assertIn(".scratch/", answer)
+        self.assertFalse(answer.lstrip().startswith("{"))
+        self.assertEqual(opencode.write([]), "")
+        self.assertEqual(hook.write_opencode(denials), answer)
         call = hook.read_cursor({"hook_event_name": "preToolUse", "tool_name": "Grep", "cwd": CWD,
                                  "tool_input": {"pattern": "T", "glob": ".env.*"}})
         self.assertTrue(hook.decide(call, TABLE, HOME).denials)

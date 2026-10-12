@@ -71,89 +71,19 @@ Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CL
 
 ## What verify must show
 
-Shared lines first. Each harness then has its own section for the lines only that harness adds. A harness with no section of its own is done when its `hook wired` line is present.
+Shared lines first. Then read the reference for each harness that is present. That reference states the lines only that harness adds. A harness whose reference adds no line is done when its `hook wired` line is present.
 
 ### Shared
 
 - `rules ok`
 - a `hook wired` line for every harness found
 - `personal ok` or `personal none`, and no `personal FAIL`
-- no `harness FAIL`; a `harness gap` names instructions for a harness this skill can't deliver to yet
-- no `plugin FAIL`; a `plugin gap` names a plugin a harness can't take from this skill yet, and `plugin extra` a Claude Code bundle or a Pi extension the list leaves out
-
-### Claude Code
-
-No further line. The `hook wired` line is the check, and each personal permission is `present`, `n/a` or `gap` on the `personal` lines. Details: [references/claude-code.md](references/claude-code.md).
-
-### Codex
-
-[references/codex.md](references/codex.md)
-
-- Every `codex differs` line is a row that reference says gets no rule.
-- Declared defaults match with no `config FAIL` line, or a `config n/a` line says Codex isn't installed.
-- In the report, distinguish persisted defaults from effective overrides, and state how a later session picks the change up.
-
-### opencode
-
-No further line. The `hook wired` line is the check. Details: [references/opencode.md](references/opencode.md).
-
-### Pi
-
-[references/pi.md](references/pi.md)
-
-- When Pi's agent folder exists, `pi ok` for the `AGENTS.md` link, and a `pi same` line per key the Pi `config` declares, or `pi none` when `setup/harnesses.json` names no such file. A `pi FAIL` means the audit is not done.
-- Its `hook wired` line is the extension. Pi has no permission system, so the hook is its only enforcement, and the extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call. A `hook gap` line is an extension someone else wrote at the same path, left alone.
-- A `pi extra` line is a broken skill link, for the user to remove.
-- A `pi gap` for `packages` in the Pi `config` asks the user to move them into `plugins`, where Pi extensions belong.
-
-### Cursor
-
-[references/cursor.md](references/cursor.md)
-
-- The `cursor` lines in that reference's *What verify must show*. A `cursor FAIL` means the audit is not done.
-- When `setup/harnesses.json` names Cursor's `instructions`, `harness ok` for `~/.cursor/rules/harness-instructions.mdc`.
+- no `harness FAIL`. A `harness gap` names instructions this skill cannot deliver yet. The harness reference states that line.
+- no `plugin FAIL`. A `plugin gap` or `plugin extra` is stated in that harness's reference.
 
 ## Rule table
 
-`rules.json` holds each global rule once, by meaning, not in any harness's form. Each harness reference turns a row into that harness's entries; the hook and `verify.py` read it through `scripts/setupmachine/rules.py`, which refuses a malformed row. A workstation repo's `setup/permissions.json` holds personal permissions in the same format, which every harness, the hook and `verify.py` take beside the table's (`references/workstation.md`).
-
-### A row
-
-| Field | Holds |
-|---|---|
-| `id` | a stable kebab-case name |
-| `level` | `deny`, `ask` or `allow-and-report`; a personal permission may also be `allow` |
-| `summary` | what the rule covers, shown in rejection messages |
-| `match` | what it covers, in one of the three kinds below |
-| `reason` | why the rule exists |
-| `instruction` | for `deny`, what the agent does instead: an alternative, or "Stop, say why, and give the user the exact command; never work around it."; for `ask` and `allow-and-report`, how to go ahead |
-| `samples` | `covers`: calls the row must catch; `leaves`: near misses it must let through. A shell command for a command row, a path for a file row, a tool name for an MCP row. `verify.py` checks them against the hook |
-| `gap` | optional: what no harness can catch for the row (`echo $TOKEN`); every audit names it |
-| `approver` | optional, on an `ask` row only: `user` when each call needs the user's own approval, which an automatic reviewer's or a remembered answer's doesn't replace |
-
-### `match` kinds
-
-A `match` object's keys say which kind it is:
-
-- **Command:** `program`, a bare name (`rm`) or a list of them, and optionally:
-  - `subcommands`: alternative word lists after the program (`[["repo", "delete"], ["repo", "archive"]]`);
-  - `flags`: every flag group the command carries, each listing one flag's names without dashes, a one-letter name being the short flag (`["r", "R", "recursive"]`);
-  - `operands`: words right after the subcommand and flags (`["777"]`), or alternative word lists (`[["777"], ["a+rwx"]]`);
-  - `any_operand`: words any one of which may appear anywhere after the subcommand (`["main", "master"]`);
-  - `arguments: "none"`: the program with nothing after it (`env`); `arguments: "flags"`: with flags and nothing else (`declare -x`);
-  - `files`: globs one of its operands must match (`cat .env`), with an optional `except`;
-  - `variables`: globs over the names of the variables an argument expands (`*TOKEN*` covers `echo $API_TOKEN`, not `echo '$API_TOKEN'`).
-- **File:** `paths`, globs relative to the project (`**/.env`), or starting `~/` or `/`; `access`, `read` or `write`; an optional `except` (`**/.env.example`). A `read` row covers writes too.
-- **MCP tool:** `server` and `tool`, case-insensitive regular expressions over the two parts of `mcp__<server>__<tool>`. Store the meaning (`mail`, `^(send|reply|forward)`), never one account's server ID, so the row matches on every machine and account.
-
-### Spellings
-
-A harness that matches a command's text catches only the spellings it lists, so give it one entry per way of writing a command row:
-
-- **Programs:** each program as typed, then as `/bin/<program>` and `/usr/bin/<program>`, except shell builtins (`.`, `source`, `set`, `export`, `declare`, `typeset`, `unset`, `eval`, `alias`), which have no path.
-- **Flags:** a one-letter name is a short flag (`-r`), a longer one a long flag (`--recursive`). Every order of the groups, every spelling in each group, as separate words; and, when every group has a one-letter name, the one-letter names clustered in every order (`-rf`, `-fr`, `-Rf`, `-fR`).
-- **Order:** program, then subcommand words, then flags, then operands (`git push --force`, `chmod -R 777`).
-- **`find`'s options** (`-delete`) are one-dash words written after the path, so no prefix entry catches them: a command row on `find` gets no native entry, a gap the hook covers on every harness.
+`rules.json` holds each global rule once, by meaning, not in any harness's form. Each field of a row, each `match` kind, and the spellings are in [references/rule-table.md](references/rule-table.md). Each harness reference turns a row into that harness's entries. The hook and `verify.py` read the same rows through `scripts/setupmachine/rules.py`, which refuses a malformed row. A workstation repo's `setup/permissions.json` holds personal permissions in the same format, which every harness, the hook and `verify.py` take beside the table's (`references/workstation.md`).
 
 ## Pre-tool hook
 
@@ -203,12 +133,7 @@ Name these once in every audit:
 
 ## Scripts
 
-- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine. Shared checks: each row's samples through the hook, the shared file against the workstation repo, each harness's own instructions against the file `setup/harnesses.json` names, and the `plugins` list against each harness it names. Every script finds the workstation repo's files through `scripts/setupmachine/layout.py`. `scripts/setupmachine/plugins.py` dispatches that list through `scripts/setupmachine/harnesses/<harness>.py`. Each adapter exposes `validate`, `check` and `propose`. Harness checks:
-  - **Claude Code:** each personal permission's entries.
-  - **Codex:** its own policy check, plus declared defaults, installed support and override gaps at the resolved config home.
-  - **opencode:** the hook wiring only.
-  - **Cursor:** the run mode and the global instructions copy, as [references/cursor.md](references/cursor.md) describes.
-  - **Pi:** the instructions link, declared defaults, broken skill links and the hook's extension, at the resolved agent folder.
+- [scripts/verify.py](scripts/verify.py): checks, without writing anything, that the rules work on this machine. Shared checks: each row's samples through the hook, the shared file against the workstation repo, each harness's own instructions against the file `setup/harnesses.json` names, and the `plugins` list. Every script finds the workstation repo's files through `scripts/setupmachine/layout.py`. The verifier, the hook, and the plugin checker discover harness setups in `scripts/setupmachine/harness_setups/`. A harness setup that takes plugins exposes `validate`, `check`, and `propose`. Each harness reference states that harness's audit lines.
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
 - [references/pi-extension.ts](references/pi-extension.ts): the Pi extension that calls the hook and asks the user for ask rows.

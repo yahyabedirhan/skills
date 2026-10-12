@@ -46,26 +46,16 @@ Exits 1 when a rules, hook, personal, config, pi or cursor line fails. --codex-t
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
+import inspect
 import os
-import re
-import shlex
 import shutil
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from setupmachine import commands, codex_config, hook, personal, plugins, pi_config, rules as rule_table  # noqa: E402
-
-HOOK_SCRIPT = "pre_tool_hook.py"
-CURSOR_EVENTS = ("beforeShellExecution", "beforeMCPExecution", "beforeReadFile", "preToolUse")
-CODEX_DECISION = {"forbidden": "deny", "prompt": "ask", "allow": "allow-and-report"}
-SHELL_SYNTAX = set(";&|<>$`()\n")
-STRICTNESS = {"allow-and-report": 0, "ask": 1, "deny": 2}
+from setupmachine import codex_config, harness_setups, hook, personal, plugins, rules as rule_table  # noqa: E402
 
 
 @dataclass
@@ -118,327 +108,43 @@ def _holds(verdict, rule) -> bool:
 
 def check_codex(table: list, home: Path, codex: str, codex_home: Path | None = None) -> list:
     """(row, sample, Codex's decision as a level or "no match") for each plain command sample."""
-    rules_dir = (codex_home or home / ".codex") / "rules"
-    files = sorted(rules_dir.glob("*.rules")) if rules_dir.is_dir() else []
-    if not files:
-        return []
-    out = []
-    for rule in table:
-        if rule.kind != "command":
-            continue
-        for sample in rule.covers:
-            if SHELL_SYNTAX & set(sample):
-                continue  # a compound isn't one argv
-            argv = [codex, "execpolicy", "check", "--resolve-host-executables"]
-            for f in files:
-                argv += ["--rules", str(f)]
-            done = subprocess.run(argv + ["--", *shlex.split(sample)], capture_output=True, text=True, timeout=60)
-            try:
-                decision = json.loads(done.stdout or "{}").get("decision")
-            except ValueError:
-                decision = None
-            out.append((rule, sample, CODEX_DECISION.get(decision, "no match")))
-    return out
+    from setupmachine.harness_setups import codex as codex_setup
+    return codex_setup.check_codex(table, home, codex, codex_home)
 
 
 # --- hook wiring ------------------------------------------------------------------
 
 
 def codex_trust_hash(command: str, matcher: str = "*", timeout: int = 10) -> str:
-    """The hash Codex records when a PreToolUse command hook is trusted in /hooks: sha256 over the
-    canonical JSON of the hook's identity (codex-rs/hooks, discovery)."""
-    identity = {
-        "event_name": "pre_tool_use",
-        "matcher": matcher,
-        "hooks": [{"type": "command", "command": command, "timeout": timeout, "async": False}],
-    }
-    text = json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return "sha256:" + hashlib.sha256(text.encode()).hexdigest()
+    """The hash Codex records when a PreToolUse command hook is trusted in /hooks."""
+    from setupmachine.harness_setups import codex as codex_setup
+    return codex_setup.trust_hash(command, matcher, timeout)
 
 
-def _json(path: Path):
-    try:
-        data = json.loads(path.read_text())
-    except (OSError, ValueError):
-        return None
-    return data if isinstance(data, dict) else None
+def harness_setup_audits(home: Path, **context) -> list:
+    """`(channel, status, text)` from every discovered harness setup.
 
-
-def _script(command: str, harness: str, home: Path):
-    """The hook script a wired command runs, when it runs it for this harness; else None."""
-    try:
-        words = shlex.split(command)
-    except ValueError:
-        return None
-    script = next((w for w in words if w.endswith(HOOK_SCRIPT)), None)
-    if script is None or f"--harness {harness}" not in " ".join(words):
-        return None
-    return Path(str(home) + script[1:]) if script.startswith("~/") else Path(script)
-
-
-def _pre_tool_commands(settings: dict) -> list:
-    """(group index, handler index, matcher, command) for every PreToolUse command handler."""
-    hooks = settings.get("hooks") if isinstance(settings.get("hooks"), dict) else {}
-    groups = hooks.get("PreToolUse") if isinstance(hooks.get("PreToolUse"), list) else []
-    out = []
-    for g, group in enumerate(groups):
-        handlers = group.get("hooks") if isinstance(group, dict) and isinstance(group.get("hooks"), list) else []
-        for h, handler in enumerate(handlers):
-            if isinstance(handler, dict) and isinstance(handler.get("command"), str):
-                out.append((g, h, group.get("matcher"), handler["command"], handler.get("timeout", 10)))
-    return out
-
-
-def _script_line(label: str, where: Path, script: Path, extra: str = ""):
-    if not script.is_file():
-        return ("FAIL", f"{label}: {where} runs {script}, which doesn't exist")
-    return ("wired", f"{label}: {where} -> {script}{extra}")
-
-
-def _claude_code(home: Path, folder: Path):
-    path = folder / "settings.json"
-    for _, _, matcher, command, _ in _pre_tool_commands(_json(path) or {}):
-        script = _script(command, "claude-code", home)
-        if script and matcher in ("*", "", None):
-            return _script_line("Claude Code", path, script)
-    return ("FAIL", f"Claude Code: no pre-tool hook for every tool in {path}")
-
-
-def _codex(home: Path, folder: Path):
-    path = folder / "hooks.json"
-    config = (folder / "config.toml")
-    for g, h, matcher, command, timeout in _pre_tool_commands(_json(path) or {}):
-        script = _script(command, "codex", home)
-        if not (script and matcher in ("*", "", None)):
+    Keyword arguments are passed when that audit names them. An argument keyed by the
+    harness id is that setup's agent folder, passed as `folder`. This function does not
+    sort the lines.
+    """
+    lines = []
+    for setup in harness_setups.load():
+        audit = getattr(setup, "audit", None)
+        if not callable(audit):
             continue
-        status, text = _script_line("Codex", path, script)
-        if status != "wired":
-            return status, text
-        key = f"{path}:pre_tool_use:{g}:{h}"
-        if _toml_trust(config, key) != codex_trust_hash(command, matcher or "*", timeout):
-            return ("FAIL", f"Codex: the hook in {path} is not trusted: config.toml needs "
-                            f"[hooks.state.\"{key}\"] trusted_hash = \"{codex_trust_hash(command, matcher or '*', timeout)}\"")
-        return status, text + ", trusted"
-    return ("FAIL", f"Codex: no pre-tool hook for every tool in {path}")
+        lines.extend(audit(home, **_audit_kwargs(audit, setup.id, context)))
+    return lines
 
 
-def _toml_trust(config: Path, key: str):
-    try:
-        lines = config.read_text().split("\n")
-    except OSError:
-        return None
-    header = f"[hooks.state.{json.dumps(key)}]"
-    for i, line in enumerate(lines):
-        if line.strip() == header:
-            for body in lines[i + 1:]:
-                if body.lstrip().startswith("["):
-                    break
-                m = re.match(r'^\s*trusted_hash\s*=\s*"([^"]*)"', body)
-                if m:
-                    return m.group(1)
-    return None
-
-
-def _opencode(home: Path, folder: Path):
-    path = folder / "plugins" / "set-up-machine.js"
-    try:
-        text = path.read_text()
-    except OSError:
-        return ("FAIL", f"opencode: no plugin at {path}")
-    m = re.search(r"^const COMMAND = (\[.*\]);$", text, re.M)
-    command = json.loads(m.group(1)) if m else []
-    script = _script(shlex.join(command), "opencode", home) if command else None
-    if script is None:
-        return ("FAIL", f"opencode: {path} doesn't run the pre-tool hook with --harness opencode")
-    return _script_line("opencode", path, script)
-
-
-def _cursor(home: Path, folder: Path):
-    path = folder / "hooks.json"
-    hooks = (_json(path) or {}).get("hooks")
-    hooks = hooks if isinstance(hooks, dict) else {}
-    missing, scripts = [], set()
-    for event in CURSOR_EVENTS:
-        found = [_script(h["command"], "cursor", home) for h in hooks.get(event) or []
-                 if isinstance(h, dict) and isinstance(h.get("command"), str)]
-        found = [s for s in found if s]
-        if found:
-            scripts.add(found[0])
-        else:
-            missing.append(event)
-    if missing:
-        return ("FAIL", f"Cursor: {path} has no pre-tool hook on {', '.join(missing)}")
-    gone = [s for s in scripts if not s.is_file()]
-    if gone:
-        return ("FAIL", f"Cursor: {path} runs {gone[0]}, which doesn't exist")
-    return ("wired", f"Cursor: {path} -> {', '.join(str(s) for s in sorted(scripts))} on all four events")
-
-
-PI_EXTENSION_HEADER = "// set-up-machine: the pre-tool hook, as a Pi extension."
-
-
-def _pi(home: Path, folder: Path):
-    path = folder / "extensions" / "set-up-machine.ts"
-    try:
-        text = path.read_text()
-    except OSError:
-        return ("FAIL", f"Pi: no extension at {path}; Pi has no permission system, so nothing enforces the rule table")
-    if not text.startswith(PI_EXTENSION_HEADER):
-        return ("gap", f"Pi: {path} wasn't written by set-up-machine; left alone, so the hook isn't wired (references/pi.md)")
-    m = re.search(r"^const COMMAND = (\[.*\]);$", text, re.M)
-    try:
-        command = json.loads(m.group(1)) if m else []
-    except ValueError:
-        command = []
-    script = _script(shlex.join(command), "pi", home) if command else None
-    if script is None:
-        return ("FAIL", f"Pi: {path} doesn't run the pre-tool hook with --harness pi")
-    return _script_line("Pi", path, script)
-
-
-HARNESSES = (
-    ("Claude Code", ".claude", _claude_code),
-    ("Codex", ".codex", _codex),
-    ("opencode", ".config/opencode", _opencode),
-    ("Cursor", ".cursor", _cursor),
-    ("Pi", ".pi/agent", _pi),
-)
-
-
-def check_cursor_run_mode(home: Path) -> list:
-    """(status, text) for Cursor's run mode: auto-review, with the sandbox enabled.
-
-    `none` when Cursor isn't set up. `ok` when both keys are set. `FAIL` when
-    ~/.cursor exists and either key is missing or different. Other keys are kept.
-    """
-    folder = home / ".cursor"
-    if not folder.is_dir():
-        return [("none", "Cursor: not set up here (no ~/.cursor)")]
-    path = folder / "cli-config.json"
-    data = _json(path) or {}
-    sandbox = data.get("sandbox")
-    sandbox_mode = sandbox.get("mode") if isinstance(sandbox, dict) else None
-    missing = []
-    if data.get("approvalMode") != "auto-review":
-        missing.append("approvalMode auto-review")
-    if sandbox_mode != "enabled":
-        missing.append("sandbox.mode enabled")
-    if missing:
-        return [("FAIL", f"Cursor: {path} lacks {', '.join(missing)}")]
-    return [("ok", f"Cursor: {path} has approvalMode auto-review and sandbox.mode enabled")]
-
-
-# The header references/cursor.md writes above the shared file.
-CURSOR_COPY_MARK = "<!-- Generated by set-up-machine from the shared global instructions file, ~/.config/agents/AGENTS.md. Edit that file and run `/set-up-machine`; changes here are overwritten. -->"
-CURSOR_COPY_HEADER = f"---\nalwaysApply: true\n---\n{CURSOR_COPY_MARK}\n\n"
-
-
-def check_cursor_global_instructions(home: Path) -> list:
-    """(status, text) for Cursor's copy of the shared file.
-
-    No line when Cursor isn't set up.
-    `ok` when the generated copy matches ~/.config/agents/AGENTS.md.
-    `FAIL` when that copy is missing or differs.
-    `gap` when the file lacks the generated comment: it is someone else's.
-    """
-    if not (home / ".cursor").is_dir():
-        return []
-    path = home / ".cursor/rules/global-instructions.mdc"
-    shared = home / ".config/agents/AGENTS.md"
-    if not path.is_file():
-        return [("FAIL", f"Cursor: {path} doesn't exist; set-up-machine copies {shared} there")]
-    try:
-        text = path.read_text()
-    except OSError:
-        return [("FAIL", f"Cursor: {path} can't be read")]
-    if CURSOR_COPY_MARK not in text:
-        return [("gap", f"Cursor: {path} wasn't written by set-up-machine; left alone")]
-    if not text.startswith(CURSOR_COPY_HEADER):
-        return [("FAIL", f"Cursor: {path} differs from {shared}")]
-    try:
-        body = shared.read_text()
-    except OSError:
-        return [("FAIL", f"Cursor: {path} copies {shared}, which doesn't exist")]
-    if text[len(CURSOR_COPY_HEADER):] != body:
-        return [("FAIL", f"Cursor: {path} differs from {shared}")]
-    return [("ok", f"Cursor: {path} matches {shared}")]
-
-
-def check_wiring(home: Path, codex_home: Path | None = None, pi_dir: Path | None = None) -> list:
-    """(status, text) per harness: wired, FAIL, gap, or none when the harness isn't set up here."""
-    homes = {"Codex": codex_home, "Pi": pi_dir}
-    out = []
-    for label, rel, check in HARNESSES:
-        folder = homes.get(label) or home / rel
-        if not folder.is_dir():
-            out.append(("none", f"{label}: not set up here (no ~/{rel})"))
-        else:
-            out.append(check(home, folder))
-    return out
-
-
-# --- personal permissions in Claude Code's settings ------------------------------
-
-CLAUDE_LISTS = {"deny": "deny", "ask": "ask", "allow-and-report": "allow", "allow": "allow"}
-
-
-def check_personal_entries(home: Path, rows: list) -> list:
-    """(status, text) per personal permission: its entries in Claude Code's settings, as references/claude-code.md writes them.
-
-    `present` names them; with none, `gap` for a row Claude Code has no entry for, `n/a` when
-    Claude Code lacks the row's tool (no MCP tool it matches, or no program on PATH), else FAIL.
-    """
-    folder = home / ".claude"
-    if not rows or not folder.is_dir():
-        return []
-    path = folder / "settings.json"
-    permissions = (_json(path) or {}).get("permissions")
-    permissions = permissions if isinstance(permissions, dict) else {}
-    out = []
-    for rule in rows:
-        name = CLAUDE_LISTS[rule.level]
-        listed = permissions.get(name) if isinstance(permissions.get(name), list) else []
-        entries = [e for e in listed if isinstance(e, str) and _claude_entry_of(rule, e, home)]
-        label = f"Claude Code: {rule.id} ({rule.level}, personal)"
-        if entries:
-            out.append(("present", f"{label}: {', '.join(entries)} in {path}"))
-        elif rule.kind == "command" and (rule.bare or rule.flags_only or rule.variables or rule.files):
-            out.append(("gap", f"{label}: Claude Code has no entry for this kind of command row; the hook covers "
-                               "deny and allow-and-report rows"))
-        elif rule.kind == "mcp-tool":
-            out.append(("n/a", f"{label}: no MCP tool in {path} matches it, so it's written only once Claude Code "
-                               "lists a tool it matches"))
-        elif rule.kind == "command" and not any(shutil.which(p) for p in rule.programs):
-            out.append(("n/a", f"{label}: {', '.join(rule.programs)} isn't on PATH, so there's no tool to write it for"))
-        else:
-            out.append(("FAIL", f"{label}: no entry in permissions.{name} of {path}"))
-    return out
-
-
-def _claude_entry_of(rule, entry: str, home: Path) -> bool:
-    """Whether a Claude Code permission entry is one this row produces: what the entry names, the row covers."""
-    if rule.kind == "mcp-tool":
-        return bool(rule_table.matching_tools(rule, [entry]))
-    m = re.fullmatch(r"(Bash|Read|Edit|Write)\((.+)\)", entry, re.S)
-    if not m:
-        return False
-    tool, inner = m.groups()
-    if rule.kind == "command":
-        if tool != "Bash":
-            return False
-        argvs = commands.simple_commands(re.sub(r"(:\*| \*)$", "", inner))
-        return len(argvs) == 1 and commands.covers(rule, argvs[0])
-    if tool not in (("Read",) if rule.access == "read" else ("Edit", "Write")):
-        return False
-    cwd = str(home / "project")
-    if inner.startswith("//"):
-        path = inner[1:]
-    elif inner.startswith("~/") or inner.startswith("**/"):
-        path = inner
-    else:
-        path = f"{cwd}/{inner[2:] if inner.startswith('./') else inner}"
-    path = str(home) + path[1:] if path.startswith("~/") else path
-    return any(rule_table.glob_regex(g, cwd, home).match(path) for g in rule.paths)
+def _audit_kwargs(audit, setup_id: str, context: dict) -> dict:
+    params = inspect.signature(audit).parameters
+    if any(param.kind == inspect.Parameter.VAR_KEYWORD for param in params.values()):
+        return context
+    chosen = {key: value for key, value in context.items() if key in params}
+    if setup_id in context and "folder" in params and "folder" not in chosen:
+        chosen["folder"] = context[setup_id]
+    return chosen
 
 
 # --- the report -------------------------------------------------------------------
@@ -468,7 +174,7 @@ def main(argv=None, stdout=None) -> int:
     custom_home = os.environ.get("CODEX_HOME") if home == Path.home().resolve() and args.codex_home is None else None
     codex_home = (args.codex_home or (Path(custom_home) if custom_home else home / ".codex")).expanduser().resolve()
     custom_pi = os.environ.get("PI_CODING_AGENT_DIR") if home == Path.home().resolve() and args.pi_agent_dir is None else None
-    pi_dir = (args.pi_agent_dir or (Path(custom_pi) if custom_pi else home / pi_config.DEFAULT_DIR)).expanduser().resolve()
+    pi_dir = (args.pi_agent_dir or (Path(custom_pi) if custom_pi else home / ".pi/agent")).expanduser().resolve()
 
     def private(text):
         """The text with each environment-chosen folder named, not printed."""
@@ -479,6 +185,13 @@ def main(argv=None, stdout=None) -> int:
         return text
 
     failed = False
+
+    def emit(channel, rows, redact=False):
+        nonlocal failed
+        for status, text in rows:
+            line(channel, status, private(text) if redact else text)
+            failed |= status == "FAIL"
+
     try:
         table = rule_table.load(args.rules)
     except rule_table.RuleTableError as exc:
@@ -503,52 +216,27 @@ def main(argv=None, stdout=None) -> int:
     failed |= bool(wrong)
 
     codex = None if args.no_codex else (args.codex or shutil.which("codex"))
-    if codex:
-        checked = check_codex(table, home, codex, codex_home)
-        if not checked:
-            line("codex", "skipped", "no rules files in the resolved Codex config home's rules folder")
-        for rule, sample, level in checked:
-            want = "allow-and-report" if rule.level == "allow" else rule.level  # Codex has one allow decision
-            if level == want:
-                line("codex", "same", f"{rule.id}: {sample} -> {_decision(level)}")
-            elif STRICTNESS.get(level, -1) > STRICTNESS[want]:
-                line("codex", "stricter", f"{rule.id}: {sample} -> {_decision(level)}, the row is {rule.level}")
-            else:
-                line("codex", "differs", f"{rule.id}: {sample} -> {_decision(level)}, the row is {rule.level}")
-    elif not args.no_codex:
-        line("codex", "skipped", "codex isn't on PATH; from a non-login shell, such as one without nvm loaded, pass --codex PATH")
+    audited = harness_setup_audits(
+        home, rows=own, pi=pi_dir, codex_home=codex_home, codex=codex, rules=table, no_codex=args.no_codex)
+    emit("hook", [(status, text) for channel, status, text in audited if channel == "hook"], redact=True)
 
-    for status, text in check_wiring(home, codex_home, pi_dir):
-        line("hook", status, private(text))
-        failed |= status == "FAIL"
+    for channel, status, text in audited:
+        if channel not in ("hook", "harness", "personal"):
+            line(channel, status, private(text))
+            failed |= status == "FAIL"
 
-    for status, text in pi_config.audit(home, pi_dir):
-        line("pi", status, private(text))
-        failed |= status == "FAIL"
-
-    for status, text in check_cursor_run_mode(home) + check_cursor_global_instructions(home):
-        line("cursor", status, text)
-        failed |= status == "FAIL"
-
-    for status, text in personal.check(home) + own_lines + check_personal_entries(home, own):
+    for status, text in personal.check(home) + own_lines:
         line("personal", status, text)
         failed |= status == "FAIL"
-    for status, text in personal.check_harnesses(home):
-        line("harness", status, text)
-        failed |= status == "FAIL"
+    emit("personal", [(status, text) for channel, status, text in audited if channel == "personal"])
+    emit("harness", personal.check_harnesses(home))
+    emit("harness", [(status, text) for channel, status, text in audited if channel == "harness"])
     for status, text in plugins.check(home, pi_dir, codex_home, codex, table + own):
         line("plugin", status, private(text))
-        failed |= status == "FAIL"
-    for status, text in codex_config.audit(home, codex_home, codex):
-        line("config", status, text)
         failed |= status == "FAIL"
     line("freshness", "gap", "Latest harness, skill, plugin and tool versions need separate upstream checks; "
          "this verifier checks persisted setup, not remote releases")
     return 1 if failed else 0
-
-
-def _decision(level: str) -> str:
-    return {v: k for k, v in CODEX_DECISION.items()}.get(level, level)
 
 
 if __name__ == "__main__":

@@ -6,10 +6,11 @@ How to set up and audit Cursor, its IDE agent and the `cursor-agent` CLI, from t
 
 ## What verify must show
 
-Two `cursor` lines when `~/.cursor` exists. No `~/.cursor` is one `cursor none` line.
+Two `cursor` lines when `~/.cursor` exists, and a `harness` line when Cursor has its own instructions. No `~/.cursor` is one `cursor none` line.
 
 - **Run mode:** `cursor ok` when Auto-review is on and the sandbox is on. `cursor FAIL` when `~/.cursor` exists and either key is missing or different.
 - **Global instructions copy:** `cursor ok` when `~/.cursor/rules/global-instructions.mdc` matches the shared file. `cursor FAIL` when that copy is missing or differs. A copy without the generated comment is `cursor gap`, left alone, and that line does not fail the audit.
+- **Harness instructions:** when `setup/harnesses.json` names Cursor's `instructions`, `harness ok` for `~/.cursor/rules/harness-instructions.mdc`.
 
 ## Global instructions
 
@@ -114,6 +115,10 @@ The rows with no entry above, the ask rows, the exceptions the CLI refuses, the 
 A native CLI deny: `Permission denied: Command blocked by permissions configuration` or `Write permission denied:`, naming no rule; the copied global instructions supply general rejection guidance and the `rm -rf` fallback. A hook deny: `Rejected: Command execution was blocked by a hook: Refused by the pre-tool hook, …` ("File read" or "MCP tool execution" for those events).
 
 ## Checking it
+
+This harness's setup is `scripts/setupmachine/harness_setups/cursor.py`.
+
+The audit lines are under *What verify must show*.
 
 `cursor-agent -p --trust --force` in a throwaway folder, with `CURSOR_CONFIG_DIR` at a trial `.cursor` and `CURSOR_DATA_DIR` at a scratch folder. `CURSOR_CONFIG_DIR` moves only `cli-config.json`: `hooks.json`, `mcp.json` and `~/.claude/settings.json` are always read from the real home, so a trial puts them in the folder (`.cursor/hooks.json`, `.cursor/mcp.json`, and `.claude/settings.json` at the folder's git root).
 

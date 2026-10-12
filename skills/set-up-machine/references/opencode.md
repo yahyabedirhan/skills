@@ -79,6 +79,8 @@ A native refusal: `The user has specified a rule which prevents you from using t
 
 ## Checking it
 
+This harness's setup is `scripts/setupmachine/harness_setups/opencode.py`. The `hook wired` line is the check. opencode takes no plugins, so the setup has no plugin adapter.
+
 In a sandbox: `OPENCODE_CONFIG_DIR=<a copy of the config folder>` layers it over the real global config (read, not written), and `XDG_DATA_HOME`, `XDG_STATE_HOME` and `XDG_CACHE_HOME` pointed into the sandbox keep sessions and logs out. `opencode run` takes the session's folder from `PWD`. Start it with a scrubbed environment.
 
 - `opencode debug agent build` prints the ruleset in the order opencode evaluates it.

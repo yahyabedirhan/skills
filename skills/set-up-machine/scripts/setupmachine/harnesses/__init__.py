@@ -1,4 +1,4 @@
-"""Harness adapters for the plugins setup area.
+"""Shared plugin helpers that a harness setup reads.
 
-plugins.py dispatches through a lookup table. Each module exposes validate, check and propose.
+Claude Code keeps the install record and deny matching here, because Cursor's harness setup reads them.
 """

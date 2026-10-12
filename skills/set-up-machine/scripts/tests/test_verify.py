@@ -18,6 +18,7 @@ SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
 
 import verify  # noqa: E402
+from setupmachine.harness_setups import cursor as cursor_setup  # noqa: E402
 
 HOOK = SCRIPTS / "pre_tool_hook.py"
 TABLE = SCRIPTS.parent / "rules.json"
@@ -150,6 +151,10 @@ class WiringTest(unittest.TestCase):
         code, lines = self.lines("Codex")
         self.assertRegex(lines[0], r"hook +none +Codex: not set up here")
         self.assertEqual(code, 0)
+        code, lines = self.lines("opencode")
+        self.assertEqual(len(lines), 1, lines)
+        self.assertRegex(lines[0], r"hook +none +opencode: not set up here \(no ~/.config/opencode\)")
+        self.assertEqual(code, 0)
 
     def test_claude_code_wired_to_a_script_that_exists(self):
         self.claude(wired(HOOK, "claude-code"))
@@ -197,16 +202,22 @@ class WiringTest(unittest.TestCase):
         command = json.dumps(["python3", str(HOOK), "--harness", "opencode"])
         self.write(".config/opencode/plugins/set-up-machine.js", template.replace("__HOOK_COMMAND__", command))
         code, lines = self.lines("opencode")
+        self.assertEqual(len(lines), 1, lines)
         self.assertRegex(lines[0], r"hook +wired +opencode")
+        self.assertEqual(code, 0)
         self.write(".config/opencode/plugins/set-up-machine.js", template.replace(
             "__HOOK_COMMAND__", json.dumps(["python3", "/gone/pre_tool_hook.py", "--harness", "opencode"])))
         code, lines = self.lines("opencode")
+        self.assertEqual(len(lines), 1, lines)
         self.assertRegex(lines[0], r"hook +FAIL +opencode: .*doesn't exist")
+        self.assertEqual(code, 1)
 
     def test_opencode_without_the_plugin_fails(self):
         (self.home / ".config" / "opencode").mkdir(parents=True)
         code, lines = self.lines("opencode")
+        self.assertEqual(len(lines), 1, lines)
         self.assertRegex(lines[0], r"hook +FAIL +opencode: no plugin")
+        self.assertEqual(code, 1)
 
     def test_cursor_needs_all_four_events(self):
         command = wired(HOOK, "cursor")
@@ -226,7 +237,7 @@ class WiringTest(unittest.TestCase):
         self.assertRegex(lines[0], r"hook +wired +Cursor")
         body = "# Global agent instructions\n\nRule.\n"
         self.write(".config/agents/AGENTS.md", body)
-        self.write(".cursor/rules/global-instructions.mdc", verify.CURSOR_COPY_HEADER + body)
+        self.write(".cursor/rules/global-instructions.mdc", cursor_setup.COPY_HEADER + body)
         code, lines = self.lines("Cursor")
         self.assertRegex(lines[0], r"hook +wired +Cursor")
         self.assertEqual(code, 0)
@@ -277,12 +288,12 @@ class WiringTest(unittest.TestCase):
 
         body = "# Global agent instructions\n\nCurrent.\n"
         self.write(".config/agents/AGENTS.md", body)
-        self.write(".cursor/rules/global-instructions.mdc", verify.CURSOR_COPY_HEADER + body)
+        self.write(".cursor/rules/global-instructions.mdc", cursor_setup.COPY_HEADER + body)
         code, lines = self.cursor_lines()
         self.assertEqual(code, 0, lines)
         self.assertRegex(lines[1], r"cursor +ok +Cursor: .*global-instructions\.mdc matches")
 
-        self.write(".cursor/rules/global-instructions.mdc", verify.CURSOR_COPY_HEADER + "Stale.\n")
+        self.write(".cursor/rules/global-instructions.mdc", cursor_setup.COPY_HEADER + "Stale.\n")
         code, lines = self.cursor_lines()
         self.assertEqual(code, 1)
         self.assertRegex(lines[1], r"cursor +FAIL +Cursor: .*global-instructions\.mdc differs")
@@ -755,7 +766,8 @@ class HarnessInstructionsTest(PersonalHome, unittest.TestCase):
         self.assertRegex(lines[0], r"harness +ok +Cursor: .*harness-instructions\.mdc matches .*harnesses/cursor/instructions\.md")
 
     def test_the_text_cursor_should_get_is_the_instructions_section_only(self):
-        self.assertEqual(verify.personal.harness_rule(CURSOR_SOURCE, CURSOR_PATH), CURSOR_RULE)
+        from setupmachine.harness_setups import cursor
+        self.assertEqual(cursor.harness_rule(CURSOR_SOURCE, CURSOR_PATH), CURSOR_RULE)
 
     def test_the_header_names_the_path_the_harnesses_file_gives(self):
         self.harnesses({"cursor": {"instructions": "elsewhere/cursor.md"}})
@@ -856,16 +868,34 @@ class HarnessInstructionsTest(PersonalHome, unittest.TestCase):
         self.assertRegex(lines[0], r"harness +n/a +Cursor: not set up here")
         self.assertEqual(code, 0)
 
+    def test_opencode_instructions_are_still_a_gap(self):
+        (self.home / ".cursor").rmdir()
+        self.write("code/personal/harnesses/opencode/instructions.md", "## Instructions\n\n- One.\n")
+        self.harnesses({"opencode": {"instructions": "harnesses/opencode/instructions.md"}})
+        code, lines = self.harness_lines()
+        self.assertEqual(len(lines), 1, lines)
+        self.assertRegex(lines[0], r"harness +gap +opencode: .*instructions\.md has instructions, "
+                                   r"but set-up-machine can't deliver them to opencode yet")
+        self.assertEqual(code, 0)
+
+    def test_a_missing_opencode_instructions_file_still_fails(self):
+        (self.home / ".cursor").rmdir()
+        self.harnesses({"opencode": {"instructions": "harnesses/opencode/instructions.md"}})
+        code, lines = self.harness_lines()
+        self.assertRegex(lines[0], r"harness +FAIL +opencode: .*doesn't exist")
+        self.assertEqual(code, 1)
+
     def test_a_harness_without_delivery_yet_is_a_gap(self):
         self.write("code/personal/harnesses/codex-cli/instructions.md", "Codex.\n")
         self.write("code/personal/harnesses/opencode/config/opencode.json", "{}\n")
         self.harnesses({"codex": {"instructions": "harnesses/codex-cli/instructions.md"},
                         "opencode": {"config": "harnesses/opencode/config/opencode.json"}})
         code, lines = self.harness_lines()
-        self.assertRegex(lines[0], r"harness +gap +codex: .*harnesses/codex-cli/instructions\.md has instructions, "
-                                   r"but set-up-machine can't deliver them to codex yet")
-        self.assertRegex(lines[1], r"harness +gap +opencode: .*opencode\.json is its config, but set-up-machine "
-                                   r"can't deliver a config to opencode yet")
+        text = "\n".join(lines)
+        self.assertRegex(text, r"harness +gap +codex: .*harnesses/codex-cli/instructions\.md has instructions, "
+                               r"but set-up-machine can't deliver them to codex yet")
+        self.assertRegex(text, r"harness +gap +opencode: .*opencode\.json is its config, but set-up-machine "
+                               r"can't deliver a config to opencode yet")
         self.assertEqual(len(lines), 2, lines)
 
     def test_a_missing_file_for_a_harness_without_delivery_fails(self):
