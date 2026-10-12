@@ -5,7 +5,7 @@ description: Set up or audit a machine's coding-agent harnesses from one rule ta
 
 # Set up machine
 
-Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CLI, Pi) from its sources. Install or update each selected tool to the latest available version. Running the skill again is the **audit**: check configuration and freshness, then propose any required updates.
+Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CLI, Pi, Grok Bot) from its sources. Install or update each selected tool to the latest available version. Running the skill again is the **audit**: check configuration and freshness, then propose any required updates.
 
 ## Sources
 
@@ -48,6 +48,7 @@ Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CL
    - **When the pointer is missing:** read `references/workstation.md`, then ask the user once for `<workstation-repo>` and `<path-to-workstation-repo>`, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
    - **When the pointer records no workstation repo:** set up the machine as `references/workstation.md` says for a run without one, or, when the user names one now, as it says for rewriting the pointer.
    - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
+   - **When the harness is Grok Bot:** its instructions go into memory, not files. Follow references/grok-bot.md, *Instructions*, for apply, reconcile and audit.
    - **When trying a change without touching the real machine:** run the steps against a copy of the home folder in the project's `.scratch/`, and check it with `verify.py --home <copy>`. Start no harness there, since it would read the real login.
 2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, each harness's declared config, and the installs: every skill and command `setup/installs.json` lists for this machine, each selected installation up to date. Include harness upgrades and plugin updates, not only missing installs. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
 
@@ -150,11 +151,12 @@ Name these once in every audit:
   - [references/opencode.md](references/opencode.md): opencode.
   - [references/cursor.md](references/cursor.md): Cursor's IDE and CLI.
   - [references/pi.md](references/pi.md): Pi, whose only enforcement is the hook's extension.
+  - [references/grok-bot.md](references/grok-bot.md): Grok Bot, whose instructions live in memory and whose permissions, connectors, secrets and routines live in the app.
 
 ## Scripts
 
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
-- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`. `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command (references/codex.md).
+- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`. `--grok-bot-rules` prints the rule table and personal permissions as Grok Bot's Auto-review rules (references/grok-bot.md). `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command (references/codex.md).
 - `scripts/setupmachine/`: the modules both scripts use. `harnesses/__init__.py` lists every harness in `ALL`, and each harness has one module there.
 - [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
 - [references/pi-extension.ts](references/pi-extension.ts): the Pi extension that calls the hook and asks the user for ask rows.

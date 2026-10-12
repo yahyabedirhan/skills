@@ -2,6 +2,14 @@
 
 The decisions behind the `set-up-machine` skill. This file is for maintaining it and is never installed. Add an entry for each new decision, in the shape from [index.md](index.md). The spec is "Spec: every harness and project is set up and audited from the skills" (#49).
 
+## 2026-10-12: Grok Bot is a harness, and a bare ~/.cursor is not Cursor
+
+- **Status:** accepted
+- **Context:** Grok Bot runs on a Linux box with a shared skill library. It has no instructions file, hook, permission lists or model setting in a file: the app owns them. The box also has a `~/.cursor/` folder that Grok Bot made, so the verifier reported Cursor and failed three of its cells.
+- **Options:** Leave Grok Bot out: its skills drift with no check. Reuse the Cursor setup: its files mean nothing to Grok Bot.
+- **Choice and why:** Add `grok-bot` with its own reference and module. Its skills are copied from their sources and recorded in a lock with each folder's git tree hash, so the verifier can tell a stale copy. The other areas are `gap` or `n/a` with the reason, and its instructions go into its memory by hand. Cursor is found only by a file or folder its IDE or CLI writes, or its CLI on `PATH`.
+- **Consequences:** A Grok Bot box passes the verifier with gaps, never with a false Cursor row. Its live check is a gap.
+
 ## 2026-10-11: checks and steps run cursor-agent
 
 - **Status:** accepted
