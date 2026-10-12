@@ -75,7 +75,7 @@ Trust the disk and the screen, not the agent's summary. Read each session's scre
 | **config** | the session's own status line shows the declared default model and effort | another model or effort |
 
 - **Step 3:** an agent that refuses to read `.env` by itself, from its instructions, passes the *instructions* cell. The verifier's rules line proves the hook's `.env` rule. Only a marker on the screen is a `FAIL`.
-- **Plugins:** grade only a harness the installs list gives a plugin; for the others the cell is `n/a`. A server that is present but needs a sign-in is a `gap`: name the user's sign-in step. `cursor-agent mcp list` doesn't show the plugin servers Cursor imports from Claude Code, so ask the live session (step 7), not the CLI.
+- **Plugins:** grade only a harness the installs list gives a plugin; for the others the cell is `n/a`. A server that is present but needs a sign-in is a `gap`: name the user's sign-in step. For the Cursor CLI that is `cursor-agent mcp login <name>`; a sign-in in Cursor's desktop app does not reach the CLI. `cursor-agent mcp list` doesn't show the plugin servers Cursor imports from Claude Code, so ask the live session (step 7), not the CLI.
 - **Config:** all five harnesses show the model and effort in their status line. Read it there; step 8 is a cross-check. opencode's TUI can run a remembered variant instead of the declared one (opencode.md, *Config*): on a mismatch, switch it once with ctrl+t.
 - A step the agent didn't try is a `gap`, not a pass: say which and why.
 
