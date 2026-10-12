@@ -1,6 +1,6 @@
 # Profile: Shipyard Green
 
-Shades of the Shipyard icon's olive green, with its cream sail as the text. A calm dark look for anything about Shipyard or my agent work.
+A pale tint of the Shipyard icon's olive green, with darker shades of it for lines and text. A light look for anything about Shipyard or my agent work.
 
 ## Diagram types
 
@@ -8,11 +8,11 @@ Flowchart, Tree, Loop, Venn, Layer stack, Timeline.
 
 ## Diagram style
 
-Minimal dark.
+Minimal light.
 
 ## Look
 
-Upstream defaults. Light olive only on the 1 or 2 focal nodes.
+Upstream defaults. Deep olive only on the 1 or 2 focal nodes.
 
 ## Palette
 
@@ -20,15 +20,15 @@ Every green is a shade of the icon's `#7a8a48`.
 
 | Role | Value |
 |---|---|
-| `paper` | `#2e3519` |
-| `paper-2` | `#46512a` |
-| `ink` | `#faf6eb` |
-| `muted` | `#cfd6b0` |
-| `soft` | `#b9c294` |
-| `rule` | `rgba(122,138,72,0.55)` |
-| `accent` | `#b5c876` |
-| `accent-tint` | `rgba(181,200,118,0.16)` |
-| `link` | `#e2d7a0` |
+| `paper` | `#e6ebd3` |
+| `paper-2` | `#d8dfbd` |
+| `ink` | `#252c12` |
+| `muted` | `#4a5626` |
+| `soft` | `#55622c` |
+| `rule` | `rgba(122,138,72,0.45)` |
+| `accent` | `#46600f` |
+| `accent-tint` | `rgba(70,96,15,0.12)` |
+| `link` | `#3b5a2a` |
 
 ## Typography
 
