@@ -74,7 +74,7 @@ def check_instructions(ctx) -> Cell:
 
 
 def check_guardrails(ctx) -> Cell:
-    """A match-all PreToolUse group runs the hook, hooks are on, and each personal permission has its entry."""
+    """A match-all PreToolUse group runs the hook, hooks are on, no `Write(...)` entry is left, and each personal permission has its entry."""
     path = ctx.home / FOLDER / "settings.json"
     settings = read_json(path)
     if settings is None:
@@ -85,6 +85,10 @@ def check_guardrails(ctx) -> Cell:
     problems = [any_wired_problem(ctx, path, commands, ID)]
     if settings.get("disableAllHooks") is True:
         problems.append(("FAIL", f"{ctx.show(path)} sets disableAllHooks, so the hook never runs"))
+    stale = [e for name in ("deny", "ask", "allow") for e in as_list(dig(settings, "permissions", name))
+             if isinstance(e, str) and e.startswith("Write(")]
+    if stale:
+        problems.append(("FAIL", f"{ctx.show(path)} holds {', '.join(stale)}, which Claude Code never checks; remove them"))
     return cell([p for p in problems if p] + personal_problems(ctx, native_lists(settings), path))
 
 
