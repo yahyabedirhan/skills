@@ -1,4 +1,6 @@
-# skills
+<p align="center"><img src="assets/images/logo/skills.png" width="128" alt="skills' logo: five book spines on a shelf, the last leaning on the others, on a graphite tile"></p>
+
+<h1 align="center">skills</h1>
 
 [![skills.sh](https://skills.sh/b/yahyabedirhan/skills)](https://skills.sh/yahyabedirhan/skills)
 
