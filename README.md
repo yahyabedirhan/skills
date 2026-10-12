@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/images/logo/skills.png" width="128" alt="skills' logo: five book spines on a shelf, the last leaning on the others, on a graphite tile"></p>
+<p align="center"><img src="assets/images/logo/skills.png" width="128" alt="skills' logo: five book spines folded like paper, the last leaning on the others, on a graphite tile laid in bricks"></p>
 
 <h1 align="center">skills</h1>
 
