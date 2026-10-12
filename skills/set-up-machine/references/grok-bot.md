@@ -23,9 +23,9 @@ The lock is `~/.local/state/agents/grok-bot-instructions-lock.json`:
  "sources": {"setup/instructions.md": ["<fact as written>"], "<grok-bot instructions path>": ["<fact as written>"]}}
 ```
 
-The **applied log** is the workstation repo's `harnesses/grok-bot/applied.md`, when it exists: one dated entry per apply or reconcile, never edited later.
+The **applied state page** is the workstation repo's `harnesses/grok-bot/applied.md`, when it exists: the lock's commit and date, each exact fact by scope, the profile and the Auto-review rules status. Its history is its git log.
 
-You may merge or reword lines into facts. The lock and the log always hold the exact text written, since a later forget or rewrite finds the fact by it.
+You may merge or reword lines into facts. The lock and the applied state page always hold the exact text written, since a later forget or rewrite finds the fact by it.
 
 ### First-time apply
 
@@ -36,7 +36,7 @@ You may merge or reword lines into facts. The lock and the log always hold the e
 5. Set the profile's title and description from that file's notes.
 6. When you can't write memory or the profile, give the user the facts by scope and wait until they confirm the exact texts written.
 7. Write the lock with the commit, the date and each exact fact.
-8. Append a log entry: the date, the commit, each fact added per scope, and the Auto-review rules handed over.
+8. Rewrite the applied state page to match the lock, with the profile and the Auto-review rules status.
 9. Give the user the Auto-review rules text (*Guardrails*) and each user-only step: rules to paste, connectors, secrets, rulesets.
 
 ### Reconcile
@@ -47,7 +47,7 @@ Run it when the verifier's instructions cell says stale.
 2. Map each changed line: added is **add**; changed is **rewrite** of the lock's fact for it; removed is **forget** that fact. User scope for `setup/instructions.md`, agent scope for Grok Bot's file.
 3. Apply each with the memory tool, finding an old fact by its exact lock text. Or give the user the list and wait until they confirm.
 4. Rewrite the lock with the new commit, the date and every fact now applied.
-5. Append a log entry with each fact added, rewritten (old and new text) or forgotten, per scope.
+5. Rewrite the applied state page to match the lock.
 
 ### Audit
 

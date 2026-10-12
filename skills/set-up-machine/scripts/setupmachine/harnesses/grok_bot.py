@@ -62,7 +62,7 @@ def check_instructions(ctx) -> Cell:
     lock_path = ctx.home / INSTRUCTIONS_LOCK
     lock = read_json(lock_path)
     if not lock or not isinstance(lock.get("sha"), str):
-        return Cell("gap", [f"no {ctx.show(lock_path)}: write the facts into memory, then the lock "
+        return Cell("gap", [f"no {ctx.show(lock_path)}: write the facts into memory, then the lock and the applied state page "
                             "(references/grok-bot.md, *First-time apply*)"])
     problems = []
     for source in sources(ctx):
