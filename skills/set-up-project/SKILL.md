@@ -20,7 +20,7 @@ You explore, present what you found, confirm with the user, then write. Running 
 
 ### 1. Check the machine
 
-Run **set-up-machine**'s verify script, `python3 <set-up-machine skill>/scripts/verify.py` (the skill is installed beside this one). A pass is exit code 0. That means the `rules` line says `ok` and no `hook` line says `FAIL`. A `codex` line that says `differs`, `same`, `stricter`, or `skipped` is not a failure. `differs` is what the script prints for a row Codex can't express, and it still exits 0 with `rules ok`. When the exit code is not 0, run the **set-up-machine** skill first, then come back. Done when verify exits 0.
+Run **set-up-machine**'s verifier, `python3 <set-up-machine skill>/scripts/verify.py` (the skill is installed beside this one). A pass is exit code 0. When the exit code is not 0, run the **set-up-machine** skill first, then come back. Done when the verifier exits 0.
 
 ### 2. Explore
 
