@@ -86,8 +86,8 @@ Where each harness's own files are in the repository, so that each can sit in th
 - **`harnesses`:** one entry per harness that has a file of its own. `<harness>` is the harness's reference name, as in `installs.json`: `claude-code`, `codex`, `cursor`, `opencode` or `pi`. An entry takes `instructions`, `config`, or both. A harness with nothing to point at has no entry.
 - **`<path>`:** relative to the repository's root, such as `harnesses/cursor/instructions.md`. It stays inside the repository: an absolute path, a path through `..` out of the repository, or a link that leads out of it is refused.
 - **`instructions`:** the harness's instructions file, below.
-- **`config`:** the harness's declared defaults: a Codex config or a Pi config, below. A `config` for another harness is a `gap` line, since set-up-machine has no config reader for it.
-- **Without the file,** no harness has instructions or declared defaults of its own.
+- **`config`:** the harness's declared config, such as its default model, below. Every harness can have one.
+- **Without the file,** no harness has instructions or declared config of its own.
 - **A file that isn't valid JSON, lacks `version`, has an unknown key or harness, or a path outside the repository** is a `FAIL` that names the problem, and nothing it points at is read or written.
 - **A path to a file that doesn't exist** is a `FAIL` that names the pointer, such as `harnesses.cursor.instructions`, and the path it gives.
 
@@ -120,9 +120,29 @@ The person's own permission rows, such as allowing a tool they added, or refusin
 
 The checks are the rule table's, through `scripts/setupmachine/rules.py`: a malformed row is refused, and so is an id the rule table already uses. A personal permission can't loosen a table row: an `allow` row whose sample a table row denies or asks for fails `verify.py`. No file means no personal permissions.
 
+### A declared config
+
+The file `setup/harnesses.json` points at with a harness's `config`. It holds the keys the user chose for that harness, such as its default model and reasoning effort, in the format of the harness's own config file. set-up-machine merges those keys into that file:
+
+| Harness | Declared config, for example | Merged into |
+|---|---|---|
+| `claude-code` | `harnesses/claude-code/config/settings.json` | `~/.claude/settings.json` |
+| `codex` | `harnesses/codex-cli/config/config.toml` | `config.toml` in the Codex config home (`codex.md`) |
+| `cursor` | `harnesses/cursor/config/cli-config.json` | `~/.cursor/cli-config.json` |
+| `opencode` | `harnesses/opencode/config/opencode.json` | the global config file opencode reads last: `opencode.jsonc` or `opencode.json` in `~/.config/opencode` (`opencode.md`) |
+| `pi` | `harnesses/pi/config/settings.json` | `settings.json` in Pi's agent folder (`pi.md`) |
+
+- **Each key is optional.** An omitted key declares no preference, so that setting stays user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
+- **A key's value is the whole value.** A nested object, such as Cursor's `selectedModel`, is written and compared as a whole. Keys the declared file doesn't name are never written or compared.
+- **Declare only preferences.** Leave out credentials, trust decisions, runtime state the harness writes itself, and anything another part of this skill owns: permissions, hooks, memory and plugins.
+- **Writing it:** mark each declared key `present, personal` when the value matches and `updated, personal` when it differs, showing the current and the declared value. Back up the file, write through a symlink at its target, keep every other key, and stop on a file that isn't valid JSON or TOML. Keep chosen values out of public reports, issues, pull requests and fixtures; use synthetic values there.
+- **Activation:** a new session reads the change. Project config and CLI flags such as `--model` can override it: name that in the report.
+
+`verify.py` checks each declared key in the harness's `config` column: `ok` when the harness's file holds every declared value, `FAIL` when one is missing or differs, and `n/a` with no `config` entry. It never prints the values. The column sits beside the five setup areas, not in one of them, since a default model is no setup area. A declared file that isn't valid JSON or TOML fails the cell.
+
 ### A Codex config
 
-The file `setup/harnesses.json` points at with `codex`'s `config`, such as `harnesses/codex-cli/config/config.toml`. Keep explicitly chosen Codex CLI defaults in this private file. Use only the top-level keys `sandbox_mode`, `approval_policy` and `approvals_reviewer`; each is optional. No `config` entry, or an omitted key, declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
+The file `setup/harnesses.json` points at with `codex`'s `config`, such as `harnesses/codex-cli/config/config.toml`. Keep explicitly chosen Codex CLI defaults in this private file. Use only the top-level keys `model`, `model_reasoning_effort`, `sandbox_mode`, `approval_policy` and `approvals_reviewer`; each is optional. `verify.py` checks `sandbox_mode`, `approval_policy` and `approvals_reviewer` in Codex's `sandbox` cell and the other keys in its `config` cell, so each key is checked once.
 
 Validate the keys and values before proposing any write. Reject unknown keys, nested tables and unsupported values with an explicit gap; this file is an allowlist, not a copy of Codex's whole configuration. Keep credentials, model providers, project trust, profiles, hook state and runtime state in their existing homes. Existing memory and hook ownership remains with this skill's Codex adapter.
 
@@ -144,7 +164,7 @@ The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harness
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
 - Read `pi.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
 
-`verify.py` checks each declared key in Pi's `sandbox` cell, since Pi has no sandbox of its own: `ok` when `settings.json` holds every declared value, `FAIL` when one is missing or differs, and `n/a` with no `config` entry. It never prints the values.
+`verify.py` checks each declared key in Pi's `config` cell, as *A declared config* says; a `packages` key there is a `gap`.
 
 ### `setup/installs.json`
 

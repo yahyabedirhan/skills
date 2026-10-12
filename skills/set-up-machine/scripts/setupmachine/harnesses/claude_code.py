@@ -1,8 +1,9 @@
 """Claude Code: its hook payload, and the check of each setup area (references/claude-code.md).
 
-Every setting lives in `~/.claude/settings.json`; the instructions are `~/.claude/CLAUDE.md`,
-a link to the shared file. Cursor reads this harness's plugins and permission lists too,
-so cursor.py imports `plugins_installed` and `native_lists` from here.
+Every setting lives in `~/.claude/settings.json`, including the declared config's keys; the
+instructions are `~/.claude/CLAUDE.md`, a link to the shared file. Cursor reads this harness's
+plugins and permission lists too, so cursor.py imports `plugins_installed` and `native_lists`
+from here.
 """
 from __future__ import annotations
 
@@ -10,8 +11,8 @@ import json
 import re
 from pathlib import Path
 
-from ..checks import (Cell, any_wired_problem, as_list, cell, dig, link_problem, na, on_path, personal_problems,
-                      read_json, skill_problems)
+from ..checks import (Cell, any_wired_problem, as_list, cell, dig, json_config_cell, link_problem, na, on_path,
+                      personal_problems, read_json, skill_problems)
 from ..hook import ToolCall, refusal, search_pair
 
 ID, LABEL = "claude-code", "Claude Code"
@@ -111,6 +112,11 @@ def check_plugins(ctx) -> Cell:
 
 def check_skills(ctx) -> Cell:
     return cell(skill_problems(ctx, [ctx.home / FOLDER / "skills"]))
+
+
+def check_config(ctx) -> Cell:
+    """Each key the declared Claude Code config sets, such as `model`, has its value in settings.json."""
+    return json_config_cell(ctx, ID, LABEL, ctx.home / FOLDER / "settings.json")
 
 
 # --- shared with Cursor --------------------------------------------------------------------

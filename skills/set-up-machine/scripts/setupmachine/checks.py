@@ -10,8 +10,8 @@ as (status, sentence) pairs and calls `cell`, which picks the worst status:
 - `n/a`: the area does not apply to this harness (`na`).
 
 The helpers below read a file the same way for every harness: JSON, TOML, a link to the
-shared file, the hook script a wired command runs, the skills a harness can see, and the
-personal permission entries a harness's native lists hold.
+shared file, the hook script a wired command runs, the keys a declared config sets, the skills
+a harness can see, and the personal permission entries a harness's native lists hold.
 """
 from __future__ import annotations
 
@@ -178,6 +178,31 @@ def any_wired_problem(ctx: Context, where: Path, commands: list, harness: str):
     if None in problems:
         return None
     return problems[0] if problems else ("FAIL", f"{ctx.show(where)} has no pre-tool hook for every tool")
+
+
+def declared_problems(ctx: Context, source: Path, declared, target: Path, actual, keys=None) -> list:
+    """A FAIL per key the declared config sets that `target` doesn't hold with the same value.
+
+    `declared` and `actual` are the two files as read_json or read_toml read them: a dict, or
+    None when the file is malformed. A key's value is compared whole, so a nested object must
+    match as a whole; keys the declared file doesn't name are left alone. `keys`, when given,
+    limits the check to those names. The values are never printed: they are personal.
+    """
+    if declared is None:
+        return [("FAIL", f"{ctx.show(source)} isn't a valid config object")]
+    if actual is None:
+        return [("FAIL", f"{ctx.show(target)} isn't a valid config object")]
+    return [("FAIL", f"{key} in {ctx.show(target)} differs from the declared {source.name}")
+            for key, value in declared.items() if (keys is None or key in keys) and actual.get(key) != value]
+
+
+def json_config_cell(ctx: Context, harness: str, label: str, target: Path, read=read_json) -> Cell:
+    """The config cell of a harness whose declared config is JSON: each declared key holds its
+    value in `target`, read with `read`. n/a when setup/harnesses.json names no config for it."""
+    source = ctx.setup.file(harness, "config")
+    if source is None:
+        return na(f"setup/harnesses.json names no {label} config")
+    return cell(declared_problems(ctx, source, read_json(source), target, read(target)))
 
 
 def skill_problems(ctx: Context, folders: list) -> list:

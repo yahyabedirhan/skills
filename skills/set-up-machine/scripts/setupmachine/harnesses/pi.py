@@ -2,8 +2,7 @@
 
 Every path is under Pi's agent folder: `PI_CODING_AGENT_DIR`, else `~/.pi/agent` (`agent_dir`).
 Pi has no permission system, so the hook, run through an extension, is its only guardrail.
-Pi has no sandbox either: its sandbox column checks the declared Pi settings instead, the one
-piece of declared config Pi takes.
+Pi has no sandbox either, so that column is n/a; the declared Pi settings are the config column.
 """
 from __future__ import annotations
 
@@ -11,7 +10,8 @@ import json
 import os
 from pathlib import Path
 
-from ..checks import Cell, cell, dig, link_problem, na, on_path, read_json, skill_problems, template_problem
+from ..checks import (Cell, cell, declared_problems, dig, link_problem, na, on_path, read_json, skill_problems,
+                      template_problem)
 from ..hook import ToolCall, plain, refusal, search_pair
 
 ID, LABEL = "pi", "Pi"
@@ -84,17 +84,7 @@ def check_guardrails(ctx) -> Cell:
 
 
 def check_sandbox(ctx) -> Cell:
-    """Pi has no sandbox. This column checks each key the declared Pi config sets against settings.json."""
-    source = ctx.setup.file(ID, "config")
-    if source is None:
-        return na("Pi has no sandbox, and setup/harnesses.json names no Pi config")
-    declared, settings = read_json(source), read_json(ctx.pi_dir / "settings.json")
-    if declared is None or settings is None:
-        return cell([("FAIL", f"{ctx.show(source)} or Pi's settings.json isn't a JSON object")])
-    problems = [("gap", f"{source.name} declares packages; move Pi extensions into installs.json plugins")
-                if key == "packages" else ("FAIL", f"{key} in Pi's settings.json differs from {source.name}")
-                for key, value in declared.items() if key == "packages" or settings.get(key) != value]
-    return cell(problems)
+    return na("Pi has no sandbox or approval setting")
 
 
 def check_plugins(ctx) -> Cell:
@@ -118,6 +108,19 @@ def check_plugins(ctx) -> Cell:
 
 def check_skills(ctx) -> Cell:
     return cell(skill_problems(ctx, [ctx.home / ".agents/skills", ctx.pi_dir / "skills"]))
+
+
+def check_config(ctx) -> Cell:
+    """Each key the declared Pi config sets has its value in settings.json. A `packages` key is a gap:
+    Pi extensions come from installs.json plugins, so it is never compared."""
+    source = ctx.setup.file(ID, "config")
+    if source is None:
+        return na("setup/harnesses.json names no Pi config")
+    declared, target = read_json(source), ctx.pi_dir / "settings.json"
+    problems = [("gap", f"{source.name} declares packages; move Pi extensions into installs.json plugins")
+                ] if isinstance(declared, dict) and "packages" in declared else []
+    keys = [key for key in declared if key != "packages"] if isinstance(declared, dict) else None
+    return cell(problems + declared_problems(ctx, source, declared, target, read_json(target), keys))
 
 
 def _unversioned(source) -> str:

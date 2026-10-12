@@ -83,20 +83,7 @@ A refused call's tool result is the hook's refusal: each refused part, its rule,
 
 ## Sandbox
 
-Pi has no sandbox and no approval setting. Its declared settings are the one declared config Pi takes, so the verifier's `sandbox` cell checks them.
-
-### Declared defaults
-
-The optional Pi `config` that the workstation repo's `setup/harnesses.json` names declares Pi settings (workstation.md). Compare each key it declares with `<agent-dir>/settings.json`:
-
-- `present, personal` when the values are equal; otherwise `updated, personal`, showing the current and the declared value.
-- Write only the declared keys, and keep every other key as it is. Pi writes runtime state into the same file, such as `lastChangelogVersion` and `deviceId`, and other tools add their own keys.
-- A `settings.json` that is a symlink is written at its target. A file that isn't valid JSON stops the change until the user fixes it.
-- Back up the file as SKILL.md, *Back up*, says: `.pi/agent/settings.json` under the backup folder for the default folder. For an agent folder outside the home folder, name the destination in the diff, `pi/settings.json` under the backup folder.
-- A key the file no longer declares keeps its persisted value, for the user to remove.
-- A `packages` key in the Pi `config` is a `gap`, never compared or written: Pi extensions come only from the plugins list (*Plugins*), so one file says what Pi loads. Tell the user to move each entry into `plugins`.
-- **Activation:** a new session reads the change. A running session reads it after `/reload`.
-- **Gaps:** a trusted project's `.pi/settings.json` overrides these keys, and CLI flags such as `--model` override them for one run.
+Pi has no sandbox and no approval setting, so the verifier's `sandbox` cell is `n/a`. Its declared settings are in *Config*.
 
 ## Plugins
 
@@ -107,7 +94,7 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
   - A matching declaration proves configuration only. Use `present` for the installation only after comparing its installed code with the latest source. Keep object entries and their resource filters.
   - `added` when no entry names the extension: append the source.
   - `updated` when an entry names the same extension with a different source: replace that entry with the source.
-  - Keep every other entry and key, and write the file as *Declared defaults* says: back it up first, write a symlink at its target, and stop on invalid JSON.
+  - Keep every other entry and key, and write the file as *Config* says: back it up first, write a symlink at its target, and stop on invalid JSON.
   - **Update and activation:** use the installed Pi's documented package update command for selected packages even when their declarations match. Pi 1.1.0 uses `pi update --extensions`; `pi update` updates the managed harness itself. Startup and `pi list` do not prove freshness. Reload or restart after checking installed versions against current upstream metadata.
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `<agent-dir>/mcp.json`, keeping every other server and key. `present` when it matches, `added` when it's missing, `updated` when it differs. Back it up like `settings.json`. Pi takes server names of letters, digits, `_` and `-`.
   - A running session reads the change after `/reload`.
@@ -123,6 +110,19 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 - Pi discovers skills in `~/.agents/skills/` and `<agent-dir>/skills/`, follows symlinks, and loads a skill reached through two links only once, by its real path. So the skills `setup/installs.json` installs into `~/.agents/skills` reach Pi with no extra install and no `-a` flag.
 - Older `npx skills` versions left one link per skill in `<agent-dir>/skills/`, pointing into `~/.agents/skills`. A link that resolves is harmless and `extra`. A broken link, such as one left after a skill was removed, is `extra`, for the user to remove: Pi skips it without a word.
 - A project's `.agents/skills/` loads only after the user trusts the project.
+
+## Config
+
+The optional Pi `config` that the workstation repo's `setup/harnesses.json` names declares Pi settings (workstation.md, *A declared config* and *A Pi config*). Compare each key it declares with `<agent-dir>/settings.json`:
+
+- `present, personal` when the values are equal; otherwise `updated, personal`, showing the current and the declared value.
+- Write only the declared keys, and keep every other key as it is. Pi writes runtime state into the same file, such as `lastChangelogVersion` and `deviceId`, and other tools add their own keys.
+- A `settings.json` that is a symlink is written at its target. A file that isn't valid JSON stops the change until the user fixes it.
+- Back up the file as SKILL.md, *Back up*, says: `.pi/agent/settings.json` under the backup folder for the default folder. For an agent folder outside the home folder, name the destination in the diff, `pi/settings.json` under the backup folder.
+- A key the file no longer declares keeps its persisted value, for the user to remove.
+- A `packages` key in the Pi `config` is a `gap`, never compared or written: Pi extensions come only from the plugins list (*Plugins*), so one file says what Pi loads. Tell the user to move each entry into `plugins`.
+- **Activation:** a new session reads the change. A running session reads it after `/reload`.
+- **Gaps:** a trusted project's `.pi/settings.json` overrides these keys, and CLI flags such as `--model` override them for one run.
 
 ## Hook wiring
 
@@ -150,9 +150,10 @@ The verifier's Pi row, from `scripts/setupmachine/harnesses/pi.py`, reads the re
 
 - **instructions:** `<agent-dir>/AGENTS.md` is a link to the shared file. An `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Pi in `setup/harnesses.json`.
 - **guardrails:** `<agent-dir>/extensions/set-up-machine.ts` runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness pi`, and the file is [pi-extension.ts](pi-extension.ts) but for its `COMMAND` line; one that differs otherwise, or whose `COMMAND` isn't a JSON list, is `FAIL`. No extension is `FAIL`, since nothing else enforces the rule table in Pi. A file there without the template's first line is someone else's: a `gap`, left alone. Pi has no native rules, so personal permissions need no entry. The extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call.
-- **sandbox:** Pi has no sandbox, so this cell checks the declared Pi settings: each key the Pi `config` declares holds the same value in `settings.json`. A `packages` key there is a `gap`, which asks the user to move it into `plugins`. `n/a` without a Pi `config`.
+- **sandbox:** `n/a`: Pi has no sandbox.
 - **plugins:** as *Plugins* says.
 - **skills:** each listed skill is in `~/.agents/skills` or `<agent-dir>/skills`.
+- **config:** each key the Pi `config` declares holds the same value in `settings.json`. A `packages` key there is a `gap`, which asks the user to move it into `plugins`. `n/a` without a Pi `config`.
 
 The verifier doesn't report broken skill links: list them in the diff as `extra` (*Skills*). To see Pi read the setup, start it in a sandbox:
 

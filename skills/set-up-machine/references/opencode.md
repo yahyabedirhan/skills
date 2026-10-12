@@ -73,6 +73,12 @@ A `gap`: set-up-machine doesn't deliver `plugins` entries (workstation.md) to op
 
 opencode reads skills from `~/.config/opencode/skills`, `~/.claude/skills` and `~/.agents/skills` ([skills](https://opencode.ai/docs/skills/)). Skills installed into `~/.agents/skills` reach it with no extra install. Install each skill as workstation.md, *A skill*, says.
 
+## Config
+
+When `setup/harnesses.json` names an opencode `config` (workstation.md, *A declared config*), merge each key it sets, such as `model` (`<provider>/<model>`), into the global config file *Permissions* names: the last of `config.json`, `opencode.json` and `opencode.jsonc` that exists, else a new `opencode.json`. In an `opencode.jsonc`, change only the declared keys' lines and keep its comments. Keep every other key. Mark each key `present, personal` or `updated, personal`.
+
+- **Activation:** a new session reads it. A project's `opencode.json` and the `--model` flag override it.
+
 ## Hook wiring
 
 - **Wiring:** the plugin `~/.config/opencode/plugins/set-up-machine.js`, which opencode loads from its global plugin folder. Write it from [opencode-plugin.js](opencode-plugin.js), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "opencode"]` (`<script>` as in SKILL.md, *Wiring*). Its `tool.execute.before` runs before every tool call, built-in and MCP, and before the permission check; it throws the hook's refusal, which stops the call. When the script is gone, can't start, exits non-zero or takes over 10 seconds, it lets the call through.
@@ -100,6 +106,7 @@ The verifier's opencode row, from `scripts/setupmachine/harnesses/opencode.py`:
 - **sandbox:** `n/a`.
 - **plugins:** each entry for opencode is a `gap`; no entry is `n/a`.
 - **skills:** each listed skill is in `~/.config/opencode/skills`, `~/.claude/skills` or `~/.agents/skills`.
+- **config:** each key the declared opencode config sets has the same value in the config file *Config* names (an `opencode.jsonc` is read without its comments and trailing commas). `n/a` without a declared config.
 
 To see opencode itself enforce the rows, start it in a sandbox. 
 In a sandbox: `OPENCODE_CONFIG_DIR=<a copy of the config folder>` layers it over the real global config (read, not written), and `XDG_DATA_HOME`, `XDG_STATE_HOME` and `XDG_CACHE_HOME` pointed into the sandbox keep sessions and logs out. `opencode run` takes the session's folder from `PWD`. Start it with a scrubbed environment.

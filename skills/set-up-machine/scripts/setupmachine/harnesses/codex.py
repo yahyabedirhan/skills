@@ -1,7 +1,7 @@
 """Codex: its hook payload, and the check of each setup area (references/codex.md).
 
 Every path is under the Codex config home: `CODEX_HOME`, else `~/.codex` (verify.py resolves it
-once). Its `config.toml` holds memory, hook trust, declared defaults and plugins. TOML checks need
+once). Its `config.toml` holds memory, hook trust, the declared config and plugins. TOML checks need
 Python 3.11's tomllib; on an older Python they are a gap.
 """
 from __future__ import annotations
@@ -14,13 +14,13 @@ from pathlib import Path
 
 from . import claude_code
 from .. import checks
-from ..checks import (Cell, any_wired_problem, as_list, cell, dig, link_problem, na, native_command_row, on_path,
-                      read_json, read_toml, skill_problems, wiring_problem)
+from ..checks import (Cell, any_wired_problem, as_list, cell, declared_problems, dig, link_problem, na,
+                      native_command_row, on_path, read_json, read_toml, skill_problems, wiring_problem)
 from ..hook import PATCH_FILE, ToolCall
 
 ID, LABEL = "codex", "Codex"
-# The declared defaults a Codex config in the workstation repo may set.
-DECLARED_KEYS = ("sandbox_mode", "approval_policy", "approvals_reviewer")
+# The keys of the declared Codex config the sandbox column checks; the config column checks the rest.
+SANDBOX_KEYS = ("sandbox_mode", "approval_policy", "approvals_reviewer")
 NO_TOML = ("gap", "this Python has no tomllib (3.11+), so config.toml isn't checked")
 
 
@@ -114,18 +114,8 @@ def check_guardrails(ctx) -> Cell:
 
 
 def check_sandbox(ctx) -> Cell:
-    """Each key the declared Codex config sets has the same value in config.toml."""
-    source = ctx.setup.file(ID, "config")
-    if source is None:
-        return na("setup/harnesses.json names no Codex config")
-    (declared, bad_source), (config, bad_config) = _toml(ctx, source), _toml(ctx, ctx.codex_home / "config.toml")
-    if bad_source or bad_config:
-        return cell([bad_source or bad_config])
-    problems = [("FAIL", f"{source.name} sets {key}, which isn't one of {', '.join(DECLARED_KEYS)}")
-                for key in declared if key not in DECLARED_KEYS]
-    problems += [("FAIL", f"{key} in config.toml differs from the declared Codex config")
-                 for key in DECLARED_KEYS if key in declared and config.get(key) != declared[key]]
-    return cell(problems)
+    """The sandbox and approval keys the declared Codex config sets have the same value in config.toml."""
+    return _declared_cell(ctx, sandbox=True)
 
 
 def check_plugins(ctx) -> Cell:
@@ -151,6 +141,26 @@ def check_plugins(ctx) -> Cell:
 
 def check_skills(ctx) -> Cell:
     return cell(skill_problems(ctx, [ctx.home / ".agents/skills", ctx.codex_home / "skills"]))
+
+
+def check_config(ctx) -> Cell:
+    """Every other key the declared Codex config sets, such as `model`, has the same value in config.toml."""
+    return _declared_cell(ctx, sandbox=False)
+
+
+def _declared_cell(ctx, sandbox: bool) -> Cell:
+    """One of the declared Codex config's two cells: its SANDBOX_KEYS (sandbox), or the rest (config).
+    Each key is checked in one cell only, so one wrong value is one FAIL. n/a when the cell has no key."""
+    source = ctx.setup.file(ID, "config")
+    if source is None:
+        return na("setup/harnesses.json names no Codex config")
+    (declared, bad_source), (config, bad_config) = _toml(ctx, source), _toml(ctx, ctx.codex_home / "config.toml")
+    if bad_source or bad_config:
+        return cell([bad_source or bad_config])
+    keys = [key for key in declared if (key in SANDBOX_KEYS) == sandbox]
+    if not keys:
+        return na(f"the declared Codex config sets no {'sandbox' if sandbox else 'other'} key")
+    return cell(declared_problems(ctx, source, declared, ctx.codex_home / "config.toml", config, keys))
 
 
 def _toml(ctx, path: Path) -> tuple:

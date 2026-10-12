@@ -1,6 +1,6 @@
 ---
 name: set-up-machine
-description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, memory kept off, declared Codex CLI and Pi defaults, the plugins each harness gets, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
+description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, memory kept off, each harness's declared config such as its default model, the plugins each harness gets, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
 ---
 
 # Set up machine
@@ -14,7 +14,7 @@ Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CL
   - `setup/instructions.md`: the working agreement, the glossaries, which tool fills each role, and the personal workflow;
   - `setup/permissions.json`: the **personal permissions**, rows each harness carries beside the rule table's;
   - `setup/installs.json`: the skills, plugins and commands every machine gets;
-  - `setup/harnesses.json`: where each harness's instructions and declared defaults are. Today only Codex and Pi have declared defaults.
+  - `setup/harnesses.json`: where each harness's instructions and declared config are. Every harness can have a declared config, such as its default model.
 
 ## Outputs
 
@@ -23,7 +23,7 @@ Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CL
 - Each harness's permission entries, from the rule table and the personal permissions.
 - The **pre-tool hook**, `scripts/pre_tool_hook.py`, run before every tool call.
 - The **pointer**, when it is missing or records none.
-- Codex CLI defaults and Pi settings, from the `config` files that `setup/harnesses.json` names.
+- Each harness's **declared config**, from the `config` file `setup/harnesses.json` names for it: only the keys that file sets are merged into the harness's own config file (references/workstation.md, *A declared config*), and every other key stays the user's.
 - The skills and commands `setup/installs.json` lists for this machine, and its **plugins** in each harness it names: the plugins setup area, a plugin bundle or a standalone MCP server per entry.
 - Memory off in every harness.
 
@@ -40,15 +40,16 @@ Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CL
 - `<skills-repo>`: the user's own skills repo on GitHub, as `owner/repo`. Installed only when the workstation repo has no `setup/installs.json`.
 - `<workstation-repo>`: the user's own repo for their personal agent setup, usually private, as `owner/repo`.
 - `<path-to-workstation-repo>`: where that repo is cloned, e.g. `~/code/agent-setup`.
+- `<session-host>`: where agent sessions run, such as `herdr`. The live check starts a session of each harness there.
 
 ## Steps
 
-1. **Inspect.** Find each selected harness and tool, compare its installed version with the latest source, and read its current documentation. Preserve its installation channel. Read each harness reference, then the non-secret configuration fields it needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a workstation repo, read `references/workstation.md` and the repository's `setup/instructions.md`, `setup/permissions.json`, `setup/installs.json` and `setup/harnesses.json` in `<path-to-workstation-repo>`, then each file `setup/harnesses.json` points at. For Codex, inspect the optional Codex `config` as its reference directs; use one resolved config home throughout setup and verification. For Pi, do the same with the optional Pi `config` and one resolved agent folder.
+1. **Inspect.** Find each selected harness and tool, compare its installed version with the latest source, and read its current documentation. Preserve its installation channel. Read each harness reference, then the non-secret configuration fields it needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a workstation repo, read `references/workstation.md` and the repository's `setup/instructions.md`, `setup/permissions.json`, `setup/installs.json` and `setup/harnesses.json` in `<path-to-workstation-repo>`, then each file `setup/harnesses.json` points at. Inspect each harness's optional `config` as its reference directs. For Codex, use one resolved config home throughout setup and verification; for Pi, one resolved agent folder.
    - **When the pointer is missing:** read `references/workstation.md`, then ask the user once for `<workstation-repo>` and `<path-to-workstation-repo>`, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
    - **When the pointer records no workstation repo:** set up the machine as `references/workstation.md` says for a run without one, or, when the user names one now, as it says for rewriting the pointer.
    - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
    - **When trying a change without touching the real machine:** run the steps against a copy of the home folder in the project's `.scratch/`, and check it with `verify.py --home <copy>`. Start no harness there, since it would read the real login.
-2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, declared supported Codex defaults, declared Pi defaults, and the installs: every skill and command `setup/installs.json` lists for this machine, each selected installation up to date. Include harness upgrades and plugin updates, not only missing installs. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
+2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, each harness's declared config, and the installs: every skill and command `setup/installs.json` lists for this machine, each selected installation up to date. Include harness upgrades and plugin updates, not only missing installs. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
 
    Work out what each harness should hold, from `rules.json`, the personal permissions, the shared file's shape and the harness's reference, and compare it with what the machine holds. Write the whole diff: per harness and file, the exact entries or a unified diff, each line marked:
 
@@ -69,6 +70,9 @@ Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CL
 
    The verifier checks persisted configuration, not upstream releases. Complete the freshness checks from Inspect before you report that every installation is the latest.
 
+7. **Live check** each harness, as [references/live-check.md](references/live-check.md) says. Start a real session of each harness in `<session-host>`, with its default model, give each the same probe in a throwaway folder, and read the disk and the screen. The verifier proves the files; the live check proves each harness acts on them. Fix each `FAIL` through steps 2 to 6, then check that harness again. The run is done when the verifier and the live check both pass.
+   - **When `<session-host>` can't start a session of a harness:** name that harness's live check as a `gap`.
+
 ## What verify must show
 
 Two global lines, then one table, then one detail line per `FAIL` and `gap` cell:
@@ -77,9 +81,9 @@ Two global lines, then one table, then one detail line per `FAIL` and `gap` cell
 setup  ok    <owner>/<repo>: the shared file matches setup/instructions.md
 rules  ok    38 rows and 2 personal permissions, 197 samples
 
-harness      instructions  guardrails    sandbox       plugins       skills
-Claude Code  ok            ok            n/a           ok            ok
-Cursor       FAIL          ok            ok            ok            ok
+harness      instructions  guardrails    sandbox       plugins       skills        config
+Claude Code  ok            ok            n/a           ok            ok            ok
+Cursor       FAIL          ok            ok            ok            ok            ok
 
 FAIL  Cursor instructions: ~/.cursor/rules/global-instructions.mdc is stale; generate it again
 ```
@@ -89,9 +93,10 @@ FAIL  Cursor instructions: ~/.cursor/rules/global-instructions.mdc is stale; gen
 - **A row per harness present.** Each cell is `ok`, `FAIL`, `gap` (the harness can't do it, or the check can't see it) or `n/a` (the area doesn't apply). The columns:
   - `instructions`: the harness reads the shared file, its own instructions from `setup/harnesses.json` when named, and memory is off;
   - `guardrails`: the hook is wired to an installed script, and each personal permission has its native entry where the harness has native rules;
-  - `sandbox`: the harness's declared sandbox and approval settings (Pi's declared settings);
+  - `sandbox`: the harness's sandbox and approval settings: Cursor's run mode, and the sandbox and approval keys of the declared Codex config;
   - `plugins`: each `setup/installs.json` plugin for this harness is installed and enabled;
-  - `skills`: each skill `setup/installs.json` lists is in a folder this harness reads skills from.
+  - `skills`: each skill `setup/installs.json` lists is in a folder this harness reads skills from;
+  - `config`: each key the harness's declared config sets has the same value in the harness's config file; `n/a` without a declared config. It isn't a setup area: a default model is none of the five.
 
 The run passes when no line or cell is `FAIL`; the verifier then exits 0. Report each `gap` line. Each harness reference's *Checking it* section says what its row checks.
 
@@ -136,9 +141,10 @@ Name these once in every audit:
 - [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, the working agreement and glossaries, what counts as personal workflow, moving a harness's own file, and why memory stays off.
 - [references/rule-table.md](references/rule-table.md): a row's fields, its `match` kinds, and the spellings a harness needs.
 - [references/workstation.md](references/workstation.md): what this skill reads from the workstation repo: the pointer, the `setup/` files, the files `setup/harnesses.json` points at, and their format, generating the shared file's personal parts and the personal permissions from them, the installs list, and the run without one.
+- [references/live-check.md](references/live-check.md): starting a real session of each harness, the probe, and reading what it did.
 - [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
   - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
-- One reference per harness, read for each harness found. Each has the same headings: Found, Instructions, Guardrails, Sandbox, Plugins, Skills, Hook wiring, Gaps, Checking it.
+- One reference per harness, read for each harness found. Each has the same headings: Found, Instructions, Guardrails, Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it.
   - [references/claude-code.md](references/claude-code.md): Claude Code.
   - [references/codex.md](references/codex.md): Codex. Its *Codex MCP* section holds the TOML and OAuth detail.
   - [references/opencode.md](references/opencode.md): opencode.

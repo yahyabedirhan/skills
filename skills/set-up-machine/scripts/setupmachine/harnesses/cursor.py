@@ -13,8 +13,8 @@ from dataclasses import replace
 from pathlib import Path
 
 from . import claude_code
-from ..checks import (Cell, any_wired_problem, as_list, cell, dig, na, on_path, personal_problems, read_json,
-                      skill_problems)
+from ..checks import (Cell, any_wired_problem, as_list, cell, dig, json_config_cell, na, on_path, personal_problems,
+                      read_json, skill_problems)
 from ..hook import ToolCall, refusal, search_pair
 from ..workstation import HARNESS_SECTION, section
 
@@ -140,6 +140,11 @@ def check_plugins(ctx) -> Cell:
 
 def check_skills(ctx) -> Cell:
     return cell(skill_problems(ctx, [ctx.home / ".agents/skills", ctx.home / FOLDER / "skills"]))
+
+
+def check_config(ctx) -> Cell:
+    """Each key the declared Cursor config sets, such as `selectedModel`, has its value in cli-config.json."""
+    return json_config_cell(ctx, ID, LABEL, ctx.home / FOLDER / "cli-config.json")
 
 
 def _generated_problem(ctx, path: Path, want: str):
