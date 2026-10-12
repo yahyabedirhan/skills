@@ -18,6 +18,14 @@ The decisions behind the `show-me-diagram` skill. This file is for maintaining i
 - **Choice and why:** Keep the profiles in `profiles/` in the skill, with an `index.md` that marks the default and defines the shape. The skill uses the profile the user names, otherwise the default, so adding a profile changes only that folder.
 - **Consequences:** The skill reads the profile directly and leaves diagram-design's install and profile library unchanged.
 
+## 2026-10-12: a profile is one choice per layer
+
+- **Status:** accepted
+- **Context:** A profile copied as a full upstream style guide was 246 lines, mostly restated upstream rules. Explainer Studio had the same problem with styles and replaced them with layers, each with options, and presets that pick one option per layer.
+- **Options:** Full upstream style guides: long, and they drift from upstream.
+- **Choice and why:** A profile picks one option per layer, from what the diagram is to how it looks: diagram types, diagram style, look, palette, typography. It names upstream types, variants and roles, and leaves the rest to upstream defaults. The shape lives only in `profiles/index.md`.
+- **Consequences:** Profiles are short and comparable. Cursor Dark is the default; Navy Blue, Chalky Green and Sketchbook ship beside it.
+
 ## 2026-10-12: model-invoked, no plugin entry yet
 
 - **Status:** accepted

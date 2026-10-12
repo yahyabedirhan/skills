@@ -6,10 +6,10 @@ description: Explain the current topic, a status or a concept as one designed di
 Show the topic as one diagram the user opens in a browser. The diagram is for the user's own understanding, so stay with plain text when you only need to explain something to another agent.
 
 1. **Load the `diagram-design` skill** and follow it for the build. Don't restate or replace its rules, since it changes upstream.
-2. **Use the profile the user names; otherwise use the default** that `profiles/index.md` marks. Read that profile from `profiles/` beside this file and use it as the style guide for this diagram. Don't save it into diagram-design's install or profile library, since other projects share them.
+2. **Use the profile the user names; otherwise use the default** that `profiles/index.md` marks. Read that profile from `profiles/` beside this file and apply its choices on top of diagram-design's style guide for this diagram. Don't save it into diagram-design's install or profile library, since other projects share them.
 3. **Pick the diagram type that fits the point,** from the types `diagram-design` lists: a flowchart or sequence for a process, a state machine for status, a tree or layer stack for structure, a timeline for progress. Make one diagram per point. Above about nine nodes, split it.
 4. **Open the file for the user,** with one or two lines on what it shows. Keep the rest of the reply short, since the diagram carries the point.
 
 ## References
 
-- `profiles/index.md`: the profiles, which one is the default, and the shape every profile follows.
+- `profiles/index.md`: the profiles, which one is the default, and the layers every profile fills in, and how to check one.
