@@ -7,7 +7,7 @@ import Synchronization
 /// late a block posted to it every 8 ms ran (a stall: frames not drawn).
 ///
 /// Call `MainThreadMeter.shared.start()` once on the main thread, then
-/// `read()` at any interval, for example twice a second from a timer, to get
+/// `read()` from one thread at any interval, for example twice a second from a timer, to get
 /// what happened since the last reading. `beginEpisode()` and
 /// `endEpisode()` time one action, such as a tab switch, apart from the
 /// readings.

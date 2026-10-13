@@ -52,3 +52,17 @@ The skill is a distilled record of one diagnosis. The app was a SwiftUI menu bar
 - **Options:** Add the pointers now: each adds a line to a skill that every kind of project uses, before anyone has used this skill.
 - **Choice and why:** Let the description trigger the skill on Swift UI work for now.
 - **Consequences:** Decide again after agents use the skill. Add the pointers if agents that write SwiftUI don't load it.
+
+## 2026-10-13: the first audit
+
+- **Status:** accepted
+- **Context:** A fresh sub-agent ran the prompt audit on the new skill. It also checked the rules against current Swift, and ran both scripts.
+- **Options:** None considered.
+- **Choice and why:** All 15 findings were applied:
+  - Three facts were wrong. A repeating effect keeps the window rendering, but it doesn't run every body again. An observer on each item fires on each scroll step, not on each layout pass. Copying values in a sort was a micro-optimisation, so the rule went.
+  - Two facts were missing. The frame budget is 16 ms at 60 Hz too. Swift 6.2 code with approachable concurrency needs `@concurrent` to leave the main actor.
+  - The meter's 8 ms ping wakes the main thread. The skill now says to measure idle with `sample`.
+  - The description now leads with its triggers, not with the two modes.
+  - Repeated rules, a no-op sentence and a restated "done when" line were removed. A number from one session became a general reason.
+  - The rule from the first draft stays: the frame cost grows with the size of the view tree. The diagnosis measured it. The same pulse cost 97% of the main thread in an eager list and 8% in a lazy one.
+- **Consequences:** `SKILL.md` went from 75 to 72 lines. Most changes made a line shorter. `/diagnosing-bugs` and `/write-swift` also trigger on slowness. Check which skill loads in the first sessions.
