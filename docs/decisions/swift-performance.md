@@ -66,3 +66,17 @@ The skill is a distilled record of one diagnosis. The app was a SwiftUI menu bar
   - Repeated rules, a no-op sentence and a restated "done when" line were removed. A number from one session became a general reason.
   - The rule from the first draft stays: the frame cost grows with the size of the view tree. The diagnosis measured it. The same pulse cost 97% of the main thread in an eager list and 8% in a lazy one.
 - **Consequences:** `SKILL.md` went from 75 to 72 lines. Most changes made a line shorter. `/diagnosing-bugs` and `/write-swift` also trigger on slowness. Check which skill loads in the first sessions.
+
+## 2026-10-13: pruned for readability
+
+- **Status:** accepted
+- **Context:** The maintainer found the audited skill too crowded.
+- **Options:** None considered.
+- **Choice and why:** Keep every rule, and remove the words around it:
+  - The mode table became one sentence in the opening paragraph.
+  - Examples that a rule already implies were removed.
+  - Four "done when" lines that restated their steps were removed.
+  - The rule "find causes by isolation" moved into diagnosis step 4.
+  - "Measure one process" merged into "confirm the state while you measure".
+  - Reporting became one line under diagnosis mode.
+- **Consequences:** The body went from about 1,250 words to about 650.
