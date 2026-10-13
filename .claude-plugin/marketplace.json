@@ -110,6 +110,26 @@
       "category": "development"
     },
     {
+      "name": "cli-design",
+      "source": "./skills/cli-design",
+      "description": "Design, explain, audit or redesign a command-line interface through a step-by-step delivery framework, with a reference for the shared conventions: verbs, flags, exit codes, environment, configuration and help layouts.",
+      "author": {
+        "name": "Yahya Bedirhan Pak",
+        "url": "https://github.com/yahyabedirhan"
+      },
+      "homepage": "https://github.com/yahyabedirhan/skills/tree/main/skills/cli-design",
+      "repository": "https://github.com/yahyabedirhan/skills",
+      "license": "MIT",
+      "keywords": [
+        "cli",
+        "command-line",
+        "design",
+        "help",
+        "developer-experience"
+      ],
+      "category": "development"
+    },
+    {
       "name": "email",
       "source": "./skills/email",
       "description": "Read and tidy your email: the Spark CLI for fast reading, the Gmail connector for marking done, labels, pins and drafts. It never sends; setup and checks included.",
