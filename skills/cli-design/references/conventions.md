@@ -6,7 +6,7 @@ Defaults for the names, codes and layouts a CLI shares with other CLIs. Callers 
 
 Pick one word per meaning and use it on every noun that supports it.
 
-| Verb | Meaning | Avoid alongside it |
+| Verb | Meaning | Synonyms to drop for this meaning |
 |---|---|---|
 | `list` | print many items; changes nothing | `ls`, `show` for many |
 | `get` | print one item; changes nothing | `show`, `describe`, `info` for the same thing |
@@ -21,7 +21,7 @@ Pick one word per meaning and use it on every noun that supports it.
 | `watch` | print events as they happen until interrupted | |
 | `login` / `logout` | start or end an authenticated session | `auth` as a verb |
 
-Avoid two commands whose names look alike and mean different things, such as `update` and `upgrade`.
+Give commands that mean different things names that look different, unlike `update` and `upgrade`.
 
 ## Flags
 
@@ -31,7 +31,7 @@ Avoid two commands whose names look alike and mean different things, such as `up
 | `--version` | print the version and exit 0 |
 | `--json` | print machine-readable JSON on standard output |
 | `-q`, `--quiet` | print less; errors only |
-| `-v`, `--verbose` | print more; repeatable for more detail |
+| `-v`, `--verbose` | print more; repeatable for more detail. Leave `--version` without a short letter, so `-v` has one meaning |
 | `-f`, `--force` | skip a confirmation or a safety check |
 | `-y`, `--yes` | answer yes to every prompt |
 | `-n`, `--dry-run` | say what would happen and change nothing |
@@ -46,21 +46,19 @@ Avoid two commands whose names look alike and mean different things, such as `up
 |---|---|
 | 0 | success |
 | 1 | the command failed or was refused |
-| 2 | wrong usage; most parsing libraries use it, and `sysexits.h` names 64 for the same meaning |
-| 130 | interrupted with Ctrl-C (128 + SIGINT) |
-
-Add a code only for a case a caller handles differently from failure, such as a timeout or "nothing found", and document it in the help.
+| 2 | wrong usage; many argument parsers and shell builtins use it. `sysexits.h` names 64 (`EX_USAGE`) for the same meaning, but its man page marks the interface deprecated |
+| 130 | interrupted with Ctrl-C: 128 plus the number of `SIGINT`, which is 2 |
 
 ## Environment variables
 
-- `NO_COLOR`: print no colour when it is set to any value.
+- `NO_COLOR`: print no colour when it is set to a non-empty value, whatever the value. An empty value leaves colour on.
 - `TERM=dumb`: print no colour or cursor movement.
 - `PAGER`, `EDITOR`: the programs to use for paging and editing.
 - `TOOL_*`: the CLI's own variables, prefixed with its name in capitals, each one listed in the help and the docs.
 
 ## Configuration precedence
 
-From highest to lowest: flags, environment variables, the project's configuration file, the user's configuration file (under `$XDG_CONFIG_HOME` or the platform's equivalent), the system's configuration file, built-in defaults. A command that reads configuration can say which source each value came from.
+From highest to lowest: flags, environment variables, the project's configuration file, the user's configuration file (under `$XDG_CONFIG_HOME`, which defaults to `~/.config`, or the platform's equivalent), the system's configuration file, built-in defaults. When a command shows the configuration, show which source each value came from.
 
 ## Help layouts
 
@@ -98,7 +96,7 @@ A group's help, for `tool <group> --help` and `tool <group>` alone:
 ```text
 <summary of the group>
 
-Usage: <tool> <group> <command> [options]
+Usage: <tool> <group> <verb> [options]
 
 Commands:
   <tool> <group> <verb> <words> [--flag <value>]
