@@ -41,6 +41,7 @@ Then install a plugin by name:
 | low-level-design | low-level-design | `claude plugin install low-level-design@yahyabedirhan-skills` |
 | system-design | system-design | `claude plugin install system-design@yahyabedirhan-skills` |
 | cli-design | cli-design | `claude plugin install cli-design@yahyabedirhan-skills` |
+| swift-performance | swift-performance | `claude plugin install swift-performance@yahyabedirhan-skills` |
 | email | email | `claude plugin install email@yahyabedirhan-skills` |
 | wispr-flow-dictionary | wispr-flow-dictionary | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
 
@@ -79,6 +80,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 | [low-level-design](skills/low-level-design/SKILL.md) | Designs, explains or redesigns code at the level of modules, classes, files and folders, with reference documents for the principles, OOP concepts and patterns. | Original. Distils Hello Interview's low-level design lessons, cited at the end of each document. |
 | [system-design](skills/system-design/SKILL.md) | Designs, explains or redesigns a system at the level of services, data stores, APIs and scale, with reference documents for the core concepts. | Original. Distils Hello Interview's system design lessons, cited at the end of each document. |
 | [cli-design](skills/cli-design/SKILL.md) | Designs, explains, audits or redesigns a command-line interface for the people, scripts and agents that call it, with a reference document for the shared conventions: verbs, flags, exit codes, environment, configuration and help layouts. | Original. Distils the [Command Line Interface Guidelines](https://clig.dev/) and the POSIX Utility Conventions, cited at the end of each document. |
+| [swift-performance](skills/swift-performance/SKILL.md) | Keeps a Swift app fast on macOS: a build mode whose seven steps keep the common mistakes out of SwiftUI and AppKit code, and a diagnosis mode that finds the cause of slowness, with a main-thread meter and a `sample` reader. | Original. Distils a diagnosis of a SwiftUI menu bar app's tabs layout. |
 
 ### Communication style
 
@@ -143,6 +145,9 @@ system-design      systems: services, data stores, APIs, scale
   requirements → core entities → API → data flow → high-level design → deep dives
 cli-design         command-line interfaces: commands, flags, output, help
   requirements → command model → inputs → output and errors → help → implementation → evolution
+swift-performance  Swift apps: what runs, how often, at what volume
+  build:     workload → hot paths → budgets → work bounding → reuse → concurrency → measurement
+  diagnosis: symptom → reproduction → measurement → isolation → root cause → verification
 ```
 
 The documents in each skill's `references/` hold the principles, patterns and concepts, loaded only when a step needs them.

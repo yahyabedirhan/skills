@@ -130,6 +130,26 @@
       "category": "development"
     },
     {
+      "name": "swift-performance",
+      "source": "./skills/swift-performance",
+      "description": "Keep a Swift app fast on macOS: a build mode that keeps common performance mistakes out of SwiftUI and AppKit code, and a diagnosis mode that finds the cause of slowness, with a main-thread meter and a sample reader.",
+      "author": {
+        "name": "Yahya Bedirhan Pak",
+        "url": "https://github.com/yahyabedirhan"
+      },
+      "homepage": "https://github.com/yahyabedirhan/skills/tree/main/skills/swift-performance",
+      "repository": "https://github.com/yahyabedirhan/skills",
+      "license": "MIT",
+      "keywords": [
+        "performance",
+        "swift",
+        "swiftui",
+        "appkit",
+        "profiling"
+      ],
+      "category": "development"
+    },
+    {
       "name": "email",
       "source": "./skills/email",
       "description": "Read and tidy your email: the Spark CLI for fast reading, the Gmail connector for marking done, labels, pins and drafts. It never sends; setup and checks included.",
