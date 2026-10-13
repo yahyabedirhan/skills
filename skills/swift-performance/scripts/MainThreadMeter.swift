@@ -1,8 +1,8 @@
 import Darwin
 import Foundation
-import Synchronization
+import os
 
-/// Watches the main thread from a background queue: its share of the CPU
+/// Watches the main thread from a background queue, on macOS 13 and later: its share of the CPU
 /// (the kernel's own accounting of the thread, as `sample` sees it) and how
 /// late a block posted to it every 8 ms ran (a stall: frames not drawn).
 ///
@@ -24,8 +24,8 @@ public final class MainThreadMeter: @unchecked Sendable {
     public static let shared = MainThreadMeter()
 
     private let queue = DispatchQueue(label: "main-thread-meter", qos: .userInteractive)
-    private let stalls = Mutex<(worst: Double, late: Int)>((0, 0))
-    private let episode = Mutex<Double>(0)
+    private let stalls = OSAllocatedUnfairLock(initialState: (worst: 0.0, late: 0))
+    private let episode = OSAllocatedUnfairLock(initialState: 0.0)
     private var mainThread: thread_act_t = 0
     private var lastCPU: Double = 0
     private var lastWall: Double = 0

@@ -80,3 +80,11 @@ The skill is a distilled record of one diagnosis. The app was a SwiftUI menu bar
   - "Measure one process" merged into "confirm the state while you measure".
   - Reporting became one line under diagnosis mode.
 - **Consequences:** The body went from about 1,250 words to about 650.
+
+## 2026-10-13: the meter runs on macOS 13 and later
+
+- **Status:** accepted
+- **Context:** The first app to use the meter targets macOS 14. `Mutex` needs macOS 15, so the meter didn't compile there.
+- **Options:** Keep `Mutex`: many apps still support macOS 14.
+- **Choice and why:** Use `OSAllocatedUnfairLock`, which has the same `withLock` shape and works from macOS 13.
+- **Consequences:** The meter compiles in a macOS 14 app, as the shipyard diagnosis showed.
