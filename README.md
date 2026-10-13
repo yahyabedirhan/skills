@@ -9,7 +9,7 @@ Agent skills I use across projects: my own, and forks of other people's that I'v
 They come in five families. Each family's skills are listed under [Skills](#skills) and explained under [How the skills work](#how-the-skills-work):
 
 - **[Effort workflow](#effort-workflow)**: take a feature from an idea to a merged pull request.
-- **[Design frameworks](#design-frameworks)**: design or explain code and systems step by step.
+- **[Design frameworks](#design-frameworks)**: design or explain code, systems and command-line interfaces step by step.
 - **[Communication style](#communication-style)**: how an agent explains and reports its work.
 - **[Agent setup](#agent-setup)**: install, maintain and audit what your agents run with.
 - **[Daily workflows](#daily-workflows)**: everyday tasks outside the code, such as email and dictation.
@@ -40,6 +40,7 @@ Then install a plugin by name:
 | show-me | show-me | `claude plugin install show-me@yahyabedirhan-skills` |
 | low-level-design | low-level-design | `claude plugin install low-level-design@yahyabedirhan-skills` |
 | system-design | system-design | `claude plugin install system-design@yahyabedirhan-skills` |
+| cli-design | cli-design | `claude plugin install cli-design@yahyabedirhan-skills` |
 | email | email | `claude plugin install email@yahyabedirhan-skills` |
 | wispr-flow-dictionary | wispr-flow-dictionary | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
 
@@ -77,6 +78,7 @@ The Origin column names the upstream commit each fork was copied from, so a late
 |---|---|---|
 | [low-level-design](skills/low-level-design/SKILL.md) | Designs, explains or redesigns code at the level of modules, classes, files and folders, with reference documents for the principles, OOP concepts and patterns. | Original. Distils Hello Interview's low-level design lessons, cited at the end of each document. |
 | [system-design](skills/system-design/SKILL.md) | Designs, explains or redesigns a system at the level of services, data stores, APIs and scale, with reference documents for the core concepts. | Original. Distils Hello Interview's system design lessons, cited at the end of each document. |
+| [cli-design](skills/cli-design/SKILL.md) | Designs, explains, audits or redesigns a command-line interface for the people, scripts and agents that call it, with a reference document for the shared conventions: verbs, flags, exit codes, environment, configuration and help layouts. | Original. Distils the [Command Line Interface Guidelines](https://clig.dev/) and the POSIX Utility Conventions, cited at the end of each document. |
 
 ### Communication style
 
@@ -139,6 +141,8 @@ low-level-design   code: modules, classes, files, folders
   requirements → entities and relationships → class design → implementation → extensibility
 system-design      systems: services, data stores, APIs, scale
   requirements → core entities → API → data flow → high-level design → deep dives
+cli-design         command-line interfaces: commands, flags, output, help
+  requirements → command model → inputs → output and errors → help → implementation → evolution
 ```
 
 The documents in each skill's `references/` hold the principles, patterns and concepts, loaded only when a step needs them.
