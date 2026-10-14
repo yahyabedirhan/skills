@@ -9,6 +9,8 @@ A low-level design decides which modules exist, what state and rules each one ow
 
 The recurring failure is structure added before it is needed: factories with one product, interfaces with one implementation, a file per function. Start from the simplest design that meets the requirements, and add a class, an interface or a pattern only for a named reason, such as a second implementation today or the same edit repeated across several files. Before designing a module, check whether a dependency the project already has provides it, and build only the difference.
 
+To design a system at the level of services, data stores, APIs and scale, use `/system-design`. To design a command-line interface's commands, flags, output and help, use `/cli-design`.
+
 ## The flow
 
 1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix.

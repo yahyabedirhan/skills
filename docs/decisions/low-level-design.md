@@ -14,6 +14,14 @@ To add a newly transcribed lesson, add one reference:
 
 Problem walkthroughs (design a parking lot) are examples of the framework, not concepts; add them only when the user asks.
 
+## 2026-10-14: name the other two design skills
+
+- **Status:** accepted
+- **Context:** `/cli-design` already names `/low-level-design` and `/system-design`. An agent in `/low-level-design` that reaches a command-line interface had no pointer to the CLI framework, and the skill also never named `/system-design`.
+- **Options:** Point only at `/cli-design`: the three skills would still not each name the other two.
+- **Choice and why:** Add one routing paragraph that names `/system-design` and `/cli-design`, so each design skill names the other two.
+- **Consequences:** None.
+
 ## 2026-09-30: the delivery framework stays in SKILL.md
 
 - **Status:** accepted

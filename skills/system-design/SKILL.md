@@ -9,6 +9,8 @@ Follow the **delivery framework** in every session, whether the design is new, e
 
 To design inside one service's codebase, at the level of its modules, classes and folders, use `/low-level-design` instead.
 
+To design a command-line interface's commands, flags, output and help, use `/cli-design`.
+
 ## Flow
 
 1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply.
