@@ -1,4 +1,4 @@
-"""Cursor cloud agents: one VM per run, project hooks, and a generated CLOUD.md
+"""Cursor cloud agents: one VM per run, project hooks, and the repo AGENTS.md cloud section
 (references/cursor/cloud.md).
 
 The hook payload is Cursor's, so read and write are Cursor's. The project hook
@@ -19,7 +19,9 @@ ID, LABEL = "cursor", "Cursor"
 ENV = "cloud"
 SOCKET = Path("/run/cursor/api.sock")
 ENV_FILE = Path(".cursor/environment.json")
-CLOUD = Path(".cursor/CLOUD.md")
+AGENTS = Path("AGENTS.md")
+# The section Cursor documents for cloud-only instructions in the repo AGENTS.md.
+CLOUD_SECTION = "## Cursor Cloud specific instructions"
 HOOKS = Path(".cursor/hooks.json")
 # A cloud agent runs these. beforeMCPExecution is in the file for the CLI and does not run here.
 RAN = ("beforeShellExecution", "beforeReadFile", "preToolUse")
@@ -47,10 +49,10 @@ def write(denials: list, asks=()) -> str:
 
 
 def check_instructions(ctx) -> Cell:
-    """The clone has an environment file with an install command, and CLOUD.md holds the
-    cloud instructions section."""
+    """The clone has an environment file with an install command, and the repo AGENTS.md has
+    Cursor's cloud section, which links the cloud instructions file the agent applies itself."""
     if ctx.setup.clone is None:
-        return Cell("gap", ["no workstation clone: can't see .cursor/environment.json or CLOUD.md"])
+        return Cell("gap", ["no workstation clone: can't see .cursor/environment.json or AGENTS.md"])
     env_path = ctx.setup.clone / ENV_FILE
     declared = ctx.setup.file(ID, "instructions", ENV)
     if not env_path.is_file():
@@ -62,16 +64,17 @@ def check_instructions(ctx) -> Cell:
     if not isinstance(data, dict) or not isinstance(data.get("install"), str) or not data["install"].strip():
         problems.append(("FAIL", f"{ctx.show(env_path)} needs an install command"))
     if declared is None:
-        problems.append(("gap", "setup/harnesses.json names no Cursor cloud instructions"))
-    else:
-        body = section(declared.read_text(), HARNESS_SECTION)
-        cloud_path = ctx.setup.clone / CLOUD
-        if not body:
-            problems.append(("FAIL", f"{ctx.show(declared)} has no `{HARNESS_SECTION}` section"))
-        elif not cloud_path.is_file():
-            problems.append(("FAIL", f"no {ctx.show(cloud_path)}; the install writes it"))
-        elif body not in cloud_path.read_text():
-            problems.append(("FAIL", f"{ctx.show(cloud_path)} does not contain the cloud instructions"))
+        problems.append(("gap", "setup/harnesses.json names no instructions for Cursor's cloud environment"))
+        return cell(problems)
+    if not section(declared.read_text(), HARNESS_SECTION):
+        problems.append(("FAIL", f"{ctx.show(declared)} has no `{HARNESS_SECTION}` section"))
+    agents = ctx.setup.clone / AGENTS
+    body = section(agents.read_text(), CLOUD_SECTION) if agents.is_file() else ""
+    relative = declared.relative_to(ctx.setup.clone).as_posix()
+    if not body:
+        problems.append(("FAIL", f"{ctx.show(agents)} has no `{CLOUD_SECTION}` section; the agent reads it at start"))
+    elif relative not in body:
+        problems.append(("FAIL", f"{ctx.show(agents)}'s `{CLOUD_SECTION}` section doesn't point at {relative}"))
     return cell(problems)
 
 

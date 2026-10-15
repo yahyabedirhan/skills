@@ -10,12 +10,13 @@ check_plugins, check_skills and check_config, each taking the run's context and 
 To add an environment, write its module and its reference page, then add it here.
 """
 from . import claude_code, codex
-from .cursor import cli as cursor_cli, cloud as cursor_cloud, desktop as cursor_desktop
+from . import cursor
+from .cursor import cli, cloud, desktop  # noqa: F401  (loads cursor.cli, cursor.cloud, cursor.desktop)
 from .grok_bot import desktop as grok_bot_desktop
 from .opencode import cli as opencode_cli
 from .pi import cli as pi_cli
 
-ALL = (claude_code, codex, cursor_cli, cursor_desktop, cursor_cloud, grok_bot_desktop, opencode_cli, pi_cli)
+ALL = (claude_code, codex, cursor.cli, cursor.desktop, cursor.cloud, grok_bot_desktop, opencode_cli, pi_cli)
 # Every environment of a harness reads the same hook payload, so the hook takes the harness's first one.
 BY_ID = {}
 for _module in ALL:

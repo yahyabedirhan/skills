@@ -1767,13 +1767,13 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 - [anomalyco/opencode#38363](https://github.com/anomalyco/opencode/issues/38363): the TUI's remembered variant beats the config.
 - [anomalyco/opencode#13718](https://github.com/anomalyco/opencode/issues/13718): the same for `agent.build.variant`.
 
-## 2026-10-15: a Cursor cloud agent is its own harness
+## 2026-10-15: a Cursor cloud agent is graded on its own row
 
 - **Status:** accepted
 - **Context:** A cloud agent is a VM with project hooks and no CLI config. Grading it with the Cursor CLI checks looks for `cli-config.json` and `~/.cursor/hooks.json`, which that VM does not use.
-- **Options:** A flag on the Cursor module. Rejected: the two machines fail different checks, and one module would hide which one ran.
-- **Choice and why:** `cursor_cloud` in `ALL`, with `references/cursor-cloud.md` (now `harnesses/cursor/cloud.py` and `references/cursor/cloud.md`, see the next entry). Found when `/run/cursor/api.sock` is a socket. It checks the repo environment file, that the project hook command resolves to an existing `pre_tool_hook.py`, the skills in the folders the process scans, and secret names only. Network mode and dashboard MCP are `gap`s, because nothing on the VM shows them. `read` and `write` are Cursor's: the project hook keeps `--harness cursor`.
-- **Consequences:** On a cloud VM the row is graded even for a repo that has no environment file yet: that case is a `gap` until `setup/harnesses.json` names the harness. A laptop has no socket, so the row is skipped.
+- **Options:** A flag on the Cursor CLI module. Rejected: the two machines fail different checks, and one module would hide which one ran.
+- **Choice and why:** Cursor's `cloud` environment as its own module in `ALL`, `harnesses/cursor/cloud.py`, with `references/cursor/cloud.md`; the next entry makes every harness a package of environments. Found when `/run/cursor/api.sock` is a socket. It checks the repo environment file, that the project hook command resolves to an existing `pre_tool_hook.py`, the skills in the folders the process scans, and secret names only. Network mode and dashboard MCP are `gap`s, because nothing on the VM shows them. `read` and `write` are Cursor's: the project hook keeps `--harness cursor`.
+- **Consequences:** On a cloud VM the `Cursor / cloud` row is graded even for a repo that has no environment file yet: that case is a `gap` until `setup/harnesses.json` names the cloud environment. A laptop has no socket, so the row is skipped.
 
 ### References
 - [Cursor cloud agent setup](https://cursor.com/docs/cloud-agent/setup): the environment file, and what a Build runs.
@@ -1787,3 +1787,10 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 - **Choice and why:** `harnesses/<harness>/` with one module per environment and the shared code in `__init__.py`, and `references/<harness>/` with one page per environment and an `index.md` for what they share. An id names a harness only. The environment is a second dimension: `ENV` on the module, `--env` on the verifier, `environments` in `setup/harnesses.json`, and rows that read `Cursor / cloud`. Cursor has `cli`, `desktop` and `cloud`. Grok Bot (`desktop`), opencode (`cli`) and Pi (`cli`) are packages with one environment, so a second one is one new module. `verify.py --harness <h>` checks each environment of that harness found on the machine, and `--env <env>` keeps one. The hook keeps `--harness cursor`: every Cursor environment sends the same payload. Which harnesses and environments a person uses is the workstation repo's; this skill only lays out its own references and code.
 - **Consequences:** `cursor-cloud` is no longer an id anywhere, so a `setup/harnesses.json` or `installs.json` naming it fails until it moves under `cursor`. On a machine with both the CLI and the desktop app, the shared cells appear on both rows. Claude Code and Codex are still flat, with no environments, until they move, as the design's *Extensibility* table says.
 
+## 2026-10-15: a cloud Build installs; the agent sets itself up
+
+- **Status:** accepted
+- **Context:** A cloud environment's Build ran a script that wrote the shared file, the pointer and a `.cursor/CLOUD.md`, then ran the audit. That is a second setup path beside this skill, against the rule that the agent writes the setup and scripts only enforce and check (2026-09-30, 2026-10-12). The generated `.cursor/CLOUD.md` was also never seen loading.
+- **Options:** Keep the generating script. Rejected: it drifts from the skill.
+- **Choice and why:** The Build installs the skills and tools only. The repo `AGENTS.md` section "Cursor Cloud specific instructions", the channel Cursor documents, tells the agent to follow this skill for `cursor` / `cloud` at session start, run `verify.py --harness cursor --env cloud`, and stop and ask when it needs access. The audit checks that section points at the cloud instructions file, instead of checking a generated `.cursor/CLOUD.md`.
+- **Consequences:** Each cloud session spends its first steps on setup. The same holds for any harness's cloud environment.
