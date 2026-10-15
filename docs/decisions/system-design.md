@@ -14,6 +14,14 @@ To add a newly transcribed lesson, add one reference:
 
 Problem walkthroughs (Design Uber) are examples of the framework, not concepts; add them only when the user asks.
 
+## 2026-10-14: name /cli-design beside /low-level-design
+
+- **Status:** accepted
+- **Context:** `/cli-design` already names `/system-design`. An agent in `/system-design` that reaches a command-line interface had no pointer to the CLI framework.
+- **Options:** None considered.
+- **Choice and why:** Add one line beside the existing `/low-level-design` pointer: to design a command-line interface's commands, flags, output and help, use `/cli-design`.
+- **Consequences:** Each of the three design skills now names the other two.
+
 ## 2026-09-25: the skill is the delivery framework
 
 - **Status:** accepted
