@@ -8,7 +8,7 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 ## Instructions
 
-Cursor's documented channel for cloud-only instructions is a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). A Cursor staff answer on the forum adds `.cursor/CLOUD.md`, read by cloud agents only, after `AGENTS.md` ([forum](https://forum.cursor.com/t/is-there-a-way-to-add-rule-or-agent-md-only-for-cloud-agent/159595)). The public docs don't list that file, and a generated copy has not yet been seen loading. The file is generated and not committed. The install writes it: `setup/instructions.md`, then the text of the `instructions` file `setup/harnesses.json` names for `cursor-cloud`.
+Cursor's documented channel for cloud-only instructions is a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). A Cursor staff answer on the forum adds `.cursor/CLOUD.md`, read by cloud agents only, after `AGENTS.md` ([forum](https://forum.cursor.com/t/is-there-a-way-to-add-rule-or-agent-md-only-for-cloud-agent/159595)). The public docs don't list that file, and a generated copy has not yet been seen loading. The file is generated and not committed. The install writes it: `setup/instructions.md`, then the text of the `instructions` file `setup/harnesses.json` names for Cursor's `cloud` environment (`harnesses.cursor.environments.cloud`).
 
 `~/.config/agents/AGENTS.md` is still the shared file, and the `setup` line checks it. Do not append the cloud-only lines to the shared file.
 
@@ -18,9 +18,9 @@ Cursor's documented channel for cloud-only instructions is a section of the repo
 
 A cloud agent runs project command hooks from `.cursor/hooks.json` only. It does not load `~/.cursor/hooks.json`. It runs `beforeShellExecution`, `beforeReadFile` and `preToolUse`. It does not run `beforeMCPExecution`. Commands auto-run: there is no ask prompt, and the hook's refusal is the stop.
 
-The command is the same one Cursor's CLI uses, `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'`, with `<script>` the installed `pre_tool_hook.py`. `--harness cursor` is the payload id. `--harness cursor-cloud` is the same reader. The `echo '{}'` matters: an empty answer is invalid JSON, which blocks. When the script is missing the command fails open.
+The command is the same one Cursor's CLI uses, `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'`, with `<script>` the installed `pre_tool_hook.py`. `--harness cursor` is the harness id; every Cursor environment reads the same payload. The `echo '{}'` matters: an empty answer is invalid JSON, which blocks. When the script is missing the command fails open.
 
-- **Audit:** `ok` for an event whose command names an existing `pre_tool_hook.py` and `--harness cursor` or `--harness cursor-cloud`. `$HOME` and `~/` in the path are expanded. `FAIL` when the command is missing, names no script, or the script is not a file. `beforeMCPExecution` is a `gap`.
+- **Audit:** `ok` for an event whose command names an existing `pre_tool_hook.py` and `--harness cursor`. `$HOME` and `~/` in the path are expanded. `FAIL` when the command is missing, names no script, or the script is not a file. `beforeMCPExecution` is a `gap`.
 
 ## Sandbox
 
@@ -52,10 +52,10 @@ Network mode, dashboard MCP servers, and whether a skill installed before the pr
 
 ## Checking it
 
-The verifier's Cursor cloud row, from `scripts/setupmachine/harnesses/cursor/cloud.py`:
+The verifier's `Cursor / cloud` row (`verify.py --harness cursor --env cloud`), from `scripts/setupmachine/harnesses/cursor/cloud.py`:
 
 - **instructions:** `.cursor/environment.json` has an `install` string. `.cursor/CLOUD.md` contains the `## Instructions` section. `gap` when the repo has neither the file nor a declared harness.
-- **guardrails:** `beforeShellExecution`, `beforeReadFile` and `preToolUse` each run an existing `pre_tool_hook.py` with `--harness cursor` or `--harness cursor-cloud`. `beforeMCPExecution` is a `gap`.
+- **guardrails:** `beforeShellExecution`, `beforeReadFile` and `preToolUse` each run an existing `pre_tool_hook.py` with `--harness cursor`. `beforeMCPExecution` is a `gap`.
 - **sandbox:** `gap`.
 - **plugins:** `gap`.
 - **skills:** each listed skill is in `~/.cursor/skills`, `~/.agents/skills`, or the repo's `.cursor/skills` or `.agents/skills`.

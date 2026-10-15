@@ -4,7 +4,7 @@ How to set up and audit Cursor from the rule table. This page holds what every C
 
 ## Environments
 
-Each environment has its own page and its own verifier row (`verify.py --harness cursor --env <env>`):
+Each environment has its own page and its own verifier row, `Cursor / <env>`. `verify.py --harness cursor` checks every environment found on the machine; `--env <env>` keeps one:
 
 - [cli.md](cli.md): the `cursor-agent` CLI. Its permission lists, its sandbox and the declared config, all in `~/.cursor/cli-config.json`.
 - [desktop.md](desktop.md): the desktop app's agent. No file-based permission lists or run mode.
@@ -98,7 +98,7 @@ The rows with no entry above, the ask rows, the exceptions the CLI refuses, the 
 
 ## Checking it
 
-The shared cells of the verifier's Cursor CLI and Cursor desktop rows, from `scripts/setupmachine/harnesses/cursor/__init__.py`:
+The shared cells of the verifier's `Cursor / cli` and `Cursor / desktop` rows, from `scripts/setupmachine/harnesses/cursor/__init__.py`:
 
 - **instructions:** `~/.cursor/rules/global-instructions.mdc` is the header above the shared file, byte for byte. When `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` matches its source too. A missing or stale copy is `FAIL`, and so is a generated `harness-instructions.mdc` whose source is gone. A file without the generated comment is a `gap`, left alone.
 - **guardrails:** all four events in `~/.cursor/hooks.json` run the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness cursor`.

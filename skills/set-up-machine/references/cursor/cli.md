@@ -49,7 +49,7 @@ When `setup/harnesses.json` names a Cursor `config` (../workstation.md, *A decla
 
 ## Checking it
 
-The verifier's Cursor CLI row, from `scripts/setupmachine/harnesses/cursor/cli.py`. The id is `cursor`, the key `setup/harnesses.json` uses. The instructions, plugins and skills cells are the shared ones (index.md, *Checking it*).
+The verifier's `Cursor / cli` row (`--harness cursor --env cli`), from `scripts/setupmachine/harnesses/cursor/cli.py`. Its declared config is `harnesses.cursor.environments.cli.config`. The instructions, plugins and skills cells are the shared ones (index.md, *Checking it*).
 
 - **guardrails:** the shared hook check, and each personal deny or allow row has its entry in `cli-config.json` or in Claude Code's lists, which the CLI unions.
 - **sandbox:** `cli-config.json` has `approvalMode` `auto-review` and `sandbox.mode` `enabled`.

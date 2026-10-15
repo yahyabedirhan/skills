@@ -72,8 +72,8 @@ skills/set-up-machine/
 
 | Name | What it is |
 |---|---|
-| `ID`, `LABEL` | `"cursor-cloud"`, `"Cursor cloud"`: the row, and the key in `setup/harnesses.json` |
-| `HARNESS`, `ENV` | `"cursor"`, `"cloud"`: what `--harness` and `--env` select. A module not yet split has no `ENV` |
+| `ID`, `LABEL` | `"cursor"`, `"Cursor"`: the harness, the same for each of its environments; the key in `setup/harnesses.json` and `installs.json`, and the hook's `--harness` |
+| `ENV` | `"cloud"`: the environment, what `--env` selects; the row reads `Cursor / cloud`. A module not yet split has no `ENV` |
 | `present(home)` | its folder exists, or its CLI is on `PATH` |
 | `read(payload)` | the hook payload as one `ToolCall` |
 | `write(denials, asks)` | the harness's answer to the hook |
@@ -123,7 +123,7 @@ pre_tool_hook.py --harness cursor
 
 ## Decisions
 
-- **One package per harness, one module per environment.** Cursor runs as a CLI, a desktop app and a cloud agent; each reads different files, so each is graded on its own row. What they share, such as the hook payload, sits once in the package's `__init__.py`. A harness with one environment is a package too, so a second environment is one new module. The ids `setup/harnesses.json` and the hook wiring use don't change: `cursor` is the CLI's row.
+- **One package per harness, one module per environment.** Cursor runs as a CLI, a desktop app and a cloud agent; each reads different files, so each is graded on its own row. What they share, such as the hook payload, sits once in the package's `__init__.py`. A harness with one environment is a package too, so a second environment is one new module. An id names a harness only, never an environment: the environment is its own dimension, in `ENV`, in `--env` and in `setup/harnesses.json`'s `environments`.
 
 - **`config` is a verifier column beside the five setup areas, not a sixth setup area.** A default model or reasoning effort is a personal choice, not part of setting a harness up: it is neither instructions, guardrails, sandbox, plugins nor skills. Before, Pi's declared settings sat in its sandbox column and Codex allowed only sandbox keys, so a declared model had nowhere to go. Now every harness can declare a config, the sandbox column holds sandbox state only, and the last column checks the declared keys, `n/a` without a declared config.
 
@@ -133,7 +133,7 @@ pre_tool_hook.py --harness cursor
 |---|---|
 | Add a harness | `harnesses/<h>/<env>.py` with the names above; one line in `ALL`; `references/<h>/<env>.md` with the same headings |
 | Add an environment to a harness | `harnesses/<h>/<env>.py`, moving shared code into `harnesses/<h>/__init__.py`; one line in `ALL`; `references/<h>/<env>.md`, and `references/<h>/index.md` for what the environments share |
-| Split Claude Code or Codex into environments | the row above, with `harnesses/<h>.py` becoming the package and `references/<h>.md` its `index.md`; keep the module's `ID` so the hook wiring and `setup/harnesses.json` keep working |
+| Split Claude Code or Codex into environments | the row above, with `harnesses/<h>.py` becoming the package and `references/<h>.md` its `index.md`; keep the harness id, and move environment-only files under `environments` in `setup/harnesses.json` |
 | Add a global rule | one row with samples in `rules.json`; each harness reference already says how a row becomes native entries |
 | Add a setup area | the glossary's setup areas first; one `check_<area>` in every harness module; one column |
 | Declare a new config key | the workstation repo's `config` file only; the `config` column compares every key it sets |

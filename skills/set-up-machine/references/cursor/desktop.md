@@ -18,7 +18,7 @@ The app keeps its run mode and its model choice in its own settings, not in a fi
 
 ## Checking it
 
-The verifier's Cursor desktop row, from `scripts/setupmachine/harnesses/cursor/desktop.py`, id `cursor-desktop`. The instructions, plugins and skills cells are the shared ones (index.md, *Checking it*).
+The verifier's `Cursor / desktop` row (`--harness cursor --env desktop`), from `scripts/setupmachine/harnesses/cursor/desktop.py`. The instructions, plugins and skills cells are the shared ones (index.md, *Checking it*).
 
 - **guardrails:** the shared hook check only.
 - **sandbox:** `n/a`.
