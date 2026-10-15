@@ -8,7 +8,7 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 ## Instructions
 
-A cloud agent loads `.cursor/CLOUD.md` from the repo as its cloud instructions when that file is non-empty, under the heading "Cursor Cloud specific instructions". Without the file, that channel is the repo `AGENTS.md`. The file is generated and not committed. The install writes it: `setup/instructions.md`, then the text of the `instructions` file `setup/harnesses.json` names for `cursor-cloud`.
+Cursor's documented channel for cloud-only instructions is a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). A Cursor staff answer on the forum adds `.cursor/CLOUD.md`, read by cloud agents only, after `AGENTS.md` ([forum](https://forum.cursor.com/t/is-there-a-way-to-add-rule-or-agent-md-only-for-cloud-agent/159595)). The public docs don't list that file, and a generated copy has not yet been seen loading. The file is generated and not committed. The install writes it: `setup/instructions.md`, then the text of the `instructions` file `setup/harnesses.json` names for `cursor-cloud`.
 
 `~/.config/agents/AGENTS.md` is still the shared file, and the `setup` line checks it. Do not append the cloud-only lines to the shared file.
 
@@ -61,4 +61,4 @@ The verifier's Cursor cloud row, from `scripts/setupmachine/harnesses/cursor_clo
 - **skills:** each listed skill is in `~/.cursor/skills`, `~/.agents/skills`, or the repo's `.cursor/skills` or `.agents/skills`.
 - **config:** each `secrets` name is set in the real home, by name only. An empty list is `ok`. An unknown key is a `gap`. `n/a` without a declared config.
 
-On a cloud VM, after the install: `rm -rf x` is refused by the hook, and `git status` is allowed. A skill installed before the process started can be invoked by name. One added after is readable as a file and is not a slash command in that process.
+On a cloud VM, after the install: `rm -rf x` is refused by the hook, and `git status` is allowed. A skill added after the process started is readable as a file and is not a slash command in that process. Whether a skill installed during the Build is a slash command on a cold start has not been observed.
