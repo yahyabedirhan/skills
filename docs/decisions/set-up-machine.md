@@ -1766,3 +1766,15 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 ### References
 - [anomalyco/opencode#38363](https://github.com/anomalyco/opencode/issues/38363): the TUI's remembered variant beats the config.
 - [anomalyco/opencode#13718](https://github.com/anomalyco/opencode/issues/13718): the same for `agent.build.variant`.
+
+## 2026-10-15: a Cursor cloud agent is its own harness
+
+- **Status:** accepted
+- **Context:** A cloud agent is a VM with project hooks and no CLI config. Grading it with the Cursor CLI checks looks for `cli-config.json` and `~/.cursor/hooks.json`, which that VM does not use.
+- **Options:** A flag on the Cursor module. Rejected: the two machines fail different checks, and one module would hide which one ran.
+- **Choice and why:** `cursor_cloud` in `ALL`, with `references/cursor-cloud.md`. Found when `/run/cursor/api.sock` is a socket. It checks the repo environment file, that the project hook command resolves to an existing `pre_tool_hook.py`, the skills in the folders the process scans, and secret names only. Network mode and dashboard MCP are `gap`s, because nothing on the VM shows them. `read` and `write` are Cursor's: the project hook keeps `--harness cursor`.
+- **Consequences:** On a cloud VM the row is graded even for a repo that has no environment file yet: that case is a `gap` until `setup/harnesses.json` names the harness. A laptop has no socket, so the row is skipped.
+
+### References
+- [Cursor cloud agent setup](https://cursor.com/docs/cloud-agent/setup): the environment file, and what a Build runs.
+- [Cursor hooks](https://cursor.com/docs/hooks): the events a cloud agent runs. `beforeMCPExecution` is not among them.

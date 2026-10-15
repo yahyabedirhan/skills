@@ -92,7 +92,7 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 
 ## Skills
 
-Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills](https://cursor.com/docs/skills.md)). Skills installed into `~/.agents/skills` reach it with no extra install. Cursor doesn't copy `~/.agents/skills` to Cloud Agents or remote SSH sessions. Install each skill as workstation.md, *A skill*, says.
+Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills](https://cursor.com/docs/skills.md)). Skills installed into `~/.agents/skills` reach it with no extra install. Cursor doesn't copy `~/.agents/skills` to Cloud Agents or remote SSH sessions. A cloud agent is a separate harness (cursor-cloud.md): its own install puts skills on that VM. Install each skill as workstation.md, *A skill*, says.
 
 ## Config
 

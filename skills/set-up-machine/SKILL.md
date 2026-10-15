@@ -150,6 +150,7 @@ Name these once in every audit:
   - [references/codex.md](references/codex.md): Codex. Its *Codex MCP* section holds the TOML and OAuth detail.
   - [references/opencode.md](references/opencode.md): opencode.
   - [references/cursor.md](references/cursor.md): Cursor's IDE and CLI.
+  - [references/cursor-cloud.md](references/cursor-cloud.md): a Cursor cloud agent, found on its VM.
   - [references/pi.md](references/pi.md): Pi, whose only enforcement is the hook's extension.
   - [references/grok-bot.md](references/grok-bot.md): Grok Bot, whose instructions live in memory and whose permissions, connectors, secrets and routines live in the app.
 
