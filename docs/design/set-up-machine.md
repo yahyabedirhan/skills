@@ -3,8 +3,8 @@
 How `set-up-machine` is built. A newcomer needs three facts first:
 
 - The **agent** sets up a machine. It reads the workstation repo's `setup/` and one reference per harness, proposes one diff, and writes it. No script writes a harness file.
-- Two scripts exist. The **hook** (`scripts/pre_tool_hook.py`) runs before every tool call and refuses what the rule table denies. The **verifier** (`scripts/verify.py`) reads the machine and prints one table: a harness on each row, a setup area in each of five columns, and the declared config in a sixth.
-- `scripts/setupmachine/harnesses/__init__.py` holds `ALL`, the one list of harnesses. Everything about one harness sits in `harnesses/<harness>.py` and `references/<harness>.md`.
+- Two scripts exist. The **hook** (`scripts/pre_tool_hook.py`) runs before every tool call and refuses what the rule table denies. The **verifier** (`scripts/verify.py`) reads the machine and prints one table: a harness environment on each row, a setup area in each of five columns, and the declared config in a sixth.
+- `scripts/setupmachine/harnesses/__init__.py` holds `ALL`, the one list of harness environments. Everything about one harness sits in `harnesses/<harness>/` and `references/<harness>/`: one module and one page per environment, and the shared code and page beside them. Claude Code and Codex are still `harnesses/<harness>.py` and `references/<harness>.md`.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ How `set-up-machine` is built. A newcomer needs three facts first:
 - **Verifier**: runs the global checks, then each harness's area checks, and prints the table.
 
 ```text
-agent ──reads──▶ SKILL.md ──▶ references/<harness>.md ──▶ writes the harness's files
+agent ──reads──▶ SKILL.md ──▶ references/<harness>/<env>.md ──▶ writes the environment's files
 agent ──reads──▶ workstation setup/   (the skill never writes the workstation repo)
 harness ──calls──▶ pre_tool_hook.py ──▶ hook.decide ──▶ rules + personal rows
 verify.py ──▶ global checks (pointer, shared file, rule samples)
@@ -41,13 +41,16 @@ skills/set-up-machine/
 ├── SKILL.md                    # sources, outputs, the steps, what verify must show
 ├── rules.json                  # the rule table, with samples per row
 ├── references/
-│   ├── <harness>.md            # one per harness, same headings: Found, Instructions, Guardrails,
+│   ├── <harness>/              # one folder per harness
+│   │   ├── index.md            #   what its environments share, when it has more than one
+│   │   └── <env>.md            #   one per environment, same headings: Found, Instructions, Guardrails,
 │   │                           #   Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it
+│   ├── claude-code.md, codex.md  # not yet split into environments
 │   ├── workstation.md          # the format of every setup/ file, and the run without one
 │   ├── global-instructions.md  # the shared file's shape
 │   ├── rule-table.md           # a row's fields, match kinds, spellings
 │   ├── remote-machine.md, new-remote-machine.md
-│   └── opencode-plugin.js, pi-extension.ts   # the hook's wiring files for those harnesses
+│   # opencode/opencode-plugin.js, pi/pi-extension.ts: the hook's wiring files for those harnesses
 └── scripts/
     ├── pre_tool_hook.py        # entry: payload in → decide → the harness's answer out
     ├── verify.py               # entry: global checks, the table, the exit code
@@ -58,15 +61,19 @@ skills/set-up-machine/
         ├── workstation.py      # the pointer, the setup/ files, the generated shared file
         ├── checks.py           # Cell, Context and the helpers every harness check shares
         └── harnesses/
-            ├── __init__.py     # ALL: the one list of harnesses
-            └── <harness>.py    # one harness: paths, read/write hook payload, check per area
+            ├── __init__.py     # ALL: the one list of environments; --harness and --env select from it
+            ├── <harness>/
+            │   ├── __init__.py # what its environments share, such as the hook payload
+            │   └── <env>.py    # one environment: paths, read/write hook payload, check per area
+            └── claude_code.py, codex.py  # not yet split into environments
 ```
 
-**A harness module** exposes the same names, so a reader learns one and knows them all:
+**An environment module** exposes the same names, so a reader learns one and knows them all:
 
 | Name | What it is |
 |---|---|
-| `ID`, `LABEL` | `"cursor"`, `"Cursor"` |
+| `ID`, `LABEL` | `"cursor-cloud"`, `"Cursor cloud"`: the row, and the key in `setup/harnesses.json` |
+| `HARNESS`, `ENV` | `"cursor"`, `"cloud"`: what `--harness` and `--env` select. A module not yet split has no `ENV` |
 | `present(home)` | its folder exists, or its CLI is on `PATH` |
 | `read(payload)` | the hook payload as one `ToolCall` |
 | `write(denials, asks)` | the harness's answer to the hook |
@@ -116,16 +123,20 @@ pre_tool_hook.py --harness cursor
 
 ## Decisions
 
+- **One package per harness, one module per environment.** Cursor runs as a CLI, a desktop app and a cloud agent; each reads different files, so each is graded on its own row. What they share, such as the hook payload, sits once in the package's `__init__.py`. A harness with one environment is a package too, so a second environment is one new module. The ids `setup/harnesses.json` and the hook wiring use don't change: `cursor` is the CLI's row.
+
 - **`config` is a verifier column beside the five setup areas, not a sixth setup area.** A default model or reasoning effort is a personal choice, not part of setting a harness up: it is neither instructions, guardrails, sandbox, plugins nor skills. Before, Pi's declared settings sat in its sandbox column and Codex allowed only sandbox keys, so a declared model had nowhere to go. Now every harness can declare a config, the sandbox column holds sandbox state only, and the last column checks the declared keys, `n/a` without a declared config.
 
 ## Extensibility
 
 | Change | What you touch |
 |---|---|
-| Add a harness | `harnesses/<h>.py` with the names above; one line in `ALL`; `references/<h>.md` with the same headings |
+| Add a harness | `harnesses/<h>/<env>.py` with the names above; one line in `ALL`; `references/<h>/<env>.md` with the same headings |
+| Add an environment to a harness | `harnesses/<h>/<env>.py`, moving shared code into `harnesses/<h>/__init__.py`; one line in `ALL`; `references/<h>/<env>.md`, and `references/<h>/index.md` for what the environments share |
+| Split Claude Code or Codex into environments | the row above, with `harnesses/<h>.py` becoming the package and `references/<h>.md` its `index.md`; keep the module's `ID` so the hook wiring and `setup/harnesses.json` keep working |
 | Add a global rule | one row with samples in `rules.json`; each harness reference already says how a row becomes native entries |
 | Add a setup area | the glossary's setup areas first; one `check_<area>` in every harness module; one column |
 | Declare a new config key | the workstation repo's `config` file only; the `config` column compares every key it sets |
-| A harness changes its file format | its `references/<h>.md` and its `harnesses/<h>.py` only |
+| A harness changes its file format | its `references/<h>/` and its `harnesses/<h>/` only |
 
 Not now: unit tests in the repo. A maintainer writes throwaway tests in `.scratch/` while changing a script, and the rule samples, run by the verifier, are the check that stays.
