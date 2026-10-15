@@ -1,4 +1,4 @@
-"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area (references/pi.md).
+"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area (references/pi/cli.md).
 
 Every path is under Pi's agent folder: `PI_CODING_AGENT_DIR`, else `~/.pi/agent` (`agent_dir`).
 Pi has no permission system, so the hook, run through an extension, is its only guardrail.
@@ -10,11 +10,13 @@ import json
 import os
 from pathlib import Path
 
-from ..checks import (Cell, cell, declared_problems, dig, link_problem, na, on_path, read_json, skill_problems,
+from ...checks import (Cell, cell, declared_problems, dig, link_problem, na, on_path, read_json, skill_problems,
                       template_problem)
-from ..hook import ToolCall, plain, refusal, search_pair
+from ...hook import ToolCall, plain, refusal, search_pair
 
 ID, LABEL = "pi", "Pi"
+HARNESS = ID
+ENV = "cli"
 # Pi's built-in tools that take a path: the input field holding it, and the access it means.
 FILE_TOOLS = {"read": "read", "edit": "write", "write": "write", "grep": "read", "find": "read", "ls": "read"}
 SEARCH_GLOB = {"grep": "glob", "find": "pattern"}

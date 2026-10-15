@@ -1,4 +1,4 @@
-"""opencode: its hook payload, and the check of each setup area (references/opencode.md).
+"""opencode: its hook payload, and the check of each setup area (references/opencode/cli.md).
 
 Its global folder is `~/.config/opencode`. The hook runs through a plugin there, and the
 permissions and the declared config's keys are in its config file. set-up-machine delivers
@@ -11,11 +11,13 @@ import os
 import re
 from pathlib import Path
 
-from ..checks import (Cell, cell, json_config_cell, link_problem, na, on_path, personal_problems, read_json,
+from ...checks import (Cell, cell, json_config_cell, link_problem, na, on_path, personal_problems, read_json,
                       skill_problems, template_problem)
-from ..hook import PATCH_FILE, ToolCall, refusal, search_pair
+from ...hook import PATCH_FILE, ToolCall, refusal, search_pair
 
 ID, LABEL = "opencode", "opencode"
+HARNESS = ID
+ENV = "cli"
 FOLDER = Path(".config/opencode")
 # Built-in tools that take a path: the argument holding it, and the access it means.
 FILE_TOOLS = {"read": ("filePath", "read"), "grep": ("path", "read"), "glob": ("path", "read"),

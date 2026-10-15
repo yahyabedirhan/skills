@@ -1,5 +1,5 @@
 """Grok Bot, the agent app with one persistent Linux box: its hook payload, and the check of each
-setup area (references/grok-bot.md).
+setup area (references/grok-bot/desktop.md).
 
 The app owns most of what other harnesses keep in files: approvals, Auto-review, the model, the
 connectors and memory. So only skills are checked fully. Each skill is a folder in the shared
@@ -14,10 +14,12 @@ import os
 import subprocess
 from pathlib import Path
 
-from ..checks import Cell, cell, na, read_json
-from ..hook import ToolCall, refusal
+from ...checks import Cell, cell, na, read_json
+from ...hook import ToolCall, refusal
 
 ID, LABEL = "grok-bot", "Grok Bot"
+HARNESS = ID
+ENV = "desktop"
 FOLDER = Path("agent-data/workflows")
 # Like ~/.agents/.skill-lock.json: {"skills": {name: {"source", "skillPath", "skillFolderHash"}}}.
 LOCK = Path(".local/state/agents/grok-bot-skill-lock.json")
@@ -64,7 +66,7 @@ def check_instructions(ctx) -> Cell:
     lock = read_json(lock_path)
     if not lock or not isinstance(lock.get("sha"), str):
         return Cell("gap", [f"no {ctx.show(lock_path)}: write the facts into memory, then the lock and the applied state page "
-                            "(references/grok-bot.md, *First-time apply*)"])
+                            "(references/grok-bot/desktop.md, *First-time apply*)"])
     agents = lock.get("agents") if isinstance(lock.get("agents"), dict) else {}
     problems = []
     for source in sources(ctx):
@@ -79,7 +81,7 @@ def check_instructions(ctx) -> Cell:
             if then is None or then.returncode != 0 or then.stdout != source.read_text():
                 who = f" for agent {name}" if name else ""
                 problems.append(("FAIL", f"stale: {relative} changed since {str(sha)[:7]}{who}; reconcile memory "
-                                         "(references/grok-bot.md, *Reconcile*)"))
+                                         "(references/grok-bot/desktop.md, *Reconcile*)"))
     return cell(problems)
 
 
@@ -158,7 +160,7 @@ def check_config(ctx) -> Cell:
     return cell(problems)
 
 
-# The keys a declared Grok Bot config may set (references/grok-bot.md, *Config*).
+# The keys a declared Grok Bot config may set (references/grok-bot/desktop.md, *Config*).
 KEYS = ("secrets", "connectors", "routines")
 
 

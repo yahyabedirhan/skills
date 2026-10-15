@@ -1,5 +1,5 @@
 """Cursor cloud agents: one VM per run, project hooks, and a generated CLOUD.md
-(references/cursor-cloud.md).
+(references/cursor/cloud.md).
 
 The hook payload is Cursor's, so read and write are Cursor's. The project hook
 calls the script with `--harness cursor`.
@@ -11,11 +11,13 @@ import re
 import shlex
 from pathlib import Path
 
-from . import cursor
-from ..checks import Cell, cell, na, read_json, skill_problems
-from ..workstation import HARNESS_SECTION, section
+from . import read as _read, write as _write
+from ...checks import Cell, cell, na, read_json, skill_problems
+from ...workstation import HARNESS_SECTION, section
 
 ID, LABEL = "cursor-cloud", "Cursor cloud"
+ENV = "cloud"
+HARNESS = "cursor"
 SOCKET = Path("/run/cursor/api.sock")
 ENV_FILE = Path(".cursor/environment.json")
 CLOUD = Path(".cursor/CLOUD.md")
@@ -23,7 +25,7 @@ HOOKS = Path(".cursor/hooks.json")
 # A cloud agent runs these. beforeMCPExecution is in the file for the CLI and does not run here.
 RAN = ("beforeShellExecution", "beforeReadFile", "preToolUse")
 NOT_RAN = "beforeMCPExecution"
-# The keys a declared config may set (references/cursor-cloud.md, *Config*).
+# The keys a declared config may set (references/cursor/cloud.md, *Config*).
 KEYS = ("secrets",)
 _HARNESS = re.compile(r"--harness(?:\s+|=)cursor(?:-cloud)?(?:\s|$)")
 
@@ -35,11 +37,11 @@ def present(home: Path) -> bool:
 
 
 def read(payload: dict):
-    return cursor.read(payload)
+    return _read(payload)
 
 
 def write(denials: list, asks=()) -> str:
-    return cursor.write(denials, asks)
+    return _write(denials, asks)
 
 
 # --- the checks ----------------------------------------------------------------------------
