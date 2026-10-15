@@ -1,6 +1,6 @@
 # Cursor cloud
 
-How to audit a Cursor cloud agent, the VM Cursor starts from a Build. Docs: [setup](https://cursor.com/docs/cloud-agent/setup), [skills](https://cursor.com/docs/skills), [hooks](https://cursor.com/docs/hooks). The IDE and the `cursor-agent` CLI are a different harness (cursor.md).
+How to audit a Cursor cloud agent, the VM Cursor starts from a Build. Docs: [setup](https://cursor.com/docs/cloud-agent/setup), [skills](https://cursor.com/docs/skills), [hooks](https://cursor.com/docs/hooks). The desktop app and the `cursor-agent` CLI are the other environments of this harness (index.md).
 
 ## Found
 
@@ -34,7 +34,7 @@ The command is the same one Cursor's CLI uses, `[ -f <script> ] && python3 <scri
 
 The process scans these folders when it starts: `~/.cursor/skills`, `~/.agents/skills`, `<repo>/.cursor/skills`, `<repo>/.agents/skills`, plus built-in skills and plugins. A folder created after the process has started is not a slash command until the next start. Reading the skill file still works.
 
-Install each skill as workstation.md, *A skill*, says, into `~/.agents/skills`. Also link each installed skill into `~/.cursor/skills`, so both startup folders hold it. Cursor does not copy `~/.agents/skills` onto a cloud VM by itself (cursor.md).
+Install each skill as ../workstation.md, *A skill*, says, into `~/.agents/skills`. Also link each installed skill into `~/.cursor/skills`, so both startup folders hold it. Cursor does not copy `~/.agents/skills` onto a cloud VM by itself (index.md, *Skills*).
 
 - **Audit:** each listed skill has a `SKILL.md` in one of the four folders above.
 
@@ -52,7 +52,7 @@ Network mode, dashboard MCP servers, and whether a skill installed before the pr
 
 ## Checking it
 
-The verifier's Cursor cloud row, from `scripts/setupmachine/harnesses/cursor_cloud.py`:
+The verifier's Cursor cloud row, from `scripts/setupmachine/harnesses/cursor/cloud.py`:
 
 - **instructions:** `.cursor/environment.json` has an `install` string. `.cursor/CLOUD.md` contains the `## Instructions` section. `gap` when the repo has neither the file nor a declared harness.
 - **guardrails:** `beforeShellExecution`, `beforeReadFile` and `preToolUse` each run an existing `pre_tool_hook.py` with `--harness cursor` or `--harness cursor-cloud`. `beforeMCPExecution` is a `gap`.

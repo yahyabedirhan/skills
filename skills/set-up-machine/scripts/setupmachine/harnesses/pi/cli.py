@@ -82,7 +82,7 @@ def check_guardrails(ctx) -> Cell:
     path = ctx.pi_dir / "extensions/set-up-machine.ts"
     if not path.is_file():
         return cell([("FAIL", f"no extension at {ctx.show(path)}; nothing enforces the rule table in Pi")])
-    return cell([p for p in [template_problem(ctx, path, "pi-extension.ts", ID)] if p])
+    return cell([p for p in [template_problem(ctx, path, "pi/pi-extension.ts", ID)] if p])
 
 
 def check_sandbox(ctx) -> Cell:

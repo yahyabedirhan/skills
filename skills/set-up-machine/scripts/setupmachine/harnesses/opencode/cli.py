@@ -75,7 +75,7 @@ def check_instructions(ctx) -> Cell:
 def check_guardrails(ctx) -> Cell:
     """The plugin runs the hook; personal permissions are patterns in the config's `permission` key."""
     plugin = ctx.home / FOLDER / "plugins/set-up-machine.js"
-    problems = [template_problem(ctx, plugin, "opencode-plugin.js", ID) if plugin.is_file() else
+    problems = [template_problem(ctx, plugin, "opencode/opencode-plugin.js", ID) if plugin.is_file() else
                 ("FAIL", f"no plugin at {ctx.show(plugin)}")]
     config = _config_path(ctx.home)
     data = _read_config(config)

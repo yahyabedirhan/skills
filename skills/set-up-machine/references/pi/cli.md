@@ -43,13 +43,13 @@ Whether Pi loads a project's own `.pi` settings and resources. Context files loa
 
 - Pi loads one context file from `<agent-dir>`, the first that exists of `AGENTS.override.md`, `AGENTS.md`, `AGENTS.MD`, `CLAUDE.md` and `CLAUDE.MD`. It then adds one from each folder from the working folder up. It follows a symlink and skips a broken one. It doesn't follow `@` imports.
 - `<agent-dir>/AGENTS.md` becomes a **relative symlink to the shared file**. For the default folder it's `../../.config/agents/AGENTS.md`. For another folder, compute the path from `<agent-dir>` to `~/.config/agents/AGENTS.md`. It's `present` once it's that link.
-- An existing `AGENTS.md` there, a file or a link elsewhere, is kept and `extra`, with a `gap`: Pi reads it instead until its lines move into the shared file (global-instructions.md, *Moving a harness's file*) and the user deletes it.
+- An existing `AGENTS.md` there, a file or a link elsewhere, is kept and `extra`, with a `gap`: Pi reads it instead until its lines move into the shared file (../global-instructions.md, *Moving a harness's file*) and the user deletes it.
 - An `AGENTS.override.md` in `<agent-dir>` is kept and `extra`, with a `gap`: Pi reads it instead of the link. A `CLAUDE.md` there with no `AGENTS.md` is read until the link exists; once the link is written it's `extra`, never read.
 - `--no-context-files` (`-nc`) starts a session without any context file: a `gap` line.
 
 ### Memory
 
-No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it reloads only when the user resumes one. Install no persistent-memory extension, since memory stays off in every harness (global-instructions.md).
+No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it reloads only when the user resumes one. Install no persistent-memory extension, since memory stays off in every harness (../global-instructions.md).
 
 ## Guardrails
 
@@ -87,7 +87,7 @@ Pi has no sandbox and no approval setting, so the verifier's `sandbox` cell is `
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md). Docs: `packages.md` and `mcp.md`.
+The plugins setup area, from `plugins` in `setup/installs.json` (../workstation.md). Docs: `packages.md` and `mcp.md`.
 
 - **A bundle** names an installable Pi package, not necessarily a repository root. The entry names only `pi`. Use `npm:<name>@latest`, a `git:<host>/<owner>/<repo>` source, or an `https://` Git URL. Review the latest source before installing or updating it. A package can expose extensions, skills, prompt templates and themes.
 - **Write a bundle** into the `packages` array of `<agent-dir>/settings.json`. Pi names an extension by its npm name, or by its git host and repository path, so two source strings can name one extension.
@@ -113,7 +113,7 @@ The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md)
 
 ## Config
 
-The optional Pi `config` that the workstation repo's `setup/harnesses.json` names declares Pi settings (workstation.md, *A declared config* and *A Pi config*). Compare each key it declares with `<agent-dir>/settings.json`:
+The optional Pi `config` that the workstation repo's `setup/harnesses.json` names declares Pi settings (../workstation.md, *A declared config* and *A Pi config*). Compare each key it declares with `<agent-dir>/settings.json`:
 
 - `present, personal` when the values are equal; otherwise `updated, personal`, showing the current and the declared value.
 - Write only the declared keys, and keep every other key as it is. Pi writes runtime state into the same file, such as `lastChangelogVersion` and `deviceId`, and other tools add their own keys.
@@ -146,7 +146,7 @@ The optional Pi `config` that the workstation repo's `setup/harnesses.json` name
 
 ## Checking it
 
-The verifier's Pi row, from `scripts/setupmachine/harnesses/pi.py`, reads the resolved agent folder:
+The verifier's Pi row, from `scripts/setupmachine/harnesses/pi/cli.py`, reads the resolved agent folder:
 
 - **instructions:** `<agent-dir>/AGENTS.md` is a link to the shared file. An `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Pi in `setup/harnesses.json`.
 - **guardrails:** `<agent-dir>/extensions/set-up-machine.ts` runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness pi`, and the file is [pi-extension.ts](pi-extension.ts) but for its `COMMAND` line; one that differs otherwise, or whose `COMMAND` isn't a JSON list, is `FAIL`. No extension is `FAIL`, since nothing else enforces the rule table in Pi. A file there without the template's first line is someone else's: a `gap`, left alone. Pi has no native rules, so personal permissions need no entry. The extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call.

@@ -5,7 +5,7 @@ description: Set up or audit a machine's coding-agent harnesses from one rule ta
 
 # Set up machine
 
-Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CLI, Pi, Grok Bot) from its sources. Install or update each selected tool to the latest available version. Running the skill again is the **audit**: check configuration and freshness, then propose any required updates.
+Set up every selected harness (Claude Code, Codex, opencode, Cursor's CLI, desktop app and cloud agents, Pi, Grok Bot) from its sources. Install or update each selected tool to the latest available version. Running the skill again is the **audit**: check configuration and freshness, then propose any required updates.
 
 ## Sources
 
@@ -48,7 +48,7 @@ Set up every selected harness (Claude Code, Codex, opencode, Cursor's IDE and CL
    - **When the pointer is missing:** read `references/workstation.md`, then ask the user once for `<workstation-repo>` and `<path-to-workstation-repo>`, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
    - **When the pointer records no workstation repo:** set up the machine as `references/workstation.md` says for a run without one, or, when the user names one now, as it says for rewriting the pointer.
    - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
-   - **When the harness is Grok Bot:** its instructions go into memory, not files. Follow references/grok-bot.md, *Instructions*, for apply, reconcile and audit.
+   - **When the harness is Grok Bot:** its instructions go into memory, not files. Follow references/grok-bot/desktop.md, *Instructions*, for apply, reconcile and audit.
    - **When trying a change without touching the real machine:** run the steps against a copy of the home folder in the project's `.scratch/`, and check it with `verify.py --home <copy>`. Start no harness there, since it would read the real login.
 2. **Propose one diff** that brings each harness in line with the rule table, the shared file's shape and personal parts, the pointer, memory off, the hook wired, each harness's declared config, and the installs: every skill and command `setup/installs.json` lists for this machine, each selected installation up to date. Include harness upgrades and plugin updates, not only missing installs. Give every harness found its own section, listing each gap its reference names and the hook's blind spots. Read `references/global-instructions.md` whenever a global instructions file is in the diff.
 
@@ -111,7 +111,7 @@ The run passes when no line or cell is `FAIL`; the verifier then exits 0. Report
 
 - **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
 - **allow-and-report** rows: it writes one JSON line per call to `<report-folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
-- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why). Cursor has no ask list at all, so there the hook refuses every ask row, `approver` or not. Pi has no ask list either, but its extension can ask: with a UI, the hook names the ask rows and the extension asks the user in Pi's dialog; without one, the hook refuses every ask row (references/pi.md).
+- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why). Cursor has no ask list at all, so there the hook refuses every ask row, `approver` or not. Pi has no ask list either, but its extension can ask: with a UI, the hook names the ask rows and the extension asks the user in Pi's dialog; without one, the hook refuses every ask row (references/pi/cli.md).
 - **allow** rows: it says nothing; the harness's native allow entries let the call run without a prompt.
 
 A malformed personal file leaves the table's rows in force: the hook skips the personal permissions and `verify.py` reports the file.
@@ -120,7 +120,7 @@ A malformed personal file leaves the table's rows in force: the hook skips the p
 
 Each harness reference shows its wiring with `<script>` in place of the script's path. Replace it with the absolute path of `scripts/pre_tool_hook.py` in the installed skill (under `~/.agents/skills` or `~/.claude/skills`), never in a checkout or worktree, which can be deleted. If there is no installed copy, name the gap. `verify.py` fails wiring whose script is elsewhere.
 
-The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call. Pi is the exception: it has no native entries underneath, so its extension fails closed and refuses each call the hook can't check (references/pi.md).
+The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call. Pi is the exception: it has no native entries underneath, so its extension fails closed and refuses each call the hook can't check (references/pi/cli.md).
 
 `<report-folder>` is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 
@@ -145,19 +145,18 @@ Name these once in every audit:
 - [references/live-check.md](references/live-check.md): starting a real session of each harness, the probe, and reading what it did.
 - [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
   - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
-- One reference per harness, read for each harness found. Each has the same headings: Found, Instructions, Guardrails, Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it.
+- One folder per harness, `references/<harness>/`, with one page per environment, `<env>.md`, read for each environment found. A harness with more than one environment also has an `index.md` for what its environments share. Each page has the same headings: Found, Instructions, Guardrails, Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it, and leaves out what the shared page already covers. Which harnesses and environments there are, and the rule for the split, are the workstation repo's, in its `harnesses/index.md`. Claude Code and Codex are still one page each, `references/<harness>.md`, until they move to this layout.
   - [references/claude-code.md](references/claude-code.md): Claude Code.
   - [references/codex.md](references/codex.md): Codex. Its *Codex MCP* section holds the TOML and OAuth detail.
-  - [references/opencode.md](references/opencode.md): opencode.
-  - [references/cursor.md](references/cursor.md): Cursor's IDE and CLI.
-  - [references/cursor-cloud.md](references/cursor-cloud.md): a Cursor cloud agent, found on its VM.
-  - [references/pi.md](references/pi.md): Pi, whose only enforcement is the hook's extension.
-  - [references/grok-bot.md](references/grok-bot.md): Grok Bot, whose instructions live in memory and whose permissions, connectors, secrets and routines live in the app.
+  - [references/cursor/](references/cursor/index.md): Cursor. What the CLI and the desktop app share, then [cli.md](references/cursor/cli.md), [desktop.md](references/cursor/desktop.md) and [cloud.md](references/cursor/cloud.md), a cloud agent found on its VM.
+  - [references/opencode/cli.md](references/opencode/cli.md): opencode.
+  - [references/pi/cli.md](references/pi/cli.md): Pi, whose only enforcement is the hook's extension.
+  - [references/grok-bot/desktop.md](references/grok-bot/desktop.md): Grok Bot, whose instructions live in memory and whose permissions, connectors, secrets and routines live in the app.
 
 ## Scripts
 
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
-- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`. `--grok-bot-rules` prints the rule table and personal permissions as Grok Bot's Auto-review rules (references/grok-bot.md). `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command (references/codex.md).
-- `scripts/setupmachine/`: the modules both scripts use. `harnesses/__init__.py` lists every harness in `ALL`, and each harness has one module there.
-- [references/opencode-plugin.js](references/opencode-plugin.js): the opencode plugin that calls the hook.
-- [references/pi-extension.ts](references/pi-extension.ts): the Pi extension that calls the hook and asks the user for ask rows.
+- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`. `--grok-bot-rules` prints the rule table and personal permissions as Grok Bot's Auto-review rules (references/grok-bot/desktop.md). `--harness <harness> [--env <env>]` keeps one harness's rows, or one environment's, such as `--harness cursor --env cloud`. `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command (references/codex.md).
+- `scripts/setupmachine/`: the modules both scripts use. `harnesses/__init__.py` lists every environment in `ALL`. A harness is a package, `harnesses/<harness>/`, with one module per environment and the shared code in its `__init__.py`; Claude Code and Codex are still one module each.
+- [references/opencode/opencode-plugin.js](references/opencode/opencode-plugin.js): the opencode plugin that calls the hook.
+- [references/pi/pi-extension.ts](references/pi/pi-extension.ts): the Pi extension that calls the hook and asks the user for ask rows.

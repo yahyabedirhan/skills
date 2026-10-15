@@ -106,7 +106,7 @@ The file `setup/harnesses.json` points at with a harness's `instructions`. It ho
 ```
 
 - **Copying:** everything under `## Instructions`, up to the next `## ` heading, is copied as it is into the harness's own instructions file. Other text is notes and stays in the repository. A file with no `## Instructions` section, or an empty one, is a `FAIL`.
-- **Where it goes:** Cursor's is `~/.cursor/rules/harness-instructions.mdc` (cursor.md, *Global instructions*). Its header names the path `setup/harnesses.json` gives. A Cursor cloud agent's is `.cursor/CLOUD.md` in the clone, written by that repo's install, and the verifier checks the section is in it (cursor-cloud.md). Claude Code, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line. Grok Bot's lines go into its memory (grok-bot.md).
+- **Where it goes:** Cursor's is `~/.cursor/rules/harness-instructions.mdc` (cursor/index.md, *Global instructions*). Its header names the path `setup/harnesses.json` gives. A Cursor cloud agent's is `.cursor/CLOUD.md` in the clone, written by that repo's install, and the verifier checks the section is in it (cursor/cloud.md). Claude Code, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line. Grok Bot's lines go into its memory (grok-bot/desktop.md).
 - Never put a rule every harness needs here; it belongs in `setup/instructions.md`. Check every line against the team test in `global-instructions.md`.
 
 `verify.py` checks this file in the harness's `instructions` cell: `ok` when the generated file matches its source; `FAIL` when it is missing or differs, or when a generated file outlived its source; `gap` for a harness with no place yet, or a file of the same name the skill didn't write. A malformed `setup/harnesses.json`, or one that points at a missing file, fails the `setup` line. A generated file whose header names another path, such as one from before the source moved, differs, and the diff rewrites it.
@@ -128,9 +128,9 @@ The file `setup/harnesses.json` points at with a harness's `config`. It holds th
 |---|---|---|
 | `claude-code` | `harnesses/claude-code/config/settings.json` | `~/.claude/settings.json` |
 | `codex` | `harnesses/codex-cli/config/config.toml` | `config.toml` in the Codex config home (`codex.md`) |
-| `cursor` | `harnesses/cursor/config/cli-config.json` | `~/.cursor/cli-config.json` |
-| `opencode` | `harnesses/opencode/config/opencode.json` | the global config file opencode reads last: `opencode.jsonc` or `opencode.json` in `~/.config/opencode` (`opencode.md`) |
-| `pi` | `harnesses/pi/config/settings.json` | `settings.json` in Pi's agent folder (`pi.md`) |
+| `cursor` | `harnesses/cursor/environments/cli/config/cli-config.json` | `~/.cursor/cli-config.json` |
+| `opencode` | `harnesses/opencode/environments/cli/config/opencode.json` | the global config file opencode reads last: `opencode.jsonc` or `opencode.json` in `~/.config/opencode` (`opencode/cli.md`) |
+| `pi` | `harnesses/pi/environments/cli/config/settings.json` | `settings.json` in Pi's agent folder (`pi/cli.md`) |
 
 - **Each key is optional.** An omitted key declares no preference, so that setting stays user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
 - **A key's value is the whole value.** A nested object, such as Cursor's `selectedModel`, is written and compared as a whole. Keys the declared file doesn't name are never written or compared.
@@ -150,7 +150,7 @@ Read `codex.md` for installed-version support, preservation and override checks.
 
 ### A Pi config
 
-The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harnesses/pi/config/settings.json`. Keep explicitly chosen Pi settings in this private file: a JSON object of top-level keys from Pi's settings reference, such as `defaultProvider`, `defaultModel`, `defaultThinkingLevel` and `enableInstallTelemetry`. Each key is optional. No `config` entry, or an omitted key, declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
+The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harnesses/pi/environments/cli/config/settings.json`. Keep explicitly chosen Pi settings in this private file: a JSON object of top-level keys from Pi's settings reference, such as `defaultProvider`, `defaultModel`, `defaultThinkingLevel` and `enableInstallTelemetry`. Each key is optional. No `config` entry, or an omitted key, declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
 
 ```json
 {
@@ -162,7 +162,7 @@ The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harness
 - **No extension list here.** Pi extensions go in `plugins` in `setup/installs.json`. A copy of Pi's `packages` setting in this file is a `gap`.
 - Declare only preferences. Leave out runtime state Pi writes itself, such as `deviceId` and `lastChangelogVersion`, and keep credentials, trust decisions and sessions in Pi's own files.
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
-- Read `pi.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
+- Read `pi/cli.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
 
 `verify.py` checks each declared key in Pi's `config` cell, as *A declared config* says; a `packages` key there is a `gap`.
 
