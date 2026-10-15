@@ -4,19 +4,21 @@ A harness is a package or, until it is migrated, a single module. A package hold
 environment (cursor/cli.py, cursor/desktop.py, cursor/cloud.py) and its __init__.py holds what the
 environments share. Each environment module exposes the same names: ID (the harness id, the same
 for every environment of a harness), LABEL (the harness name) and ENV (the environment, None for a
-module not yet split into environments: claude_code.py, codex.py); present(home); read(payload)
+module not yet split into environments: codex.py); present(home); read(payload)
 and write(denials, asks) for the hook; and check_instructions, check_guardrails, check_sandbox,
 check_plugins, check_skills and check_config, each taking the run's context and returning a Cell.
 To add an environment, write its module and its reference page, then add it here.
 """
 from . import claude_code, codex
+from .claude_code import cli as claude_code_cli, cloud as claude_code_cloud, desktop as claude_code_desktop
 from . import cursor
 from .cursor import cli, cloud, desktop  # noqa: F401  (loads cursor.cli, cursor.cloud, cursor.desktop)
 from .grok_bot import desktop as grok_bot_desktop
 from .opencode import cli as opencode_cli
 from .pi import cli as pi_cli
 
-ALL = (claude_code, codex, cursor.cli, cursor.desktop, cursor.cloud, grok_bot_desktop, opencode_cli, pi_cli)
+ALL = (claude_code_cli, claude_code_desktop, claude_code_cloud, codex, cursor.cli, cursor.desktop, cursor.cloud,
+       grok_bot_desktop, opencode_cli, pi_cli)
 # Every environment of a harness reads the same hook payload, so the hook takes the harness's first one.
 BY_ID = {}
 for _module in ALL:

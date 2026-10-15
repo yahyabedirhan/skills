@@ -1,9 +1,11 @@
-"""Claude Code: its hook payload, and the check of each setup area (references/claude-code.md).
+"""Claude Code's local environments, the CLI and the desktop app, share `~/.claude/`: its hook
+payload, and the checks both environments run (references/claude-code/index.md). Each
+environment is a module here: cli.py, desktop.py and cloud.py.
 
-Every setting lives in `~/.claude/settings.json`, including the declared config's keys; the
+Every local setting lives in `~/.claude/settings.json`, including the declared config's keys; the
 instructions are `~/.claude/CLAUDE.md`, a link to the shared file. Cursor reads this harness's
-plugins and permission lists too, so cursor.py imports `plugins_installed` and `native_lists`
-from here.
+plugins and permission lists too, so cursor/__init__.py imports `plugins_installed` and
+`native_lists` from here, and Codex takes this harness's hook answer.
 """
 from __future__ import annotations
 
@@ -11,10 +13,11 @@ import json
 import re
 from pathlib import Path
 
-from ..checks import (Cell, any_wired_problem, as_list, cell, dig, json_config_cell, link_problem, na, on_path,
-                      personal_problems, read_json, skill_problems)
-from ..hook import ToolCall, refusal, search_pair
+from ...checks import (Cell, any_wired_problem, as_list, cell, dig, json_config_cell, link_problem, na,
+                       personal_problems, read_json, skill_problems)
+from ...hook import ToolCall, refusal, search_pair
 
+# The harness id: the key in setup/harnesses.json and installs.json, and the hook's --harness.
 ID, LABEL = "claude-code", "Claude Code"
 FOLDER = Path(".claude")
 # Claude Code's file tools: the input field holding the path, and the access it means.
@@ -23,10 +26,6 @@ FILE_TOOLS = {"Read": ("file_path", "read"), "Grep": ("path", "read"), "Edit": (
               "NotebookEdit": ("notebook_path", "write")}
 # Permission modes in which an ask entry doesn't reach the user.
 UNATTENDED = ("auto", "dontAsk", "bypassPermissions")
-
-
-def present(home: Path) -> bool:
-    return (home / FOLDER).is_dir() or on_path(home, "claude")
 
 
 # --- the hook ------------------------------------------------------------------------------
@@ -59,7 +58,7 @@ def write(denials: list, asks=()) -> str:
                                               "permissionDecisionReason": refusal(denials)}}) + "\n"
 
 
-# --- the checks ----------------------------------------------------------------------------
+# --- the checks both local environments run ---------------------------------------------
 
 
 def check_instructions(ctx) -> Cell:
@@ -69,7 +68,8 @@ def check_instructions(ctx) -> Cell:
     if settings.get("autoMemoryEnabled") is not False:
         problems.append(("FAIL", "autoMemoryEnabled isn't false in ~/.claude/settings.json"))
     if ctx.setup.file(ID, "instructions"):
-        problems.append(("gap", "setup/harnesses.json names instructions for Claude Code, which has no place for them"))
+        problems.append(("gap", "setup/harnesses.json names instructions for Claude Code, which has no place for "
+                                "them on a machine"))
     return cell([p for p in problems if p])
 
 
@@ -86,10 +86,6 @@ def check_guardrails(ctx) -> Cell:
     if settings.get("disableAllHooks") is True:
         problems.append(("FAIL", f"{ctx.show(path)} sets disableAllHooks, so the hook never runs"))
     return cell([p for p in problems if p] + personal_problems(ctx, native_lists(settings), path))
-
-
-def check_sandbox(ctx) -> Cell:
-    return na("set-up-machine declares no sandbox for Claude Code")
 
 
 def check_plugins(ctx) -> Cell:
@@ -114,9 +110,9 @@ def check_skills(ctx) -> Cell:
     return cell(skill_problems(ctx, [ctx.home / FOLDER / "skills"]))
 
 
-def check_config(ctx) -> Cell:
+def check_config(ctx, env=None) -> Cell:
     """Each key the declared Claude Code config sets, such as `model`, has its value in settings.json."""
-    return json_config_cell(ctx, ID, LABEL, ctx.home / FOLDER / "settings.json")
+    return json_config_cell(ctx, ID, LABEL, ctx.home / FOLDER / "settings.json", env=env)
 
 
 # --- shared with Cursor --------------------------------------------------------------------
@@ -139,7 +135,7 @@ def native_lists(settings: dict) -> dict:
 
 def _entry(entry):
     """`Bash(rm -rf *)` -> ("command", "rm -rf"); `Read(./.env)` -> ("path", "./.env"); `mcp__…` as is.
-    A `Write(...)` entry counts for nothing: Claude Code never checks it (references/claude-code.md)."""
+    A `Write(...)` entry counts for nothing: Claude Code never checks it (references/claude-code/index.md)."""
     if not isinstance(entry, str):
         return None
     if entry.startswith("mcp__"):
