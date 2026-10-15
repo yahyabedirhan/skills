@@ -8,11 +8,13 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 ## Instructions
 
-Cursor's documented channel for cloud-only instructions is a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). A Cursor staff answer on the forum adds `.cursor/CLOUD.md`, read by cloud agents only, after `AGENTS.md` ([forum](https://forum.cursor.com/t/is-there-a-way-to-add-rule-or-agent-md-only-for-cloud-agent/159595)). The public docs don't list that file, and a generated copy has not yet been seen loading. The file is generated and not committed. The install writes it: `setup/instructions.md`, then the text of the `instructions` file `setup/harnesses.json` names for Cursor's `cloud` environment (`harnesses.cursor.environments.cloud`).
+The Build only installs: the repo's environment file runs an install that puts the skills and tools on the VM. It writes no instructions and no harness files, and it runs no audit. The agent applies the setup itself at session start, as on any machine: this skill writes the setup, and scripts only enforce and check.
 
-`~/.config/agents/AGENTS.md` is still the shared file, and the `setup` line checks it. Do not append the cloud-only lines to the shared file.
+The agent learns this at start from Cursor's documented channel for cloud-only instructions, a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). That section tells the agent, before other work, to follow this skill for harness `cursor`, environment `cloud` (first-time setup, or a reconcile), to run `verify.py --harness cursor --env cloud`, and to stop and ask when a step needs more access. It points at the `instructions` file `setup/harnesses.json` names for the cloud environment (`harnesses.cursor.environments.cloud`), whose `## Instructions` lines the agent follows for the session. A `.cursor/CLOUD.md` file, which a Cursor staff answer on the forum mentions, was not seen loading, so this skill does not use it.
 
-- **Audit:** `ok` when `.cursor/environment.json` is a JSON object with an `install` string, and `.cursor/CLOUD.md` contains the text under `## Instructions` of the cloud instructions file. `FAIL` when the harness is declared and either file is missing or the section is absent. `gap` when the repo has no environment file and `setup/harnesses.json` does not name this harness, or when there is no clone to read.
+`~/.config/agents/AGENTS.md` is the shared file, written by the agent as on any machine, and the `setup` line checks it. Do not append the cloud-only lines to the shared file.
+
+- **Audit:** `ok` when `.cursor/environment.json` is a JSON object with an `install` string, the cloud instructions file has an `## Instructions` section, and the repo `AGENTS.md` has a "Cursor Cloud specific instructions" section that names that file's path. `FAIL` when the environment is declared and one of those is missing. `gap` when the repo has no environment file and `setup/harnesses.json` names no cloud instructions, or when there is no clone to read.
 
 ## Guardrails
 
@@ -54,11 +56,11 @@ Network mode, dashboard MCP servers, and whether a skill installed before the pr
 
 The verifier's `Cursor / cloud` row (`verify.py --harness cursor --env cloud`), from `scripts/setupmachine/harnesses/cursor/cloud.py`:
 
-- **instructions:** `.cursor/environment.json` has an `install` string. `.cursor/CLOUD.md` contains the `## Instructions` section. `gap` when the repo has neither the file nor a declared harness.
+- **instructions:** `.cursor/environment.json` has an `install` string, and the repo `AGENTS.md` cloud section names the cloud instructions file, which has an `## Instructions` section. `gap` when the repo has neither the environment file nor declared cloud instructions.
 - **guardrails:** `beforeShellExecution`, `beforeReadFile` and `preToolUse` each run an existing `pre_tool_hook.py` with `--harness cursor`. `beforeMCPExecution` is a `gap`.
 - **sandbox:** `gap`.
 - **plugins:** `gap`.
 - **skills:** each listed skill is in `~/.cursor/skills`, `~/.agents/skills`, or the repo's `.cursor/skills` or `.agents/skills`.
 - **config:** each `secrets` name is set in the real home, by name only. An empty list is `ok`. An unknown key is a `gap`. `n/a` without a declared config.
 
-On a cloud VM, after the install: `rm -rf x` is refused by the hook, and `git status` is allowed. A skill added after the process started is readable as a file and is not a slash command in that process. Whether a skill installed during the Build is a slash command on a cold start has not been observed.
+On a cloud VM, after the install and the agent's own setup: `rm -rf x` is refused by the hook, and `git status` is allowed. A skill added after the process started is readable as a file and is not a slash command in that process. Whether a skill installed during the Build is a slash command on a cold start has not been observed.
