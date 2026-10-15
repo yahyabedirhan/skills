@@ -1,5 +1,5 @@
 """Grok Bot, the agent app with one persistent Linux box: its hook payload, and the check of each
-setup area (references/grok-bot.md).
+setup area (references/grok-bot/desktop.md).
 
 The app owns most of what other harnesses keep in files: approvals, Auto-review, the model, the
 connectors and memory. So only skills are checked fully. Each skill is a folder in the shared
@@ -14,10 +14,11 @@ import os
 import subprocess
 from pathlib import Path
 
-from ..checks import Cell, cell, na, read_json
-from ..hook import ToolCall, refusal
+from ...checks import Cell, cell, na, read_json
+from ...hook import ToolCall, refusal
 
 ID, LABEL = "grok-bot", "Grok Bot"
+ENV = "desktop"
 FOLDER = Path("agent-data/workflows")
 # Like ~/.agents/.skill-lock.json: {"skills": {name: {"source", "skillPath", "skillFolderHash"}}}.
 LOCK = Path(".local/state/agents/grok-bot-skill-lock.json")
@@ -64,7 +65,7 @@ def check_instructions(ctx) -> Cell:
     lock = read_json(lock_path)
     if not lock or not isinstance(lock.get("sha"), str):
         return Cell("gap", [f"no {ctx.show(lock_path)}: write the facts into memory, then the lock and the applied state page "
-                            "(references/grok-bot.md, *First-time apply*)"])
+                            "(references/grok-bot/desktop.md, *First-time apply*)"])
     agents = lock.get("agents") if isinstance(lock.get("agents"), dict) else {}
     problems = []
     for source in sources(ctx):
@@ -79,14 +80,14 @@ def check_instructions(ctx) -> Cell:
             if then is None or then.returncode != 0 or then.stdout != source.read_text():
                 who = f" for agent {name}" if name else ""
                 problems.append(("FAIL", f"stale: {relative} changed since {str(sha)[:7]}{who}; reconcile memory "
-                                         "(references/grok-bot.md, *Reconcile*)"))
+                                         "(references/grok-bot/desktop.md, *Reconcile*)"))
     return cell(problems)
 
 
 def sources(ctx) -> list:
     """The files memory facts come from: setup/instructions.md for user memory, and Grok Bot's own
     instructions from setup/harnesses.json for agent memory."""
-    files = [ctx.setup.clone / "setup/instructions.md", ctx.setup.file(ID, "instructions")]
+    files = [ctx.setup.clone / "setup/instructions.md", ctx.setup.file(ID, "instructions", ENV)]
     return [f for f in files if f is not None and f.is_file()]
 
 
@@ -136,7 +137,7 @@ def check_skills(ctx) -> Cell:
 def check_config(ctx) -> Cell:
     """The declared config's `secrets` are set as environment variables, by name only; `connectors`
     are checked in the plugins column; `routines` live in the app."""
-    source = ctx.setup.file(ID, "config")
+    source = ctx.setup.file(ID, "config", ENV)
     if source is None:
         return na("setup/harnesses.json names no Grok Bot config")
     declared = _declared(ctx)
@@ -158,12 +159,12 @@ def check_config(ctx) -> Cell:
     return cell(problems)
 
 
-# The keys a declared Grok Bot config may set (references/grok-bot.md, *Config*).
+# The keys a declared Grok Bot config may set (references/grok-bot/desktop.md, *Config*).
 KEYS = ("secrets", "connectors", "routines")
 
 
 def _declared(ctx) -> dict:
-    source = ctx.setup.file(ID, "config")
+    source = ctx.setup.file(ID, "config", ENV)
     data = read_json(source) if source is not None else {}
     return data if isinstance(data, dict) else {}
 

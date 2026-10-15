@@ -1,4 +1,4 @@
-"""opencode: its hook payload, and the check of each setup area (references/opencode.md).
+"""opencode: its hook payload, and the check of each setup area (references/opencode/cli.md).
 
 Its global folder is `~/.config/opencode`. The hook runs through a plugin there, and the
 permissions and the declared config's keys are in its config file. set-up-machine delivers
@@ -11,11 +11,12 @@ import os
 import re
 from pathlib import Path
 
-from ..checks import (Cell, cell, json_config_cell, link_problem, na, on_path, personal_problems, read_json,
+from ...checks import (Cell, cell, json_config_cell, link_problem, na, on_path, personal_problems, read_json,
                       skill_problems, template_problem)
-from ..hook import PATCH_FILE, ToolCall, refusal, search_pair
+from ...hook import PATCH_FILE, ToolCall, refusal, search_pair
 
 ID, LABEL = "opencode", "opencode"
+ENV = "cli"
 FOLDER = Path(".config/opencode")
 # Built-in tools that take a path: the argument holding it, and the access it means.
 FILE_TOOLS = {"read": ("filePath", "read"), "grep": ("path", "read"), "glob": ("path", "read"),
@@ -65,7 +66,7 @@ def write(denials: list, asks=()) -> str:
 def check_instructions(ctx) -> Cell:
     """AGENTS.md links to the shared file. opencode has no memory feature."""
     problems = [link_problem(ctx, ctx.home / FOLDER / "AGENTS.md")]
-    if ctx.setup.file(ID, "instructions"):
+    if ctx.setup.file(ID, "instructions", ENV):
         problems.append(("gap", "setup/harnesses.json names instructions for opencode, which has no place for them"))
     return cell([p for p in problems if p])
 
@@ -73,7 +74,7 @@ def check_instructions(ctx) -> Cell:
 def check_guardrails(ctx) -> Cell:
     """The plugin runs the hook; personal permissions are patterns in the config's `permission` key."""
     plugin = ctx.home / FOLDER / "plugins/set-up-machine.js"
-    problems = [template_problem(ctx, plugin, "opencode-plugin.js", ID) if plugin.is_file() else
+    problems = [template_problem(ctx, plugin, "opencode/opencode-plugin.js", ID) if plugin.is_file() else
                 ("FAIL", f"no plugin at {ctx.show(plugin)}")]
     config = _config_path(ctx.home)
     data = _read_config(config)
@@ -102,7 +103,7 @@ def check_skills(ctx) -> Cell:
 def check_config(ctx) -> Cell:
     """Each key the declared opencode config sets, such as `model`, has its value in the config file
     opencode reads last (an opencode.jsonc read without its comments)."""
-    return json_config_cell(ctx, ID, LABEL, _config_path(ctx.home), read=_read_config)
+    return json_config_cell(ctx, ID, LABEL, _config_path(ctx.home), read=_read_config, env=ENV)
 
 
 def _mcp_names(tool: str) -> tuple:

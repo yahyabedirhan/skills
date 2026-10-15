@@ -106,7 +106,7 @@ Memory and Auto-review rules can't be read from the box; connectors and routines
 
 ## Checking it
 
-The verifier's Grok Bot row, from `scripts/setupmachine/harnesses/grok_bot.py`:
+The verifier's Grok Bot row, from `scripts/setupmachine/harnesses/grok_bot/desktop.py`:
 
 - **instructions:** as *Audit*, step 1.
 - **guardrails:** `gap`: Auto-review and its rules can't be read.

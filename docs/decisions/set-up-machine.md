@@ -1766,3 +1766,24 @@ The decisions behind the `set-up-machine` skill. This file is for maintaining it
 ### References
 - [anomalyco/opencode#38363](https://github.com/anomalyco/opencode/issues/38363): the TUI's remembered variant beats the config.
 - [anomalyco/opencode#13718](https://github.com/anomalyco/opencode/issues/13718): the same for `agent.build.variant`.
+
+## 2026-10-15: a Cursor cloud agent is its own harness
+
+- **Status:** accepted
+- **Context:** A cloud agent is a VM with project hooks and no CLI config. Grading it with the Cursor CLI checks looks for `cli-config.json` and `~/.cursor/hooks.json`, which that VM does not use.
+- **Options:** A flag on the Cursor module. Rejected: the two machines fail different checks, and one module would hide which one ran.
+- **Choice and why:** `cursor_cloud` in `ALL`, with `references/cursor-cloud.md` (now `harnesses/cursor/cloud.py` and `references/cursor/cloud.md`, see the next entry). Found when `/run/cursor/api.sock` is a socket. It checks the repo environment file, that the project hook command resolves to an existing `pre_tool_hook.py`, the skills in the folders the process scans, and secret names only. Network mode and dashboard MCP are `gap`s, because nothing on the VM shows them. `read` and `write` are Cursor's: the project hook keeps `--harness cursor`.
+- **Consequences:** On a cloud VM the row is graded even for a repo that has no environment file yet: that case is a `gap` until `setup/harnesses.json` names the harness. A laptop has no socket, so the row is skipped.
+
+### References
+- [Cursor cloud agent setup](https://cursor.com/docs/cloud-agent/setup): the environment file, and what a Build runs.
+- [Cursor hooks](https://cursor.com/docs/hooks): the events a cloud agent runs. `beforeMCPExecution` is not among them.
+
+## 2026-10-15: harnesses split into environments
+
+- **Status:** accepted
+- **Context:** Cursor runs as a CLI, a desktop app and a cloud agent. Claude Code and Codex also run in more than one place. One flat module and one flat page per harness mixed facts that hold everywhere with facts that hold in one place, and the cloud agent had become a separate harness beside Cursor.
+- **Options:** Keep one module per harness with flags. Rejected: one module would hide which environment ran. A separate harness per environment, as `cursor-cloud` was. Rejected: the shared facts get two homes.
+- **Choice and why:** `harnesses/<harness>/` with one module per environment and the shared code in `__init__.py`, and `references/<harness>/` with one page per environment and an `index.md` for what they share. An id names a harness only. The environment is a second dimension: `ENV` on the module, `--env` on the verifier, `environments` in `setup/harnesses.json`, and rows that read `Cursor / cloud`. Cursor has `cli`, `desktop` and `cloud`. Grok Bot (`desktop`), opencode (`cli`) and Pi (`cli`) are packages with one environment, so a second one is one new module. `verify.py --harness <h>` checks each environment of that harness found on the machine, and `--env <env>` keeps one. The hook keeps `--harness cursor`: every Cursor environment sends the same payload. Which harnesses and environments a person uses is the workstation repo's; this skill only lays out its own references and code.
+- **Consequences:** `cursor-cloud` is no longer an id anywhere, so a `setup/harnesses.json` or `installs.json` naming it fails until it moves under `cursor`. On a machine with both the CLI and the desktop app, the shared cells appear on both rows. Claude Code and Codex are still flat, with no environments, until they move, as the design's *Extensibility* table says.
+

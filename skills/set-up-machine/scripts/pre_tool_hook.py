@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """set-up-machine's pre-tool hook. A harness runs it before each tool call, with the call on stdin.
 
-usage: pre_tool_hook.py [--harness claude-code|codex|cursor|opencode|pi] [--config FILE] [--rules FILE]
+usage: pre_tool_hook.py [--harness claude-code|codex|cursor|grok-bot|opencode|pi] [--config FILE] [--rules FILE]
 
 The steps:
 
@@ -13,7 +13,7 @@ The steps:
    answer, which leaves the call to the harness's own permissions (or, in Pi, asks the user).
 
 It exits 1 when it can't read the call or the rule table. Each harness's wiring then lets the call
-through to its native rules, except Pi's, which has none and refuses it (references/pi.md).
+through to its native rules, except Pi's, which has none and refuses it (references/pi/cli.md).
 Python 3.9+, standard library only.
 """
 import argparse

@@ -42,7 +42,8 @@ class Setup:
     problems: list = field(default_factory=list)  # one sentence per missing or malformed file
     rows: list = field(default_factory=list)  # personal permissions, as rule-table Rules
     installs: dict = field(default_factory=dict)  # installs.json, or {} without it
-    harness_files: dict = field(default_factory=dict)  # {harness: {"instructions" | "config": Path}}
+    # {harness: {"instructions" | "config": Path, "environments": {env: {"instructions" | "config": Path}}}}
+    harness_files: dict = field(default_factory=dict)
 
     def plugins(self, harness: str) -> list:
         """The installs.json plugin entries for this harness that apply to this machine's OS."""
@@ -50,12 +51,16 @@ class Setup:
         return [e for e in self.installs.get("plugins", [])
                 if harness in e["harnesses"] and (not e.get("os") or any(OSES.get(o) == here for o in e["os"]))]
 
-    def file(self, harness: str, kind: str) -> Path | None:
-        return self.harness_files.get(harness, {}).get(kind)
+    def file(self, harness: str, kind: str, env: str | None = None) -> Path | None:
+        """The environment's own file when harnesses.json names one, else the harness's shared one."""
+        entry = self.harness_files.get(harness, {})
+        own = entry.get("environments", {}).get(env, {}).get(kind) if env else None
+        return own or entry.get(kind)
 
 
 def load(home: Path, table: list, harness_ids) -> Setup:
-    """The pointer and every setup/ file it leads to. Problems are recorded, never raised."""
+    """The pointer and every setup/ file it leads to. Problems are recorded, never raised.
+    `harness_ids` maps each harness id to the environments it has."""
     setup = Setup()
     try:
         setup.repository, setup.clone, setup.clone_text = read_pointer(home)
@@ -70,7 +75,7 @@ def load(home: Path, table: list, harness_ids) -> Setup:
     except ValueError as exc:
         setup.problems.append(str(exc))
     setup.installs = _installs(folder / "installs.json", set(harness_ids), setup.problems)
-    setup.harness_files = _harness_files(setup.clone, set(harness_ids), setup.problems)
+    setup.harness_files = _harness_files(setup.clone, dict(harness_ids), setup.problems)
     return setup
 
 
@@ -258,8 +263,9 @@ def _installs(path: Path, harness_ids: set, problems: list) -> dict:
     return data
 
 
-def _harness_files(clone: Path, harness_ids: set, problems: list) -> dict:
-    """{harness: {kind: path}} from harnesses.json; each path must be a file inside the repo."""
+def _harness_files(clone: Path, harness_ids: dict, problems: list) -> dict:
+    """{harness: {kind: path, "environments": {env: {kind: path}}}} from harnesses.json. A harness's
+    `environments` key holds what only one of its environments has; each path must be a file inside the repo."""
     path = clone / "setup/harnesses.json"
     data = _json(path, problems)
     if not data:
@@ -268,14 +274,36 @@ def _harness_files(clone: Path, harness_ids: set, problems: list) -> dict:
         problems.append(f"{path} needs \"version\": 1 and a `harnesses` object")
         return {}
     files = {}
+    kinds = {"instructions", "config"}
     for harness, entry in data.get("harnesses", {}).items():
-        if harness not in harness_ids or not isinstance(entry, dict) or not set(entry) <= {"instructions", "config"}:
-            problems.append(f"{path}: `harnesses.{harness}` must be a known harness with instructions, config or both")
+        if harness not in harness_ids or not isinstance(entry, dict) or not set(entry) <= kinds | {"environments"}:
+            problems.append(f"{path}: `harnesses.{harness}` must be a known harness with instructions, config, "
+                            "environments or some of them")
             continue
-        for kind, value in entry.items():
-            target = clone / str(value)
-            if not target.resolve().is_relative_to(clone.resolve()) or not target.is_file():
-                problems.append(f"{path}: `harnesses.{harness}.{kind}` is `{value}`, which isn't a file in the repo")
+        found = files.setdefault(harness, {})
+        found.update(_kind_files(clone, path, f"harnesses.{harness}", {k: v for k, v in entry.items() if k in kinds},
+                                 problems))
+        envs = entry.get("environments", {})
+        known = harness_ids[harness]
+        if not isinstance(envs, dict):
+            problems.append(f"{path}: `harnesses.{harness}.environments` must be an object")
+            continue
+        for env, own in envs.items():
+            if env not in known or not isinstance(own, dict) or not own or not set(own) <= kinds:
+                problems.append(f"{path}: `harnesses.{harness}.environments.{env}` must be one of "
+                                f"{', '.join(sorted(known)) or 'none'}, with instructions, config or both")
                 continue
-            files.setdefault(harness, {})[kind] = target
+            found.setdefault("environments", {})[env] = _kind_files(
+                clone, path, f"harnesses.{harness}.environments.{env}", own, problems)
+    return files
+
+
+def _kind_files(clone: Path, path: Path, where: str, entry: dict, problems: list) -> dict:
+    files = {}
+    for kind, value in entry.items():
+        target = clone / str(value)
+        if not target.resolve().is_relative_to(clone.resolve()) or not target.is_file():
+            problems.append(f"{path}: `{where}.{kind}` is `{value}`, which isn't a file in the repo")
+            continue
+        files[kind] = target
     return files

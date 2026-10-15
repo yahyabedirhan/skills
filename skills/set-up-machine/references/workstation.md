@@ -77,19 +77,23 @@ Where each harness's own files are in the repository, so that each can sit in th
 {
   "version": 1,
   "harnesses": {
-    "<harness>": {"instructions": "<path>", "config": "<path>"}
+    "<harness>": {
+      "instructions": "<path>", "config": "<path>",
+      "environments": {"<env>": {"instructions": "<path>", "config": "<path>"}}
+    }
   }
 }
 ```
 
 - **`version`:** required, and `1`.
-- **`harnesses`:** one entry per harness that has a file of its own. `<harness>` is the harness's reference name, as in `installs.json`: `claude-code`, `codex`, `cursor`, `opencode` or `pi`. An entry takes `instructions`, `config`, or both. A harness with nothing to point at has no entry.
+- **`harnesses`:** one entry per harness that has a file of its own. `<harness>` is a harness id from SKILL.md, *Harnesses*, as in `installs.json`. An entry takes `instructions`, `config`, `environments`, or some of them. A harness with nothing to point at has no entry.
+- **`environments`:** the files only one environment has, keyed by one of that harness's environments in SKILL.md, *Harnesses*. A harness with none there has no `environments`. An environment's file wins over the harness's shared one of the same kind; without one, the environment uses the shared file.
 - **`<path>`:** relative to the repository's root, such as `harnesses/cursor/instructions.md`. It stays inside the repository: an absolute path, a path through `..` out of the repository, or a link that leads out of it is refused.
 - **`instructions`:** the harness's instructions file, below.
 - **`config`:** the harness's declared config, such as its default model, below. Every harness can have one.
 - **Without the file,** no harness has instructions or declared config of its own.
 - **A file that isn't valid JSON, lacks `version`, has an unknown key or harness, or a path outside the repository** is a `FAIL` that names the problem, and nothing it points at is read or written.
-- **A path to a file that doesn't exist** is a `FAIL` that names the pointer, such as `harnesses.cursor.instructions`, and the path it gives.
+- **A path to a file that doesn't exist** is a `FAIL` that names the pointer, such as `harnesses.cursor.environments.cloud.instructions`, and the path it gives.
 
 ### A harness's instructions file
 
@@ -106,7 +110,7 @@ The file `setup/harnesses.json` points at with a harness's `instructions`. It ho
 ```
 
 - **Copying:** everything under `## Instructions`, up to the next `## ` heading, is copied as it is into the harness's own instructions file. Other text is notes and stays in the repository. A file with no `## Instructions` section, or an empty one, is a `FAIL`.
-- **Where it goes:** only Cursor has a file today, `~/.cursor/rules/harness-instructions.mdc` (cursor.md, *Global instructions*). Its header names the path `setup/harnesses.json` gives. Claude Code, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line. Grok Bot's lines go into its memory (grok-bot.md).
+- **Where it goes:** Cursor's is `~/.cursor/rules/harness-instructions.mdc` (cursor/index.md, *Global instructions*). Its header names the path `setup/harnesses.json` gives. A Cursor cloud agent's is `.cursor/CLOUD.md` in the clone, written by that repo's install, and the verifier checks the section is in it (cursor/cloud.md). Claude Code, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line. Grok Bot's lines go into its memory (grok-bot/desktop.md).
 - Never put a rule every harness needs here; it belongs in `setup/instructions.md`. Check every line against the team test in `global-instructions.md`.
 
 `verify.py` checks this file in the harness's `instructions` cell: `ok` when the generated file matches its source; `FAIL` when it is missing or differs, or when a generated file outlived its source; `gap` for a harness with no place yet, or a file of the same name the skill didn't write. A malformed `setup/harnesses.json`, or one that points at a missing file, fails the `setup` line. A generated file whose header names another path, such as one from before the source moved, differs, and the diff rewrites it.
@@ -128,9 +132,9 @@ The file `setup/harnesses.json` points at with a harness's `config`. It holds th
 |---|---|---|
 | `claude-code` | `harnesses/claude-code/config/settings.json` | `~/.claude/settings.json` |
 | `codex` | `harnesses/codex-cli/config/config.toml` | `config.toml` in the Codex config home (`codex.md`) |
-| `cursor` | `harnesses/cursor/config/cli-config.json` | `~/.cursor/cli-config.json` |
-| `opencode` | `harnesses/opencode/config/opencode.json` | the global config file opencode reads last: `opencode.jsonc` or `opencode.json` in `~/.config/opencode` (`opencode.md`) |
-| `pi` | `harnesses/pi/config/settings.json` | `settings.json` in Pi's agent folder (`pi.md`) |
+| `cursor` | `harnesses/cursor/environments/cli/config/cli-config.json` | `~/.cursor/cli-config.json` |
+| `opencode` | `harnesses/opencode/environments/cli/config/opencode.json` | the global config file opencode reads last: `opencode.jsonc` or `opencode.json` in `~/.config/opencode` (`opencode/cli.md`) |
+| `pi` | `harnesses/pi/environments/cli/config/settings.json` | `settings.json` in Pi's agent folder (`pi/cli.md`) |
 
 - **Each key is optional.** An omitted key declares no preference, so that setting stays user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
 - **A key's value is the whole value.** A nested object, such as Cursor's `selectedModel`, is written and compared as a whole. Keys the declared file doesn't name are never written or compared.
@@ -150,7 +154,7 @@ Read `codex.md` for installed-version support, preservation and override checks.
 
 ### A Pi config
 
-The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harnesses/pi/config/settings.json`. Keep explicitly chosen Pi settings in this private file: a JSON object of top-level keys from Pi's settings reference, such as `defaultProvider`, `defaultModel`, `defaultThinkingLevel` and `enableInstallTelemetry`. Each key is optional. No `config` entry, or an omitted key, declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
+The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harnesses/pi/environments/cli/config/settings.json`. Keep explicitly chosen Pi settings in this private file: a JSON object of top-level keys from Pi's settings reference, such as `defaultProvider`, `defaultModel`, `defaultThinkingLevel` and `enableInstallTelemetry`. Each key is optional. No `config` entry, or an omitted key, declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
 
 ```json
 {
@@ -162,7 +166,7 @@ The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harness
 - **No extension list here.** Pi extensions go in `plugins` in `setup/installs.json`. A copy of Pi's `packages` setting in this file is a `gap`.
 - Declare only preferences. Leave out runtime state Pi writes itself, such as `deviceId` and `lastChangelogVersion`, and keep credentials, trust decisions and sessions in Pi's own files.
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
-- Read `pi.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
+- Read `pi/cli.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
 
 `verify.py` checks each declared key in Pi's `config` cell, as *A declared config* says; a `packages` key there is a `gap`.
 
@@ -217,7 +221,7 @@ What each machine installs beyond the harnesses' configuration: skills, plugins,
 
 - **`skills`:** each entry has a `source`, a GitHub `owner/repo`, and an optional `skills` array of skill names in it. Without `skills`, the entry means every skill in the source, including one added to it later.
 - **`ignore`:** skill names a machine may have that the list leaves out on purpose, such as an experiment on one machine or a hand-made skill the lock doesn't track. Mark an installed skill on this list `ignored`, not `extra`, and never install, update or remove it, since it is the user's on that machine.
-- **`plugins`:** what each harness plugs in for new tools, the plugins setup area. An entry has a `name`, a `kind` and the `harnesses` that should have it (`claude-code`, `cursor`, `codex`, `opencode`, `pi`, `grok-bot`). Two entries may share a `name` when they name different harnesses, such as an `exa` bundle for Claude Code and an `exa` server for Pi; each harness gets a name once.
+- **`plugins`:** what each harness plugs in for new tools, the plugins setup area. An entry has a `name`, a `kind` and the `harnesses` that should have it, as ids from SKILL.md, *Harnesses*. An entry names a harness, never an environment: every environment of the harness it reaches gets it. Two entries may share a `name` when they name different harnesses, such as an `exa` bundle for Claude Code and an `exa` server for Pi; each harness gets a name once.
   - `kind: "bundle"`: a plugin installed as one unit with its MCP servers, skills and hooks. `source` is `<plugin>@<marketplace>`, as Claude Code and Codex name it. `marketplace` is the GitHub `<owner>/<repo>` to add first, for a marketplace the harness does not know yet.
   - `mcp_policy` is optional and the same object for every harness on the entry. Its fields are `enabled_tools`, `disabled_tools`, `approval_mode` (`auto`, `prompt`, `writes` or `approve`) and `require_oauth`. `require_oauth` asks for a sign-in check. It is not a setting the harness stores. Credentials never enter the list.
   - Tool lists come from `setup/permissions.json` and the rule table. A deny or allow row that names this entry's server supplies the tools. Leave `enabled_tools` and `disabled_tools` unset when a row already names the tool. The adapters derive each harness's list from those rows.

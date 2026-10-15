@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """set-up-machine's verifier: did every harness on this machine get what the workstation repo's setup/ asks for?
 
-usage: verify.py [--home DIR] [--rules FILE]
+usage: verify.py [--home DIR] [--rules FILE] [--harness ID [--env ENV]]
        verify.py --codex-trust-hash COMMAND
 
 It reads the machine and writes nothing. The steps:
@@ -13,12 +13,15 @@ It reads the machine and writes nothing. The steps:
      file (~/.config/agents/AGENTS.md) carries what setup/instructions.md generates;
    - rules: every sample of every rule-table row and personal permission gets its row's
      answer from the hook's decision.
-3. Print one table: a row per harness found (its folder exists, or its CLI is on PATH; a --home
+3. Print one table: a row per harness environment found (its folder exists, or its CLI is on PATH; a --home
    copy counts only its folders), a column per setup area (instructions, guardrails, sandbox,
    plugins, skills) and a last one, config, for the keys setup/harnesses.json declares, such as
    a default model. Each cell is ok, FAIL, gap or n/a.
 4. Print one detail line per FAIL and gap cell.
 5. Exit 1 when any line or cell is FAIL.
+
+--harness keeps the rows of one harness, such as `cursor`: each of its environments found on the
+machine. --env keeps one of them, such as `cloud`. A row reads harness / environment: `Cursor / cloud`.
 
 --codex-trust-hash prints the trusted_hash Codex needs in config.toml for a hook running
 COMMAND (references/codex.md). Python 3.9+, standard library only.
@@ -32,7 +35,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from setupmachine import checks, hook, rules, workstation  # noqa: E402
-from setupmachine.harnesses import ALL, codex, grok_bot, pi  # noqa: E402
+from setupmachine.harnesses import ALL, ENVIRONMENTS, codex, env_of, row_label  # noqa: E402
+from setupmachine.harnesses.grok_bot import desktop as grok_bot  # noqa: E402
+from setupmachine.harnesses.pi import cli as pi  # noqa: E402
 
 # The table's columns: the five setup areas, then the declared config, which is none of them.
 AREAS = ("instructions", "guardrails", "sandbox", "plugins", "skills", "config")
@@ -44,18 +49,24 @@ def main() -> int:
     parser.add_argument("--rules", type=Path, default=rules.DEFAULT_TABLE)
     parser.add_argument("--grok-bot-rules", action="store_true",
                         help="print the rule table and personal permissions as Grok Bot Auto-review rules")
+    parser.add_argument("--harness", help="only this harness's rows, such as cursor")
+    parser.add_argument("--env", help="with --harness, only this environment, such as cli, desktop or cloud")
     parser.add_argument("--codex-trust-hash", metavar="COMMAND", help="print Codex's trusted_hash for this hook command")
     args = parser.parse_args()
     if args.codex_trust_hash is not None:
         print(codex.trust_hash(args.codex_trust_hash))
         return 0
+    try:
+        chosen = select(args.harness, args.env)
+    except ValueError as exc:
+        parser.error(str(exc))
     home = args.home.expanduser().resolve()
     try:
         table = rules.load(args.rules)
     except rules.RuleTableError as exc:
         print(f"rules  FAIL  {exc}")
         return 1
-    setup = workstation.load(home, table, [h.ID for h in ALL])
+    setup = workstation.load(home, table, ENVIRONMENTS)
     ctx = checks.Context(home, setup, table + setup.rows, codex.config_home(home), pi.agent_dir(home))
     if args.grok_bot_rules:
         print(grok_bot.review_rules(ctx.rows), end="")
@@ -63,9 +74,23 @@ def main() -> int:
 
     failed = global_line("setup", *setup_line(ctx), home)
     failed |= global_line("rules", *rules_line(ctx, len(table)), home)
-    rows = [(h.LABEL, [getattr(h, f"check_{area}")(ctx) for area in AREAS]) for h in ALL if h.present(home)]
+    rows = [(row_label(h), [getattr(h, f"check_{area}")(ctx) for area in AREAS]) for h in chosen if h.present(home)]
     print_table(rows)
     return 1 if failed or any(c.status == "FAIL" for _, cells in rows for c in cells) else 0
+
+
+def select(harness, env) -> tuple:
+    """The environment modules --harness and --env keep; all of them when neither is given."""
+    if env and not harness:
+        raise ValueError("--env needs --harness")
+    if not harness:
+        return ALL
+    if harness not in ENVIRONMENTS:
+        raise ValueError(f"unknown harness `{harness}`; known: {', '.join(sorted(ENVIRONMENTS))}")
+    if env is not None and env not in ENVIRONMENTS[harness]:
+        envs = ", ".join(ENVIRONMENTS[harness]) or "none: it isn't split into environments yet"
+        raise ValueError(f"no environment `{env}` in harness `{harness}`; it has {envs}")
+    return tuple(h for h in ALL if h.ID == harness and (env is None or env_of(h) == env))
 
 
 def setup_line(ctx) -> tuple:

@@ -1,4 +1,4 @@
-"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area (references/pi.md).
+"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area (references/pi/cli.md).
 
 Every path is under Pi's agent folder: `PI_CODING_AGENT_DIR`, else `~/.pi/agent` (`agent_dir`).
 Pi has no permission system, so the hook, run through an extension, is its only guardrail.
@@ -10,11 +10,12 @@ import json
 import os
 from pathlib import Path
 
-from ..checks import (Cell, cell, declared_problems, dig, link_problem, na, on_path, read_json, skill_problems,
+from ...checks import (Cell, cell, declared_problems, dig, link_problem, na, on_path, read_json, skill_problems,
                       template_problem)
-from ..hook import ToolCall, plain, refusal, search_pair
+from ...hook import ToolCall, plain, refusal, search_pair
 
 ID, LABEL = "pi", "Pi"
+ENV = "cli"
 # Pi's built-in tools that take a path: the input field holding it, and the access it means.
 FILE_TOOLS = {"read": "read", "edit": "write", "write": "write", "grep": "read", "find": "read", "ls": "read"}
 SEARCH_GLOB = {"grep": "glob", "find": "pattern"}
@@ -70,7 +71,7 @@ def check_instructions(ctx) -> Cell:
     problems = [link_problem(ctx, ctx.pi_dir / "AGENTS.md")]
     if (ctx.pi_dir / "AGENTS.override.md").exists():
         problems.append(("gap", "AGENTS.override.md in Pi's agent folder is read instead of AGENTS.md"))
-    if ctx.setup.file(ID, "instructions"):
+    if ctx.setup.file(ID, "instructions", ENV):
         problems.append(("gap", "setup/harnesses.json names instructions for Pi, which has no place for them"))
     return cell([p for p in problems if p])
 
@@ -80,7 +81,7 @@ def check_guardrails(ctx) -> Cell:
     path = ctx.pi_dir / "extensions/set-up-machine.ts"
     if not path.is_file():
         return cell([("FAIL", f"no extension at {ctx.show(path)}; nothing enforces the rule table in Pi")])
-    return cell([p for p in [template_problem(ctx, path, "pi-extension.ts", ID)] if p])
+    return cell([p for p in [template_problem(ctx, path, "pi/pi-extension.ts", ID)] if p])
 
 
 def check_sandbox(ctx) -> Cell:
@@ -113,7 +114,7 @@ def check_skills(ctx) -> Cell:
 def check_config(ctx) -> Cell:
     """Each key the declared Pi config sets has its value in settings.json. A `packages` key is a gap:
     Pi extensions come from installs.json plugins, so it is never compared."""
-    source = ctx.setup.file(ID, "config")
+    source = ctx.setup.file(ID, "config", ENV)
     if source is None:
         return na("setup/harnesses.json names no Pi config")
     declared, target = read_json(source), ctx.pi_dir / "settings.json"

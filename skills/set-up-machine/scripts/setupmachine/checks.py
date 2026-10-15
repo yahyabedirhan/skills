@@ -196,10 +196,10 @@ def declared_problems(ctx: Context, source: Path, declared, target: Path, actual
             for key, value in declared.items() if (keys is None or key in keys) and actual.get(key) != value]
 
 
-def json_config_cell(ctx: Context, harness: str, label: str, target: Path, read=read_json) -> Cell:
+def json_config_cell(ctx: Context, harness: str, label: str, target: Path, read=read_json, env=None) -> Cell:
     """The config cell of a harness whose declared config is JSON: each declared key holds its
     value in `target`, read with `read`. n/a when setup/harnesses.json names no config for it."""
-    source = ctx.setup.file(harness, "config")
+    source = ctx.setup.file(harness, "config", env)
     if source is None:
         return na(f"setup/harnesses.json names no {label} config")
     return cell(declared_problems(ctx, source, read_json(source), target, read(target)))
