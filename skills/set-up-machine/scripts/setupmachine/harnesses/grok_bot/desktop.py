@@ -18,7 +18,6 @@ from ...checks import Cell, cell, na, read_json
 from ...hook import ToolCall, refusal
 
 ID, LABEL = "grok-bot", "Grok Bot"
-HARNESS = ID
 ENV = "desktop"
 FOLDER = Path("agent-data/workflows")
 # Like ~/.agents/.skill-lock.json: {"skills": {name: {"source", "skillPath", "skillFolderHash"}}}.
@@ -88,7 +87,7 @@ def check_instructions(ctx) -> Cell:
 def sources(ctx) -> list:
     """The files memory facts come from: setup/instructions.md for user memory, and Grok Bot's own
     instructions from setup/harnesses.json for agent memory."""
-    files = [ctx.setup.clone / "setup/instructions.md", ctx.setup.file(ID, "instructions")]
+    files = [ctx.setup.clone / "setup/instructions.md", ctx.setup.file(ID, "instructions", ENV)]
     return [f for f in files if f is not None and f.is_file()]
 
 
@@ -138,7 +137,7 @@ def check_skills(ctx) -> Cell:
 def check_config(ctx) -> Cell:
     """The declared config's `secrets` are set as environment variables, by name only; `connectors`
     are checked in the plugins column; `routines` live in the app."""
-    source = ctx.setup.file(ID, "config")
+    source = ctx.setup.file(ID, "config", ENV)
     if source is None:
         return na("setup/harnesses.json names no Grok Bot config")
     declared = _declared(ctx)
@@ -165,7 +164,7 @@ KEYS = ("secrets", "connectors", "routines")
 
 
 def _declared(ctx) -> dict:
-    source = ctx.setup.file(ID, "config")
+    source = ctx.setup.file(ID, "config", ENV)
     data = read_json(source) if source is not None else {}
     return data if isinstance(data, dict) else {}
 

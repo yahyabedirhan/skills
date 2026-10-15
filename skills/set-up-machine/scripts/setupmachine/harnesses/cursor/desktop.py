@@ -5,11 +5,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from . import (FOLDER, HARNESS, check_instructions, check_plugins, check_skills, read, write)  # noqa: F401
+from . import (FOLDER, check_instructions, check_plugins, check_skills, read, write)  # noqa: F401
 from . import check_guardrails as _guardrails
 from ...checks import Cell, na, on_path
 
-ID, LABEL = "cursor-desktop", "Cursor desktop"
+ID, LABEL = "cursor", "Cursor"
 ENV = "desktop"
 # What the desktop app writes. cli-config.json is the CLI's.
 MARKS = ("argv.json", "extensions")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """set-up-machine's pre-tool hook. A harness runs it before each tool call, with the call on stdin.
 
-usage: pre_tool_hook.py [--harness claude-code|codex|cursor|cursor-cloud|grok-bot|opencode|pi] [--config FILE] [--rules FILE]
+usage: pre_tool_hook.py [--harness claude-code|codex|cursor|grok-bot|opencode|pi] [--config FILE] [--rules FILE]
 
 The steps:
 

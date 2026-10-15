@@ -15,7 +15,6 @@ from ...checks import (Cell, cell, declared_problems, dig, link_problem, na, on_
 from ...hook import ToolCall, plain, refusal, search_pair
 
 ID, LABEL = "pi", "Pi"
-HARNESS = ID
 ENV = "cli"
 # Pi's built-in tools that take a path: the input field holding it, and the access it means.
 FILE_TOOLS = {"read": "read", "edit": "write", "write": "write", "grep": "read", "find": "read", "ls": "read"}
@@ -72,7 +71,7 @@ def check_instructions(ctx) -> Cell:
     problems = [link_problem(ctx, ctx.pi_dir / "AGENTS.md")]
     if (ctx.pi_dir / "AGENTS.override.md").exists():
         problems.append(("gap", "AGENTS.override.md in Pi's agent folder is read instead of AGENTS.md"))
-    if ctx.setup.file(ID, "instructions"):
+    if ctx.setup.file(ID, "instructions", ENV):
         problems.append(("gap", "setup/harnesses.json names instructions for Pi, which has no place for them"))
     return cell([p for p in problems if p])
 
@@ -115,7 +114,7 @@ def check_skills(ctx) -> Cell:
 def check_config(ctx) -> Cell:
     """Each key the declared Pi config sets has its value in settings.json. A `packages` key is a gap:
     Pi extensions come from installs.json plugins, so it is never compared."""
-    source = ctx.setup.file(ID, "config")
+    source = ctx.setup.file(ID, "config", ENV)
     if source is None:
         return na("setup/harnesses.json names no Pi config")
     declared, target = read_json(source), ctx.pi_dir / "settings.json"

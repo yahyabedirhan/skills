@@ -16,7 +16,6 @@ from ...checks import (Cell, cell, json_config_cell, link_problem, na, on_path, 
 from ...hook import PATCH_FILE, ToolCall, refusal, search_pair
 
 ID, LABEL = "opencode", "opencode"
-HARNESS = ID
 ENV = "cli"
 FOLDER = Path(".config/opencode")
 # Built-in tools that take a path: the argument holding it, and the access it means.
@@ -67,7 +66,7 @@ def write(denials: list, asks=()) -> str:
 def check_instructions(ctx) -> Cell:
     """AGENTS.md links to the shared file. opencode has no memory feature."""
     problems = [link_problem(ctx, ctx.home / FOLDER / "AGENTS.md")]
-    if ctx.setup.file(ID, "instructions"):
+    if ctx.setup.file(ID, "instructions", ENV):
         problems.append(("gap", "setup/harnesses.json names instructions for opencode, which has no place for them"))
     return cell([p for p in problems if p])
 
@@ -104,7 +103,7 @@ def check_skills(ctx) -> Cell:
 def check_config(ctx) -> Cell:
     """Each key the declared opencode config sets, such as `model`, has its value in the config file
     opencode reads last (an opencode.jsonc read without its comments)."""
-    return json_config_cell(ctx, ID, LABEL, _config_path(ctx.home), read=_read_config)
+    return json_config_cell(ctx, ID, LABEL, _config_path(ctx.home), read=_read_config, env=ENV)
 
 
 def _mcp_names(tool: str) -> tuple:

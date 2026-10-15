@@ -15,9 +15,8 @@ from . import read as _read, write as _write
 from ...checks import Cell, cell, na, read_json, skill_problems
 from ...workstation import HARNESS_SECTION, section
 
-ID, LABEL = "cursor-cloud", "Cursor cloud"
+ID, LABEL = "cursor", "Cursor"
 ENV = "cloud"
-HARNESS = "cursor"
 SOCKET = Path("/run/cursor/api.sock")
 ENV_FILE = Path(".cursor/environment.json")
 CLOUD = Path(".cursor/CLOUD.md")
@@ -27,7 +26,7 @@ RAN = ("beforeShellExecution", "beforeReadFile", "preToolUse")
 NOT_RAN = "beforeMCPExecution"
 # The keys a declared config may set (references/cursor/cloud.md, *Config*).
 KEYS = ("secrets",)
-_HARNESS = re.compile(r"--harness(?:\s+|=)cursor(?:-cloud)?(?:\s|$)")
+_HARNESS = re.compile(r"--harness(?:\s+|=)cursor(?:\s|$)")
 
 
 def present(home: Path) -> bool:
@@ -53,7 +52,7 @@ def check_instructions(ctx) -> Cell:
     if ctx.setup.clone is None:
         return Cell("gap", ["no workstation clone: can't see .cursor/environment.json or CLOUD.md"])
     env_path = ctx.setup.clone / ENV_FILE
-    declared = ctx.setup.file(ID, "instructions")
+    declared = ctx.setup.file(ID, "instructions", ENV)
     if not env_path.is_file():
         if declared is None:
             return Cell("gap", ["this repo has no .cursor/environment.json"])
@@ -113,7 +112,7 @@ def check_skills(ctx) -> Cell:
 
 def check_config(ctx) -> Cell:
     """The declared config's `secrets` are set as environment variables, by name only."""
-    source = ctx.setup.file(ID, "config")
+    source = ctx.setup.file(ID, "config", ENV)
     if source is None:
         return na("setup/harnesses.json names no Cursor cloud config")
     declared = read_json(source)
