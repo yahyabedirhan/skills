@@ -8,7 +8,7 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 ## Instructions
 
-The Build only installs: the repo's environment file runs an install that puts the skills and tools on the VM. It writes no instructions and no harness files, and it runs no audit. The agent applies the setup itself at session start, as on any machine: this skill writes the setup, and scripts only enforce and check.
+The Build only installs: the repo's environment file runs an install that puts the skills and tools on the VM. It writes no instructions and no harness files except the hook file (*Guardrails*), and it runs no audit. The agent applies the setup itself at session start, as on any machine: this skill writes the setup, and scripts only enforce and check.
 
 The agent learns this at start from Cursor's documented channel for cloud-only instructions, a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). That section tells the agent, before other work, to follow this skill for harness `cursor`, environment `cloud` (first-time setup, or a reconcile), to run `verify.py --harness cursor --env cloud`, and to stop and ask when a step needs more access. It points at the `instructions` file `setup/harnesses.json` names for the cloud environment (`harnesses.cursor.environments.cloud`), whose `## Instructions` lines the agent follows for the session. A `.cursor/CLOUD.md` file, which a Cursor staff answer on the forum mentions, was not seen loading, so this skill does not use it.
 
@@ -18,11 +18,15 @@ The agent learns this at start from Cursor's documented channel for cloud-only i
 
 ## Guardrails
 
-A cloud agent runs project command hooks from `.cursor/hooks.json` only. It does not load `~/.cursor/hooks.json`. It runs `beforeShellExecution`, `beforeReadFile` and `preToolUse`. It does not run `beforeMCPExecution`. Commands auto-run: there is no ask prompt, and the hook's refusal is the stop.
+A cloud agent runs command hooks from one file: `/agent/.cursor/hooks.json`. Its exec daemon runs from `/agent`, the first workspace folder, and loads project hooks from there only, and only at session startup. There is no file watcher; a later edit loads only through the daemon's skill reload. A multi-repo test on 2026-10-15 saw none of `<repo>/.cursor/hooks.json`, `~/.cursor/hooks.json`, `/agent/repos/.cursor/hooks.json` or `/etc/cursor/hooks.json` fire. Cursor's [hooks](https://cursor.com/docs/hooks) page agrees that user-level hooks don't reach a cloud agent.
+
+So the Build writes the file, the one exception to "the Build only installs": the hook is the enforcement tool, not setup, and the agent's own setup at session start comes after the daemon has read it. `/agent` is root-owned; the install writes with `sudo -n`, which works on the VM. A repo's own `.cursor/hooks.json` stays, for single-repo environments and the CLI.
+
+It runs `beforeShellExecution`, `beforeReadFile` and `preToolUse`. It does not run `beforeMCPExecution`. Commands auto-run: there is no ask prompt, and the hook's refusal is the stop.
 
 The command is the same one Cursor's CLI uses, `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'`, with `<script>` the installed `pre_tool_hook.py`. `--harness cursor` is the harness id; every Cursor environment reads the same payload. The `echo '{}'` matters: an empty answer is invalid JSON, which blocks. When the script is missing the command fails open.
 
-- **Audit:** `ok` for an event whose command names an existing `pre_tool_hook.py` and `--harness cursor`. `$HOME` and `~/` in the path are expanded. `FAIL` when the command is missing, names no script, or the script is not a file. `beforeMCPExecution` is a `gap`.
+- **Audit:** `FAIL` when `/agent/.cursor/hooks.json` is missing. `ok` for an event whose command names an existing `pre_tool_hook.py` and `--harness cursor`. `$HOME` and `~/` in the path are expanded. `FAIL` when the command is missing, names no script, or the script is not a file. `beforeMCPExecution` is a `gap`.
 
 ## Sandbox
 
@@ -46,18 +50,18 @@ When `setup/harnesses.json` names a Cursor cloud `config`, it is a JSON object. 
 
 ## Hook wiring
 
-The wiring is the committed `.cursor/hooks.json` (*Guardrails*). This skill does not write it. The hook fails open when the script is missing, except that Cursor treats an empty stdout as invalid JSON, which is why the command prints `{}`.
+The wiring is `/agent/.cursor/hooks.json`, which the Build writes (*Guardrails*). The agent does not write it: a file written after startup is not loaded. The hook fails open when the script is missing, except that Cursor treats an empty stdout as invalid JSON, which is why the command prints `{}`.
 
 ## Gaps
 
-Network mode, dashboard MCP servers, and whether a skill installed before the process started is offered as a slash command. `beforeMCPExecution` does not run. A cold start is a new VM, which this check cannot start.
+Network mode, dashboard MCP servers, and whether a skill installed before the process started is offered as a slash command. `beforeMCPExecution` does not run. A cold start is a new VM, which this check cannot start. Whether a file under `/agent` written during the Build survives into the Build snapshot has not been observed.
 
 ## Checking it
 
 The verifier's `Cursor / cloud` row (`verify.py --harness cursor --env cloud`), from `scripts/setupmachine/harnesses/cursor/cloud.py`:
 
 - **instructions:** `.cursor/environment.json` has an `install` string, and the repo `AGENTS.md` cloud section names the cloud instructions file, which has an `## Instructions` section. `gap` when the repo has neither the environment file nor declared cloud instructions.
-- **guardrails:** `beforeShellExecution`, `beforeReadFile` and `preToolUse` each run an existing `pre_tool_hook.py` with `--harness cursor`. `beforeMCPExecution` is a `gap`.
+- **guardrails:** `/agent/.cursor/hooks.json` exists, and `beforeShellExecution`, `beforeReadFile` and `preToolUse` each run an existing `pre_tool_hook.py` with `--harness cursor`. `beforeMCPExecution` is a `gap`.
 - **sandbox:** `gap`.
 - **plugins:** `gap`.
 - **skills:** each listed skill is in `~/.cursor/skills`, `~/.agents/skills`, or the repo's `.cursor/skills` or `.agents/skills`.

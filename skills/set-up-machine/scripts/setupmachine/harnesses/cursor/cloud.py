@@ -1,4 +1,4 @@
-"""Cursor cloud agents: one VM per run, project hooks, and the repo AGENTS.md cloud section
+"""Cursor cloud agents: one VM per run, the hook file at /agent, and the repo AGENTS.md cloud section
 (references/cursor/cloud.md).
 
 The hook payload is Cursor's, so read and write are Cursor's. The project hook
@@ -22,7 +22,8 @@ ENV_FILE = Path(".cursor/environment.json")
 AGENTS = Path("AGENTS.md")
 # The section Cursor documents for cloud-only instructions in the repo AGENTS.md.
 CLOUD_SECTION = "## Cursor Cloud specific instructions"
-HOOKS = Path(".cursor/hooks.json")
+# The daemon runs from /agent and loads project hooks only from this file, at startup.
+HOOKS = Path("/agent/.cursor/hooks.json")
 # A cloud agent runs these. beforeMCPExecution is in the file for the CLI and does not run here.
 RAN = ("beforeShellExecution", "beforeReadFile", "preToolUse")
 NOT_RAN = "beforeMCPExecution"
@@ -79,11 +80,11 @@ def check_instructions(ctx) -> Cell:
 
 
 def check_guardrails(ctx) -> Cell:
-    """The events a cloud agent runs resolve to an existing pre_tool_hook.py. beforeMCPExecution
-    does not run here."""
-    if ctx.setup.clone is None:
-        return Cell("gap", ["no workstation clone: can't see .cursor/hooks.json"])
-    path = ctx.setup.clone / HOOKS
+    """The events a cloud agent runs, in the one file its daemon loads, resolve to an existing
+    pre_tool_hook.py. beforeMCPExecution does not run here."""
+    path = HOOKS
+    if not path.is_file():
+        return Cell("FAIL", [f"no {path}: the daemon loads hooks only from it, at startup; the Build writes it"])
     hooks = read_json(path)
     hooks = hooks.get("hooks") if isinstance(hooks, dict) else None
     hooks = hooks if isinstance(hooks, dict) else {}
