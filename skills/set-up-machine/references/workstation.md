@@ -110,7 +110,7 @@ The file `setup/harnesses.json` points at with a harness's `instructions`. It ho
 ```
 
 - **Copying:** everything under `## Instructions`, up to the next `## ` heading, is copied as it is into the harness's own instructions file. Other text is notes and stays in the repository. A file with no `## Instructions` section, or an empty one, is a `FAIL`.
-- **Where it goes:** Cursor's is `~/.cursor/rules/harness-instructions.mdc` (cursor/index.md, *Global instructions*). Its header names the path `setup/harnesses.json` gives. A Cursor cloud agent reads its lines from the file itself at session start, through the repo `AGENTS.md` cloud section, and the verifier checks that section points at it (cursor/cloud.md). Claude Code, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line. Grok Bot's lines go into its memory (grok-bot/desktop.md).
+- **Where it goes:** Cursor's is `~/.cursor/rules/harness-instructions.mdc` (cursor/index.md, *Global instructions*). Its header names the path `setup/harnesses.json` gives. A Cursor cloud agent reads its lines from the file itself at session start, through the repo `AGENTS.md` cloud section, and the verifier checks that section points at it (cursor/cloud.md). A Claude Code cloud session does the same, through the repo `CLAUDE.md` cloud section (claude-code/cloud.md). Claude Code on a machine, Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line. Grok Bot's lines go into its memory (grok-bot/desktop.md).
 - Never put a rule every harness needs here; it belongs in `setup/instructions.md`. Check every line against the team test in `global-instructions.md`.
 
 `verify.py` checks this file in the harness's `instructions` cell: `ok` when the generated file matches its source; `FAIL` when it is missing or differs, or when a generated file outlived its source; `gap` for a harness with no place yet, or a file of the same name the skill didn't write. A malformed `setup/harnesses.json`, or one that points at a missing file, fails the `setup` line. A generated file whose header names another path, such as one from before the source moved, differs, and the diff rewrites it.
@@ -130,7 +130,7 @@ The file `setup/harnesses.json` points at with a harness's `config`. It holds th
 
 | Harness | Declared config, for example | Merged into |
 |---|---|---|
-| `claude-code` | `harnesses/claude-code/config/settings.json` | `~/.claude/settings.json` |
+| `claude-code` | `harnesses/claude-code/environments/cli/config/settings.json` | `~/.claude/settings.json`, read by the CLI and the desktop app (`claude-code/cli.md`) |
 | `codex` | `harnesses/codex-cli/config/config.toml` | `config.toml` in the Codex config home (`codex.md`) |
 | `cursor` | `harnesses/cursor/environments/cli/config/cli-config.json` | `~/.cursor/cli-config.json` |
 | `opencode` | `harnesses/opencode/environments/cli/config/opencode.json` | the global config file opencode reads last: `opencode.jsonc` or `opencode.json` in `~/.config/opencode` (`opencode/cli.md`) |

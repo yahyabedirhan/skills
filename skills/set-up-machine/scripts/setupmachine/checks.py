@@ -127,7 +127,8 @@ def link_problem(ctx: Context, link: Path):
 
 
 def hook_script(command: str, harness: str, home: Path):
-    """The hook script a wired command runs for this harness, or None when it runs none."""
+    """The hook script a wired command runs for this harness, or None when it runs none.
+    `~/`, `$HOME` and `${HOME}` in its path are the home folder, as the shell expands them."""
     try:
         words = shlex.split(command)
     except ValueError:
@@ -135,6 +136,7 @@ def hook_script(command: str, harness: str, home: Path):
     script = next((w for w in words if w.endswith(HOOK_SCRIPT)), None)
     if script is None or f"--harness {harness}" not in " ".join(words):
         return None
+    script = script.replace("${HOME}", str(home)).replace("$HOME", str(home))
     return Path(str(home) + script[1:]) if script.startswith("~/") else Path(script)
 
 

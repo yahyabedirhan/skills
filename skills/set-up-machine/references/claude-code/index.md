@@ -1,10 +1,20 @@
 # Claude Code
 
-How to set up and audit Claude Code from the rule table. Docs: [permissions](https://code.claude.com/docs/en/permissions), [hooks](https://code.claude.com/docs/en/hooks), [settings](https://code.claude.com/docs/en/settings), [memory](https://code.claude.com/docs/en/memory). Background: the repo's `docs/research/harness-capabilities.md` and `docs/research/auto-mode-semantic-guard.md`.
+How to set up and audit Claude Code from the rule table. This page holds what both local environments share: the CLI and the desktop app's local sessions read the same `~/.claude/`. Docs: [permissions](https://code.claude.com/docs/en/permissions), [hooks](https://code.claude.com/docs/en/hooks), [settings](https://code.claude.com/docs/en/settings), [memory](https://code.claude.com/docs/en/memory). Background: the repo's `docs/research/harness-capabilities.md` and `docs/research/auto-mode-semantic-guard.md`.
+
+## Environments
+
+Each environment has its own page and its own verifier row, `Claude Code / <env>`. `verify.py --harness claude-code` checks every environment found; `--env <env>` keeps one:
+
+- [cli.md](cli.md): the `claude` CLI, in a terminal or an IDE extension. Its sandbox and the declared config.
+- [desktop.md](desktop.md): a local session in the Claude desktop app. It reads this page's files; its permission mode and worktrees are app settings.
+- [cloud.md](cloud.md): a cloud session, one Anthropic-managed VM per session. It reads none of `~/.claude/` from the user's machine, so nothing on this page applies to it except the hook payload.
+
+The code is `scripts/setupmachine/harnesses/claude_code/`: `__init__.py` holds the hook payload and the checks on this page, and each environment is a module.
 
 ## Found
 
-Found when `~/.claude/` exists or `claude` is on `PATH`. Every setting below lives in one file, `~/.claude/settings.json`, except the instructions. Keep every key you don't change; a file that isn't valid JSON stops the run until the user fixes it.
+Each environment page says when its row is found. Every setting below lives in one file, `~/.claude/settings.json`, except the instructions. Keep every key you don't change; a file that isn't valid JSON stops the run until the user fixes it.
 
 ## Instructions
 
@@ -12,7 +22,7 @@ Found when `~/.claude/` exists or `claude` is on `PATH`. Every setting below liv
 
 - Claude Code reads `~/.claude/CLAUDE.md` in every session, and follows a symlink; it has no global `AGENTS.md`.
 - `~/.claude/CLAUDE.md` becomes a **symlink to the shared file**, `~/.config/agents/AGENTS.md`, so the shared file is the one source and Claude Code reads it as written. It's `present` once it's that link.
-- Link it only once nothing in the old file would be lost: every other line is `extra` until it moves into the shared file (global-instructions.md, *Moving a harness's file*). The old file is `removed` (backed up). A file holding only `@~/.config/agents/AGENTS.md`, this skill's earlier form, is `removed` and becomes the link.
+- Link it only once nothing in the old file would be lost: every other line is `extra` until it moves into the shared file (../global-instructions.md, *Moving a harness's file*). The old file is `removed` (backed up). A file holding only `@~/.config/agents/AGENTS.md`, this skill's earlier form, is `removed` and becomes the link.
 
 ### Memory
 
@@ -45,7 +55,7 @@ Found when `~/.claude/` exists or `claude` is on `PATH`. Every setting below liv
 ### File rows
 
 - A `read` row becomes `Read(<path>)`, a `write` row `Edit(<path>)`. Project paths get `./` (`./**/.env`), `~/` paths stay as they are, and an absolute path gets a second `/` (`Read(//proc/**/environ)`), because Claude Code reads `/path` as relative to the settings file. A path with no `/` after the `./` matches at any depth, as in `.gitignore`: `Read(./.env.*)` refuses `sub/.env.local` too. A `Read` deny also blocks edits.
-- **Only `Edit(...)`, never `Write(...)`.** Claude Code never checks a `Write(...)` deny, and warns at startup for each one: "Use Edit(**/.env) instead (Edit rules cover all file-editing tools)". The Cursor CLI gets its `Write(...)` entries in its own `cli-config.json` (cursor/cli.md, *Guardrails*). An existing `Write(...)` entry, such as `Write(**/.env)` from an older run, is this skill's own outdated wiring: `removed`.
+- **Only `Edit(...)`, never `Write(...)`.** Claude Code never checks a `Write(...)` deny, and warns at startup for each one: "Use Edit(**/.env) instead (Edit rules cover all file-editing tools)". The Cursor CLI gets its `Write(...)` entries in its own `cli-config.json` (../cursor/cli.md, *Guardrails*). An existing `Write(...)` entry, such as `Write(**/.env)` from an older run, is this skill's own outdated wiring: `removed`.
 - **No negation.** Globs have positive character classes only (`[!e]` lists `!` and `e`), matched case-insensitively on macOS. So an `except` of literal names becomes the globs around them. For `**/.env.*` minus `.env.example`, `.env.sample` and `.env.template`:
   - each name the literals start with but none of them is: `.env.`, `.env.e`, `.env.ex`, … `.env.exampl`, `.env.s`, … `.env.templat`;
   - after each of those, a class of every letter (both cases), digit, `_` and `.` except the literals' next letters, then `*`: `.env.[0-9A-DF-RU-Za-df-ru-z_.]*` (not `e`, `s`, `t`), `.env.exa[0-9A-LN-Za-ln-z_.]*` (not `m`);
@@ -63,7 +73,7 @@ Found when `~/.claude/` exists or `claude` is on `PATH`. Every setting below liv
 
 ### Personal permissions
 
-A personal permission (workstation.md) becomes entries the way a table row of its kind does above, in the same lists, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does.
+A personal permission (../workstation.md) becomes entries the way a table row of its kind does above, in the same lists, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does.
 
 - **Worked example,** an `allow` MCP-tool row with `server` `<server>` and `tool` `^read_`: each tool of the listing above that it matches becomes an exact entry in `allow`, `mcp__<server>__read_<name>`, marked `added, personal`. With no match in the listing, the row is `n/a` here, "no tool it matches in Claude Code", and nothing is written.
 - **Its tool exists** for a command row when one of its programs is on `PATH`, for an MCP-tool row when the listing above has a tool it matches, and for a file row always.
@@ -79,28 +89,18 @@ Leave auto mode's classifier as Claude Code ships it: write no `autoMode` rules.
 
 A native refusal says `Permission to use Bash with command <command> has been denied.` or `File is in a directory that is denied by your permission settings.`, naming no rule; the shared file supplies general rejection guidance and the `rm -rf` fallback. The hook runs first; its refusal names each refused part, its rule, reason and instruction.
 
-## Sandbox
-
-set-up-machine declares no sandbox or approval setting for Claude Code, so the verifier's `sandbox` cell is `n/a`.
-
 ## Plugins
 
-The plugins setup area, from `plugins` in `setup/installs.json` (workstation.md).
+The plugins setup area, from `plugins` in `setup/installs.json` (../workstation.md).
 
 - **A bundle:** `added` when `~/.claude/plugins/installed_plugins.json` lacks its `source`. Install it with `claude plugin install <source>`, after `claude plugin marketplace add <marketplace>` when the entry names a marketplace Claude Code doesn't list (`claude plugin marketplace list`). Installing enables it in `~/.claude/settings.json` (`enabledPlugins`); one set to `false` there is a `FAIL`, which the user decides on. Installed and enabled proves readiness only, not freshness. Mark it `present` only after comparing installed code with the latest marketplace source. Docs: [plugins](https://code.claude.com/docs/en/plugins).
 - **Freshness:** inspect the selected marketplace source and the plugin's installed version or commit. Update only that marketplace with `claude plugin marketplace update <marketplace-name>`. Update only the selected plugin with `claude plugin update <source> --scope user`, then compare its installed code again. Report an unresolved freshness check as `gap`. Do not run broad updates or reinstall bundles to force freshness.
 - **A standalone MCP server:** a `gap`. Claude Code keeps user-scope servers in `~/.claude.json`, beside data that can hold tokens, so `verify.py` doesn't read it. Prefer a bundle.
-- **An enabled bundle the list leaves out** is `extra`: kept, for the user to add or turn off. Cursor imports every enabled bundle too (cursor/index.md, *Plugins*).
+- **An enabled bundle the list leaves out** is `extra`: kept, for the user to add or turn off. Cursor imports every enabled bundle too (../cursor/index.md, *Plugins*).
 
 ## Skills
 
-Claude Code reads skills from `~/.claude/skills`. When that folder is a link to `~/.agents/skills`, every skill installed there reaches Claude Code: install without `-a claude-code`, since the CLI would link the folder into itself. Otherwise add `-a claude-code` to each install command. Install each skill as workstation.md, *A skill*, says.
-
-## Config
-
-When `setup/harnesses.json` names a Claude Code `config` (workstation.md, *A declared config*), merge each key it sets, such as `model` and `effortLevel`, into `~/.claude/settings.json`, as that file's other keys are written: back it up, write through a symlink at its target, and keep every key the declared file doesn't name, including the hooks and permission lists this skill writes. Mark each key `present, personal` or `updated, personal`.
-
-- **Activation:** a new session reads it. `/model` in a running session, the `--model` flag, the `ANTHROPIC_MODEL` environment variable and a project's `.claude/settings.json` override it: name an override you find as a `gap`.
+Claude Code reads skills from `~/.claude/skills`. When that folder is a link to `~/.agents/skills`, every skill installed there reaches Claude Code: install without `-a claude-code`, since the CLI would link the folder into itself. Otherwise add `-a claude-code` to each install command. Install each skill as ../workstation.md, *A skill*, says.
 
 ## Hook wiring
 
@@ -132,19 +132,11 @@ The hook's own misses are in SKILL.md, *What it can't see*.
 
 ## Checking it
 
-The verifier's Claude Code row, from `scripts/setupmachine/harnesses/claude_code.py`:
+The checks both local rows run, from `scripts/setupmachine/harnesses/claude_code/__init__.py`. Each environment page lists its own row:
 
-- **instructions:** `~/.claude/CLAUDE.md` is a link to the shared file, and `autoMemoryEnabled` is `false`. An `instructions` entry for Claude Code in `setup/harnesses.json` is a `gap`.
+- **instructions:** `~/.claude/CLAUDE.md` is a link to the shared file, and `autoMemoryEnabled` is `false`. An `instructions` entry for Claude Code in `setup/harnesses.json` is a `gap`: a machine has no place for it.
 - **guardrails:** a match-all `PreToolUse` group runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness claude-code`, `disableAllHooks` isn't `true`, and each personal permission has its entry (*Personal permissions*).
-- **sandbox:** `n/a`.
 - **plugins:** each bundle is in `installed_plugins.json` and enabled in `enabledPlugins`. A standalone MCP server is a `gap`.
 - **skills:** each listed skill is in `~/.claude/skills`.
-- **config:** each key the declared Claude Code config sets has the same value in `~/.claude/settings.json`. `n/a` without a declared config.
 
-The verifier doesn't report an enabled bundle the list leaves out: find those in the diff. To see Claude Code itself enforce the rows, in a throwaway folder with `--setting-sources project,local --settings <a copy of settings.json>`:
-
-- `claude -p "Run exactly: rm -fr x" --allowedTools Bash` leaves `x` and quotes the hook's refusal; allowing `Bash` proves a rule refused it. With a settings file holding only `hooks`, `bash -lc "rm -rf x"` is refused too, which proves the hook.
-- `gh api rate_limit` runs, and its line appears in the report folder.
-- Writes to `.env` and `secrets/k` with `--allowedTools Write` leave them unchanged, and the session starts with no warning about a `Write(...)` rule; a Read of `sub/.env.example` works.
-- For environment rows, use fake `.env` files and a fake variable, and start the session with a scrubbed environment (`HOME`, `PATH`, `USER` and the fake variable), since a sample that gets through prints whatever the shell holds.
-- Against the real login, `claude -p "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback from the shared file.
+The verifier doesn't report an enabled bundle the list leaves out: find those in the diff. How to see Claude Code itself enforce the rows is in cli.md, *Checking it*.
