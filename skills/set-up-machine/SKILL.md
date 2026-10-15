@@ -5,7 +5,7 @@ description: Set up or audit a machine's coding-agent harnesses from one rule ta
 
 # Set up machine
 
-Set up every selected harness (Claude Code, Codex, opencode, Cursor's CLI, desktop app and cloud agents, Pi, Grok Bot) from its sources. Install or update each selected tool to the latest available version. Running the skill again is the **audit**: check configuration and freshness, then propose any required updates.
+Set up every selected harness and environment ([Harnesses](#harnesses)) from its sources. Install or update each selected tool to the latest available version. Running the skill again is the **audit**: check configuration and freshness, then propose any required updates.
 
 ## Sources
 
@@ -137,6 +137,21 @@ Name these once in every audit:
 - an automatic reviewer, such as Codex's `auto_review`, answering an `approver: "user"` row, since the call's payload doesn't show the reviewer;
 - each row's own `gap`.
 
+## Harnesses
+
+The one list of the harnesses and environments this skill sets up. The id is what `setup/harnesses.json`, `installs.json`, `verify.py --harness` and the hook's `--harness` take; an environment is what `--env` and `environments` in `setup/harnesses.json` take. Which of them a person uses is the workstation repo's.
+
+| Harness (id) | Environments | Reference |
+|---|---|---|
+| Claude Code (`claude-code`) | none yet, one page | [claude-code.md](references/claude-code.md) |
+| Codex (`codex`) | none yet, one page | [codex.md](references/codex.md); its *Codex MCP* section holds the TOML and OAuth detail |
+| Cursor (`cursor`) | `cli`, `desktop`, `cloud` | [cursor/index.md](references/cursor/index.md) for what the CLI and the desktop app share, then [cli.md](references/cursor/cli.md), [desktop.md](references/cursor/desktop.md), [cloud.md](references/cursor/cloud.md) |
+| Grok Bot (`grok-bot`) | `desktop` | [grok-bot/desktop.md](references/grok-bot/desktop.md): instructions live in memory; permissions, connectors, secrets and routines live in the app |
+| opencode (`opencode`) | `cli` | [opencode/cli.md](references/opencode/cli.md) |
+| Pi (`pi`) | `cli` | [pi/cli.md](references/pi/cli.md): the hook's extension is its only enforcement |
+
+A harness with environments has `references/<harness>/<env>.md` and `scripts/setupmachine/harnesses/<harness>/<env>.py`. One without has `references/<harness>.md` and one module. To add a harness or an environment, add its row here (docs/design/set-up-machine.md, *Extensibility*).
+
 ## References
 
 - [references/global-instructions.md](references/global-instructions.md): the shared file's shape, the roles table, the working agreement and glossaries, what counts as personal workflow, moving a harness's own file, and why memory stays off.
@@ -145,14 +160,7 @@ Name these once in every audit:
 - [references/live-check.md](references/live-check.md): starting a real session of each harness, the probe, and reading what it did.
 - [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
   - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
-- One folder per harness, `references/<harness>/`, with one page per environment, `<env>.md`, read for each environment found. A harness with more than one environment also has an `index.md` for what its environments share. Each page has the same headings: Found, Instructions, Guardrails, Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it, and leaves out what the shared page already covers. Which harnesses and environments there are, and the rule for the split, are the workstation repo's, in its `harnesses/index.md`. Claude Code and Codex are still one page each, `references/<harness>.md`, until they move to this layout.
-  - [references/claude-code.md](references/claude-code.md): Claude Code.
-  - [references/codex.md](references/codex.md): Codex. Its *Codex MCP* section holds the TOML and OAuth detail.
-  - [references/cursor/](references/cursor/index.md): Cursor. What the CLI and the desktop app share, then [cli.md](references/cursor/cli.md), [desktop.md](references/cursor/desktop.md) and [cloud.md](references/cursor/cloud.md), a cloud agent found on its VM.
-  - [references/opencode/cli.md](references/opencode/cli.md): opencode.
-  - [references/pi/cli.md](references/pi/cli.md): Pi, whose only enforcement is the hook's extension.
-  - [references/grok-bot/desktop.md](references/grok-bot/desktop.md): Grok Bot, whose instructions live in memory and whose permissions, connectors, secrets and routines live in the app.
-
+- One reference per harness environment, read for each one found: the [Harnesses](#harnesses) table lists them. Each page has the same headings: Found, Instructions, Guardrails, Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it, and leaves out what its harness's `index.md` already covers.
 ## Scripts
 
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.

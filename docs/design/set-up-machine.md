@@ -20,7 +20,7 @@ How `set-up-machine` is built. A newcomer needs three facts first:
 
 - **Rule table** (`rules.json`): every global rule once, by meaning, with samples. Personal rows from `setup/permissions.json` join it.
 - **Workstation setup** (`setup/` in the workstation repo, found through the pointer `~/.config/agents/source.md`): the source of every personal part.
-- **Harness**: one coding agent (Claude Code, Codex, opencode, Cursor, Cursor cloud, Pi, Grok Bot). It knows its own paths, its hook payload, and how to check each setup area.
+- **Harness**: one coding agent, with the environments it runs in; the skill's SKILL.md, *Harnesses*, lists them. Each environment knows its own paths, its hook payload, and how to check each setup area.
 - **Setup area**: instructions, guardrails, sandbox, plugins, skills. Five of the verifier's six columns.
 - **Declared config**: the keys a harness's `config` file in the workstation repo sets, such as its default model, merged into the harness's own config file. The verifier's last column, `config`.
 - **Hook**: decides one tool call against the rule rows.
@@ -131,8 +131,8 @@ pre_tool_hook.py --harness cursor
 
 | Change | What you touch |
 |---|---|
-| Add a harness | `harnesses/<h>/<env>.py` with the names above; one line in `ALL`; `references/<h>/<env>.md` with the same headings |
-| Add an environment to a harness | `harnesses/<h>/<env>.py`, moving shared code into `harnesses/<h>/__init__.py`; one line in `ALL`; `references/<h>/<env>.md`, and `references/<h>/index.md` for what the environments share |
+| Add a harness | a row in SKILL.md's *Harnesses* table; `harnesses/<h>/<env>.py` with the names above; one line in `ALL`; `references/<h>/<env>.md` with the same headings |
+| Add an environment to a harness | its name in SKILL.md's *Harnesses* row; `harnesses/<h>/<env>.py`, moving shared code into `harnesses/<h>/__init__.py`; one line in `ALL`; `references/<h>/<env>.md`, and `references/<h>/index.md` for what the environments share |
 | Split Claude Code or Codex into environments | the row above, with `harnesses/<h>.py` becoming the package and `references/<h>.md` its `index.md`; keep the harness id, and move environment-only files under `environments` in `setup/harnesses.json` |
 | Add a global rule | one row with samples in `rules.json`; each harness reference already says how a row becomes native entries |
 | Add a setup area | the glossary's setup areas first; one `check_<area>` in every harness module; one column |
