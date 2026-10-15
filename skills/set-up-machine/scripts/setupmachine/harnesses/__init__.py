@@ -1,6 +1,6 @@
 """ALL: the one list of harness environments set-up-machine knows, in the order the verifier prints them.
 
-A harness is a package or, until it is migrated, a single module. A package holds one module per
+A harness is a package or, until it is migrated, a single module (codex.py). A package holds one module per
 environment (cursor/cli.py, cursor/desktop.py, cursor/cloud.py) and its __init__.py holds what the
 environments share. Each environment module exposes the same names: ID (the harness id, the same
 for every environment of a harness), LABEL (the harness name) and ENV (the environment, None for a
