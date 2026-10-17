@@ -1,4 +1,4 @@
-"""Codex: its hook payload, and the check of each setup area (references/codex.md).
+"""Codex: its hook payload, and the check of each setup area (references/codex/index.md).
 
 Every path is under the Codex config home: `CODEX_HOME`, else `~/.codex` (verify.py resolves it
 once). Its `config.toml` holds memory, hook trust, the declared config and plugins. TOML checks need
@@ -12,11 +12,11 @@ import os
 import re
 from pathlib import Path
 
-from . import claude_code
-from .. import checks
-from ..checks import (Cell, any_wired_problem, as_list, cell, declared_problems, dig, link_problem, na,
+from .. import claude_code
+from ... import checks
+from ...checks import (Cell, any_wired_problem, as_list, cell, declared_problems, dig, link_problem, na,
                       native_command_row, on_path, read_json, read_toml, skill_problems, wiring_problem)
-from ..hook import PATCH_FILE, ToolCall
+from ...hook import PATCH_FILE, ToolCall
 
 ID, LABEL = "codex", "Codex"
 # The keys of the declared Codex config the sandbox column checks; the config column checks the rest.
@@ -69,7 +69,7 @@ def trust_hash(command: str, matcher: str = "*", timeout: int = 10) -> str:
 # --- the checks ----------------------------------------------------------------------------
 
 
-def check_instructions(ctx) -> Cell:
+def check_instructions(ctx, env=None) -> Cell:
     """AGENTS.md links to the shared file, no override file wins over it, and memories are off."""
     folder = ctx.codex_home
     problems = [link_problem(ctx, folder / "AGENTS.md")]
@@ -80,7 +80,7 @@ def check_instructions(ctx) -> Cell:
     problems.append(problem)
     if config is not None and dig(config, "features", "memories") is not False:
         problems.append(("FAIL", "memories isn't false in [features] of config.toml"))
-    if ctx.setup.file(ID, "instructions"):
+    if ctx.setup.file(ID, "instructions", env):
         problems.append(("gap", "setup/harnesses.json names instructions for Codex, which has no place for them"))
     return cell([p for p in problems if p])
 
@@ -113,9 +113,9 @@ def check_guardrails(ctx) -> Cell:
     return cell(problems)
 
 
-def check_sandbox(ctx) -> Cell:
+def check_sandbox(ctx, env=None) -> Cell:
     """The sandbox and approval keys the declared Codex config sets have the same value in config.toml."""
-    return _declared_cell(ctx, sandbox=True)
+    return _declared_cell(ctx, sandbox=True, env=env)
 
 
 def check_plugins(ctx) -> Cell:
@@ -131,6 +131,8 @@ def check_plugins(ctx) -> Cell:
         if entry["kind"] == "mcp":
             if dig(config, "mcp_servers", entry["name"]) is None:
                 problems.append(("FAIL", f"{entry['name']} has no [mcp_servers.{entry['name']}] in config.toml"))
+            if dig(config, "mcp_servers", entry["name"], "enabled") is False:
+                problems.append(("gap", f"{entry['name']} is disabled; enable it only after any required sign-in"))
             continue
         plugin, _, market = entry["source"].partition("@")
         cache = ctx.codex_home / "plugins/cache" / market / plugin
@@ -143,15 +145,15 @@ def check_skills(ctx) -> Cell:
     return cell(skill_problems(ctx, [ctx.home / ".agents/skills", ctx.codex_home / "skills"]))
 
 
-def check_config(ctx) -> Cell:
+def check_config(ctx, env=None) -> Cell:
     """Every other key the declared Codex config sets, such as `model`, has the same value in config.toml."""
-    return _declared_cell(ctx, sandbox=False)
+    return _declared_cell(ctx, sandbox=False, env=env)
 
 
-def _declared_cell(ctx, sandbox: bool) -> Cell:
+def _declared_cell(ctx, sandbox: bool, env=None) -> Cell:
     """One of the declared Codex config's two cells: its SANDBOX_KEYS (sandbox), or the rest (config).
     Each key is checked in one cell only, so one wrong value is one FAIL. n/a when the cell has no key."""
-    source = ctx.setup.file(ID, "config")
+    source = ctx.setup.file(ID, "config", env)
     if source is None:
         return na("setup/harnesses.json names no Codex config")
     (declared, bad_source), (config, bad_config) = _toml(ctx, source), _toml(ctx, ctx.codex_home / "config.toml")

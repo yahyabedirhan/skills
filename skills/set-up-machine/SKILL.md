@@ -144,7 +144,7 @@ The one list of the harnesses and environments this skill sets up. The id is wha
 | Harness (id) | Environments | Reference |
 |---|---|---|
 | Claude Code (`claude-code`) | `cli`, `desktop`, `cloud` | [claude-code/index.md](references/claude-code/index.md) for what the CLI and the desktop app share, then [cli.md](references/claude-code/cli.md), [desktop.md](references/claude-code/desktop.md), [cloud.md](references/claude-code/cloud.md) |
-| Codex (`codex`) | none yet, one page | [codex.md](references/codex.md); its *Codex MCP* section holds the TOML and OAuth detail |
+| Codex (`codex`) | `cli`, `desktop` | [codex/index.md](references/codex/index.md) for shared setup, then [cli.md](references/codex/cli.md) or [desktop.md](references/codex/desktop.md) |
 | Cursor (`cursor`) | `cli`, `desktop`, `cloud` | [cursor/index.md](references/cursor/index.md) for what the CLI and the desktop app share, then [cli.md](references/cursor/cli.md), [desktop.md](references/cursor/desktop.md), [cloud.md](references/cursor/cloud.md) |
 | Grok Bot (`grok-bot`) | `desktop` | [grok-bot/desktop.md](references/grok-bot/desktop.md): instructions live in memory; permissions, connectors, secrets and routines live in the app |
 | opencode (`opencode`) | `cli` | [opencode/cli.md](references/opencode/cli.md) |
@@ -164,7 +164,7 @@ A harness with environments has `references/<harness>/<env>.md` and `scripts/set
 ## Scripts
 
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
-- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`. `--grok-bot-rules` prints the rule table and personal permissions as Grok Bot's Auto-review rules (references/grok-bot/desktop.md). `--harness <harness> [--env <env>]` keeps one harness's rows, or one environment's, such as `--harness cursor --env cloud`. `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command (references/codex.md).
+- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`. `--grok-bot-rules` prints the rule table and personal permissions as Grok Bot's Auto-review rules (references/grok-bot/desktop.md). `--harness <harness> [--env <env>]` keeps one harness's rows, or one environment's, such as `--harness cursor --env cloud`. `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command (references/codex/index.md).
 - `scripts/setupmachine/`: the modules both scripts use. `harnesses/__init__.py` lists every environment in `ALL`. A harness is a package, `harnesses/<harness>/`, with one module per environment and the shared code in its `__init__.py`; Codex is still one module.
 - [references/opencode/opencode-plugin.js](references/opencode/opencode-plugin.js): the opencode plugin that calls the hook.
 - [references/pi/pi-extension.ts](references/pi/pi-extension.ts): the Pi extension that calls the hook and asks the user for ask rows.

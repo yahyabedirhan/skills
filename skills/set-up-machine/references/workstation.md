@@ -119,7 +119,7 @@ The file `setup/harnesses.json` points at with a harness's `instructions`. It ho
 
 The person's own permission rows, such as allowing a tool they added, or refusing a command only they want refused. It has the rule table's format, `{"version": 1, "rules": [<row>, …]}`, and each row the fields and `match` kinds of a rule-table row (SKILL.md, *Rule table*), with one more level:
 
-- **`allow`:** the harness runs a call the row covers without a prompt, and the hook says nothing. On Codex the command also runs outside the sandbox, unreported, since Codex's only decision that skips the prompt is `allow` (`codex.md`). Only a personal permission takes it; the rule table refuses it, since a generic rule never loosens a harness. Its `instruction` says how to go ahead, and its `covers` samples are calls it must allow.
+- **`allow`:** the harness runs a call the row covers without a prompt, and the hook says nothing. On Codex the command also runs outside the sandbox, unreported, since Codex's only decision that skips the prompt is `allow` (`codex/index.md`). Only a personal permission takes it; the rule table refuses it, since a generic rule never loosens a harness. Its `instruction` says how to go ahead, and its `covers` samples are calls it must allow.
 - **`deny`, `ask` and `allow-and-report`** work as in the rule table: the hook refuses a deny row's calls and reports an allow-and-report row's, and the harnesses' native entries ask.
 
 The checks are the rule table's, through `scripts/setupmachine/rules.py`: a malformed row is refused, and so is an id the rule table already uses. A personal permission can't loosen a table row: an `allow` row whose sample a table row denies or asks for fails `verify.py`. No file means no personal permissions.
@@ -131,7 +131,7 @@ The file `setup/harnesses.json` points at with a harness's `config`. It holds th
 | Harness | Declared config, for example | Merged into |
 |---|---|---|
 | `claude-code` | `harnesses/claude-code/environments/cli/config/settings.json` | `~/.claude/settings.json`, read by the CLI and the desktop app (`claude-code/cli.md`) |
-| `codex` | `harnesses/codex-cli/config/config.toml` | `config.toml` in the Codex config home (`codex.md`) |
+| `codex` | `harnesses/codex/environments/cli/config/config.toml` | `config.toml` in the Codex config home (`codex/index.md`) |
 | `cursor` | `harnesses/cursor/environments/cli/config/cli-config.json` | `~/.cursor/cli-config.json` |
 | `opencode` | `harnesses/opencode/environments/cli/config/opencode.json` | the global config file opencode reads last: `opencode.jsonc` or `opencode.json` in `~/.config/opencode` (`opencode/cli.md`) |
 | `pi` | `harnesses/pi/environments/cli/config/settings.json` | `settings.json` in Pi's agent folder (`pi/cli.md`) |
@@ -146,11 +146,11 @@ The file `setup/harnesses.json` points at with a harness's `config`. It holds th
 
 ### A Codex config
 
-The file `setup/harnesses.json` points at with `codex`'s `config`, such as `harnesses/codex-cli/config/config.toml`. Keep explicitly chosen Codex CLI defaults in this private file. Use only the top-level keys `model`, `model_reasoning_effort`, `sandbox_mode`, `approval_policy` and `approvals_reviewer`; each is optional. `verify.py` checks `sandbox_mode`, `approval_policy` and `approvals_reviewer` in Codex's `sandbox` cell and the other keys in its `config` cell, so each key is checked once.
+The file `setup/harnesses.json` points at with `codex`'s `config`, such as `harnesses/codex/environments/cli/config/config.toml`. Keep explicitly chosen Codex CLI defaults in this private file. Use only the top-level keys `model`, `model_reasoning_effort`, `sandbox_mode`, `approval_policy` and `approvals_reviewer`; each is optional. `verify.py` checks `sandbox_mode`, `approval_policy` and `approvals_reviewer` in Codex's `sandbox` cell and the other keys in its `config` cell, so each key is checked once.
 
 Validate the keys and values before proposing any write. Reject unknown keys, nested tables and unsupported values with an explicit gap; this file is an allowlist, not a copy of Codex's whole configuration. Keep credentials, model providers, project trust, profiles, hook state and runtime state in their existing homes. Existing memory and hook ownership remains with this skill's Codex adapter.
 
-Read `codex.md` for installed-version support, preservation and override checks. Mark each declared preference `personal` in the diff. Keep chosen values and this repository's identity and clone path out of public reports, issues, pull requests and fixtures; use synthetic values there.
+Read `codex/index.md` for installed-version support, preservation and override checks. Mark each declared preference `personal` in the diff. Keep chosen values and this repository's identity and clone path out of public reports, issues, pull requests and fixtures; use synthetic values there.
 
 ### A Pi config
 
