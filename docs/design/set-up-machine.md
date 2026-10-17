@@ -4,7 +4,7 @@ How `set-up-machine` is built. A newcomer needs three facts first:
 
 - The **agent** sets up a machine. It reads the workstation repo's `setup/` and one reference per harness, proposes one diff, and writes it. No script writes a harness file.
 - Two scripts exist. The **hook** (`scripts/pre_tool_hook.py`) runs before every tool call and refuses what the rule table denies. The **verifier** (`scripts/verify.py`) reads the machine and prints one table: a harness environment on each row, a setup area in each of five columns, and the declared config in a sixth.
-- `scripts/setupmachine/harnesses/__init__.py` holds `ALL`, the one list of harness environments. Everything about one harness sits in `harnesses/<harness>/` and `references/<harness>/`: one module and one page per environment, and the shared code and page beside them. Claude Code and Codex are still `harnesses/<harness>.py` and `references/<harness>.md`.
+- `scripts/setupmachine/harnesses/__init__.py` holds `ALL`, the one list of harness environments. Everything about one harness sits in `harnesses/<harness>/` and `references/<harness>/`: one module and one page per environment, and the shared code and page beside them.
 
 ## Requirements
 
@@ -45,7 +45,6 @@ skills/set-up-machine/
 │   │   ├── index.md            #   what its environments share, when it has more than one
 │   │   └── <env>.md            #   one per environment, same headings: Found, Instructions, Guardrails,
 │   │                           #   Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it
-│   ├── codex.md                # not yet split into environments
 │   ├── workstation.md          # the format of every setup/ file, and the run without one
 │   ├── global-instructions.md  # the shared file's shape
 │   ├── rule-table.md           # a row's fields, match kinds, spellings
@@ -65,7 +64,7 @@ skills/set-up-machine/
             ├── <harness>/
             │   ├── __init__.py # what its environments share, such as the hook payload
             │   └── <env>.py    # one environment: paths, read/write hook payload, check per area
-            └── codex.py        # not yet split into environments
+            └── codex/         # shared local checks, cli.py and desktop.py
 ```
 
 **An environment module** exposes the same names, so a reader learns one and knows them all:
@@ -79,7 +78,7 @@ skills/set-up-machine/
 | `write(denials, asks)` | the harness's answer to the hook |
 | `check_instructions(ctx)` … `check_skills(ctx)`, `check_config(ctx)` | one `Cell(status, detail)` per column |
 
-**Statuses:** `ok`, `FAIL`, `gap` (the harness can't do it, or the check can't see it), `n/a` (the area does not apply). Only `FAIL` sets exit code 1. A cell is the worst of its checks: `FAIL`, then `gap`, then `ok`. `checks.declared_problems` compares a declared config with the harness's file for every harness, key by key, each value as a whole; Codex reads both sides as TOML, the others as JSON. Codex's declared `sandbox_mode`, `approval_policy` and `approvals_reviewer` are checked in its sandbox column and its other keys in config, so one wrong value is one `FAIL`. `verify.py --codex-trust-hash COMMAND` prints the hash Codex needs to trust the hook, since `references/codex.md` gives it to the user.
+**Statuses:** `ok`, `FAIL`, `gap` (the harness can't do it, or the check can't see it), `n/a` (the area does not apply). Only `FAIL` sets exit code 1. A cell is the worst of its checks: `FAIL`, then `gap`, then `ok`. `checks.declared_problems` compares a declared config with the harness's file for every harness, key by key, each value as a whole; Codex reads both sides as TOML, the others as JSON. Codex's declared `sandbox_mode`, `approval_policy` and `approvals_reviewer` are checked in its sandbox column and its other keys in config, so one wrong value is one `FAIL`. `verify.py --codex-trust-hash COMMAND` prints the hash Codex needs to trust the hook, since `references/codex/index.md` gives it to the user.
 
 ## Implementation (traced)
 
@@ -133,7 +132,7 @@ pre_tool_hook.py --harness cursor
 |---|---|
 | Add a harness | a row in SKILL.md's *Harnesses* table; `harnesses/<h>/<env>.py` with the names above; one line in `ALL`; `references/<h>/<env>.md` with the same headings |
 | Add an environment to a harness | its name in SKILL.md's *Harnesses* row; `harnesses/<h>/<env>.py`, moving shared code into `harnesses/<h>/__init__.py`; one line in `ALL`; `references/<h>/<env>.md`, and `references/<h>/index.md` for what the environments share |
-| Split Codex into environments, as Claude Code was | the row above, with `harnesses/<h>.py` becoming the package and `references/<h>.md` its `index.md`; keep the harness id, and move environment-only files under `environments` in `setup/harnesses.json` |
+| Add a Codex environment | add its adapter and reference page; keep local shared configuration separate from hosted execution |
 | Add a global rule | one row with samples in `rules.json`; each harness reference already says how a row becomes native entries |
 | Add a setup area | the glossary's setup areas first; one `check_<area>` in every harness module; one column |
 | Declare a new config key | the workstation repo's `config` file only; the `config` column compares every key it sets |

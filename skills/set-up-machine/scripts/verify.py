@@ -24,7 +24,7 @@ It reads the machine and writes nothing. The steps:
 machine. --env keeps one of them, such as `cloud`. A row reads harness / environment: `Cursor / cloud`.
 
 --codex-trust-hash prints the trusted_hash Codex needs in config.toml for a hook running
-COMMAND (references/codex.md). Python 3.9+, standard library only.
+COMMAND (references/codex/index.md). Python 3.9+, standard library only.
 """
 from __future__ import annotations
 
