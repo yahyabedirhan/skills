@@ -3,7 +3,8 @@ payload, and the checks both environments run (references/claude-code/index.md).
 environment is a module here: cli.py, desktop.py and cloud.py.
 
 Every local setting lives in `~/.claude/settings.json`, including the declared config's keys; the
-instructions are `~/.claude/CLAUDE.md`, a link to the shared file. Cursor reads this harness's
+instructions are `~/.claude/CLAUDE.md`, a link to the shared file, and `~/.claude/rules/harness-instructions.md`,
+a generated copy of what only Claude Code needs. Cursor reads this harness's
 plugins and permission lists too, so cursor/__init__.py imports `plugins_installed` and
 `native_lists` from here, and Codex takes this harness's hook answer.
 """
@@ -13,13 +14,15 @@ import json
 import re
 from pathlib import Path
 
-from ...checks import (Cell, any_wired_problem, as_list, cell, dig, json_config_cell, link_problem, na,
-                       personal_problems, read_json, skill_problems)
+from ...checks import (Cell, any_wired_problem, as_list, cell, dig, harness_instructions_problem, json_config_cell,
+                       link_problem, na, personal_problems, read_json, skill_problems)
 from ...hook import ToolCall, refusal, search_pair
 
 # The harness id: the key in setup/harnesses.json and installs.json, and the hook's --harness.
 ID, LABEL = "claude-code", "Claude Code"
 FOLDER = Path(".claude")
+# What only Claude Code needs: a user-level rule file, which loads in every session.
+HARNESS_INSTRUCTIONS = FOLDER / "rules/harness-instructions.md"
 # Claude Code's file tools: the input field holding the path, and the access it means.
 FILE_TOOLS = {"Read": ("file_path", "read"), "Grep": ("path", "read"), "Edit": ("file_path", "write"),
               "MultiEdit": ("file_path", "write"), "Write": ("file_path", "write"),
@@ -62,14 +65,12 @@ def write(denials: list, asks=()) -> str:
 
 
 def check_instructions(ctx) -> Cell:
-    """CLAUDE.md links to the shared file, and auto memory is off."""
+    """CLAUDE.md links to the shared file, auto memory is off, and Claude Code's own instructions match their source."""
     settings = read_json(ctx.home / FOLDER / "settings.json") or {}
     problems = [link_problem(ctx, ctx.home / FOLDER / "CLAUDE.md")]
     if settings.get("autoMemoryEnabled") is not False:
         problems.append(("FAIL", "autoMemoryEnabled isn't false in ~/.claude/settings.json"))
-    if ctx.setup.file(ID, "instructions"):
-        problems.append(("gap", "setup/harnesses.json names instructions for Claude Code, which has no place for "
-                                "them on a machine"))
+    problems.append(harness_instructions_problem(ctx, ID, ctx.home / HARNESS_INSTRUCTIONS))
     return cell([p for p in problems if p])
 
 

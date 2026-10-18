@@ -10,8 +10,9 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from . import FOLDER, read, write  # noqa: F401
-from ...checks import Cell, any_wired_problem, as_list, cell, dig, link_problem, na, read_json, skill_problems
+from . import FOLDER, HARNESS_INSTRUCTIONS, read, write  # noqa: F401
+from ...checks import (Cell, any_wired_problem, as_list, cell, dig, harness_instructions_problem, link_problem, na,
+                       read_json, skill_problems)
 from ...workstation import HARNESS_SECTION, section
 
 ID, LABEL = "claude-code", "Claude Code"
@@ -32,7 +33,7 @@ def present(home: Path) -> bool:
 
 def check_instructions(ctx) -> Cell:
     """The repo installs on SessionStart, its instructions carry the cloud section, which points at
-    the cloud instructions file, and the agent's own setup linked CLAUDE.md and turned memory off."""
+    the cloud instructions file, and the agent's own setup linked CLAUDE.md, turned memory off and wrote Claude Code's own instructions."""
     if ctx.setup.clone is None:
         return Cell("gap", ["no workstation clone: can't see the repo's CLAUDE.md or .claude/settings.json"])
     declared = ctx.setup.file(ID, "instructions", ENV)
@@ -54,6 +55,7 @@ def check_instructions(ctx) -> Cell:
     problems.append(link_problem(ctx, ctx.home / FOLDER / "CLAUDE.md"))
     if (read_json(ctx.home / FOLDER / "settings.json") or {}).get("autoMemoryEnabled") is not False:
         problems.append(("FAIL", "autoMemoryEnabled isn't false in ~/.claude/settings.json"))
+    problems.append(harness_instructions_problem(ctx, ID, ctx.home / HARNESS_INSTRUCTIONS))
     return cell([p for p in problems if p])
 
 
