@@ -97,7 +97,7 @@ When the personal source pointer names a repository, load the optional Codex `co
 
 Check `codex --version`, current help and the [official configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) for each declared key and value. Use the installed CLI's configuration schema or a synthetic configuration check with one invalid-value negative control per declared key, without authentication or secrets. Run `codex features list` with a temporary `CODEX_HOME` for each sandbox and approval key. Check one declared value and one invalid control. The valid value must succeed. The invalid control must fail on that key. For model and reasoning choices, inspect the current `model/list` response from `codex app-server`. Require the exact model and reasoning level in that catalog. Some releases silently ignore an invalid `model_reasoning_effort` in `features list`. Use the catalog and installed protocol schema for that key. A successful parse alone is insufficient: Codex ignores unknown keys and some conflicts. Report unsupported keys, values or an unavailable validation mechanism as gaps and leave those preferences unchanged.
 
-The inspected CLI was 0.159.3 on 2026-10-01. That snapshot supported:
+The declared config takes these values:
 
 | Key | Values accepted for this source |
 |---|---|
@@ -107,7 +107,7 @@ The inspected CLI was 0.159.3 on 2026-10-01. That snapshot supported:
 | `model` | a model the installed CLI offers |
 | `model_reasoning_effort` | a level the installed CLI accepts for that model |
 
-Treat the snapshot as evidence to recheck, not a permanent version gate. Explicit `untrusted` is unsupported and `on-failure` deprecated in this version. Codex also supports granular approval policies, but the declared config accepts scalar policies only. Report a granular source as unsupported; preserve an existing granular target policy and report the need for review.
+Recheck them against the installed CLI, since a later release can change them. Explicit `untrusted` is unsupported and `on-failure` deprecated. Codex also supports granular approval policies, but the declared config accepts scalar policies only. Report a granular source as unsupported; preserve an existing granular target policy and report the need for review.
 
 ### Propose and apply
 
@@ -151,13 +151,13 @@ Take tool names from `setup/permissions.json` and the rule table, as ../workstat
 
 Keep undeclared keys and comments, because the file holds choices this skill does not own. Keep a stricter tool list already in the file: more disabled tools, or a shorter enabled list. Leave an unfamiliar TOML form unchanged and name the gap, instead of rewriting the file. Apply the skill's backup and approval steps to the diff.
 
-When `require_oauth` is true, keep the server disabled until `codex mcp login <name>` shows the server connected. Never test the exclusion by calling the tool. A disabled server reports `unsupported` in `codex mcp list --json`. Enable it only for that listing, then restore the disabled state unless the login is connected. Codex 0.162.1 reports a connected login as `o_auth`.
+When `require_oauth` is true, keep the server disabled until `codex mcp login <name>` shows the server connected. Never test the exclusion by calling the tool. A disabled server reports `unsupported` in `codex mcp list --json`. Enable it only for that listing, then restore the disabled state unless the login is connected. Codex reports a connected login as `o_auth`.
 
 On a headless machine, the browser callback opens on the wrong machine. Leave the login process running. The user forwards the callback to the listener on the machine that runs Codex. Treat that URL as a secret. Never put it in a repository, a log, or shell history.
 
 Check the login with `codex mcp list --json`, which reads no credential file. A missing login is a `gap` that names the login command. A file check does not prove which tools the current session can see.
 
-Codex 0.162.1 accepts a portable Claude-compatible bundle. A Claude LSP declaration or a harness-specific mod API does not establish working Codex tools. Read the bundle's manifest before claiming parity. Report an unsupported component as a gap even when the install succeeds.
+Codex accepts a portable Claude-compatible bundle. A Claude LSP declaration or a harness-specific mod API does not establish working Codex tools. Read the bundle's manifest before claiming parity. Report an unsupported component as a gap even when the install succeeds.
 
 Never call an excluded tool, including as a capability test. The exclusion comes from the permission row. It does not depend on the approval reviewer.
 
@@ -213,3 +213,8 @@ The TOML checks need Python 3.11+; on an older Python they are `gap`. The verifi
 - **Hook trust:** `codex app-server` with `CODEX_HOME` at the folder, then `hooks/list` for a throwaway folder: the group is `trusted`.
 - **A session without a login:** `codex exec` with `CODEX_HOME` and `HOME` at a trial home and a `model_providers` entry pointing at a local stand-in that answers the Responses API with one `exec_command` or `apply_patch` call; the next request's `function_call_output` is what the agent read. With `--disable hooks` it shows the rule's justification, and with hooks on the hook's refusal.
 - **Instructions:** `codex debug prompt-input hello` in a throwaway folder shows the shared file's rejection guidance, and no Context7 block.
+
+## Notes
+
+- The keys and values under *Installed support* were checked against Codex CLI 0.159.3 on 2026-10-01.
+- The `o_auth` login state and the portable bundle support under *Codex MCP* were checked on Codex 0.162.1.

@@ -34,7 +34,7 @@ No memory feature: a `none` line. Some models are prompted to keep a memory file
 - Each spelling, as ../rule-table.md > *Spellings* lists them, becomes one `bash` pattern ending in ` *`: `"rm -rf *": "deny"`, `"/bin/rm -rf *": "deny"`, `"git push --force *": "deny"`. The space keeps a word boundary: `git push --force *` doesn't match `git push --force-with-lease`.
 - `arguments: "none"` becomes the exact command, with no ` *`: `"env": "deny"`, so `env FOO=1 cmd` still runs.
 - **No pattern, and a gap instead:** `arguments: "flags"` rows, `files` rows (`cat .env`) and `variables` rows (`echo $API_TOKEN`); patterns match text, not paths, "only flags" or a variable's name.
-- opencode checks each plain command of a compound (`a && rm -rf x`, pipes, `$(…)`) by its text, but never a declaration: `export -p`, `declare -p` and `typeset -p` (and `local`, `readonly`) don't meet their patterns (probed). A `gap` for those rows; the hook refuses them.
+- opencode checks each plain command of a compound (`a && rm -rf x`, pipes, `$(…)`) by its text, but never a declaration: `export -p`, `declare -p` and `typeset -p` (and `local`, `readonly`) don't meet their patterns. A `gap` for those rows; the hook refuses them.
 
 ### File rows
 
@@ -87,13 +87,13 @@ When `setup/harnesses.json` names an opencode `config`, as ../workstation.md > *
 - **Audit:** `wired` when the file is the template with the current command. A file there without the template's first line is someone else's: a `gap`, left alone. A plugin with an old command is rewritten.
 - **Input:** `{"tool", "sessionID", "args", "directory"}`: `args.command` and `args.workdir` for `bash`; `filePath` for `read`, `edit` and `write`; `path` for `grep`, `glob` and `list`; the file headers of `apply_patch`'s `patchText`. A tool that isn't built in is read as an MCP tool, trying each `_` as the split between server and tool.
 - **Answer:** the refusal as plain text, which the plugin throws; the agent reads the error's message as the tool's result. Otherwise nothing, so the native permissions decide.
-- **Gaps:** a project's plugin runs after this one and can rewrite a call's arguments once the hook has passed them; `--pure` or `OPENCODE_PURE` starts opencode without plugins (probed). The native rules still hold in both.
+- **Gaps:** a project's plugin runs after this one and can rewrite a call's arguments once the hook has passed them; `--pure` or `OPENCODE_PURE` starts opencode without plugins. The native rules still hold in both.
 
 ## Gaps
 
 With native entries alone these get through; the hook closes the command and MCP gaps for deny and allow-and-report rows, so list those only for `ask` rows:
 
-- more flags in the same word (`rm -rfv`) or after the operands (`git push origin main --force`, probed); options before a subcommand (`git -C dir push --force`); a command inside another program's string (`bash -lc "…"`, `eval`, a script);
+- more flags in the same word (`rm -rfv`) or after the operands (`git push origin main --force`); options before a subcommand (`git -C dir push --force`); a command inside another program's string (`bash -lc "…"`, `eval`, a script);
 - a bash command (`sed`, `echo … > .env`), a script or another program opening a file; for `~/` paths, a session whose project is the home folder;
 - the rows with no pattern above.
 
@@ -117,3 +117,7 @@ To see opencode itself enforce the rows, start it in a sandbox with a scrubbed e
 - With only the permissions and no plugin, the same samples get opencode's own refusal, and `git push <remote> HEAD --force` runs: the gap the hook closes.
 - A `read` of `.env` is refused; a `read` of `.env.example` works.
 - `opencode run "Without tools: quote your rule about rm -rf and the file it came from."` quotes the shared file's `rm -rf` fallback.
+
+## Notes
+
+- These were probed on a live opencode: declarations such as `export -p` missing their patterns, `--pure` starting without plugins, and a flag after the operands getting past a native pattern.
