@@ -2,11 +2,11 @@
 
 How to place keys on a changing set of nodes so that adding or losing a node moves only a small share of the data.
 
-## The problem
+## Problem
 
 Modulo hashing (`hash(key) % number_of_nodes`) spreads keys evenly, but changing the number of nodes changes almost every key's node: adding a fourth database, or losing one, forces most data to move, with load spikes and slow or failed reads while it does.
 
-## How it works
+## Mechanism
 
 Nodes and keys are hashed onto the same ring of values, in practice 0 to 2^32 - 1. A key belongs to the first node clockwise from its position. Adding a node takes over only the keys between it and the node before it; removing one hands its keys to the next node. Everything else stays put.
 
@@ -18,7 +18,7 @@ Nodes and keys are hashed onto the same ring of values, in practice 0 to 2^32 - 
 - **Data movement on failure**: in practice stores replicate each key range to several nodes, such as DynamoDB across three zones or Cassandra to the next N nodes on the ring, and promote a replica when a node fails, so no data moves. Data moves on planned changes, and then only a bounded share.
 - **An alternative**: fixed hash slots. Redis Cluster maps keys to 16,384 slots and assigns slot ranges to nodes: simpler to reason about, more coordination when rebalancing.
 
-## Where it applies
+## Applicability
 
 Anything spread across a cluster: databases (Cassandra, DynamoDB), caches, message brokers, CDNs, stateful servers. When a design uses one of these stores, note that it distributes data this way and go no further. Explain the ring, virtual nodes, failures and hot spots in depth only when designing the distributed database, cache or broker itself.
 

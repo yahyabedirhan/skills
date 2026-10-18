@@ -2,7 +2,7 @@
 
 The CLI environment of Claude Code, in a terminal or an IDE extension. This page says how it is detected, what its sandbox and config rows mean and how the verifier checks it. The VS Code and JetBrains extensions read the same settings files ([settings](https://code.claude.com/docs/en/settings)). The instructions, guardrails, plugins, skills and hook wiring are in `index.md`; this page holds what only the CLI row has.
 
-## The environment
+## Environment
 
 ### Presence detection
 
@@ -16,15 +16,15 @@ set-up-machine declares no sandbox or approval setting for Claude Code, so the v
 
 ### Config
 
-When `setup/harnesses.json` names a Claude Code `config` for this environment, or for the harness, as `../workstation.md` > 'A declared config' describes, merge each key it sets, such as `model` and `effortLevel`, into `~/.claude/settings.json`, as that file's other keys are written: back it up, write through a symlink at its target, and keep every key the declared file doesn't name, including the hooks and permission lists this skill writes. Mark each key `present, personal` or `updated, personal`. The desktop app reads the same file, so this one merge serves both local environments.
+When `setup/harnesses.json` names a Claude Code `config` for this environment, or for the harness, as `../workstation.md` > 'Declared config' describes, merge each key it sets, such as `model` and `effortLevel`, into `~/.claude/settings.json`, as that file's other keys are written: back it up, write through a symlink at its target, and keep every key the declared file doesn't name, including the hooks and permission lists this skill writes. Mark each key `present, personal` or `updated, personal`. The desktop app reads the same file, so this one merge serves both local environments.
 
 - **Activation:** a new session reads it. `/model` in a running session, the `--model` flag, the `ANTHROPIC_MODEL` environment variable and a project's `.claude/settings.json` override it: name an override you find as a `gap`.
 
-## Checking it
+## Verification
 
 The verifier's `Claude Code / cli` row (`verify.py --harness claude-code --env cli`), from `scripts/setupmachine/harnesses/claude_code/cli.py`:
 
-- **instructions, guardrails, plugins, skills:** the shared checks, as `index.md` > 'Checking it' describes.
+- **instructions, guardrails, plugins, skills:** the shared checks, as `index.md` > 'Verification' describes.
 - **sandbox:** `n/a`.
 - **config:** each key the declared Claude Code config sets has the same value in `~/.claude/settings.json`. `n/a` without a declared config.
 

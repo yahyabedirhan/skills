@@ -13,7 +13,7 @@ The recurring failure is **drift**: each command added on its own terms, until t
 
 To design the code behind the commands, at the level of its modules, classes and folders, use `/low-level-design`. For a networked API, use `/system-design`.
 
-## Flow
+## Steps
 
 1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing a new CLI or new commands, explaining or auditing an existing one, redesigning it, or deciding one question.
    - **Invoked inside a project with a CLI and no instructions:** explain and audit that CLI.
@@ -29,7 +29,7 @@ The purpose decides how the stages are walked. The cases below are common, not a
   - Build each stage from the evidence: run the top help and every group's help, read the command definitions and the dispatch code, and read the docs, scripts and skills that call the CLI. Cite the file or the command behind each claim.
   - Mark requirements read from behaviour **inferred**. Mark what the evidence can't show, such as who the main callers are or why a name was chosen, **unknown**, and ask about it rather than filling it in.
   - Count what the audit finds: commands per group, verbs and the meanings each one has, places that list the same thing by hand. Numbers show drift better than adjectives.
-  - Record weaknesses as observations against the review checklist at the end, without proposing changes, since this session leaves the CLI as it is.
+  - Record weaknesses as observations against the Verification list at the end, without proposing changes, since this session leaves the CLI as it is.
 - **Redesigning an existing CLI:** explain it first and get the user's agreement that the explanation is right. Then redesign through the same stages, changing only what the problems need. Show every renamed command as a before/after row with the rule it breaks, and carry each rename through the evolution stage, since existing callers depend on the old name.
 - **Deciding one question,** such as "should this be a flag or a subcommand?": answer it with the part of the design it touches, the requirement behind it, the options with their trade-offs, and a recommendation.
 
@@ -142,7 +142,7 @@ Start each choice from its default, because callers bring these expectations fro
 - **Prompts:** none when not in a terminal.
 - **Help:** generated from one command table.
 
-## Review checklist
+## Verification
 
 Check a finished design, or audit an existing CLI, against every item:
 

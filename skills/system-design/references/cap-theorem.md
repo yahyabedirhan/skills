@@ -2,7 +2,7 @@
 
 What a distributed system does when its nodes can't reach each other: refuse to answer, or answer with possibly stale data. It is the first non-functional requirement to settle, because it shapes every store and replication choice after it.
 
-## The theorem
+## Theorem
 
 A distributed system can guarantee at most two of:
 
@@ -14,7 +14,7 @@ Network partitions happen, so partition tolerance is required, and the real choi
 
 An example: users in the USA and Europe, with a server in each and replication between them. When the link breaks and a European user views an American user's profile, the system either chooses consistency and returns an error, or chooses availability and shows the last name it has, possibly stale. For a profile, stale is better than an error.
 
-## Choosing
+## Choice
 
 Ask: would it be a disaster if users briefly saw inconsistent data? Does every read need the latest write?
 
@@ -23,7 +23,7 @@ Ask: would it be a disaster if users briefly saw inconsistent data? Does every r
 
 Real systems choose **per feature**: Ticketmaster is consistent for booking a seat and available for browsing events; a dating app is consistent for matches and available for viewing profiles.
 
-## What each choice puts in the design
+## Design effects
 
 - **Consistency**: distributed transactions across stores that must agree, or a single database as the one source of truth; higher latency while nodes agree. PostgreSQL, MySQL, Spanner, DynamoDB in strong consistency mode.
 - **Availability**: read replicas with asynchronous replication; change data capture propagating changes to replicas, caches and other systems. Cassandra, multi-zone DynamoDB, Redis clusters.

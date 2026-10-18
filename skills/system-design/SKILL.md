@@ -11,7 +11,7 @@ To design inside one service's codebase, at the level of its modules, classes an
 
 To design a command-line interface's commands, flags, output and help, use `/cli-design`.
 
-## Flow
+## Steps
 
 1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply.
    - **Invoked inside a project with no instructions:** explain that project's current design.
@@ -126,7 +126,7 @@ Each covers one concept: what it is, why it matters, its trade-offs, and when to
 | [api-design.md](references/api-design.md) | REST, GraphQL, RPC, resources, pagination, idempotency, versioning, auth |
 | [data-modeling.md](references/data-modeling.md) | Database models, schema design, normalization |
 | [database-indexing.md](references/database-indexing.md) | B-tree, LSM, hash, geospatial and inverted indexes, composite indexes |
-| [caching.md](references/caching.md) | Where to cache, cache patterns, eviction, what goes wrong |
+| [caching.md](references/caching.md) | Cache placement, cache patterns, eviction, failure modes |
 | [sharding.md](references/sharding.md) | Shard keys, distribution strategies, hot spots, cross-shard work |
 | [consistent-hashing.md](references/consistent-hashing.md) | The hash ring, virtual nodes, hot keys |
 | [cap-theorem.md](references/cap-theorem.md) | Consistency against availability, consistency levels |

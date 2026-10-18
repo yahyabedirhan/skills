@@ -2,7 +2,7 @@
 
 The cloud environment of Cursor, the VM Cursor starts from a Build. This page says how it is detected, what each harness row means on it, which gaps stay and how the verifier checks it. Docs: [setup](https://cursor.com/docs/cloud-agent/setup), [skills](https://cursor.com/docs/skills), [hooks](https://cursor.com/docs/hooks). The desktop app and the `cursor-agent` CLI are the other environments of this harness, as `index.md` describes.
 
-## The environment
+## Environment
 
 ### Presence detection
 
@@ -55,9 +55,7 @@ When `setup/harnesses.json` names a Cursor cloud `config`, it is a JSON object. 
 
 The wiring is `/agent/.cursor/hooks.json`, which the Build writes, as 'Guardrails' describes. The agent does not write it: a file written after startup is not loaded. The hook fails open when the script is missing, except that Cursor treats an empty stdout as invalid JSON, which is why the command prints `{}`.
 
-## Known limits
-
-### Gaps
+## Limitations
 
 - **Network mode:** set in the dashboard; nothing on the VM shows it.
 - **MCP servers:** connected in the dashboard; nothing on the VM shows them.
@@ -66,11 +64,11 @@ The wiring is `/agent/.cursor/hooks.json`, which the Build writes, as 'Guardrail
 - **Cold start:** a new VM, which this check can't start.
 - **Build snapshot:** whether a file under `/agent` written during the Build survives into the Build snapshot is unknown.
 
-### Notes
+## Notes
 
 - The hook files a multi-repo cloud agent runs were tested on 2026-10-15.
 
-## Checking it
+## Verification
 
 The verifier's `Cursor / cloud` row (`verify.py --harness cursor --env cloud`), from `scripts/setupmachine/harnesses/cursor/cloud.py`:
 

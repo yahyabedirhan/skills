@@ -24,7 +24,7 @@ Each environment page says when its environment is present. Every setting below 
 
 - Claude Code reads `~/.claude/CLAUDE.md` in every session, and follows a symlink; it has no global `AGENTS.md`.
 - `~/.claude/CLAUDE.md` becomes a **symlink to the shared file**, `~/.config/agents/AGENTS.md`, so the shared file is the one source and Claude Code reads it as written. It's `present` once it's that link.
-- Link it only once nothing in the old file would be lost: every other line is `extra` until it moves into the shared file, as `../global-instructions.md` > 'Moving a harness's file' describes. The old file is backed up and `removed`. A file holding only `@~/.config/agents/AGENTS.md`, this skill's earlier form, is `removed` and becomes the link.
+- Link it only once nothing in the old file would be lost: every other line is `extra` until it moves into the shared file, as `../global-instructions.md` > 'Harness file migration' describes. The old file is backed up and `removed`. A file holding only `@~/.config/agents/AGENTS.md`, this skill's earlier form, is `removed` and becomes the link.
 
 - **Harness instructions:** when `<workstation-repo>`'s `setup/harnesses.json` names Claude Code's `instructions`, `~/.claude/rules/harness-instructions.md` holds what only Claude Code needs. The section `../workstation.md` > `setup/harnesses.json` describes that entry. Claude Code loads every user-level rule file in `~/.claude/rules/` in every project, before project rules; one without `paths` frontmatter applies to every file ([memory](https://code.claude.com/docs/en/memory#user-level-rules)). Write it exactly like this:
 
@@ -97,7 +97,7 @@ A personal permission, as the section `../workstation.md` > `setup/permissions.j
 
 Leave auto mode's classifier as Claude Code ships it: write no `autoMode` rules. Probes in `docs/research/auto-mode-semantic-guard.md` found that a custom `hard_deny` rule for environment reads caught nothing the pre-tool hook doesn't refuse, and missed a script that prints `.env`. An `autoMode` block already in the file is the user's: list it as `extra`.
 
-#### What the agent sees
+#### Agent view
 
 A native refusal says `Permission to use Bash with command <command> has been denied.` or `File is in a directory that is denied by your permission settings.`, naming no rule; the shared file supplies general rejection guidance and the `rm -rf` fallback. The hook runs first; its refusal names each refused part, its rule, reason and instruction.
 
@@ -132,9 +132,7 @@ Claude Code reads skills from `~/.claude/skills`. When that folder is a link to 
 - **Hooks off:** `"disableAllHooks": true` in this file turns every hook off, so the hook never runs: `verify.py` fails guardrails. Name it and leave the change to the user.
 - **Gap:** a project's settings can set `"disableAllHooks": true` too.
 
-## Known limits
-
-### Gaps
+## Limitations
 
 The native entries alone let these through. The hook closes them for deny and allow-and-report rows, so name them in the diff only under each `ask` row they apply to:
 
@@ -142,9 +140,9 @@ The native entries alone let these through. The hook closes them for deny and al
 - a script or another program that opens a denied file itself;
 - a tool connected after the run, until the next run. The hook matches it by name.
 
-The hook's own misses are in `SKILL.md` > 'Pre-tool hook' > 'What it can't see'.
+The hook's own misses are in `SKILL.md` > 'Pre-tool hook' > 'Limitations'.
 
-## Checking it
+## Verification
 
 The checks both local rows run, from `scripts/setupmachine/harnesses/claude_code/__init__.py`. Each environment page lists its own row:
 
@@ -153,4 +151,4 @@ The checks both local rows run, from `scripts/setupmachine/harnesses/claude_code
 - **plugins:** each bundle is in `installed_plugins.json` and enabled in `enabledPlugins`. A standalone MCP server is a `gap`.
 - **skills:** each listed skill is in `~/.claude/skills`.
 
-The verifier doesn't report an enabled bundle the list leaves out: find those in the diff. How to see Claude Code itself enforce the rows is in `cli.md` > 'Checking it'.
+The verifier doesn't report an enabled bundle the list leaves out: find those in the diff. How to see Claude Code itself enforce the rows is in `cli.md` > 'Verification'.

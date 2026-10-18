@@ -34,7 +34,7 @@ Present when `~/.cursor/` holds a file or folder the IDE or CLI writes, such as 
   <the shared file, as it will be after this run>
   ```
 
-  Refresh it whenever the shared file changes. A `../global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The verifier checks it, as 'Checking it' describes.
+  Refresh it whenever the shared file changes. A `../global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The verifier checks it, as 'Verification' describes.
 - **Harness instructions:** when `<workstation-repo>`'s `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` holds what only Cursor needs. The section `../workstation.md` > `setup/harnesses.json` describes that entry. Write the file exactly like this:
 
   ```markdown
@@ -60,7 +60,7 @@ No memory feature: a `none` line.
 
 The hook, below, is the guardrail every local environment shares. The CLI's permission lists are on `cli.md`; the desktop app has none, as `desktop.md` describes.
 
-#### What the agent sees
+#### Agent view
 
 A native CLI deny: `Permission denied: Command blocked by permissions configuration` or `Write permission denied:`, naming no rule; the copied global instructions supply general rejection guidance and the `rm -rf` fallback. A hook deny: `Rejected: Command execution was blocked by a hook: Refused by the pre-tool hook, …`. The other events say "File read" or "MCP tool execution" in its place.
 
@@ -94,13 +94,11 @@ Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills
 - **Answer:** always JSON. A deny is `{"permission": "deny", "user_message": …, "agent_message": …}`, both the refusal; the CLI shows the agent `user_message`. Otherwise `{}`, which leaves the call to Cursor's permissions. The hook isn't `failClosed`: a crash or timeout lets the call through, and in the IDE nothing native is left underneath: a `gap`.
 - **Claude Code's hook runs here too,** as `../claude-code/index.md` > 'Hook wiring' describes: it refuses what it recognises and leaves the report to this one.
 
-## Known limits
+## Limitations
 
-### Gaps
+The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses, as `SKILL.md` > 'Limitations' describes.
 
-The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses, as `SKILL.md` > 'What it can't see' describes.
-
-## Checking it
+## Verification
 
 The shared cells of the verifier's `Cursor / cli` and `Cursor / desktop` rows, from `scripts/setupmachine/harnesses/cursor/__init__.py`:
 

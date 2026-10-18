@@ -16,7 +16,7 @@ The session that holds the context should put it to use before handing over. A t
 - `<session-host>`: where agent sessions run, e.g. `herdr`, Claude Code Desktop, Codex Desktop.
 - `<agent>`: the command that starts a new agent session, e.g. `claude` or `codex`, with its flags.
 
-## Flow
+## Steps
 
 1. **Give the work its own worktree and branch,** and move into it the uncommitted changes on the default branch that belong to the work, leaving the rest where they are. Until the new session starts, keep this session on its own checkout and branch, so the maintainer's checkout isn't switched under them. Write into the worktree by absolute path, and run git there with `git -C <worktree>`.
    - **When it has none yet:** make them with `<worktree-tool>`. Branch from the remote default branch, or from the local default branch when the work builds on commits there that aren't pushed.

@@ -5,7 +5,7 @@ This page says how it is detected, what its sandbox and config rows mean and how
 The rest is in [index.md](index.md).
 Preserve the existing installation channel.
 
-## The environment
+## Environment
 
 ### Presence detection
 
@@ -18,7 +18,7 @@ The resolved Codex config home exists, or `codex` is on `PATH`. Fixture homes us
 Read `setup/harnesses.json` > `harnesses` > `codex` > `environments` > `cli` > `config`, falling back to the shared `setup/harnesses.json` > `harnesses` > `codex` > `config`.
 Apply only its declared keys to the resolved `config.toml`, as `index.md` specifies.
 
-## Checking it
+## Verification
 
 Run `python3 <skill-folder>/scripts/verify.py --harness codex --env cli`.
 The CLI adapter checks the shared instructions, guardrails, plugins and skills.

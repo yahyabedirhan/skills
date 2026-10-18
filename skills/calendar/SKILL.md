@@ -40,7 +40,7 @@ A writing tool named like a read gets through the first rule, so never call a ca
 | Spark CLI, `spark events` and `spark availability` | The first try | About 0.1 s, compact tables | Spark Desktop running and signed in to the calendar |
 | Google Calendar connector, `mcp__<server-id>__<tool>` | When Spark Desktop is closed | A network call, JSON | The connector added and signed in |
 
-## Flow
+## Steps
 
 1. **Read with Spark.**
 

@@ -17,7 +17,7 @@ Both the effort's thinking now and its build later happen in the worktree this s
 - `<session-host>`: where agent sessions run, e.g. `herdr`, Claude Code Desktop, Codex Desktop.
 - `<agent>`: the command that starts a new agent session, e.g. `claude` or `codex`, with its flags.
 
-## Flow
+## Steps
 
 1. **Decide where it lives:** an effort in an existing repo, which is the current one or one the idea names, or a new project that has no repo yet.
 2. **Name it.** Propose a short kebab-case effort name, and a branch that follows the project's branch naming, or `<area>/<effort>` when the project has none. Confirm both with the maintainer.

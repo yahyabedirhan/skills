@@ -16,7 +16,7 @@ Scaffold and audit the per-repo configuration the skills assume:
 
 You explore, present what you found, confirm with the user, then write. Running it again is the **audit**.
 
-## Process
+## Steps
 
 ### 1. Check the machine
 

@@ -5,7 +5,7 @@ This page says how it is detected, what each harness row means on it and how the
 The rest is in [index.md](index.md).
 The app and CLI share MCP configuration on the same host ([official MCP guide](https://learn.chatgpt.com/docs/extend/mcp)).
 
-## The environment
+## Environment
 
 ### Presence detection
 
@@ -35,7 +35,7 @@ Preserve app preferences, project trust and current chats.
 A running chat can retain its selected model and permissions after persisted defaults change.
 Verify effective settings in a fresh desktop chat.
 
-## Checking it
+## Verification
 
 Run `python3 <skill-folder>/scripts/verify.py --harness codex --env desktop`.
 All six columns check this environment, including config when the standalone CLI is absent.

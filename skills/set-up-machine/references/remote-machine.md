@@ -4,7 +4,7 @@ What changes when the machine is a remote or headless one, such as a VPS that ru
 
 Brand-new machine? Set up its base first with [new-remote-machine.md](new-remote-machine.md), then come back here.
 
-## Signing in a harness without a browser
+## Browserless sign-in
 
 The normal sign-in opens a browser, which a headless machine lacks. The user picks one, and sets the value themselves; never print or write the token:
 
@@ -20,11 +20,11 @@ The normal sign-in opens a browser, which a headless machine lacks. The user pic
   ssh -L <port>:localhost:<port> <user>@<host>
   ```
 
-## Keeping sessions alive
+## Session persistence
 
 Start every agent inside the user's session host, such as `herdr` or `tmux`, never directly in the SSH shell. A process in the SSH shell dies when the connection drops; one inside the session host keeps running and can be reattached from any device.
 
-## Containing a misled agent
+## Agent containment
 
 The global rules still apply on a remote machine and cost nothing; keep them. On top of them, propose these to the user, each as `gap` in the report when it isn't in place:
 

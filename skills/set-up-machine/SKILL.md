@@ -19,11 +19,11 @@ Set up every selected harness and environment from its sources, as [Harnesses](#
 ## Outputs
 
 - **Shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads; its personal parts come from `setup/instructions.md`.
-- **Harness instructions**, for a harness whose `instructions` file `setup/harnesses.json` names: Cursor's `~/.cursor/rules/harness-instructions.mdc` and Claude Code's `~/.claude/rules/harness-instructions.md`, as `references/workstation.md` > 'A harness's instructions file' describes.
+- **Harness instructions**, for a harness whose `instructions` file `setup/harnesses.json` names: Cursor's `~/.cursor/rules/harness-instructions.mdc` and Claude Code's `~/.claude/rules/harness-instructions.md`, as `references/workstation.md` > 'Harness instructions file' describes.
 - Each harness's permission entries, from the rule table and the personal permissions.
 - The **pre-tool hook**, `scripts/pre_tool_hook.py`, run before every tool call.
 - The **pointer**, when it is missing or records none.
-- Each harness's **declared config**, from the `config` file `setup/harnesses.json` names for it: only the keys that file sets are merged into the harness's own config file, as `references/workstation.md` > 'A declared config' describes, and every other key stays the user's.
+- Each harness's **declared config**, from the `config` file `setup/harnesses.json` names for it: only the keys that file sets are merged into the harness's own config file, as `references/workstation.md` > 'Declared config' describes, and every other key stays the user's.
 - The skills and commands `setup/installs.json` lists for this machine, and its **plugins** in each harness it names: the plugins setup area, a plugin bundle or a standalone MCP server per entry.
 - Memory off in every harness.
 
@@ -71,14 +71,14 @@ Set up every selected harness and environment from its sources, as [Harnesses](#
    - **When the diff holds only `added` and `updated` installs from `setup/installs.json`:** write it without asking, since the user approved that list by writing it.
 4. **Back up** every file the diff changes or removes. Before writing any file, copy each one into `~/.config/agents/backups/<UTC time as YYYYmmddTHHMMSSZ>/`, at its path relative to the home folder, such as `.claude/settings.json`. Copy a symlink as a link.
 5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, stop subsequent writes and report what changed before the failure. Check configuration and guardrail compatibility after upgrades; report failures rather than making an old snapshot the desired state. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
-6. **Verify** with `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when [What verify must show](#what-verify-must-show) holds. Then inspect again until the diff changes nothing: no pending `added`, `updated`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
+6. **Verify** with `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when [Verification](#verification) holds. Then inspect again until the diff changes nothing: no pending `added`, `updated`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
 
    The verifier checks persisted configuration, not upstream releases. Complete the freshness checks from Inspect before you report that every installation is the latest.
 
 7. **Live check** each harness, as [references/live-check.md](references/live-check.md) says. Start a real session of each harness in `<session-host>`, with its default model, give each the same probe in a throwaway folder, and read the disk and the screen. The verifier proves the files; the live check proves each harness acts on them. Fix each `FAIL` through steps 2 to 6, then check that harness again. The run is done when the verifier and the live check both pass.
    - **When `<session-host>` can't start a session of a harness:** name that harness's live check as a `gap`.
 
-## What verify must show
+## Verification
 
 Two global lines, then one table, then one detail line per `FAIL` and `gap` cell:
 
@@ -103,7 +103,7 @@ FAIL  Cursor instructions: ~/.cursor/rules/global-instructions.mdc is stale; gen
   - `skills`: each skill `setup/installs.json` lists is in a folder this harness reads skills from;
   - `config`: each key the harness's declared config sets has the same value in the harness's config file; `n/a` without a declared config. It isn't a setup area: a default model is none of the five.
 
-The run passes when no line or cell is `FAIL`; the verifier then exits 0. Report each `gap` line. Each harness reference's 'Checking it' section says what its row checks.
+The run passes when no line or cell is `FAIL`; the verifier then exits 0. Report each `gap` line. Each harness reference's 'Verification' section says what its row checks.
 
 ## Rule table
 
@@ -128,7 +128,7 @@ The wiring fails open, written as `[ -f <script> ] && … || true` or in the for
 
 `<report-folder>` is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 
-### What it can't see
+### Limitations
 
 Name these once in every audit:
 
@@ -164,7 +164,7 @@ A harness with environments has `references/<harness>/<env>.md` and `scripts/set
 - [references/live-check.md](references/live-check.md): starting a real session of each harness, the probe, and reading what it did.
 - [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
   - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
-- One reference per harness environment, read for each one found: the [Harnesses](#harnesses) table lists them. Each page has the same headings: Presence detection, Instructions, Guardrails, Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it, and leaves out what its harness's `index.md` already covers. A page whose facts were checked against a version or a test ends with Notes, which records that history so the sections above it state only current facts.
+- One reference per harness environment, read for each one found: the [Harnesses](#harnesses) table lists them. Each page has the same headings: Presence detection, Instructions, Guardrails, Sandbox, Plugins, Skills, Config, Hook wiring, Limitations, Verification, and leaves out what its harness's `index.md` already covers. A page whose facts were checked against a version or a test ends with Notes, which records that history so the sections above it state only current facts.
 ## Scripts
 
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.

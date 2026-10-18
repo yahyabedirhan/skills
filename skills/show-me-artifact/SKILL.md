@@ -5,7 +5,7 @@ description: Publish a visual report or a page of decisions as a private Claude 
 
 Publish the report as one artifact page the user reads in a browser, instead of a long chat message or a local HTML file. It needs Claude's `Artifact` tool. Without it, write one focused HTML file with `/show-me` instead.
 
-## Flow
+## Steps
 
 1. **Load `/show-me` for its views and principles,** and publish them as one artifact page in place of the local HTML file it opens.
 2. **Make one page per report or decision set.** When the user asks about a different subject, start a new page instead of adding a section. Open with what the reader needs first: where things stand and how many decisions wait on them. Then pick a view per point:

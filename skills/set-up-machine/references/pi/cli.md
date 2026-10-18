@@ -2,7 +2,7 @@
 
 The CLI environment of Pi, the `pi` coding agent (`@earendil-works/pi-coding-agent`). This page says how it is detected, what each harness row means, which gaps stay and how the verifier checks it. Docs: the `docs/` folder of the installed package, chiefly `configuration.md`, `settings.md`, `skills.md`, `extensions.md`, `cli.md` and `security.md`.
 
-## The environment
+## Environment
 
 ### Presence detection
 
@@ -47,7 +47,7 @@ Whether Pi loads a project's own `.pi` settings and resources. Context files loa
 
 - Pi loads one context file from `<agent-dir>`, the first that exists of `AGENTS.override.md`, `AGENTS.md`, `AGENTS.MD`, `CLAUDE.md` and `CLAUDE.MD`. It then adds one from each folder from the working folder up. It follows a symlink and skips a broken one. It doesn't follow `@` imports.
 - `<agent-dir>/AGENTS.md` becomes a **relative symlink to the shared file**. For the default folder it's `../../.config/agents/AGENTS.md`. For another folder, compute the path from `<agent-dir>` to `~/.config/agents/AGENTS.md`. It's `present` once it's that link.
-- An existing `AGENTS.md` there, a file or a link elsewhere, is kept and `extra`, with a `gap`: Pi reads it instead until its lines move into the shared file, as `../global-instructions.md` > 'Moving a harness's file' describes, and the user deletes it.
+- An existing `AGENTS.md` there, a file or a link elsewhere, is kept and `extra`, with a `gap`: Pi reads it instead until its lines move into the shared file, as `../global-instructions.md` > 'Harness file migration' describes, and the user deletes it.
 - An `AGENTS.override.md` in `<agent-dir>` is kept and `extra`, with a `gap`: Pi reads it instead of the link. A `CLAUDE.md` there with no `AGENTS.md` is read until the link exists; once the link is written it's `extra`, never read.
 - `--no-context-files` (`-nc`) starts a session without any context file: a `gap` line.
 
@@ -81,7 +81,7 @@ Each personal permission is `n/a` here: "Pi has no permission entries". The hook
 
 None: Pi has no approval prompts to automate.
 
-#### What the agent sees
+#### Agent view
 
 A refused call's tool result is the hook's refusal: each refused part, its rule, reason and instruction. For an ask row the user declined, the result starts `Refused: the user declined this call when the pre-tool hook asked.`, followed by the question. When the hook can't check the call, the result starts `Refused: the pre-tool hook couldn't check this call`, says why, and asks the agent to stop and have the user run `/set-up-machine`. A refused nested call fails the `codemode` script with the same text. The shared file also gives the agent the rule lines and the rejection guidance.
 
@@ -117,7 +117,7 @@ The plugins setup area, from `plugins` in `setup/installs.json`, as the section 
 
 ### Config
 
-The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` names declares Pi settings, as `../workstation.md` > 'A declared config' and `../workstation.md` > 'A Pi config' describe. Compare each key it declares with `<agent-dir>/settings.json`:
+The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` names declares Pi settings, as `../workstation.md` > 'Declared config' and `../workstation.md` > 'Pi config' describe. Compare each key it declares with `<agent-dir>/settings.json`:
 
 - `present, personal` when the values are equal; otherwise `updated, personal`, showing the current and the declared value.
 - Write only the declared keys, and keep every other key as it is. Pi writes runtime state into the same file, such as `lastChangelogVersion` and `deviceId`, and other tools add their own keys.
@@ -139,9 +139,7 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - **Session host:** while a dialog waits, Pi reports `blocked` to the terminal itself through OSC 7501. A session host's own Pi integration can report a state of its own instead. Herdr's integration reports `working`, so the user gets no notice. It listens for a `herdr:blocked` event on Pi's event bus, so the extension emits that event around the dialog, and Herdr then shows the pane as `blocked`. Without that integration nothing listens, and the event does nothing.
 - Other extensions in `<agent-dir>/extensions/`, such as a session host's integration, are the user's: leave them.
 
-## Known limits
-
-### Gaps
+## Limitations
 
 - **The only layer:** Pi has no native rules underneath, so the extension fails closed: while `python3` or the script is missing, or the hook fails, Pi refuses every tool call until `/set-up-machine` repairs it. `pi --no-extensions` starts a session without the hook in the meantime. The containment Pi offers beyond the hook is the operating system's: a container, a virtual machine or a separate user, as Pi's `docs/security.md` and `docs/containerization.md` say. Name this once in every audit.
 - **`--no-extensions`:** `pi --no-extensions` (`-ne`) skips the extension. Explicit `-e <path>` extensions still load.
@@ -157,14 +155,14 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
   So an extension from `packages`, or a built-in one, runs after the hook and could change a call the hook already passed. Pi offers no way to run last or to check the final input before the tool runs. A project extension runs before the hook: the hook sees what it changed.
 - **Child sessions without extensions:** an extension that starts child sessions in the same process can start them with extensions off, and the hook doesn't run there. The `pi-subagents` extension does this for foreground children; its setting `subagents.defaultSubagentOnlyExtensions`, listing the hook extension's path, loads it there. Check each such extension. A child without a UI gets ask rows refused.
 - **`!` commands:** the user's own `!` commands run as `user_bash`, not as tool calls, so the hook doesn't see them, as in Claude Code.
-- `SKILL.md` > 'Pre-tool hook' > 'What it can't see' lists the hook's own misses.
+- `SKILL.md` > 'Pre-tool hook' > 'Limitations' lists the hook's own misses.
 
-### Notes
+## Notes
 
 - This page was checked against Pi 1.1.0 and its `dist/` source, including the `pi update --extensions` command and the handler load order.
 - The `pi-subagents` behaviour was checked on version 0.77.0, and Herdr's `working` state on Herdr version 9.
 
-## Checking it
+## Verification
 
 The verifier's Pi row, from `scripts/setupmachine/harnesses/pi/cli.py`, reads the resolved agent folder:
 

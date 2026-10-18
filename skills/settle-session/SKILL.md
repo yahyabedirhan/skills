@@ -15,7 +15,7 @@ Do every step yourself. Leave all terminal workspaces, tabs and panes open. An e
 - `<worktree-tool>`: the tool that makes and frees worktrees, e.g. `treehouse`, or plain git worktrees.
 - `<session-host>`: where agent sessions run, e.g. `herdr`, Claude Code Desktop, Codex Desktop.
 
-## Flow
+## Steps
 
 Run each commit, push and deletion as its own call, so a refused one stops only itself.
 

@@ -13,7 +13,7 @@ Build one effort from its spec and tickets, as its orchestrator, following `/orc
 - `<worktree-tool>`: the tool that makes and frees worktrees, e.g. `treehouse`, or plain git worktrees.
 - `<session-host>`: where agent sessions run, e.g. `herdr`, Claude Code Desktop, Codex Desktop.
 
-## Flow
+## Steps
 
 1. **Read the effort.** The argument points at the effort folder or at the spec and tickets. Read the spec, the handoff and every ticket in full, for each ticket's blockers, its acceptance criteria and any input only the user can give.
    - **With no argument:** ask for one.

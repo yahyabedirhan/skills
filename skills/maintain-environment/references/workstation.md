@@ -2,7 +2,7 @@
 
 What a workstation repo is for, and how to start one. Once it exists, its own `DESIGN.md` is the guide for changing it, and `/set-up-machine`'s `references/workstation.md` defines the format of each `setup/` file.
 
-## What it is for
+## Purpose
 
 The workstation repo is the one source of everything personal about how the user's agents run:
 
@@ -14,7 +14,7 @@ The workstation repo is the one source of everything personal about how the user
 
 `<workstation-repo>` is the user's own repository, usually private, because it holds the personal detail that the public skills repo and the user's projects leave out. `/set-up-machine` reads its `setup/` folder on each machine, so a change made once reaches every machine. Without one, each machine's shared global instructions file holds the personal lines itself, and a personal permission has no home.
 
-## Its starting layout
+## Starting layout
 
 ```text
 README.md                 what the repository is, for the user
@@ -29,7 +29,7 @@ setup/installs.json       {"skills": [{"source": "<skills-repo>"}]}
 - **`AGENTS.md`** names each other document, such as the user's principles or a full glossary, and says when to read it. The names and paths of those documents are the user's to choose.
 - **`DESIGN.md`** starts short: the layout above, and that a new file copies the shape of its siblings. It grows as the user adds kinds of files.
 
-## Starting one
+## Creation
 
 Start a workstation repo when the user asks for one. Offer to start one when a change needs it, such as a personal permission.
 

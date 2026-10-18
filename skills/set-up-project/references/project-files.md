@@ -2,7 +2,7 @@
 
 The facts behind the audit, per harness. The global rules are the machine's safety rails, written by **set-up-machine** from its rule table; a project's own files are for convenience and add only `allow` entries for the project's own commands. Harness formats change: check the docs set-up-machine's harness references link. Sources: this repo's `docs/research/harness-capabilities.md` > '1.5 Can a project override the global rules?' and the matching subsection in each other harness's section, and `docs/research/auto-mode-semantic-guard.md` > '1.3 What a project can override'.
 
-## How the audit reads a rule
+## Rule reading
 
 Each deny and ask row of set-up-machine's `rules.json` carries the key `samples` > `covers`: commands (`rm -fr x`, `git push --force-with-lease`), paths (`.env`, `sub/.env.local`, `~/.ssh/id_ed25519`) or MCP tool names. A project entry that matches one of them, by the harness's own matching below, covers the rule; for an MCP row, also check the row's `server` and `tool` regexes against the entry. `allow-and-report` rows are left out: a project allow can't make them looser. Check every harness's files, whether or not that harness is set up on this machine.
 
@@ -44,6 +44,6 @@ Each deny and ask row of set-up-machine's `rules.json` carries the key `samples`
 
 Named so nothing here reads as checked: opencode agents defined in `.opencode/agent/*.md` and config files below the project root; Cursor IDE's `.cursor/permissions.json`, whose `allow_instructions` only steer its classifier, and `.cursor/hooks.json`, since hooks only add; Claude Code's `env` key in project settings; Codex's approval, sandbox and auto-review settings, which the rule table doesn't set.
 
-## Fixing a line
+## Line fixes
 
 A project harness file is the project's: change it only with the user's approval. For `weakens`, remove the entry or narrow it to the project's own commands, such as `Bash(npm test *)` rather than `Bash(npm *)`, never a pattern that reaches a rail's command. For a rail the project wants, a deny or a stricter level, add it through `/set-up-machine`'s rule table when every project needs it, else keep it as an `extra`.

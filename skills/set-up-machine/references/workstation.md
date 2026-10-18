@@ -6,7 +6,7 @@ The workstation repo is the source and the machine's files are output: every run
 
 **When the user has no workstation repo,** set up the machine without one. The personal parts of the shared file are then their own source, and this skill keeps them as they are. Say in the report that `/maintain-environment` can start a workstation repo.
 
-## The pointer
+## Pointer
 
 `~/.config/agents/source.md` names `<workstation-repo>` and `<path-to-workstation-repo>` on this machine. This skill needs it to find the repository before it generates anything. It sits outside every repository, so it stays private by being local.
 
@@ -25,7 +25,7 @@ The clone path starts `~/` or `/`. A person with no workstation repo has `- Repo
 - **When the pointer records none and the user names a workstation repo:** the diff rewrites the pointer with both values as an `updated` line.
 - **When the clone path doesn't exist:** the diff clones the repository there, as an install command run before any file is written.
 
-## The repository's layout
+## Repository layout
 
 This skill reads only the `setup/` folder at the repository's root, and the files `setup/harnesses.json` points at. The rest of the repository is the user's, as `/maintain-environment`'s `references/workstation.md` describes. `scripts/setupmachine/workstation.py` is the one module that reads these paths. There is no fallback to an older layout: a file outside `setup/` that `setup/harnesses.json` doesn't point at is never read.
 
@@ -95,7 +95,7 @@ Where each harness's own files are in the repository, so that each can sit in th
 - **A file that isn't valid JSON, lacks `version`, has an unknown key or harness, or a path outside the repository** is a `FAIL` that names the problem, and nothing it points at is read or written.
 - **A path to a file that doesn't exist** is a `FAIL` that names the pointer, such as `harnesses.cursor.environments.cloud.instructions`, and the path it gives.
 
-### A harness's instructions file
+### Harness instructions file
 
 The file `setup/harnesses.json` points at with a harness's `instructions`. It holds instructions for that harness only, for what differs between harnesses: a sandbox, a missing ask list, a tool only one harness has.
 
@@ -128,7 +128,7 @@ The person's own permission rows, such as allowing a tool they added, or refusin
 
 The checks are the rule table's, through `scripts/setupmachine/rules.py`: a malformed row is refused, and so is an id the rule table already uses. A personal permission can't loosen a table row: an `allow` row whose sample a table row denies or asks for fails `verify.py`. No file means no personal permissions.
 
-### A declared config
+### Declared config
 
 The file `setup/harnesses.json` points at with a harness's `config`. It holds the keys the user chose for that harness, such as its default model and reasoning effort, in the format of the harness's own config file. set-up-machine merges those keys into that file:
 
@@ -148,7 +148,7 @@ The file `setup/harnesses.json` points at with a harness's `config`. It holds th
 
 `verify.py` checks each declared key in the harness's `config` column: `ok` when the harness's file holds every declared value, `FAIL` when one is missing or differs, and `n/a` with no `config` entry. It never prints the values. The column sits beside the five setup areas, not in one of them, since a default model is no setup area. A declared file that isn't valid JSON or TOML fails the cell.
 
-### A Codex config
+### Codex config
 
 The file `setup/harnesses.json` points at with `codex`'s `config`, such as `harnesses/codex/environments/cli/config/config.toml`. Keep explicitly chosen Codex CLI defaults in this private file. Use only the top-level keys `model`, `model_reasoning_effort`, `sandbox_mode`, `approval_policy` and `approvals_reviewer`; each is optional. `verify.py` checks `sandbox_mode`, `approval_policy` and `approvals_reviewer` in Codex's `sandbox` cell and the other keys in its `config` cell, so each key is checked once.
 
@@ -156,7 +156,7 @@ Validate the keys and values before proposing any write. Reject unknown keys, ne
 
 Read `codex/index.md` for installed-version support, preservation and override checks. Mark each declared preference `personal` in the diff. Keep chosen values and this repository's identity and clone path out of public reports, issues, pull requests and fixtures; use synthetic values there.
 
-### A Pi config
+### Pi config
 
 The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harnesses/pi/environments/cli/config/settings.json`. Keep explicitly chosen Pi settings in this private file: a JSON object of top-level keys from Pi's settings reference, such as `defaultProvider`, `defaultModel`, `defaultThinkingLevel` and `enableInstallTelemetry`. Each key is optional. No `config` entry, or an omitted key, declares no preference, so leave that setting user-managed. Removing a declaration leaves its persisted value in place for the user to remove.
 
@@ -172,7 +172,7 @@ The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harness
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
 - Read `pi/cli.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
 
-`verify.py` checks each declared key in Pi's `config` cell, as 'A declared config' says; a `packages` key there is a `gap`.
+`verify.py` checks each declared key in Pi's `config` cell, as 'Declared config' says; a `packages` key there is a `gap`.
 
 ### `setup/installs.json`
 
@@ -253,7 +253,7 @@ Check each entry that applies, then put what's missing in the diff:
 
 Never put a secret in the file: it is a repository, and the commands run as written. A command that needs a credential reads it from where the tool already keeps it.
 
-## Writing the shared file from it
+## Shared file generation
 
 With a workstation repo, the shared file's personal parts are generated from `setup/instructions.md`: the Working agreement, the Glossary, the Tool column of the Environment defaults table except the two rows the pointer fills, the tool glossaries after it, and the Personal workflow section. Each sits in the order `global-instructions.md` gives. The rules block follows `global-instructions.md`'s compact template. The roles' What it is and When none columns still come from this skill's roles table.
 
@@ -262,7 +262,7 @@ With a workstation repo, the shared file's personal parts are generated from `se
 
 `verify.py` checks the result on its `setup` line: `ok` when the shared file carries the repository's values and sections, `n/a` when the pointer says there is no repository, and `FAIL` when the pointer is missing, a section differs, a `workstation-repo` or `path-to-workstation-repo` row is missing or differs from the pointer, or the shared file has an optional section the repository lacks or lacks one it has.
 
-## Writing the personal permissions
+## Personal permissions generation
 
 Turn each personal permission into each harness's entries the way that harness's reference turns a rule-table row, written beside the table's entries in the same files. Mark every entry a personal permission produced `personal` in the diff, so the user tells it from the table's and never reads it as `extra`.
 

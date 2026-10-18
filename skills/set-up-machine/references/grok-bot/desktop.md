@@ -2,7 +2,7 @@
 
 Grok Bot, the agent app that works on one persistent Linux box shared by all of the user's agents. This page says how it is detected, what each harness row means for it, which gaps stay and how the verifier checks it. The app keeps most settings other harnesses keep in files: memory, Auto-review, connectors, secrets and routines. So the agent applies most areas through the app's own tools, or gives the user a step, and the verifier checks what a file shows.
 
-## The environment
+## Environment
 
 ### Presence detection
 
@@ -110,13 +110,11 @@ There is no model to set: the app picks it. When `setup/harnesses.json` names a 
 
 `none`: no hook runs. An agent can check a command by hand before running it: `echo '{"command": "<command>"}' | python3 <script> --harness grok-bot` prints `{}`, or a deny with the refusal. Every ask row is refused, since the hook can't see whether the user will be asked.
 
-## Known limits
-
-### Gaps
+## Limitations
 
 Memory and Auto-review rules can't be read from the box; connectors and routines are seen only through the app; no session host starts a Grok Bot session for the live check.
 
-## Checking it
+## Verification
 
 The verifier's Grok Bot row, from `scripts/setupmachine/harnesses/grok_bot/desktop.py`:
 

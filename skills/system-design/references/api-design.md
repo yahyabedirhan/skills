@@ -2,7 +2,7 @@
 
 The contract between the system and its callers. Aim for a reasonable API, not a perfect one: design the user-facing endpoints, then move on to the harder parts. Give internal APIs one line in the high-level design, such as "services talk over gRPC".
 
-## Choosing the protocol
+## Protocol choice
 
 - **REST**: resources identified by URLs, manipulated with HTTP methods. The default; it fits most web and mobile APIs.
 - **GraphQL**: one endpoint where clients ask for exactly the data they need. Choose it when clients with different needs, such as a mobile app and a dashboard, would otherwise force many endpoints or over-fetching. Costs: the N+1 problem, one query for a list and one per item, which batching solves; field-level authorization; and harder caching.

@@ -2,7 +2,7 @@
 
 The base a brand-new remote machine needs before agents run on it, such as a VPS fresh from a provider's image. It extends `remote-machine.md`, which still applies. Go through the base with the user before the steps in `SKILL.md`, then finish with the items after them. Check each item and propose what's missing. Most need root, so give the user the commands to run.
 
-## The base, before the steps
+## Base setup
 
 Go in this order, since each item relies on the one before it.
 
@@ -24,7 +24,7 @@ Work as a dedicated unprivileged user, separate from root and from any other ser
 
 - Result: a new connection as `<user>` signs in with the key.
 
-### 4. A sudo password the user types
+### 4. Sudo password
 
 Recommend that the user keeps a password for sudo only, while logins stay key-only, so an agent running as that user can't become root without them. Passwordless sudo, `NOPASSWD`, is more convenient and defeats that; when the user picks it, report it as `gap`.
 
@@ -71,15 +71,15 @@ After `systemctl daemon-reload`, `systemd-zram-setup@zram0` formats the device, 
 
 - Result: `swapon --show` lists `/dev/zram0` at priority 100 and `/swapfile` at priority 10.
 
-### 9. The docker group
+### 9. Docker group
 
 When Docker is installed, check the dedicated user isn't in the `docker` group with `id -nG`. Membership lets any process the user runs, an agent included, become root without the sudo password. Default to `sudo docker`; when the user wants the group anyway, say so and report it as `gap`.
 
 - Result: `id -nG` as `<user>` doesn't list `docker`, or the report names the `gap`.
 
-## After the steps
+## Follow-up setup
 
-### 1. The session host's integration
+### 1. Session host integration
 
 Once the steps in `SKILL.md` have written the harness settings, install the session host's own integration, which writes its own hooks, such as `herdr integration install claude` and `herdr integration install codex`, plus its skill. Skip what `setup/installs.json` in `<workstation-repo>` lists, since the steps installed it.
 
@@ -87,7 +87,7 @@ Once the steps in `SKILL.md` have written the harness settings, install the sess
 
 ### 2. Git identity and credentials
 
-Check `git config --global user.name` and `user.email` are set. The user signs in with `gh auth login` on the machine, letting it make this machine's own SSH key and token, as the item `remote-machine.md` > 'Containing a misled agent' > **Separate credentials** asks.
+Check `git config --global user.name` and `user.email` are set. The user signs in with `gh auth login` on the machine, letting it make this machine's own SSH key and token, as the item `remote-machine.md` > 'Agent containment' > **Separate credentials** asks.
 
 - Result: `gh auth status` shows a login on this machine.
 
@@ -97,7 +97,7 @@ On Debian and Ubuntu, `~/.bashrc` returns early when the shell isn't interactive
 
 - Result: `ssh <host> "bash -lc 'command -v <tool>'"` prints the tool's path.
 
-### 4. A headless browser
+### 4. Headless browser
 
 Do this when agents run browser tests on the machine. The user installs Chromium's system libraries as root with `npx playwright install-deps chromium`, and the dedicated user installs the browser with `npx playwright install chromium`. A missing library shows up only at launch, not at install.
 
