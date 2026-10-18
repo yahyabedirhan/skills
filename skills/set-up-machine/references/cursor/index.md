@@ -33,7 +33,7 @@ Found when `~/.cursor/` holds a file or folder the IDE or CLI writes (`cli-confi
   ```
 
   Refresh it whenever the shared file changes. A `../global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The verifier checks it (*Checking it*).
-- **Harness instructions:** when the workstation repo's `setup/harnesses.json` names Cursor's `instructions` (../workstation.md), `~/.cursor/rules/harness-instructions.mdc` holds what only Cursor needs, written exactly like this:
+- **Harness instructions:** when `<workstation-repo>`'s `setup/harnesses.json` names Cursor's `instructions` (../workstation.md), `~/.cursor/rules/harness-instructions.mdc` holds what only Cursor needs, written exactly like this:
 
   ```markdown
   ---
