@@ -1,12 +1,12 @@
 # Pi
 
-The CLI environment of Pi, the `pi` coding agent (`@earendil-works/pi-coding-agent`). This page says how it is found, what each harness row means, which gaps stay and how the verifier checks it. Docs: the `docs/` folder of the installed package, chiefly `configuration.md`, `settings.md`, `skills.md`, `extensions.md`, `cli.md` and `security.md`.
+The CLI environment of Pi, the `pi` coding agent (`@earendil-works/pi-coding-agent`). This page says how it is detected, what each harness row means, which gaps stay and how the verifier checks it. Docs: the `docs/` folder of the installed package, chiefly `configuration.md`, `settings.md`, `skills.md`, `extensions.md`, `cli.md` and `security.md`.
 
 ## The environment
 
-### Found
+### Presence detection
 
-Found when `pi` is on `PATH` or the agent folder exists. The agent folder is `PI_CODING_AGENT_DIR`, else `~/.pi/agent`; a leading `~` in the variable means the home folder. Resolve it once, without printing the variable's value, and use that one folder for every path below, written `<agent-dir>`. For a fixture home, `verify.py --home <fixture>` uses `<fixture>/.pi/agent` and ignores the variable.
+Present when `pi` is on `PATH` or the agent folder exists. The agent folder is `PI_CODING_AGENT_DIR`, else `~/.pi/agent`; a leading `~` in the variable means the home folder. Resolve it once, without printing the variable's value, and use that one folder for every path below, written `<agent-dir>`. For a fixture home, `verify.py --home <fixture>` uses `<fixture>/.pi/agent` and ignores the variable.
 
 Leave `<agent-dir>/auth.json`, `mcp-auth.json`, `trust.json`, `models-store.json` and `sessions/` unread and unwritten: they hold credentials, trust decisions and runtime state, never a setting this skill owns.
 

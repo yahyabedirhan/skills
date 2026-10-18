@@ -1,6 +1,6 @@
 # Claude Code
 
-Claude Code, set up from the rule table. This page says how its environments are found, what each harness row means and how the verifier checks them. It holds what both local environments share: the CLI and the desktop app's local sessions read the same `~/.claude/`. Docs: [permissions](https://code.claude.com/docs/en/permissions), [hooks](https://code.claude.com/docs/en/hooks), [settings](https://code.claude.com/docs/en/settings), [memory](https://code.claude.com/docs/en/memory). Background: the repo's `docs/research/harness-capabilities.md` and `docs/research/auto-mode-semantic-guard.md`.
+Claude Code, set up from the rule table. This page says how its environments are detected, what each harness row means and how the verifier checks them. It holds what both local environments share: the CLI and the desktop app's local sessions read the same `~/.claude/`. Docs: [permissions](https://code.claude.com/docs/en/permissions), [hooks](https://code.claude.com/docs/en/hooks), [settings](https://code.claude.com/docs/en/settings), [memory](https://code.claude.com/docs/en/memory). Background: the repo's `docs/research/harness-capabilities.md` and `docs/research/auto-mode-semantic-guard.md`.
 
 ## Environments
 
@@ -12,9 +12,9 @@ Each environment has its own page and its own verifier row, `Claude Code / <env>
 
 The code is `scripts/setupmachine/harnesses/claude_code/`: `__init__.py` holds the hook payload and the checks on this page, and each environment is a module.
 
-### Found
+### Presence detection
 
-Each environment page says when its row is found. Every setting below lives in one file, `~/.claude/settings.json`, except the instructions. Keep every key you don't change; a file that isn't valid JSON stops the run until the user fixes it.
+Each environment page says when its environment is present. Every setting below lives in one file, `~/.claude/settings.json`, except the instructions. Keep every key you don't change; a file that isn't valid JSON stops the run until the user fixes it.
 
 ## Harness rows
 

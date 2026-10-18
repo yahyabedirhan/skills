@@ -1,12 +1,12 @@
 # Cursor cloud
 
-The cloud environment of Cursor, the VM Cursor starts from a Build. This page says how it is found, what each harness row means on it, which gaps stay and how the verifier checks it. Docs: [setup](https://cursor.com/docs/cloud-agent/setup), [skills](https://cursor.com/docs/skills), [hooks](https://cursor.com/docs/hooks). The desktop app and the `cursor-agent` CLI are the other environments of this harness, as `index.md` describes.
+The cloud environment of Cursor, the VM Cursor starts from a Build. This page says how it is detected, what each harness row means on it, which gaps stay and how the verifier checks it. Docs: [setup](https://cursor.com/docs/cloud-agent/setup), [skills](https://cursor.com/docs/skills), [hooks](https://cursor.com/docs/hooks). The desktop app and the `cursor-agent` CLI are the other environments of this harness, as `index.md` describes.
 
 ## The environment
 
-### Found
+### Presence detection
 
-Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fixture on the VM is still found, the same way a CLI on `PATH` is. A laptop has no socket, and this row is not graded there.
+Present when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fixture on the VM is still detected, the same way a CLI on `PATH` is. A laptop has no socket, and this row is not graded there.
 
 ## Harness rows
 

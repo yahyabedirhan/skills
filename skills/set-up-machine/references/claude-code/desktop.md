@@ -1,12 +1,12 @@
 # Claude Code desktop
 
-The desktop environment of Claude Code: its local sessions in the Claude desktop app, on macOS and Windows. This page says how it is found, what differs from the CLI, what its sandbox and config rows mean and how the verifier checks it. Docs: [desktop](https://code.claude.com/docs/en/desktop). The app's local sessions read the same settings files as the CLI ([settings](https://code.claude.com/docs/en/settings)) and load personal skills from `~/.claude/skills`, so `index.md` applies as written. A session started as **Cloud** in the app is a cloud session, as `cloud.md` describes.
+The desktop environment of Claude Code: its local sessions in the Claude desktop app, on macOS and Windows. This page says how it is detected, what differs from the CLI, what its sandbox and config rows mean and how the verifier checks it. Docs: [desktop](https://code.claude.com/docs/en/desktop). The app's local sessions read the same settings files as the CLI ([settings](https://code.claude.com/docs/en/settings)) and load personal skills from `~/.claude/skills`, so `index.md` applies as written. A session started as **Cloud** in the app is a cloud session, as `cloud.md` describes.
 
 ## The environment
 
-### Found
+### Presence detection
 
-Found when the app's own Claude Code folder exists: `~/Library/Application Support/Claude/claude-code/` on macOS, `~/AppData/Roaming/Claude/claude-code/` on Windows. The app downloads its Claude Code there; `claude` on `PATH` is the CLI's.
+Present when the app's own Claude Code folder exists: `~/Library/Application Support/Claude/claude-code/` on macOS, `~/AppData/Roaming/Claude/claude-code/` on Windows. The app downloads its Claude Code there; `claude` on `PATH` is the CLI's.
 
 ### What differs from the CLI
 

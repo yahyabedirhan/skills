@@ -1,6 +1,6 @@
 # Claude Code cloud
 
-The cloud environment of Claude Code. This page says what a cloud session is, how it is found, what reaches it, the two ways it is set up, what each harness row means on it and how the verifier checks it. The CLI and the desktop app are the other environments of this harness, as `index.md` describes.
+The cloud environment of Claude Code. This page says what a cloud session is, how it is detected, what reaches it, the two ways it is set up, what each harness row means on it and how the verifier checks it. The CLI and the desktop app are the other environments of this harness, as `index.md` describes.
 
 ## The environment
 
@@ -10,7 +10,7 @@ One Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo. It 
 
 ### Cloud session detection
 
-Found when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and the local machine or a remote machine never does. A `--home` fixture on the VM is still found. On the VM the CLI row is not found, even though `claude` is on `PATH`.
+Present when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and the local machine or a remote machine never does. A `--home` fixture on the VM is still detected. On the VM the CLI row is not detected, even though `claude` is on `PATH`.
 
 ### Files reaching the VM
 

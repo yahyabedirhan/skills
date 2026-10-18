@@ -43,7 +43,7 @@ skills/set-up-machine/
 ├── references/
 │   ├── <harness>/              # one folder per harness
 │   │   ├── index.md            #   what its environments share, when it has more than one
-│   │   └── <env>.md            #   one per environment, same headings: Found, Instructions, Guardrails,
+│   │   └── <env>.md            #   one per environment, same headings: Presence detection, Instructions, Guardrails,
 │   │                           #   Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it
 │   ├── workstation.md          # the format of every setup/ file, and the run without one
 │   ├── global-instructions.md  # the shared file's shape

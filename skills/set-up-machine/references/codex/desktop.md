@@ -1,10 +1,10 @@
 # Codex desktop
 
-The desktop environment of Codex: local chats in the desktop app. This page says how it is found, what each harness row means on it and how the verifier checks it. The rest is in [index.md](index.md). The app and CLI share MCP configuration on the same host ([official MCP guide](https://learn.chatgpt.com/docs/extend/mcp)).
+The desktop environment of Codex: local chats in the desktop app. This page says how it is detected, what each harness row means on it and how the verifier checks it. The rest is in [index.md](index.md). The app and CLI share MCP configuration on the same host ([official MCP guide](https://learn.chatgpt.com/docs/extend/mcp)).
 
 ## The environment
 
-### Found
+### Presence detection
 
 On macOS, find `~/Library/Application Support/Codex/` or `~/Library/Application Support/com.openai.codex/`. On the real machine, also check `/Applications/ChatGPT.app` and `/Applications/Codex.app` for a fresh install. System applications never establish presence in a fixture home. Other operating systems need a verified app marker before this adapter can detect them.
 

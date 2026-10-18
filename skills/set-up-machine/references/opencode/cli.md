@@ -1,12 +1,12 @@
 # opencode
 
-The CLI environment of opencode, set up from the rule table. This page says how it is found, what each harness row means, which gaps stay and how the verifier checks it. Docs: [rules](https://opencode.ai/docs/rules/), [permissions](https://opencode.ai/docs/permissions/), [config](https://opencode.ai/docs/config/), [plugins](https://opencode.ai/docs/plugins/). Background: this repo's `docs/research/harness-capabilities.md` > '3. opencode'.
+The CLI environment of opencode, set up from the rule table. This page says how it is detected, what each harness row means, which gaps stay and how the verifier checks it. Docs: [rules](https://opencode.ai/docs/rules/), [permissions](https://opencode.ai/docs/permissions/), [config](https://opencode.ai/docs/config/), [plugins](https://opencode.ai/docs/plugins/). Background: this repo's `docs/research/harness-capabilities.md` > '3. opencode'.
 
 ## The environment
 
-### Found
+### Presence detection
 
-Found when `~/.config/opencode/` exists or `opencode` is on `PATH`.
+Present when `~/.config/opencode/` exists or `opencode` is on `PATH`.
 
 ## Harness rows
 

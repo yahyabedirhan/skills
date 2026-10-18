@@ -1,6 +1,6 @@
 # Cursor
 
-Cursor, set up from the rule table. This page says how its environments are found, what each harness row means and how the verifier checks them. It holds what every Cursor environment on a machine shares: the desktop app and the `cursor-agent` CLI both read `~/.cursor/`. Docs: [rules](https://cursor.com/help/customization/rules.md), [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [hooks](https://cursor.com/docs/hooks.md). Background: the repo's `docs/research/harness-capabilities.md`, section 4, and probes of `cursor-agent` 2026.09.18.
+Cursor, set up from the rule table. This page says how its environments are detected, what each harness row means and how the verifier checks them. It holds what every Cursor environment on a machine shares: the desktop app and the `cursor-agent` CLI both read `~/.cursor/`. Docs: [rules](https://cursor.com/help/customization/rules.md), [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [hooks](https://cursor.com/docs/hooks.md). Background: the repo's `docs/research/harness-capabilities.md`, section 4, and probes of `cursor-agent` 2026.09.18.
 
 ## Environments
 
@@ -12,9 +12,9 @@ Each environment has its own page and its own verifier row, `Cursor / <env>`. `v
 
 The code is `scripts/setupmachine/harnesses/cursor/`: `__init__.py` holds the hook payload and the checks on this page, and each environment is a module.
 
-### Found
+### Presence detection
 
-Found when `~/.cursor/` holds a file or folder the IDE or CLI writes, such as `cli-config.json`, `argv.json`, `hooks.json`, `mcp.json`, `rules/` or `extensions/`, or `cursor-agent` or `cursor` is on `PATH`. A bare `~/.cursor/` isn't Cursor: another app, such as Grok Bot, can make one.
+Present when `~/.cursor/` holds a file or folder the IDE or CLI writes, such as `cli-config.json`, `argv.json`, `hooks.json`, `mcp.json`, `rules/` or `extensions/`, or `cursor-agent` or `cursor` is on `PATH`. A bare `~/.cursor/` isn't Cursor: another app, such as Grok Bot, can make one.
 
 ## Harness rows
 

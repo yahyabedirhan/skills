@@ -1,12 +1,12 @@
 # Cursor desktop
 
-The desktop environment of Cursor, the desktop app's agent. This page says how it is found, what differs from the CLI in its harness rows and how the verifier checks it. The rules, hooks, plugins and skills it shares with the CLI are in [index.md](index.md).
+The desktop environment of Cursor, the desktop app's agent. This page says how it is detected, what differs from the CLI in its harness rows and how the verifier checks it. The rules, hooks, plugins and skills it shares with the CLI are in [index.md](index.md).
 
 ## The environment
 
-### Found
+### Presence detection
 
-Found when `~/.cursor/argv.json` or `~/.cursor/extensions/` exists, or `cursor` is on `PATH`.
+Present when `~/.cursor/argv.json` or `~/.cursor/extensions/` exists, or `cursor` is on `PATH`.
 
 ## Harness rows
 

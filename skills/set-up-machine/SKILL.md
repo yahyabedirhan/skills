@@ -164,12 +164,12 @@ A harness with environments has `references/<harness>/<env>.md` and `scripts/set
 - [references/live-check.md](references/live-check.md): starting a real session of each harness, the probe, and reading what it did.
 - [references/remote-machine.md](references/remote-machine.md): running agents on any remote or headless machine: signing in without a browser, per-machine settings, keeping sessions alive, and containing a misled agent.
   - [references/new-remote-machine.md](references/new-remote-machine.md): for a brand-new machine, first: the base it needs, done with the user as root, from key access, the dedicated user, keys-only SSH, the firewall, updates, swap and the docker group to the session host's integration, git credentials, `PATH` over SSH and a headless browser.
-- One reference per harness environment, read for each one found: the [Harnesses](#harnesses) table lists them. Each page has the same headings: Found, Instructions, Guardrails, Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it, and leaves out what its harness's `index.md` already covers. A page whose facts were checked against a version or a test ends with Notes, which records that history so the sections above it state only current facts.
+- One reference per harness environment, read for each one found: the [Harnesses](#harnesses) table lists them. Each page has the same headings: Presence detection, Instructions, Guardrails, Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it, and leaves out what its harness's `index.md` already covers. A page whose facts were checked against a version or a test ends with Notes, which records that history so the sections above it state only current facts.
 ## Scripts
 
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
 - [scripts/verify.py](scripts/verify.py): the check above. It writes nothing.
-  - `--home <folder>`: checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`.
+  - `--home <folder>`: checks a copy of a home folder, where a harness is detected by its folder only, not by a CLI on `PATH`.
   - `--grok-bot-rules`: prints the rule table and personal permissions as Grok Bot's Auto-review rules, as `references/grok-bot/desktop.md` > 'Guardrails' describes.
   - `--harness <harness> [--env <env>]`: keeps one harness's rows, or one environment's, such as `--harness cursor --env cloud`.
   - `--codex-trust-hash '<command>'`: prints the `trusted_hash` Codex needs for a hook command, as `references/codex/index.md` > 'Hook wiring' describes.

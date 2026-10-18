@@ -1,10 +1,10 @@
 # Codex CLI
 
-The CLI environment of Codex: terminal and IDE sessions. This page says how it is found, what its sandbox and config rows mean and how the verifier checks it. The rest is in [index.md](index.md). Preserve the existing installation channel.
+The CLI environment of Codex: terminal and IDE sessions. This page says how it is detected, what its sandbox and config rows mean and how the verifier checks it. The rest is in [index.md](index.md). Preserve the existing installation channel.
 
 ## The environment
 
-### Found
+### Presence detection
 
 The resolved Codex config home exists, or `codex` is on `PATH`. Fixture homes use their own config folder.
 

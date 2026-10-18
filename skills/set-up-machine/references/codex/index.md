@@ -1,14 +1,14 @@
 # Codex
 
-Codex, set up from the rule table. This page says how its environments are found, what each harness row means and how the verifier checks them. It holds the procedure both environments use. Docs: [rules](https://learn.chatgpt.com/docs/agent-configuration/rules), [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [hooks](https://learn.chatgpt.com/docs/hooks), [memories](https://learn.chatgpt.com/docs/customization/memories), and the `openai/codex` source where the docs are silent. Background: this repo's `docs/research/harness-capabilities.md` > '2. OpenAI Codex (CLI)'.
+Codex, set up from the rule table. This page says how its environments are detected, what each harness row means and how the verifier checks them. It holds the procedure both environments use. Docs: [rules](https://learn.chatgpt.com/docs/agent-configuration/rules), [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [hooks](https://learn.chatgpt.com/docs/hooks), [memories](https://learn.chatgpt.com/docs/customization/memories), and the `openai/codex` source where the docs are silent. Background: this repo's `docs/research/harness-capabilities.md` > '2. OpenAI Codex (CLI)'.
 
 ## Environments
 
 Read [cli.md](cli.md) for terminal sessions or [desktop.md](desktop.md) for desktop sessions. Both use this procedure.
 
-### Found
+### Presence detection
 
-Found when the resolved Codex config home exists or `codex` is on `PATH`; a fresh install makes the folder only on first start. Resolve the non-secret `CODEX_HOME` internally, falling back to `~/.codex`, without printing its environment value. Use that one folder for `config.toml`, instructions, profiles, rules, hooks and trust checks. Every relative Codex path below is under it. For a fixture home, pass `verify.py --home <fixture>`; it uses `<fixture>/.codex` and ignores ambient `CODEX_HOME`.
+Present when the resolved Codex config home exists or `codex` is on `PATH`; a fresh install makes the folder only on first start. Resolve the non-secret `CODEX_HOME` internally, falling back to `~/.codex`, without printing its environment value. Use that one folder for `config.toml`, instructions, profiles, rules, hooks and trust checks. Every relative Codex path below is under it. For a fixture home, pass `verify.py --home <fixture>`; it uses `<fixture>/.codex` and ignores ambient `CODEX_HOME`.
 
 ## Harness rows
 

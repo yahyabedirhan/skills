@@ -1,12 +1,12 @@
 # Cursor CLI
 
-The CLI environment of Cursor, the `cursor-agent` CLI. This page says how it is found, what its guardrails, sandbox and config rows mean and how the verifier checks it, all of which only the CLI has. The rules, hooks, plugins and skills it shares with the desktop app are in [index.md](index.md). Docs: [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
+The CLI environment of Cursor, the `cursor-agent` CLI. This page says how it is detected, what its guardrails, sandbox and config rows mean and how the verifier checks it, all of which only the CLI has. The rules, hooks, plugins and skills it shares with the desktop app are in [index.md](index.md). Docs: [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
 
 ## The environment
 
-### Found
+### Presence detection
 
-Found when `~/.cursor/cli-config.json` exists or `cursor-agent` is on `PATH`.
+Present when `~/.cursor/cli-config.json` exists or `cursor-agent` is on `PATH`.
 
 ## Harness rows
 

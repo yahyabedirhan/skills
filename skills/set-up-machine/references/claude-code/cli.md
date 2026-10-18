@@ -1,12 +1,12 @@
 # Claude Code CLI
 
-The CLI environment of Claude Code, in a terminal or an IDE extension. This page says how it is found, what its sandbox and config rows mean and how the verifier checks it. The VS Code and JetBrains extensions read the same settings files ([settings](https://code.claude.com/docs/en/settings)). The instructions, guardrails, plugins, skills and hook wiring are in `index.md`; this page holds what only the CLI row has.
+The CLI environment of Claude Code, in a terminal or an IDE extension. This page says how it is detected, what its sandbox and config rows mean and how the verifier checks it. The VS Code and JetBrains extensions read the same settings files ([settings](https://code.claude.com/docs/en/settings)). The instructions, guardrails, plugins, skills and hook wiring are in `index.md`; this page holds what only the CLI row has.
 
 ## The environment
 
-### Found
+### Presence detection
 
-Found when `~/.claude/` exists or `claude` is on `PATH`, except on a cloud VM with `CLAUDE_CODE_REMOTE=true`, which is the cloud row, as `cloud.md` describes.
+Present when `~/.claude/` exists or `claude` is on `PATH`, except on a cloud VM with `CLAUDE_CODE_REMOTE=true`, which is the cloud row, as `cloud.md` describes.
 
 ## Harness rows
 
