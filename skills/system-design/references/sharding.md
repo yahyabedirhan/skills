@@ -9,11 +9,11 @@ Splitting data across machines once a single database can't keep up with its sto
 
 Replicas for availability are a separate concern: a primary with replicas is not a single point of failure, and it isn't sharded.
 
-## When to shard
+## Triggers
 
 Only after showing one database won't do ([numbers-to-know.md](numbers-to-know.md)): storage approaching tens of terabytes, sustained writes above about 10k per second, or read load that replicas and caching can't absorb. State the bottleneck, why a single database can't handle it, then propose sharding. Sharding before the math is the most common mistake.
 
-## The shard key
+## Shard key
 
 What the data is split by. A good key has:
 

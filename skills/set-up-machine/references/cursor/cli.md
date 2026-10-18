@@ -2,7 +2,7 @@
 
 The CLI environment of Cursor, the `cursor-agent` CLI. This page says how it is detected, what its guardrails, sandbox and config rows mean and how the verifier checks it, all of which only the CLI has. The rules, hooks, plugins and skills it shares with the desktop app are in [index.md](index.md). Docs: [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
 
-## The environment
+## Environment
 
 ### Presence detection
 
@@ -46,7 +46,7 @@ Auto-review with the sandbox on is the mode this skill sets for anyone who has C
 
 ### Config
 
-When `setup/harnesses.json` names a Cursor `config`, as `../workstation.md` > 'A declared config' describes, merge each key it sets, such as `hasChangedDefaultModel`, `model` and `selectedModel`, into `~/.cursor/cli-config.json`, the file that holds the CLI's permissions and run mode too. Write each declared key whole, keep every other key, and add `"version": 1` to a new file. Mark each key `present, personal` or `updated, personal`.
+When `setup/harnesses.json` names a Cursor `config`, as `../workstation.md` > 'Declared config' describes, merge each key it sets, such as `hasChangedDefaultModel`, `model` and `selectedModel`, into `~/.cursor/cli-config.json`, the file that holds the CLI's permissions and run mode too. Write each declared key whole, keep every other key, and add `"version": 1` to a new file. Mark each key `present, personal` or `updated, personal`.
 
 - **Drift:** the CLI rewrites these keys itself when the user picks another model in it, so the `config` cell then fails. Ask the user whether to change the declared file or the machine; don't overwrite the choice silently.
 - **Activation:** a new `cursor-agent` session reads it. The IDE keeps its own model choice, which this file doesn't set.

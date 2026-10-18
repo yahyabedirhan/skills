@@ -2,7 +2,7 @@
 
 The format of a row of the rule table, `rules.json`, and of a personal permission: its fields, its `match` kinds, and the spellings a harness that matches text needs. This file describes each field once.
 
-## A row
+## Row
 
 | Field | Holds |
 |---|---|

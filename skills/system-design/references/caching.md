@@ -2,7 +2,7 @@
 
 Keeping frequently read data in memory so reads skip the store behind it. A Redis read takes about a millisecond where a database query takes up to tens, and every cache hit is load the database doesn't carry. The price is staleness, invalidation, and new ways to fail.
 
-## When a cache is justified
+## Justification
 
 Add a cache only for a named bottleneck, with rough numbers, such as:
 
@@ -13,7 +13,7 @@ Add a cache only for a named bottleneck, with rough numbers, such as:
 
 An indexed row lookup already takes a few milliseconds; caching it adds infrastructure for nothing ([numbers-to-know.md](numbers-to-know.md)).
 
-## Where to cache
+## Placement
 
 - **External cache** (Redis, Memcached): a separate service every app server shares, with eviction and TTLs. The default.
 - **CDN**: edge servers near users cache content; reach for it first for static media served worldwide.
@@ -36,7 +36,7 @@ An indexed row lookup already takes a few milliseconds; caching it adds infrastr
 - **FIFO** evicts the oldest inserted, ignoring use; rarely right.
 - **TTL** expires entries after a set time; combined with LRU or LFU wherever data must refresh.
 
-## What goes wrong
+## Failure modes
 
 - **Stampede (thundering herd)**: a popular entry expires and every request hits the database at once. Coalesce requests so only one rebuilds while the others wait; or refresh hot keys before they expire.
 - **Stale data**: the database changed and the cache didn't. Delete the entry on write, use short TTLs, or accept eventual consistency where the requirements allow it.

@@ -5,7 +5,7 @@ This page says how it is detected, what its sandbox and config rows mean and how
 The rest is in [index.md](index.md).
 Preserve the existing installation channel.
 
-## The environment
+## Environment
 
 ### Presence detection
 

@@ -2,7 +2,7 @@
 
 The desktop environment of Cursor, the desktop app's agent. This page says how it is detected, what differs from the CLI in its harness rows and how the verifier checks it. The rules, hooks, plugins and skills it shares with the CLI are in [index.md](index.md).
 
-## The environment
+## Environment
 
 ### Presence detection
 

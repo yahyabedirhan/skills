@@ -5,7 +5,7 @@ This page says how it is detected, what each harness row means on it and how the
 The rest is in [index.md](index.md).
 The app and CLI share MCP configuration on the same host ([official MCP guide](https://learn.chatgpt.com/docs/extend/mcp)).
 
-## The environment
+## Environment
 
 ### Presence detection
 

@@ -2,7 +2,7 @@
 
 Grok Bot, the agent app that works on one persistent Linux box shared by all of the user's agents. This page says how it is detected, what each harness row means for it, which gaps stay and how the verifier checks it. The app keeps most settings other harnesses keep in files: memory, Auto-review, connectors, secrets and routines. So the agent applies most areas through the app's own tools, or gives the user a step, and the verifier checks what a file shows.
 
-## The environment
+## Environment
 
 ### Presence detection
 

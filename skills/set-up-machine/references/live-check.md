@@ -6,7 +6,7 @@ The verifier reads files: it proves each harness's config says the right thing. 
 
 - `<session-host>`: where agent sessions run, such as `herdr`. The live check needs a host that can start an interactive session of each harness, type a prompt into it, and read its screen.
 
-## The probe
+## Probe
 
 ### 1. Make the probe folders
 

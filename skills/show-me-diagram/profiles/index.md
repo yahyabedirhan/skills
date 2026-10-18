@@ -10,7 +10,7 @@ The diagram-design profiles this skill ships. A profile is a saved set of choice
 | Parchment | [parchment.md](parchment.md) | a story or a process, on warm paper |
 | Graphite | [graphite.md](graphite.md) | a crafted dark diagram in the look of the Shipyard and skills logos: folded white paper on granite |
 
-## The shape of a profile
+## Profile shape
 
 Every profile has these sections, in this order, from what the diagram is to how it looks. Name things by their upstream names in diagram-design's `SKILL.md` and `references/style-guide.md`, and don't restate upstream rules.
 
@@ -39,6 +39,6 @@ Use <sublabel family> for all technical text.
 
 To add a profile, copy this shape and add a row to the table above.
 
-## How to check a profile
+## Verification
 
 Render the same upstream examples, `assets/example-flowchart.html` and `assets/example-layers.html`, with each profile's palette and fonts swapped in, and screenshot them in a headless browser. Compare them side by side: the fonts load, every label reads against its ground, and the accent marks only the focal nodes.

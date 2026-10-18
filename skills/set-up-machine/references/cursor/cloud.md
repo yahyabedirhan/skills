@@ -2,7 +2,7 @@
 
 The cloud environment of Cursor, the VM Cursor starts from a Build. This page says how it is detected, what each harness row means on it, which gaps stay and how the verifier checks it. Docs: [setup](https://cursor.com/docs/cloud-agent/setup), [skills](https://cursor.com/docs/skills), [hooks](https://cursor.com/docs/hooks). The desktop app and the `cursor-agent` CLI are the other environments of this harness, as `index.md` describes.
 
-## The environment
+## Environment
 
 ### Presence detection
 

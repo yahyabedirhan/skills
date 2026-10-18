@@ -17,7 +17,7 @@ Present when the resolved Codex config home exists or `codex` is on `PATH`; a fr
 #### Global instructions
 
 - Codex reads `AGENTS.md` in every session and follows a symlink; it has no imports. It becomes a **symlink to the shared file**, `~/.config/agents/AGENTS.md`.
-- Link it only once nothing in the old file would be lost: each line other than a heading is already in the shared file, or sits in a known block below. Every other line is `extra`, with a `gap` saying Codex still reads its own file; move those lines first, as `../global-instructions.md` > 'Moving a harness's file' describes, then run again. The old file is backed up and `removed`.
+- Link it only once nothing in the old file would be lost: each line other than a heading is already in the shared file, or sits in a known block below. Every other line is `extra`, with a `gap` saying Codex still reads its own file; move those lines first, as `../global-instructions.md` > 'Harness file migration' describes, then run again. The old file is backed up and `removed`.
 - A non-empty `AGENTS.override.md` is read instead of `AGENTS.md`: a `gap`, left alone.
 
 ##### Blocks that become a skill
@@ -89,7 +89,7 @@ A personal permission, as the section `../workstation.md` > `setup/permissions.j
 - **It can't loosen a table row:** the strictest matching decision wins, so a personal `allow` never overrides the table's `forbidden` or `prompt`.
 - The `justification` takes the table's form and ends `(set-up-machine personal rule <id>)`, so the agent can tell a personal rule from the table's.
 
-#### What the agent sees
+#### Agent view
 
 A forbidden rule: `` exec_command failed: … `/bin/zsh -lc 'rm -fr x'` rejected: <justification> ``. The hook, which runs first: its refusal, naming each refused part, its rule, reason and instruction.
 
@@ -190,7 +190,7 @@ Codex reads user skills from `~/.agents/skills`, where `npx skills add … -a co
 
 ### Config
 
-The declared Codex config's `model` and `model_reasoning_effort`, which `../workstation.md` > 'A Codex config' describes, are top-level keys of `config.toml`. Check, propose and write them as 'Sandbox' says: 'Installed support', 'Propose and apply', and 'Overrides and activation', where a profile or a trusted project's `model` can win. The verifier's `config` cell checks them.
+The declared Codex config's `model` and `model_reasoning_effort`, which `../workstation.md` > 'Codex config' describes, are top-level keys of `config.toml`. Check, propose and write them as 'Sandbox' says: 'Installed support', 'Propose and apply', and 'Overrides and activation', where a profile or a trusted project's `model` can win. The verifier's `config` cell checks them.
 
 ### Hook wiring
 
@@ -217,7 +217,7 @@ The declared Codex config's `model` and `model_reasoning_effort`, which `../work
 
 ## Limitations
 
-Rules alone let through flags after the operands (`git push origin main --force`), options before a subcommand (`git -C dir push --force`), and anything that isn't a plain chain of words. The hook closes them for deny and allow-and-report rows, so list them only for `ask` rows, beside the rows above that get no rule. `SKILL.md` > 'Pre-tool hook' > 'What it can't see' lists the hook's own misses.
+Rules alone let through flags after the operands (`git push origin main --force`), options before a subcommand (`git -C dir push --force`), and anything that isn't a plain chain of words. The hook closes them for deny and allow-and-report rows, so list them only for `ask` rows, beside the rows above that get no rule. `SKILL.md` > 'Pre-tool hook' > 'Limitations' lists the hook's own misses.
 
 ## Notes
 

@@ -19,11 +19,11 @@ Set up every selected harness and environment from its sources, as [Harnesses](#
 ## Outputs
 
 - **Shared global instructions file**, `~/.config/agents/AGENTS.md`, which every harness reads; its personal parts come from `setup/instructions.md`.
-- **Harness instructions**, for a harness whose `instructions` file `setup/harnesses.json` names: Cursor's `~/.cursor/rules/harness-instructions.mdc` and Claude Code's `~/.claude/rules/harness-instructions.md`, as `references/workstation.md` > 'A harness's instructions file' describes.
+- **Harness instructions**, for a harness whose `instructions` file `setup/harnesses.json` names: Cursor's `~/.cursor/rules/harness-instructions.mdc` and Claude Code's `~/.claude/rules/harness-instructions.md`, as `references/workstation.md` > 'Harness instructions file' describes.
 - Each harness's permission entries, from the rule table and the personal permissions.
 - The **pre-tool hook**, `scripts/pre_tool_hook.py`, run before every tool call.
 - The **pointer**, when it is missing or records none.
-- Each harness's **declared config**, from the `config` file `setup/harnesses.json` names for it: only the keys that file sets are merged into the harness's own config file, as `references/workstation.md` > 'A declared config' describes, and every other key stays the user's.
+- Each harness's **declared config**, from the `config` file `setup/harnesses.json` names for it: only the keys that file sets are merged into the harness's own config file, as `references/workstation.md` > 'Declared config' describes, and every other key stays the user's.
 - The skills and commands `setup/installs.json` lists for this machine, and its **plugins** in each harness it names: the plugins setup area, a plugin bundle or a standalone MCP server per entry.
 - Memory off in every harness.
 
@@ -128,7 +128,7 @@ The wiring fails open, written as `[ -f <script> ] && … || true` or in the for
 
 `<report-folder>` is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 
-### What it can't see
+### Limitations
 
 Name these once in every audit:
 

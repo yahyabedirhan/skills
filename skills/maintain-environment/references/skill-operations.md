@@ -18,7 +18,7 @@ A **local** skill has no source and no lock file, so edit it in place and commit
 
 Keep a skill local until the user names it for publishing to `<skills-repo>`. Move a skill to global once the user wants it in a second project; keep a niche one, such as for a single cloud vendor, in the projects that use it, so it doesn't load in every session.
 
-## Reaching Claude Code and Codex
+## Claude Code and Codex access
 
 Codex reads `.agents/skills/`; Claude Code reads `.claude/skills/`.
 
@@ -67,19 +67,19 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 6. In the README row, move the Origin to the new commit and update the Changes column. Keep the `LICENSE.<upstream>` file.
 7. Ship it. The pull request lists each upstream change taken or left out, with the reason for each one left out.
 
-## Shipping to the skills repo
+## Release to the skills repo
 
 1. Branch from an up-to-date default branch: `<skill>/<topic>` for one skill, `skills/<topic>` for several.
 2. For a new skill or a fork that changes behaviour, audit it as below, and commit the fixes and the full findings to its decision record.
 3. In the pull request for an audited skill, summarise the audit in the description's notes for reviewers and link the decision record.
 
-## Auditing
+## Audit
 
-### Auditing a skill
+### Skill audit
 
 After any change to a skill, including creating or forking one, have a fresh sub-agent audit it, because the author reads what it meant to write and the auditor reads only what is on disk. Tell it to run `/claude-api`'s `prompt-audit` on the skill folder where the harness has it, or to audit against `/writing-for-agents` where it doesn't, and report without editing, unless the user has said the auditor should make its fixes itself. Apply the fixes you accept, and say why each other finding was left.
 
-### Auditing usage
+### Usage audit
 
 When the user asks which skills they use, count invocations in local transcripts. Report per skill the count per agent and the last use, list installed skills with no use as zero, and give the date each transcript window starts, since a harness can delete older transcripts.
 
@@ -88,6 +88,6 @@ When the user asks which skills they use, count invocations in local transcripts
 
 Keep the counting script and its output out of the skills repo. Recommend removals, and leave each one to the user.
 
-## Publishing the skills repo
+## Skills repo publication
 
 Creating the repo and every push publish to the public, so confirm with the user before creating it. Give a new repo an MIT `LICENSE` in the user's name unless they choose another, and a README with an install line and a table of skills with an Origin column.

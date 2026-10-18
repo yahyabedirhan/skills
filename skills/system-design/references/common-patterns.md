@@ -10,19 +10,19 @@ Pushing changes to users as they happen: chat, notifications, live dashboards. S
 
 Work that takes more than a few seconds: video encoding, reports, bulk operations. The web server validates the request, puts a job on a queue, and returns a job ID immediately; separate workers pull jobs and do the work. Web servers and workers scale independently, and failures stay in the workers. Needs job status tracking, retries, and a dead-letter queue for jobs that keep failing. Short jobs stay synchronous: simpler, with natural back-pressure and a better user experience.
 
-## Dealing with contention
+## Contention
 
 Many users after the same resource at once: the last concert ticket, an auction item. Within one database: transactions, pessimistic locking, or optimistic concurrency control, which checks a version on write. Across databases: distributed locks, two-phase commit, or serializing through a queue. Keep contended data in one database as long as possible: databases are built to handle contention, and once the data is split across stores, you have to handle it yourself.
 
-## Scaling reads
+## Read scaling
 
 Reads usually grow far faster than writes, with read-to-write ratios of 10:1 to 100:1 and beyond. Scale them in this order: optimize inside the database with indexes and denormalization, then read replicas, then caching layers (Redis, CDNs) ([caching.md](caching.md)). Watch cache invalidation, replica lag, and hot keys.
 
-## Scaling writes
+## Write scaling
 
 Sharding across servers ([sharding.md](sharding.md)); vertical partitioning, which puts different kinds of data in different stores; queues to absorb bursts; load shedding to drop low-priority writes under overload; batching to cut per-write overhead. The partition key must spread load evenly and keep related data together.
 
-## Handling large blobs
+## Large blobs
 
 Videos, images, documents. Keep them off the application servers: the server issues a short-lived presigned URL and the client uploads directly to object storage (S3); downloads come from a CDN with signed URLs. This brings resumable uploads and progress tracking. The hard part is keeping database metadata in sync with the blob store through failed uploads and deletions; storage event notifications help.
 

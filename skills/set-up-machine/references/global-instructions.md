@@ -84,7 +84,7 @@ A line belongs here only when it's about this person, not the work, and holds fo
 
 ## Related setup
 
-### Moving a harness's file
+### Harness file migration
 
 When a harness still keeps its own global file, such as a `~/.claude/CLAUDE.md` that isn't a link or an old `~/.codex/AGENTS.md`, move it line by line before the harness's file becomes a link:
 

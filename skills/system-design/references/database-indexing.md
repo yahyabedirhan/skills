@@ -2,7 +2,7 @@
 
 How a database finds rows without scanning the whole table, and which kind of index fits which query.
 
-## Why indexes, and their cost
+## Purpose and cost
 
 Data lives on disk and is read into memory page by page; without an index, a query reads every page. An index is a separate structure that points straight at the pages holding the match. Random reads stay slower than sequential ones even on SSDs, which is why this matters.
 

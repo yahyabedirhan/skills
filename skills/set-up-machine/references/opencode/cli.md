@@ -2,7 +2,7 @@
 
 The CLI environment of opencode, set up from the rule table. This page says how it is detected, what each harness row means, which gaps stay and how the verifier checks it. Docs: [rules](https://opencode.ai/docs/rules/), [permissions](https://opencode.ai/docs/permissions/), [config](https://opencode.ai/docs/config/), [plugins](https://opencode.ai/docs/plugins/). Background: this repo's `docs/research/harness-capabilities.md` > '3. opencode'.
 
-## The environment
+## Environment
 
 ### Presence detection
 
@@ -16,7 +16,7 @@ Present when `~/.config/opencode/` exists or `opencode` is on `PATH`.
 
 - opencode reads the first that exists of `~/.config/opencode/AGENTS.md` and `~/.claude/CLAUDE.md`. It doesn't follow `@` imports; its own link below makes the order not matter.
 - `~/.config/opencode/AGENTS.md` becomes a **relative symlink**, `../agents/AGENTS.md`, to the shared file.
-- An existing `AGENTS.md` there, a file or a link elsewhere, is kept and `extra`, with a `gap`: opencode reads it instead until its lines move into the shared file, as `../global-instructions.md` > 'Moving a harness's file' describes, and the user deletes it.
+- An existing `AGENTS.md` there, a file or a link elsewhere, is kept and `extra`, with a `gap`: opencode reads it instead until its lines move into the shared file, as `../global-instructions.md` > 'Harness file migration' describes, and the user deletes it.
 
 #### Memory
 
@@ -61,7 +61,7 @@ A personal permission, as the section `../workstation.md` > `setup/permissions.j
 - **Worked example,** an `allow` command row on `<program>` with subcommand `<word>`: `"bash": {"<program> <word> *": "allow", "/bin/<program> <word> *": "allow", "/usr/bin/<program> <word> *": "allow", …}`, before the deny patterns.
 - **Its tool exists** for a command row when one of its programs is on `PATH`, for a file row always, and for an MCP-tool row when its `server` regex matches a server in the `mcp` key; otherwise the row is `n/a` here. A matching MCP-tool row is still a `gap`, as above: an `allow` row then leaves the tools to opencode's own defaults.
 
-#### What the agent sees
+#### Agent view
 
 A native refusal: `The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [...]`, with every bash pattern as JSON, not just the one that matched: about 150, which costs the agent tokens. An `ask` rule prompts in the TUI; `opencode run` auto-rejects it with `The user rejected permission to use this specific tool call.` The hook runs first, and its refusal names each refused part, its rule, reason and instruction.
 
@@ -79,7 +79,7 @@ opencode reads skills from `~/.config/opencode/skills`, `~/.claude/skills` and `
 
 ### Config
 
-When `setup/harnesses.json` names an opencode `config`, as `../workstation.md` > 'A declared config' describes, merge each key it sets, such as `model` (`<provider>/<model>`), into the global config file 'Permissions' names: the last of `config.json`, `opencode.json` and `opencode.jsonc` that exists, else a new `opencode.json`. In an `opencode.jsonc`, change only the declared keys' lines and keep its comments. Keep every other key. Mark each key `present, personal` or `updated, personal`.
+When `setup/harnesses.json` names an opencode `config`, as `../workstation.md` > 'Declared config' describes, merge each key it sets, such as `model` (`<provider>/<model>`), into the global config file 'Permissions' names: the last of `config.json`, `opencode.json` and `opencode.jsonc` that exists, else a new `opencode.json`. In an `opencode.jsonc`, change only the declared keys' lines and keep its comments. Keep every other key. Mark each key `present, personal` or `updated, personal`.
 
 - **Activation:** a new session reads it. A project's `opencode.json` and the `--model` flag override it.
 - **Variant:** declare `agent` > `build` > `variant` beside `model`, set to the reasoning effort the model's options name, such as `high`.
@@ -101,7 +101,7 @@ With native entries alone these get through; the hook closes the command and MCP
 - a bash command (`sed`, `echo … > .env`), a script or another program opening a file; for `~/` paths, a session whose project is the home folder;
 - the rows with no pattern above.
 
-`SKILL.md` > 'Pre-tool hook' > 'What it can't see' lists the hook's own misses.
+`SKILL.md` > 'Pre-tool hook' > 'Limitations' lists the hook's own misses.
 
 ## Notes
 
