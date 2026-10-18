@@ -1,6 +1,6 @@
 # What a project's harness files can do to the global rules
 
-The facts behind the audit, per harness. The global rules are the machine's safety rails, written by **set-up-machine** from its rule table; a project's own files are for convenience and add only `allow` entries for the project's own commands. Harness formats change: check the docs set-up-machine's harness references link. Sources: this repo's docs/research/harness-capabilities.md > *1.5 Can a project override the global rules?* and the matching subsection in each other harness's section, and docs/research/auto-mode-semantic-guard.md > *1.3 What a project can override*.
+The facts behind the audit, per harness. The global rules are the machine's safety rails, written by **set-up-machine** from its rule table; a project's own files are for convenience and add only `allow` entries for the project's own commands. Harness formats change: check the docs set-up-machine's harness references link. Sources: this repo's `docs/research/harness-capabilities.md` > '1.5 Can a project override the global rules?' and the matching subsection in each other harness's section, and `docs/research/auto-mode-semantic-guard.md` > '1.3 What a project can override'.
 
 ## How the audit reads a rule
 
@@ -24,7 +24,7 @@ Each deny and ask row of set-up-machine's `rules.json` carries the key `samples`
 
 - **List merge:** a project list replaces the global one. The key `permissions` > `deny` in the project's file replaces `~/.cursor/cli-config.json`'s, so a list missing any global entry (`"deny": []`) is `weakens`; the deny lists in `~/.claude/settings.json` and the pre-tool hook still hold. A project deny beyond the global list is `extra`.
 - **No ask level:** an allow covering an ask row is `weakens`. One covering a deny row is `overlaps`, since deny wins over allow.
-- **Matching:** `Shell(p)` covers `p` alone or followed by a space, `Shell(p:)` `p` alone, `Shell(cmd:args)` a one-word command whose arguments match the glob; `*` matches anything. `Read`, `Write` and `Mcp(server:tool)` as set-up-machine's references/cursor/cli.md says.
+- **Matching:** `Shell(p)` covers `p` alone or followed by a space, `Shell(p:)` `p` alone, `Shell(cmd:args)` a one-word command whose arguments match the glob; `*` matches anything. `Read`, `Write` and `Mcp(server:tool)` as set-up-machine's `references/cursor/cli.md` says.
 - **Hooks** can't be turned off by a project.
 
 ## opencode: `opencode.json`, `opencode.jsonc`, `.opencode/opencode.json(c)`

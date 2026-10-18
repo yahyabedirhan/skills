@@ -39,7 +39,7 @@ The tool therefore reports "Terminal notification sent" truthfully: it wrote the
 
 ### Direct macOS routes
 
-- `osascript -e 'display notification "<msg>" with title "Claude Code" sound name "Glass"'` is the command the Claude Code hooks guide itself uses on macOS ([hooks-guide](https://code.claude.com/docs/en/hooks-guide#get-notified-when-claude-needs-input)). It posts as Script Editor; if Script Editor lacks notification permission it fails silently. Tested working by the user on 2026-09-24 (issue [#9](https://github.com/yahyabedirhan/skills/issues/9)). Needs no escape passthrough, so Herdr cannot block it. Mac only: it does nothing on the VPS, as [herdr-vps.md > *Notifications*](herdr-vps.md#notifications) says.
+- `osascript -e 'display notification "<msg>" with title "Claude Code" sound name "Glass"'` is the command the Claude Code hooks guide itself uses on macOS ([hooks-guide](https://code.claude.com/docs/en/hooks-guide#get-notified-when-claude-needs-input)). It posts as Script Editor; if Script Editor lacks notification permission it fails silently. Tested working by the user on 2026-09-24 (issue [#9](https://github.com/yahyabedirhan/skills/issues/9)). Needs no escape passthrough, so Herdr cannot block it. Mac only: it does nothing on the VPS, as [herdr-vps.md > 'Notifications'](herdr-vps.md#notifications) says.
 - `terminal-notifier` is not installed here, and no primary Apple source covers it. Not needed while `osascript` works.
 
 ### Recommendation
@@ -81,7 +81,7 @@ Combined with the shape the user validated (issue [#18](https://github.com/yahya
 3. **The outcome as a diff** of the ticket tree, commit tree or file tree under the recommended options (the **show-me** `diff` form).
 4. **A one-line close:** "Reply `go` to accept the picks, or name the options you'd rather have."
 
-Collection: put the full view in the chat or a show-me page, then, for picks, optionally follow with one `AskUserQuestion` call whose options repeat the table's columns, the pick first and labelled "(Recommended)". The table carries the context, the picker makes the answer one keystroke. For a value such as an ID, give a named slot instead of a picker, as *Secrets and user-only inputs* describes.
+Collection: put the full view in the chat or a show-me page, then, for picks, optionally follow with one `AskUserQuestion` call whose options repeat the table's columns, the pick first and labelled "(Recommended)". The table carries the context, the picker makes the answer one keystroke. For a value such as an ID, give a named slot instead of a picker, as 'Secrets and user-only inputs' describes.
 
 ### Timing and batching
 

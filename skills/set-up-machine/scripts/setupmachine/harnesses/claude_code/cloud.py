@@ -99,7 +99,7 @@ def check_plugins(ctx) -> Cell:
 
 
 def check_skills(ctx) -> Cell:
-    """Each listed skill is in `~/.claude/skills` or the repo's .claude/skills."""
+    """Each listed skill is in `~/.claude/skills` or the repo's `.claude/skills`."""
     folders = [ctx.home / FOLDER / "skills"]
     if ctx.setup.clone is not None:
         folders.append(ctx.setup.clone / FOLDER / "skills")

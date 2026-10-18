@@ -1,6 +1,6 @@
 ---
 name: set-up-project
-description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, AGENTS.md as the one rules file with CLAUDE.md pointing at it, the issue tracker, triage labels and domain docs, the folder standard's .gitignore, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
+description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, `AGENTS.md` as the one rules file with `CLAUDE.md` pointing at it, the issue tracker, triage labels and domain docs, the folder standard's `.gitignore`, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
 ---
 
 # Set up project
@@ -70,9 +70,9 @@ Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSS
 
 When exploration found an old `CONTEXT.md` or `CONTEXT-MAP.md`, propose renaming each with `git mv`, so its history follows it: `git mv CONTEXT.md GLOSSARY.md`, `git mv CONTEXT-MAP.md GLOSSARY-MAP.md`, and the same for each per-context `CONTEXT.md`. Where the new name already exists, `git mv` refuses: propose merging the old file into the new one instead, and ask which wins where they disagree. Also propose updating the map's links and any other file that names the old files; the drafts of `AGENTS.md` and `docs/agents/domain.md` already use the new names.
 
-When exploration found a `docs/assets/` folder, propose moving each topic with `git mv`, as ../orchestrating/folder-standard.md > *Migration from older layouts* says: images the project ships or shows to `assets/images/<topic>/`, screenshots to `assets/screenshots/<topic>/`, and each relative link to them updated.
+When exploration found a `docs/assets/` folder, propose moving each topic with `git mv`, as `../orchestrating/folder-standard.md` > 'Migration from older layouts' says: images the project ships or shows to `assets/images/<topic>/`, screenshots to `assets/screenshots/<topic>/`, and each relative link to them updated.
 
-**Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md) > *Environment defaults* says what may go there.
+**Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md) > 'Environment defaults' says what may go there.
 
 ### 4. Confirm and write
 

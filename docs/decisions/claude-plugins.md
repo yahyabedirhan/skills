@@ -1,6 +1,6 @@
 # Decisions: Claude Code plugins
 
-How the skills in this repo are published as Claude Code plugins, from `.claude-plugin/marketplace.json`. This file is for maintaining the marketplace and is never installed. The first plugin's own decisions are in wispr-flow-dictionary.md > *2026-09-28: also a Claude Code plugin, from a marketplace in this repo*. Entries follow the shape in [index.md](index.md).
+How the skills in this repo are published as Claude Code plugins, from `.claude-plugin/marketplace.json`. This file is for maintaining the marketplace and is never installed. The first plugin's own decisions are in `wispr-flow-dictionary.md` > '2026-09-28: also a Claude Code plugin, from a marketplace in this repo'. Entries follow the shape in [index.md](index.md).
 
 The entries below come from [#34](https://github.com/yahyabedirhan/skills/issues/34). They were checked against Claude Code 2.1.286 and its docs ([plugins reference](https://code.claude.com/docs/en/plugins-reference), [marketplace reference](https://code.claude.com/docs/en/plugins/marketplace-reference), [host a marketplace](https://code.claude.com/docs/en/plugins/host-marketplace), [skills](https://code.claude.com/docs/en/skills)).
 

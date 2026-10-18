@@ -20,7 +20,7 @@ Check the user signs in with an SSH key. If they still use the password the prov
 
 ### 3. User
 
-Work as a dedicated unprivileged user, separate from root and from any other service on the machine. The user creates it (`adduser <user>`, `usermod -aG sudo <user>`), copies their key into its `~/.ssh/authorized_keys`, and sets `~/.ssh` to `700` and the file to `600`, both owned by that user. Then they prove a key login as that user in a new connection before turning root login off in *5. Keys-only SSH*, or one mistake locks everyone out.
+Work as a dedicated unprivileged user, separate from root and from any other service on the machine. The user creates it (`adduser <user>`, `usermod -aG sudo <user>`), copies their key into its `~/.ssh/authorized_keys`, and sets `~/.ssh` to `700` and the file to `600`, both owned by that user. Then they prove a key login as that user in a new connection before turning root login off in '5. Keys-only SSH', or one mistake locks everyone out.
 
 - Result: a new connection as `<user>` signs in with the key.
 
@@ -87,7 +87,7 @@ Once the steps in `SKILL.md` have written the harness settings, install the sess
 
 ### 2. Git identity and credentials
 
-Check `git config --global user.name` and `user.email` are set. The user signs in with `gh auth login` on the machine, letting it make this machine's own SSH key and token, as the item remote-machine.md > *Containing a misled agent* > **Separate credentials** asks.
+Check `git config --global user.name` and `user.email` are set. The user signs in with `gh auth login` on the machine, letting it make this machine's own SSH key and token, as the item `remote-machine.md` > 'Containing a misled agent' > **Separate credentials** asks.
 
 - Result: `gh auth status` shows a login on this machine.
 

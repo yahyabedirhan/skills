@@ -43,13 +43,13 @@ Whether Pi loads a project's own `.pi` settings and resources. Context files loa
 
 - Pi loads one context file from `<agent-dir>`, the first that exists of `AGENTS.override.md`, `AGENTS.md`, `AGENTS.MD`, `CLAUDE.md` and `CLAUDE.MD`. It then adds one from each folder from the working folder up. It follows a symlink and skips a broken one. It doesn't follow `@` imports.
 - `<agent-dir>/AGENTS.md` becomes a **relative symlink to the shared file**. For the default folder it's `../../.config/agents/AGENTS.md`. For another folder, compute the path from `<agent-dir>` to `~/.config/agents/AGENTS.md`. It's `present` once it's that link.
-- An existing `AGENTS.md` there, a file or a link elsewhere, is kept and `extra`, with a `gap`: Pi reads it instead until its lines move into the shared file, as ../global-instructions.md > *Moving a harness's file* describes, and the user deletes it.
+- An existing `AGENTS.md` there, a file or a link elsewhere, is kept and `extra`, with a `gap`: Pi reads it instead until its lines move into the shared file, as `../global-instructions.md` > 'Moving a harness's file' describes, and the user deletes it.
 - An `AGENTS.override.md` in `<agent-dir>` is kept and `extra`, with a `gap`: Pi reads it instead of the link. A `CLAUDE.md` there with no `AGENTS.md` is read until the link exists; once the link is written it's `extra`, never read.
 - `--no-context-files` (`-nc`) starts a session without any context file: a `gap` line.
 
 ### Memory
 
-No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it reloads only when the user resumes one. Install no persistent-memory extension, since memory stays off in every harness, as ../global-instructions.md > *Memory* says.
+No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it reloads only when the user resumes one. Install no persistent-memory extension, since memory stays off in every harness, as `../global-instructions.md` > 'Memory' says.
 
 ## Guardrails
 
@@ -83,18 +83,18 @@ A refused call's tool result is the hook's refusal: each refused part, its rule,
 
 ## Sandbox
 
-Pi has no sandbox and no approval setting, so the verifier's `sandbox` cell is `n/a`. Its declared settings are in *Config*.
+Pi has no sandbox and no approval setting, so the verifier's `sandbox` cell is `n/a`. Its declared settings are in 'Config'.
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `setup/installs.json`, as the section ../workstation.md > `setup/installs.json` defines it. Docs: `packages.md` and `mcp.md`.
+The plugins setup area, from `plugins` in `setup/installs.json`, as the section `../workstation.md` > `setup/installs.json` defines it. Docs: `packages.md` and `mcp.md`.
 
 - **A bundle** names an installable Pi package, not necessarily a repository root. The entry names only `pi`. Use `npm:<name>@latest`, a `git:<host>/<owner>/<repo>` source, or an `https://` Git URL. Review the latest source before installing or updating it. A package can expose extensions, skills, prompt templates and themes.
 - **Write a bundle** into the `packages` array of `<agent-dir>/settings.json`. Pi names an extension by its npm name, or by its git host and repository path, so two source strings can name one extension.
   - A matching declaration proves configuration only. Use `present` for the installation only after comparing its installed code with the latest source. Keep object entries and their resource filters.
   - `added` when no entry names the extension: append the source.
   - `updated` when an entry names the same extension with a different source: replace that entry with the source.
-  - Keep every other entry and key, and write the file as *Config* says: back it up first, write a symlink at its target, and stop on invalid JSON.
+  - Keep every other entry and key, and write the file as 'Config' says: back it up first, write a symlink at its target, and stop on invalid JSON.
   - **Update and activation:** use the installed Pi's documented package update command for selected packages even when their declarations match. Pi uses `pi update --extensions`; `pi update` updates the managed harness itself. Startup and `pi list` do not prove freshness. Reload or restart after checking installed versions against current upstream metadata.
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `<agent-dir>/mcp.json`, keeping every other server and key. `present` when it matches, `added` when it's missing, `updated` when it differs. Back it up like `settings.json`. Pi takes server names of letters, digits, `_` and `-`.
   - A running session reads the change after `/reload`.
@@ -113,20 +113,20 @@ The plugins setup area, from `plugins` in `setup/installs.json`, as the section 
 
 ## Config
 
-The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` names declares Pi settings, as ../workstation.md > *A declared config* and ../workstation.md > *A Pi config* describe. Compare each key it declares with `<agent-dir>/settings.json`:
+The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` names declares Pi settings, as `../workstation.md` > 'A declared config' and `../workstation.md` > 'A Pi config' describe. Compare each key it declares with `<agent-dir>/settings.json`:
 
 - `present, personal` when the values are equal; otherwise `updated, personal`, showing the current and the declared value.
 - Write only the declared keys, and keep every other key as it is. Pi writes runtime state into the same file, such as `lastChangelogVersion` and `deviceId`, and other tools add their own keys.
 - A `settings.json` that is a symlink is written at its target. A file that isn't valid JSON stops the change until the user fixes it.
-- Back up the file as the item SKILL.md > *Steps* > **Back up** says: `.pi/agent/settings.json` under the backup folder for the default folder. For an agent folder outside the home folder, name the destination in the diff, `pi/settings.json` under the backup folder.
+- Back up the file as the item `SKILL.md` > 'Steps' > **Back up** says: `.pi/agent/settings.json` under the backup folder for the default folder. For an agent folder outside the home folder, name the destination in the diff, `pi/settings.json` under the backup folder.
 - A key the file no longer declares keeps its persisted value, for the user to remove.
-- A `packages` key in the Pi `config` is a `gap`, never compared or written: Pi extensions come only from the plugins list, as *Plugins* says, so one file says what Pi loads. Tell the user to move each entry into `plugins`.
+- A `packages` key in the Pi `config` is a `gap`, never compared or written: Pi extensions come only from the plugins list, as 'Plugins' says, so one file says what Pi loads. Tell the user to move each entry into `plugins`.
 - **Activation:** a new session reads the change. A running session reads it after `/reload`.
 - **Gaps:** a trusted project's `.pi/settings.json` overrides these keys, and CLI flags such as `--model` override them for one run.
 
 ## Hook wiring
 
-- **Wiring:** the extension `<agent-dir>/extensions/set-up-machine.ts`, which Pi loads from its global extension folder. Write it from [pi-extension.ts](pi-extension.ts), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "pi"]`, with `<script>` as SKILL.md > *Pre-tool hook* > *Wiring* gives it. Its `tool_call` handler runs before every tool call, built-in, extension and MCP. Calls that `codemode` scripts make with `tools.<name>(…)` reach it one by one, as nested calls.
+- **Wiring:** the extension `<agent-dir>/extensions/set-up-machine.ts`, which Pi loads from its global extension folder. Write it from [pi-extension.ts](pi-extension.ts), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "pi"]`, with `<script>` as `SKILL.md` > 'Pre-tool hook' > 'Wiring' gives it. Its `tool_call` handler runs before every tool call, built-in, extension and MCP. Calls that `codemode` scripts make with `tools.<name>(…)` reach it one by one, as nested calls.
 - **Fails closed:** Pi has no native rules underneath, so a call the hook can't check is refused. When the script is gone, `python3` can't start, the hook exits non-zero, prints anything but a JSON object or takes over 10 seconds, the extension blocks the call. The agent reads that the guardrail is unavailable and that the user should run `/set-up-machine`. The hook exits non-zero on a call it can't read, a rule table it can't load, and a report line it can't write. The extension catches its own errors and turns them into the same refusal.
 - **Audit:** `wired` when the file is the template with the current command. A file there without the template's first line is someone else's: a `gap`, left alone. An extension with an old command is rewritten.
 - **Input:** `{"toolName", "input", "cwd", "sessionId", "hasUI"}`. `input` holds the tool's arguments: `command` for `bash` and `powershell`; `path` for the file tools; `pattern`, `path` and `glob` for `grep`; `pattern`, a glob, and `path` for `find`. The outer `codemode` call carries its script in `input.code`, which the hook doesn't read as a command.
@@ -151,20 +151,20 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
   So an extension from `packages`, or a built-in one, runs after the hook and could change a call the hook already passed. Pi offers no way to run last or to check the final input before the tool runs. A project extension runs before the hook: the hook sees what it changed.
 - **Child sessions without extensions:** an extension that starts child sessions in the same process can start them with extensions off, and the hook doesn't run there. The `pi-subagents` extension does this for foreground children; its setting `subagents.defaultSubagentOnlyExtensions`, listing the hook extension's path, loads it there. Check each such extension. A child without a UI gets ask rows refused.
 - **`!` commands:** the user's own `!` commands run as `user_bash`, not as tool calls, so the hook doesn't see them, as in Claude Code.
-- SKILL.md > *Pre-tool hook* > *What it can't see* lists the hook's own misses.
+- `SKILL.md` > 'Pre-tool hook' > 'What it can't see' lists the hook's own misses.
 
 ## Checking it
 
 The verifier's Pi row, from `scripts/setupmachine/harnesses/pi/cli.py`, reads the resolved agent folder:
 
 - **instructions:** `<agent-dir>/AGENTS.md` is a link to the shared file. An `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Pi in `setup/harnesses.json`.
-- **guardrails:** `<agent-dir>/extensions/set-up-machine.ts` runs the installed skill's existing `pre_tool_hook.py`, as SKILL.md > *Pre-tool hook* > *Wiring* describes, with `--harness pi`, and the file is [pi-extension.ts](pi-extension.ts) but for its `COMMAND` line; one that differs otherwise, or whose `COMMAND` isn't a JSON list, is `FAIL`. No extension is `FAIL`, since nothing else enforces the rule table in Pi. A file there without the template's first line is someone else's: a `gap`, left alone. Pi has no native rules, so personal permissions need no entry. The extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call.
+- **guardrails:** `<agent-dir>/extensions/set-up-machine.ts` runs the installed skill's existing `pre_tool_hook.py`, as `SKILL.md` > 'Pre-tool hook' > 'Wiring' describes, with `--harness pi`, and the file is [pi-extension.ts](pi-extension.ts) but for its `COMMAND` line; one that differs otherwise, or whose `COMMAND` isn't a JSON list, is `FAIL`. No extension is `FAIL`, since nothing else enforces the rule table in Pi. A file there without the template's first line is someone else's: a `gap`, left alone. Pi has no native rules, so personal permissions need no entry. The extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call.
 - **sandbox:** `n/a`: Pi has no sandbox.
 - **plugins:** as 'Plugins' says.
 - **skills:** each listed skill is in `~/.agents/skills` or `<agent-dir>/skills`.
 - **config:** each key the Pi `config` declares holds the same value in `settings.json`. A `packages` key there is a `gap`, which asks the user to move it into `plugins`. `n/a` without a Pi `config`.
 
-The verifier doesn't report broken skill links: list them in the diff as `extra`, as *Skills* says. To see Pi read the setup, start it in a sandbox:
+The verifier doesn't report broken skill links: list them in the diff as `extra`, as 'Skills' says. To see Pi read the setup, start it in a sandbox:
 
 1. Make a sandbox folder, with a fresh agent folder in it. Copy `settings.json` and recreate the `AGENTS.md` link there. Copy no credential, trust or session file.
 2. Run `PI_CODING_AGENT_DIR=<sandbox agent folder> pi` from an empty folder in the sandbox.

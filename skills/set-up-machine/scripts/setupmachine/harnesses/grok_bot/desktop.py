@@ -1,4 +1,4 @@
-"""Grok Bot, the agent app with one persistent Linux box: its hook payload, and the check of each setup area, as references/grok-bot/desktop.md describes.
+"""Grok Bot, the agent app with one persistent Linux box: its hook payload, and the check of each setup area, as `references/grok-bot/desktop.md` describes.
 
 The app owns most of what other harnesses keep in files: approvals, Auto-review, the model, the connectors and memory. So only skills are checked fully. Each skill is a folder in the shared skill library, `~/agent-data/workflows/<skill>/`, recorded in a lock with the git tree hash of its source folder, so a copy that drifted from its source fails.
 """
@@ -78,7 +78,7 @@ def check_instructions(ctx) -> Cell:
 
 
 def sources(ctx) -> list:
-    """The files memory facts come from: setup/instructions.md for user memory, and Grok Bot's own instructions from setup/harnesses.json for agent memory."""
+    """The files memory facts come from: `setup/instructions.md` for user memory, and Grok Bot's own instructions from `setup/harnesses.json` for agent memory."""
     files = [ctx.setup.clone / "setup/instructions.md", ctx.setup.file(ID, "instructions", ENV)]
     return [f for f in files if f is not None and f.is_file()]
 
@@ -93,7 +93,7 @@ def check_sandbox(ctx) -> Cell:
 
 
 def check_plugins(ctx) -> Cell:
-    """A connector is added in the app, so each one installs.json or the declared config names is a gap the user confirms there."""
+    """A connector is added in the app, so each one `installs.json` or the declared config names is a gap the user confirms there."""
     names = [e["name"] for e in ctx.setup.plugins(ID)] + [n for n in _declared(ctx).get("connectors", [])
                                                           if isinstance(n, str)]
     if not names:
@@ -149,7 +149,7 @@ def check_config(ctx) -> Cell:
     return cell(problems)
 
 
-# The keys a declared Grok Bot config may set, as references/grok-bot/desktop.md > *Config* lists them.
+# The keys a declared Grok Bot config may set, as `references/grok-bot/desktop.md` > 'Config' lists them.
 KEYS = ("secrets", "connectors", "routines")
 
 

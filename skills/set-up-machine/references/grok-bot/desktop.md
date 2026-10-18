@@ -47,7 +47,7 @@ You may merge or reword lines into facts. The lock and the applied state page al
 6. When you can't write memory or the profile, give the user the facts by scope and wait until they confirm the exact texts written.
 7. Write the lock with the commit, the date and each exact user fact, and this agent's entry. An agent joining later writes only its entry.
 8. Rewrite the applied state page to match the lock, with the profile and the Auto-review rules status.
-9. Give the user the Auto-review rules text, as *Guardrails* describes, and each user-only step: rules to paste, connectors, secrets, rulesets.
+9. Give the user the Auto-review rules text, as 'Guardrails' describes, and each user-only step: rules to paste, connectors, secrets, rulesets.
 
 ### Reconcile
 
@@ -99,7 +99,7 @@ A library folder no entry provides is `extra`, or `ignored` when `ignore` names 
 There is no model to set: the app picks it. When `setup/harnesses.json` names a Grok Bot `config`, it is a JSON object with these keys, each optional:
 
 - `secrets`: the names of the environment variables the app's secret store must set, such as a GitHub token. The user adds each in the app. Check a name with `test -n "$NAME"`; never print a value.
-- `connectors`: the connectors the user should have, as *Plugins* describes.
+- `connectors`: the connectors the user should have, as 'Plugins' describes.
 - `routines`: each scheduled or event-triggered prompt the agent should run, as `{"name", "trigger", "prompt"}`. Create or check each with the app's routine tools; an empty list means none.
 
 ## Hook wiring
@@ -114,7 +114,7 @@ Memory and Auto-review rules can't be read from the box; connectors and routines
 
 The verifier's Grok Bot row, from `scripts/setupmachine/harnesses/grok_bot/desktop.py`:
 
-- **instructions:** as *Audit*, step 1.
+- **instructions:** as 'Audit', step 1.
 - **guardrails:** `gap`: Auto-review and its rules can't be read.
 - **sandbox:** `n/a`.
 - **plugins:** `n/a` with no connector declared, else `gap` per connector.

@@ -89,7 +89,7 @@ A personal permission, as the section `../workstation.md` > `setup/permissions.j
 - **Its tool exists** for a command row when one of its programs is on `PATH`, for an MCP-tool row when the listing above has a tool it matches, and for a file row always.
 - **It can't loosen a table row:** deny and ask are evaluated before allow, so a personal `allow` entry never overrides the table's.
 - **The Cursor CLI** unions this file's `allow` and `deny` lists, so a personal entry written here reaches it too.
-- The verifier's `guardrails` cell fails when a personal permission has no entry here. It skips a row whose tool Claude Code lacks, an MCP-tool row, and the kinds under *No entry, and a gap instead*.
+- The verifier's `guardrails` cell fails when a personal permission has no entry here. It skips a row whose tool Claude Code lacks, an MCP-tool row, and the kinds under **No entry, and a gap instead**.
 
 ### Auto mode
 
@@ -110,7 +110,7 @@ The plugins setup area, from `plugins` in `setup/installs.json`, as the section 
 
 ## Skills
 
-Claude Code reads skills from `~/.claude/skills`. When that folder is a link to `~/.agents/skills`, every skill installed there reaches Claude Code: install without `-a claude-code`, since the CLI would link the folder into itself. Otherwise add `-a claude-code` to each install command. Install each skill as ../workstation.md, *A skill*, says.
+Claude Code reads skills from `~/.claude/skills`. When that folder is a link to `~/.agents/skills`, every skill installed there reaches Claude Code: install without `-a claude-code`, since the CLI would link the folder into itself. Otherwise add `-a claude-code` to each install command. Install each skill as the item `../workstation.md` > `setup/installs.json` > **A skill** says.
 
 ## Hook wiring
 
@@ -121,7 +121,7 @@ Claude Code reads skills from `~/.claude/skills`. When that folder is a link to 
     "command": "[ -f <script> ] && python3 <script> --harness claude-code || true"}]}
   ```
 
-  `<script>` and the fail-open wrapping are in SKILL.md, *Wiring*.
+  `<script>` and the fail-open wrapping are in `SKILL.md` > 'Pre-tool hook' > 'Wiring'.
 - **Audit:** `wired` when a match-all group runs exactly that command. A handler that runs `pre_tool_hook.py` from another path is this skill's old wiring: `removed`, with the new one `added`. Other hooks are the user's and stay.
 - **Input:** `tool_name`, `tool_input`, `cwd`, `session_id` and `permission_mode`. `tool_input` holds `command` for Bash; `file_path` or `notebook_path` for Read, Edit, MultiEdit, Write and NotebookEdit; `path` and `glob` for Grep. `permission_mode` is `default`, `plan`, `acceptEdits`, `auto`, `dontAsk` or `bypassPermissions`.
 - **Answer:** a deny is `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "<the refusal>"}}` with exit 0; Claude Code shows the agent the reason. Otherwise nothing, exit 0, so the native permissions decide. It never answers `allow`, which would skip them, and leaves `ask` rows to the native `ask` list.
@@ -138,7 +138,7 @@ The native entries alone let these through. The hook closes them for deny and al
 - a script or another program that opens a denied file itself;
 - a tool connected after the run, until the next run. The hook matches it by name.
 
-The hook's own misses are in SKILL.md, *What it can't see*.
+The hook's own misses are in `SKILL.md` > 'Pre-tool hook' > 'What it can't see'.
 
 ## Checking it
 
@@ -149,4 +149,4 @@ The checks both local rows run, from `scripts/setupmachine/harnesses/claude_code
 - **plugins:** each bundle is in `installed_plugins.json` and enabled in `enabledPlugins`. A standalone MCP server is a `gap`.
 - **skills:** each listed skill is in `~/.claude/skills`.
 
-The verifier doesn't report an enabled bundle the list leaves out: find those in the diff. How to see Claude Code itself enforce the rows is in cli.md, *Checking it*.
+The verifier doesn't report an enabled bundle the list leaves out: find those in the diff. How to see Claude Code itself enforce the rows is in `cli.md` > 'Checking it'.

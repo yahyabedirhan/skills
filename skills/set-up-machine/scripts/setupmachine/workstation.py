@@ -7,7 +7,7 @@ The pointer, `~/.config/agents/source.md`, names `<workstation-repo>` and its cl
 - `setup/installs.json`: the skills and plugins every machine gets;
 - `setup/harnesses.json`: where each harness's own instructions and declared config are.
 
-The steps: read the pointer, read each file that exists, and record a problem that names the file for each one that is missing or malformed. The verifier prints those problems as FAIL lines. The hook uses only `personal_rows`. references/workstation.md is the format.
+The steps: read the pointer, read each file that exists, and record a problem that names the file for each one that is missing or malformed. The verifier prints those problems as FAIL lines. The hook uses only `personal_rows`. `references/workstation.md` is the format.
 """
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ class Setup:
 
 
 def load(home: Path, table: list, harness_ids) -> Setup:
-    """The pointer and every setup/ file it leads to. Problems are recorded, never raised. `harness_ids` maps each harness id to the environments it has."""
+    """The pointer and every `setup/` file it leads to. Problems are recorded, never raised. `harness_ids` maps each harness id to the environments it has."""
     setup = Setup()
     try:
         setup.repository, setup.clone, setup.clone_text = read_pointer(home)
@@ -258,7 +258,7 @@ def _installs(path: Path, harness_ids: set, problems: list) -> dict:
 
 
 def _harness_files(clone: Path, harness_ids: dict, problems: list) -> dict:
-    """{harness: {kind: path, "environments": {env: {kind: path}}}} from harnesses.json. A harness's `environments` key holds what only one of its environments has; each path must be a file inside the repo."""
+    """{harness: {kind: path, "environments": {env: {kind: path}}}} from `harnesses.json`. A harness's `environments` key holds what only one of its environments has; each path must be a file inside the repo."""
     path = clone / "setup/harnesses.json"
     data = _json(path, problems)
     if not data:

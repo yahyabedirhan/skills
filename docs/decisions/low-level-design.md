@@ -9,7 +9,7 @@ The decisions behind the `low-level-design` skill. This file is for maintaining 
 To add a newly transcribed lesson, add one reference:
 
 1. Write `references/<lesson-slug>.md` from the lesson: what each idea is, when it applies, and what it costs, with a small example where the idea needs one.
-2. Add a row for it to the table in `SKILL.md`'s "Principles, concepts and patterns" section.
+2. Add a row for it to the table in `SKILL.md` > 'Principles, concepts and patterns'.
 3. When the lesson deepens a topic an existing reference touches, point the existing reference at the new one instead of repeating it.
 
 Problem walkthroughs (design a parking lot) are examples of the framework, not concepts; add them only when the user asks.

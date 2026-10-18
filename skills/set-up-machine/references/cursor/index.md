@@ -56,7 +56,7 @@ No memory feature: a `none` line.
 
 ## Guardrails
 
-The hook, below, is the guardrail every local environment shares. The CLI's permission lists are on cli.md; the desktop app has none, as desktop.md describes.
+The hook, below, is the guardrail every local environment shares. The CLI's permission lists are on `cli.md`; the desktop app has none, as `desktop.md` describes.
 
 ### What the agent sees
 
@@ -66,13 +66,13 @@ A native CLI deny: `Permission denied: Command blocked by permissions configurat
 
 The plugins setup area, from `plugins` in `setup/installs.json`, as the section `../workstation.md` > `setup/installs.json` defines it.
 
-- **A bundle:** Cursor's CLI imports Claude Code's installed and enabled plugins, as the item `cli.md` > 'Guardrails' > 'Claude Code plugins Cursor imports' describes, and has no install command of its own. So a bundle reaches Cursor only through Claude Code: Installed and enabled in Claude Code proves readiness only, whether or not the entry lists `claude-code`; otherwise report a `FAIL` naming the Claude Code install. Inherit Claude Code's separate freshness checks and selected marketplace and plugin updates, as `../claude-code/index.md` > 'Plugins' describes. Mark it `present` only when those checks pass. Report an inherited unresolved freshness check as `gap`; do not reinstall or update unrelated bundles. Its MCP servers show up as `plugin-<plugin>-<server>`, from the plugin folder's `mcp.json` or `.mcp.json`. The CLI can't sign in an imported server that uses OAuth: `cursor-agent mcp login` knows only servers in an `mcp.json`, and the desktop app keeps its own sign-ins apart from the CLI's, as checked with `cursor-agent` 2026.10.01. When the CLI needs such a server, give Cursor a standalone entry for it instead of the bundle.
+- **A bundle:** Cursor's CLI imports Claude Code's installed and enabled plugins, as the item `cli.md` > 'Guardrails' > **Claude Code plugins Cursor imports** describes, and has no install command of its own. So a bundle reaches Cursor only through Claude Code: Installed and enabled in Claude Code proves readiness only, whether or not the entry lists `claude-code`; otherwise report a `FAIL` naming the Claude Code install. Inherit Claude Code's separate freshness checks and selected marketplace and plugin updates, as `../claude-code/index.md` > 'Plugins' describes. Mark it `present` only when those checks pass. Report an inherited unresolved freshness check as `gap`; do not reinstall or update unrelated bundles. Its MCP servers show up as `plugin-<plugin>-<server>`, from the plugin folder's `mcp.json` or `.mcp.json`. The CLI can't sign in an imported server that uses OAuth: `cursor-agent mcp login` knows only servers in an `mcp.json`, and the desktop app keeps its own sign-ins apart from the CLI's, as checked with `cursor-agent` 2026.10.01. When the CLI needs such a server, give Cursor a standalone entry for it instead of the bundle.
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `~/.cursor/mcp.json`, keeping every other key ([MCP](https://cursor.com/docs/context/mcp)). `present` when it matches, `added` when it's missing, `updated` when it differs. A global server needs no approval; one in a project's `.cursor/mcp.json` waits for `cursor-agent mcp enable`.
 - **Sign-in:** for the CLI, per project folder: the user runs `cursor-agent mcp login <name>` in the folder, then starts `cursor-agent` there, trusts the workspace and approves its MCP servers, and quits. `cursor-agent mcp list` then shows the server `ready`; before that it shows `requires_authentication` or `not loaded (needs approval)`. A global server in `~/.cursor/mcp.json` still needs that approval. For the desktop app's agent, the user connects each server in the app's MCP settings; that sign-in doesn't reach the CLI. An agent never signs in. On a headless machine the callback goes to `localhost:8787` there, which the user finishes with `curl` or an SSH tunnel.
 
 ## Skills
 
-Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills](https://cursor.com/docs/skills.md)). Skills installed into `~/.agents/skills` reach it with no extra install. Cursor doesn't copy `~/.agents/skills` to Cloud Agents or remote SSH sessions. A cloud agent is a separate environment, as cloud.md describes: its own install puts skills on that VM. Install each skill as the item `../workstation.md` > `setup/installs.json` > 'A skill' says.
+Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills](https://cursor.com/docs/skills.md)). Skills installed into `~/.agents/skills` reach it with no extra install. Cursor doesn't copy `~/.agents/skills` to Cloud Agents or remote SSH sessions. A cloud agent is a separate environment, as `cloud.md` describes: its own install puts skills on that VM. Install each skill as the item `../workstation.md` > `setup/installs.json` > **A skill** says.
 
 ## Hook wiring
 
@@ -101,7 +101,7 @@ The rows with no entry above, the ask rows, the exceptions the CLI refuses, the 
 The shared cells of the verifier's `Cursor / cli` and `Cursor / desktop` rows, from `scripts/setupmachine/harnesses/cursor/__init__.py`:
 
 - **instructions:** `~/.cursor/rules/global-instructions.mdc` is the header above the shared file, byte for byte. When `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` matches its source too. A missing or stale copy is `FAIL`, and so is a generated `harness-instructions.mdc` whose source is gone. A file without the generated comment is a `gap`, left alone.
-- **guardrails:** all four events in `~/.cursor/hooks.json` run the installed skill's existing `pre_tool_hook.py` with `--harness cursor`, wired as SKILL.md > *Wiring* describes.
+- **guardrails:** all four events in `~/.cursor/hooks.json` run the installed skill's existing `pre_tool_hook.py` with `--harness cursor`, wired as `SKILL.md` > 'Wiring' describes.
 - **sandbox:** `cli-config.json` has `"approvalMode": "auto-review"` and `"sandbox": {"mode": "enabled"}`.
 - **plugins:** each bundle is installed and enabled in Claude Code. Each standalone server is in `~/.cursor/mcp.json`, equal to its entry.
 

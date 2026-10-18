@@ -1,4 +1,4 @@
-"""opencode: its hook payload, and the check of each setup area , as references/opencode/cli.md describes.
+"""opencode: its hook payload, and the check of each setup area, as `references/opencode/cli.md` describes.
 
 Its global folder is `~/.config/opencode`. The hook runs through a plugin there, and the permissions and the declared config's keys are in its config file. set-up-machine delivers no plugins entries to opencode, so that area is a gap.
 """

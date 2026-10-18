@@ -2,9 +2,9 @@
 
 > Moved from a private notes repo on 2026-09-26. Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo. The VPS host, user, label and machine ID, and the private repos' names, are redacted.
 
-Facts for issues [#13](https://github.com/yahyabedirhan/skills/issues/13), [#15](https://github.com/yahyabedirhan/skills/issues/15) and [#16](https://github.com/yahyabedirhan/skills/issues/16): how an agent on the Mac reaches Herdr, git and tools on the VPS, what the reverse direction looks like, and what can be checked before handing work from one machine to the other. Researched on 2026-09-25 against Herdr 0.9.0 on both machines. [agent-skill-invocation.md > *Delivery through Herdr*](agent-skill-invocation.md#delivery-through-herdr) covers how a handover prompt gets into an agent tab.
+Facts for issues [#13](https://github.com/yahyabedirhan/skills/issues/13), [#15](https://github.com/yahyabedirhan/skills/issues/15) and [#16](https://github.com/yahyabedirhan/skills/issues/16): how an agent on the Mac reaches Herdr, git and tools on the VPS, what the reverse direction looks like, and what can be checked before handing work from one machine to the other. Researched on 2026-09-25 against Herdr 0.9.0 on both machines. [agent-skill-invocation.md > 'Delivery through Herdr'](agent-skill-invocation.md#delivery-through-herdr) covers how a handover prompt gets into an agent tab.
 
-Sources are cited inline. `[mac]` and `[vps]` mark command output captured on that machine on 2026-09-25; `ssh vps` stands for `ssh <vps-user>@<vps-host>`, as *Finding the host* describes. Herdr docs are cited at the `v0.9.0` tag unless marked 0.9.1, under `https://raw.githubusercontent.com/herdrdev/herdr/<tag>/docs/next/website/src/content/docs/`.
+Sources are cited inline. `[mac]` and `[vps]` mark command output captured on that machine on 2026-09-25; `ssh vps` stands for `ssh <vps-user>@<vps-host>`, as 'Finding the host' describes. Herdr docs are cited at the `v0.9.0` tag unless marked 0.9.1, under `https://raw.githubusercontent.com/herdrdev/herdr/<tag>/docs/next/website/src/content/docs/`.
 
 ## The machine model
 
@@ -15,7 +15,7 @@ Sources are cited inline. `[mac]` and `[vps]` mark command output captured on th
 - **The API is a local Unix socket only.** Mac: `~/.config/herdr/herdr.sock`; VPS: `~/.config/herdr/herdr.sock` (`herdr status --json` on each). There is no TCP listener; `HERDR_SOCKET_PATH` overrides the socket path (`cli-reference.mdx`, Environment variables). So in 0.9.0 the only way for a Mac agent to drive the VPS server is `ssh vps ~/.local/bin/herdr …`.
 - **Selecting the VPS in the window changes nothing for agents.** CLI commands in a pane "still use that pane's inherited session and socket" (`connecting-machines.mdx`; herdr skill).
 - **IDs and names are per server.** Workspace, tab and pane IDs and agent names "are scoped to one server. Two machines may both contain `w1:p1` or an agent named `reviewer`" (`connecting-machines.mdx`). Every remote command must look its IDs up on the VPS first. `--current` and `$HERDR_PANE_ID` from a Mac pane mean nothing there.
-- **0.9.1 adds CLI forwarding.** Herdr 0.9.1, released 2026-09-16, adds a global prefix `herdr --machine <label-or-id> …` that sends `workspace`, `worktree`, `tab`, `pane`, `notification`, `agent` (not `attach`), `api snapshot` and `status server` to a saved machine as JSON over non-interactive SSH, with no open window and no shell interpolation of payloads. It needs 0.9.1 on both ends and never falls back to Local (release notes `https://github.com/herdrdev/herdr/releases/tag/v0.9.1`; `v0.9.1/.../cli-reference.mdx`, "Saved SSH machines"). On 0.9.0 it fails: `herdr --machine x agent list` prints `unknown option: --machine` [mac].
+- **0.9.1 adds CLI forwarding.** Herdr 0.9.1, released 2026-09-16, adds a global prefix `herdr --machine <label-or-id> …` that sends `workspace`, `worktree`, `tab`, `pane`, `notification`, `agent` (not `attach`), `api snapshot` and `status server` to a saved machine as JSON over non-interactive SSH, with no open window and no shell interpolation of payloads. It needs 0.9.1 on both ends and never falls back to Local (release notes `https://github.com/herdrdev/herdr/releases/tag/v0.9.1`; `v0.9.1/.../cli-reference.mdx`, 'Saved SSH machines'). On 0.9.0 it fails: `herdr --machine x agent list` prints `unknown option: --machine` [mac].
 
 ## Mac to VPS: command reference
 
@@ -53,7 +53,7 @@ Notes for writes:
 
 - `<name>` must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents on that server (herdr skill).
 - A prompt or path passed through `ssh vps '…'` goes through the remote shell. Quote it for the remote side, for example with `printf %q` locally, or pipe a script over stdin. The 0.9.1 `--machine` path avoids this.
-- `claude` is found in a login shell on the VPS, and Herdr panes start interactive shells. Whether `agent start --kind claude` finds it is a **Gap**: not tested, see *Open questions*.
+- `claude` is found in a login shell on the VPS, and Herdr panes start interactive shells. Whether `agent start --kind claude` finds it is a **Gap**: not tested, see 'Open questions'.
 
 ## VPS to Mac
 

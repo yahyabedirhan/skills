@@ -29,8 +29,8 @@ Main sources:
 ### 1.1 Global instructions
 
 - **Global file:** `~/.claude/CLAUDE.md`, plus `~/.claude/rules/*.md`, plus a managed `CLAUDE.md` when one exists. [doc memory]
-- **No global `AGENTS.md`.** Claude Code reads `AGENTS.md` (since v2.1.277) only as a project file, and by default only when no `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` sits in the working directory or above. `~/.claude/CLAUDE.md` doesn't count for that check. The `pluginConfigs["agents-md@builtin"].options.instructionFiles` user setting changes this (`claude-md-or-agents-md` by default, `claude-md-and-agents-md`, `claude-md`, `managed-only`). [doc memory, "When Claude Code reads AGENTS.md"]
-- **Imports:** `@path/to/file` anywhere outside code spans and fenced blocks; relative to the importing file, absolute, or `~/`; at most 4 hops. Imports in user-scope files load without a dialog. [doc memory, "Import additional files"]
+- **No global `AGENTS.md`.** Claude Code reads `AGENTS.md` (since v2.1.277) only as a project file, and by default only when no `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` sits in the working directory or above. `~/.claude/CLAUDE.md` doesn't count for that check. The `pluginConfigs["agents-md@builtin"].options.instructionFiles` user setting changes this (`claude-md-or-agents-md` by default, `claude-md-and-agents-md`, `claude-md`, `managed-only`). [doc memory, 'When Claude Code reads AGENTS.md']
+- **Imports:** `@path/to/file` anywhere outside code spans and fenced blocks; relative to the importing file, absolute, or `~/`; at most 4 hops. Imports in user-scope files load without a dialog. [doc memory, 'Import additional files']
 - **Symlinks:** supported (the docs show `ln -s AGENTS.md CLAUDE.md`, and symlinks in `.claude/rules/`). Edit and Write refuse to write through a symlink. [doc memory]
 - **Precedence:** every file is concatenated, none overrides another. Order is managed, user, then project from the root down. On a conflict "Claude may follow either one". [doc memory]
 
@@ -41,41 +41,41 @@ Main sources:
 ### 1.3 Permission files, format and levels
 
 - **Global:** `~/.claude/settings.json`, key `permissions.{allow, ask, deny}`. Three levels. [doc settings, permissions]
-- **Project:** `.claude/settings.json` (shared) and `.claude/settings.local.json` (personal). Project `allow` rules apply only after the workspace-trust dialog. [doc permissions, "Project allow rules and workspace trust"]
-- **Evaluation:** deny, then ask, then allow; the first match wins and specificity doesn't matter. An allow can't carve an exception out of a deny. [doc permissions, "Manage permissions"]
+- **Project:** `.claude/settings.json` (shared) and `.claude/settings.local.json` (personal). Project `allow` rules apply only after the workspace-trust dialog. [doc permissions, 'Project allow rules and workspace trust']
+- **Evaluation:** deny, then ask, then allow; the first match wins and specificity doesn't matter. An allow can't carve an exception out of a deny. [doc permissions, 'Manage permissions']
 
 ### 1.4 How commands are matched
 
-- `Bash(...)` matches the whole command text with a glob `*` that can span spaces. `Bash(x:*)` equals `Bash(x *)`. Everything before the first `*` must match as written, so matching isn't argument-aware: `Bash(rm -rf:*)` misses `rm -fr`, `rm -Rf`, `rm -f -r` and `rm --recursive --force`. [doc permissions, "Wildcard patterns"]
-- Commands are split on `&&`, `||`, `;`, `|`, `|&`, `&` and newlines. Deny and ask rules apply when any subcommand matches, including one nested in a subshell, a command substitution or a control-flow body. [doc permissions, "Compound commands"]
-- Wrappers `timeout`, `time`, `nice`, `nohup`, `stdbuf`, `command`, `builtin`, `noglob` and bare `xargs` are stripped before matching; a deny also matches past a leading `VAR=value`. [doc permissions, "Wrappers"]
-- Not matched: a program by absolute path (`/bin/rm`), and the script inside `bash -c '…'`. The docs say a Bash deny "isn't a security boundary around the program". A separate `Bash(bash -c:*)` rule blocks `bash -c` itself, but not `bash -lc`, `zsh -c` or `/bin/bash -c`. [doc permissions, "What a Bash rule doesn't match"]
-- A built-in set of read-only commands (`ls`, `cat`, `grep`, `find`, …) runs without a prompt; deny rules still apply to them. [doc permissions, "Read-only commands"]
+- `Bash(...)` matches the whole command text with a glob `*` that can span spaces. `Bash(x:*)` equals `Bash(x *)`. Everything before the first `*` must match as written, so matching isn't argument-aware: `Bash(rm -rf:*)` misses `rm -fr`, `rm -Rf`, `rm -f -r` and `rm --recursive --force`. [doc permissions, 'Wildcard patterns']
+- Commands are split on `&&`, `||`, `;`, `|`, `|&`, `&` and newlines. Deny and ask rules apply when any subcommand matches, including one nested in a subshell, a command substitution or a control-flow body. [doc permissions, 'Compound commands']
+- Wrappers `timeout`, `time`, `nice`, `nohup`, `stdbuf`, `command`, `builtin`, `noglob` and bare `xargs` are stripped before matching; a deny also matches past a leading `VAR=value`. [doc permissions, 'Wrappers']
+- Not matched: a program by absolute path (`/bin/rm`), and the script inside `bash -c '…'`. The docs say a Bash deny "isn't a security boundary around the program". A separate `Bash(bash -c:*)` rule blocks `bash -c` itself, but not `bash -lc`, `zsh -c` or `/bin/bash -c`. [doc permissions, 'What a Bash rule doesn't match']
+- A built-in set of read-only commands (`ls`, `cat`, `grep`, `find`, …) runs without a prompt; deny rules still apply to them. [doc permissions, 'Read-only commands']
 
 ### 1.5 Can a project override the global rules?
 
-- **Permissions: no.** "If a tool is denied at any level, no other level can allow it … a user-level deny blocks a project-level allow." [doc permissions, "Settings precedence"]
-- **Hooks: yes, all at once.** A project's `.claude/settings.json` can set `"disableAllHooks": true`, which turns off user, project, local and plugin hooks (not managed ones). A project's `"disableAllHooks": false` also overrides a user `true`. Only managed settings can disable managed hooks. There's no way to disable one hook and keep the rest. [doc hooks, "Disable or remove hooks"; doc settings-reference, `disableAllHooks`]
+- **Permissions: no.** "If a tool is denied at any level, no other level can allow it … a user-level deny blocks a project-level allow." [doc permissions, 'Settings precedence']
+- **Hooks: yes, all at once.** A project's `.claude/settings.json` can set `"disableAllHooks": true`, which turns off user, project, local and plugin hooks (not managed ones). A project's `"disableAllHooks": false` also overrides a user `true`. Only managed settings can disable managed hooks. There's no way to disable one hook and keep the rest. [doc hooks, 'Disable or remove hooks'; doc settings-reference, `disableAllHooks`]
 - **Memory: yes.** `autoMemoryEnabled` is read from any settings file, and project settings outrank user settings, so a project can turn it back on. The environment variable `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` outranks the key "for one session, in either direction". [doc settings-reference, `autoMemoryEnabled`; doc env-vars]
 - **Project-proof settings:** managed settings, `managed-settings.json` in `/Library/Application Support/ClaudeCode/` (macOS) or `/etc/claude-code/` (Linux), a system directory that needs admin rights to write. [doc settings; doc [managed-settings](https://code.claude.com/docs/en/managed-settings)]
 
 ### 1.6 File, MCP and network rules
 
-- **Files:** `Read(path)` and `Edit(path)` with gitignore-style paths (`//abs`, `~/home`, `/relative-to-settings-file`, `./cwd`). A Read deny also blocks Edit and Write on that path. They apply to the built-in file tools, recognised Bash file commands (`cat`, `head`, `tail`, `sed`, `tee`) and redirect targets, and they follow symlinks. [doc permissions, "Read and Edit", "Symlinks"]
-- **`Write(path)` rules are never consulted.** "If you write a path rule for `Write`, `NotebookEdit`, `Glob`, or the legacy `MultiEdit` tool instead, Claude Code accepts the rule but never consults it, and warns at startup." Use `Edit(path)`. [doc permissions, "Read and Edit"]
+- **Files:** `Read(path)` and `Edit(path)` with gitignore-style paths (`//abs`, `~/home`, `/relative-to-settings-file`, `./cwd`). A Read deny also blocks Edit and Write on that path. They apply to the built-in file tools, recognised Bash file commands (`cat`, `head`, `tail`, `sed`, `tee`) and redirect targets, and they follow symlinks. [doc permissions, 'Read and Edit', 'Symlinks']
+- **`Write(path)` rules are never consulted.** "If you write a path rule for `Write`, `NotebookEdit`, `Glob`, or the legacy `MultiEdit` tool instead, Claude Code accepts the rule but never consults it, and warns at startup." Use `Edit(path)`. [doc permissions, 'Read and Edit']
 - Reads by arbitrary subprocesses (a Python script) aren't covered unless the OS sandbox is on; the sandbox applies to Bash, PowerShell and Monitor. [doc permissions; doc sandboxing]
-- **MCP:** `mcp__<server>__<tool>`, `mcp__<server>` or `mcp__<server>__*`. Deny and ask rules accept tool-name globs that must match the full name (`mcp__*`). Tools from claude.ai connectors that Claude Code fetches itself appear as `mcp__claude_ai_<server>__<tool>`, so a rule must use that name in the CLI; a rule naming the server any other way matches nothing there. Settings files skip any `mcp__` rule with parentheses, so MCP arguments can't be matched. [doc permissions, "MCP", "Tool name wildcards"]
+- **MCP:** `mcp__<server>__<tool>`, `mcp__<server>` or `mcp__<server>__*`. Deny and ask rules accept tool-name globs that must match the full name (`mcp__*`). Tools from claude.ai connectors that Claude Code fetches itself appear as `mcp__claude_ai_<server>__<tool>`, so a rule must use that name in the CLI; a rule naming the server any other way matches nothing there. Settings files skip any `mcp__` rule with parentheses, so MCP arguments can't be matched. [doc permissions, 'MCP', 'Tool name wildcards']
 - **Network:** `WebFetch(domain:host)` with wildcards; the sandbox has its own network allowlist. [doc permissions]
 
 ### 1.7 Hooks
 
-- `PreToolUse` runs before every tool call and can block it: exit code 2 (stderr is the reason), or JSON `hookSpecificOutput.permissionDecision: "deny"` with `permissionDecisionReason`. Exit code 1 is a non-blocking error. `permissionDecision` also takes `allow`, `ask` and `defer`. [doc hooks, "Exit code 2", "PreToolUse decision control"]
+- `PreToolUse` runs before every tool call and can block it: exit code 2 (stderr is the reason), or JSON `hookSpecificOutput.permissionDecision: "deny"` with `permissionDecisionReason`. Exit code 1 is a non-blocking error. `permissionDecision` also takes `allow`, `ask` and `defer`. [doc hooks, 'Exit code 2', 'PreToolUse decision control']
 - Hooks live under `hooks` in any settings file; entries from user, project and local settings are merged, not replaced. [doc hooks]
 
 ### 1.8 Memory
 
 - **Auto memory** is on by default and stores notes in `~/.claude/projects/<project>/memory/`.
-- Turn it off with `"autoMemoryEnabled": false` in `~/.claude/settings.json` (the `/memory` toggle writes this key), or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` in the environment. When off, Claude doesn't read or write the memory directory. [doc memory, "Enable or disable auto memory"; doc settings-reference]
+- Turn it off with `"autoMemoryEnabled": false` in `~/.claude/settings.json` (the `/memory` toggle writes this key), or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` in the environment. When off, Claude doesn't read or write the memory directory. [doc memory, 'Enable or disable auto memory'; doc settings-reference]
 - Subagents can keep their own memory through the subagent `memory` field. [doc memory]
 
 ### 1.9 What the agent sees when refused
@@ -98,22 +98,22 @@ Main sources:
 
 ### 2.2 Project instructions
 
-- From the project root (found by `project_root_markers`, default `.git`) down to the working directory, one file per directory: `AGENTS.override.md`, else `AGENTS.md`, else a fallback name. It never walks above the project root. [src core/src/agents_md.rs module doc]
+- From the project root (found by `project_root_markers`, default `.git`) down to the working directory, one file per directory: `AGENTS.override.md`, else `AGENTS.md`, else a fallback name. It never walks above the project root. [src `core/src/agents_md.rs` module doc]
 - **A project marked `trust_level = "untrusted"` loses its `AGENTS.md` too,** not only its `.codex/` config. With no trust entry at all, `AGENTS.md` loads but `.codex/config.toml` doesn't. [check: `codex debug prompt-input` with trusted, untrusted and absent entries]
 
 ### 2.3 Permission files, format and levels
 
-- **Command rules:** Starlark `.rules` files, `~/.codex/rules/*.rules` globally and `<repo>/.codex/rules/*.rules` per project, each holding `prefix_rule(pattern=[...], decision=..., justification=..., match=..., not_match=...)`. [doc rules; src execpolicy/README.md]
+- **Command rules:** Starlark `.rules` files, `~/.codex/rules/*.rules` globally and `<repo>/.codex/rules/*.rules` per project, each holding `prefix_rule(pattern=[...], decision=..., justification=..., match=..., not_match=...)`. [doc rules; src `execpolicy/README.md`]
 - **Levels:** `allow` (runs outside the sandbox without a prompt), `prompt`, `forbidden`. The most restrictive matching decision wins. [doc rules]
 - **Other config:** `~/.codex/config.toml` for `approval_policy`, `sandbox_mode`, permission profiles, MCP and features. [doc config-reference]
 - **Admin layer:** `/etc/codex/requirements.toml` (Unix) constrains security-sensitive settings, can pin `[features]`, can add `[rules]` (`prompt` or `forbidden` only) and managed `[hooks]`. Users and projects can't override it. [doc managed-configuration]
 
 ### 2.4 How commands are matched
 
-- Token-exact prefix over the argv. Any pattern element can be a list of alternatives. No globs or regex. [src execpolicy/README.md]
-- **Absolute paths are resolved.** The harness evaluates with `resolve_host_executables: true`, so `/bin/rm -rf x` falls back to an `rm` rule (restricted to listed paths when a `host_executable()` entry exists). `codex execpolicy check` does this only with `--resolve-host-executables`. [src core/src/exec_policy.rs; src execpolicy/README.md] [check: `/bin/rm -rf x` is `forbidden` with the flag, no match without it]
-- **Shell wrappers:** `bash -c`/`-lc` and the `sh` and `zsh` forms are parsed with tree-sitter. A plain linear chain (`&&`, `||`, `;`, `|` of plain words) is split and each part evaluated. Scripts with redirection, `$(…)`, `VAR=`, globs or control flow aren't split; they're evaluated as the single argv `["bash","-lc","<script>"]`. [doc rules; src core/src/exec_policy.rs, shell-command/src/bash.rs]
-- **Built-in danger check:** any `rm` with a force flag (`-f` inside any short-flag group, or `--force`, anywhere) and `sudo`/`env` in front of one count as dangerous. An unmatched dangerous command prompts, or is forbidden under `approval_policy = never`. [src is_dangerous_command.rs, exec_policy.rs]
+- Token-exact prefix over the argv. Any pattern element can be a list of alternatives. No globs or regex. [src `execpolicy/README.md`]
+- **Absolute paths are resolved.** The harness evaluates with `resolve_host_executables: true`, so `/bin/rm -rf x` falls back to an `rm` rule (restricted to listed paths when a `host_executable()` entry exists). `codex execpolicy check` does this only with `--resolve-host-executables`. [src `core/src/exec_policy.rs`; src `execpolicy/README.md`] [check: `/bin/rm -rf x` is `forbidden` with the flag, no match without it]
+- **Shell wrappers:** `bash -c`/`-lc` and the `sh` and `zsh` forms are parsed with tree-sitter. A plain linear chain (`&&`, `||`, `;`, `|` of plain words) is split and each part evaluated. Scripts with redirection, `$(…)`, `VAR=`, globs or control flow aren't split; they're evaluated as the single argv `["bash","-lc","<script>"]`. [doc rules; src `core/src/exec_policy.rs`, `shell-command/src/bash.rs`]
+- **Built-in danger check:** any `rm` with a force flag (`-f` inside any short-flag group, or `--force`, anywhere) and `sudo`/`env` in front of one count as dangerous. An unmatched dangerous command prompts, or is forbidden under `approval_policy = never`. [src `is_dangerous_command.rs`, `exec_policy.rs`]
 - Probes against a throwaway rules file [check: `codex execpolicy check`]:
 
   | Rule | Command | Result |
@@ -126,25 +126,25 @@ Main sources:
 
 ### 2.5 Can a project override the global rules?
 
-- **Rules: no.** All layers' rules merge and the strictest decision wins. [doc rules; src exec_policy.rs]
-- **Config: yes, for a trusted project.** A trusted project's `.codex/config.toml` can set `sandbox_mode`, `approval_policy` and `[features]`; only provider, auth, notification, profile and telemetry keys are ignored there. [doc config-reference, config.toml section]
+- **Rules: no.** All layers' rules merge and the strictest decision wins. [doc rules; src `exec_policy.rs`]
+- **Config: yes, for a trusted project.** A trusted project's `.codex/config.toml` can set `sandbox_mode`, `approval_policy` and `[features]`; only provider, auth, notification, profile and telemetry keys are ignored there. [doc config-reference, `config.toml` section]
 - **Hooks: yes, all at once.** Hooks from every layer run, and "higher-precedence config layers don't replace lower-precedence hooks", but a trusted project's `[features] hooks = false` turns every hook off, the user's included. [doc hooks] [check: `codex features list` shows `hooks false` in a trusted project that sets it, `true` in an untrusted one]
 - **Memory: yes.** A trusted project's `[features] memories = true` turns memories on over a user `false`. [check: `codex features list`]
-- **Project-proof settings:** `requirements.toml`: pin `[features] hooks = true` and `memories = false`, define managed hooks, or set `allow_managed_hooks_only`. [doc hooks, "Managed hooks from requirements.toml"; doc managed-configuration]
+- **Project-proof settings:** `requirements.toml`: pin `[features] hooks = true` and `memories = false`, define managed hooks, or set `allow_managed_hooks_only`. [doc hooks, 'Managed hooks from requirements.toml'; doc managed-configuration]
 
 ### 2.6 File, MCP and network rules
 
 - **No per-tool file rules.** Codex reads through the shell and writes through the shell and `apply_patch`. [doc rules]
 - **Sandbox:** `sandbox_mode = read-only | workspace-write | danger-full-access`, `sandbox_workspace_write` > `writable_roots` and `network_access`. [doc config-reference]
 - **Permission profiles (beta):** `[permissions.<name>.filesystem]` maps a path or glob to `read`, `write` or `deny`; a deny covers reads and writes (`"**/*.env" = "deny"`, `~/path`, `:workspace_roots`). `[permissions.<name>.network.domains]` needs the network proxy. They bind sandboxed commands; a command a rule `allow`s runs outside the sandbox. [doc permissions; doc rules]
-- **MCP:** `mcp_servers.<id>.enabled_tools` / `disabled_tools`, and `approval_mode` per server or per tool. Hooks see MCP tools as `mcp__<server>__<tool>`. [doc config-reference; doc hooks, "Matcher patterns"]
+- **MCP:** `mcp_servers.<id>.enabled_tools` / `disabled_tools`, and `approval_mode` per server or per tool. Hooks see MCP tools as `mcp__<server>__<tool>`. [doc config-reference; doc hooks, 'Matcher patterns']
 
 ### 2.7 Hooks
 
 - **Codex has a pre-tool hook.** `hooks.json` or inline `[hooks]` in `config.toml`, at `~/.codex/` and `<repo>/.codex/`; the `hooks` feature is stable and on by default. [doc hooks] [check: `codex features list`]
-- **Shape:** event → matcher group (regex on the tool name) → handlers (`type = "command"` or `mcp_tool`). `PreToolUse` covers shell (`Bash`), unified exec (`Bash`), `apply_patch` (matchable as `apply_patch`, `Edit` or `Write`), MCP tools and other local function tools; hosted tools such as web search aren't covered. Input on stdin carries `tool_name`, `tool_use_id`, `tool_input` (`tool_input.command` for Bash and `apply_patch`). [doc hooks, "PreToolUse", "Tool coverage"]
-- **Blocking:** `hookSpecificOutput.permissionDecision: "deny"` with `permissionDecisionReason`, the older `{"decision": "block", "reason": …}`, or exit code 2 with the reason on stderr. `allow` with `updatedInput` rewrites the call. `ask` is parsed but not supported yet: the hook run is marked failed and the tool call continues. [doc hooks, "PreToolUse"]
-- **Trust:** non-managed hooks must be reviewed and trusted in `/hooks` before they run; trust is recorded against the hook's hash, so a changed hook is skipped until trusted again. `--dangerously-bypass-hook-trust` skips this for one run. [doc hooks, "Review and trust hooks"]
+- **Shape:** event → matcher group (regex on the tool name) → handlers (`type = "command"` or `mcp_tool`). `PreToolUse` covers shell (`Bash`), unified exec (`Bash`), `apply_patch` (matchable as `apply_patch`, `Edit` or `Write`), MCP tools and other local function tools; hosted tools such as web search aren't covered. Input on stdin carries `tool_name`, `tool_use_id`, `tool_input` (`tool_input.command` for Bash and `apply_patch`). [doc hooks, 'PreToolUse', 'Tool coverage']
+- **Blocking:** `hookSpecificOutput.permissionDecision: "deny"` with `permissionDecisionReason`, the older `{"decision": "block", "reason": …}`, or exit code 2 with the reason on stderr. `allow` with `updatedInput` rewrites the call. `ask` is parsed but not supported yet: the hook run is marked failed and the tool call continues. [doc hooks, 'PreToolUse']
+- **Trust:** non-managed hooks must be reviewed and trusted in `/hooks` before they run; trust is recorded against the hook's hash, so a changed hook is skipped until trusted again. `--dangerously-bypass-hook-trust` skips this for one run. [doc hooks, 'Review and trust hooks']
 - Matching hooks from all files run, concurrently; one hook can't stop another from starting. The docs call tool hooks "a useful guardrail, not a complete enforcement boundary". [doc hooks]
 
 ### 2.8 Memory
@@ -154,7 +154,7 @@ Main sources:
 
 ### 2.9 What the agent sees when refused
 
-- `` `<command>` rejected: <justification> `` when the matched `forbidden` rule has a justification; otherwise `` `<command>` rejected: policy forbids commands starting with `<prefix>` `` (the longest matching forbidden prefix). [src core/src/exec_policy.rs `derive_forbidden_reason`]
+- `` `<command>` rejected: <justification> `` when the matched `forbidden` rule has a justification; otherwise `` `<command>` rejected: policy forbids commands starting with `<prefix>` `` (the longest matching forbidden prefix). [src `core/src/exec_policy.rs` `derive_forbidden_reason`]
 - A hook deny passes its reason to the model. [doc hooks]
 
 ---
@@ -163,16 +163,16 @@ Main sources:
 
 ### 3.1 Global instructions
 
-- **Global file:** the first that exists of `~/.config/opencode/AGENTS.md` and `~/.claude/CLAUDE.md`. `OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=1` (or `OPENCODE_DISABLE_CLAUDE_CODE=1`) drops the Claude fallback. [doc rules; src session/instruction.ts `globalFiles`]
-- **No imports.** "opencode doesn't automatically parse file references in AGENTS.md"; files are read as plain text, so `@AGENTS.md` inside a `CLAUDE.md` isn't expanded. Use `"instructions": ["path", "glob/*.md", "https://…"]` in `opencode.json`. [doc rules; src session/instruction.ts]
-- **Symlinks work:** files are checked with an exists call and read with a plain file read, both of which follow symlinks. [src session/instruction.ts]
+- **Global file:** the first that exists of `~/.config/opencode/AGENTS.md` and `~/.claude/CLAUDE.md`. `OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=1` (or `OPENCODE_DISABLE_CLAUDE_CODE=1`) drops the Claude fallback. [doc rules; src `session/instruction.ts` `globalFiles`]
+- **No imports.** "opencode doesn't automatically parse file references in AGENTS.md"; files are read as plain text, so `@AGENTS.md` inside a `CLAUDE.md` isn't expanded. Use `"instructions": ["path", "glob/*.md", "https://…"]` in `opencode.json`. [doc rules; src `session/instruction.ts`]
+- **Symlinks work:** files are checked with an exists call and read with a plain file read, both of which follow symlinks. [src `session/instruction.ts`]
 
 ### 3.2 Project instructions
 
-- Upward search from the working directory to the worktree root for `AGENTS.md`, else `CLAUDE.md` ("if you have both … only AGENTS.md is used"); every match of the winning name between the two is loaded. [doc rules; src session/instruction.ts `systemPaths`]
-- **Nested files load on demand:** when the agent reads a file, `AGENTS.md`/`CLAUDE.md` files in the directories between it and the project root are attached once per message. [src session/instruction.ts `resolve`]
-- `OPENCODE_DISABLE_PROJECT_CONFIG` turns off project instructions as well as project config. [src session/instruction.ts, config/config.ts]
-- Some models get a system prompt telling them to keep a memory file in the repo (`.github/instructions/memory.instruction.md`): model IDs containing `gpt-4`, `o1` or `o3`. [src session/system.ts, session/prompt/beast.txt]
+- Upward search from the working directory to the worktree root for `AGENTS.md`, else `CLAUDE.md` ("if you have both … only AGENTS.md is used"); every match of the winning name between the two is loaded. [doc rules; src `session/instruction.ts` `systemPaths`]
+- **Nested files load on demand:** when the agent reads a file, `AGENTS.md`/`CLAUDE.md` files in the directories between it and the project root are attached once per message. [src `session/instruction.ts` `resolve`]
+- `OPENCODE_DISABLE_PROJECT_CONFIG` turns off project instructions as well as project config. [src `session/instruction.ts`, `config/config.ts`]
+- Some models get a system prompt telling them to keep a memory file in the repo (`.github/instructions/memory.instruction.md`): model IDs containing `gpt-4`, `o1` or `o3`. [src `session/system.ts`, `session/prompt/beast.txt`]
 
 ### 3.3 Permission files, format and levels
 
@@ -182,8 +182,8 @@ Main sources:
 
 ### 3.4 How commands are matched
 
-- **Last matching rule wins.** `*` matches anything (spaces and `/` included), `?` one character; patterns compile to anchored regexes, and a trailing `" *"` also matches the bare command. The ruleset is flattened in config order and evaluated with `findLast`. [doc permissions; src util/wildcard.ts, permission/index.ts]
-- **Every command node is checked:** the command is parsed with tree-sitter-bash, and each `command` node (inside `&&` chains, pipes, `$(…)`, subshells) is matched separately by its source text. The string inside `bash -c "…"` isn't re-parsed, so only a rule on `bash -c*` itself catches it. [src tool/shell.ts]
+- **Last matching rule wins.** `*` matches anything (spaces and `/` included), `?` one character; patterns compile to anchored regexes, and a trailing `" *"` also matches the bare command. The ruleset is flattened in config order and evaluated with `findLast`. [doc permissions; src `util/wildcard.ts`, `permission/index.ts`]
+- **Every command node is checked:** the command is parsed with tree-sitter-bash, and each `command` node (inside `&&` chains, pipes, `$(…)`, subshells) is matched separately by its source text. The string inside `bash -c "…"` isn't re-parsed, so only a rule on `bash -c*` itself catches it. [src `tool/shell.ts`]
 - A `"rm -rf*": "deny"` rule therefore misses `rm -fr`, `rm -r -f` and `/bin/rm -rf`; it catches `a && rm -rf x`. [src, from the matching rules above; probe: `"rm -rf *": "deny"` refuses `echo a && rm -rf x`, and nothing in the call runs]
 - **Declarations aren't checked:** `export -p` runs under `"export -p *": "deny"`; tree-sitter-bash parses `export`, `declare` and `typeset` as declarations, not `command` nodes. [probe]
 - **Global config files:** `config.json`, `opencode.json` and `opencode.jsonc` in the global folder all load, in that order. [check: the log's `loading path=` lines]
@@ -194,33 +194,33 @@ Main sources:
   - A project that sets an existing pattern key changes its level in place. A project key that's new is appended after the global keys and, by last-match-wins, beats them. [check: `opencode debug agent build` shows global `"git push --force*": "deny"` followed by the project's `"git push*": "allow"`, and a project's `"rm -rf*": "allow"` replacing the global deny]
   - A project's `"*": "allow"` keeps the position of the global `"*"` key, so it doesn't defeat global rules listed after it. [check: same]
   - Agent definitions can override permissions too ("agent rules take precedence"). [doc permissions]
-- **Hooks (plugins): yes, in effect.** Global and project plugins all load (global config, project config, global plugin folder, project plugin folder, in that order) and all hooks run in sequence; plugin arrays concatenate, so a project can't remove a global plugin by config. But a project plugin runs after the global one and can rewrite `output.args` after the global check has passed. [doc plugins, "Load order"; src plugin/index.ts `trigger`, config/config.ts `mergeConfigConcatArrays`] `--pure` / `OPENCODE_PURE` runs without external plugins, the global plugin folder's files included. [src; probe: with `--pure`, a command the global plugin refuses runs]
+- **Hooks (plugins): yes, in effect.** Global and project plugins all load (global config, project config, global plugin folder, project plugin folder, in that order) and all hooks run in sequence; plugin arrays concatenate, so a project can't remove a global plugin by config. But a project plugin runs after the global one and can rewrite `output.args` after the global check has passed. [doc plugins, 'Load order'; src `plugin/index.ts` `trigger`, `config/config.ts` `mergeConfigConcatArrays`] `--pure` / `OPENCODE_PURE` runs without external plugins, the global plugin folder's files included. [src; probe: with `--pure`, a command the global plugin refuses runs]
 - **Project-proof settings:** managed config (`/Library/Application Support/opencode/` on macOS, or MDM). [doc config]
 
 ### 3.6 File, MCP and network rules
 
-- `read` and `edit` patterns match the path relative to the worktree, so `"secrets/*": "deny"` works but `~/.ssh/*` in `read` doesn't. [src tool/read.ts, tool/edit.ts]
-- Paths outside the worktree go through `external_directory`, matched as `<absolute dir>/*`; `{"~/.ssh/*": "deny"}` blocks the file tools and bash commands whose file arguments point there. [src tool/external-directory.ts; doc permissions]
-- `read` rules don't apply to `cat .env` in bash: bash checks only the command text and external directories. [src tool/shell.ts]
-- **No OS sandbox** for bash; the source has none. [src tool/shell.ts]
+- `read` and `edit` patterns match the path relative to the worktree, so `"secrets/*": "deny"` works but `~/.ssh/*` in `read` doesn't. [src `tool/read.ts`, `tool/edit.ts`]
+- Paths outside the worktree go through `external_directory`, matched as `<absolute dir>/*`; `{"~/.ssh/*": "deny"}` blocks the file tools and bash commands whose file arguments point there. [src `tool/external-directory.ts`; doc permissions]
+- `read` rules don't apply to `cat .env` in bash: bash checks only the command text and external directories. [src `tool/shell.ts`]
+- **No OS sandbox** for bash; the source has none. [src `tool/shell.ts`]
 - **MCP:** tools are named `<server>_<tool>`: `"myserver_*": "deny"`. [doc mcp-servers]
 - **Network:** `webfetch` (URL patterns) and `websearch`. [doc permissions]
 
 ### 3.7 Hooks
 
-- **The pre-tool hook is a plugin hook, `tool.execute.before`,** signature `(input: {tool, sessionID, callID}, output: {args})`. It runs for built-in tools and MCP tools, before the permission check. [src packages/plugin/src/index.ts, session/tools.ts]
-- **It can block:** a thrown error stops the call. The docs' `.env`-protection example throws `new Error("Do not read .env files")`. It can also rewrite `output.args`. [doc plugins, ".env protection"; src session/tools.ts; probe: a global plugin that throws refuses `rm -rf x`, and `x` stays]
+- **The pre-tool hook is a plugin hook, `tool.execute.before`,** signature `(input: {tool, sessionID, callID}, output: {args})`. It runs for built-in tools and MCP tools, before the permission check. [src `packages/plugin/src/index.ts`, `session/tools.ts`]
+- **It can block:** a thrown error stops the call. The docs' `.env`-protection example throws `new Error("Do not read .env files")`. It can also rewrite `output.args`. [doc plugins, '.env protection'; src `session/tools.ts`; probe: a global plugin that throws refuses `rm -rf x`, and `x` stays]
 - MCP tools don't appear in `opencode debug agent` or the server's `/experimental/tool/ids` list, even with the server connected; only a session lists them. [probe]
 - Plugins are JavaScript or TypeScript files in `~/.config/opencode/plugins/` or `.opencode/plugins/`, or npm packages in `plugin`. [doc plugins]
-- A `permission.ask` hook is declared in the plugin types but nothing in the opencode package triggers it. [src packages/plugin/src/index.ts; no trigger in packages/opencode/src]
+- A `permission.ask` hook is declared in the plugin types but nothing in the opencode package triggers it. [src `packages/plugin/src/index.ts`; no trigger in `packages/opencode/src`]
 
 ### 3.8 Memory
 
-- **No memory feature.** Nothing in the source stores or loads memories between sessions; the only "memory" is the model prompt in 3.2 that asks certain models to keep a file in the repo. Nothing to turn off. [src: no memory store in packages/opencode/src]
+- **No memory feature.** Nothing in the source stores or loads memories between sessions; the only "memory" is the model prompt in 3.2 that asks certain models to keep a file in the repo. Nothing to turn off. [src: no memory store in `packages/opencode/src`]
 
 ### 3.9 What the agent sees when refused
 
-- A deny rule: "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules <JSON of the ruleset for that permission>". The agent sees the rules, not which subcommand or rule matched. [src packages/core/src/v1/permission.ts]
+- A deny rule: "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules <JSON of the ruleset for that permission>". The agent sees the rules, not which subcommand or rule matched. [src `packages/core/src/v1/permission.ts`]
 - A user rejection: "The user rejected permission to use this specific tool call." (plus the feedback, if any). [src same file] `opencode run` has no one to ask, so it auto-rejects an `ask` rule with this message and prints `permission requested: bash (<command>); auto-rejecting` on stderr. [probe]
 - A plugin throw: the tool part is marked as an error whose text is the error's message, unwrapped and with its line breaks, and that is the tool result the model reads. [probe: a plugin throwing `new Error("…line one.\nLine two…")` on `echo BLOCKME`; the tool part's `state.error` and the model's quote of its tool result both hold exactly the two lines]
 - `opencode run` takes the session's folder from `PWD`, not the process's working directory. [probe]
@@ -281,7 +281,7 @@ Main sources:
 ### 4.5 Can a project override the global rules?
 
 - **CLI permissions: partly.** `.cursor/cli.json` files from the git root down to the working directory are deep-merged into the user config, and arrays are replaced, so a project's `"permissions": {"deny": []}` empties the `cli-config.json` deny list. The Claude settings deny lists are unioned separately (4.3), so rules in `~/.claude/settings.json` survive, and a project `.claude/settings.json` can only add. A hidden `--disable-project-configs` flag skips project files. [bin: the `cli.json` loader and its merge function; `MergedPermissionsProvider`]
-- **Hooks: no.** "All matching hooks from every source run", and a `deny` from any source wins. [doc hooks, "Configuration"] Project hooks run only in trusted workspaces. [doc hooks]
+- **Hooks: no.** "All matching hooks from every source run", and a `deny` from any source wins. [doc hooks, 'Configuration'] Project hooks run only in trusted workspaces. [doc hooks]
 - **IDE:** `permissions.json` per-repo arrays are concatenated with per-user ones; `sandbox.json` denies are unioned and `default: "deny"` wins. [doc IDE permissions, sandbox]
 
 ### 4.6 File, MCP and network rules
@@ -365,11 +365,11 @@ A gap is a rule the harness's native permissions can't enforce as meant. The bas
 - **Flags after arguments:** `git push origin main --force`, `git -C dir push --force`, `chmod 777 -R`: prefix rules can't reach them. (2.4)
 - **Shell strings that aren't plain,** such as `bash -lc 'x=$(…); rm -rf y'`:
   - **Matching:** Codex evaluates them whole, so inner rules don't apply.
-  - **`["bash","-lc"]` rule:** a forbidden rule would catch them, but it isn't usable. Codex's own shell tool sends every command as `[<user shell>, "-lc", <command>]`, so the rule refuses Codex's own wrapper around any non-plain command. The tool uses `-c` when the model passes `login: false` or `allow_login_shell = false`, and the model can also pick the shell. A `["zsh","-c"]` rule does the same with login off. [src core/src/shell.rs `derive_exec_args`, core/src/tools/handlers/unified_exec.rs `get_command`]
+  - **`["bash","-lc"]` rule:** a forbidden rule would catch them, but it isn't usable. Codex's own shell tool sends every command as `[<user shell>, "-lc", <command>]`, so the rule refuses Codex's own wrapper around any non-plain command. The tool uses `-c` when the model passes `login: false` or `allow_login_shell = false`, and the model can also pick the shell. A `["zsh","-c"]` rule does the same with login off. [src `core/src/shell.rs` `derive_exec_args`, `core/src/tools/handlers/unified_exec.rs` `get_command`]
   - **Evidence:** a real `codex exec` session reported `` `/bin/zsh -lc 'rm -fr x'` rejected: … ``, and `codex execpolicy check -- /bin/zsh -c "ls > out"` against `["zsh","-c"]` is `forbidden`. [check] (2.4)
 - **Reads and writes of `.env`, `secrets/`, `~/.ssh`, `~/.aws`:** no per-tool file rule. A permission-profile `filesystem` deny (beta) binds sandboxed commands only; a command a rule allows runs outside the sandbox. **To confirm** whether `apply_patch` honours a profile deny. (2.6)
 - **Mail tools:** only if the same server is configured in Codex (`disabled_tools`); claude.ai connectors aren't Codex MCP servers. A `PreToolUse` hook matching `mcp__<server>__<tool>` covers it once the server exists. (2.6, 2.7)
-- **Hook and memory cover:** `PreToolUse` closes the command gaps, but a trusted project can set `hooks = false` or `memories = true` unless `requirements.toml` pins them, and each hook must be trusted in `/hooks` before it runs. Trust is `[hooks.state."<hooks.json path>:<event>:<group>:<handler>"] trusted_hash` in `config.toml`: sha256 over the canonical JSON (sorted keys, no spaces) of `{event_name, matcher, hooks: [handler]}`, the handler normalised with `type`, `command`, `timeout`, `async`. [src hooks/src/engine/discovery.rs `hook_hash`, config/src/fingerprint.rs] [check: the app-server's `hooks/list` reports the computed hash as `currentHash`, and a hook with that entry as `trusted`] (2.5, 2.7)
+- **Hook and memory cover:** `PreToolUse` closes the command gaps, but a trusted project can set `hooks = false` or `memories = true` unless `requirements.toml` pins them, and each hook must be trusted in `/hooks` before it runs. Trust is `[hooks.state."<hooks.json path>:<event>:<group>:<handler>"] trusted_hash` in `config.toml`: sha256 over the canonical JSON (sorted keys, no spaces) of `{event_name, matcher, hooks: [handler]}`, the handler normalised with `type`, `command`, `timeout`, `async`. [src `hooks/src/engine/discovery.rs` `hook_hash`, `config/src/fingerprint.rs`] [check: the app-server's `hooks/list` reports the computed hash as `currentHash`, and a hook with that entry as `trusted`] (2.5, 2.7)
 
 ### opencode
 

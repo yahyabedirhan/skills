@@ -97,7 +97,7 @@ def rows(con, sql, params=()):
     return [dict(r) for r in con.execute(sql, params)]
 
 
-# The bundle nests a helper app with the same executable name; its path runs through Resources/.
+# The bundle nests a helper app with the same executable name; its path runs through `Resources/`.
 APP_BUNDLE_ID = "com.electron.wispr-flow"
 
 

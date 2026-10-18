@@ -2,7 +2,7 @@
 
 A harness module checks one setup area at a time and returns a `Cell`: one of the four statuses, with a detail sentence for each problem it found. A check collects its problems as (status, sentence) pairs and calls `cell`, which picks the worst status:
 
-- `FAIL`: the machine lacks what setup/ asks for;
+- `FAIL`: the machine lacks what `setup/` asks for;
 - `gap`: the harness can't do it, or the check can't see it;
 - `ok`: nothing is missing;
 - `n/a`: the area does not apply to this harness; `na` makes it.
@@ -45,7 +45,7 @@ class Cell:
 
 @dataclass
 class Context:
-    """One verifier run: the home folder, what setup/ asks for, and the resolved harness folders."""
+    """One verifier run: the home folder, what `setup/` asks for, and the resolved harness folders."""
     home: Path
     setup: workstation.Setup
     rows: list  # the rule table and the personal permissions

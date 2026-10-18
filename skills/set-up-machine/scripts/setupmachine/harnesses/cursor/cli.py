@@ -1,4 +1,4 @@
-"""Cursor's `cursor-agent` CLI: the checks only the CLI has, its permission lists, run mode and declared config in `~/.cursor/cli-config.json` , as references/cursor/cli.md describes. The shared checks and the hook payload are in this package's __init__.py.
+"""Cursor's `cursor-agent` CLI: the checks only the CLI has, its permission lists, run mode and declared config in `~/.cursor/cli-config.json`, as `references/cursor/cli.md` describes. The shared checks and the hook payload are in this package's `__init__.py`.
 """
 from __future__ import annotations
 

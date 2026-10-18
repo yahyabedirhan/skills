@@ -1,6 +1,6 @@
-"""Codex: its hook payload, and the check of each setup area , as references/codex/index.md describes.
+"""Codex: its hook payload, and the check of each setup area, as `references/codex/index.md` describes.
 
-Every path is under the Codex config home: `CODEX_HOME`, else `~/.codex`, which verify.py resolves once. Its `config.toml` holds memory, hook trust, the declared config and plugins. TOML checks need Python 3.11's tomllib; on an older Python they are a gap.
+Every path is under the Codex config home: `CODEX_HOME`, else `~/.codex`, which `verify.py` resolves once. Its `config.toml` holds memory, hook trust, the declared config and plugins. TOML checks need Python 3.11's tomllib; on an older Python they are a gap.
 """
 from __future__ import annotations
 
@@ -148,7 +148,7 @@ def check_config(ctx, env=None) -> Cell:
 
 
 def _declared_cell(ctx, sandbox: bool, env=None) -> Cell:
-    """One of the declared Codex config's two cells: its SANDBOX_KEYS (sandbox), or the rest (config). Each key is checked in one cell only, so one wrong value is one FAIL. n/a when the cell has no key."""
+    """One of the declared Codex config's two cells: its SANDBOX_KEYS (sandbox), or the rest (config). Each key is checked in one cell only, so one wrong value is one FAIL. `n/a` when the cell has no key."""
     source = ctx.setup.file(ID, "config", env)
     if source is None:
         return na("setup/harnesses.json names no Codex config")
@@ -170,7 +170,7 @@ def _toml(ctx, path: Path) -> tuple:
 
 
 def _trusted_hash(config: Path, key: str):
-    """The trusted_hash under [hooks.state."<key>"] in config.toml, read line by line, without a TOML parser."""
+    """The trusted_hash under [hooks.state."<key>"] in `config.toml`, read line by line, without a TOML parser."""
     try:
         lines = config.read_text().split("\n")
     except OSError:

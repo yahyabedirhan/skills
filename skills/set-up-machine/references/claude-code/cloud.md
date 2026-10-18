@@ -1,6 +1,6 @@
 # Claude Code cloud
 
-How to audit a Claude Code cloud session: one Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo, started from claude.ai/code, the Claude app, the desktop app's **Cloud** choice or `claude --cloud`. Docs: [cloud environments](https://code.claude.com/docs/en/cloud-environments), [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), [hooks](https://code.claude.com/docs/en/hooks). The CLI and the desktop app are the other environments of this harness, as index.md describes. A cloud session is set up from its repo, as *Install*, *Instructions* and *Guardrails* describe, or by its cloud environment, as 'Environment setup' describes.
+How to audit a Claude Code cloud session: one Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo, started from claude.ai/code, the Claude app, the desktop app's **Cloud** choice or `claude --cloud`. Docs: [cloud environments](https://code.claude.com/docs/en/cloud-environments), [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), [hooks](https://code.claude.com/docs/en/hooks). The CLI and the desktop app are the other environments of this harness, as `index.md` describes. A cloud session is set up from its repo, as 'Install', 'Instructions' and 'Guardrails' describe, or by its cloud environment, as 'Environment setup' describes.
 
 ## Found
 
@@ -60,7 +60,7 @@ A cloud session is set up in one of two ways, and `~/.local/share/agents/environ
 
 - **Repo setup**, without that file: the repo's `SessionStart` install, then the agent's own setup, as above.
 - **Environment setup**, with that file: the cloud environment's setup script, which `<workstation-repo>` renders, sets the session up. It runs as root before Claude Code launches, on every repo, and the environment caches the disk it leaves as a snapshot. It writes:
-  - the same files the agent writes in *Instructions*;
+  - the same files the agent writes in 'Instructions';
   - `~/.claude/rules/cloud-instructions.md`, from the cloud `instructions` file;
   - a match-all `PreToolUse` hook in `~/.claude/settings.json`;
   - that marker file, last.
