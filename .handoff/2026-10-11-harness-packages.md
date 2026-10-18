@@ -4,7 +4,7 @@ Build Spec: Give each harness one harness setup and deliver one pull request.
 
 ## Where
 
-- Worktree: `/home/yabepa/.treehouse/skills-22e236/4/skills`
+- Worktree: `~/.treehouse/skills-22e236/4/skills`
 - Branch: `chore/harness-packages`
 - Lease id: `b44d378ddcc47cd8276886c7210c240a`. Holder: `harness-packages`.
 - Do not return this worktree. Do not switch the maintainer's other checkouts.

@@ -35,7 +35,7 @@ Read-only (run and verified):
 | An agent's recent output | `ssh vps '~/.local/bin/herdr agent read w6:p2 --source recent-unwrapped --lines 120'` |
 | Full live state | `ssh vps '~/.local/bin/herdr api snapshot'` (from `herdr api --help`; not run) |
 
-All list/get commands return JSON. `agent list` gives, per agent: `agent` (kind), `agent_status` (`idle`, `working`, `blocked`, `done`, `unknown`), `pane_id`, `tab_id`, `workspace_id`, `cwd`, `terminal_title` and the agent's native session id [vps]. On 2026-09-25 the VPS had workspaces `w5` "~ ROOT", `w7` "~ VPS MAINTAINER", `w6` "shipyard" (tabs `w6:t1` "CLI", `w6:t2` "Orchestrator"), two workspaces for private repos, and one agent: `claude` in `w6:p2`, `idle`, cwd the shipyard checkout, unnamed [vps].
+All list/get commands return JSON. `agent list` gives, per agent: `agent` (kind), `agent_status` (`idle`, `working`, `blocked`, `done`, `unknown`), `pane_id`, `tab_id`, `workspace_id`, `cwd`, `terminal_title` and the agent's native session id [vps]. On 2026-09-25 the VPS had five workspaces and one agent: `claude` in `w6:p2`, `idle`, its cwd a project checkout, unnamed [vps].
 
 Writes (syntax from `herdr <cmd> --help` [mac]; **not run**, per the research rules):
 
@@ -109,7 +109,7 @@ ssh vps '~/.local/bin/herdr worktree open --cwd <repo-path> --path ~/Developer/w
 
 Read-only checks to run from the Mac before starting a second orchestrator on the same branch:
 
-1. **Find the agent in that checkout.** `ssh vps '~/.local/bin/herdr agent list'` and match `cwd` against the worktree path. Agent names may be unset (the shipyard orchestrator had none [vps]), so match on `cwd` and `workspace_id`, not on a name.
+1. **Find the agent in that checkout.** `ssh vps '~/.local/bin/herdr agent list'` and match `cwd` against the worktree path. An agent can have no name, as one orchestrator on the VPS had none [vps], so match on `cwd` and `workspace_id`, not on a name.
 2. **Its state.** `agent_status` of `idle` or `done` means ready for input, `working` means busy, `blocked` means waiting on an approval or question (herdr skill). `unknown` does not prove it stopped. No agent in the pane list for that cwd means none is running there.
 3. **What it last said.** `ssh vps '~/.local/bin/herdr agent read <pane> --source recent-unwrapped --lines 60'`. On 2026-09-25 this showed an orchestrator reporting its commit pushed and a clean tree [vps].
 4. **Clean tree.** `ssh vps 'git -C <worktree> status --porcelain'` is empty.
@@ -119,7 +119,7 @@ Read-only checks to run from the Mac before starting a second orchestrator on th
    ssh vps 'cd <worktree> && git rev-parse HEAD && git ls-remote origin refs/heads/<branch>'
    ```
 
-   Equal SHAs mean pushed. If they differ, `git log @{u}..HEAD` only shows commits missing from the last fetch. A `git fetch origin <branch>` first makes it exact; it updates remote-tracking refs only (issue [#16](https://github.com/yahyabedirhan/skills/issues/16) counts it as a read). Worked example [vps]: the shipyard checkout was at `0646a5a`, `git status -sb` showed it level with `origin/build/shipyard-core-0.0.x`, yet `git ls-remote` returned `d831d00` because the Mac had pushed since. The VPS checkout was behind, not ahead, and had no unpushed work. `git status` alone would have claimed it was up to date.
+   Equal SHAs mean pushed. If they differ, `git log @{u}..HEAD` only shows commits missing from the last fetch. A `git fetch origin <branch>` first makes it exact; it updates remote-tracking refs only (issue [#16](https://github.com/yahyabedirhan/skills/issues/16) counts it as a read). Worked example [vps]: a project checkout was at `0646a5a`, `git status -sb` showed it level with `origin/<branch>`, yet `git ls-remote` returned `d831d00` because the Mac had pushed since. The VPS checkout was behind, not ahead, and had no unpushed work. `git status` alone would have claimed it was up to date.
 6. **Other checkouts of the branch.** `ssh vps 'git -C <repo> worktree list'` shows every worktree and its branch.
 
 Stopping the old agent, closing its workspace, or removing its worktree are writes and stay behind an explicit ask (issues [#13](https://github.com/yahyabedirhan/skills/issues/13) and [#16](https://github.com/yahyabedirhan/skills/issues/16)).
@@ -141,4 +141,4 @@ Stopping the old agent, closing its workspace, or removing its worktree are writ
 - TODO: Confirm `herdr agent start --kind claude` finds `claude` in a new VPS pane (it is only on the login-shell `PATH`).
 - TODO: Decide whether VPS to Mac is needed at all; if so, pick Remote Login plus Tailscale, or a reverse tunnel.
 - TODO: Install the `herdr` skill on the VPS if VPS agents are to drive Herdr (it is missing from `~/.claude/skills` and `~/.agents/skills` there).
-- TODO: Pull the notes repo on the VPS before an effort starts there: the VPS copy was behind the Mac's [vps, mac].
+- TODO: Pull each repo on the VPS before an effort starts there: a VPS copy was behind the Mac's [vps, mac].

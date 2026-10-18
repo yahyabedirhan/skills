@@ -5,7 +5,7 @@ How everything under `docs/` is written: research files and their HTML guides in
 ## 2026-10-03: a light version of ASD-STE100
 
 - **Status:** accepted
-- **Context:** The maintainer reads English as a second language. The cloud-agents research (#76) was hard to read: long sentences, chains of clauses joined with semicolons, and coined terms nobody defined.
+- **Context:** Many readers read English as a second language. The cloud-agents research (#76) was hard to read: long sentences, chains of clauses joined with semicolons, and coined terms nobody defined.
 - **Options:** Full ASD-STE100 (Simplified Technical English): its controlled dictionary would force awkward wording around product names, citations and comparisons.
 - **Choice and why:** Apply only STE100's sentence rules, to every document under `docs/`. They fixed the cloud-agents research. Write every prose sentence to these rules:
   - **One idea per sentence.** Split a sentence that joins two statements with "and", "but", "which", "while" or a dash.

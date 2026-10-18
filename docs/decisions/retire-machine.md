@@ -21,7 +21,7 @@ The decisions behind the `retire-machine` skill. This file is for maintaining it
 ## 2026-10-09: take stock before changing anything
 
 - **Status:** accepted
-- **Context:** Retiring the Hetzner server found a public web service that had run for seven weeks, and an untracked file in a repository cloned into the home folder. Neither was in the machine's own checklist.
+- **Context:** Retiring a VPS found a public web service that had run for seven weeks, and an untracked file in a repository cloned into the home folder. Neither was in the machine's own checklist.
 - **Options:** None considered.
 - **Choice and why:** Take stock before any change, and read panes without typing into them.
 - **Consequences:** Retirement takes longer, and finds what a checklist misses.

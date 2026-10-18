@@ -7,7 +7,7 @@ Versions checked: Claude Code 2.1.286, codex-cli 0.159.3, opencode 1.18.34, curs
 Evidence tags:
 
 - **[doc]** official documentation, linked per section.
-- **[src]** official source: `anthropic-experimental/sandbox-runtime` at commit `117eb92`, `openai/codex` at commit `2685e3a`, `anomalyco/opencode` branch `dev` at commit `aa481b8`. All are cloned under `~/Developer/open-source/`.
+- **[src]** official source: `anthropic-experimental/sandbox-runtime` at commit `117eb92`, `openai/codex` at commit `2685e3a`, `anomalyco/opencode` branch `dev` at commit `aa481b8`.
 - **[man]** a man page installed on this Mac (`ps(1)`, `security(1)`), or the Linux man-pages project.
 - **[probe]** a command run for this research in a scratch folder, using fake files and a fake variable `ACME_API_TOKEN=probe-not-a-secret`. Each process was started with `env -i`, so no real variable could reach it. Section 5 has the details.
 - **To confirm** says what is still open and the exact check that would settle it.
@@ -190,7 +190,7 @@ Target: a `python3` process sleeping, started with `env -i … ACME_API_TOKEN=pr
 
 > **Decided 2026-10-01:** rules and the hook only, with the gap accepted, plus two more file rows. 1Password, the sandbox and the Codex profile were dropped. See [the decision record](../decisions/set-up-machine.md#2026-10-01-secrets-stay-behind-rules-with-the-gap-accepted-98).
 
-The maintainer decides. The maintainer's projects hold no secrets in the environment today (#98), so everything here is preparation. Each option lists its cost.
+The maintainer decides. Issue #98 found no secrets in the environment on 2026-10-01, so everything here is preparation. Each option lists its cost.
 
 ### 6.1 set-up-machine
 

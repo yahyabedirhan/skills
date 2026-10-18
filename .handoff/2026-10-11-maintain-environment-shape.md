@@ -4,7 +4,7 @@ Build Spec: Give maintain-environment one shape for its references and deliver o
 
 ## Where
 
-- Worktree: `/home/yabepa/.treehouse/skills-22e236/5/skills`
+- Worktree: `~/.treehouse/skills-22e236/5/skills`
 - Branch: `chore/maintain-environment-shape`
 - Lease id: `1a3c6dbfc67cc5da77dd417267db0743`. Holder: `maintain-environment-shape`.
 - Do not return this worktree. Do not switch the maintainer's other checkouts.

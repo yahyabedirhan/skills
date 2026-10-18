@@ -38,7 +38,7 @@ All of this is the agent's work, not the user's:
 1. Merge #117 and check that `main`'s CI passes. Don't use `--delete-branch`.
 2. Do #112 "Reinstall the skills after the settle rename, on the Mac and the VPS", through `/maintain-environment`. The old `~/.claude/skills/close-effort` is still installed, and `settle-session` and `settle-effort` aren't yet. Until the reinstall, `/settle-effort` isn't available, so reinstall first, or follow `skills/settle-effort/SKILL.md` from the merged `main` directly. Asking before `ssh` to the VPS is a global rule.
 3. Try `settle-session` and `settle-effort` once installed, and report the result.
-4. Settle the effort with `/settle-effort`. Besides this worktree and its branch, it must free one leftover: the first implement agent's worktree `~/Developer/yahyabedirhan/skills/.claude/worktrees/agent-a21181278acf0bb7d` and its branch `worktree-agent-a21181278acf0bb7d`. The harness locked it, so `git worktree remove` refused. Its commit `7b613b4` landed on the branch as `a1beb89` by cherry-pick, so the proof is the patch match (`git cherry`) or the merged pull request's head. Unlock it with `git worktree unlock` before removing it.
+4. Settle the effort with `/settle-effort`. Besides this worktree and its branch, it must free one leftover: the first implement agent's worktree `<path-to-skills-repo>/.claude/worktrees/agent-a21181278acf0bb7d` and its branch `worktree-agent-a21181278acf0bb7d`. The harness locked it, so `git worktree remove` refused. Its commit `7b613b4` landed on the branch as `a1beb89` by cherry-pick, so the proof is the patch match (`git cherry`) or the merged pull request's head. Unlock it with `git worktree unlock` before removing it.
 
 ## Suggested skills
 

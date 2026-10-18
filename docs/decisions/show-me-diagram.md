@@ -21,7 +21,7 @@ The decisions behind the `show-me-diagram` skill. This file is for maintaining i
 ## 2026-10-12: a profile is one choice per layer
 
 - **Status:** accepted
-- **Context:** A profile copied as a full upstream style guide was 246 lines, mostly restated upstream rules. Explainer Studio had the same problem with styles and replaced them with layers, each with options, and presets that pick one option per layer.
+- **Context:** A profile copied as a full upstream style guide was 246 lines, mostly restated upstream rules. Another project of the maintainer's had the same problem with styles and replaced them with layers, each with options, and presets that pick one option per layer.
 - **Options:** Full upstream style guides: long, and they drift from upstream.
 - **Choice and why:** A profile picks one option per layer, from what the diagram is to how it looks: diagram types, diagram style, look, palette, typography. It names upstream types, variants and roles, and leaves the rest to upstream defaults. The shape lives only in `profiles/index.md`.
 - **Consequences:** Profiles are short and comparable. Cursor Dark is the default; Navy Blue, Shipyard Green and Parchment ship beside it.
@@ -37,7 +37,7 @@ The decisions behind the `show-me-diagram` skill. This file is for maintaining i
 ## 2026-10-12: a Graphite profile in the logos' origami look
 
 - **Status:** accepted
-- **Context:** The maintainer wants diagrams for his personal website in the look of the Swift Lab, Shipyard and skills logos. Those logos show folded white paper on a dark granite tile.
+- **Context:** Diagrams should match the look of the project logos: folded white paper on a dark granite tile.
 - **Options:** Re-skin Cursor Dark: its serif title and orange accent don't match the logos.
 - **Choice and why:** A new profile, Graphite. It takes the logos' grey palette and the tile's gradient and double rim. White replaces the orange accent. Only the focal nodes and arrows fold, so the folds keep the accent's role. The fonts are geometric sans faces with no serif, to match the crisp folds.
 - **Consequences:** The profile adds three roles that upstream lacks: `shade` for the folded faces, `fold-muted` for secondary text on a folded node, and `line` for node outlines. A first build of three diagrams showed the gaps. Two rules came from it: the diagram itself is the tile, and label masks take the tile's gradient.

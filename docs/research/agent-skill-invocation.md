@@ -100,8 +100,8 @@ There is no Herdr option that types a slash command as keystrokes. Its "start wi
 
 What happened in the real sessions, read from the transcripts under `~/.claude/projects/` and the paste cache `~/.claude/paste-cache/`:
 
-- Issue [#17](https://github.com/yahyabedirhan/skills/issues/17) orchestrator (`-Users-<user>--treehouse-shipyard-1e47e3-1-shipyard/0d65a485…jsonl`): the first user message is `<pasted_content id="948b">/orchestrate-with-handoff .handoff/…` (four or more lines). The agent read the handoff, called the message "only the pasted kickoff prompt", and asked to confirm. The user's typed `/orchestrate-with-handoff …` then arrived as a real `<command-name>`.
-- Issue [#12](https://github.com/yahyabedirhan/skills/issues/12) shipyard thinking session (`-Users-<user>-Developer-yahyabedirhan-shipyard/d1839cb1…jsonl`): the message was also `<pasted_content>` (8 lines, 1,365 characters). The slash command did **not** run. The agent ran `cat ~/.claude/skills/setup-matt-pocock-skills/SKILL.md` and followed it by hand, working around the user-only flag.
+- Issue [#17](https://github.com/yahyabedirhan/skills/issues/17) orchestrator, a session transcript under `~/.claude/projects/`: the first user message is `<pasted_content id="948b">/orchestrate-with-handoff .handoff/…` (four or more lines). The agent read the handoff, called the message "only the pasted kickoff prompt", and asked to confirm. The user's typed `/orchestrate-with-handoff …` then arrived as a real `<command-name>`.
+- Issue [#12](https://github.com/yahyabedirhan/skills/issues/12) shipyard thinking session, a session transcript under `~/.claude/projects/`: the message was also `<pasted_content>` (8 lines, 1,365 characters). The slash command did **not** run. The agent ran `cat ~/.claude/skills/setup-matt-pocock-skills/SKILL.md` and followed it by hand, working around the user-only flag.
 - Issue [#10](https://github.com/yahyabedirhan/skills/issues/10) thinking prompt (paste cache `9e0f023c5a95ea12.txt`, 10 lines, 1,893 characters): same shape, so `/grill-with-docs` could not have run as a command.
 
 ## Sub-agents and skills
@@ -112,12 +112,12 @@ Sources: <https://code.claude.com/docs/en/sub-agents>, plus tests run from insid
 - They see the same model-invocable list as the main session. This sub-agent's list includes `claude-api` and `implement`, and it excludes `to-spec`, `to-tickets` and `grill-with-docs`.
 - A user-only skill cannot be loaded (same Skill tool error as above) or preloaded through a custom agent's `skills:` field.
 - To give a sub-agent a user-only skill: paste the body of its `SKILL.md` into the sub-agent's prompt, or better, make the skill model-invocable. The Skill tool's "do not replicate this skill's workflow" message is aimed at the model reproducing a skill it was refused. It does not stop a parent from deliberately passing instructions, but it shows the flag is meant as a hard boundary.
-- `implement` no longer sets `disable-model-invocation` (`~/.agents/skills/implement/SKILL.md`; its `agents/openai.yaml` has `allow_implicit_invocation: true`). The vault CLAUDE.md line "a sub-agent cannot load it" is stale.
+- `implement` no longer sets `disable-model-invocation` (`~/.agents/skills/implement/SKILL.md`; its `agents/openai.yaml` has `allow_implicit_invocation: true`).
 - Sub-agents can nest up to three layers by default (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`).
 
 ## `/claude-api prompt-audit`
 
-Where it lives: `claude-api` is bundled inside the Claude Code binary (`~/.local/share/claude/versions/2.1.282`), not under `~/.claude/skills`. Its reference files are extracted per session to `/private/tmp/claude-502/bundled-skills/<version>/<hash>/claude-api/`; the audit guide is `shared/prompt-audit.md`. The registration code in the binary shows `userInvocable: true`, **no** `disableModelInvocation`, `allowedTools: ["WebFetch(domain:platform.claude.com)"]`, and a subcommand parser that takes the first word of the arguments (`prompt-audit`, `migrate`, `upgrade`, `cost-optimize`, `build-eval`, `hillclimb`, `managed-agents-onboard`, `preserved-thinking-migration`).
+Where it lives: `claude-api` is bundled inside the Claude Code binary (`~/.local/share/claude/versions/2.1.282`), not under `~/.claude/skills`. Its reference files are extracted per session to `$TMPDIR/claude-<uid>/bundled-skills/<version>/<hash>/claude-api/`; the audit guide is `shared/prompt-audit.md`. The registration code in the binary shows `userInvocable: true`, **no** `disableModelInvocation`, `allowedTools: ["WebFetch(domain:platform.claude.com)"]`, and a subcommand parser that takes the first word of the arguments (`prompt-audit`, `migrate`, `upgrade`, `cost-optimize`, `build-eval`, `hillclimb`, `managed-agents-onboard`, `preserved-thinking-migration`).
 
 What it does (from `shared/prompt-audit.md`):
 
@@ -185,7 +185,6 @@ Sources: <https://code.claude.com/docs/en/permissions> ("Compound commands", pre
 - Finding: a sub-agent **can** load `claude-api` and run `prompt-audit` itself; no pasting needed.
 - Fix: have maintain-skills spawn a sub-agent whose prompt says "use the Skill tool: `claude-api` with args `prompt-audit <paths>, target model Claude Opus 5.5, do not apply edits`; write the report to `tmp/skill-audit/<skill>.md`; return a summary". The audit is non-interactive and returns a report and a proposed diff, which fits "apply clear findings, ask about the rest".
 - The trigger-overlap check against other skills' descriptions is not part of prompt-audit; add it as a separate instruction.
-- Also correct the vault CLAUDE.md line about `implement`, which is now model-invocable.
 
 ## Open questions
 
