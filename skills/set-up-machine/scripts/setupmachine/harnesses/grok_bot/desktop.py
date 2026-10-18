@@ -1,10 +1,6 @@
-"""Grok Bot, the agent app with one persistent Linux box: its hook payload, and the check of each
-setup area (references/grok-bot/desktop.md).
+"""Grok Bot, the agent app with one persistent Linux box: its hook payload, and the check of each setup area (references/grok-bot/desktop.md).
 
-The app owns most of what other harnesses keep in files: approvals, Auto-review, the model, the
-connectors and memory. So only skills are checked fully. Each skill is a folder in the shared
-skill library, `~/agent-data/workflows/<skill>/`, recorded in a lock with the git tree hash of its
-source folder, so a copy that drifted from its source fails.
+The app owns most of what other harnesses keep in files: approvals, Auto-review, the model, the connectors and memory. So only skills are checked fully. Each skill is a folder in the shared skill library, `~/agent-data/workflows/<skill>/`, recorded in a lock with the git tree hash of its source folder, so a copy that drifted from its source fails.
 """
 from __future__ import annotations
 
@@ -35,9 +31,7 @@ def present(home: Path) -> bool:
 
 
 def read(payload: dict) -> ToolCall:
-    """A call the agent checks by hand, since Grok Bot runs no hook: `{"command": …, "cwd": …}` for a
-    shell command, or `{"tool": …}` for an MCP tool. No one is sure to be asked, so every ask row
-    is refused."""
+    """A call the agent checks by hand, since Grok Bot runs no hook: `{"command": …, "cwd": …}` for a shell command, or `{"tool": …}` for an MCP tool. No one is sure to be asked, so every ask row is refused."""
     def text(key):
         return payload.get(key) if isinstance(payload.get(key), str) else ""
 
@@ -57,8 +51,7 @@ def write(denials: list, asks=()) -> str:
 
 
 def check_instructions(ctx) -> Cell:
-    """The facts in memory came from the current instructions sources. Memory itself can't be read, so
-    the check compares the sources at the commit the lock records with the sources now."""
+    """The facts in memory came from the current instructions sources. Memory itself can't be read, so the check compares the sources at the commit the lock records with the sources now."""
     if not ctx.setup.repository:
         return Cell("gap", ["no workstation repo: the check can't see memory"])
     lock_path = ctx.home / INSTRUCTIONS_LOCK
@@ -85,8 +78,7 @@ def check_instructions(ctx) -> Cell:
 
 
 def sources(ctx) -> list:
-    """The files memory facts come from: setup/instructions.md for user memory, and Grok Bot's own
-    instructions from setup/harnesses.json for agent memory."""
+    """The files memory facts come from: setup/instructions.md for user memory, and Grok Bot's own instructions from setup/harnesses.json for agent memory."""
     files = [ctx.setup.clone / "setup/instructions.md", ctx.setup.file(ID, "instructions", ENV)]
     return [f for f in files if f is not None and f.is_file()]
 
@@ -101,8 +93,7 @@ def check_sandbox(ctx) -> Cell:
 
 
 def check_plugins(ctx) -> Cell:
-    """A connector is added in the app, so each one installs.json or the declared config names is a
-    gap the user confirms there."""
+    """A connector is added in the app, so each one installs.json or the declared config names is a gap the user confirms there."""
     names = [e["name"] for e in ctx.setup.plugins(ID)] + [n for n in _declared(ctx).get("connectors", [])
                                                           if isinstance(n, str)]
     if not names:
@@ -135,8 +126,7 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """The declared config's `secrets` are set as environment variables, by name only; `connectors`
-    are checked in the plugins column; `routines` live in the app."""
+    """The declared config's `secrets` are set as environment variables, by name only; `connectors` are checked in the plugins column; `routines` live in the app."""
     source = ctx.setup.file(ID, "config", ENV)
     if source is None:
         return na("setup/harnesses.json names no Grok Bot config")

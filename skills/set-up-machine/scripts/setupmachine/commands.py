@@ -1,28 +1,16 @@
 """Shell command text -> the simple commands it runs, and whether a command row covers one.
 
-The pre-tool hook reads a command the way the shell would run it, not as text,
-so a rule catches the common spellings of the same command:
+The pre-tool hook reads a command the way the shell would run it, not as text, so a rule catches the common spellings of the same command:
 
-- quoting is read first: single quotes, `\\` escapes, comments and `$(( ))` hold
-  text, not commands; `$(…)` and backticks outside single quotes are read as
-  commands of their own, and so is a heredoc body when its delimiter is unquoted;
+- quoting is read first: single quotes, `\\` escapes, comments and `$(( ))` hold text, not commands; `$(…)` and backticks outside single quotes are read as commands of their own, and so is a heredoc body when its delimiter is unquoted;
 - compound commands are split on `&&`, `||`, `;`, `|`, `&`, newlines and parentheses;
-- leading `VAR=value` words, shell keywords (`then`, `do`, `{`, `!`) and
-  wrappers (`timeout`, `nice`, `setsid`, `env`, `xargs`, `watch`, `flock`, …) are
-  dropped; a wrapper that runs no command is read as itself alone (`env -u X` -> `env`);
-- a program named by path (`/bin/rm`) is read by its basename, in lower case where
-  the filesystem ignores case (macOS runs `/bin/rm` for `RM`; Linux finds no `RM`);
-- the command inside `<shell> -c '…'` (any flag cluster holding `c`, such as
-  `-lc`), `eval`, `sudo`, `find -exec`, a heredoc or a pipe into a shell is read
-  as a command of its own;
-- flags are read anywhere after the program (`git push origin main --force`,
-  `rm x -rf`), clustered or not (`-rfv`), until `--`; `find`'s one-dash words
-  (`-delete`) are flags by name;
-- redirect targets are files the command reads (`< x`) or writes (`> x`, `>> x`,
-  `&> x`), and `tee`'s operands files it writes (tee_writes).
+- leading `VAR=value` words, shell keywords (`then`, `do`, `{`, `!`) and wrappers (`timeout`, `nice`, `setsid`, `env`, `xargs`, `watch`, `flock`, …) are dropped; a wrapper that runs no command is read as itself alone (`env -u X` -> `env`);
+- a program named by path (`/bin/rm`) is read by its basename, in lower case where the filesystem ignores case (macOS runs `/bin/rm` for `RM`; Linux finds no `RM`);
+- the command inside `<shell> -c '…'` (any flag cluster holding `c`, such as `-lc`), `eval`, `sudo`, `find -exec`, a heredoc or a pipe into a shell is read as a command of its own;
+- flags are read anywhere after the program (`git push origin main --force`, `rm x -rf`), clustered or not (`-rfv`), until `--`; `find`'s one-dash words (`-delete`) are flags by name;
+- redirect targets are files the command reads (`< x`) or writes (`> x`, `>> x`, `&> x`), and `tee`'s operands files it writes (tee_writes).
 
-What it can't see (a glob the shell expands, a variable holding a command, a
-script file's contents) is named as a gap in the rule table.
+What it can't see (a glob the shell expands, a variable holding a command, a script file's contents) is named as a gap in the rule table.
 
 Standard library only: it runs on macOS's Python 3.9.
 """
@@ -169,12 +157,10 @@ class _Scanner:
     """One pass over shell text that reads its quoting the way the shell does.
 
     - `kept`: the text without comments and heredoc bodies, for the tokenizer;
-    - `substitutions`: the text inside each `$(…)`, backticks and `$(( ))` outside
-      single quotes, and inside an unquoted heredoc's body, to be read as commands;
+    - `substitutions`: the text inside each `$(…)`, backticks and `$(( ))` outside single quotes, and inside an unquoted heredoc's body, to be read as commands;
     - `shell_bodies`: heredoc bodies on a line that feeds a shell (`bash <<EOF`).
 
-    A `<<` counts as a heredoc only where the shell reads code: never inside
-    quotes, a comment or `$(( ))`.
+    A `<<` counts as a heredoc only where the shell reads code: never inside quotes, a comment or `$(( ))`.
     """
 
     def __init__(self, text: str, heredoc_body: bool = False):
@@ -528,8 +514,7 @@ def covers(rule, argv: list) -> bool:
 def _flags_and_words(argv: list):
     """Flag names (short letters and long names) and the other words, read past operands until `--`.
 
-    A shell's own options end at its first operand; after that the words are
-    its script's arguments.
+    A shell's own options end at its first operand; after that the words are its script's arguments.
     """
     flags, words, ended = set(), [], False
     stops_at_operand = argv[0] in SHELLS

@@ -1,8 +1,6 @@
 """opencode: its hook payload, and the check of each setup area (references/opencode/cli.md).
 
-Its global folder is `~/.config/opencode`. The hook runs through a plugin there, and the
-permissions and the declared config's keys are in its config file. set-up-machine delivers
-no plugins entries to opencode yet, so that area is a gap.
+Its global folder is `~/.config/opencode`. The hook runs through a plugin there, and the permissions and the declared config's keys are in its config file. set-up-machine delivers no plugins entries to opencode yet, so that area is a gap.
 """
 from __future__ import annotations
 
@@ -35,8 +33,7 @@ def present(home: Path) -> bool:
 
 
 def read(payload: dict) -> ToolCall:
-    """What the opencode plugin sends from `tool.execute.before`: `tool`, `sessionID`, `args` and `directory`.
-    Auto-approve can answer an ask for the user, and the plugin can't tell it's on, so every call is unattended."""
+    """What the opencode plugin sends from `tool.execute.before`: `tool`, `sessionID`, `args` and `directory`. Auto-approve can answer an ask for the user, and the plugin can't tell it's on, so every call is unattended."""
     tool = payload.get("tool") if isinstance(payload.get("tool"), str) else ""
     args = payload.get("args") if isinstance(payload.get("args"), dict) else {}
     directory = payload.get("directory") if isinstance(payload.get("directory"), str) else ""
@@ -101,8 +98,7 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """Each key the declared opencode config sets, such as `model`, has its value in the config file
-    opencode reads last (an opencode.jsonc read without its comments)."""
+    """Each key the declared opencode config sets, such as `model`, has its value in the config file opencode reads last (an opencode.jsonc read without its comments)."""
     return json_config_cell(ctx, ID, LABEL, _config_path(ctx.home), read=_read_config, env=ENV)
 
 

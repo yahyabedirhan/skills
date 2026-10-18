@@ -1,16 +1,13 @@
 """The workstation repo: the source of every personal part of a machine's setup.
 
-The pointer, `~/.config/agents/source.md`, names the person's workstation repo and its clone,
-or says there is none. This module reads the repo's `setup/` folder through it:
+The pointer, `~/.config/agents/source.md`, names the person's workstation repo and its clone, or says there is none. This module reads the repo's `setup/` folder through it:
 
 - `setup/instructions.md`: the personal parts of the shared global instructions file;
 - `setup/permissions.json`: personal permissions, rows in the rule table's format;
 - `setup/installs.json`: the skills and plugins every machine gets;
 - `setup/harnesses.json`: where each harness's own instructions and declared config are.
 
-The steps: read the pointer, read each file that exists, and record a problem that names
-the file for each one that is missing or malformed. The verifier prints those problems as
-FAIL lines. The hook uses only `personal_rows`. references/workstation.md is the format.
+The steps: read the pointer, read each file that exists, and record a problem that names the file for each one that is missing or malformed. The verifier prints those problems as FAIL lines. The hook uses only `personal_rows`. references/workstation.md is the format.
 """
 from __future__ import annotations
 
@@ -59,8 +56,7 @@ class Setup:
 
 
 def load(home: Path, table: list, harness_ids) -> Setup:
-    """The pointer and every setup/ file it leads to. Problems are recorded, never raised.
-    `harness_ids` maps each harness id to the environments it has."""
+    """The pointer and every setup/ file it leads to. Problems are recorded, never raised. `harness_ids` maps each harness id to the environments it has."""
     setup = Setup()
     try:
         setup.repository, setup.clone, setup.clone_text = read_pointer(home)
@@ -124,9 +120,7 @@ def personal_rows(home: Path, table: list) -> list:
 def shared_file_problems(setup: Setup, home: Path) -> list:
     """How the shared file differs from what setup/instructions.md generates; [] when it matches.
 
-    Compared: the Tool column of the Environment defaults table (with the two roles the
-    pointer fills), the tool glossaries after it, and the Working agreement, Glossary and
-    Personal workflow sections.
+    Compared: the Tool column of the Environment defaults table (with the two roles the pointer fills), the tool glossaries after it, and the Working agreement, Glossary and Personal workflow sections.
     """
     source, shared = setup.clone / "setup/instructions.md", home / SHARED
     try:
@@ -264,8 +258,7 @@ def _installs(path: Path, harness_ids: set, problems: list) -> dict:
 
 
 def _harness_files(clone: Path, harness_ids: dict, problems: list) -> dict:
-    """{harness: {kind: path, "environments": {env: {kind: path}}}} from harnesses.json. A harness's
-    `environments` key holds what only one of its environments has; each path must be a file inside the repo."""
+    """{harness: {kind: path, "environments": {env: {kind: path}}}} from harnesses.json. A harness's `environments` key holds what only one of its environments has; each path must be a file inside the repo."""
     path = clone / "setup/harnesses.json"
     data = _json(path, problems)
     if not data:

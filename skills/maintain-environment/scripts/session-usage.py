@@ -3,9 +3,7 @@
 
 usage: session-usage.py <transcript.jsonl> [--split HH:MM:SS ...]
 
-Prints the user-message timestamps (to choose split points), then per phase:
-model calls, output tokens, cache reads, cache writes, uncached input.
-Times are the transcript's UTC timestamps.
+Prints the user-message timestamps (to choose split points), then per phase: model calls, output tokens, cache reads, cache writes, uncached input. Times are the transcript's UTC timestamps.
 """
 import json
 import sys

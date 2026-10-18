@@ -1,31 +1,14 @@
 """The rule table: loading, validation, and what each row covers.
 
-The pre-tool hook and the verify script read the table through this module; agents
-read `rules.json` itself, with the harness references, to write each harness's
-native entries. A row's `match` takes one of three
-kinds, told apart by its keys:
+The pre-tool hook and the verify script read the table through this module; agents read `rules.json` itself, with the harness references, to write each harness's native entries. A row's `match` takes one of three kinds, told apart by its keys:
 
-- command: `program` (one name or a list), optional `subcommands`, `flags`, `operands`
-  (words right after the subcommand, or a list of alternative word lists), `any_operand`
-  (words any one of which may appear anywhere after the subcommand), `arguments: "none"` (the
-  program run with nothing after it) or `arguments: "flags"` (with flags and nothing else
-  after it), `files` (globs one of its operands matches, read as a file row's paths, with an
-  optional `except`), and `variables` (globs over the names of variables an argument expands);
-- file: `paths` (globs, relative to the project, or starting `~/` or `/`), `access` (`read` or `write`)
-  and an optional `except` (globs the row leaves out, such as `**/.env.example`);
-- mcp-tool: `server` and `tool`, two case-insensitive regular expressions matched
-  against the tool names the harness exposes on the machine.
+- command: `program` (one name or a list), optional `subcommands`, `flags`, `operands` (words right after the subcommand, or a list of alternative word lists), `any_operand` (words any one of which may appear anywhere after the subcommand), `arguments: "none"` (the program run with nothing after it) or `arguments: "flags"` (with flags and nothing else after it), `files` (globs one of its operands matches, read as a file row's paths, with an optional `except`), and `variables` (globs over the names of variables an argument expands);
+- file: `paths` (globs, relative to the project, or starting `~/` or `/`), `access` (`read` or `write`) and an optional `except` (globs the row leaves out, such as `**/.env.example`);
+- mcp-tool: `server` and `tool`, two case-insensitive regular expressions matched against the tool names the harness exposes on the machine.
 
-Every row carries `samples`: `covers`, calls the row must catch (a shell command,
-a path, or an MCP tool name, by the row's kind), and `leaves`, near misses it must
-let through. The verify script feeds them to the hook. Any row may carry a `gap`:
-what no harness can catch for it, which every harness's audit names. An `ask` row may
-carry `approver: "user"`: each call needs the user's own approval, so the hook refuses
-it where the harness won't ask the user.
+Every row carries `samples`: `covers`, calls the row must catch (a shell command, a path, or an MCP tool name, by the row's kind), and `leaves`, near misses it must let through. The verify script feeds them to the hook. Any row may carry a `gap`: what no harness can catch for it, which every harness's audit names. An `ask` row may carry `approver: "user"`: each call needs the user's own approval, so the hook refuses it where the harness won't ask the user.
 
-A workstation repo's permissions file holds rows of the same format, loaded with
-`personal=True`: they may also take the level `allow`, which only the harnesses' native
-entries carry out, and which the generic table refuses.
+A workstation repo's permissions file holds rows of the same format, loaded with `personal=True`: they may also take the level `allow`, which only the harnesses' native entries carry out, and which the generic table refuses.
 """
 from __future__ import annotations
 
@@ -237,9 +220,7 @@ def _parse_mcp_tool(match: dict, where: str) -> dict:
 def glob_regex(glob: str, cwd: str, home, fold_case: bool = False):
     """A path glob as a regex over absolute paths.
 
-    `**/x` matches at any depth, even outside the project; other relative globs
-    are anchored at the working directory, `~/` globs at the home folder, and `/` globs at the root.
-    With `fold_case`, as where the filesystem ignores case, `.ENV` matches `.env`.
+    `**/x` matches at any depth, even outside the project; other relative globs are anchored at the working directory, `~/` globs at the home folder, and `/` globs at the root. With `fold_case`, as where the filesystem ignores case, `.ENV` matches `.env`.
     """
     if glob.startswith("~/"):
         anchor, glob = re.escape(str(home).rstrip("/")) + "/", glob[2:]

@@ -1,24 +1,15 @@
 """The pre-tool hook's decision: what the rule rows say about one tool call.
 
-pre_tool_hook.py reads a harness's payload into a `ToolCall` (each harness module
-knows its own payload), then calls `decide` here. `decide` returns a `Verdict`:
+pre_tool_hook.py reads a harness's payload into a `ToolCall` (each harness module knows its own payload), then calls `decide` here. `decide` returns a `Verdict`:
 
-- **deny:** any part of the call a deny row covers refuses the whole call. The answer
-  names each refused part with its rule's reason and instruction (`refusal`).
-- **allow-and-report:** a call such a row covers gets one line in the report folder
-  (`write_report`). The hook says nothing else, so the harness's own permissions decide.
-- **ask:** the verdict names the ask rows a call hits, and the harness's native ask
-  entries do the asking. A row with `approver: "user"` is refused instead when the call
-  shows that no one will ask the user, such as Claude Code in bypassPermissions mode.
-  A harness with no ask list (Cursor, Pi) gets every ask row refused when unattended.
+- **deny:** any part of the call a deny row covers refuses the whole call. The answer names each refused part with its rule's reason and instruction (`refusal`).
+- **allow-and-report:** a call such a row covers gets one line in the report folder (`write_report`). The hook says nothing else, so the harness's own permissions decide.
+- **ask:** the verdict names the ask rows a call hits, and the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead when the call shows that no one will ask the user, such as Claude Code in bypassPermissions mode. A harness with no ask list (Cursor, Pi) gets every ask row refused when unattended.
 - **allow**, a personal permission's level: named in the verdict, and the hook says nothing.
 
-The steps of `decide`: split a shell command into the simple commands the shell runs
-(commands.py), collect the files the call reads or writes, match every row against the
-commands, files and MCP tool name, then sort the hits by level.
+The steps of `decide`: split a shell command into the simple commands the shell runs (commands.py), collect the files the call reads or writes, match every row against the commands, files and MCP tool name, then sort the hits by level.
 
-The report folder is `report_dir` in `~/.config/agents/hook.json`, or
-`~/.local/state/agents/reports` by default.
+The report folder is `report_dir` in `~/.config/agents/hook.json`, or `~/.local/state/agents/reports` by default.
 """
 from __future__ import annotations
 
@@ -131,11 +122,9 @@ PATCH_FILE = re.compile(r"^\*\*\* (Add File|Update File|Delete File|Move to): (.
 
 
 def path_matches(rule, path: str, cwd: str, home: Path) -> bool:
-    """Whether a file path falls under one of the row's globs (`paths`, or a command row's
-    `files`) and none of its `except` globs.
+    """Whether a file path falls under one of the row's globs (`paths`, or a command row's `files`) and none of its `except` globs.
 
-    Globs read as rules.glob_regex says. The path is checked as written and with
-    symlinks resolved, and as a folder too (`secrets` counts as inside `secrets/**`).
+    Globs read as rules.glob_regex says. The path is checked as written and with symlinks resolved, and as a folder too (`secrets` counts as inside `secrets/**`).
     """
     base = os.path.normpath(cwd or os.getcwd())
     if path == "~" or path.startswith("~/"):
@@ -157,9 +146,7 @@ ORDINARY_NAMES = ("README.md", "main.py", "notes.txt")
 def glob_targets(rule, glob: str) -> bool:
     """Whether a search glob (`*.env`, `.env*`) picks out a file row's files by name.
 
-    A name the row covers is made from each of its globs' last part (`.env.*` -> `.env.local`);
-    a search glob matching one of those, but no ordinary file name, targets the row. A glob
-    matching everything (`*`) is a search over the folder, which the hook doesn't expand.
+    A name the row covers is made from each of its globs' last part (`.env.*` -> `.env.local`); a search glob matching one of those, but no ordinary file name, targets the row. A glob matching everything (`*`) is a search over the folder, which the hook doesn't expand.
     """
     pattern = glob.rstrip("/").rsplit("/", 1)[-1]
     if not set("*?[") & set(pattern) or any(fnmatch.fnmatchcase(n, pattern) for n in ORDINARY_NAMES):
@@ -219,8 +206,7 @@ def report_dir(config: dict, config_path: Path) -> Path:
 def write_report(folder: Path, call: ToolCall, hits: list, harness: str, now: datetime) -> Path:
     """Append one JSON line for this call to the day's file in the report folder.
 
-    The file is readable by the user alone: a reported command can carry a
-    secret's value (`gh secret set NAME --body …`).
+    The file is readable by the user alone: a reported command can carry a secret's value (`gh secret set NAME --body …`).
     """
     folder.mkdir(mode=0o700, parents=True, exist_ok=True)
     path = folder / f"{now.strftime('%Y-%m-%d')}.jsonl"
