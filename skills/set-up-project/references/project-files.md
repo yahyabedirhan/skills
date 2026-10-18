@@ -15,27 +15,27 @@ Each deny and ask row of set-up-machine's `rules.json` carries the key `samples`
 
 ## Claude Code: `.claude/settings.json`, `.claude/settings.local.json`
 
-- **Permissions can't be loosened.** A user deny or ask wins over any project allow.
+- **Loosening:** none. A user deny or ask wins over any project allow.
 - **Auto mode:** a project allow over a deny command row is `overlaps`: the user's deny and the pre-tool hook still refuse the command. `autoMode` is read only from user settings, so a project's is a `gap` that does nothing.
 - **Switches that weaken:** `"disableAllHooks": true` turns every hook off, the pre-tool hook included; `"autoMemoryEnabled": true` turns memory back on; `"disableAutoMode"` turns auto mode off. Each is `weakens`.
-- **Read by the Cursor CLI too:** it unions the `allow` and `deny` lists of the project's `.claude/settings.json`, but not `settings.local.json`, with its own, and has no ask level. So an allow there that covers an ask row (`Bash(git push *)` over `git push --force-with-lease`) is `weakens`: the Cursor CLI runs it without a prompt.
+- **Cursor CLI:** it reads this file too, and unions the `allow` and `deny` lists of the project's `.claude/settings.json`, but not `settings.local.json`, with its own, and has no ask level. So an allow there that covers an ask row (`Bash(git push *)` over `git push --force-with-lease`) is `weakens`: the Cursor CLI runs it without a prompt.
 
 ## Cursor CLI: `.cursor/cli.json`, from the git root down
 
-- **A list replaces the global one.** The key `permissions` > `deny` in the project's file replaces `~/.cursor/cli-config.json`'s, so a list missing any global entry (`"deny": []`) is `weakens`; the deny lists in `~/.claude/settings.json` and the pre-tool hook still hold. A project deny beyond the global list is `extra`.
+- **List merge:** a project list replaces the global one. The key `permissions` > `deny` in the project's file replaces `~/.cursor/cli-config.json`'s, so a list missing any global entry (`"deny": []`) is `weakens`; the deny lists in `~/.claude/settings.json` and the pre-tool hook still hold. A project deny beyond the global list is `extra`.
 - **No ask level:** an allow covering an ask row is `weakens`. One covering a deny row is `overlaps`, since deny wins over allow.
 - **Matching:** `Shell(p)` covers `p` alone or followed by a space, `Shell(p:)` `p` alone, `Shell(cmd:args)` a one-word command whose arguments match the glob; `*` matches anything. `Read`, `Write` and `Mcp(server:tool)` as set-up-machine's references/cursor/cli.md says.
 - **Hooks** can't be turned off by a project.
 
 ## opencode: `opencode.json`, `opencode.jsonc`, `.opencode/opencode.json(c)`
 
-- **Permissions can be loosened.** A project's config merges over the global one: a pattern already in the global config changes level in place, and a new one goes after the global rules, where the last match wins. So the audit merges the project's `permission` over the global config and asks, per sample, which level opencode would apply; a looser one than the global config gives is `weakens`, naming the entry that wins. A tool set to one level (`"read": "allow"`) replaces the tool's whole global object.
+- **Loosening:** possible. A project's config merges over the global one: a pattern already in the global config changes level in place, and a new one goes after the global rules, where the last match wins. So the audit merges the project's `permission` over the global config and asks, per sample, which level opencode would apply; a looser one than the global config gives is `weakens`, naming the entry that wins. A tool set to one level (`"read": "allow"`) replaces the tool's whole global object.
 - **Agents:** the key `agent` > `<name>` > `permission` in the project config is merged after, and checked the same way.
 - **Plugins:** a project plugin, from `plugin` in the config or a file in `.opencode/plugin/` or `.opencode/plugins/`, runs after the global pre-tool hook and can rewrite a call's arguments once the hook has passed them. The audit can't read what it does, so it's a `gap`: read it.
 
 ## Codex: `.codex/config.toml`
 
-- **Rules can't be loosened:** Codex applies the strictest decision across every `.rules` file.
+- **Loosening:** none. Codex applies the strictest decision across every `.rules` file.
 - **Switches that weaken,** in a trusted project: `[features] hooks = false` turns every hook off, the pre-tool hook included; `[features] memories = true` turns memories back on. Each is `weakens`, in either the `[features]` table or a dotted `features.<name>` key.
 
 ## Not audited
