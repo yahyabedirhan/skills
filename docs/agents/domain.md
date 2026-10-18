@@ -8,7 +8,7 @@ How the engineering skills should consume this repo's domain documentation when 
 - **`GLOSSARY-MAP.md`** at the repo root if it exists: it points at one `GLOSSARY.md` per context. Read each one relevant to the topic.
 - **`docs/decisions/`**: read the decision records that touch the area you're about to work in. In multi-context repos, also check `src/<context>/docs/decisions/` for context-scoped decisions.
 
-If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill, which `/grill-with-docs` and `/improve-codebase-architecture` reach, creates them lazily when terms or decisions actually get resolved.
+If any of these files don't exist, **proceed silently** and work from the code: the `/domain-modeling` skill creates them lazily, when terms or decisions actually get resolved.
 
 ## File structure
 
@@ -40,7 +40,7 @@ Multi-context repo (presence of `GLOSSARY-MAP.md` at the root):
 
 ## Use the glossary's vocabulary
 
-When your output names a domain concept, such as in an issue title, a refactor proposal, a hypothesis or a test name, use the term as defined in `GLOSSARY.md`. Don't drift to synonyms the glossary explicitly avoids.
+When your output names a domain concept, such as in an issue title, a refactor proposal, a hypothesis or a test name, use the term as defined in `GLOSSARY.md`, even where the glossary lists a synonym it avoids.
 
 If the concept you need isn't in the glossary yet, that's a signal: either you're inventing language the project doesn't use and should reconsider, or there's a real gap to note for `/domain-modeling`.
 
