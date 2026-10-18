@@ -41,9 +41,10 @@ On a machine the variable is unset, so the user-level hook (index.md, *Hook wiri
 
 ## Environment setup
 
-A cloud environment can set every session up instead, whatever repo it works on. Its setup script runs as root before Claude Code launches, and the environment caches the disk it leaves as a snapshot. The user's workstation repo may render that script: the setup sources inline, then a script that writes the same files the agent writes above, plus `~/.claude/rules/cloud-instructions.md` from the cloud `instructions` file, and a match-all `PreToolUse` hook in `~/.claude/settings.json`. Claude Code reads that file at launch, so the user-level hook guards the session from its first call. The script leaves `~/.local/share/agents/environment-setup.json` when it is done.
+A cloud environment can set every session up instead, whatever repo it works on. Its setup script runs as root before Claude Code launches, and the environment caches the disk it leaves as a snapshot. `<workstation-repo>` may render that script: the setup sources inline, then a script that writes the same files the agent writes above, plus `~/.claude/rules/cloud-instructions.md` from the cloud `instructions` file and a match-all `PreToolUse` hook in `~/.claude/settings.json`. The script leaves `~/.local/share/agents/environment-setup.json` when it is done.
 
-- **Setting up again:** when that marker exists, the workstation repo's cloud instructions name the command that applies the setup again. Run it instead of writing the files by hand, and say that new instructions and hooks load in the next session.
+- **Gap:** the docs say a cloud session doesn't read `~/.claude/settings.json` and runs hooks only from the repo and server-managed settings ([settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions)). A script-written `~/.claude/CLAUDE.md` is documented to load. Whether the script-written hook fires is not tested.
+- **Setting up again:** when that marker exists, `<workstation-repo>`'s cloud instructions name the command that applies the setup again. Run it instead of writing the files by hand, and say that new instructions and hooks load in the next session.
 - **Audit:** with the marker, the instructions cell checks the `~/.claude/CLAUDE.md` link, memory off, `harness-instructions.md` and `cloud-instructions.md` against their sources, and not the repo's hook or cloud section. The guardrails cell checks the match-all group in `~/.claude/settings.json`.
 
 ## Sandbox
