@@ -79,9 +79,22 @@ The cloud environment's setup script, which `<workstation-repo>` renders, sets t
   - a match-all `PreToolUse` hook in `~/.claude/settings.json`;
   - `~/.local/share/agents/environment-setup.json`, the marker that tells the two routes apart, last.
 
-- **Gap:** the docs say a cloud session doesn't read `~/.claude/settings.json` and runs hooks only from the repo and server-managed settings ([settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions)). A script-written `~/.claude/CLAUDE.md` is documented to load. Whether the script-written hook fires is not tested.
+- **Hooks in `~/.claude/settings.json`:** the docs say a cloud session runs hooks only from the repo and server-managed settings ([settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions)). A test on 2026-10-18 showed otherwise: in a session on another repo, a match-all `PreToolUse` hook written there mid-session refused `rm -rf x` at once.
 - **Re-setup:** when that marker exists, `<workstation-repo>`'s cloud instructions name the command that applies the setup again. Run it instead of writing the files by hand. It changes only the current VM, so read the new instructions and rule files for the rest of the session; new sessions start from the environment's snapshot.
 - **Audit:** with the marker, the instructions cell checks the `~/.claude/CLAUDE.md` link, memory off, `harness-instructions.md` and `cloud-instructions.md` against their sources, and not the repo's hook or cloud section. The guardrails cell checks the match-all group in `~/.claude/settings.json`.
+
+### Bootstrap
+
+A setup script runs before Claude Code starts, so it can clone only public repos: a private `<workstation-repo>` is reachable only after the agent attaches it with `add_repo`. The bootstrap splits the work at that point. The setup script runs `scripts/cloud_bootstrap.py` from this skill's public repo, and the agent does the rest:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/<owner>/<skills-repo>/main/skills/set-up-machine/scripts/cloud_bootstrap.py | python3 - <workstation-repo> <setup-command>
+```
+
+- **Before Claude Code starts:** the script writes `~/.claude/CLAUDE.md` with the bootstrap steps, and adds one allow rule to `~/.claude/settings.json` for `bash <clone>/<setup-command> <clone>`. It holds nothing personal: the repo and the command are its arguments.
+- **At session start:** the agent attaches `<workstation-repo>`, clones it to `/home/user/<repo>` and runs the setup command. When the command reports a repo it can't reach, such as a private skill source, the agent attaches that repo and runs the command once more.
+- **Why the allow rule:** in auto mode, the auto mode check refused the setup command in one of two test sessions, as code from an outside source.
+- **Gap:** the guard starts when the setup command has written the hook, not with the session's first command.
 
 ## Harness rows
 

@@ -168,6 +168,7 @@ A harness with environments has `references/<harness>/<env>.md` and `scripts/set
 ## Scripts
 
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
+- [scripts/cloud_bootstrap.py](scripts/cloud_bootstrap.py): run from a Claude Code cloud environment's setup script; it leaves the agent the steps to set the session up from the workstation repo, as `references/claude-code/cloud.md` > 'Bootstrap' describes.
 - [scripts/verify.py](scripts/verify.py): the check above. It writes nothing.
   - `--home <folder>`: checks a copy of a home folder, where a harness is detected by its folder only, not by a CLI on `PATH`.
   - `--grok-bot-rules`: prints the rule table and personal permissions as Grok Bot's Auto-review rules, as `references/grok-bot/desktop.md` > 'Guardrails' describes.
