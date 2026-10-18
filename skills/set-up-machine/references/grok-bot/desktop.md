@@ -1,12 +1,16 @@
 # Grok Bot
 
-How to set up and audit Grok Bot, the agent app that works on one persistent Linux box shared by all of the user's agents. The app keeps most settings other harnesses keep in files: memory, Auto-review, connectors, secrets and routines. So the agent applies most areas through the app's own tools, or gives the user a step, and the verifier checks what a file shows.
+Grok Bot, the agent app that works on one persistent Linux box shared by all of the user's agents. This page says how it is found, what each harness row means for it, which gaps stay and how the verifier checks it. The app keeps most settings other harnesses keep in files: memory, Auto-review, connectors, secrets and routines. So the agent applies most areas through the app's own tools, or gives the user a step, and the verifier checks what a file shows.
 
-## Found
+## The environment
+
+### Found
 
 Found when `~/agent-data/workflows/` exists: the shared skill library on the box.
 
-## Instructions
+## Harness rows
+
+### Instructions
 
 > **Grok Bot differs here.** Other harnesses read instructions from files the setup writes. Grok Bot reads none: the agent applies instructions into its own memory with its memory tool. The verifier can't read memory, so it compares a lock, the source commit and the exact facts written, with the current sources. Follow the steps below instead of the shared file's link or copy.
 
@@ -37,7 +41,7 @@ The **applied state page** records what the lock holds, for the user to read:
 
 You may merge or reword lines into facts. The lock and the applied state page always hold the exact text written, since a later forget or rewrite finds the fact by it.
 
-### First-time apply
+#### First-time apply
 
 1. Write the shared file as every run does; the `setup` line checks it.
 2. Read `setup/instructions.md` and Grok Bot's instructions file at the latest default branch of `<workstation-repo>`. Note its commit, `git rev-parse HEAD`.
@@ -49,7 +53,7 @@ You may merge or reword lines into facts. The lock and the applied state page al
 8. Rewrite the applied state page to match the lock, with the profile and the Auto-review rules status.
 9. Give the user the Auto-review rules text, as 'Guardrails' describes, and each user-only step: rules to paste, connectors, secrets, rulesets.
 
-### Reconcile
+#### Reconcile
 
 Run it when the verifier's instructions cell says stale.
 
@@ -59,7 +63,7 @@ Run it when the verifier's instructions cell says stale.
 4. Rewrite the lock: the top commit and user facts for a user-scope change, this agent's entry for an agent-scope change. Every agent reconciles its own entry.
 5. Rewrite the applied state page to match the lock.
 
-### Audit
+#### Audit
 
 1. Run `verify.py`. Instructions is `ok` when each source equals its version at the lock's commit, stale (`FAIL`) when one changed, `gap` without a lock.
 2. Recall memory in each scope and compare it with the lock's facts. A lock fact missing from memory is drift: write it again. A fact the lock doesn't list is the user's: keep it, and name it `extra`.
@@ -67,7 +71,7 @@ Run it when the verifier's instructions cell says stale.
 
 Memory stays on: it holds the instructions.
 
-## Guardrails
+### Guardrails
 
 Grok Bot has no permission lists and no hook. The app decides each call:
 
@@ -76,15 +80,15 @@ Grok Bot has no permission lists and no hook. The app decides each call:
 - **Sending a message or email, posting, buying, and deleting or sharing outside the box** need the user's approval through a draft or an approval card.
 - **Hard limits outside the agent:** a token's scope and a repository's rulesets, such as blocking force pushes to `main`, hold even when an instruction is missed. Name each one the workstation repo lists as a step for the user.
 
-## Sandbox
+### Sandbox
 
 `none`: the box is the sandbox, and the app sets it. Commands on a **registered computer** run through the app, each approved by the user when local execution asks, and only while that computer is online. Document which computers are registered in the workstation repo; there is nothing to write.
 
-## Plugins
+### Plugins
 
 Connectors, the app's MCP servers, are installed in the app, per account, each with optional custom instructions. List the expected ones in the declared config's `connectors`, or as `setup/installs.json` plugins that name `grok-bot`. For each one, give the user the step to add it and sign in, and put any instruction for that connector in its custom instructions, not in memory. List the connectors the agent can see, for the report.
 
-## Skills
+### Skills
 
 The library, `~/agent-data/workflows/<skill>/SKILL.md`, is shared by every agent. `npx skills` doesn't know it, so copy each skill folder from its source:
 
@@ -94,7 +98,7 @@ The library, `~/agent-data/workflows/<skill>/SKILL.md`, is shared by every agent
 
 A library folder no entry provides is `extra`, or `ignored` when `ignore` names it: keep it. A skill the user made in the app is one of these.
 
-## Config
+### Config
 
 There is no model to set: the app picks it. When `setup/harnesses.json` names a Grok Bot `config`, it is a JSON object with these keys, each optional:
 
@@ -102,11 +106,13 @@ There is no model to set: the app picks it. When `setup/harnesses.json` names a 
 - `connectors`: the connectors the user should have, as 'Plugins' describes.
 - `routines`: each scheduled or event-triggered prompt the agent should run, as `{"name", "trigger", "prompt"}`. Create or check each with the app's routine tools; an empty list means none.
 
-## Hook wiring
+### Hook wiring
 
 `none`: no hook runs. An agent can check a command by hand before running it: `echo '{"command": "<command>"}' | python3 <script> --harness grok-bot` prints `{}`, or a deny with the refusal. Every ask row is refused, since the hook can't see whether the user will be asked.
 
-## Gaps
+## Known limits
+
+### Gaps
 
 Memory and Auto-review rules can't be read from the box; connectors and routines are seen only through the app; no session host starts a Grok Bot session for the live check.
 

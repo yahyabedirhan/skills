@@ -1,14 +1,16 @@
 # Pi
 
-How to set up and audit Pi, the `pi` coding agent (`@earendil-works/pi-coding-agent`). Docs: the `docs/` folder of the installed package, chiefly `configuration.md`, `settings.md`, `skills.md`, `extensions.md`, `cli.md` and `security.md`.
+The CLI environment of Pi, the `pi` coding agent (`@earendil-works/pi-coding-agent`). This page says how it is found, what each harness row means, which gaps stay and how the verifier checks it. Docs: the `docs/` folder of the installed package, chiefly `configuration.md`, `settings.md`, `skills.md`, `extensions.md`, `cli.md` and `security.md`.
 
-## Found
+## The environment
+
+### Found
 
 Found when `pi` is on `PATH` or the agent folder exists. The agent folder is `PI_CODING_AGENT_DIR`, else `~/.pi/agent`; a leading `~` in the variable means the home folder. Resolve it once, without printing the variable's value, and use that one folder for every path below, written `<agent-dir>`. For a fixture home, `verify.py --home <fixture>` uses `<fixture>/.pi/agent` and ignores the variable.
 
 Leave `<agent-dir>/auth.json`, `mcp-auth.json`, `trust.json`, `models-store.json` and `sessions/` unread and unwritten: they hold credentials, trust decisions and runtime state, never a setting this skill owns.
 
-### Words
+#### Words
 
 Pi's own terms, as its docs use them. Every Pi document that follows this skill uses them the same way.
 
@@ -37,9 +39,11 @@ The other resources a package or the agent folder can hold: a skill is a `SKILL.
 **Project trust**:
 Whether Pi loads a project's own `.pi` settings and resources. Context files load either way. Trust is not a guardrail: it doesn't limit tool calls.
 
-## Instructions
+## Harness rows
 
-### Global instructions
+### Instructions
+
+#### Global instructions
 
 - Pi loads one context file from `<agent-dir>`, the first that exists of `AGENTS.override.md`, `AGENTS.md`, `AGENTS.MD`, `CLAUDE.md` and `CLAUDE.MD`. It then adds one from each folder from the working folder up. It follows a symlink and skips a broken one. It doesn't follow `@` imports.
 - `<agent-dir>/AGENTS.md` becomes a **relative symlink to the shared file**. For the default folder it's `../../.config/agents/AGENTS.md`. For another folder, compute the path from `<agent-dir>` to `~/.config/agents/AGENTS.md`. It's `present` once it's that link.
@@ -47,45 +51,45 @@ Whether Pi loads a project's own `.pi` settings and resources. Context files loa
 - An `AGENTS.override.md` in `<agent-dir>` is kept and `extra`, with a `gap`: Pi reads it instead of the link. A `CLAUDE.md` there with no `AGENTS.md` is read until the link exists; once the link is written it's `extra`, never read.
 - `--no-context-files` (`-nc`) starts a session without any context file: a `gap` line.
 
-### Memory
+#### Memory
 
 No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it reloads only when the user resumes one. Install no persistent-memory extension, since memory stays off in every harness, as `../global-instructions.md` > 'Memory' says.
 
-## Guardrails
+### Guardrails
 
-### Permissions
+#### Permissions
 
 Pi has no permission system. It asks for no approval before a tool call, as its `docs/security.md` says, and has no deny, ask or allow list. The pre-tool hook, wired through an extension, is the only enforcement: it refuses deny rows, asks the user for ask rows in a Pi dialog, and reports allow-and-report rows. Write no native entry for any row.
 
-### Command rows
+#### Command rows
 
 No native entry. The hook checks the `command` of the `bash` and `powershell` tools. It reads a PowerShell command as a POSIX shell command, so a PowerShell spelling can slip past a row: a `gap` line on Windows.
 
-### File rows
+#### File rows
 
 No native entry. The hook checks the `path` of `read`, `edit`, `write` and `ls`, and the search glob of `grep`, its `glob`, and of `find`, its `pattern`.
 
-### MCP-tool rows
+#### MCP-tool rows
 
 No native entry. Pi reads MCP servers from `<agent-dir>/mcp.json` and names their tools `mcp__<server>__<tool>`, the name the rows match, so the hook checks them as they are.
 
-### Personal permissions
+#### Personal permissions
 
 Each personal permission is `n/a` here: "Pi has no permission entries". The hook applies a personal `deny`, `ask` or `allow-and-report` row as it applies a table row. A personal `allow` row needs nothing: Pi runs every call the hook lets through.
 
-### Auto mode
+#### Auto mode
 
 None: Pi has no approval prompts to automate.
 
-### What the agent sees
+#### What the agent sees
 
 A refused call's tool result is the hook's refusal: each refused part, its rule, reason and instruction. For an ask row the user declined, the result starts `Refused: the user declined this call when the pre-tool hook asked.`, followed by the question. When the hook can't check the call, the result starts `Refused: the pre-tool hook couldn't check this call`, says why, and asks the agent to stop and have the user run `/set-up-machine`. A refused nested call fails the `codemode` script with the same text. The shared file also gives the agent the rule lines and the rejection guidance.
 
-## Sandbox
+### Sandbox
 
 Pi has no sandbox and no approval setting, so the verifier's `sandbox` cell is `n/a`. Its declared settings are in 'Config'.
 
-## Plugins
+### Plugins
 
 The plugins setup area, from `plugins` in `setup/installs.json`, as the section `../workstation.md` > `setup/installs.json` defines it. Docs: `packages.md` and `mcp.md`.
 
@@ -105,13 +109,13 @@ The plugins setup area, from `plugins` in `setup/installs.json`, as the section 
   - An extension that registers `/mcp`, such as `pi-mcp-adapter`, replaces the built-in MCP client, and Pi then ignores `mcp.json`. The verifier doesn't detect this.
   - The structured list doesn't take local package paths. For independent directory packages, retain a clone on each machine, update it to latest default-branch code without discarding local work, and install each package directory by its resolved absolute path. Record the commit deployed as history only. Report the missing structured verification support; never replace independent packages with an overlapping root bundle.
 
-## Skills
+### Skills
 
 - Pi discovers skills in `~/.agents/skills/` and `<agent-dir>/skills/`, follows symlinks, and loads a skill reached through two links only once, by its real path. So the skills `setup/installs.json` installs into `~/.agents/skills` reach Pi with no extra install and no `-a` flag.
 - Older `npx skills` versions left one link per skill in `<agent-dir>/skills/`, pointing into `~/.agents/skills`. A link that resolves is harmless and `extra`. A broken link, such as one left after a skill was removed, is `extra`, for the user to remove: Pi skips it without a word.
 - A project's `.agents/skills/` loads only after the user trusts the project.
 
-## Config
+### Config
 
 The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` names declares Pi settings, as `../workstation.md` > 'A declared config' and `../workstation.md` > 'A Pi config' describe. Compare each key it declares with `<agent-dir>/settings.json`:
 
@@ -124,7 +128,7 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - **Activation:** a new session reads the change. A running session reads it after `/reload`.
 - **Gaps:** a trusted project's `.pi/settings.json` overrides these keys, and CLI flags such as `--model` override them for one run.
 
-## Hook wiring
+### Hook wiring
 
 - **Wiring:** the extension `<agent-dir>/extensions/set-up-machine.ts`, which Pi loads from its global extension folder. Write it from [pi-extension.ts](pi-extension.ts), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "pi"]`, with `<script>` as `SKILL.md` > 'Pre-tool hook' > 'Wiring' gives it. Its `tool_call` handler runs before every tool call, built-in, extension and MCP. Calls that `codemode` scripts make with `tools.<name>(…)` reach it one by one, as nested calls.
 - **Fails closed:** Pi has no native rules underneath, so a call the hook can't check is refused. When the script is gone, `python3` can't start, the hook exits non-zero, prints anything but a JSON object or takes over 10 seconds, the extension blocks the call. The agent reads that the guardrail is unavailable and that the user should run `/set-up-machine`. The hook exits non-zero on a call it can't read, a rule table it can't load, and a report line it can't write. The extension catches its own errors and turns them into the same refusal.
@@ -135,7 +139,9 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - **Session host:** while a dialog waits, Pi reports `blocked` to the terminal itself through OSC 7501. A session host's own Pi integration can report a state of its own instead. Herdr's integration reports `working`, so the user gets no notice. It listens for a `herdr:blocked` event on Pi's event bus, so the extension emits that event around the dialog, and Herdr then shows the pane as `blocked`. Without that integration nothing listens, and the event does nothing.
 - Other extensions in `<agent-dir>/extensions/`, such as a session host's integration, are the user's: leave them.
 
-## Gaps
+## Known limits
+
+### Gaps
 
 - **The only layer:** Pi has no native rules underneath, so the extension fails closed: while `python3` or the script is missing, or the hook fails, Pi refuses every tool call until `/set-up-machine` repairs it. `pi --no-extensions` starts a session without the hook in the meantime. The containment Pi offers beyond the hook is the operating system's: a container, a virtual machine or a separate user, as Pi's `docs/security.md` and `docs/containerization.md` say. Name this once in every audit.
 - **`--no-extensions`:** `pi --no-extensions` (`-ne`) skips the extension. Explicit `-e <path>` extensions still load.
@@ -152,6 +158,11 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - **Child sessions without extensions:** an extension that starts child sessions in the same process can start them with extensions off, and the hook doesn't run there. The `pi-subagents` extension does this for foreground children; its setting `subagents.defaultSubagentOnlyExtensions`, listing the hook extension's path, loads it there. Check each such extension. A child without a UI gets ask rows refused.
 - **`!` commands:** the user's own `!` commands run as `user_bash`, not as tool calls, so the hook doesn't see them, as in Claude Code.
 - `SKILL.md` > 'Pre-tool hook' > 'What it can't see' lists the hook's own misses.
+
+### Notes
+
+- This page was checked against Pi 1.1.0 and its `dist/` source, including the `pi update --extensions` command and the handler load order.
+- The `pi-subagents` behaviour was checked on version 0.77.0, and Herdr's `working` state on Herdr version 9.
 
 ## Checking it
 
@@ -190,8 +201,3 @@ A live model turn needs the login, so check the hook with the real agent folder 
    - Result: the call is refused as declined.
 5. Ask again, move to Yes and press Enter.
    - Result: the call runs.
-
-## Notes
-
-- This page was checked against Pi 1.1.0 and its `dist/` source, including the `pi update --extensions` command and the handler load order.
-- The `pi-subagents` behaviour was checked on version 0.77.0, and Herdr's `working` state on Herdr version 9.
