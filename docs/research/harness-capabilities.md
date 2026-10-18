@@ -57,7 +57,7 @@ Main sources:
 - **Permissions: no.** "If a tool is denied at any level, no other level can allow it … a user-level deny blocks a project-level allow." [doc permissions, "Settings precedence"]
 - **Hooks: yes, all at once.** A project's `.claude/settings.json` can set `"disableAllHooks": true`, which turns off user, project, local and plugin hooks (not managed ones). A project's `"disableAllHooks": false` also overrides a user `true`. Only managed settings can disable managed hooks. There's no way to disable one hook and keep the rest. [doc hooks, "Disable or remove hooks"; doc settings-reference, `disableAllHooks`]
 - **Memory: yes.** `autoMemoryEnabled` is read from any settings file, and project settings outrank user settings, so a project can turn it back on. The environment variable `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` outranks the key "for one session, in either direction". [doc settings-reference, `autoMemoryEnabled`; doc env-vars]
-- **What holds against a project:** managed settings, `managed-settings.json` in `/Library/Application Support/ClaudeCode/` (macOS) or `/etc/claude-code/` (Linux), a system directory that needs admin rights to write. [doc settings; doc [managed-settings](https://code.claude.com/docs/en/managed-settings)]
+- **Project-proof settings:** managed settings, `managed-settings.json` in `/Library/Application Support/ClaudeCode/` (macOS) or `/etc/claude-code/` (Linux), a system directory that needs admin rights to write. [doc settings; doc [managed-settings](https://code.claude.com/docs/en/managed-settings)]
 
 ### 1.6 File, MCP and network rules
 
@@ -130,7 +130,7 @@ Main sources:
 - **Config: yes, for a trusted project.** A trusted project's `.codex/config.toml` can set `sandbox_mode`, `approval_policy` and `[features]`; only provider, auth, notification, profile and telemetry keys are ignored there. [doc config-reference, config.toml section]
 - **Hooks: yes, all at once.** Hooks from every layer run, and "higher-precedence config layers don't replace lower-precedence hooks", but a trusted project's `[features] hooks = false` turns every hook off, the user's included. [doc hooks] [check: `codex features list` shows `hooks false` in a trusted project that sets it, `true` in an untrusted one]
 - **Memory: yes.** A trusted project's `[features] memories = true` turns memories on over a user `false`. [check: `codex features list`]
-- **What holds against a project:** `requirements.toml`: pin `[features] hooks = true` and `memories = false`, define managed hooks, or set `allow_managed_hooks_only`. [doc hooks, "Managed hooks from requirements.toml"; doc managed-configuration]
+- **Project-proof settings:** `requirements.toml`: pin `[features] hooks = true` and `memories = false`, define managed hooks, or set `allow_managed_hooks_only`. [doc hooks, "Managed hooks from requirements.toml"; doc managed-configuration]
 
 ### 2.6 File, MCP and network rules
 
@@ -195,7 +195,7 @@ Main sources:
   - A project's `"*": "allow"` keeps the position of the global `"*"` key, so it doesn't defeat global rules listed after it. [check: same]
   - Agent definitions can override permissions too ("agent rules take precedence"). [doc permissions]
 - **Hooks (plugins): yes, in effect.** Global and project plugins all load (global config, project config, global plugin folder, project plugin folder, in that order) and all hooks run in sequence; plugin arrays concatenate, so a project can't remove a global plugin by config. But a project plugin runs after the global one and can rewrite `output.args` after the global check has passed. [doc plugins, "Load order"; src plugin/index.ts `trigger`, config/config.ts `mergeConfigConcatArrays`] `--pure` / `OPENCODE_PURE` runs without external plugins, the global plugin folder's files included. [src; probe: with `--pure`, a command the global plugin refuses runs]
-- **What holds against a project:** managed config (`/Library/Application Support/opencode/` on macOS, or MDM). [doc config]
+- **Project-proof settings:** managed config (`/Library/Application Support/opencode/` on macOS, or MDM). [doc config]
 
 ### 3.6 File, MCP and network rules
 

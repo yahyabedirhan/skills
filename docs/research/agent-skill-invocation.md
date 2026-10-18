@@ -139,7 +139,7 @@ Sources: <https://code.claude.com/docs/en/permissions> ("Compound commands", pre
   - An allow rule must match every subcommand.
   - A deny or ask rule applies when any subcommand matches, including inside subshells, command substitutions and loop bodies.
 - **Auto mode:** deny rules still apply first. What remains goes to a classifier that sees user messages, tool calls and CLAUDE.md, but not tool results. A handoff file the agent read is invisible to it; a boundary stated in a user message or CLAUDE.md ("don't push") is a block signal. By default it blocks irreversible deletion of files that existed before the session, force push, and similar. When it blocks, "Claude receives the reason and tries an alternative", usually a rule tag like `[Data Exfiltration]`. Three consecutive or 20 total blocks pause auto mode.
-- **What the model is told on a deny-rule match:** only `Permission to use Bash with command <full command> has been denied.` No rule is named. The rule came up twice here:
+- **Deny message:** only `Permission to use Bash with command <full command> has been denied.` No rule is named. The rule came up twice here:
   - It was seen in issue [#3](https://github.com/yahyabedirhan/skills/issues/3) (a session transcript under `~/.claude/projects/<project>/`, session in auto mode). The command was `git diff … && git add … && git commit … && git push && rm -rf tmp/<test-folder> && git log --oneline -1`.
   - This research hit the same rule. A `cd … && rm -rf .git && claude -p …` command was denied, and a narrower command without the delete then ran.
 - The user's global deny list includes `Bash(rm -rf:*)`, `Bash(git push --force:*)`, `Bash(git reset --hard:*)`, `Bash(bash -c:*)` and others. Any bundle containing one of these is denied whole.
