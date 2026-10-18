@@ -21,7 +21,7 @@ Evidence tags:
 | Can an OS sandbox refuse `.env`, `secrets/`, `~/.ssh` and `~/.aws` by path? | **Claude Code: yes, for Bash only.** `settings.json` > `sandbox` > `filesystem` > `denyRead` and `sandbox` > `credentials` are enforced by Seatbelt or bubblewrap for every child process, and Read deny rules are merged into that list. It doesn't cover the file tools, hooks or MCP servers. **Codex: yes,** with a permission-profile `deny` [probe]. **Cursor: partly:** `.cursorignore`d files are refused inside its sandbox, but `~/.ssh` is always readable. **opencode: no sandbox.** |
 | Cost | Things that need the home folder, sockets or Apple Events break inside Claude Code's sandbox: git over SSH, `herdr`'s socket, `osascript` notifications, Go-based CLIs such as `gh` (TLS on macOS), `docker` and `watchman`. Each needs `excludedCommands` (not a boundary) or the user. |
 | Per-project secrets | The user starts the dev server outside the agent, for example in their own Herdr pane. The app reads the secret at run time from a path the agent's sandbox can't read. On macOS, any same-user process can read another process's **launch** environment, even from inside an approximation of Claude Code's sandbox and inside Codex's own sandbox [probe]. So `op run -- npm run dev` hides the value from the agent's environment but not from `ps -E`. |
-| What to configure | Section 6. In short: environment hygiene and an audit line for it now; Claude Code's sandbox with explicit `denyRead` as an opt-in with its costs listed; Codex profiles only if the maintainer leaves `sandbox_mode`; set-up-project audits the new sandbox keys as `weakens`. The maintainer decides. |
+| What to configure | Section 6. In short: environment hygiene and an audit line for it now; Claude Code's sandbox with explicit `denyRead` as an opt-in with its costs listed; Codex profiles only if the maintainer leaves `sandbox_mode`; set-up-project audits the new sandbox keys as `weakens`. Section 6 says what was decided on 2026-10-01. |
 
 ---
 
@@ -190,7 +190,7 @@ Target: a `python3` process sleeping, started with `env -i … ACME_API_TOKEN=pr
 
 > **Decided 2026-10-01:** rules and the hook only, with the gap accepted, plus two more file rows. 1Password, the sandbox and the Codex profile were dropped. See [the decision record](../decisions/set-up-machine.md#2026-10-01-secrets-stay-behind-rules-with-the-gap-accepted-98).
 
-The maintainer decides. Issue #98 found no secrets in the environment on 2026-10-01, so everything here is preparation. Each option lists its cost.
+Issue #98 found no secrets in the environment on 2026-10-01, so everything here is preparation. Each option lists its cost.
 
 ### 6.1 set-up-machine
 

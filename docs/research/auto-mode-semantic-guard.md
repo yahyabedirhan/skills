@@ -176,9 +176,9 @@ Claude Code, opencode and Cursor weren't probed: see 1.6, 3 and 4.
 
 ---
 
-## 6. Recommendation
+## 6. Recommendation, not adopted
 
-The maintainer decides. For each harness: whether set-up-machine should configure a semantic guard, and the exact setting it would write.
+For each harness: whether set-up-machine should configure a semantic guard, and the exact setting it would write.
 
 ### 6.1 Claude Code: yes, as a second net
 

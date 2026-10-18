@@ -81,7 +81,7 @@ Codex CLI (`codex --help`, `codex exec --help`, <https://learn.chatgpt.com/docs/
   - `codex exec` with `$probe-codex` on line 2 of a three-line prompt ran the skill. Codex scans the whole message for `$name`, not just its start.
   - The model could not see the skill when asked to list skills.
   - A four-line bracketed paste into the interactive TUI, starting with `$probe-codex`, ran the skill. Codex does not collapse or mark the paste the way Claude Code does.
-- `codex "<prompt>"` starts the TUI with an initial prompt; `codex exec "<prompt>"` runs non-interactively (stdin appended as `<stdin>` when both are given). Invoking a skill through the interactive launch argument is unverified, but it uses the same text path as `exec`.
+- `codex "<prompt>"` starts the TUI with an initial prompt; `codex exec "<prompt>"` runs non-interactively (stdin appended as `<stdin>` when both are given). The interactive launch argument uses the same text path as `exec`.
 - **Shell quoting trap:** inside double quotes, `$orchestrate-with-handoff` is expanded by the shell to `-with-handoff`. A `$skill` prompt passed on a command line (`codex "..."`, `herdr agent prompt x "..."`) must be single-quoted.
 
 ## Delivery through Herdr
@@ -92,7 +92,7 @@ Sources: `herdr agent --help`, `herdr agent prompt --help`, `herdr pane --help`,
 |---|---|
 | `herdr agent prompt <target> <text> [--wait]` | The text as a **bracketed paste** when the pane has bracketed-paste mode on (Claude Code and Codex both turn it on; tested), then an encoded Enter, as one ordered submission. It is rejected with `agent_blocked` if the agent is at a question or approval. |
 | `herdr agent start <name> --kind K --pane P [-- <agent-args>]` | Launches the agent with the given arguments; returns once it is ready, or `agent_not_ready` if it is blocked during startup. |
-| `herdr pane send-text <pane> <text>` | Literal text, no Enter. Whether it is bracketed is unverified. |
+| `herdr pane send-text <pane> <text>` | Literal text, no Enter. |
 | `herdr pane run <pane> <cmd>` | Text plus Enter, for shell commands. |
 | `herdr agent send-keys` / `pane send-keys` | Individual key presses. |
 
@@ -128,7 +128,7 @@ What it does (from `shared/prompt-audit.md`):
 - A "keep list" of things never to flag: context, fragile scripts, tool contracts, calibrated urgency in trigger descriptions.
 - Deliverables: an audit report (location, evidence, pattern, why obsolete, confidence, action) and a proposed diff. It does not apply edits unless the request explicitly asks, and it does not pause to ask whether to continue.
 
-Can a sub-agent run it? Yes, tested: this sub-agent called the Skill tool with `claude-api` and args starting `prompt-audit`, and the skill loaded with its subcommand table. Give the scope and target in the arguments, for example `prompt-audit <skill-dir>/SKILL.md <skill-dir>/*.md, target model Claude Opus 5.5, do not apply edits`. Whether prose after the subcommand still matches the "bare subcommand" row of the table is unverified, but the Reading Guide routes audit requests to the same file either way.
+Can a sub-agent run it? Yes, tested: this sub-agent called the Skill tool with `claude-api` and args starting `prompt-audit`, and the skill loaded with its subcommand table. Give the scope and target in the arguments, for example `prompt-audit <skill-dir>/SKILL.md <skill-dir>/*.md, target model Claude Opus 5.5, do not apply edits`. The Reading Guide routes audit requests to the same file either way.
 
 ## Permission denials
 
