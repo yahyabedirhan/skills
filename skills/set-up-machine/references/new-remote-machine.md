@@ -87,7 +87,7 @@ Once the steps in `SKILL.md` have written the harness settings, install the sess
 
 ### 2. Git identity and credentials
 
-Check `git config --global user.name` and `user.email` are set. The user signs in with `gh auth login` on the machine, letting it make this machine's own SSH key and token, as remote-machine.md > *Containing a misled agent* > the item **Separate credentials** asks.
+Check `git config --global user.name` and `user.email` are set. The user signs in with `gh auth login` on the machine, letting it make this machine's own SSH key and token, as the item remote-machine.md > *Containing a misled agent* > **Separate credentials** asks.
 
 - Result: `gh auth status` shows a login on this machine.
 

@@ -24,7 +24,7 @@ A block a tool wrote into the old file becomes the upstream skill it came from, 
 |---|---|---|
 | `<!-- context7 -->` … `<!-- context7 -->` | `find-docs` | `npx --yes skills add upstash/context7 -s find-docs -g -a codex [-a claude-code] -y` |
 
-Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. Compare its installed folder hash with the source's latest default branch before marking it `present`, as ../workstation.md > the section `setup/installs.json` > the item **A skill** describes. File existence alone proves presence, not freshness. The block's advice to run `ctx7` outside the sandbox needs no line: an `allow` rule for `npx ctx7@latest` does that, and is `extra` where the machine has it.
+Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. Compare its installed folder hash with the source's latest default branch before marking it `present`, as the item ../workstation.md > `setup/installs.json` > **A skill** describes. File existence alone proves presence, not freshness. The block's advice to run `ctx7` outside the sandbox needs no line: an `allow` rule for `npx ctx7@latest` does that, and is `extra` where the machine has it.
 
 ### Memory
 
@@ -79,7 +79,7 @@ Codex configures each MCP tool in `config.toml`. Sources: the [configuration ref
 
 ### Personal permissions
 
-A personal permission, as ../workstation.md > the section `setup/permissions.json` defines it, becomes `prefix_rule`s the way a table row of its kind does above, in `rules/set-up-machine.rules` after the table's rules, each marked `personal`. An `allow` row gets `decision="allow"`, as an `allow-and-report` row does: the command runs outside the sandbox without a prompt.
+A personal permission, as the section ../workstation.md > `setup/permissions.json` defines it, becomes `prefix_rule`s the way a table row of its kind does above, in `rules/set-up-machine.rules` after the table's rules, each marked `personal`. An `allow` row gets `decision="allow"`, as an `allow-and-report` row does: the command runs outside the sandbox without a prompt.
 
 - **Its tool exists** for a command row when one of its programs is on `PATH`; otherwise the row is `n/a` here. File rows, and MCP-tool rows without a tool listing, get no rule, as above: a `gap` for a `deny` or `allow-and-report` row, which the hook still enforces, and for an `allow` row, which Codex then leaves to its own approval settings.
 - **It can't loosen a table row:** the strictest matching decision wins, so a personal `allow` never overrides the table's `forbidden` or `prompt`.
@@ -146,7 +146,7 @@ Explain that persisted changes affect subsequent sessions. Keep running sessions
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `setup/installs.json`, as ../workstation.md > the section `setup/installs.json` defines it. Tool lists come from `setup/permissions.json` and the rule table. Read *Codex MCP* below when an entry has `mcp_policy`, a standalone server, or `require_oauth`.
+The plugins setup area, from `plugins` in `setup/installs.json`, as the section ../workstation.md > `setup/installs.json` defines it. Tool lists come from `setup/permissions.json` and the rule table. Read *Codex MCP* below when an entry has `mcp_policy`, a standalone server, or `require_oauth`.
 
 1. Add a missing marketplace with `codex plugin marketplace add <owner>/<repo>`.
 2. Install the bundle with `codex plugin add <plugin>@<marketplace>`.
@@ -166,7 +166,7 @@ The server id is the entry's `name`.
 - Write a standalone server's `server` object in `[mcp_servers.<name>]`, with the policy keys beside it.
 - Write `enabled_tools` and `disabled_tools` under those names. Write `approval_mode` as `default_tools_approval_mode`. Do not write `require_oauth`: it is only an audit flag.
 
-Take tool names from `setup/permissions.json` and the rule table, as ../workstation.md > the section `setup/installs.json` describes. Union those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
+Take tool names from `setup/permissions.json` and the rule table, as the section ../workstation.md > `setup/installs.json` describes. Union those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
 
 Keep undeclared keys and comments, because the file holds choices this skill does not own. Keep a stricter tool list already in the file: more disabled tools, or a shorter enabled list. Leave an unfamiliar TOML form unchanged and name the gap, instead of rewriting the file. Apply the skill's backup and approval steps to the diff.
 
@@ -182,7 +182,7 @@ Never call an excluded tool, including as a capability test. The exclusion comes
 
 ## Skills
 
-Codex reads user skills from `~/.agents/skills`, where `npx skills add … -a codex` installs them, and from `skills/` in the Codex config home. Install each skill as ../workstation.md > the section `setup/installs.json` > the item **A skill** says.
+Codex reads user skills from `~/.agents/skills`, where `npx skills add … -a codex` installs them, and from `skills/` in the Codex config home. Install each skill as the item ../workstation.md > `setup/installs.json` > **A skill** says.
 
 ## Config
 

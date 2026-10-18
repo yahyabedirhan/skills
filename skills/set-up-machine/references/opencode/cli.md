@@ -52,7 +52,7 @@ Tools are named `<server>_<tool>`, and that name is also the tool's `permission`
 
 ### Personal permissions
 
-A personal permission, as ../workstation.md > the section `setup/permissions.json` defines it, becomes `permission` patterns the way a table row of its kind does above, each marked `personal`. An `allow` row's patterns get `allow`, written with the other allow entries first, so the table's ask and deny entries after them win and a personal `allow` never loosens a table row.
+A personal permission, as the section ../workstation.md > `setup/permissions.json` defines it, becomes `permission` patterns the way a table row of its kind does above, each marked `personal`. An `allow` row's patterns get `allow`, written with the other allow entries first, so the table's ask and deny entries after them win and a personal `allow` never loosens a table row.
 
 - **Worked example,** an `allow` command row on `<program>` with subcommand `<word>`: `"bash": {"<program> <word> *": "allow", "/bin/<program> <word> *": "allow", "/usr/bin/<program> <word> *": "allow", …}`, before the deny patterns.
 - **Its tool exists** for a command row when one of its programs is on `PATH`, for a file row always, and for an MCP-tool row when its `server` regex matches a server in the `mcp` key; otherwise the row is `n/a` here. A matching MCP-tool row is still a `gap`, as above: an `allow` row then leaves the tools to opencode's own defaults.
@@ -67,11 +67,11 @@ set-up-machine declares no sandbox setting for opencode, so the verifier's `sand
 
 ## Plugins
 
-A `gap`: set-up-machine doesn't deliver `plugins` entries, which ../workstation.md > the section `setup/installs.json` defines, to opencode, so an entry that lists `opencode` makes the verifier's `plugins` cell a `gap`.
+A `gap`: set-up-machine doesn't deliver `plugins` entries, which the section ../workstation.md > `setup/installs.json` defines, to opencode, so an entry that lists `opencode` makes the verifier's `plugins` cell a `gap`.
 
 ## Skills
 
-opencode reads skills from `~/.config/opencode/skills`, `~/.claude/skills` and `~/.agents/skills` ([skills](https://opencode.ai/docs/skills/)). Skills installed into `~/.agents/skills` reach it with no extra install. Install each skill as ../workstation.md > the section `setup/installs.json` > the item **A skill** says.
+opencode reads skills from `~/.config/opencode/skills`, `~/.claude/skills` and `~/.agents/skills` ([skills](https://opencode.ai/docs/skills/)). Skills installed into `~/.agents/skills` reach it with no extra install. Install each skill as the item ../workstation.md > `setup/installs.json` > **A skill** says.
 
 ## Config
 

@@ -87,7 +87,7 @@ Pi has no sandbox and no approval setting, so the verifier's `sandbox` cell is `
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `setup/installs.json`, as ../workstation.md > the section `setup/installs.json` defines it. Docs: `packages.md` and `mcp.md`.
+The plugins setup area, from `plugins` in `setup/installs.json`, as the section ../workstation.md > `setup/installs.json` defines it. Docs: `packages.md` and `mcp.md`.
 
 - **A bundle** names an installable Pi package, not necessarily a repository root. The entry names only `pi`. Use `npm:<name>@latest`, a `git:<host>/<owner>/<repo>` source, or an `https://` Git URL. Review the latest source before installing or updating it. A package can expose extensions, skills, prompt templates and themes.
 - **Write a bundle** into the `packages` array of `<agent-dir>/settings.json`. Pi names an extension by its npm name, or by its git host and repository path, so two source strings can name one extension.
@@ -118,7 +118,7 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - `present, personal` when the values are equal; otherwise `updated, personal`, showing the current and the declared value.
 - Write only the declared keys, and keep every other key as it is. Pi writes runtime state into the same file, such as `lastChangelogVersion` and `deviceId`, and other tools add their own keys.
 - A `settings.json` that is a symlink is written at its target. A file that isn't valid JSON stops the change until the user fixes it.
-- Back up the file as SKILL.md > *Steps* > the item **Back up** says: `.pi/agent/settings.json` under the backup folder for the default folder. For an agent folder outside the home folder, name the destination in the diff, `pi/settings.json` under the backup folder.
+- Back up the file as the item SKILL.md > *Steps* > **Back up** says: `.pi/agent/settings.json` under the backup folder for the default folder. For an agent folder outside the home folder, name the destination in the diff, `pi/settings.json` under the backup folder.
 - A key the file no longer declares keeps its persisted value, for the user to remove.
 - A `packages` key in the Pi `config` is a `gap`, never compared or written: Pi extensions come only from the plugins list, as *Plugins* says, so one file says what Pi loads. Tell the user to move each entry into `plugins`.
 - **Activation:** a new session reads the change. A running session reads it after `/reload`.
@@ -132,7 +132,7 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - **Input:** `{"toolName", "input", "cwd", "sessionId", "hasUI"}`. `input` holds the tool's arguments: `command` for `bash` and `powershell`; `path` for the file tools; `pattern`, `path` and `glob` for `grep`; `pattern`, a glob, and `path` for `find`. The outer `codemode` call carries its script in `input.code`, which the hook doesn't read as a command.
 - **Answer:** always one JSON line. `{"block": "<refusal>"}` becomes `{ block: true, reason }`, and Pi gives the agent the reason as the tool's result. `{"ask": "<question>"}` names each ask row's part, reason and instruction. `{}` lets the call run.
 - **Asking:** with a UI, where `ctx.hasUI` is true in the TUI and in RPC mode, the extension shows a notice, then a `ctx.ui.select` dialog with the question and two answers, No first. Pi's `ctx.ui.confirm` is the same dialog with Yes first, so `select` puts the cursor on the safe answer: Enter refuses, and so does Escape. Yes runs the call. No blocks it, and the agent reads that the user declined. Print and JSON mode have no UI, so the hook refuses every ask row there, `approver: "user"` or not.
-- **Session host:** while a dialog waits, Pi reports `blocked` to the terminal itself through OSC 7501. A session host's own Pi integration can report a state of its own instead. Herdr's reports `working`, so the user gets no notice. It listens for a `herdr:blocked` event on Pi's event bus, so the extension emits that event around the dialog, and Herdr then shows the pane as `blocked`. Without that integration nothing listens, and the event does nothing.
+- **Session host:** while a dialog waits, Pi reports `blocked` to the terminal itself through OSC 7501. A session host's own Pi integration can report a state of its own instead. Herdr's integration reports `working`, so the user gets no notice. It listens for a `herdr:blocked` event on Pi's event bus, so the extension emits that event around the dialog, and Herdr then shows the pane as `blocked`. Without that integration nothing listens, and the event does nothing.
 - Other extensions in `<agent-dir>/extensions/`, such as a session host's integration, are the user's: leave them.
 
 ## Gaps

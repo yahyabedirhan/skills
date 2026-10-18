@@ -1,6 +1,6 @@
 ---
 name: set-up-machine
-description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules each one enforces, deny, ask and allow-and-report, the pre-tool hook, memory kept off, each harness's declared config such as its default model, the plugins each harness gets, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
+description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules each one enforces as deny, ask or allow-and-report, the pre-tool hook, memory kept off, each harness's declared config such as its default model, the plugins each harness gets, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
 ---
 
 # Set up machine
@@ -107,7 +107,7 @@ The run passes when no line or cell is `FAIL`; the verifier then exits 0. Report
 
 ## Rule table
 
-`rules.json` holds each global rule once, by meaning, not in any harness's form. Each field of a row, each `match` kind, and the spellings are in [references/rule-table.md](references/rule-table.md). Each harness reference turns a row into that harness's entries. The hook and `verify.py` read the same rows through `scripts/setupmachine/rules.py`, which refuses a malformed row. A workstation repo's `setup/permissions.json` holds personal permissions in the same format, which every harness, the hook and `verify.py` take beside the table's, as references/workstation.md > the section `setup/permissions.json` describes.
+`rules.json` holds each global rule once, by meaning, not in any harness's form. Each field of a row, each `match` kind, and the spellings are in [references/rule-table.md](references/rule-table.md). Each harness reference turns a row into that harness's entries. The hook and `verify.py` read the same rows through `scripts/setupmachine/rules.py`, which refuses a malformed row. A workstation repo's `setup/permissions.json` holds personal permissions in the same format, which every harness, the hook and `verify.py` take beside the table's, as the section references/workstation.md > `setup/permissions.json` describes.
 
 ## Pre-tool hook
 
@@ -124,7 +124,7 @@ A malformed personal file leaves the table's rows in force: the hook skips the p
 
 Each harness reference shows its wiring with `<script>` in place of the script's path. Replace it with the absolute path of `scripts/pre_tool_hook.py` in the installed skill, under `~/.agents/skills` or `~/.claude/skills`, never in a checkout or worktree, which can be deleted. If there is no installed copy, name the gap. `verify.py` fails wiring whose script is elsewhere.
 
-The wiring fails open, as `[ -f <script> ] && … || true` or the form a harness reference gives: if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call. Pi is the exception: it has no native entries underneath, so its extension fails closed and refuses each call the hook can't check, as references/pi/cli.md > *Hook wiring* describes.
+The wiring fails open, written as `[ -f <script> ] && … || true` or in the form a harness reference gives: if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call. Pi is the exception: it has no native entries underneath, so its extension fails closed and refuses each call the hook can't check, as references/pi/cli.md > *Hook wiring* describes.
 
 `<report-folder>` is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 

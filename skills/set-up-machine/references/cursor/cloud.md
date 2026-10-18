@@ -39,7 +39,7 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 The process scans these folders when it starts: `~/.cursor/skills`, `~/.agents/skills`, `<repo>/.cursor/skills`, `<repo>/.agents/skills`, plus built-in skills and plugins. A folder created after the process has started is not a slash command until the next start. Reading the skill file still works.
 
-Install each skill as ../workstation.md > the section `setup/installs.json` > the item **A skill** says, into `~/.agents/skills`. Also link each installed skill into `~/.cursor/skills`, so both startup folders hold it. Cursor does not copy `~/.agents/skills` onto a cloud VM by itself, as index.md > *Skills* describes.
+Install each skill as the item ../workstation.md > `setup/installs.json` > **A skill** says, into `~/.agents/skills`. Also link each installed skill into `~/.cursor/skills`, so both startup folders hold it. Cursor does not copy `~/.agents/skills` onto a cloud VM by itself, as index.md > *Skills* describes.
 
 - **Audit:** each listed skill has a `SKILL.md` in one of the four folders above.
 
@@ -57,7 +57,7 @@ The wiring is `/agent/.cursor/hooks.json`, which the Build writes, as *Guardrail
 - **MCP servers:** connected in the dashboard, per user.
 - **Slash commands:** whether a skill installed before the process started is offered as a slash command, such as one installed during the Build on a cold start.
 - **MCP hook:** `beforeMCPExecution` doesn't run.
-- **Cold start:** a cold start is a new VM, which this check can't start.
+- **Cold start:** a new VM, which this check can't start.
 - **Build snapshot:** whether a file under `/agent` written during the Build survives into the Build snapshot is unknown.
 
 ## Checking it
