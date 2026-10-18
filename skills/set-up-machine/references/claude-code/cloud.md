@@ -35,7 +35,7 @@ Hooks are read when the session starts, so the agent's own `~/.claude/settings.j
 
 On a machine the variable is unset, so the user-level hook stays the only one, as index.md > *Hook wiring* describes. On the VM, do not add the user-level hook too: two hooks would report each allow-and-report call twice. The command fails open until the install has put the script there.
 
-- **Ask rows:** a cloud session has the same permission modes, chosen per session. A probe on 2026-09-29 saw a permission prompt stall the session even in auto mode; the hook still refuses `approver: "user"` rows in `auto`, `dontAsk` and `bypassPermissions`.
+- **Ask rows:** a cloud session has the same permission modes, chosen per session. A permission prompt can stall a cloud session even in auto mode; the hook still refuses `approver: "user"` rows in `auto`, `dontAsk` and `bypassPermissions`.
 - **Personal permissions:** a `gap`. The repo's settings hold no personal lists, so the hook alone refuses them.
 - **Audit:** `ok` when a match-all group runs an existing installed `pre_tool_hook.py` with `--harness claude-code`, with `$HOME` and `~/` expanded, and `disableAllHooks` isn't `true`.
 
