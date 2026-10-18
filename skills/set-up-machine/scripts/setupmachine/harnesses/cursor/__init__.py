@@ -1,4 +1,4 @@
-"""Cursor's local environments, the desktop app and the `cursor-agent` CLI, share `~/.cursor/`: its hook payload, and the checks both environments run (references/cursor/index.md). Each environment is a module here: cli.py, desktop.py and cloud.py.
+"""Cursor's local environments, the desktop app and the `cursor-agent` CLI, share `~/.cursor/`: its hook payload, and the checks both environments run, as references/cursor/index.md describes. Each environment is a module here: cli.py, desktop.py and cloud.py.
 
 Cursor can't follow a link to the shared file, so `~/.cursor/rules/global-instructions.mdc` is a generated copy of it. Its CLI also reads Claude Code's permission lists and imports Claude Code's plugins, so some checks read Claude Code's files through the claude_code package.
 """

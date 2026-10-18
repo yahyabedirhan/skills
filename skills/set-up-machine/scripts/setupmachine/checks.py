@@ -5,7 +5,7 @@ A harness module checks one setup area at a time and returns a `Cell`: one of th
 - `FAIL`: the machine lacks what setup/ asks for;
 - `gap`: the harness can't do it, or the check can't see it;
 - `ok`: nothing is missing;
-- `n/a`: the area does not apply to this harness (`na`).
+- `n/a`: the area does not apply to this harness; `na` makes it.
 
 The helpers below read a file the same way for every harness: JSON, TOML, a link to the shared file, the hook script a wired command runs, the keys a declared config sets, the skills a harness can see, and the personal permission entries a harness's native lists hold.
 """
@@ -31,7 +31,7 @@ REFERENCES = Path(__file__).resolve().parents[2] / "references"
 # The line of a generated hook file that names the hook command; the template holds a placeholder there.
 COMMAND_LINE = re.compile(r"^const COMMAND = (.*);$", re.M)
 LOCK = Path(".agents/.skill-lock.json")
-# Where an installed skill lives; the hook is wired to its copy there (SKILL.md, *Wiring*).
+# Where an installed skill lives; the hook is wired to its copy there, as SKILL.md > *Wiring* describes.
 INSTALLED_SKILLS = (".agents/skills", ".claude/skills")
 # Which native list a personal permission's entries go to, by the row's level.
 LISTS = {"deny": "deny", "ask": "ask", "allow-and-report": "allow", "allow": "allow"}
@@ -246,7 +246,7 @@ def skill_problems(ctx: Context, folders: list) -> list:
 def personal_problems(ctx: Context, lists: dict, where: Path) -> list:
     """A problem per personal permission with no entry in the native list its level goes to.
 
-    `lists` maps a list name (deny, ask, allow) to its entries, each a (kind, text) pair: ("command", "rm -rf"), ("path", "~/.ssh/**") or ("mcp", "mcp__server__tool"). A list the harness lacks is left out of `lists`, and its rows are skipped. A row with no native entry by its harness reference (an MCP row before a tool listing names its tools, a command whose program isn't on PATH, or a kind of command row no prefix can express) is skipped too.
+    `lists` maps a list name, deny, ask or allow, to its entries, each a (kind, text) pair: ("command", "rm -rf"), ("path", "~/.ssh/**") or ("mcp", "mcp__server__tool"). A list the harness lacks is left out of `lists`, and its rows are skipped. A row with no native entry by its harness reference is skipped too: an MCP row before a tool listing names its tools, a command whose program isn't on PATH, or a kind of command row no prefix can express.
     """
     problems = []
     for row in ctx.setup.rows:

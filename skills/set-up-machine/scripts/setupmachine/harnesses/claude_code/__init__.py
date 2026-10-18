@@ -1,4 +1,4 @@
-"""Claude Code's local environments, the CLI and the desktop app, share `~/.claude/`: its hook payload, and the checks both environments run (references/claude-code/index.md). Each environment is a module here: cli.py, desktop.py and cloud.py.
+"""Claude Code's local environments, the CLI and the desktop app, share `~/.claude/`: its hook payload, and the checks both environments run, as references/claude-code/index.md describes. Each environment is a module here: cli.py, desktop.py and cloud.py.
 
 Every local setting lives in `~/.claude/settings.json`, including the declared config's keys. The instructions are `~/.claude/CLAUDE.md`, a link to the shared file, and `~/.claude/rules/harness-instructions.md`, a generated copy of what only Claude Code needs.
 
@@ -85,7 +85,7 @@ def check_guardrails(ctx) -> Cell:
 
 
 def check_plugins(ctx) -> Cell:
-    """Each bundle is installed and enabled; a standalone MCP server is a gap (its file can hold tokens)."""
+    """Each bundle is installed and enabled; a standalone MCP server is a gap, because its file can hold tokens."""
     entries = ctx.setup.plugins(ID)
     if not entries:
         return na("installs.json lists no plugin for Claude Code")
@@ -130,7 +130,7 @@ def native_lists(settings: dict) -> dict:
 
 
 def _entry(entry):
-    """`Bash(rm -rf *)` -> ("command", "rm -rf"); `Read(./.env)` -> ("path", "./.env"); `mcp__…` as is. A `Write(...)` entry counts for nothing: Claude Code never checks it (references/claude-code/index.md)."""
+    """`Bash(rm -rf *)` -> ("command", "rm -rf"); `Read(./.env)` -> ("path", "./.env"); `mcp__…` as is. A `Write(...)` entry counts for nothing: Claude Code never checks it, as references/claude-code/index.md > *File rows* describes."""
     if not isinstance(entry, str):
         return None
     if entry.startswith("mcp__"):
