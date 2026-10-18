@@ -1,6 +1,6 @@
 # Codex
 
-How to set up and audit Codex from the rule table. Docs: [rules](https://learn.chatgpt.com/docs/agent-configuration/rules), [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [hooks](https://learn.chatgpt.com/docs/hooks), [memories](https://learn.chatgpt.com/docs/customization/memories), and the `openai/codex` source where the docs are silent. Background: the repo's `docs/research/harness-capabilities.md`, section 2.
+How to set up and audit Codex from the rule table. Docs: [rules](https://learn.chatgpt.com/docs/agent-configuration/rules), [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [hooks](https://learn.chatgpt.com/docs/hooks), [memories](https://learn.chatgpt.com/docs/customization/memories), and the `openai/codex` source where the docs are silent. Background: this repo's docs/research/harness-capabilities.md > *2. OpenAI Codex (CLI)*.
 
 Read [cli.md](cli.md) for terminal sessions or [desktop.md](desktop.md) for desktop sessions. Both use this procedure.
 
@@ -13,7 +13,7 @@ Found when the resolved Codex config home exists or `codex` is on `PATH`; a fres
 ### Global instructions
 
 - Codex reads `AGENTS.md` in every session and follows a symlink; it has no imports. It becomes a **symlink to the shared file**, `~/.config/agents/AGENTS.md`.
-- Link it only once nothing in the old file would be lost: each line other than a heading is already in the shared file, or sits in a known block below. Every other line is `extra`, with a `gap` saying Codex still reads its own file; move those lines first (../global-instructions.md, *Moving a harness's file*), then run again. The old file is backed up and `removed`.
+- Link it only once nothing in the old file would be lost: each line other than a heading is already in the shared file, or sits in a known block below. Every other line is `extra`, with a `gap` saying Codex still reads its own file; move those lines first, as ../global-instructions.md > *Moving a harness's file* describes, then run again. The old file is backed up and `removed`.
 - A non-empty `AGENTS.override.md` is read instead of `AGENTS.md`: a `gap`, left alone.
 
 #### Blocks that become a skill
@@ -24,7 +24,7 @@ A block a tool wrote into the old file becomes the upstream skill it came from, 
 |---|---|---|
 | `<!-- context7 -->` … `<!-- context7 -->` | `find-docs` | `npx --yes skills add upstash/context7 -s find-docs -g -a codex [-a claude-code] -y` |
 
-Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. Compare its installed folder hash with the source's latest default branch before marking it `present` (../workstation.md, *A skill*). File existence alone proves presence, not freshness. The block's advice to run `ctx7` outside the sandbox needs no line: an `allow` rule for `npx ctx7@latest` does that, and is `extra` where the machine has it.
+Add `-a claude-code` unless `~/.claude/skills` is a link to `~/.agents/skills`. Compare its installed folder hash with the source's latest default branch before marking it `present`, as ../workstation.md > the section `setup/installs.json` > the item **A skill** describes. File existence alone proves presence, not freshness. The block's advice to run `ctx7` outside the sandbox needs no line: an `allow` rule for `npx ctx7@latest` does that, and is `extra` where the machine has it.
 
 ### Memory
 
@@ -79,7 +79,7 @@ Codex configures each MCP tool in `config.toml`. Sources: the [configuration ref
 
 ### Personal permissions
 
-A personal permission (../workstation.md) becomes `prefix_rule`s the way a table row of its kind does above, in `rules/set-up-machine.rules` after the table's rules, each marked `personal`. An `allow` row gets `decision="allow"`, as an `allow-and-report` row does: the command runs outside the sandbox without a prompt.
+A personal permission, as ../workstation.md > the section `setup/permissions.json` defines it, becomes `prefix_rule`s the way a table row of its kind does above, in `rules/set-up-machine.rules` after the table's rules, each marked `personal`. An `allow` row gets `decision="allow"`, as an `allow-and-report` row does: the command runs outside the sandbox without a prompt.
 
 - **Its tool exists** for a command row when one of its programs is on `PATH`; otherwise the row is `n/a` here. File rows, and MCP-tool rows without a tool listing, get no rule, as above: a `gap` for a `deny` or `allow-and-report` row, which the hook still enforces, and for an `allow` row, which Codex then leaves to its own approval settings.
 - **It can't loosen a table row:** the strictest matching decision wins, so a personal `allow` never overrides the table's `forbidden` or `prompt`.
@@ -127,7 +127,7 @@ Explain that persisted changes affect subsequent sessions. Keep running sessions
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `setup/installs.json` (../workstation.md). Tool lists come from `setup/permissions.json` and the rule table. Read *Codex MCP* below when an entry has `mcp_policy`, a standalone server, or `require_oauth`.
+The plugins setup area, from `plugins` in `setup/installs.json`, as ../workstation.md > the section `setup/installs.json` defines it. Tool lists come from `setup/permissions.json` and the rule table. Read *Codex MCP* below when an entry has `mcp_policy`, a standalone server, or `require_oauth`.
 
 1. Add a missing marketplace with `codex plugin marketplace add <owner>/<repo>`.
 2. Install the bundle with `codex plugin add <plugin>@<marketplace>`.
@@ -147,7 +147,7 @@ The server id is the entry's `name`.
 - Write a standalone server's `server` object in `[mcp_servers.<name>]`, with the policy keys beside it.
 - Write `enabled_tools` and `disabled_tools` under those names. Write `approval_mode` as `default_tools_approval_mode`. Do not write `require_oauth`: it is only an audit flag.
 
-Take tool names from `setup/permissions.json` and the rule table (../workstation.md). Union those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
+Take tool names from `setup/permissions.json` and the rule table, as ../workstation.md > the section `setup/installs.json` describes. Union those names with any list still on `mcp_policy`. A deny row wins over an allow row for the same tool.
 
 Keep undeclared keys and comments, because the file holds choices this skill does not own. Keep a stricter tool list already in the file: more disabled tools, or a shorter enabled list. Leave an unfamiliar TOML form unchanged and name the gap, instead of rewriting the file. Apply the skill's backup and approval steps to the diff.
 
@@ -163,11 +163,11 @@ Never call an excluded tool, including as a capability test. The exclusion comes
 
 ## Skills
 
-Codex reads user skills from `~/.agents/skills`, where `npx skills add … -a codex` installs them, and from `skills/` in the Codex config home. Install each skill as ../workstation.md, *A skill*, says.
+Codex reads user skills from `~/.agents/skills`, where `npx skills add … -a codex` installs them, and from `skills/` in the Codex config home. Install each skill as ../workstation.md > the section `setup/installs.json` > the item **A skill** says.
 
 ## Config
 
-The declared Codex config's `model` and `model_reasoning_effort` (../workstation.md, *A Codex config*) are top-level keys of `config.toml`. Check, propose and write them as *Sandbox* says: *Installed support*, *Propose and apply*, and *Overrides and activation*, where a profile or a trusted project's `model` can win. The verifier's `config` cell checks them.
+The declared Codex config's `model` and `model_reasoning_effort`, which ../workstation.md > *A Codex config* describes, are top-level keys of `config.toml`. Check, propose and write them as *Sandbox* says: *Installed support*, *Propose and apply*, and *Overrides and activation*, where a profile or a trusted project's `model` can win. The verifier's `config` cell checks them.
 
 ## Hook wiring
 
@@ -178,7 +178,7 @@ The declared Codex config's `model` and `model_reasoning_effort` (../workstation
     "command": "[ -f <script> ] && python3 <script> --harness codex || true"}]}]}}
   ```
 
-  `<script>` and the fail-open wrapping are in SKILL.md, *Wiring*.
+  SKILL.md > *Pre-tool hook* > *Wiring* gives `<script>` and the fail-open wrapping.
 - **Trust:** Codex runs a user hook only once it's trusted, which `/hooks` records in `config.toml`. Write that entry yourself, as part of the approved diff: approving the whole diff stands in for Codex's own hook review.
 
   ```toml
@@ -194,14 +194,14 @@ The declared Codex config's `model` and `model_reasoning_effort` (../workstation
 
 ## Gaps
 
-Rules alone let through flags after the operands (`git push origin main --force`), options before a subcommand (`git -C dir push --force`), and anything that isn't a plain chain of words. The hook closes them for deny and allow-and-report rows, so list them only for `ask` rows, beside the rows above that get no rule. The hook's own misses are in SKILL.md, *What it can't see*.
+Rules alone let through flags after the operands (`git push origin main --force`), options before a subcommand (`git -C dir push --force`), and anything that isn't a plain chain of words. The hook closes them for deny and allow-and-report rows, so list them only for `ask` rows, beside the rows above that get no rule. SKILL.md > *Pre-tool hook* > *What it can't see* lists the hook's own misses.
 
 ## Checking it
 
 The verifier's Codex local rows, from `scripts/setupmachine/harnesses/codex/__init__.py`, reads the resolved Codex config home:
 
 - **instructions:** `AGENTS.md` is a link to the shared file, and `memories` is `false` in `[features]`. A non-empty `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Codex in `setup/harnesses.json`.
-- **guardrails:** a match-all `PreToolUse` group in `hooks.json` runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness codex`, `config.toml` holds its current `trusted_hash`, and `[features] hooks` isn't `false`. Each personal command row that gets a rule has `(set-up-machine personal rule <id>)` in `rules/set-up-machine.rules`.
+- **guardrails:** a match-all `PreToolUse` group in `hooks.json` runs the installed skill's existing `pre_tool_hook.py`, as SKILL.md > *Pre-tool hook* > *Wiring* describes, with `--harness codex`, `config.toml` holds its current `trusted_hash`, and `[features] hooks` isn't `false`. Each personal command row that gets a rule has `(set-up-machine personal rule <id>)` in `rules/set-up-machine.rules`.
 - **sandbox:** each of `sandbox_mode`, `approval_policy` and `approvals_reviewer` the declared Codex config sets has the same value in `config.toml`. `n/a` without a declared config, or when it sets none of them.
 - **plugins:** as *Plugins* says.
 - **skills:** each listed skill is in `~/.agents/skills` or `skills/` in the config home.

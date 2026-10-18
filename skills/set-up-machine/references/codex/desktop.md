@@ -12,7 +12,7 @@ Apply the shared procedure once for the selected Codex host. Keep the shared `AG
 
 ## Sandbox and config
 
-Read `codex.environments.desktop.config` from `setup/harnesses.json`, falling back to shared `codex.config`. Merge its declared keys into the same resolved `config.toml`. Use the same source file for CLI and desktop defaults when they share those choices. Report conflicting declarations before writing them. Preserve app preferences, project trust and current chats. A running chat can retain its selected model and permissions after persisted defaults change. Verify effective settings in a fresh desktop chat.
+Read `setup/harnesses.json` > `harnesses` > `codex` > `environments` > `desktop` > `config`, falling back to the shared `setup/harnesses.json` > `harnesses` > `codex` > `config`. Merge its declared keys into the same resolved `config.toml`. Use the same source file for CLI and desktop defaults when they share those choices. Report conflicting declarations before writing them. Preserve app preferences, project trust and current chats. A running chat can retain its selected model and permissions after persisted defaults change. Verify effective settings in a fresh desktop chat.
 
 ## Checking it
 

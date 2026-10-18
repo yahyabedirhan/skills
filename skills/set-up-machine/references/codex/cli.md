@@ -8,7 +8,7 @@ The resolved Codex config home exists, or `codex` is on `PATH`. Fixture homes us
 
 ## Sandbox and config
 
-Read `codex.environments.cli.config` from `setup/harnesses.json`, falling back to the shared `codex.config`. Apply only its declared keys to the resolved `config.toml`, as index.md specifies.
+Read `setup/harnesses.json` > `harnesses` > `codex` > `environments` > `cli` > `config`, falling back to the shared `setup/harnesses.json` > `harnesses` > `codex` > `config`. Apply only its declared keys to the resolved `config.toml`, as index.md specifies.
 
 ## Checking it
 

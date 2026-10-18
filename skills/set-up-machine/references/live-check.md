@@ -33,7 +33,7 @@ Check that each marker exists with `test -s <probe folder>/.env` only. Never rea
 Open a place for the check in `<session-host>`, apart from the user's work, with one session per harness, each in its own probe folder. Start each harness with no model flag, so it runs on the default model the machine setup wrote.
 
 - **When `<session-host>` is `herdr`:** create one workspace named `live-check` with the probe root as its folder, one tab per harness, and run `herdr agent start <harness>-check --kind <kind> --pane <the tab's pane>` from that harness's probe folder. The kinds are `claude`, `codex`, `cursor`, `opencode` and `pi`. Wait for each agent to be idle before prompting it.
-- **Grok Bot:** no session host starts it, so its live check is a `gap` (grok-bot/desktop.md, *Checking it*).
+- **Grok Bot:** no session host starts it, so its live check is a `gap`, as grok-bot/desktop.md > *Checking it* says.
 
 Start each harness so it doesn't stop to ask before a tool, when that is how the user runs it. Then only a guardrail can stop a command. Start Claude Code with `--allowedTools Bash Read`.
 
@@ -77,7 +77,7 @@ Trust the disk and the screen, not the agent's summary. Read each session's scre
 
 - **Step 3:** an agent that refuses to read `.env` by itself, from its instructions, passes the *instructions* cell. The verifier's rules line proves the hook's `.env` rule. Only a marker on the screen is a `FAIL`.
 - **Plugins:** grade only a harness the installs list gives a plugin; for the others the cell is `n/a`. A server that is present but needs a sign-in is a `gap`: name the user's sign-in step. For the Cursor CLI that is `cursor-agent mcp login <name>`; a sign-in in Cursor's desktop app does not reach the CLI. `cursor-agent mcp list` doesn't show the plugin servers Cursor imports from Claude Code, so ask the live session (step 7), not the CLI.
-- **Config:** all five harnesses show the model and effort in their status line. Read it there; step 8 is a cross-check. opencode's TUI can run a remembered variant instead of the declared one (opencode/cli.md, *Config*): on a mismatch, switch it once with ctrl+t.
+- **Config:** all five harnesses show the model and effort in their status line. Read it there; step 8 is a cross-check. opencode's TUI can run a remembered variant instead of the declared one, as opencode/cli.md > *Config* describes: on a mismatch, switch it once with ctrl+t.
 - A step the agent didn't try is a `gap`, not a pass: say which and why.
 
 ## 5. Report and clean up

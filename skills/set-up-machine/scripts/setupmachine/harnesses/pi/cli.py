@@ -1,4 +1,4 @@
-"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area (references/pi/cli.md).
+"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area , as references/pi/cli.md describes.
 
 Every path is under Pi's agent folder: `PI_CODING_AGENT_DIR`, else `~/.pi/agent` (`agent_dir`). Pi has no permission system, so the hook, run through an extension, is its only guardrail. Pi has no sandbox either, so that column is n/a; the declared Pi settings are the config column.
 """

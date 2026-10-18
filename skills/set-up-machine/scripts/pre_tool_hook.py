@@ -11,7 +11,7 @@ The steps:
 4. A denied call: print the harness's refusal, naming each refused part, its rule and instruction.
 5. Otherwise, write a report line for each allow-and-report row it hits, and print the harness's answer, which leaves the call to the harness's own permissions, or in Pi asks the user.
 
-It exits 1 when it can't read the call or the rule table. Each harness's wiring then lets the call through to its native rules, except Pi's, which has none and refuses it (references/pi/cli.md). Python 3.9+, standard library only.
+It exits 1 when it can't read the call or the rule table. Each harness's wiring then lets the call through to its native rules, except Pi's, which has none and refuses it, as references/pi/cli.md > *Hook wiring* describes. Python 3.9+, standard library only.
 """
 import argparse
 import json

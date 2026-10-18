@@ -1,6 +1,6 @@
 # Cursor cloud
 
-How to audit a Cursor cloud agent, the VM Cursor starts from a Build. Docs: [setup](https://cursor.com/docs/cloud-agent/setup), [skills](https://cursor.com/docs/skills), [hooks](https://cursor.com/docs/hooks). The desktop app and the `cursor-agent` CLI are the other environments of this harness (index.md).
+How to audit a Cursor cloud agent, the VM Cursor starts from a Build. Docs: [setup](https://cursor.com/docs/cloud-agent/setup), [skills](https://cursor.com/docs/skills), [hooks](https://cursor.com/docs/hooks). The desktop app and the `cursor-agent` CLI are the other environments of this harness, as index.md describes.
 
 ## Found
 
@@ -8,9 +8,9 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 ## Instructions
 
-The Build only installs: the repo's environment file runs an install that puts the skills and tools on the VM. It writes no instructions and no harness files except the hook file (*Guardrails*), and it runs no audit. The agent applies the setup itself at session start, as on any machine: this skill writes the setup, and scripts only enforce and check.
+The Build only installs: the repo's environment file runs an install that puts the skills and tools on the VM. It writes no instructions and no harness files except the hook file, as *Guardrails* describes, and it runs no audit. The agent applies the setup itself at session start, as on any machine: this skill writes the setup, and scripts only enforce and check.
 
-The agent learns this at start from Cursor's documented channel for cloud-only instructions, a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). That section tells the agent, before other work, to follow this skill for harness `cursor`, environment `cloud`, as a first-time setup or a reconcile, to run `verify.py --harness cursor --env cloud`, and to stop and ask when a step needs more access. It points at the `instructions` file `setup/harnesses.json` names for the cloud environment (`harnesses.cursor.environments.cloud`), whose `## Instructions` lines the agent follows for the session. A `.cursor/CLOUD.md` file, which a Cursor staff answer on the forum mentions, was not seen loading, so this skill does not use it.
+The agent learns this at start from Cursor's documented channel for cloud-only instructions, a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). That section tells the agent, before other work, to follow this skill for harness `cursor`, environment `cloud`, as a first-time setup or a reconcile, to run `verify.py --harness cursor --env cloud`, and to stop and ask when a step needs more access. It points at the `instructions` file `setup/harnesses.json` names for the cloud environment, `setup/harnesses.json` > `harnesses` > `cursor` > `environments` > `cloud` > `instructions`, whose `## Instructions` lines the agent follows for the session. A `.cursor/CLOUD.md` file, which a Cursor staff answer on the forum mentions, was not seen loading, so this skill does not use it.
 
 `~/.config/agents/AGENTS.md` is the shared file, written by the agent as on any machine, and the `setup` line checks it. Do not append the cloud-only lines to the shared file.
 
@@ -40,7 +40,7 @@ The command is the same one Cursor's CLI uses, `[ -f <script> ] && python3 <scri
 
 The process scans these folders when it starts: `~/.cursor/skills`, `~/.agents/skills`, `<repo>/.cursor/skills`, `<repo>/.agents/skills`, plus built-in skills and plugins. A folder created after the process has started is not a slash command until the next start. Reading the skill file still works.
 
-Install each skill as ../workstation.md, *A skill*, says, into `~/.agents/skills`. Also link each installed skill into `~/.cursor/skills`, so both startup folders hold it. Cursor does not copy `~/.agents/skills` onto a cloud VM by itself (index.md, *Skills*).
+Install each skill as ../workstation.md > the section `setup/installs.json` > the item **A skill** says, into `~/.agents/skills`. Also link each installed skill into `~/.cursor/skills`, so both startup folders hold it. Cursor does not copy `~/.agents/skills` onto a cloud VM by itself, as index.md > *Skills* describes.
 
 - **Audit:** each listed skill has a `SKILL.md` in one of the four folders above.
 
@@ -50,7 +50,7 @@ When `setup/harnesses.json` names a Cursor cloud `config`, it is a JSON object. 
 
 ## Hook wiring
 
-The wiring is `/agent/.cursor/hooks.json`, which the Build writes (*Guardrails*). The agent does not write it: a file written after startup is not loaded. The hook fails open when the script is missing, except that Cursor treats an empty stdout as invalid JSON, which is why the command prints `{}`.
+The wiring is `/agent/.cursor/hooks.json`, which the Build writes, as *Guardrails* describes. The agent does not write it: a file written after startup is not loaded. The hook fails open when the script is missing, except that Cursor treats an empty stdout as invalid JSON, which is why the command prints `{}`.
 
 ## Gaps
 

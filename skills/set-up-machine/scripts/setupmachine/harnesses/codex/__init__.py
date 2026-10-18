@@ -1,4 +1,4 @@
-"""Codex: its hook payload, and the check of each setup area (references/codex/index.md).
+"""Codex: its hook payload, and the check of each setup area , as references/codex/index.md describes.
 
 Every path is under the Codex config home: `CODEX_HOME`, else `~/.codex`, which verify.py resolves once. Its `config.toml` holds memory, hook trust, the declared config and plugins. TOML checks need Python 3.11's tomllib; on an older Python they are a gap.
 """

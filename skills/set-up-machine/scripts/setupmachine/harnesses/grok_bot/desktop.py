@@ -1,4 +1,4 @@
-"""Grok Bot, the agent app with one persistent Linux box: its hook payload, and the check of each setup area (references/grok-bot/desktop.md).
+"""Grok Bot, the agent app with one persistent Linux box: its hook payload, and the check of each setup area, as references/grok-bot/desktop.md describes.
 
 The app owns most of what other harnesses keep in files: approvals, Auto-review, the model, the connectors and memory. So only skills are checked fully. Each skill is a folder in the shared skill library, `~/agent-data/workflows/<skill>/`, recorded in a lock with the git tree hash of its source folder, so a copy that drifted from its source fails.
 """
@@ -149,7 +149,7 @@ def check_config(ctx) -> Cell:
     return cell(problems)
 
 
-# The keys a declared Grok Bot config may set (references/grok-bot/desktop.md, *Config*).
+# The keys a declared Grok Bot config may set, as references/grok-bot/desktop.md > *Config* lists them.
 KEYS = ("secrets", "connectors", "routines")
 
 
