@@ -1,6 +1,6 @@
 # Decisions: set-up-project
 
-The decisions behind the `set-up-project` skill. This file is for maintaining it and is never installed. Read it before changing the skill. Entries follow the shape in [index.md](index.md). The spec is "Spec: every harness and project is set up and audited from the skills" (#49); the ticket is "set-up-project sets up and audits a project" (#60).
+The decisions behind the `set-up-project` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md). The spec is "Spec: every harness and project is set up and audited from the skills" (#49); the ticket is "set-up-project sets up and audits a project" (#60).
 
 ## 2026-09-29: a fork of setup-matt-pocock-skills
 

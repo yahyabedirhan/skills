@@ -1,6 +1,6 @@
 # Decisions: maintain-environment
 
-The decisions behind the `maintain-environment` skill, named `maintain-skills` until 2026-09-29. This file is for maintaining it and is never installed. Read it before changing the skill. Entries follow the shape in [index.md](index.md).
+The decisions behind the `maintain-environment` skill, named `maintain-skills` until 2026-09-29. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
 
 ## 2026-09-28: every new skill gets a prompt audit from a fresh sub-agent
 

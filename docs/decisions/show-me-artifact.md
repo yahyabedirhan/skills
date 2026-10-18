@@ -1,6 +1,6 @@
 # Decisions: show-me-artifact
 
-The decisions behind the `show-me-artifact` skill. This file is for maintaining it and is never installed. Read it before changing the skill. Entries follow the shape in [index.md](index.md).
+The decisions behind the `show-me-artifact` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
 
 ## 2026-10-01: a new skill on top of show-me, which stays unchanged
 
