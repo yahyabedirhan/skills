@@ -15,7 +15,7 @@ Sources are cited inline. `[mac]` and `[vps]` mark command output captured on th
 - **The API is a local Unix socket only.** Mac: `~/.config/herdr/herdr.sock`; VPS: `~/.config/herdr/herdr.sock` (`herdr status --json` on each). There is no TCP listener; `HERDR_SOCKET_PATH` overrides the socket path (`cli-reference.mdx`, Environment variables). So in 0.9.0 the only way for a Mac agent to drive the VPS server is `ssh vps ~/.local/bin/herdr …`.
 - **Selecting the VPS in the window changes nothing for agents.** CLI commands in a pane "still use that pane's inherited session and socket" (`connecting-machines.mdx`; herdr skill).
 - **IDs and names are per server.** Workspace, tab and pane IDs and agent names "are scoped to one server. Two machines may both contain `w1:p1` or an agent named `reviewer`" (`connecting-machines.mdx`). Every remote command must look its IDs up on the VPS first. `--current` and `$HERDR_PANE_ID` from a Mac pane mean nothing there.
-- **0.9.1 adds CLI forwarding.** Herdr 0.9.1 (released 2026-09-16) adds a global prefix `herdr --machine <label-or-id> …` that sends `workspace`, `worktree`, `tab`, `pane`, `notification`, `agent` (not `attach`), `api snapshot` and `status server` to a saved machine as JSON over non-interactive SSH, with no open window and no shell interpolation of payloads. It needs 0.9.1 on both ends and never falls back to Local (release notes `https://github.com/herdrdev/herdr/releases/tag/v0.9.1`; `v0.9.1/.../cli-reference.mdx`, "Saved SSH machines"). On 0.9.0 it fails: `herdr --machine x agent list` prints `unknown option: --machine` [mac].
+- **0.9.1 adds CLI forwarding.** Herdr 0.9.1, released 2026-09-16, adds a global prefix `herdr --machine <label-or-id> …` that sends `workspace`, `worktree`, `tab`, `pane`, `notification`, `agent` (not `attach`), `api snapshot` and `status server` to a saved machine as JSON over non-interactive SSH, with no open window and no shell interpolation of payloads. It needs 0.9.1 on both ends and never falls back to Local (release notes `https://github.com/herdrdev/herdr/releases/tag/v0.9.1`; `v0.9.1/.../cli-reference.mdx`, "Saved SSH machines"). On 0.9.0 it fails: `herdr --machine x agent list` prints `unknown option: --machine` [mac].
 
 ## Mac to VPS: command reference
 
@@ -52,7 +52,7 @@ Writes (syntax from `herdr <cmd> --help` [mac]; **not run**, per the research ru
 Notes for writes:
 
 - `<name>` must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents on that server (herdr skill).
-- A prompt or path passed through `ssh vps '…'` goes through the remote shell. Quote it for the remote side (for example `printf %q` locally), or pipe a script over stdin. The 0.9.1 `--machine` path avoids this.
+- A prompt or path passed through `ssh vps '…'` goes through the remote shell. Quote it for the remote side, for example with `printf %q` locally, or pipe a script over stdin. The 0.9.1 `--machine` path avoids this.
 - `claude` is found in a login shell on the VPS, and Herdr panes start interactive shells, but whether `agent start --kind claude` finds it is a **Gap**: not tested, see *Open questions*.
 
 ## VPS to Mac
@@ -67,7 +67,7 @@ Not possible today. What exists:
 What it would take (none set up):
 
 1. **Mac always checks.** Keep the Mac as the one that looks at the VPS, never the reverse. Needs nothing.
-2. **SSH into the Mac.** Turn on Remote Login on the Mac, give it an address the VPS can reach (Tailscale on both, or a reverse tunnel the Mac opens with `ssh -R 2222:localhost:22 vps`), authorize the VPS's key `~/.ssh/id_ed25519.pub` on the Mac, then `herdr machine add` on the VPS or plain `ssh mac ~/.local/bin/herdr …`.
+2. **SSH into the Mac.** Turn on Remote Login on the Mac, give it an address the VPS can reach through Tailscale on both or a reverse tunnel the Mac opens with `ssh -R 2222:localhost:22 vps`, authorize the VPS's key `~/.ssh/id_ed25519.pub` on the Mac, then `herdr machine add` on the VPS or plain `ssh mac ~/.local/bin/herdr …`.
 3. **Forward only the Herdr socket.** OpenSSH can forward a Unix socket (`ssh -R ~/.herdr-mac.sock:~/.config/herdr/herdr.sock vps`), and the VPS could point `HERDR_SOCKET_PATH` at it. This needs no Mac sshd, but it lives only as long as the Mac holds the SSH connection open, and it gives the VPS full control of the Mac's Herdr. Unverified: Herdr docs do not describe it.
 
 ## Finding the host

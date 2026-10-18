@@ -19,7 +19,7 @@ Start every issue title with one prefix, then `: ` and a capitalized title with 
 
 1. `QA`: manual work for the maintainer.
 2. `VPS`: work on a remote machine.
-3. A harness: `Claude` (claude.ai, cloud sessions and managed agents), `Codex`, `OpenCode`, `Cursor` or `Pi`. Claude Code is the default harness, so it gets no prefix.
+3. A harness: `Claude` for claude.ai, cloud sessions and managed agents, `Codex`, `OpenCode`, `Cursor` or `Pi`. Claude Code is the default harness, so it gets no prefix.
 4. A semantic prefix from the list below: one area of this project.
 5. `Bug`, `Feature`, `Chore` or `Spec`: the kind of work.
 6. `Research`: a question to answer before the work starts.

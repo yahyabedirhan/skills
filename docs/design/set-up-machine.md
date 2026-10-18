@@ -14,12 +14,12 @@ How `set-up-machine` is built. A newcomer needs three facts first:
 4. **Verify.** One run answers "did every harness get what `setup/` asks for?" It exits 1 when any cell is `FAIL`.
 5. **Readable.** A person who opens a script reads, at its top, what it is for and the steps it takes.
 6. **Error handling.** A missing or malformed workstation file is a `FAIL` line that names the file. The hook fails open when its script is missing, except in Pi, which has no native rules under it.
-7. **Out of scope:** writing harness files from a script, pinned versions, unit tests kept in the repo, and checking upstream release versions from the verifier (the agent does that in Inspect).
+7. **Out of scope:** writing harness files from a script, pinned versions, unit tests kept in the repo, and checking upstream release versions from the verifier, which the agent does in Inspect.
 
 ## Entities and relationships
 
 - **Rule table** (`rules.json`): every global rule once, by meaning, with samples. Personal rows from `setup/permissions.json` join it.
-- **Workstation setup** (`setup/` in the workstation repo, found through the pointer `~/.config/agents/source.md`): the source of every personal part.
+- **Workstation setup**: `setup/` in the workstation repo, found through the pointer `~/.config/agents/source.md`, and the source of every personal part.
 - **Harness**: one coding agent, with the environments it runs in; the skill's SKILL.md, *Harnesses*, lists them. Each environment knows its own paths, its hook payload, and how to check each setup area.
 - **Setup area**: instructions, guardrails, sandbox, plugins, skills. Five of the verifier's six columns.
 - **Declared config**: the keys a harness's `config` file in the workstation repo sets, such as its default model, merged into the harness's own config file. The verifier's last column, `config`.

@@ -160,13 +160,13 @@ Sources: <https://code.claude.com/docs/en/permissions> ("Compound commands", pre
 **#10: thinking session runs its own skill chain.**
 - Finding: the long pasted prompt was never a slash command. Even if it had been, only the first line of a message can be one, and the later steps (`/to-spec`, `/to-tickets`) are user-only, so the model cannot load them and is told not to replicate them.
 - Recommended: option (a).
-  - Make `grill-with-docs`, `to-spec` and `to-tickets` model-invocable in forks in `yahyabedirhan/skills` (drop `disable-model-invocation`; set `allow_implicit_invocation: true` for Codex), keeping descriptions narrow so they don't fire in unrelated sessions.
+  - Make `grill-with-docs`, `to-spec` and `to-tickets` model-invocable in forks in `yahyabedirhan/skills` : drop `disable-model-invocation`, and set `allow_implicit_invocation: true` for Codex. Keep descriptions narrow so they don't fire in unrelated sessions.
   - Deliver the first prompt as the agent's launch argument (see #17) so it is neither collapsed nor marked as pasted.
   - Option (c), separate real slash commands, can't work for steps that come after user conversation.
 
 **#11: handover names match their side.**
 - Finding: `handoff-with-herdr` is run by the thinking session itself, so it must stay model-invocable.
-- `orchestrate-with-herdr` (the new orchestrator entry) can stay user-only if its prompt arrives as a real slash command. That needs a one-line prompt, or the launch argument.
+- `orchestrate-with-herdr`, the new orchestrator entry, can stay user-only if its prompt arrives as a real slash command. That needs a one-line prompt, or the launch argument.
 - Recommended: keep the orchestrator entry user-only and fix delivery as in #17. Model-invocable would also work but is not needed.
 
 **#12: new project starts with its own workspace.**
@@ -174,7 +174,7 @@ Sources: <https://code.claude.com/docs/en/permissions> ("Compound commands", pre
 - Fix: same as #10. Either fork `setup-matt-pocock-skills` as model-invocable, or launch the thinking agent with `/setup-matt-pocock-skills` alone as its launch argument, with the rest of the brief in a file in the new repo that the skill's first step reads.
 
 **#17: handover prompt starts the orchestrate skill.**
-- Cause, reproduced: the continuation prompt had four or more lines. `herdr agent prompt` sends it as a bracketed paste, Claude Code collapses it (over three lines) and marks it as pasted, so no slash command runs. The model can't see the user-only skill and, reading pasted instructions with no typed words, asks for a go-ahead. The template's own three-line prompt would have worked (a three-line paste ran in the test).
+- Cause, reproduced: the continuation prompt had four or more lines. `herdr agent prompt` sends it as a bracketed paste, Claude Code collapses it, since it is over three lines, and marks it as pasted, so no slash command runs. The model can't see the user-only skill and, reading pasted instructions with no typed words, asks for a go-ahead. The template's own three-line prompt would have worked: a three-line paste ran in the test.
 - Fix, in order of robustness:
   1. Keep the handover prompt to **one line**, `/orchestrate-with-handoff <path>`, and move worktree, branch, thinking-session and "change from the handoff" lines into the handoff document. The skill already reads the handoff first.
   2. Or start the orchestrator with the prompt as its launch argument: `herdr agent start <name> --kind claude --pane <p> -- --model claude-opus-5-5 --effort medium '<prompt>'`. A multi-line launch argument runs the command and is not marked as pasted (tested with `claude` directly; untested through Herdr).

@@ -2,7 +2,7 @@
 
 > Moved from a private notes repo on 2026-09-26. Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo. The VPS host, user and machine ID are redacted.
 
-Purpose: the facts behind issues [#5](https://github.com/yahyabedirhan/skills/issues/5), [#9](https://github.com/yahyabedirhan/skills/issues/9) and [#18](https://github.com/yahyabedirhan/skills/issues/18): how an orchestrator (Claude Code, Codex where relevant) notifies the user, asks for decisions, and receives values only the user has. Researched on 2026-09-25 against Claude Code 2.1.282, Herdr 0.9.0 and Ghostty 1.3.1 on the user's Mac. Claims marked **unverified** were read in a source but not tested here.
+Purpose: the facts behind issues [#5](https://github.com/yahyabedirhan/skills/issues/5), [#9](https://github.com/yahyabedirhan/skills/issues/9) and [#18](https://github.com/yahyabedirhan/skills/issues/18): how an orchestrator in Claude Code, and in Codex where relevant, notifies the user, asks for decisions, and receives values only the user has. Researched on 2026-09-25 against Claude Code 2.1.282, Herdr 0.9.0 and Ghostty 1.3.1 on the user's Mac. Claims marked **unverified** were read in a source but not tested here.
 
 ## Notifications
 
@@ -76,7 +76,7 @@ Combined with the shape the user validated (issue [#18](https://github.com/yahya
 3. **The outcome as a diff** of the ticket tree, commit tree or file tree under the recommended options (the **show-me** `diff` form).
 4. **A one-line close:** "Reply `go` to accept the picks, or name the options you'd rather have."
 
-Collection: put the full view in the chat (or a show-me page), then, for picks, optionally follow with one `AskUserQuestion` call whose options repeat the table's columns, the pick first and labelled "(Recommended)". The table carries the context, the picker makes the answer one keystroke. For a value (an ID), give a named slot instead of a picker (see below).
+Collection: put the full view in the chat or a show-me page, then, for picks, optionally follow with one `AskUserQuestion` call whose options repeat the table's columns, the pick first and labelled "(Recommended)". The table carries the context, the picker makes the answer one keystroke. For a value such as an ID, give a named slot instead of a picker, as *Secrets and user-only inputs* describes.
 
 ### Timing and batching
 

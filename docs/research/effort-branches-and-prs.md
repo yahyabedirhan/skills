@@ -31,7 +31,7 @@ git -C "$path" switch <branch>                             # DWIM: creates <bran
 
 ## 2. Taking over a branch safely
 
-**Same machine.** A branch can be checked out in only one worktree of a clone; `git worktree add` and `git switch` refuse otherwise unless forced. [doc: [git-worktree --force](https://git-scm.com/docs/git-worktree#Documentation/git-worktree.txt---force); tested] Reuse the existing worktree (`treehouse enter <name>` opens it even if in use, without changing pool state [doc: `treehouse enter --help`]), or free it first.
+**Same machine.** A branch can be checked out in only one worktree of a clone; `git worktree add` and `git switch` refuse otherwise unless forced. [doc: [git-worktree --force](https://git-scm.com/docs/git-worktree#Documentation/git-worktree.txt---force); tested] Reuse the existing worktree, or free it first. `treehouse enter <name>` opens it even if in use, without changing pool state. [doc: `treehouse enter --help`]
 
 **Another machine (Mac vs VPS).** Each machine is its own clone, so git offers no lock. Two writers on one branch cause non-fast-forward rejections on push, then merges or rebases of each other's work, or lost work if anyone forces. `git push` refuses non-fast-forward updates unless forced; `--force-with-lease` only protects against overwriting a ref that moved since your last fetch. [doc: [git-push --force-with-lease](https://git-scm.com/docs/git-push#Documentation/git-push.txt---force-with-leaseltrefnamegt)] The real guard is that only one orchestrator is live.
 
@@ -53,7 +53,7 @@ git -C "$path" switch <branch>                             # DWIM: creates <bran
    ```
    [doc: [git-rev-list --left-right --count](https://git-scm.com/docs/git-rev-list); tested]
 4. **PR is still open on that branch.** `gh pr view <branch> --json number,state,baseRefName,headRefName`. [doc: `gh pr view --help`; observed for shipyard PR #21: OPEN, base `main`]
-5. If step 2 found work, push it from the old side (or commit it there in its own commit, per issue [#6](https://github.com/yahyabedirhan/skills/issues/6)) before step 3.
+5. If step 2 found work, push it from the old side before step 3. Commit it there in its own commit first, as issue [#6](https://github.com/yahyabedirhan/skills/issues/6) asks.
 
 ## 3. Stacked PRs and what merging does to them
 

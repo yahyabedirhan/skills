@@ -11,7 +11,7 @@ How `set-up-project` is built. A newcomer needs two facts first:
 2. **One rules file.** `AGENTS.md` is the rules file. `CLAUDE.md` is `@AGENTS.md` or a link to it.
 3. **Skill configuration.** `docs/agents/` holds the issue tracker, the triage labels when `triage` is installed, and the domain docs.
 4. **Allow-only.** A project's harness files only add allows. The audit fails on `weakens`.
-5. **Out of scope:** the machine's own setup (set-up-machine), the project's code.
+5. **Out of scope:** the machine's own setup, which set-up-machine does, and the project's code.
 
 ## Entities and relationships
 
