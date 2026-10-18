@@ -16,9 +16,9 @@ from ...hook import ToolCall, refusal
 ID, LABEL = "grok-bot", "Grok Bot"
 ENV = "desktop"
 FOLDER = Path("agent-data/workflows")
-# Like ~/.agents/.skill-lock.json: {"skills": {name: {"source", "skillPath", "skillFolderHash"}}}.
+# Like `~/.agents/.skill-lock.json`: {"skills": {name: {"source", "skillPath", "skillFolderHash"}}}.
 LOCK = Path(".local/state/agents/grok-bot-skill-lock.json")
-# {"sha", "date", "sources": {"setup/instructions.md": [fact]}, "agents": {name: {"sha", "date", "facts", "profile"}}}:
+# {"sha", "date", "sources": {"`setup/instructions.md`": [fact]}, "agents": {name: {"sha", "date", "facts", "profile"}}}:
 # what user memory and each agent's memory hold, and from which commit. The box is shared, so one lock holds every agent.
 INSTRUCTIONS_LOCK = Path(".local/state/agents/grok-bot-instructions-lock.json")
 

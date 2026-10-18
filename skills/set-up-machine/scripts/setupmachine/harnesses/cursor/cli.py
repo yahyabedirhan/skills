@@ -33,5 +33,5 @@ def check_sandbox(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """Each key the declared Cursor config sets, such as `selectedModel`, has its value in cli-config.json."""
+    """Each key the declared Cursor config sets, such as `selectedModel`, has its value in `cli-config.json`."""
     return json_config_cell(ctx, ID, LABEL, ctx.home / FOLDER / "cli-config.json", env=ENV)

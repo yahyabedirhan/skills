@@ -18,9 +18,9 @@ ENV = "cloud"
 SOCKET = Path("/run/cursor/api.sock")
 ENV_FILE = Path(".cursor/environment.json")
 AGENTS = Path("AGENTS.md")
-# The section Cursor documents for cloud-only instructions in the repo AGENTS.md.
+# The section Cursor documents for cloud-only instructions in the repo `AGENTS.md`.
 CLOUD_SECTION = "## Cursor Cloud specific instructions"
-# The daemon runs from /agent and loads project hooks only from this file, at startup.
+# The daemon runs from `/agent` and loads project hooks only from this file, at startup.
 HOOKS = Path("/agent/.cursor/hooks.json")
 # A cloud agent runs these. beforeMCPExecution is in the file for the CLI and does not run here.
 RAN = ("beforeShellExecution", "beforeReadFile", "preToolUse")
@@ -132,7 +132,7 @@ def check_config(ctx) -> Cell:
 
 
 def _resolves(ctx, path: Path, commands: list):
-    """None when one command runs an existing pre_tool_hook.py for Cursor's payload."""
+    """None when one command runs an existing `pre_tool_hook.py` for Cursor's payload."""
     if not commands or not isinstance(commands[0], str):
         return ("FAIL", f"{ctx.show(path)} has no command")
     command = commands[0]
@@ -145,7 +145,7 @@ def _resolves(ctx, path: Path, commands: list):
 
 
 def _script(command: str):
-    """The pre_tool_hook.py path a command names, with $HOME and ~/ expanded."""
+    """The `pre_tool_hook.py` path a command names, with $HOME and ~/ expanded."""
     try:
         words = shlex.split(command)
     except ValueError:

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """set-up-machine's verifier: did every harness on this machine get what `<workstation-repo>`'s setup/ asks for?
 
-usage: verify.py [--home DIR] [--rules FILE] [--harness ID [--env ENV]]
-       verify.py --codex-trust-hash COMMAND
+usage: `verify.py` [--home DIR] [--rules FILE] [--harness ID [--env ENV]]
+       `verify.py` --codex-trust-hash COMMAND
 
 It reads the machine and writes nothing. The steps:
 
@@ -86,7 +86,7 @@ def select(harness, env) -> tuple:
 
 
 def setup_line(ctx) -> tuple:
-    """(status, text): the pointer and setup/ files, and the shared file against setup/instructions.md."""
+    """(status, text): the pointer and setup/ files, and the shared file against `setup/instructions.md`."""
     setup = ctx.setup
     if setup.problems:
         return "FAIL", "; ".join(setup.problems)

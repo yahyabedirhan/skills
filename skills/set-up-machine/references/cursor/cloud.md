@@ -16,7 +16,7 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 `~/.config/agents/AGENTS.md` is the shared file, written by the agent as on any machine, and the `setup` line checks it. Do not append the cloud-only lines to the shared file.
 
-- **Audit:** `ok` when `.cursor/environment.json` is a JSON object with an `install` string, the cloud instructions file has an `## Instructions` section, and the repo `AGENTS.md` has a "Cursor Cloud specific instructions" section that names that file's path. `FAIL` when the environment is declared and one of those is missing. `gap` when the repo has no environment file and `setup/harnesses.json` names no cloud instructions, or when there is no clone to read.
+- **Audit:** `ok` when `.cursor/environment.json` is a JSON object with an `install` string, the cloud instructions file has an `## Instructions` section, and the repo `AGENTS.md` has a 'Cursor Cloud specific instructions' section that names that file's path. `FAIL` when the environment is declared and one of those is missing. `gap` when the repo has no environment file and `setup/harnesses.json` names no cloud instructions, or when there is no clone to read.
 
 ## Guardrails
 

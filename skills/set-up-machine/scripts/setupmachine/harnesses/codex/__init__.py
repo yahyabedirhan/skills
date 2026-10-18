@@ -67,7 +67,7 @@ def trust_hash(command: str, matcher: str = "*", timeout: int = 10) -> str:
 
 
 def check_instructions(ctx, env=None) -> Cell:
-    """AGENTS.md links to the shared file, no override file wins over it, and memories are off."""
+    """`AGENTS.md` links to the shared file, no override file wins over it, and memories are off."""
     folder = ctx.codex_home
     problems = [link_problem(ctx, folder / "AGENTS.md")]
     override = folder / "AGENTS.override.md"
@@ -111,12 +111,12 @@ def check_guardrails(ctx) -> Cell:
 
 
 def check_sandbox(ctx, env=None) -> Cell:
-    """The sandbox and approval keys the declared Codex config sets have the same value in config.toml."""
+    """The sandbox and approval keys the declared Codex config sets have the same value in `config.toml`."""
     return _declared_cell(ctx, sandbox=True, env=env)
 
 
 def check_plugins(ctx) -> Cell:
-    """Each bundle is enabled in config.toml and has a cached manifest; each MCP server is configured."""
+    """Each bundle is enabled in `config.toml` and has a cached manifest; each MCP server is configured."""
     entries = ctx.setup.plugins(ID)
     if not entries:
         return na("installs.json lists no plugin for Codex")
@@ -143,7 +143,7 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx, env=None) -> Cell:
-    """Every other key the declared Codex config sets, such as `model`, has the same value in config.toml."""
+    """Every other key the declared Codex config sets, such as `model`, has the same value in `config.toml`."""
     return _declared_cell(ctx, sandbox=False, env=env)
 
 

@@ -1,6 +1,6 @@
 # Claude Code cloud
 
-How to audit a Claude Code cloud session: one Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo, started from claude.ai/code, the Claude app, the desktop app's **Cloud** choice or `claude --cloud`. Docs: [cloud environments](https://code.claude.com/docs/en/cloud-environments), [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), [hooks](https://code.claude.com/docs/en/hooks). The CLI and the desktop app are the other environments of this harness, as index.md describes. A cloud session is set up from its repo, as *Install*, *Instructions* and *Guardrails* describe, or by its cloud environment, as *Environment setup* describes.
+How to audit a Claude Code cloud session: one Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo, started from claude.ai/code, the Claude app, the desktop app's **Cloud** choice or `claude --cloud`. Docs: [cloud environments](https://code.claude.com/docs/en/cloud-environments), [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), [hooks](https://code.claude.com/docs/en/hooks). The CLI and the desktop app are the other environments of this harness, as index.md describes. A cloud session is set up from its repo, as *Install*, *Instructions* and *Guardrails* describe, or by its cloud environment, as 'Environment setup' describes.
 
 ## Found
 
@@ -32,11 +32,11 @@ The install puts the skills and tools on the VM. The agent's own setup comes aft
 
 The agent applies the setup itself at session start, as on any machine:
 
-- **Entry point:** the repo `CLAUDE.md`, or the `AGENTS.md` it links to or imports, has a section titled "Claude Code cloud specific instructions".
+- **Entry point:** the repo `CLAUDE.md`, or the `AGENTS.md` it links to or imports, has a section titled 'Claude Code cloud specific instructions'.
 - **Cloud section:** it tells the agent, before other work, to follow this skill for harness `claude-code`, environment `cloud`, to run `verify.py --harness claude-code --env cloud`, and to stop and ask when a step needs more access.
 - **Cloud instructions file:** the section points at the file named by the key `setup/harnesses.json` > `harnesses` > `claude-code` > `environments` > `cloud` > `instructions`. The agent follows that file's `## Instructions` lines for the session.
 
-- **Written files:** the shared file `~/.config/agents/AGENTS.md`, `~/.claude/CLAUDE.md` as a link to it, `~/.claude/rules/harness-instructions.md` from the harness's `instructions` file, and `"autoMemoryEnabled": false` in `~/.claude/settings.json`, as index.md > *Instructions* describes. The session started before these existed, so the agent reads the shared file itself for this session; a resumed process on the same VM loads the link. Do not append the cloud-only lines to the shared file.
+- **Written files:** the shared file `~/.config/agents/AGENTS.md`, `~/.claude/CLAUDE.md` as a link to it, `~/.claude/rules/harness-instructions.md` from the harness's `instructions` file, and `"autoMemoryEnabled": false` in `~/.claude/settings.json`, as `index.md` > 'Instructions' describes. The session started before these existed, so the agent reads the shared file itself for this session; a resumed process on the same VM loads the link. Do not append the cloud-only lines to the shared file.
 - **Audit:** `ok` when the repo's settings have a `SessionStart` hook, the cloud instructions file has an `## Instructions` section, the repo's cloud section names that file's path, `~/.claude/CLAUDE.md` links to the shared file, the harness instructions file matches its source and memory is off. `FAIL` when cloud instructions are declared and one is missing. `gap` with no clone to read, or when the repo declares no cloud instructions.
 
 ## Guardrails
@@ -48,7 +48,7 @@ In a repo setup, hooks are read when the session starts, so the agent's own `~/.
   "command": "[ \"$CLAUDE_CODE_REMOTE\" = true ] && [ -f \"$HOME/.claude/skills/set-up-machine/scripts/pre_tool_hook.py\" ] && python3 \"$HOME/.claude/skills/set-up-machine/scripts/pre_tool_hook.py\" --harness claude-code || true"}]}
 ```
 
-On a machine the variable is unset, so the user-level hook stays the only one, as index.md > *Hook wiring* describes. On the VM in a repo setup, the repo hook is the only one: a user-level hook beside it would report each allow-and-report call twice. An environment setup writes the user-level hook instead, as *Environment setup* describes. The command fails open until the install has put the script there.
+On a machine the variable is unset, so the user-level hook stays the only one, as `index.md` > 'Hook wiring' describes. On the VM in a repo setup, the repo hook is the only one: a user-level hook beside it would report each allow-and-report call twice. An environment setup writes the user-level hook instead, as 'Environment setup' describes. The command fails open until the install has put the script there.
 
 - **Ask rows:** a cloud session has the same permission modes, chosen per session. A permission prompt can stall a cloud session even in auto mode; the hook still refuses `approver: "user"` rows in `auto`, `dontAsk` and `bypassPermissions`.
 - **Personal permissions:** a `gap`. The repo's settings hold no personal lists, so the hook alone refuses them.
@@ -89,7 +89,7 @@ The model is picked when the session starts, and environment variables and netwo
 
 The verifier's `Claude Code / cloud` row (`verify.py --harness claude-code --env cloud`), from `scripts/setupmachine/harnesses/claude_code/cloud.py`:
 
-- **instructions:** the repo's `SessionStart` hook, the repo's cloud section naming the cloud instructions file, that file's `## Instructions` section, the `~/.claude/CLAUDE.md` link, `~/.claude/rules/harness-instructions.md` and memory off. With the environment's marker, it checks the link, memory off and both rule files, as *Environment setup* describes.
+- **instructions:** the repo's `SessionStart` hook, the repo's cloud section naming the cloud instructions file, that file's `## Instructions` section, the `~/.claude/CLAUDE.md` link, `~/.claude/rules/harness-instructions.md` and memory off. With the environment's marker, it checks the link, memory off and both rule files, as 'Environment setup' describes.
 - **guardrails:** the repo's match-all `PreToolUse` group runs the installed hook with `--harness claude-code`, or the one in `~/.claude/settings.json` with the environment's marker. Personal permissions are a `gap`.
 - **sandbox:** `gap`.
 - **plugins:** `gap`, or `n/a` when `installs.json` lists none for Claude Code.

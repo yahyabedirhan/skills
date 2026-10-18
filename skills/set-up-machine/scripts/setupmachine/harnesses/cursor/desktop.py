@@ -10,7 +10,7 @@ from ...checks import Cell, na, on_path
 
 ID, LABEL = "cursor", "Cursor"
 ENV = "desktop"
-# What the desktop app writes. cli-config.json is the CLI's.
+# What the desktop app writes. `cli-config.json` is the CLI's.
 MARKS = ("argv.json", "extensions")
 
 

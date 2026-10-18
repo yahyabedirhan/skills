@@ -23,5 +23,5 @@ def check_sandbox(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """Each key the declared config sets, such as `model`, has its value in ~/.claude/settings.json."""
+    """Each key the declared config sets, such as `model`, has its value in `~/.claude/settings.json`."""
     return _config(ctx, ENV)

@@ -150,7 +150,7 @@ The plugins setup area, from `plugins` in `setup/installs.json`, as the section 
 
 1. Add a missing marketplace with `codex plugin marketplace add <owner>/<repo>`.
 2. Install the bundle with `codex plugin add <plugin>@<marketplace>`.
-3. Write the policy as *Codex MCP* says, through the skill's backup and approval steps.
+3. Write the policy as 'Codex MCP' says, through the skill's backup and approval steps.
 4. For a standalone MCP server, merge `server` into `[mcp_servers.<name>]` the same way.
 5. When `require_oauth` is true, the user runs `codex mcp login <name>`. Leave the server disabled until that login is connected.
 
@@ -222,7 +222,7 @@ The verifier's Codex local rows, from `scripts/setupmachine/harnesses/codex/__in
 - **instructions:** `AGENTS.md` is a link to the shared file, and `config.toml` has `features.memories = false`. A non-empty `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Codex in `setup/harnesses.json`.
 - **guardrails:** a match-all `PreToolUse` group in `hooks.json` runs the installed skill's existing `pre_tool_hook.py`, as SKILL.md > *Pre-tool hook* > *Wiring* describes, with `--harness codex`, `config.toml` holds its current `trusted_hash`, and `[features] hooks` isn't `false`. Each personal command row that gets a rule has `(set-up-machine personal rule <id>)` in `rules/set-up-machine.rules`.
 - **sandbox:** each of `sandbox_mode`, `approval_policy` and `approvals_reviewer` the declared Codex config sets has the same value in `config.toml`. `n/a` without a declared config, or when it sets none of them.
-- **plugins:** as *Plugins* says.
+- **plugins:** as 'Plugins' says.
 - **skills:** each listed skill is in `~/.agents/skills` or `skills/` in the config home.
 - **config:** each other key the declared Codex config sets, such as `model`, has the same value in `config.toml`. `n/a` without a declared config, or when it sets only sandbox keys.
 

@@ -121,7 +121,7 @@ The file `setup/harnesses.json` points at with a harness's `instructions`. It ho
 
 ### `setup/permissions.json`
 
-The person's own permission rows, such as allowing a tool they added, or refusing a command only they want refused. It has the rule table's format, `{"version": 1, "rules": [<row>, …]}`, and each row the fields and `match` kinds of a rule-table row, as SKILL.md > *Rule table* describes, with one more level:
+The person's own permission rows, such as allowing a tool they added, or refusing a command only they want refused. It has the rule table's format, `{"version": 1, "rules": [<row>, …]}`, and each row the fields and `match` kinds of a rule-table row, as `SKILL.md` > 'Rule table' describes, with one more level:
 
 - **`allow`:** the harness runs a call the row covers without a prompt, and the hook says nothing. On Codex the command also runs outside the sandbox, unreported, since Codex's only decision that skips the prompt is `allow`, as codex/index.md describes. Only a personal permission takes it; the rule table refuses it, since a generic rule never loosens a harness. Its `instruction` says how to go ahead, and its `covers` samples are calls it must allow.
 - **`deny`, `ask` and `allow-and-report`** work as in the rule table: the hook refuses a deny row's calls and reports an allow-and-report row's, and the harnesses' native entries ask.
@@ -172,7 +172,7 @@ The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harness
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
 - Read `pi/cli.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
 
-`verify.py` checks each declared key in Pi's `config` cell, as *A declared config* says; a `packages` key there is a `gap`.
+`verify.py` checks each declared key in Pi's `config` cell, as 'A declared config' says; a `packages` key there is a `gap`.
 
 ### `setup/installs.json`
 
