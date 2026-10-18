@@ -80,7 +80,7 @@ A line belongs here only when it's about this person, not the work, and holds fo
 When a harness still keeps its own global file (a `~/.claude/CLAUDE.md` that isn't a link, an old `~/.codex/AGENTS.md`), move it line by line before the harness's file becomes a link:
 
 1. Choose where each line goes, using the list above: a role's row, a working agreement, glossary or personal workflow line, a skill, a project's `AGENTS.md`, or dropped because a skill or rule already carries it. Name the skill or project.
-2. Write each role's value and the other lines into their sections of the workstation repo's `setup/instructions.md`, except the two rows the pointer fills, or into the shared file when there is none; make each skill edit at its source, as `/maintain-environment` says.
+2. Write each role's value and the other lines into their sections of `<path-to-workstation-repo>/setup/instructions.md`, except the two rows the pointer fills, or into the shared file when there is none; make each skill edit at its source, as `/maintain-environment` says.
 3. Leave the harness's file holding only its link to the shared file.
 
 ## Memory

@@ -1,6 +1,6 @@
 """The workstation repo: the source of every personal part of a machine's setup.
 
-The pointer, `~/.config/agents/source.md`, names the person's workstation repo and its clone, or says there is none. This module reads the repo's `setup/` folder through it:
+The pointer, `~/.config/agents/source.md`, names `<workstation-repo>` and its clone, `<path-to-workstation-repo>`, or says there is none. This module reads the repo's `setup/` folder through it:
 
 - `setup/instructions.md`: the personal parts of the shared global instructions file;
 - `setup/permissions.json`: personal permissions, rows in the rule table's format;

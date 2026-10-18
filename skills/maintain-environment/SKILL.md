@@ -32,7 +32,7 @@ Two questions choose the source. Who needs it: only this user, anyone on one pro
 - **When the detail is only for some runs of a skill:** put it in a reference beside the `SKILL.md`. The body says when to read it, and a closing `## References` line says what it covers.
 - **When the user has no workstation repo:** write a personal instruction in the shared file itself. A personal permission has no home there, so offer to start a workstation repo, as [references/workstation.md](references/workstation.md) says.
 - **When this machine has no pointer** (`~/.config/agents/source.md`): run `/set-up-machine` first, which writes it.
-- **When the user asks to improve their workflow:** read the workstation repo's `AGENTS.md` and the documents it names, such as their principles. Name each principle the change conflicts with before you make it.
+- **When the user asks to improve their workflow:** read `<path-to-workstation-repo>/AGENTS.md` and the documents it names, such as their principles. Name each principle the change conflicts with before you make it.
 
 **The team test.** Picture a teammate with another harness, another session host, and a machine set up with `/set-up-machine` but none of the user's personal workflow. After the change, they must still work on any of the user's projects with only the project's instructions, the skills and the roles `/set-up-machine` writes. So nothing a teammate needs sits in the global instructions, and no skill depends on the user's default tool. A value that differs between setups becomes a `<kebab-case>` parameter in the skill, and a new role goes in `/set-up-machine`'s roles table first. Move each part that fails to the row that fits.
 

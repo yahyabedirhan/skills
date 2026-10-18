@@ -113,7 +113,7 @@ The plugins setup area, from `plugins` in `setup/installs.json` (../workstation.
 
 ## Config
 
-The optional Pi `config` that the workstation repo's `setup/harnesses.json` names declares Pi settings (../workstation.md, *A declared config* and *A Pi config*). Compare each key it declares with `<agent-dir>/settings.json`:
+The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` names declares Pi settings (../workstation.md, *A declared config* and *A Pi config*). Compare each key it declares with `<agent-dir>/settings.json`:
 
 - `present, personal` when the values are equal; otherwise `updated, personal`, showing the current and the declared value.
 - Write only the declared keys, and keep every other key as it is. Pi writes runtime state into the same file, such as `lastChangelogVersion` and `deviceId`, and other tools add their own keys.

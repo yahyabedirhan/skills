@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""set-up-machine's verifier: did every harness on this machine get what the workstation repo's setup/ asks for?
+"""set-up-machine's verifier: did every harness on this machine get what `<workstation-repo>`'s setup/ asks for?
 
 usage: verify.py [--home DIR] [--rules FILE] [--harness ID [--env ENV]]
        verify.py --codex-trust-hash COMMAND

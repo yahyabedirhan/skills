@@ -1,6 +1,6 @@
 # Workstation repo
 
-What this skill reads from the user's workstation repo, and the pointer that names the repository and its clone. The workstation repo holds the user's personal agent setup. `/maintain-environment` starts one: its `references/workstation.md` covers starting a workstation repo. After that, the repository's own `DESIGN.md` says where each thing lives and how to change it.
+What this skill reads from `<workstation-repo>`, and the pointer that names the repository and its clone. `<workstation-repo>` holds the user's personal agent setup. `/maintain-environment` starts one: its `references/workstation.md` covers starting a workstation repo. After that, the repository's own `DESIGN.md` says where each thing lives and how to change it.
 
 The workstation repo is the source and the machine's files are output: every run rewrites the generated parts of the shared file, and a personal permission's entries in each harness's settings, from the repository.
 

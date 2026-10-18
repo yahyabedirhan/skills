@@ -27,14 +27,14 @@ The lock is `~/.local/state/agents/grok-bot-instructions-lock.json`:
 
 The box is shared, so one lock holds user memory and an entry per agent. Each agent applies its own entry: it writes its agent-scope facts and profile, then adds or rewrites only its entry. Facts may be tailored to the agent's job, as long as the entry holds the exact text written. The applied state page has one agent section per entry.
 
-The **applied state page** is the workstation repo's `harnesses/grok-bot/applied.md`, when it exists: the lock's commit and date, each exact fact by scope, the profile and the Auto-review rules status. Its history is its git log. It names the commit its instructions came from, which is always earlier than the commit that holds the page. When the sources are unchanged, move the lock to a later commit, such as a merge, without rewriting the page; don't open a pull request only to match the hashes.
+The **applied state page** is `harnesses/grok-bot/applied.md` in `<path-to-workstation-repo>`, when it exists: the lock's commit and date, each exact fact by scope, the profile and the Auto-review rules status. Its history is its git log. It names the commit its instructions came from, which is always earlier than the commit that holds the page. When the sources are unchanged, move the lock to a later commit, such as a merge, without rewriting the page; don't open a pull request only to match the hashes.
 
 You may merge or reword lines into facts. The lock and the applied state page always hold the exact text written, since a later forget or rewrite finds the fact by it.
 
 ### First-time apply
 
 1. Write the shared file as every run does; the `setup` line checks it.
-2. Read `setup/instructions.md` and Grok Bot's instructions file at the workstation repo's latest default branch. Note its commit, `git rev-parse HEAD`.
+2. Read `setup/instructions.md` and Grok Bot's instructions file at the latest default branch of `<workstation-repo>`. Note its commit, `git rev-parse HEAD`.
 3. Turn each instruction line of `setup/instructions.md` into one short fact, and write each with the memory tool in user scope.
 4. Turn each line under `## Instructions` of Grok Bot's file into a fact, and write each in agent scope.
 5. Set the profile's title and description from that file's notes.
