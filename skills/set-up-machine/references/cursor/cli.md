@@ -8,7 +8,7 @@ Found when `~/.cursor/cli-config.json` exists or `cursor-agent` is on `PATH`.
 
 ## Guardrails
 
-### Permissions (CLI only)
+### Permissions
 
 - **Files:** `~/.cursor/cli-config.json`, key `permissions` with the lists `deny` and `allow` (add `"version": 1` to a new file). The CLI rewrites the rest of the file itself; keep every other key. It also unions in the `allow` and `deny` lists of `~/.claude/settings.json`, and **skips that file unless it has both lists** (../claude-code/index.md keeps an `allow` there).
 - **Matching:** a glob knows only `*`, which matches anything, `/` and spaces included; every other character is literal (no `?`, classes or `**` of its own). `Shell(<prefix>)` matches the prefix alone and followed by a space and anything; `Shell(<prefix>:)` the prefix alone; `Shell(<cmd>:<args>)` a one-word command with arguments matching the glob. Deny wins over allow.

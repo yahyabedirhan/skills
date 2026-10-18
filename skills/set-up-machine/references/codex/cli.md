@@ -6,7 +6,7 @@ Set up terminal and IDE sessions with [index.md](index.md). Preserve the existin
 
 The resolved Codex config home exists, or `codex` is on `PATH`. Fixture homes use their own config folder.
 
-## Config and sandbox
+## Sandbox and config
 
 Read `codex.environments.cli.config` from `setup/harnesses.json`, falling back to the shared `codex.config`. Apply only its declared keys to the resolved `config.toml`, as index.md specifies.
 
