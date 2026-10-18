@@ -2,11 +2,13 @@
 payload, and the checks both environments run (references/claude-code/index.md). Each
 environment is a module here: cli.py, desktop.py and cloud.py.
 
-Every local setting lives in `~/.claude/settings.json`, including the declared config's keys; the
-instructions are `~/.claude/CLAUDE.md`, a link to the shared file, and `~/.claude/rules/harness-instructions.md`,
-a generated copy of what only Claude Code needs. Cursor reads this harness's
-plugins and permission lists too, so cursor/__init__.py imports `plugins_installed` and
-`native_lists` from here, and Codex takes this harness's hook answer.
+Every local setting lives in `~/.claude/settings.json`, including the declared config's keys. The
+instructions are `~/.claude/CLAUDE.md`, a link to the shared file, and
+`~/.claude/rules/harness-instructions.md`, a generated copy of what only Claude Code needs.
+
+Other harnesses reuse parts of this one: Cursor reads its plugins and permission lists, so
+cursor/__init__.py imports `plugins_installed` and `native_lists` from here, and Codex takes its
+hook answer.
 """
 from __future__ import annotations
 
