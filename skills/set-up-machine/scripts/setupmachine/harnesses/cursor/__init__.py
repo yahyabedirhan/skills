@@ -1,10 +1,6 @@
-"""Cursor's local environments, the desktop app and the `cursor-agent` CLI, share `~/.cursor/`:
-its hook payload, and the checks both environments run (references/cursor/index.md). Each
-environment is a module here: cli.py, desktop.py and cloud.py.
+"""Cursor's local environments, the desktop app and the `cursor-agent` CLI, share `~/.cursor/`: its hook payload, and the checks both environments run (references/cursor/index.md). Each environment is a module here: cli.py, desktop.py and cloud.py.
 
-Cursor can't follow a link to the shared file, so `~/.cursor/rules/global-instructions.mdc` is a
-generated copy of it. Its CLI also reads Claude Code's permission lists and imports Claude Code's
-plugins, so some checks read Claude Code's files through the claude_code package.
+Cursor can't follow a link to the shared file, so `~/.cursor/rules/global-instructions.mdc` is a generated copy of it. Its CLI also reads Claude Code's permission lists and imports Claude Code's plugins, so some checks read Claude Code's files through the claude_code package.
 """
 from __future__ import annotations
 
@@ -32,8 +28,7 @@ FILE_TOOLS = {"Read": "read", "Grep": "read", "Write": "write", "Delete": "write
 
 
 def read(payload: dict) -> ToolCall:
-    """One of Cursor's four hook events as a tool call. Cursor has no ask list and can run a
-    tool without asking, so every call is unattended and every ask row is refused."""
+    """One of Cursor's four hook events as a tool call. Cursor has no ask list and can run a tool without asking, so every call is unattended and every ask row is refused."""
     def text(key, source=payload):
         return source.get(key) if isinstance(source.get(key), str) else ""
 
@@ -78,8 +73,7 @@ def check_instructions(ctx) -> Cell:
 
 
 def check_guardrails(ctx, cli_lists: bool = True) -> Cell:
-    """Each of the four events runs the hook; personal permissions are in the CLI's lists or Claude Code's.
-    The desktop app reads no allow or deny list, so it passes cli_lists=False and checks only the hook."""
+    """Each of the four events runs the hook; personal permissions are in the CLI's lists or Claude Code's. The desktop app reads no allow or deny list, so it passes cli_lists=False and checks only the hook."""
     path = ctx.home / FOLDER / "hooks.json"
     hooks = dig(read_json(path) or {}, "hooks")
     hooks = hooks if isinstance(hooks, dict) else {}

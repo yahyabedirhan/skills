@@ -1,14 +1,8 @@
-"""Claude Code's local environments, the CLI and the desktop app, share `~/.claude/`: its hook
-payload, and the checks both environments run (references/claude-code/index.md). Each
-environment is a module here: cli.py, desktop.py and cloud.py.
+"""Claude Code's local environments, the CLI and the desktop app, share `~/.claude/`: its hook payload, and the checks both environments run (references/claude-code/index.md). Each environment is a module here: cli.py, desktop.py and cloud.py.
 
-Every local setting lives in `~/.claude/settings.json`, including the declared config's keys. The
-instructions are `~/.claude/CLAUDE.md`, a link to the shared file, and
-`~/.claude/rules/harness-instructions.md`, a generated copy of what only Claude Code needs.
+Every local setting lives in `~/.claude/settings.json`, including the declared config's keys. The instructions are `~/.claude/CLAUDE.md`, a link to the shared file, and `~/.claude/rules/harness-instructions.md`, a generated copy of what only Claude Code needs.
 
-Other harnesses reuse parts of this one: Cursor reads its plugins and permission lists, so
-cursor/__init__.py imports `plugins_installed` and `native_lists` from here, and Codex takes its
-hook answer.
+Other harnesses reuse parts of this one: Cursor reads its plugins and permission lists, so cursor/__init__.py imports `plugins_installed` and `native_lists` from here, and Codex takes its hook answer.
 """
 from __future__ import annotations
 
@@ -37,8 +31,7 @@ UNATTENDED = ("auto", "dontAsk", "bypassPermissions")
 
 
 def read(payload: dict) -> ToolCall:
-    """Claude Code's PreToolUse input. Cursor runs Claude Code's hooks too: its payload carries
-    `cursor_version`, and then Cursor's own hook does the reporting, so no call is reported twice."""
+    """Claude Code's PreToolUse input. Cursor runs Claude Code's hooks too: its payload carries `cursor_version`, and then Cursor's own hook does the reporting, so no call is reported twice."""
     tool = payload.get("tool_name") if isinstance(payload.get("tool_name"), str) else ""
     args = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
     command = args.get("command", payload.get("command"))
@@ -137,8 +130,7 @@ def native_lists(settings: dict) -> dict:
 
 
 def _entry(entry):
-    """`Bash(rm -rf *)` -> ("command", "rm -rf"); `Read(./.env)` -> ("path", "./.env"); `mcp__…` as is.
-    A `Write(...)` entry counts for nothing: Claude Code never checks it (references/claude-code/index.md)."""
+    """`Bash(rm -rf *)` -> ("command", "rm -rf"); `Read(./.env)` -> ("path", "./.env"); `mcp__…` as is. A `Write(...)` entry counts for nothing: Claude Code never checks it (references/claude-code/index.md)."""
     if not isinstance(entry, str):
         return None
     if entry.startswith("mcp__"):
