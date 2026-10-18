@@ -120,7 +120,9 @@ The verifier's opencode row, from `scripts/setupmachine/harnesses/opencode/cli.p
 - **skills:** each listed skill is in `~/.config/opencode/skills`, `~/.claude/skills` or `~/.agents/skills`.
 - **config:** each key the declared opencode config sets has the same value in the config file 'Config' names, read without comments and trailing commas for an `opencode.jsonc`. `n/a` without a declared config.
 
-To see opencode itself enforce the rows, start it in a sandbox with a scrubbed environment. There, `OPENCODE_CONFIG_DIR=<a copy of the config folder>` layers it over the real global config, which it reads but doesn't write, and `XDG_DATA_HOME`, `XDG_STATE_HOME` and `XDG_CACHE_HOME` pointed into the sandbox keep sessions and logs out. `opencode run` takes the session's folder from `PWD`.
+To see opencode itself enforce the rows, start it in a sandbox with a scrubbed environment.
+There, `OPENCODE_CONFIG_DIR=<a copy of the config folder>` layers it over the real global config, which it reads but doesn't write, and `XDG_DATA_HOME`, `XDG_STATE_HOME` and `XDG_CACHE_HOME` pointed into the sandbox keep sessions and logs out.
+`opencode run` takes the session's folder from `PWD`.
 
 - `opencode debug agent build` prints the ruleset in the order opencode evaluates it.
 - `opencode run --format json "Run exactly: rm -rf x"` leaves `x`, and the tool result is the hook's refusal; `git push --force-with-lease …` is auto-rejected as an ask; `gh api rate_limit` runs and gets a report line.

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Read Wispr Flow's dictation history and read or change its dictionary.
 
-Wispr Flow, a macOS app, keeps its data in a local SQLite database. This script is the only thing that touches it: every read opens it read-only, and every write backs up the dictionary first and records a batch id that `dict undo` reverts.
+Wispr Flow, a macOS app, keeps its data in a local SQLite database. This script is
+the only thing that touches it: every read opens it read-only, and every write
+backs up the dictionary first and records a batch id that `dict undo` reverts.
 
 Run `wispr.py <command> --help` for each command's options.
 """
@@ -202,7 +204,8 @@ WORD = re.compile(r"[\w][\w'.&/-]*[\w]|\w")
 def word_changes(raw, formatted):
     """Words the formatter swapped for others: where it corrected, or introduced, a mishearing.
 
-    Deleted fillers, inserted grammar words, list markup, number digits, and hyphenation are left out, so what remains is mostly vocabulary."""
+    Deleted fillers, inserted grammar words, list markup, number digits, and hyphenation
+    are left out, so what remains is mostly vocabulary."""
     a = [w.lower() for w in WORD.findall(raw or "")]
     b = [w.lower() for w in WORD.findall(re.sub(r"<[^>]+>", " ", formatted or ""))]
     changes = []

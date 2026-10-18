@@ -1,6 +1,8 @@
 """Pi, the `pi` coding agent: its hook payload, and the check of each setup area, as `references/pi/cli.md` describes.
 
-Every path is under Pi's agent folder: `PI_CODING_AGENT_DIR`, else `~/.pi/agent` (`agent_dir`). Pi has no permission system, so the hook, run through an extension, is its only guardrail. Pi has no sandbox either, so that column is `n/a`; the declared Pi settings are the config column.
+Every path is under Pi's agent folder: `PI_CODING_AGENT_DIR`, else `~/.pi/agent` (`agent_dir`).
+Pi has no permission system, so the hook, run through an extension, is its only guardrail.
+Pi has no sandbox either, so that column is `n/a`; the declared Pi settings are the config column.
 """
 from __future__ import annotations
 
@@ -33,7 +35,8 @@ def present(home: Path) -> bool:
 
 
 def read(payload: dict) -> ToolCall:
-    """What the Pi extension sends from `tool_call`: `toolName`, `input`, `cwd`, `sessionId` and `hasUI`. Without a UI no one can answer an ask, so the call is unattended."""
+    """What the Pi extension sends from `tool_call`: `toolName`, `input`, `cwd`, `sessionId` and `hasUI`.
+    Without a UI no one can answer an ask, so the call is unattended."""
     tool = payload.get("toolName") if isinstance(payload.get("toolName"), str) else ""
     args = payload.get("input") if isinstance(payload.get("input"), dict) else {}
     command = args.get("command") if tool in ("bash", "powershell") else None
@@ -109,7 +112,8 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """Each key the declared Pi config sets has its value in `settings.json`. A `packages` key is a gap: Pi extensions come from `installs.json` plugins, so it is never compared."""
+    """Each key the declared Pi config sets has its value in `settings.json`. A `packages` key is a gap:
+    Pi extensions come from `installs.json` plugins, so it is never compared."""
     source = ctx.setup.file(ID, "config", ENV)
     if source is None:
         return na("setup/harnesses.json names no Pi config")
@@ -121,7 +125,8 @@ def check_config(ctx) -> Cell:
 
 
 def _unversioned(source) -> str:
-    """A package source without its `@<version>` or `@<ref>`, as Pi names one extension: `npm:pi-web-access@0.38.0` and `npm:pi-web-access@latest` are the same extension."""
+    """A package source without its `@<version>` or `@<ref>`, as Pi names one extension:
+    `npm:pi-web-access@0.38.0` and `npm:pi-web-access@latest` are the same extension."""
     if not isinstance(source, str):
         return ""
     head, at, tail = source.rpartition("@")

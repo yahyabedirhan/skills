@@ -1,6 +1,8 @@
-"""Cursor cloud agents: one VM per run, the hook file at `/agent`, and the repo `AGENTS.md` cloud section, as `references/cursor/cloud.md` describes.
+"""Cursor cloud agents: one VM per run, the hook file at `/agent`, and the repo `AGENTS.md` cloud section,
+as `references/cursor/cloud.md` describes.
 
-The hook payload is Cursor's, so read and write are Cursor's. The project hook calls the script with `--harness cursor`.
+The hook payload is Cursor's, so read and write are Cursor's. The project hook
+calls the script with `--harness cursor`.
 """
 from __future__ import annotations
 
@@ -31,7 +33,8 @@ _HARNESS = re.compile(r"--harness(?:\s+|=)cursor(?:\s|$)")
 
 
 def present(home: Path) -> bool:
-    """A Cursor cloud VM has the agent API socket. A `--home` fixture on that VM still sees it, the same way a CLI on PATH is seen from the real machine."""
+    """A Cursor cloud VM has the agent API socket. A `--home` fixture on that VM still sees it,
+    the same way a CLI on PATH is seen from the real machine."""
     return SOCKET.is_socket()
 
 
@@ -47,7 +50,8 @@ def write(denials: list, asks=()) -> str:
 
 
 def check_instructions(ctx) -> Cell:
-    """The clone has an environment file with an install command, and the repo `AGENTS.md` has Cursor's cloud section, which links the cloud instructions file the agent applies itself."""
+    """The clone has an environment file with an install command, and the repo `AGENTS.md` has
+    Cursor's cloud section, which links the cloud instructions file the agent applies itself."""
     if ctx.setup.clone is None:
         return Cell("gap", ["no workstation clone: can't see .cursor/environment.json or AGENTS.md"])
     env_path = ctx.setup.clone / ENV_FILE
@@ -76,7 +80,8 @@ def check_instructions(ctx) -> Cell:
 
 
 def check_guardrails(ctx) -> Cell:
-    """The events a cloud agent runs, in the one file its daemon loads, resolve to an existing `pre_tool_hook.py`. beforeMCPExecution does not run here."""
+    """The events a cloud agent runs, in the one file its daemon loads, resolve to an existing
+    `pre_tool_hook.py`. beforeMCPExecution does not run here."""
     path = HOOKS
     if not path.is_file():
         return Cell("FAIL", [f"no {path}: the daemon loads hooks only from it, at startup; the Build writes it"])

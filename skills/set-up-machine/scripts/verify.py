@@ -6,17 +6,25 @@ usage: `verify.py` [--home DIR] [--rules FILE] [--harness ID [--env ENV]]
 
 It reads the machine and writes nothing. The steps:
 
-1. Load the rule table and the workstation repo's `setup/` files, through the pointer, `~/.config/agents/source.md`.
+1. Load the rule table and the workstation repo's `setup/` files, through the pointer,
+   `~/.config/agents/source.md`.
 2. Print two global lines:
-   - setup: the pointer and `setup/` files are readable, and the shared global instructions file (`~/.config/agents/AGENTS.md`) carries what `setup/instructions.md` generates;
-   - rules: every sample of every rule-table row and personal permission gets its row's answer from the hook's decision.
-3. Print one table: a row per harness environment found, where its folder exists or its CLI is on PATH, and a --home copy counts only its folders; a column per setup area, instructions, guardrails, sandbox, plugins and skills; and a last one, config, for the keys `setup/harnesses.json` declares, such as a default model. Each cell is ok, FAIL, gap or `n/a`.
+   - setup: the pointer and `setup/` files are readable, and the shared global instructions
+     file (`~/.config/agents/AGENTS.md`) carries what `setup/instructions.md` generates;
+   - rules: every sample of every rule-table row and personal permission gets its row's
+     answer from the hook's decision.
+3. Print one table: a row per harness environment found, where its folder exists or its CLI is on PATH, and a --home
+   copy counts only its folders; a column per setup area, instructions, guardrails, sandbox,
+   plugins and skills; and a last one, config, for the keys `setup/harnesses.json` declares, such as
+   a default model. Each cell is ok, FAIL, gap or `n/a`.
 4. Print one detail line per FAIL and gap cell.
 5. Exit 1 when any line or cell is FAIL.
 
---harness keeps the rows of one harness, such as `cursor`: each of its environments found on the machine. --env keeps one of them, such as `cloud`. A row reads harness / environment: `Cursor / cloud`.
+--harness keeps the rows of one harness, such as `cursor`: each of its environments found on the
+machine. --env keeps one of them, such as `cloud`. A row reads harness / environment: `Cursor / cloud`.
 
---codex-trust-hash prints the trusted_hash Codex needs in `config.toml` for a hook running COMMAND, as `references/codex/index.md` > 'Hook wiring' describes. Python 3.9+, standard library only.
+--codex-trust-hash prints the trusted_hash Codex needs in `config.toml` for a hook running
+COMMAND, as `references/codex/index.md` > 'Hook wiring' describes. Python 3.9+, standard library only.
 """
 from __future__ import annotations
 

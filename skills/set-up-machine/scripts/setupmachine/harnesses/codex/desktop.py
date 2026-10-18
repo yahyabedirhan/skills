@@ -1,6 +1,7 @@
 """Codex / desktop: audit the shared local configuration for this client.
 
-The shared module owns instructions, hooks, rules, plugins and skills. This adapter selects the environment's declared config; it never infers a running chat's effective settings.
+The shared module owns instructions, hooks, rules, plugins and skills. This adapter selects
+the environment's declared config; it never infers a running chat's effective settings.
 """
 from pathlib import Path
 

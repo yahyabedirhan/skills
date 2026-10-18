@@ -1,4 +1,5 @@
-"""Cursor's desktop app, the IDE agent: it reads the same rules, hooks, MCP servers and skills as the CLI, but no permission lists and no run mode from a file, as `references/cursor/desktop.md` describes.
+"""Cursor's desktop app, the IDE agent: it reads the same rules, hooks, MCP servers and skills as
+the CLI, but no permission lists and no run mode from a file, as `references/cursor/desktop.md` describes.
 """
 from __future__ import annotations
 
