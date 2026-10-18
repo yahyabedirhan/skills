@@ -93,9 +93,7 @@ When `setup/harnesses.json` names an opencode `config`, as `../workstation.md` >
 - **Answer:** the refusal as plain text, which the plugin throws; the agent reads the error's message as the tool's result. Otherwise nothing, so the native permissions decide.
 - **Gaps:** a project's plugin runs after this one and can rewrite a call's arguments once the hook has passed them; `--pure` or `OPENCODE_PURE` starts opencode without plugins. The native rules still hold in both.
 
-## Known limits
-
-### Gaps
+## Limitations
 
 With native entries alone these get through; the hook closes the command and MCP gaps for deny and allow-and-report rows, so list those only for `ask` rows:
 
@@ -105,7 +103,7 @@ With native entries alone these get through; the hook closes the command and MCP
 
 `SKILL.md` > 'Pre-tool hook' > 'What it can't see' lists the hook's own misses.
 
-### Notes
+## Notes
 
 - These were probed on a live opencode: declarations such as `export -p` missing their patterns, `--pure` starting without plugins, and a flag after the operands getting past a native pattern.
 

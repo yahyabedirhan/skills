@@ -139,9 +139,7 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - **Session host:** while a dialog waits, Pi reports `blocked` to the terminal itself through OSC 7501. A session host's own Pi integration can report a state of its own instead. Herdr's integration reports `working`, so the user gets no notice. It listens for a `herdr:blocked` event on Pi's event bus, so the extension emits that event around the dialog, and Herdr then shows the pane as `blocked`. Without that integration nothing listens, and the event does nothing.
 - Other extensions in `<agent-dir>/extensions/`, such as a session host's integration, are the user's: leave them.
 
-## Known limits
-
-### Gaps
+## Limitations
 
 - **The only layer:** Pi has no native rules underneath, so the extension fails closed: while `python3` or the script is missing, or the hook fails, Pi refuses every tool call until `/set-up-machine` repairs it. `pi --no-extensions` starts a session without the hook in the meantime. The containment Pi offers beyond the hook is the operating system's: a container, a virtual machine or a separate user, as Pi's `docs/security.md` and `docs/containerization.md` say. Name this once in every audit.
 - **`--no-extensions`:** `pi --no-extensions` (`-ne`) skips the extension. Explicit `-e <path>` extensions still load.
@@ -159,7 +157,7 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - **`!` commands:** the user's own `!` commands run as `user_bash`, not as tool calls, so the hook doesn't see them, as in Claude Code.
 - `SKILL.md` > 'Pre-tool hook' > 'What it can't see' lists the hook's own misses.
 
-### Notes
+## Notes
 
 - This page was checked against Pi 1.1.0 and its `dist/` source, including the `pi update --extensions` command and the handler load order.
 - The `pi-subagents` behaviour was checked on version 0.77.0, and Herdr's `working` state on Herdr version 9.

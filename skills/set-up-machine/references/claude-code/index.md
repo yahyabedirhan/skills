@@ -132,9 +132,7 @@ Claude Code reads skills from `~/.claude/skills`. When that folder is a link to 
 - **Hooks off:** `"disableAllHooks": true` in this file turns every hook off, so the hook never runs: `verify.py` fails guardrails. Name it and leave the change to the user.
 - **Gap:** a project's settings can set `"disableAllHooks": true` too.
 
-## Known limits
-
-### Gaps
+## Limitations
 
 The native entries alone let these through. The hook closes them for deny and allow-and-report rows, so name them in the diff only under each `ask` row they apply to:
 

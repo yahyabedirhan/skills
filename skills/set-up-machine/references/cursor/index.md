@@ -94,9 +94,7 @@ Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills
 - **Answer:** always JSON. A deny is `{"permission": "deny", "user_message": …, "agent_message": …}`, both the refusal; the CLI shows the agent `user_message`. Otherwise `{}`, which leaves the call to Cursor's permissions. The hook isn't `failClosed`: a crash or timeout lets the call through, and in the IDE nothing native is left underneath: a `gap`.
 - **Claude Code's hook runs here too,** as `../claude-code/index.md` > 'Hook wiring' describes: it refuses what it recognises and leaves the report to this one.
 
-## Known limits
-
-### Gaps
+## Limitations
 
 The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses, as `SKILL.md` > 'What it can't see' describes.
 

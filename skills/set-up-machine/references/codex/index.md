@@ -215,13 +215,11 @@ The declared Codex config's `model` and `model_reasoning_effort`, which `../work
 - **Answer:** the same as Claude Code's: `permissionDecision: "deny"` with the reason. Codex passes it on as `Command blocked by PreToolUse hook: <reason>. Command: <command>`.
 - **Gap:** a trusted project's `.codex/config.toml` can set `[features] hooks = false`; the rules still hold.
 
-## Known limits
-
-### Gaps
+## Limitations
 
 Rules alone let through flags after the operands (`git push origin main --force`), options before a subcommand (`git -C dir push --force`), and anything that isn't a plain chain of words. The hook closes them for deny and allow-and-report rows, so list them only for `ask` rows, beside the rows above that get no rule. `SKILL.md` > 'Pre-tool hook' > 'What it can't see' lists the hook's own misses.
 
-### Notes
+## Notes
 
 - The keys and values under 'Installed support' were checked against Codex CLI 0.159.3 on 2026-10-01.
 - The `o_auth` login state and the portable bundle support under 'Codex MCP' were checked on Codex 0.162.1.
