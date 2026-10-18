@@ -36,7 +36,6 @@ A leased worktree starts on a detached HEAD unless `get` makes its branch. `get 
 ## Gotchas
 
 - A leased worktree is never handed out again or pruned until it is returned.
-- `status` lists neither the caller and its ancestors nor processes whose directories it cannot read, so verify those locations yourself.
 - `return` terminates processes with a current directory in the worktree, except the return process and its ancestors, so a return run from an external shell can terminate the calling agent. A declined or unanswered dirty cleanup exits 3 and preserves the lease; other failures can happen after detach or termination.
 - `destroy --yes` executes the removal, and `--include-leased` permits a named leased target. `destroy` has no lease-identity guard: preserve a leased target unless exclusive ownership can be established through execution, and reapply the release checks before removal.
 - `return` keeps ignored files, even with `--force`, and the next effort that leases the worktree finds them, such as an old `.scratch/` or build output. Copy out what's worth keeping before returning. Use ordinary guarded return for settlement; `--force` discards changes without confirmation and does not make an occupied worktree safe.
