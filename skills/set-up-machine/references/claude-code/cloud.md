@@ -4,7 +4,7 @@ How to audit a Claude Code cloud session: one Anthropic-managed Ubuntu VM per se
 
 ## Found
 
-Found when `CLAUDE_CODE_REMOTE` is `true`, which a cloud VM sets and a machine never does. A `--home` fixture on the VM is still found. On the VM the CLI row is not found, even though `claude` is on `PATH`.
+Found when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and a machine never does. A `--home` fixture on the VM is still found. On the VM the CLI row is not found, even though `claude` is on `PATH`.
 
 ## What reaches the VM
 
@@ -52,7 +52,7 @@ On a machine the variable is unset, so the user-level hook stays the only one, a
 
 - **Ask rows:** a cloud session has the same permission modes, chosen per session. A permission prompt can stall a cloud session even in auto mode; the hook still refuses `approver: "user"` rows in `auto`, `dontAsk` and `bypassPermissions`.
 - **Personal permissions:** a `gap`. The repo's settings hold no personal lists, so the hook alone refuses them.
-- **Audit:** `ok` when a match-all group runs an existing installed `pre_tool_hook.py` with `--harness claude-code`, and `disableAllHooks` isn't `true`. The audit reads `$HOME` and `~/` in the command as the home folder.
+- **Audit:** `ok` when a match-all group runs an existing installed `pre_tool_hook.py` with `--harness claude-code`, and the settings hold no `"disableAllHooks": true`. The audit reads `$HOME` and `~/` in the command as the home folder.
 
 ## Environment setup
 

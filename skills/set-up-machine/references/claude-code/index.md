@@ -144,8 +144,8 @@ The hook's own misses are in SKILL.md, *What it can't see*.
 
 The checks both local rows run, from `scripts/setupmachine/harnesses/claude_code/__init__.py`. Each environment page lists its own row:
 
-- **instructions:** `~/.claude/CLAUDE.md` is a link to the shared file, `autoMemoryEnabled` is `false`, and `~/.claude/rules/harness-instructions.md` matches the `instructions` file `setup/harnesses.json` names for Claude Code, as *Global instructions* describes. The generated file is a `FAIL` when it is missing, stale, or outlived its source.
-- **guardrails:** a match-all `PreToolUse` group runs the installed skill's existing `pre_tool_hook.py` with `--harness claude-code`, wired as SKILL.md > *Wiring* describes. `disableAllHooks` isn't `true`, and each personal permission has its entry, as *Personal permissions* describes.
+- **instructions:** `~/.claude/CLAUDE.md` is a link to the shared file, `~/.claude/settings.json` holds `"autoMemoryEnabled": false`, and `~/.claude/rules/harness-instructions.md` matches the `instructions` file `setup/harnesses.json` names for Claude Code, as *Global instructions* describes. The generated file is a `FAIL` when it is missing, stale, or outlived its source.
+- **guardrails:** a match-all `PreToolUse` group runs the installed skill's existing `pre_tool_hook.py` with `--harness claude-code`, wired as SKILL.md > *Wiring* describes. The settings hold no `"disableAllHooks": true`, and each personal permission has its entry, as *Personal permissions* describes.
 - **plugins:** each bundle is in `installed_plugins.json` and enabled in `enabledPlugins`. A standalone MCP server is a `gap`.
 - **skills:** each listed skill is in `~/.claude/skills`.
 
