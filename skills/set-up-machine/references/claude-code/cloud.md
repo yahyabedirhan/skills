@@ -41,7 +41,10 @@ On a machine the variable is unset, so the user-level hook (index.md, *Hook wiri
 
 ## Environment setup
 
-A cloud environment can set every session up instead, whatever repo it works on. Its setup script runs as root before Claude Code launches, and the environment caches the disk it leaves as a snapshot. `<workstation-repo>` may render that script: the setup sources inline, then a script that writes the same files the agent writes above, plus `~/.claude/rules/cloud-instructions.md` from the cloud `instructions` file and a match-all `PreToolUse` hook in `~/.claude/settings.json`. The script leaves `~/.local/share/agents/environment-setup.json` when it is done.
+A cloud session is set up in one of two ways, and `~/.local/share/agents/environment-setup.json` tells them apart:
+
+- **Repo setup**, without that file: the repo's `SessionStart` install, then the agent's own setup, as above.
+- **Environment setup**, with that file: the cloud environment's setup script, which `<workstation-repo>` renders. It runs as root before Claude Code launches, on every repo, and the environment caches the disk it leaves as a snapshot. It writes the same files the agent writes above, plus `~/.claude/rules/cloud-instructions.md` from the cloud `instructions` file and a match-all `PreToolUse` hook in `~/.claude/settings.json`, then writes that file.
 
 - **Gap:** the docs say a cloud session doesn't read `~/.claude/settings.json` and runs hooks only from the repo and server-managed settings ([settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions)). A script-written `~/.claude/CLAUDE.md` is documented to load. Whether the script-written hook fires is not tested.
 - **Setting up again:** when that marker exists, `<workstation-repo>`'s cloud instructions name the command that applies the setup again. Run it instead of writing the files by hand, and say that new instructions and hooks load in the next session.

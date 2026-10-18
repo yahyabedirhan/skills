@@ -2,7 +2,7 @@
 
 Nothing in `~/.claude/` on the user's machine reaches the VM. The repo's SessionStart hook only installs the skills and tools; the agent then applies the setup itself, as the repo's cloud section tells it, and the repo's PreToolUse hook runs the pre-tool hook with `--harness claude-code`.
 
-A cloud environment can set the session up instead, script-first: its setup script, rendered by `<workstation-repo>`, writes the user-level files before Claude Code launches and leaves `~/.local/share/agents/environment-setup.json`. Then the checks read those files, whatever repo the session works on (references/claude-code/cloud.md, *Environment setup*).
+When `~/.local/share/agents/environment-setup.json` exists, the cloud environment's setup script, which `<workstation-repo>` renders, set the session up instead: it wrote the user-level files before Claude Code launched, and the checks read those files (references/claude-code/cloud.md, *Environment setup*).
 """
 from __future__ import annotations
 
