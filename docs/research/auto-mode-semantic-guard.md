@@ -15,15 +15,15 @@ Evidence tags:
 
 ## Short answer
 
-> **Decision, 2026-09-30:** no guard. The Claude Code probes (results on #65) showed section 6.1's rule added nothing the pre-tool hook doesn't refuse, and missed a script that prints `.env`. See `docs/decisions/set-up-machine.md`.
+> **Decision, 2026-09-30:** no guard. The Claude Code probes (results on #65) showed section 6.1's rule added nothing the pre-tool hook doesn't refuse, and missed a script that prints `.env`. See docs/decisions/set-up-machine.md > *2026-09-30: the auto-mode guard is optional and stays off (#81)*.
 
 
 | | Has a judging auto mode | Does it see `echo $TOKEN`? | Customisable | Project can weaken it | Recommendation |
 |---|---|---|---|---|---|
 | Claude Code | yes, a classifier on every action that isn't read-only | only under server-side review; the client-side classifier skips read-only commands such as `echo` and `cat` | `autoMode` in user or managed settings | not the rules; a project allow rule can route a command around it, which `classifyAllShell` closes | **configure it**, as a second net behind the #64 rules and hook |
-| Codex | yes, auto-review (`approvals_reviewer = "auto_review"`) | no: it reviews only requests to cross the sandbox, and reading a variable doesn't cross it [probe] | `[auto_review].policy` / `extra_policy` | a trusted project's `config.toml` can change it | **don't rely on it**; filter the shell environment instead, which needs the shell snapshot off |
+| Codex | yes, auto-review (`approvals_reviewer = "auto_review"`) | no: it reviews only requests to cross the sandbox, and reading a variable doesn't cross it [probe] | `config.toml` > `auto_review` > `policy` / `extra_policy` | a trusted project's `config.toml` can change it | **don't rely on it**; filter the shell environment instead, which needs the shell snapshot off |
 | opencode | no: `--auto` approves everything not denied | — | — | — | nothing to configure; a `shell.env` plugin can blank secret-named variables |
-| Cursor CLI | yes, Auto-review (`--auto-review`) | no, by the docs: sandboxable shell commands run in the sandbox without review | `autoRun.block_instructions` in `permissions.json` | a project file merges in, and can add `allow_instructions` | **don't rely on it** for this rule; not probed |
+| Cursor CLI | yes, Auto-review (`--auto-review`) | no, by the docs: sandboxable shell commands run in the sandbox without review | `permissions.json` > `autoRun` > `block_instructions` | a project file merges in, and can add `allow_instructions` | **don't rely on it** for this rule; not probed |
 
 The semantic guards share one limit: none sees a command's output, and most don't see commands they consider routine. Reading an environment variable is routine to every one of them unless told otherwise. Only Claude Code's classifier is placed to judge `python3 -c 'import os; print(os.environ[...])'`, `node -e 'console.log(process.env.X)'` or a script that prints `.env`, the forms that neither patterns nor a hook can list.
 
@@ -112,7 +112,7 @@ Sources: [auto-review](https://learn.chatgpt.com/docs/sandboxing/auto-review), [
 
 ### 2.2 How it's customised, and what a project can override
 
-- `[auto_review].policy` **replaces** the reviewer policy ("copy the whole default policy wording first"); `[auto_review].extra_policy` adds to it. Managed `guardian_policy_config` and `guardian_extra_policy` take precedence. [doc config-reference; doc auto-review, "Configuration"]
+- `config.toml` > `auto_review` > `policy` **replaces** the reviewer policy ("copy the whole default policy wording first"); `auto_review` > `extra_policy` adds to it. Managed `guardian_policy_config` and `guardian_extra_policy` take precedence. [doc config-reference; doc auto-review, "Configuration"]
 - A trusted project's `.codex/config.toml` can set any key except provider, auth, notification, profile and telemetry keys [harness-capabilities 2.5], so it can change `approvals_reviewer` and `auto_review`. Only `requirements.toml` holds (`allowed_approvals_reviewers`, `guardian_policy_config`). [doc config-reference]
 
 ### 2.3 What the agent sees, cost and failure
@@ -140,7 +140,7 @@ Sources: [auto-review](https://learn.chatgpt.com/docs/sandboxing/auto-review), [
 Sources: [run modes](https://cursor.com/docs/agent/security/run-modes.md), [IDE permissions](https://cursor.com/docs/reference/permissions.md).
 
 - **Auto-review** (IDE; CLI `--auto-review`, or `approvalMode: "auto-review"` in the CLI config): "Allowlisted calls run immediately. Other shell commands run in the sandbox when possible. Calls that do not use the sandbox go to the Auto-review classifier." It covers shell, MCP and Fetch calls. [doc run-modes; bin `cursor-agent --help`, the CLI config schema] `echo $TOKEN` and `cat .env` fit in the sandbox, so by this order they run without review. The docs don't say whether the sandbox strips any variables; they only list the ones it adds. [doc run-modes, "Environment variables"]
-- **Customising:** `autoRun.allow_instructions` and `block_instructions`, plain-English lines in `~/.cursor/permissions.json` and `<project>/.cursor/permissions.json`. They're merged, so a project can add `allow_instructions`; a team configuration replaces both. [doc run-modes, "Configuring Auto-review"] The docs call them "steering, not enforcement". [doc IDE permissions] The CLI bundle parses the same `autoRun` (or `autoReview`) block from `permissions.json`. [bin]
+- **Customising:** `autoRun` > `allow_instructions` and `block_instructions`, plain-English lines in `~/.cursor/permissions.json` and `<project>/.cursor/permissions.json`. They're merged, so a project can add `allow_instructions`; a team configuration replaces both. [doc run-modes, "Configuring Auto-review"] The docs call them "steering, not enforcement". [doc IDE permissions] The CLI bundle parses the same `autoRun` (or `autoReview`) block from `permissions.json`. [bin]
 - **When it blocks,** Cursor "can try another approach", and shows an approval prompt if the agent still wants the action. "Auto-review is not a security boundary." [doc run-modes]
 - **Cost and model:** a small Cursor-managed model (Claude 4.5 Haiku or GPT-5.4 Mini); unavailable if a team blocks both. [doc run-modes]
 - **Not probed.** A `cursor-agent -p` run needs `--trust`, which records the folder as trusted in the real config, and the CLI also reads the deny lists in `~/.claude/settings.json` [harness-capabilities 4.3], which would mask the classifier. **To confirm** with a throwaway project containing `.cursor/permissions.json` with a `block_instructions` line for environment variables: `cursor-agent -p --auto-review --trust "run: printenv ACME_API_TOKEN"`, then remove the trust entry.
@@ -207,7 +207,7 @@ Why these choices:
 
 ### 6.2 Codex: no semantic guard; filter the environment instead
 
-Auto-review never sees a variable read (2.1, section 5), so writing `[auto_review].extra_policy` would guard nothing for this rule. The effective control is the shell environment, and in 0.157.1 it needs the snapshot off. Candidate `~/.codex/config.toml` lines:
+Auto-review never sees a variable read (2.1, section 5), so writing `config.toml` > `auto_review` > `extra_policy` would guard nothing for this rule. The effective control is the shell environment, and in 0.157.1 it needs the snapshot off. Candidate `~/.codex/config.toml` lines:
 
 ```toml
 [shell_environment_policy]

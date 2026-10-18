@@ -135,7 +135,7 @@ Main sources:
 ### 2.6 File, MCP and network rules
 
 - **No per-tool file rules.** Codex reads through the shell and writes through the shell and `apply_patch`. [doc rules]
-- **Sandbox:** `sandbox_mode = read-only | workspace-write | danger-full-access`, `sandbox_workspace_write.writable_roots` and `.network_access`. [doc config-reference]
+- **Sandbox:** `sandbox_mode = read-only | workspace-write | danger-full-access`, `sandbox_workspace_write` > `writable_roots` and `network_access`. [doc config-reference]
 - **Permission profiles (beta):** `[permissions.<name>.filesystem]` maps a path or glob to `read`, `write` or `deny`; a deny covers reads and writes (`"**/*.env" = "deny"`, `~/path`, `:workspace_roots`). `[permissions.<name>.network.domains]` needs the network proxy. They bind sandboxed commands; a command a rule `allow`s runs outside the sandbox. [doc permissions; doc rules]
 - **MCP:** `mcp_servers.<id>.enabled_tools` / `disabled_tools`, and `approval_mode` per server or per tool. Hooks see MCP tools as `mcp__<server>__<tool>`. [doc config-reference; doc hooks, "Matcher patterns"]
 
@@ -149,7 +149,7 @@ Main sources:
 
 ### 2.8 Memory
 
-- **Local memories exist and are off by default:** `[features] memories = true` turns them on; files live in `~/.codex/memories/`. Finer keys: `memories.generate_memories`, `memories.use_memories`, `memories.disable_on_external_context`. `/memories` controls one chat. [doc memories; doc config-reference] [check: `codex features list` shows `memories stable false` with an empty config]
+- **Local memories exist and are off by default:** `[features] memories = true` turns them on; files live in `~/.codex/memories/`. Finer keys: `memories` > `generate_memories`, `use_memories` and `disable_on_external_context`. `/memories` controls one chat. [doc memories; doc config-reference] [check: `codex features list` shows `memories stable false` with an empty config]
 - To keep it off: `[features] memories = false` in `~/.codex/config.toml`, and pin it in `requirements.toml` if a project mustn't turn it on (2.5).
 
 ### 2.9 What the agent sees when refused
@@ -322,7 +322,7 @@ Main sources:
 | `/bin/rm -rf` | no | yes | no | no |
 | `bash -c "rm -rf x"` | only by a `bash -c` rule | yes if plain; no with `$()`, redirects | only by a `bash -c*` rule | no (checked) |
 | Project loosens a global deny | no | no (rules); yes (sandbox, approvals) | yes | yes for `cli-config.json`; no for Claude-settings denies |
-| Project turns hooks off | yes (`disableAllHooks`) | yes (`features.hooks = false`, trusted) | yes in effect (a later plugin rewrites args) | no |
+| Project turns hooks off | yes (`disableAllHooks`) | yes (`features` > `hooks = false`, trusted) | yes in effect (a later plugin rewrites args) | no |
 | Pre-tool hook | `PreToolUse` | `PreToolUse` | plugin `tool.execute.before` (throw) | `preToolUse`, `beforeShellExecution`, … |
 | Memory | auto memory, on by default | local memories, off by default | none | none (removed in 2.1) |
 | Turn memory off | `autoMemoryEnabled: false` or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` | `[features] memories = false` | — | — |
@@ -406,7 +406,7 @@ A gap is a rule the harness's native permissions can't enforce as meant. The bas
 | Codex, opencode, Cursor memory | Codex: local memories, off by default, `[features] memories = false` (2.8). opencode: none (3.8). Cursor: removed in 2.1 (4.8). |
 | Codex pre-tool hook | Yes: `PreToolUse` in `hooks.json` or `[hooks]`, deny by JSON or exit 2, hooks trusted per hash (2.7). |
 | opencode pre-tool hook | Plugin `tool.execute.before`; it blocks by throwing and can rewrite arguments (3.7). |
-| Can a project turn off a global hook | Claude Code: yes, all hooks (`disableAllHooks`). Codex: yes, all hooks (`features.hooks = false`, trusted project). opencode: no config switch, but a project plugin can undo the global one's effect. Cursor: no. Each has a managed layer that holds (1.5, 2.5, 3.5, 4.5). |
+| Can a project turn off a global hook | Claude Code: yes, all hooks (`disableAllHooks`). Codex: yes, all hooks (`features` > `hooks = false`, trusted project). opencode: no config switch, but a project plugin can undo the global one's effect. Cursor: no. Each has a managed layer that holds (1.5, 2.5, 3.5, 4.5). |
 
 ## 8. Corrections to the first pass
 

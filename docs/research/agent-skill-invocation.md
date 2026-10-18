@@ -161,7 +161,7 @@ Sources: <https://code.claude.com/docs/en/permissions> ("Compound commands", pre
 - Finding: the long pasted prompt was never a slash command. Even if it had been, only the first line of a message can be one, and the later steps (`/to-spec`, `/to-tickets`) are user-only, so the model cannot load them and is told not to replicate them.
 - Recommended: option (a).
   - Make `grill-with-docs`, `to-spec` and `to-tickets` model-invocable in forks in `yahyabedirhan/skills` : drop `disable-model-invocation`, and set `allow_implicit_invocation: true` for Codex. Keep descriptions narrow so they don't fire in unrelated sessions.
-  - Deliver the first prompt as the agent's launch argument (see #17) so it is neither collapsed nor marked as pasted.
+  - Deliver the first prompt as the agent's launch argument, as the #17 fix below says, so it is neither collapsed nor marked as pasted.
   - Option (c), separate real slash commands, can't work for steps that come after user conversation.
 
 **#11: handover names match their side.**
