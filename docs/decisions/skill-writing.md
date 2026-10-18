@@ -1,6 +1,6 @@
 # Decisions: skill writing
 
-How the skills in this repo are written, and why. The rules below came from reviewing #66 one skill at a time on 2026-09-30, starting with `close-effort` and spreading to every skill the maintainer authored; the forks keep their upstream wording. The decisions that belong to one skill family stay in that family's record, such as `effort-workflow.md`; this file holds what applies to every skill. Read it before writing or changing a skill. Entries follow the shape in [index.md](index.md).
+How the skills in this repo are written, and why. The rules below came from a review of #66, one skill at a time, and apply to every skill the maintainer authored; the forks keep their upstream wording. The decisions that belong to one skill family stay in that family's record, such as `effort-workflow.md`; this file holds what applies to every skill. Read it before writing or changing a skill. Entries follow the shape in [index.md](index.md).
 
 ## 2026-09-30: SKILL.md says what to do, a reference says how
 

@@ -57,7 +57,7 @@ Notes for writes:
 
 ## VPS to Mac
 
-Not possible today. What exists:
+Not possible on 2026-09-25. What exists:
 
 - The Mac's SSH server is not listening: `nc -z 127.0.0.1 22` exits 1 [mac], so Remote Login is off.
 - No Tailscale on either machine (`which tailscale` [mac] and `command -v tailscale` [vps] both empty; no Tailscale app in `/Applications` [mac]). Other networking tools installed on the Mac [mac] are not set up as a path in either.
@@ -127,7 +127,7 @@ Stopping the old agent, closing its workspace, or removing its worktree are writ
 ## Notifications
 
 - **Herdr's command.** `herdr notification show <title> [--body TEXT] [--position …] [--sound none|done|request]` sends through the server's `config.toml` > `ui` > `toast` > `delivery` setting: `herdr` (in-app toast), `terminal` (outer terminal notification, "also works over SSH"), `system` (the OS notification service), or `off` (`cli-reference.mdx`, `configuration.mdx`). The response says `shown`, `disabled`, `rate_limited`, `no_foreground_client` or `busy`; terminal and system delivery are "best-effort through the current foreground attached Herdr client" (`socket-api.mdx`).
-- **Defaults make it silent today.** `config.toml` > `ui` > `toast` > `delivery` defaults to `off` (`config-reference.json`). The VPS has no `~/.config/herdr/config.toml` [vps], so it runs on that default, and by the docs a `notification show` run there returns `disabled`. The Mac's config sets `delivery = "off"` and `[ui.sound] enabled = false` [mac] as well.
+- **Defaults make it silent.** `config.toml` > `ui` > `toast` > `delivery` defaults to `off` (`config-reference.json`). The VPS has no `~/.config/herdr/config.toml` [vps], so it runs on that default, and by the docs a `notification show` run there returns `disabled`. The Mac's config sets `delivery = "off"` and `[ui.sound] enabled = false` [mac] as well.
 - **Agent state still crosses over.** The Mac window keeps receiving the VPS's agent states and notifications while another machine is selected (`connecting-machines.mdx`), so a VPS orchestrator going `done` or `blocked` shows in the Mac's sidebar and agent list with no setup.
 - **Issue [#9](https://github.com/yahyabedirhan/skills/issues/9)'s `osascript` route does not work from the VPS**: it is Linux, and `notify-send` is missing too [vps]. Unverified: whether a `terminal` or `system` notification raised on the VPS server is shown by the Mac client when it is connected as a saved machine rather than attached with `herdr --remote`. Test: set `delivery = "terminal"` in the VPS config, run `herdr server reload-config` there, run `herdr notification show test` on the VPS with the Mac window on Local, then on the VPS, and record the `reason` and what appears.
 - **A Mac-side alternative.** A Mac agent can watch the VPS with `ssh vps '~/.local/bin/herdr agent wait <pane> --until done --until blocked'` and raise the notification itself with `osascript`. Not tested.
