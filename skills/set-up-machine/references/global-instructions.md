@@ -4,9 +4,9 @@ The shared global instructions file: its shape, its roles, and what belongs in i
 
 `~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. Keep it short and ordered from general to specific: how the user works with agents, the words they share, which tool fills each role, guidance for permission rejections, then the personal workflow. Anything a teammate would need goes in the project's `AGENTS.md` or a skill. `/maintain-environment` lists those places and the team test.
 
-## The file
+## Contents
 
-### Its shape
+### Structure
 
 The file has these parts, in this order. This skill writes the heading, the rule line, the roles' What it is and When none columns, and the generated block. The personal parts, listed below the parts, are the user's.
 
@@ -82,7 +82,7 @@ A line belongs here only when it's about this person, not the work, and holds fo
 - it's how to use one tool → that tool's skill;
 - a skill or a rule-table row already carries it → drop it.
 
-## Around the file
+## Related setup
 
 ### Moving a harness's file
 
