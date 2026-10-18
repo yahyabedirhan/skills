@@ -1,12 +1,18 @@
 # Claude Code cloud
 
-How to audit a Claude Code cloud session: one Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo, started from claude.ai/code, the Claude app, the desktop app's **Cloud** choice or `claude --cloud`. Docs: [cloud environments](https://code.claude.com/docs/en/cloud-environments), [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), [hooks](https://code.claude.com/docs/en/hooks). The CLI and the desktop app are the other environments of this harness, as `index.md` describes. A cloud session is set up from its repo, as 'Install', 'Instructions' and 'Guardrails' describe, or by its cloud environment, as 'Environment setup' describes.
+The cloud environment of Claude Code. This page says what a cloud session is, how it is found, what reaches it, the two ways it is set up, what each harness row means on it and how the verifier checks it. The CLI and the desktop app are the other environments of this harness, as `index.md` describes.
 
-## Found
+## The environment
+
+### What a session is
+
+One Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo. It starts from claude.ai/code, the Claude app, the desktop app's **Cloud** choice or `claude --cloud`. Docs: [cloud environments](https://code.claude.com/docs/en/cloud-environments), [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), [hooks](https://code.claude.com/docs/en/hooks).
+
+### Finding it
 
 Found when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and the local machine or a remote machine never does. A `--home` fixture on the VM is still found. On the VM the CLI row is not found, even though `claude` is on `PATH`.
 
-## What reaches the VM
+### What reaches the VM
 
 - **Repo:**
   - `CLAUDE.md`, `.mcp.json`, `.claude/rules/`, `.claude/skills/`, `.claude/agents/` and `.claude/commands/`.
@@ -17,7 +23,18 @@ Found when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and the local machin
 - **claude.ai account:** its enabled skills and connectors.
 - **Cloud environment:** what its setup script leaves on disk, its environment variables, and its network secrets through the proxy.
 
-## Install
+## Setting up a session
+
+A cloud session is set up in one of two ways, and `~/.local/share/agents/environment-setup.json` tells them apart:
+
+- **Repo setup**, without that file: the repo's `SessionStart` install, then the agent's own setup, as *Repo setup* describes.
+- **Environment setup**, with that file: the cloud environment's setup script sets the session up, as *Environment setup* describes.
+
+### Repo setup
+
+The repo supplies the setup: a hook installs the skills and tools, and the agent applies the rest at session start.
+
+#### Install
 
 The install puts the skills and tools on the VM. The agent's own setup comes after it.
 
@@ -28,7 +45,7 @@ The install puts the skills and tools on the VM. The agent's own setup comes aft
 - **Why a SessionStart hook, not the environment's setup script:** the setup script lives in the environment dialog on claude.ai, outside the repo, and is skipped when a cached environment exists. The hook is versioned with the repo and runs on every start and resume. It must be safe to run again.
 - **Gap:** the hook runs after Claude Code launched. Whether a skill installed then is offered as a slash command in that session is not documented. Reading its `SKILL.md` works.
 
-## Instructions
+#### Instructions
 
 The agent applies the setup itself at session start, as on any machine:
 
@@ -39,7 +56,7 @@ The agent applies the setup itself at session start, as on any machine:
 - **Written files:** the shared file `~/.config/agents/AGENTS.md`, `~/.claude/CLAUDE.md` as a link to it, `~/.claude/rules/harness-instructions.md` from the harness's `instructions` file, and `"autoMemoryEnabled": false` in `~/.claude/settings.json`, as `index.md` > 'Instructions' describes. The session started before these existed, so the agent reads the shared file itself for this session; a resumed process on the same VM loads the link. Do not append the cloud-only lines to the shared file.
 - **Audit:** `ok` when the repo's settings have a `SessionStart` hook, the cloud instructions file has an `## Instructions` section, the repo's cloud section names that file's path, `~/.claude/CLAUDE.md` links to the shared file, the harness instructions file matches its source and memory is off. `FAIL` when cloud instructions are declared and one is missing. `gap` with no clone to read, or when the repo declares no cloud instructions.
 
-## Guardrails
+#### Guardrails
 
 In a repo setup, hooks are read when the session starts, so the agent's own `~/.claude/settings.json` comes too late for this session. The guardrail is a match-all `PreToolUse` group in the repo's `.claude/settings.json`, behind the same variable:
 
@@ -54,12 +71,9 @@ On a machine the variable is unset, so the user-level hook stays the only one, a
 - **Personal permissions:** a `gap`. The repo's settings hold no personal lists, so the hook alone refuses them.
 - **Audit:** `ok` when a match-all group runs an existing installed `pre_tool_hook.py` with `--harness claude-code`, and the settings hold no `"disableAllHooks": true`. The audit reads `$HOME` and `~/` in the command as the home folder.
 
-## Environment setup
+### Environment setup
 
-A cloud session is set up in one of two ways, and `~/.local/share/agents/environment-setup.json` tells them apart:
-
-- **Repo setup**, without that file: the repo's `SessionStart` install, then the agent's own setup, as above.
-- **Environment setup**, with that file: the cloud environment's setup script, which `<workstation-repo>` renders, sets the session up. It runs as root before Claude Code launches, on every repo, and the environment caches the disk it leaves as a snapshot. It writes:
+The cloud environment's setup script, which `<workstation-repo>` renders, sets the session up. It runs as root before Claude Code launches, on every repo, and the environment caches the disk it leaves as a snapshot. It writes:
   - the same files the agent writes in 'Instructions';
   - `~/.claude/rules/cloud-instructions.md`, from the cloud `instructions` file;
   - a match-all `PreToolUse` hook in `~/.claude/settings.json`;
@@ -69,19 +83,23 @@ A cloud session is set up in one of two ways, and `~/.local/share/agents/environ
 - **Re-setup:** when that marker exists, `<workstation-repo>`'s cloud instructions name the command that applies the setup again. Run it instead of writing the files by hand. It changes only the current VM, so read the new instructions and rule files for the rest of the session; new sessions start from the environment's snapshot.
 - **Audit:** with the marker, the instructions cell checks the `~/.claude/CLAUDE.md` link, memory off, `harness-instructions.md` and `cloud-instructions.md` against their sources, and not the repo's hook or cloud section. The guardrails cell checks the match-all group in `~/.claude/settings.json`.
 
-## Sandbox
+## Harness rows
+
+The rows every harness page covers, as they stand on a cloud session.
+
+### Sandbox
 
 `gap`: commands run on the VM. The network level is set on the cloud environment, to None, Trusted, Full or Custom, and nothing on the VM shows it. GitHub goes through a proxy that keeps the credentials off the VM: `gh` is installed, `gh api` works, and GraphQL is blocked, so `gh pr` and `gh issue` fail.
 
-## Plugins
+### Plugins
 
 `gap`: a cloud session installs no plugin bundle, from user or repo settings, and an agent never signs a server in. A repo's `.mcp.json` loads. Whether claude.ai connectors load is `not checked`.
 
-## Skills
+### Skills
 
 Each listed skill in `~/.claude/skills` or the repo's `.claude/skills`. Skills enabled on claude.ai load too, and the verifier can't see them.
 
-## Config
+### Config
 
 The model is picked when the session starts, and environment variables and network secrets are set on the environment. A cloud `config` in `setup/harnesses.json` has no file to land in: each key is a `gap`. The harness's shared config describes `~/.claude/settings.json` on a machine and doesn't apply here.
 
