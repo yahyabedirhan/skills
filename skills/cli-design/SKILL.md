@@ -87,7 +87,7 @@ Show one usage line per command, with its words, its flags and their value place
 Decide what each command prints and how it fails.
 
 - **Streams:** data goes to standard output, so it can be piped. Progress, warnings and errors go to standard error.
-- **For people and for programs:** the default output is for people, short and readable. `--json` prints a stable, documented shape on every command that prints data. Treat the JSON shape as part of the contract and the plain output as free to improve.
+- **Human and JSON output:** the default output is for people, short and readable. `--json` prints a stable, documented shape on every command that prints data. Treat the JSON shape as part of the contract and the plain output as free to improve.
 - **Terminals:** use colour, spinners and progress bars only when the stream is a terminal, and turn colour off for `NO_COLOR`, `TERM=dumb` and `--no-color`. Print something within about 100 ms, and show progress for anything that takes longer than a moment, so the command never looks hung.
 - **Errors:** one line that says what went wrong and what to do next, naming the command or flag that fixes it. Put the most important information last, where the eye lands. Print a debugging trace only on request.
 - **Exit codes:** 0 for success, a non-zero code for failure, and a distinct code for wrong usage. Document every code the CLI uses, and add a code only for a case a caller handles differently from failure, such as a timeout or "nothing found".
@@ -102,7 +102,7 @@ Design the help as the main interface for learning the CLI, for people and for a
 - **Three levels:** the top help (`tool --help`) fits one screen, a group's help (`tool <group> --help`, or the group alone) lists each of its commands with its full usage line, and a command's help (`tool <group> <verb> --help`) gives the usage, a description, every flag and examples. The layouts are in [conventions.md](references/conventions.md).
 - **Summaries:** one line per command, starting with a verb and saying what the command achieves, not how the code does it. Use the same summary everywhere it appears.
 - **Examples** lead the command help, because most readers copy one and adjust it.
-- **When the caller is wrong:** wrong usage prints that command's usage line and a pointer to its help, not the whole manual. A mistyped command suggests the closest match and leaves the caller to run it.
+- **Wrong usage:** wrong usage prints that command's usage line and a pointer to its help, not the whole manual. A mistyped command suggests the closest match and leaves the caller to run it.
 - **Discovery:** the top help names where the full documentation lives. When agents are callers, give them a machine-readable listing of the commands, such as `help --json` or a schema command, and point them to it from the top help once.
 - **Completions** for the common shells, generated from the same command definitions.
 
