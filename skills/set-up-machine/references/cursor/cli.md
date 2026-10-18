@@ -35,7 +35,7 @@ A personal permission, as the section ../workstation.md > `setup/permissions.jso
 
 Auto-review with the sandbox on is the mode this skill sets for anyone who has Cursor. Allowlisted calls run. Other shell commands run in the sandbox when they can. A call that cannot use the sandbox goes to the classifier. The deny list still refuses: Auto-review does not replace it.
 
-- **Files:** the same `~/.cursor/cli-config.json`. Set `approvalMode` to `auto-review`, and `sandbox` > `mode` to `enabled`. Keep every other key, including `sandbox` > `networkAccess` when it is already set. Add `"version": 1` to a new file. Docs: [run modes](https://cursor.com/docs/agent/security/run-modes), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
+- **Files:** the same `~/.cursor/cli-config.json`. Set `"approvalMode": "auto-review"` and `"sandbox": {"mode": "enabled"}`. Keep every other key, including `sandbox` > `networkAccess` when it is already set. Add `"version": 1` to a new file. Docs: [run modes](https://cursor.com/docs/agent/security/run-modes), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
 - **Audit:** the verifier's `sandbox` cell, as *Checking it* describes.
 - **Linux:** the sandbox needs kernel 6.2 or newer with Landlock, and unprivileged user namespaces. On a remote machine or the standalone CLI, the user installs the AppArmor package the run-modes doc names; it needs root. When the sandbox cannot be created, Cursor asks before each command: a `gap`.
 - **Steering:** leave `~/.cursor/permissions.json` `autoRun` to the user. `block_instructions` steer the classifier in plain English. The rule table and the hook are the enforcement, and a second prose list of the same calls would drift from them.
@@ -52,13 +52,13 @@ When `setup/harnesses.json` names a Cursor `config`, as ../workstation.md > *A d
 The verifier's `Cursor / cli` row (`--harness cursor --env cli`), from `scripts/setupmachine/harnesses/cursor/cli.py`. Its declared config is the file `setup/harnesses.json` > `harnesses` > `cursor` > `environments` > `cli` > `config` names. The instructions, plugins and skills cells are the shared ones, as index.md > *Checking it* describes.
 
 - **guardrails:** the shared hook check, and each personal deny or allow row has its entry in `cli-config.json` or in Claude Code's lists, which the CLI unions.
-- **sandbox:** `cli-config.json` has `approvalMode` `auto-review` and `sandbox.mode` `enabled`.
+- **sandbox:** `cli-config.json` has `"approvalMode": "auto-review"` and `"sandbox": {"mode": "enabled"}`.
 - **config:** each key the declared Cursor config sets has the same value in `cli-config.json`; a nested object, such as `selectedModel`, must match as a whole. `n/a` without a declared config.
 
 To see Cursor itself enforce the rows, run `cursor-agent -p --trust --force` in a throwaway folder, with `CURSOR_CONFIG_DIR` at a trial `.cursor` and `CURSOR_DATA_DIR` at a scratch folder. `CURSOR_CONFIG_DIR` moves only `cli-config.json`: `hooks.json`, `mcp.json` and `~/.claude/settings.json` are always read from the real home, so a trial puts them in the folder: `.cursor/hooks.json`, `.cursor/mcp.json`, and `.claude/settings.json` at the folder's git root.
 
 - `rm -rf x`, `git push --force <remote> main` and `gh repo delete owner/x` return the native refusal, once from the trial `cli-config.json` and once, with its deny list emptied, from a `.claude/settings.json` holding the Claude Code lists.
-- With `approvalMode` `auto-review`, the key `sandbox` > `mode` at `enabled` and without `--force`, those three commands return the same native refusal. `--auto-review` and `--sandbox enabled` set that mode for one run. Run that check, and every other Cursor CLI step here, as `cursor-agent`.
+- With `"approvalMode": "auto-review"`, `"sandbox": {"mode": "enabled"}` and without `--force`, those three commands return the same native refusal. `--auto-review` and `--sandbox enabled` set that mode for one run. Run that check, and every other Cursor CLI step here, as `cursor-agent`.
 - With the hooks as `.cursor/hooks.json`, `git clean -f -n` and `git push --force-with-lease` are refused by the hook, naming rules `git-clean-force` and `git-push-force-with-lease`.
 - With the hooks as `.cursor/hooks.json` and no deny list, `rm -rf x`, `bash -lc 'rm -fr x'`, a read of `.env` and a fake stdio MCP server's `send_message`, run with `--approve-mcps`, are refused by the hook; `gh api rate_limit` runs and gets a report line.
 - From a folder inside the trial home, `cursor-agent -p --mode ask "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback.

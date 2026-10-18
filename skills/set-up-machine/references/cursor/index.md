@@ -102,7 +102,7 @@ The shared cells of the verifier's `Cursor / cli` and `Cursor / desktop` rows, f
 
 - **instructions:** `~/.cursor/rules/global-instructions.mdc` is the header above the shared file, byte for byte. When `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` matches its source too. A missing or stale copy is `FAIL`, and so is a generated `harness-instructions.mdc` whose source is gone. A file without the generated comment is a `gap`, left alone.
 - **guardrails:** all four events in `~/.cursor/hooks.json` run the installed skill's existing `pre_tool_hook.py` with `--harness cursor`, wired as SKILL.md > *Wiring* describes.
-- **sandbox:** `cli-config.json` has `approvalMode` `auto-review` and `sandbox.mode` `enabled`.
+- **sandbox:** `cli-config.json` has `"approvalMode": "auto-review"` and `"sandbox": {"mode": "enabled"}`.
 - **plugins:** each bundle is installed and enabled in Claude Code. Each standalone server is in `~/.cursor/mcp.json`, equal to its entry.
 
 The cells that differ are on each environment's page.

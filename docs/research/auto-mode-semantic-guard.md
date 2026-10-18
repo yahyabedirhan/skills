@@ -212,7 +212,7 @@ Why these choices:
 - **`classifyAllShell: true`,** so a trusted project's narrow allow rule can't send a command around the classifier (1.3). The cost is one classifier call per shell command (1.5).
 - **The label** is what the agent sees (1.4), so it names the rule plainly. The "give the user the exact command" instruction comes from the #64 global instructions line.
 - **Covers:** the interpreter and script forms no pattern lists (`python3 -c`, `node -e`, `ruby -e`, a script that prints `.env`). **Misses:** `echo $TOKEN` and `cat .env` under the client-side classifier (`-p`, SDK), which skips read-only commands, and anything the Read tool does. #64's deny rules and hook stay the primary guard.
-- **Audit:** `claude auto-mode config` shows the rule in effect; set-up-machine can check that its `hard_deny` entry is there and that `classifyAllShell` is `true`.
+- **Audit:** `claude auto-mode config` shows the rule in effect; set-up-machine can check that its `hard_deny` entry is there and that `"classifyAllShell": true` is set.
 
 ### 6.2 Codex: no semantic guard; filter the environment instead
 
