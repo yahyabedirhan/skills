@@ -90,7 +90,7 @@ Look for the words speech recognition gets wrong most: names of people, companie
 
    Dry-run it with `dict add --file <file> --dry-run`, tell the user Wispr Flow will close for a few seconds, write it with `dict add --file <file> --restart`, and give the user the batch id.
 
-The app syncs the dictionary to the user's account. Entries written this way have survived a restart; whether a sync ever drops them is not known, so say so when reporting a write.
+The app syncs the dictionary to the user's account. Entries written this way survive a restart. **Gap:** whether a sync ever drops them is not known, so say so when reporting a write.
 
 ## Scripts
 

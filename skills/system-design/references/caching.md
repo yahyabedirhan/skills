@@ -1,6 +1,6 @@
 # Caching
 
-Keeping frequently read data in memory so reads skip the store behind it. A Redis read takes about a millisecond where a database query may take tens, and every cache hit is load the database doesn't carry. The price is staleness, invalidation, and new ways to fail.
+Keeping frequently read data in memory so reads skip the store behind it. A Redis read takes about a millisecond where a database query takes up to tens, and every cache hit is load the database doesn't carry. The price is staleness, invalidation, and new ways to fail.
 
 ## When a cache is justified
 
