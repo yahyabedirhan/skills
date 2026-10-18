@@ -13,7 +13,7 @@ The normal sign-in opens a browser, which a headless machine lacks. The user pic
 
 ## Settings that are per machine
 
-- **Never copy `~/.claude/settings.json` or another harness's settings from a different machine.** Hook paths in it point at that machine's files. Run this skill on the remote machine instead, and rerun any tool integration that writes its own hook there (e.g. a session host's `integration install`).
+- **Never copy `~/.claude/settings.json` or another harness's settings from a different machine.** Hook paths in it point at that machine's files. Run this skill on the remote machine instead, and rerun any tool integration that writes its own hook there, such as a session host's `integration install`.
 - **MCP servers** are registered outside any repository, so register each one again. A sign-in that needs a browser either prints a URL to open on any device, or waits on a `localhost:<port>` callback. For the callback, the user reconnects with a port forward and runs the sign-in again:
 
   ```bash
@@ -22,14 +22,14 @@ The normal sign-in opens a browser, which a headless machine lacks. The user pic
 
 ## Keeping sessions alive
 
-Start every agent inside the user's session host (e.g. `herdr`, `tmux`), never directly in the SSH shell. A process in the SSH shell dies when the connection drops; one inside the session host keeps running and can be reattached from any device.
+Start every agent inside the user's session host, such as `herdr` or `tmux`, never directly in the SSH shell. A process in the SSH shell dies when the connection drops; one inside the session host keeps running and can be reattached from any device.
 
 ## Containing a misled agent
 
 The global rules still apply on a remote machine and cost nothing; keep them. On top of them, propose these to the user, each as `gap` in the report when it isn't in place:
 
 - **Sandbox on.** Keep Claude Code's built-in sandbox on (`/sandbox`); on Linux it needs `bubblewrap` and `socat` installed.
-- **Container.** Run the harness inside a container (Docker, Podman) so an agent can't reach the host's filesystem or other services, with egress limited to the model provider's API, the git host and the MCP servers in use.
+- **Container.** Run the harness inside a container, such as Docker or Podman, so an agent can't reach the host's filesystem or other services, with egress limited to the model provider's API, the git host and the MCP servers in use.
 - **Separate credentials.** Give each machine its own SSH key and git host token, so one leak has one blast radius.
 
 Done when the steps in `SKILL.md` pass on the remote machine, a session started inside the session host survives a disconnect, and each containment item is in place or reported as a `gap`.

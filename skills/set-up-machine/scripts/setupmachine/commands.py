@@ -11,9 +11,9 @@ so a rule catches the common spellings of the same command:
   wrappers (`timeout`, `nice`, `setsid`, `env`, `xargs`, `watch`, `flock`, …) are
   dropped; a wrapper that runs no command is read as itself alone (`env -u X` -> `env`);
 - a program named by path (`/bin/rm`) is read by its basename, in lower case where
-  the filesystem ignores case (macOS runs `/bin/rm` for `RM`; Linux finds no `RM`);
-- the command inside `<shell> -c '…'` (any flag cluster holding `c`, such as
-  `-lc`), `eval`, `sudo`, `find -exec`, a heredoc or a pipe into a shell is read
+  the filesystem ignores case: macOS runs `/bin/rm` for `RM`, and Linux finds no `RM`;
+- the command inside `<shell> -c '…'`, or any flag cluster holding `c` such as
+  `-lc`, `eval`, `sudo`, `find -exec`, a heredoc or a pipe into a shell is read
   as a command of its own;
 - flags are read anywhere after the program (`git push origin main --force`,
   `rm x -rf`), clustered or not (`-rfv`), until `--`; `find`'s one-dash words
@@ -21,8 +21,8 @@ so a rule catches the common spellings of the same command:
 - redirect targets are files the command reads (`< x`) or writes (`> x`, `>> x`,
   `&> x`), and `tee`'s operands files it writes (tee_writes).
 
-What it can't see (a glob the shell expands, a variable holding a command, a
-script file's contents) is named as a gap in the rule table.
+The rule table names what it can't see as a gap: a glob the shell expands, a variable holding a command,
+a script file's contents.
 
 Standard library only: it runs on macOS's Python 3.9.
 """

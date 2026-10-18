@@ -9,6 +9,7 @@ As the **orchestrator**, you get an effort built without building it yourself: r
 
 ## Parameters
 
+- `<session-host>`: where agent sessions run, e.g. `herdr`, Claude Code Desktop, Codex Desktop.
 - `<notification-method>`: how a notification reaches the user, e.g. a desktop notification command, or the harness's own tool.
 
 ## Effort lifecycle
@@ -25,7 +26,7 @@ BUILD      orchestrate the tickets through delegates; open the pull request
 SETTLE     the user approves; the agent merges, follows up, and cleans up
 ```
 
-The session host, the program where new agent sessions open, decides which of two paths an effort takes. When the host is `herdr`, take the host path: `/handover-to-herdr` automates every step between phases. Otherwise take the plain path, which runs anywhere: this session carries on, or the user pastes each starting prompt.
+`<session-host>` decides which of two paths an effort takes. When `<session-host>` is `herdr`, take the host path: `/handover-to-herdr` automates every step between phases. Otherwise take the plain path, which runs anywhere: this session carries on, or the user pastes each starting prompt.
 
 ```text
                 START                          HANDOVER                        BUILD
@@ -62,7 +63,7 @@ The starting prompt names these skills and the agent loads each one itself: the 
 
 ### Handover
 
-The session that hands over finishes its own work cleanly, through `/handover`. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in the session host without leaving its own checkout. It gets the session ready, starts the new session on the handoff with a one-line prompt, and confirms it started. The session that handed over then stops, and stays open for reference.
+The session that hands over finishes its own work cleanly, through `/handover`. A handover can run from any session at any point, not only at the end of the thinking: a desktop-app session on the default branch can hand an effort to an orchestrator in `<session-host>` without leaving its own checkout. It gets the session ready, starts the new session on the handoff with a one-line prompt, and confirms it started. The session that handed over then stops, and stays open for reference.
 
 ### Build
 

@@ -1,5 +1,5 @@
 """Claude Code's CLI, in a terminal or an IDE extension: the checks only the CLI row has, its
-sandbox and its declared config in `~/.claude/settings.json` (`references/claude-code/cli.md`). The
+sandbox and its declared config in `~/.claude/settings.json`, as `references/claude-code/cli.md` describes. The
 shared checks and the hook payload are in this package's `__init__.py`.
 """
 from __future__ import annotations

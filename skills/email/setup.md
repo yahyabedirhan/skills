@@ -23,7 +23,11 @@ Check: `search_threads` with `in:inbox` returns threads.
 
 ## 3. Deny and ask rules
 
-The second box lets the token send mail, so permission rules must block sending and make every saved-draft change ask the user. `/set-up-machine` writes them into each harness from its rule table: the deny rows `mail-send` and `mail-destructive`, and the ask rows `mail-draft-write` and `mail-cli-draft`. Run it once the connector is signed in, since it reads the connector's tool names from a session. In Claude Code they become these entries in `~/.claude/settings.json`, with the real server ID:
+The second box lets the token send mail, so permission rules must block sending and make every saved-draft change ask the user. `/set-up-machine` writes them into each harness from its rule table. Run it once the connector is signed in, since it reads the connector's tool names from a session.
+
+- **Deny rows:** `mail-send` and `mail-destructive`.
+- **Ask rows:** `mail-draft-write` and `mail-cli-draft`.
+- **Claude Code entries:** these lines in `~/.claude/settings.json`, with the real server ID:
 
 ```json
 "deny": [

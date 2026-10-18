@@ -1,6 +1,6 @@
 ---
 name: set-up-project
-description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, AGENTS.md as the one rules file with CLAUDE.md pointing at it, the issue tracker, triage labels and domain docs, the folder standard's .gitignore, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
+description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, `AGENTS.md` as the one rules file with `CLAUDE.md` pointing at it, the issue tracker, triage labels and domain docs, the folder standard's `.gitignore`, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
 ---
 
 # Set up project
@@ -20,7 +20,7 @@ You explore, present what you found, confirm with the user, then write. Running 
 
 ### 1. Check the machine
 
-Run **set-up-machine**'s verifier, `python3 <set-up-machine skill>/scripts/verify.py` (the skill is installed beside this one). A pass is exit code 0. When the exit code is not 0, run the **set-up-machine** skill first, then come back. Done when the verifier exits 0.
+Run **set-up-machine**'s verifier, `python3 <set-up-machine skill>/scripts/verify.py`, from the set-up-machine skill installed beside this one. A pass is exit code 0. When the exit code is not 0, run the **set-up-machine** skill first, then come back. Done when the verifier exits 0.
 
 ### 2. Explore
 
@@ -33,9 +33,9 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `docs/agents/`: does this skill's prior output already exist?
 - `.efforts/`: a sign that a local-markdown issue tracker is already in use
 - `docs/assets/`: the folder standard's old image folder
-- Is the `triage` skill installed? (a `triage` skill folder alongside this one, or `triage` in your available skills.) This decides whether Section B runs at all.
+- Is the `triage` skill installed? It is when a `triage` skill folder sits beside this one, or `triage` is in your available skills. This decides whether Section B runs at all.
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
-- A tool the project's own docs require for a role skills name (a worktree tool in a `docs/worktrees.md`, a session host its scripts assume). This decides whether Section D runs.
+- A tool the project's own docs require for a role skills name, such as a worktree tool in a `docs/worktrees.md` or a session host its scripts assume. This decides whether Section D runs.
 
 ### 3. Present findings and ask
 
@@ -70,9 +70,9 @@ Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSS
 
 When exploration found an old `CONTEXT.md` or `CONTEXT-MAP.md`, propose renaming each with `git mv`, so its history follows it: `git mv CONTEXT.md GLOSSARY.md`, `git mv CONTEXT-MAP.md GLOSSARY-MAP.md`, and the same for each per-context `CONTEXT.md`. Where the new name already exists, `git mv` refuses: propose merging the old file into the new one instead, and ask which wins where they disagree. Also propose updating the map's links and any other file that names the old files; the drafts of `AGENTS.md` and `docs/agents/domain.md` already use the new names.
 
-When exploration found a `docs/assets/` folder, propose moving each topic with `git mv`, as the folder standard's *Migration from older layouts* says: images the project ships or shows to `assets/images/<topic>/`, screenshots to `assets/screenshots/<topic>/`, and each relative link to them updated.
+When exploration found a `docs/assets/` folder, propose moving each topic with `git mv`, as `../orchestrating/folder-standard.md` > 'Migration from older layouts' says: images the project ships or shows to `assets/images/<topic>/`, screenshots to `assets/screenshots/<topic>/`, and each relative link to them updated.
 
-**Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md), *Environment defaults*, says what may go there.
+**Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md) > 'Environment defaults' says what may go there.
 
 ### 4. Confirm and write
 
@@ -88,7 +88,7 @@ Show the user a draft of:
 Let them edit, then take one approval for all of it. Then write:
 
 1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran.
-2. Leave `CLAUDE.md` holding `@AGENTS.md` alone (a `CLAUDE.md` that is a symlink to `AGENTS.md` is fine as it is), and add the missing `.gitignore` lines.
+2. Leave a `CLAUDE.md` that holds `@AGENTS.md` or is a symlink to `AGENTS.md` as it is, and add the missing `.gitignore` lines.
 3. Write the docs files using the seed templates in this skill folder as a starting point:
    - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
    - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md): GitLab issue tracker
@@ -110,7 +110,7 @@ Read every harness file the project holds, from the root down, against **set-up-
 
 - `weakens`: a global rule no longer holds as the machine sets it, in some harness. Explain which and why, and propose the fix: remove the entry, or narrow it to the project's own commands. The file is the project's, so change it only on the user's approval.
 - `overlaps`: an allow that covers a rule's command while the rule still holds. Propose narrowing it.
-- `extra` (a project deny or ask) and `gap` (what you can't judge): name each.
+- `extra`, a project deny or ask, and `gap`, what you can't judge: name each.
 
 Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes.
 

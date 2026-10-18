@@ -1,5 +1,5 @@
-"""Cursor cloud agents: one VM per run, the hook file at `/agent`, and the repo `AGENTS.md` cloud section
-(`references/cursor/cloud.md`).
+"""Cursor cloud agents: one VM per run, the hook file at `/agent`, and the repo `AGENTS.md` cloud section,
+as `references/cursor/cloud.md` describes.
 
 The hook payload is Cursor's, so read and write are Cursor's. The project hook
 calls the script with `--harness cursor`.
@@ -27,7 +27,7 @@ HOOKS = Path("/agent/.cursor/hooks.json")
 # A cloud agent runs these. beforeMCPExecution is in the file for the CLI and does not run here.
 RAN = ("beforeShellExecution", "beforeReadFile", "preToolUse")
 NOT_RAN = "beforeMCPExecution"
-# The keys a declared config may set, as `references/cursor/cloud.md` > 'Config' describes.
+# The keys a declared config may set, as `references/cursor/cloud.md` > 'Config' lists them.
 KEYS = ("secrets",)
 _HARNESS = re.compile(r"--harness(?:\s+|=)cursor(?:\s|$)")
 

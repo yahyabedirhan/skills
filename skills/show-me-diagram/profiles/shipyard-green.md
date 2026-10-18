@@ -1,6 +1,6 @@
 # Profile: Shipyard Green
 
-A pale tint of the Shipyard icon's olive green, with darker shades of it for lines and text. A light look for anything about Shipyard or my agent work.
+A pale tint of the Shipyard icon's olive green, with darker shades of it for lines and text. A light look for anything about Shipyard or agent work.
 
 ## Diagram types
 
@@ -38,3 +38,5 @@ Every green is a shade of the icon's `#7a8a48`.
 | `node-name` | Inter | 600 |
 | `sublabel` | JetBrains Mono | 400 |
 | `callout` | Inter | 400 |
+
+Use JetBrains Mono for all technical text.

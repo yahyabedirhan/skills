@@ -21,7 +21,17 @@ When `/settle-session` calls this skill, read `settle-commands.md` instead of th
 
 1. Check that `herdr status` reaches a server and inspect the installed commands' help. Check whether caller context exists with `test -n "$HERDR_PANE_ID"`; when it does, resolve it with `herdr pane current --current` and read the returned pane, terminal, tab and workspace IDs. Inherited IDs can survive a pane move while its live IDs change. From outside a pane, skip caller resolution: without caller context that command can resolve another client's focus.
    - **If no server answers:** say so and hand back to the calling skill, which then works as if there were no session host.
-2. Open a tab in the workspace whose checkout is the worktree, or open the worktree as a new workspace from the repository's own workspace. `herdr workspace list` shows each workspace's `worktree`, with its `checkout_path`, `repo_root` and `is_linked_worktree`. Verify the worktree's canonical path and repository with Git. Immediately before each mutation, refresh the caller when present, inspect the target workspace/tab/pane hierarchy, and compare it with the intended repository and path. For an existing pane, inspect `herdr pane get <pane_id>` and `herdr pane process-info --pane <pane_id>` for actual foreground location and occupants; workspace checkout metadata and pane `cwd` alone do not establish process location. Preserve and report a mismatch or unknown target instead of guessing. Make the worktree with `<worktree-tool>`, never with `herdr worktree create`. Read each creation result for subsequent IDs and recheck the new pane's hierarchy, actual location and shell occupancy before starting the agent. If a result is interrupted or uncertain, inspect live state before retrying, so a retry does not create duplicate topology. After any authorized pane move, use the returned current IDs and inspect them again.
+2. Open a tab in the workspace whose checkout is the worktree, or open the worktree as a new workspace from the repository's own workspace. Check each target before and after you change it:
+   - **Workspace inventory:** `herdr workspace list` shows each workspace's `worktree`, with its `checkout_path`, `repo_root` and `is_linked_worktree`. Verify the worktree's canonical path and repository with Git.
+   - **Pre-mutation check:** immediately before each mutation, refresh the caller when present, inspect the target workspace, tab and pane hierarchy, and compare it with the intended repository and path.
+   - **Existing pane:** inspect `herdr pane get <pane_id>` and `herdr pane process-info --pane <pane_id>` for the actual foreground location and occupants; workspace checkout metadata and pane `cwd` alone do not establish process location.
+   - **Mismatch or unknown target:** preserve and report it instead of guessing.
+   - **Worktree creation:** make the worktree with `<worktree-tool>`, never with `herdr worktree create`.
+   - **Post-creation check:** read each creation result for the new IDs, and recheck the new pane's hierarchy, actual location and shell occupancy before starting the agent.
+   - **Interrupted or uncertain result:** inspect live state before retrying, so a retry does not create duplicate topology.
+   - **Pane move:** after any authorized pane move, use the returned current IDs and inspect them again.
+
+   Then open the tab:
    - **When a workspace's `checkout_path` is the worktree:** add a tab to it with `herdr tab create --workspace <workspace_id> --cwd <worktree> --no-focus`. It returns the tab and its root pane.
    - **Otherwise:** open the worktree from the repository's own workspace, the one whose `repo_root` is the repository and whose `is_linked_worktree` is false:
 
@@ -48,7 +58,7 @@ When `/settle-session` calls this skill, read `settle-commands.md` instead of th
 
    Leave `--wait` off the prompt: it waits until the agent goes idle again, and a long run times out before that.
    - **If the wait times out:** check the agent before you resend anything. `herdr agent get <name>` shows its state, and `herdr agent read <name> --source visible` shows its screen; leave `--lines` off, because it fails while the agent works. The prompt may have arrived anyway, so resend it only when the screen shows it didn't.
-6. Once this session's own work is done, read `settle-commands.md` and mark its live tab settled as its Settled marker section says. Keep the caller session, its occupied worktree and all Herdr topology open.
+6. Once this session's own work is done, read `settle-commands.md` and mark its live tab settled as `settle-commands.md` > 'Settled marker' says. Keep the caller session, its occupied worktree and all Herdr topology open.
 7. Give the calling skill the workspace and tab where the new agent runs, so it can tell the maintainer.
 
 

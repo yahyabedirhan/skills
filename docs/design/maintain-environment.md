@@ -12,7 +12,7 @@ How `maintain-environment` is built. A newcomer needs two facts first:
 3. **Hand over.** After the change, say what carries it everywhere: apply `setup/` on each machine, `npx skills update`, or rerun set-up-project.
 4. **Skills.** Create, install, update, move, fork, publish, remove and audit skills.
 5. **Stay small.** A change to the workstation layout or to set-up-machine needs no edit here.
-6. **Out of scope:** the workstation repo's layout and file shapes (its `DESIGN.md`), the format of `setup/` files (set-up-machine's `references/workstation.md`), how a harness is set up (set-up-machine), how a project is set up (set-up-project).
+6. **Out of scope:** the workstation repo's layout and file shapes, which its `DESIGN.md` covers; the format of `setup/` files, which set-up-machine's `references/workstation.md` covers; how a harness is set up, which set-up-machine covers; and how a project is set up, which set-up-project covers.
 
 ## Entities and relationships
 

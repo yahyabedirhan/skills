@@ -2,9 +2,9 @@
 
 > Moved from a private notes repo on 2026-09-26. Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo. The VPS host, user, label and machine ID, and the private repos' names, are redacted.
 
-Facts for issues [#13](https://github.com/yahyabedirhan/skills/issues/13), [#15](https://github.com/yahyabedirhan/skills/issues/15) and [#16](https://github.com/yahyabedirhan/skills/issues/16): how an agent on the Mac reaches Herdr, git and tools on the VPS, what the reverse direction looks like, and what can be checked before handing work from one machine to the other. Researched on 2026-09-25 against Herdr 0.9.0 on both machines. How a handover prompt gets into an agent tab is covered elsewhere.
+Facts for issues [#13](https://github.com/yahyabedirhan/skills/issues/13), [#15](https://github.com/yahyabedirhan/skills/issues/15) and [#16](https://github.com/yahyabedirhan/skills/issues/16): how an agent on the Mac reaches Herdr, git and tools on the VPS, what the reverse direction looks like, and what can be checked before handing work from one machine to the other. Researched on 2026-09-25 against Herdr 0.9.0 on both machines. [agent-skill-invocation.md > 'Delivery through Herdr'](agent-skill-invocation.md#delivery-through-herdr) covers how a handover prompt gets into an agent tab.
 
-Sources are cited inline. `[mac]` and `[vps]` mark command output captured on that machine on 2026-09-25; `ssh vps` stands for `ssh <vps-user>@<vps-host>` (see "Finding the host"). Herdr docs are cited at the `v0.9.0` tag unless marked 0.9.1, under `https://raw.githubusercontent.com/herdrdev/herdr/<tag>/docs/next/website/src/content/docs/`.
+Sources are cited inline. `[mac]` and `[vps]` mark command output captured on that machine on 2026-09-25; `ssh vps` stands for `ssh <vps-user>@<vps-host>`, as 'Finding the host' describes. Herdr docs are cited at the `v0.9.0` tag unless marked 0.9.1, under `https://raw.githubusercontent.com/herdrdev/herdr/<tag>/docs/next/website/src/content/docs/`.
 
 ## The machine model
 
@@ -15,7 +15,7 @@ Sources are cited inline. `[mac]` and `[vps]` mark command output captured on th
 - **The API is a local Unix socket only.** Mac: `~/.config/herdr/herdr.sock`; VPS: `~/.config/herdr/herdr.sock` (`herdr status --json` on each). There is no TCP listener; `HERDR_SOCKET_PATH` overrides the socket path (`cli-reference.mdx`, Environment variables). So in 0.9.0 the only way for a Mac agent to drive the VPS server is `ssh vps ~/.local/bin/herdr …`.
 - **Selecting the VPS in the window changes nothing for agents.** CLI commands in a pane "still use that pane's inherited session and socket" (`connecting-machines.mdx`; herdr skill).
 - **IDs and names are per server.** Workspace, tab and pane IDs and agent names "are scoped to one server. Two machines may both contain `w1:p1` or an agent named `reviewer`" (`connecting-machines.mdx`). Every remote command must look its IDs up on the VPS first. `--current` and `$HERDR_PANE_ID` from a Mac pane mean nothing there.
-- **0.9.1 adds CLI forwarding.** Herdr 0.9.1 (released 2026-09-16) adds a global prefix `herdr --machine <label-or-id> …` that sends `workspace`, `worktree`, `tab`, `pane`, `notification`, `agent` (not `attach`), `api snapshot` and `status server` to a saved machine as JSON over non-interactive SSH, with no open window and no shell interpolation of payloads. It needs 0.9.1 on both ends and never falls back to Local (release notes `https://github.com/herdrdev/herdr/releases/tag/v0.9.1`; `v0.9.1/.../cli-reference.mdx`, "Saved SSH machines"). On 0.9.0 it fails: `herdr --machine x agent list` prints `unknown option: --machine` [mac].
+- **0.9.1 adds CLI forwarding.** Herdr 0.9.1, released 2026-09-16, adds a global prefix `herdr --machine <label-or-id> …` that sends `workspace`, `worktree`, `tab`, `pane`, `notification`, `agent` (not `attach`), `api snapshot` and `status server` to a saved machine as JSON over non-interactive SSH, with no open window and no shell interpolation of payloads. It needs 0.9.1 on both ends and never falls back to Local (release notes `https://github.com/herdrdev/herdr/releases/tag/v0.9.1`; `v0.9.1/.../cli-reference.mdx`, 'Saved SSH machines'). On 0.9.0 it fails: `herdr --machine x agent list` prints `unknown option: --machine` [mac].
 
 ## Mac to VPS: command reference
 
@@ -35,7 +35,7 @@ Read-only (run and verified):
 | An agent's recent output | `ssh vps '~/.local/bin/herdr agent read w6:p2 --source recent-unwrapped --lines 120'` |
 | Full live state | `ssh vps '~/.local/bin/herdr api snapshot'` (from `herdr api --help`; not run) |
 
-All list/get commands return JSON. `agent list` gives, per agent: `agent` (kind), `agent_status` (`idle`, `working`, `blocked`, `done`, `unknown`), `pane_id`, `tab_id`, `workspace_id`, `cwd`, `terminal_title` and the agent's native session id [vps]. On 2026-09-25 the VPS had workspaces `w5` "~ ROOT", `w7` "~ VPS MAINTAINER", `w6` "shipyard" (tabs `w6:t1` "CLI", `w6:t2` "Orchestrator"), two workspaces for private repos, and one agent: `claude` in `w6:p2`, `idle`, cwd the shipyard checkout, unnamed [vps].
+All list/get commands return JSON. `agent list` gives, per agent: `agent` (kind), `agent_status` (`idle`, `working`, `blocked`, `done`, `unknown`), `pane_id`, `tab_id`, `workspace_id`, `cwd`, `terminal_title` and the agent's native session id [vps]. On 2026-09-25 the VPS had five workspaces and one agent: `claude` in `w6:p2`, `idle`, its cwd a project checkout, unnamed [vps].
 
 Writes (syntax from `herdr <cmd> --help` [mac]; **not run**, per the research rules):
 
@@ -52,12 +52,12 @@ Writes (syntax from `herdr <cmd> --help` [mac]; **not run**, per the research ru
 Notes for writes:
 
 - `<name>` must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents on that server (herdr skill).
-- A prompt or path passed through `ssh vps '…'` goes through the remote shell. Quote it for the remote side (for example `printf %q` locally), or pipe a script over stdin. The 0.9.1 `--machine` path avoids this.
-- `claude` is found in a login shell on the VPS, and Herdr panes start interactive shells, so `agent start --kind claude` should find it. Unverified until tried.
+- A prompt or path passed through `ssh vps '…'` goes through the remote shell. Quote it for the remote side, for example with `printf %q` locally, or pipe a script over stdin. The 0.9.1 `--machine` path avoids this.
+- `claude` is found in a login shell on the VPS, and Herdr panes start interactive shells. Whether `agent start --kind claude` finds it is a **Gap**: not tested, see 'Open questions'.
 
 ## VPS to Mac
 
-Not possible today. What exists:
+Not possible on 2026-09-25. What exists:
 
 - The Mac's SSH server is not listening: `nc -z 127.0.0.1 22` exits 1 [mac], so Remote Login is off.
 - No Tailscale on either machine (`which tailscale` [mac] and `command -v tailscale` [vps] both empty; no Tailscale app in `/Applications` [mac]). Other networking tools installed on the Mac [mac] are not set up as a path in either.
@@ -67,7 +67,7 @@ Not possible today. What exists:
 What it would take (none set up):
 
 1. **Mac always checks.** Keep the Mac as the one that looks at the VPS, never the reverse. Needs nothing.
-2. **SSH into the Mac.** Turn on Remote Login on the Mac, give it an address the VPS can reach (Tailscale on both, or a reverse tunnel the Mac opens with `ssh -R 2222:localhost:22 vps`), authorize the VPS's key `~/.ssh/id_ed25519.pub` on the Mac, then `herdr machine add` on the VPS or plain `ssh mac ~/.local/bin/herdr …`.
+2. **SSH into the Mac.** Turn on Remote Login on the Mac, give it an address the VPS can reach through Tailscale on both or a reverse tunnel the Mac opens with `ssh -R 2222:localhost:22 vps`, authorize the VPS's key `~/.ssh/id_ed25519.pub` on the Mac, then `herdr machine add` on the VPS or plain `ssh mac ~/.local/bin/herdr …`.
 3. **Forward only the Herdr socket.** OpenSSH can forward a Unix socket (`ssh -R ~/.herdr-mac.sock:~/.config/herdr/herdr.sock vps`), and the VPS could point `HERDR_SOCKET_PATH` at it. This needs no Mac sshd, but it lives only as long as the Mac holds the SSH connection open, and it gives the VPS full control of the Mac's Herdr. Unverified: Herdr docs do not describe it.
 
 ## Finding the host
@@ -109,7 +109,7 @@ ssh vps '~/.local/bin/herdr worktree open --cwd <repo-path> --path ~/Developer/w
 
 Read-only checks to run from the Mac before starting a second orchestrator on the same branch:
 
-1. **Find the agent in that checkout.** `ssh vps '~/.local/bin/herdr agent list'` and match `cwd` against the worktree path. Agent names may be unset (the shipyard orchestrator had none [vps]), so match on `cwd` and `workspace_id`, not on a name.
+1. **Find the agent in that checkout.** `ssh vps '~/.local/bin/herdr agent list'` and match `cwd` against the worktree path. An agent can have no name, as one orchestrator on the VPS had none [vps], so match on `cwd` and `workspace_id`, not on a name.
 2. **Its state.** `agent_status` of `idle` or `done` means ready for input, `working` means busy, `blocked` means waiting on an approval or question (herdr skill). `unknown` does not prove it stopped. No agent in the pane list for that cwd means none is running there.
 3. **What it last said.** `ssh vps '~/.local/bin/herdr agent read <pane> --source recent-unwrapped --lines 60'`. On 2026-09-25 this showed an orchestrator reporting its commit pushed and a clean tree [vps].
 4. **Clean tree.** `ssh vps 'git -C <worktree> status --porcelain'` is empty.
@@ -119,15 +119,15 @@ Read-only checks to run from the Mac before starting a second orchestrator on th
    ssh vps 'cd <worktree> && git rev-parse HEAD && git ls-remote origin refs/heads/<branch>'
    ```
 
-   Equal SHAs mean pushed. If they differ, `git log @{u}..HEAD` only shows commits missing from the last fetch. A `git fetch origin <branch>` first makes it exact; it updates remote-tracking refs only (issue [#16](https://github.com/yahyabedirhan/skills/issues/16) counts it as a read). Worked example [vps]: the shipyard checkout was at `0646a5a`, `git status -sb` showed it level with `origin/build/shipyard-core-0.0.x`, yet `git ls-remote` returned `d831d00` because the Mac had pushed since. The VPS checkout was behind, not ahead, and had no unpushed work. `git status` alone would have claimed it was up to date.
+   Equal SHAs mean pushed. If they differ, `git log @{u}..HEAD` only shows commits missing from the last fetch. A `git fetch origin <branch>` first makes it exact; it updates remote-tracking refs only (issue [#16](https://github.com/yahyabedirhan/skills/issues/16) counts it as a read). Worked example [vps]: a project checkout was at `0646a5a`, `git status -sb` showed it level with `origin/<branch>`, yet `git ls-remote` returned `d831d00` because the Mac had pushed since. The VPS checkout was behind, not ahead, and had no unpushed work. `git status` alone would have claimed it was up to date.
 6. **Other checkouts of the branch.** `ssh vps 'git -C <repo> worktree list'` shows every worktree and its branch.
 
 Stopping the old agent, closing its workspace, or removing its worktree are writes and stay behind an explicit ask (issues [#13](https://github.com/yahyabedirhan/skills/issues/13) and [#16](https://github.com/yahyabedirhan/skills/issues/16)).
 
 ## Notifications
 
-- **Herdr's command.** `herdr notification show <title> [--body TEXT] [--position …] [--sound none|done|request]` sends through the server's `[ui.toast]` delivery: `herdr` (in-app toast), `terminal` (outer terminal notification, "also works over SSH"), `system` (the OS notification service), or `off` (`cli-reference.mdx`, `configuration.mdx`). The response says `shown`, `disabled`, `rate_limited`, `no_foreground_client` or `busy`; terminal and system delivery are "best-effort through the current foreground attached Herdr client" (`socket-api.mdx`).
-- **Defaults make it silent today.** `ui.toast.delivery` defaults to `off` (`config-reference.json`). The VPS has no `~/.config/herdr/config.toml` [vps], so it runs on that default and a `notification show` run on the VPS should return `disabled`. The Mac's config sets `delivery = "off"` and `[ui.sound] enabled = false` [mac] as well.
+- **Herdr's command.** `herdr notification show <title> [--body TEXT] [--position …] [--sound none|done|request]` sends through the server's `config.toml` > `ui` > `toast` > `delivery` setting: `herdr` (in-app toast), `terminal` (outer terminal notification, "also works over SSH"), `system` (the OS notification service), or `off` (`cli-reference.mdx`, `configuration.mdx`). The response says `shown`, `disabled`, `rate_limited`, `no_foreground_client` or `busy`; terminal and system delivery are "best-effort through the current foreground attached Herdr client" (`socket-api.mdx`).
+- **Defaults make it silent.** `config.toml` > `ui` > `toast` > `delivery` defaults to `off` (`config-reference.json`). The VPS has no `~/.config/herdr/config.toml` [vps], so it runs on that default, and by the docs a `notification show` run there returns `disabled`. The Mac's config sets `delivery = "off"` and `[ui.sound] enabled = false` [mac] as well.
 - **Agent state still crosses over.** The Mac window keeps receiving the VPS's agent states and notifications while another machine is selected (`connecting-machines.mdx`), so a VPS orchestrator going `done` or `blocked` shows in the Mac's sidebar and agent list with no setup.
 - **Issue [#9](https://github.com/yahyabedirhan/skills/issues/9)'s `osascript` route does not work from the VPS**: it is Linux, and `notify-send` is missing too [vps]. Unverified: whether a `terminal` or `system` notification raised on the VPS server is shown by the Mac client when it is connected as a saved machine rather than attached with `herdr --remote`. Test: set `delivery = "terminal"` in the VPS config, run `herdr server reload-config` there, run `herdr notification show test` on the VPS with the Mac window on Local, then on the VPS, and record the `reason` and what appears.
 - **A Mac-side alternative.** A Mac agent can watch the VPS with `ssh vps '~/.local/bin/herdr agent wait <pane> --until done --until blocked'` and raise the notification itself with `osascript`. Not tested.
@@ -141,4 +141,4 @@ Stopping the old agent, closing its workspace, or removing its worktree are writ
 - TODO: Confirm `herdr agent start --kind claude` finds `claude` in a new VPS pane (it is only on the login-shell `PATH`).
 - TODO: Decide whether VPS to Mac is needed at all; if so, pick Remote Login plus Tailscale, or a reverse tunnel.
 - TODO: Install the `herdr` skill on the VPS if VPS agents are to drive Herdr (it is missing from `~/.claude/skills` and `~/.agents/skills` there).
-- TODO: Pull the notes repo on the VPS before an effort starts there: the VPS copy was behind the Mac's [vps, mac].
+- TODO: Pull each repo on the VPS before an effort starts there: a VPS copy was behind the Mac's [vps, mac].

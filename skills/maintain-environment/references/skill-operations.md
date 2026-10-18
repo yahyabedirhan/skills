@@ -36,7 +36,7 @@ After every change to an install, check that the skill's `SKILL.md` resolves thr
 ln -s ../../.agents/skills/<name> .claude/skills/<name>
 ```
 
-**Install.** `npx skills add <owner>/<repo> -s <name> -y`, with the flags above. Install a bundle of skills that name each other into one scope, so no pointer dangles. For a global skill the user wants on every machine, also add it to the workstation repo's `setup/installs.json`, so `/set-up-machine` installs it on the other machines and keeps it up to date; `/set-up-machine`'s `references/workstation.md` gives the format.
+**Install.** `npx skills add <owner>/<repo> -s <name> -y`, with the flags above. Install a bundle of skills that name each other into one scope, so no pointer dangles. For a global skill the user wants on every machine, also add it to `<path-to-workstation-repo>/setup/installs.json`, so `/set-up-machine` installs it on the other machines and keeps it up to date; the section `references/workstation.md` > `setup/installs.json` of `/set-up-machine` gives the format.
 
 **Update.** First diff each installed copy against its source: a difference is a hand edit the update would erase. Keep it by forking the skill, or by moving a project-specific edit into the project's `AGENTS.md`.
 
@@ -44,15 +44,15 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 
 **Remove.** Grep the other skills and the instructions files for the name first, and fix or report each pointer left behind. Keep a skill that belongs to an installed bundle unless the user drops the whole bundle.
 
-**Change one of the user's own skills.** Read the repo's decision records for it first. Edit it in the skills repo, add a dated decision entry for each new decision, and ship it.
+**Change one of the user's own skills.** Read the repo's decision records for it first. Edit it in `<path-to-skills-repo>`, add a dated decision entry for each new decision, and ship it.
 
-**Add a skill to the user's repo.** Write it in the skills repo, add its row to the README, and ship it.
+**Add a skill to `<skills-repo>`.** Write it in `<path-to-skills-repo>`, add its row to the README, and ship it.
 
 **Fork someone else's skill.** Copying a folder keeps no link to its origin, so record the credit by hand:
 
 1. Check the upstream licence allows republishing; without a licence, the user may use the skill privately but not republish it.
 2. Find the upstream commit the copy starts from.
-3. Copy the folder into the skills repo on a branch, with the upstream licence beside it as `LICENSE.<upstream>`. Rename the skill once its behaviour diverges, so both can be installed.
+3. Copy the folder into `<path-to-skills-repo>` on a branch, with the upstream licence beside it as `LICENSE.<upstream>`. Rename the skill once its behaviour diverges, so both can be installed.
 4. Make only the intended change, so a diff against upstream shows just that.
 5. In the README row, name the upstream repo, the commit, the licence file and what changed.
 6. Ship it, then replace the upstream install with the fork in the same scope.
@@ -73,13 +73,15 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 2. For a new skill or a fork that changes behaviour, audit it as below, and commit the fixes and the full findings to its decision record.
 3. In the pull request for an audited skill, summarise the audit in the description's notes for reviewers and link the decision record.
 
-## Auditing a skill
+## Auditing
+
+### Auditing a skill
 
 After any change to a skill, including creating or forking one, have a fresh sub-agent audit it, because the author reads what it meant to write and the auditor reads only what is on disk. Tell it to run `/claude-api`'s `prompt-audit` on the skill folder where the harness has it, or to audit against `/writing-for-agents` where it doesn't, and report without editing, unless the user has said the auditor should make its fixes itself. Apply the fixes you accept, and say why each other finding was left.
 
-## Auditing usage
+### Auditing usage
 
-When the user asks which skills they use, count invocations in local transcripts. Report per skill the count per agent and the last use, list installed skills with no use as zero, and give the date each transcript window starts, since older transcripts may be gone.
+When the user asks which skills they use, count invocations in local transcripts. Report per skill the count per agent and the last use, list installed skills with no use as zero, and give the date each transcript window starts, since a harness can delete older transcripts.
 
 - **Claude Code**: `~/.claude/projects/`. Count `Skill` tool calls by `input.skill`, and `<command-name>/<name></command-name>` in user messages.
 - **Codex**: `~/.codex/sessions/`. Codex loads a skill by reading its `SKILL.md`, so count sessions that read it, and say that editing sessions inflate the count.

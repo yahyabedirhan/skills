@@ -1,6 +1,6 @@
 # Claude Code cloud
 
-The cloud environment of Claude Code. This page says what a cloud session is, how it is found, what reaches it, the two ways it is set up, what each harness row means on it and how the verifier checks it. The CLI and the desktop app are the other environments of this harness, as index.md describes.
+The cloud environment of Claude Code. This page says what a cloud session is, how it is detected, what reaches it, the two ways it is set up, what each harness row means on it and how the verifier checks it. The CLI and the desktop app are the other environments of this harness, as `index.md` describes.
 
 ## The environment
 
@@ -10,7 +10,7 @@ One Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo. It 
 
 ### Cloud session detection
 
-Found when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and a machine never does. A `--home` fixture on the VM is still found. On the VM the CLI row is not found, even though `claude` is on `PATH`.
+Present when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and the local machine or a remote machine never does. A `--home` fixture on the VM is still detected. On the VM the CLI row is not detected, even though `claude` is on `PATH`.
 
 ### Files reaching the VM
 
@@ -74,10 +74,10 @@ On a machine the variable is unset, so the user-level hook stays the only one, a
 ### Environment setup
 
 The cloud environment's setup script, which `<workstation-repo>` renders, sets the session up. It runs as root before Claude Code launches, on every repo, and the environment caches the disk it leaves as a snapshot. It writes:
-  - the same files the agent writes in *Instructions*;
+  - the same files the agent writes in 'Instructions';
   - `~/.claude/rules/cloud-instructions.md`, from the cloud `instructions` file;
   - a match-all `PreToolUse` hook in `~/.claude/settings.json`;
-  - that marker file, last.
+  - `~/.local/share/agents/environment-setup.json`, the marker that tells the two routes apart, last.
 
 - **Gap:** the docs say a cloud session doesn't read `~/.claude/settings.json` and runs hooks only from the repo and server-managed settings ([settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions)). A script-written `~/.claude/CLAUDE.md` is documented to load. Whether the script-written hook fires is not tested.
 - **Re-setup:** when that marker exists, `<workstation-repo>`'s cloud instructions name the command that applies the setup again. Run it instead of writing the files by hand. It changes only the current VM, so read the new instructions and rule files for the rest of the session; new sessions start from the environment's snapshot.

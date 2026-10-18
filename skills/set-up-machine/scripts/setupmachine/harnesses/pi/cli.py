@@ -1,4 +1,4 @@
-"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area (`references/pi/cli.md`).
+"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area, as `references/pi/cli.md` describes.
 
 Every path is under Pi's agent folder: `PI_CODING_AGENT_DIR`, else `~/.pi/agent` (`agent_dir`).
 Pi has no permission system, so the hook, run through an extension, is its only guardrail.
@@ -52,7 +52,7 @@ def read(payload: dict) -> ToolCall:
 
 
 def write(denials: list, asks=()) -> str:
-    """Always one JSON line: `{"block": …}`, `{"ask": …}` (the question the extension asks), or `{}`."""
+    """Always one JSON line: `{"block": …}`, `{"ask": …}` with the question the extension asks, or `{}`."""
     if denials:
         return json.dumps({"block": refusal(denials)}) + "\n"
     if asks:

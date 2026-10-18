@@ -25,7 +25,7 @@ Both the effort's thinking now and its build later happen in the worktree this s
 3. **For a new project only, create it.** Ask which licence it takes, recommending MIT in the maintainer's name. Ask too whether its GitHub repo is public or private. Then read `project-creation.md`, and create and push the repo.
 4. **Create the worktree** on the new branch with `<worktree-tool>`, from the remote default branch.
    - When the work builds on unpushed commits on the local default branch, branch from the local one instead.
-5. **Write the idea into a handoff** in the worktree, in the project's handoff folder, else at `.handoff/<date>-<effort>.md`. It holds the idea as the maintainer gave it, the effort, the branch and the worktree.
+5. **Write the idea into a handoff** as `<handoff-folder>/<date>-<effort>.md`, with `<handoff-folder>` as the `handoff` skill defines it. It holds the idea as the maintainer gave it, the effort, the branch and the worktree.
    - **For a new project:** it also holds its repo.
 6. **Start the thinking session:** start `<agent>` in the worktree through `<session-host>`, passing the worktree, the effort as the topic, `thinking` as the role, and the starting prompt below.
    - **When it runs in another session:** tell the maintainer where, and stop once `<session-host>` reports it working on the prompt or the maintainer says it started.

@@ -13,4 +13,4 @@ Start work without asking the maintainer for a go-ahead: they gave it when they 
    - **If not:** say so and stop, because the effort's commits belong on that branch in that worktree.
 2. Run `/orchestrate-effort` on the spec and tickets the handoff names, and on the handoff itself.
 
-When the spec, tickets and handoff leave a question open, and the handoff says the session that wrote it can still be reached, look for the answer in that session before you decide the question yourself: it may know what the handoff left out.
+When the spec, tickets and handoff leave a question open, and the handoff says the session that wrote it can still be reached, look for the answer in that session before you decide the question yourself: it holds context the handoff left out.

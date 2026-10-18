@@ -14,13 +14,13 @@ How `set-up-machine` is built. A newcomer needs three facts first:
 4. **Verify.** One run answers "did every harness get what `setup/` asks for?" It exits 1 when any cell is `FAIL`.
 5. **Readable.** A person who opens a script reads, at its top, what it is for and the steps it takes.
 6. **Error handling.** A missing or malformed workstation file is a `FAIL` line that names the file. The hook fails open when its script is missing, except in Pi, which has no native rules under it.
-7. **Out of scope:** writing harness files from a script, pinned versions, unit tests kept in the repo, and checking upstream release versions from the verifier (the agent does that in Inspect).
+7. **Out of scope:** writing harness files from a script, pinned versions, unit tests kept in the repo, and checking upstream release versions from the verifier, which the agent does in Inspect.
 
 ## Entities and relationships
 
 - **Rule table** (`rules.json`): every global rule once, by meaning, with samples. Personal rows from `setup/permissions.json` join it.
-- **Workstation setup** (`setup/` in the workstation repo, found through the pointer `~/.config/agents/source.md`): the source of every personal part.
-- **Harness**: one coding agent, with the environments it runs in; the skill's SKILL.md, *Harnesses*, lists them. Each environment knows its own paths, its hook payload, and how to check each setup area.
+- **Workstation setup**: `setup/` in the workstation repo, found through the pointer `~/.config/agents/source.md`, and the source of every personal part.
+- **Harness**: one coding agent, with the environments it runs in; `skills/set-up-machine/SKILL.md` > 'Harnesses' lists them. Each environment knows its own paths, its hook payload, and how to check each setup area.
 - **Setup area**: instructions, guardrails, sandbox, plugins, skills. Five of the verifier's six columns.
 - **Declared config**: the keys a harness's `config` file in the workstation repo sets, such as its default model, merged into the harness's own config file. The verifier's last column, `config`.
 - **Hook**: decides one tool call against the rule rows.
@@ -43,7 +43,7 @@ skills/set-up-machine/
 ├── references/
 │   ├── <harness>/              # one folder per harness
 │   │   ├── index.md            #   what its environments share, when it has more than one
-│   │   └── <env>.md            #   one per environment, same headings: Found, Instructions, Guardrails,
+│   │   └── <env>.md            #   one per environment, same headings: Presence detection, Instructions, Guardrails,
 │   │                           #   Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it
 │   ├── workstation.md          # the format of every setup/ file, and the run without one
 │   ├── global-instructions.md  # the shared file's shape
@@ -72,13 +72,19 @@ skills/set-up-machine/
 | Name | What it is |
 |---|---|
 | `ID`, `LABEL` | `"cursor"`, `"Cursor"`: the harness, the same for each of its environments; the key in `setup/harnesses.json` and `installs.json`, and the hook's `--harness` |
-| `ENV` | `"cloud"`: the environment, what `--env` selects; the row reads `Cursor / cloud`. A module not yet split has no `ENV` |
+| `ENV` | `"cloud"`: the environment, what `--env` selects; the row reads `Cursor / cloud`. Every environment module defines `ENV` |
 | `present(home)` | its folder exists, or its CLI is on `PATH` |
 | `read(payload)` | the hook payload as one `ToolCall` |
 | `write(denials, asks)` | the harness's answer to the hook |
 | `check_instructions(ctx)` … `check_skills(ctx)`, `check_config(ctx)` | one `Cell(status, detail)` per column |
 
-**Statuses:** `ok`, `FAIL`, `gap` (the harness can't do it, or the check can't see it), `n/a` (the area does not apply). Only `FAIL` sets exit code 1. A cell is the worst of its checks: `FAIL`, then `gap`, then `ok`. `checks.declared_problems` compares a declared config with the harness's file for every harness, key by key, each value as a whole; Codex reads both sides as TOML, the others as JSON. Codex's declared `sandbox_mode`, `approval_policy` and `approvals_reviewer` are checked in its sandbox column and its other keys in config, so one wrong value is one `FAIL`. `verify.py --codex-trust-hash COMMAND` prints the hash Codex needs to trust the hook, since `references/codex/index.md` gives it to the user.
+- **Statuses:** `ok`; `FAIL`; `gap` when the harness can't do it or the check can't see it; and `n/a` when the area does not apply.
+- **Exit code:** only `FAIL` sets exit code 1.
+- **Cell:** the worst of its checks: `FAIL`, then `gap`, then `ok`.
+- **Declared config:** `checks.declared_problems` compares a declared config with the harness's file for every harness, key by key, each value as a whole.
+  - Codex reads both sides as TOML, and the other harnesses as JSON.
+  - Codex's declared `sandbox_mode`, `approval_policy` and `approvals_reviewer` are checked in its sandbox column, and its other keys in config, so one wrong value is one `FAIL`.
+- **Codex trust hash:** `verify.py --codex-trust-hash COMMAND` prints the hash Codex needs to trust the hook, since `references/codex/index.md` gives it to the user.
 
 ## Implementation (traced)
 
@@ -124,14 +130,14 @@ pre_tool_hook.py --harness cursor
 
 - **One package per harness, one module per environment.** Cursor runs as a CLI, a desktop app and a cloud agent; each reads different files, so each is graded on its own row. What they share, such as the hook payload, sits once in the package's `__init__.py`. A harness with one environment is a package too, so a second environment is one new module. An id names a harness only, never an environment: the environment is its own dimension, in `ENV`, in `--env` and in `setup/harnesses.json`'s `environments`.
 
-- **`config` is a verifier column beside the five setup areas, not a sixth setup area.** A default model or reasoning effort is a personal choice, not part of setting a harness up: it is neither instructions, guardrails, sandbox, plugins nor skills. Before, Pi's declared settings sat in its sandbox column and Codex allowed only sandbox keys, so a declared model had nowhere to go. Now every harness can declare a config, the sandbox column holds sandbox state only, and the last column checks the declared keys, `n/a` without a declared config.
+- **`config` is a verifier column beside the five setup areas, not a sixth setup area.** A default model or reasoning effort is a personal choice, not part of setting a harness up: it is neither instructions, guardrails, sandbox, plugins nor skills. Pi's declared settings do not belong in the sandbox column, and Codex would otherwise allow only sandbox keys, so a declared model would have nowhere to go. Every harness can declare a config, the sandbox column holds sandbox state only, and the last column checks the declared keys, `n/a` without a declared config.
 
 ## Extensibility
 
 | Change | What you touch |
 |---|---|
-| Add a harness | a row in SKILL.md's *Harnesses* table; `harnesses/<h>/<env>.py` with the names above; one line in `ALL`; `references/<h>/<env>.md` with the same headings |
-| Add an environment to a harness | its name in SKILL.md's *Harnesses* row; `harnesses/<h>/<env>.py`, moving shared code into `harnesses/<h>/__init__.py`; one line in `ALL`; `references/<h>/<env>.md`, and `references/<h>/index.md` for what the environments share |
+| Add a harness | a row in `skills/set-up-machine/SKILL.md` > 'Harnesses'; `harnesses/<h>/<env>.py` with the names above; one line in `ALL`; `references/<h>/<env>.md` with the same headings |
+| Add an environment to a harness | its name in its row of `skills/set-up-machine/SKILL.md` > 'Harnesses'; `harnesses/<h>/<env>.py`, moving shared code into `harnesses/<h>/__init__.py`; one line in `ALL`; `references/<h>/<env>.md`, and `references/<h>/index.md` for what the environments share |
 | Add a Codex environment | add its adapter and reference page; keep local shared configuration separate from hosted execution |
 | Add a global rule | one row with samples in `rules.json`; each harness reference already says how a row becomes native entries |
 | Add a setup area | the glossary's setup areas first; one `check_<area>` in every harness module; one column |

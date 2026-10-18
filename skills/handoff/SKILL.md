@@ -4,7 +4,12 @@ description: Compact the current conversation into a handoff document for anothe
 argument-hint: "What will the next session be used for?"
 ---
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save it in the repository, in the project's handoff folder, else as `.handoff/<date>-<topic>.md`, and leave it uncommitted: the session that hands over commits it with the rest of its work.
+Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save it as `<handoff-folder>/<date>-<topic>.md`, never committed. The agent that takes the work over deletes it once the work is done.
+
+## Parameters
+
+- `<handoff-folder>`: the folder handoffs are saved in, as the environment defaults name it, such as a folder outside every repository. With no default, use `.handoff/` in the repository and keep it out of git.
+- `<date>-<topic>`: the date and the topic or project the next session works on, such as `2026-10-18-writing-rules`.
 
 Include a "suggested skills" section in the document, naming which skills the next agent should call the Skill tool for.
 

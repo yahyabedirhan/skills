@@ -5,19 +5,21 @@ read `rules.json` itself, with the harness references, to write each harness's
 native entries. A row's `match` takes one of three
 kinds, told apart by its keys:
 
-- command: `program` (one name or a list), optional `subcommands`, `flags`, `operands`
-  (words right after the subcommand, or a list of alternative word lists), `any_operand`
-  (words any one of which may appear anywhere after the subcommand), `arguments: "none"` (the
-  program run with nothing after it) or `arguments: "flags"` (with flags and nothing else
-  after it), `files` (globs one of its operands matches, read as a file row's paths, with an
-  optional `except`), and `variables` (globs over the names of variables an argument expands);
-- file: `paths` (globs, relative to the project, or starting `~/` or `/`), `access` (`read` or `write`)
-  and an optional `except` (globs the row leaves out, such as `**/.env.example`);
+- command: `program`, one name or a list, and optionally:
+  - `subcommands`;
+  - `flags`;
+  - `operands`: words right after the subcommand, or a list of alternative word lists;
+  - `any_operand`: words any one of which may appear anywhere after the subcommand;
+  - `arguments: "none"`: the program run with nothing after it; `arguments: "flags"`: with flags and nothing else after it;
+  - `files`: globs one of its operands matches, read as a file row's paths, with an optional `except`;
+  - `variables`: globs over the names of variables an argument expands;
+- file: `paths`, globs relative to the project or starting `~/` or `/`; `access`, `read` or `write`;
+  and an optional `except`, globs the row leaves out, such as `**/.env.example`;
 - mcp-tool: `server` and `tool`, two case-insensitive regular expressions matched
   against the tool names the harness exposes on the machine.
 
-Every row carries `samples`: `covers`, calls the row must catch (a shell command,
-a path, or an MCP tool name, by the row's kind), and `leaves`, near misses it must
+Every row carries `samples`: `covers`, calls the row must catch, a shell command,
+a path or an MCP tool name by the row's kind, and `leaves`, near misses it must
 let through. The verify script feeds them to the hook. Any row may carry a `gap`:
 what no harness can catch for it, which every harness's audit names. An `ask` row may
 carry `approver: "user"`: each call needs the user's own approval, so the hook refuses

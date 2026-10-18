@@ -16,11 +16,11 @@ Instead of branching on type (`if (type == "car") … else if (type == "truck")`
 
 ## Inheritance, and composition instead
 
-Inheritance shares implementation by making one class a more specific version of another. It couples tightly: a change to the parent can break every child (the fragile base class).
+Inheritance shares implementation by making one class a more specific version of another. It couples tightly: a change to the parent can break every child, which is the fragile base class problem.
 
 - **It fits** when the shared implementation is stable and every subclass truly is the parent: savings and checking accounts sharing balance, deposit and withdraw logic.
 - **It breaks** when subclasses override methods to do something different: an `ElectricCar` overriding `Car.startEngine()` has no engine, and a hybrid fits under neither.
-- **Compose instead** when behaviour varies: give `Car` a `Drivetrain` (gas engine, electric motor, both for a hybrid) and let new kinds be new implementations.
+- **Compose instead** when behaviour varies: give `Car` a `Drivetrain`, such as a gas engine, an electric motor or both for a hybrid, and let new kinds be new implementations.
 
 Default to interfaces and composition; most designs need no inheritance at all.
 

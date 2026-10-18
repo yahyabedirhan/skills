@@ -19,7 +19,7 @@ There is no `tmp/`, no `.prs/` and no vendor-named folder: one ignored folder ho
 
 ## Folder contents
 
-- **`.handoff/`**: one handoff per session that hands over, named `<date>-<topic>.md`, where the topic is the effort's name when there is one. It is committed with the work it describes, so a fresh worktree sees it. A project that names its own handoff folder in its instructions uses that one.
+- **`.handoff/`**: the handoff folder when the environment defaults name none. One handoff per session that hands over, named `<date>-<topic>.md`, where the topic is the effort's name when there is one. It stays out of git. The environment defaults can name a folder outside the repository instead, and every skill that writes a handoff uses that one.
 - **`.efforts/<effort>/`**: only on a local-files tracker. `spec.md` and `issues/<NN>-<slug>.md`, written by `/to-spec` and `/to-tickets`. With a hosted tracker, such as GitHub or Linear, the spec and tickets live there, and a project has no `.efforts/`. Without an effort, `<effort>` is a short slug for the feature.
 - **`docs/agents/issue-tracker.md`**: says which tracker the repo uses and how to reach it, so a skill knows whether to publish to the tracker or to `.efforts/`.
 - **`assets/images/<topic>/`**: images the project ships or shows, such as logos, icons and diagrams. Images aren't documentation, so they live outside `docs/`.
@@ -33,11 +33,12 @@ Move what's no longer needed, such as a delegate's temporary folder, an old log 
 
 ## Project setup
 
-`/set-up-project` applies this section. It adds both ignored paths to `.gitignore`:
+`/set-up-project` applies this section. It adds the ignored paths to `.gitignore`:
 
 ```gitignore
 .scratch/
 .claude/worktrees/
+.handoff/
 ```
 
 and writes `docs/agents/issue-tracker.md` when the project has none.

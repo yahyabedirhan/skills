@@ -6,7 +6,7 @@ How a database finds rows without scanning the whole table, and which kind of in
 
 Data lives on disk and is read into memory page by page; without an index, a query reads every page. An index is a separate structure that points straight at the pages holding the match. Random reads stay slower than sequential ones even on SSDs, which is why this matters.
 
-Indexes cost disk space and slow every write, because each index is updated too. They don't pay on write-heavy tables that are rarely read, on tiny tables, or for predicates that match most of the table (reading most rows through an index is slower than a scan).
+Indexes cost disk space and slow every write, because each index is updated too. They don't pay on write-heavy tables that are rarely read, on tiny tables, or for predicates that match most of the table, because reading most rows through an index is slower than a scan.
 
 ## Index types
 

@@ -1,6 +1,6 @@
 # Caching
 
-Keeping frequently read data in memory so reads skip the store behind it. A Redis read takes about a millisecond where a database query may take tens, and every cache hit is load the database doesn't carry. The price is staleness, invalidation, and new ways to fail.
+Keeping frequently read data in memory so reads skip the store behind it. A Redis read takes about a millisecond where a database query takes up to tens, and every cache hit is load the database doesn't carry. The price is staleness, invalidation, and new ways to fail.
 
 ## When a cache is justified
 
@@ -17,8 +17,8 @@ An indexed row lookup already takes a few milliseconds; caching it adds infrastr
 
 - **External cache** (Redis, Memcached): a separate service every app server shares, with eviction and TTLs. The default.
 - **CDN**: edge servers near users cache content; reach for it first for static media served worldwide.
-- **Client-side**: the browser or app keeps data (HTTP cache, local storage, offline sync). Little control over staleness.
-- **In-process**: small, hot, rarely changing values (config, feature flags, hot keys) in the server's own memory. The fastest, but each server has its own copy and invalidations don't reach the others. Use it as an extra layer on top of an external cache.
+- **Client-side**: the browser or app keeps data, through the HTTP cache, local storage or offline sync. Little control over staleness.
+- **In-process**: small, hot, rarely changing values, such as config, feature flags and hot keys, in the server's own memory. The fastest, but each server has its own copy and invalidations don't reach the others. Use it as an extra layer on top of an external cache.
 
 ## Read and write patterns
 
@@ -26,7 +26,7 @@ An indexed row lookup already takes a few milliseconds; caching it adds infrastr
 |---|---|---|
 | **Cache-aside** | Read the cache; on a miss, read the database, store the result, return it | The default; caches only what's read, a miss costs extra latency |
 | **Write-through** | Write to the cache, which writes the database before acknowledging | Reads must be fresh and slower writes are acceptable; needs a library that supports it, and a failed half still leaves the two inconsistent |
-| **Write-behind** | Write to the cache, which flushes to the database later in batches | Very high write throughput where losing recent writes is acceptable (metrics) |
+| **Write-behind** | Write to the cache, which flushes to the database later in batches | Very high write throughput where losing recent writes is acceptable, such as metrics |
 | **Read-through** | The cache fetches from the database on a miss itself | Mostly CDNs; rarely worth it for an application cache |
 
 ## Eviction
@@ -40,12 +40,12 @@ An indexed row lookup already takes a few milliseconds; caching it adds infrastr
 
 - **Stampede (thundering herd)**: a popular entry expires and every request hits the database at once. Coalesce requests so only one rebuilds while the others wait; or refresh hot keys before they expire.
 - **Stale data**: the database changed and the cache didn't. Delete the entry on write, use short TTLs, or accept eventual consistency where the requirements allow it.
-- **Hot keys**: one entry (a celebrity profile) overloads one cache node. Replicate it across nodes, keep an in-process copy, or rate-limit.
+- **Hot keys**: one entry, such as a celebrity profile, overloads one cache node. Replicate it across nodes, keep an in-process copy, or rate-limit.
 - **Cache failure**: every read falls to the database. Fall back with a circuit breaker so the database isn't flattened.
 
 ## In a design
 
-State the bottleneck with numbers, what to cache (read often, changes rarely, expensive to produce), the key shape (`user:123:profile`), the pattern, eviction and TTL, and the one or two failure modes that matter for this system.
+State the bottleneck with numbers, what to cache, which is data read often, changed rarely and expensive to produce, the key shape (`user:123:profile`), the pattern, eviction and TTL, and the one or two failure modes that matter for this system.
 
 ---
 

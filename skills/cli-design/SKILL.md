@@ -60,11 +60,11 @@ Show them as short numbered lists.
 Turn the jobs into a command tree.
 
 - **Nouns** are the objects the jobs act on, in the words the project already uses in its glossary, its UI and its docs. A noun with commands of its own becomes a group; information about a noun is an option or an output field, not a group.
-- **Hierarchy:** draw the nouns as a containment tree (account › project › environment), and let the groups follow it. Use `noun verb` order, since it is the more common order and it groups related commands in the help.
+- **Hierarchy:** draw the nouns as a containment tree, such as account › project › environment, and let the groups follow it. Use `noun verb` order, since it is the more common order and it groups related commands in the help.
 - **Verbs** come from one closed vocabulary, one meaning each, used the same way on every noun that supports it. Pick one word from each synonym pair, such as `create` or `new` and `get` or `show`, and use it everywhere. Keep printing and displaying apart: a verb that prints data always prints, and a window or a picker gets its own verb. The default vocabulary is in [conventions.md](references/conventions.md).
 - **Depth:** at most two levels, `tool <noun> <verb>`. A compound action gets a hyphenated verb (`send-text`) instead of a third level.
 - **Top level:** only the few commands callers run every session, plus `help`. Everything else lives in a group, because a long flat list hides the commands that matter.
-- **Targets:** one rule for how a command names the object it acts on: a required word (`tool project get <id>`), a named option (`--project <id>`), or a current default (a configured context, a working directory) that an option overrides. Apply the same rule to every command.
+- **Targets:** one rule for how a command names the object it acts on: a required word (`tool project get <id>`), a named option (`--project <id>`), or a current default, such as a configured context or the working directory, that an option overrides. Apply the same rule to every command.
 
 Show the model as the command tree with one line per group, the verb table, and the targeting rule.
 
@@ -74,7 +74,7 @@ Spell every command's arguments, flags and other inputs.
 
 - **Words and flags:** a word is required input with a natural order, such as the file to copy. Everything else is a named flag, because flags can be added later without breaking callers and read clearly in scripts. When a command needs two inputs of different kinds, take the second as a flag, so a caller can't swap them by mistake.
 - **Flag names:** long names in kebab case for every flag, a short letter only for the most common few, and the standard names for standard meanings (`--help`, `--version`, `--json`, `--quiet`, `--force`, `--dry-run`). The same flag means the same thing on every command.
-- **Global flags** that every command takes (output format, verbosity, the target context) are parsed in one place.
+- **Global flags** that every command takes, such as the output format, verbosity and the target context, are parsed in one place.
 - **Other sources:** standard input when the argument is `-`, environment variables, configuration files. Apply one precedence order, from flags down to built-in defaults.
 - **Interaction:** prompt only when standard input is a terminal, and give every prompt a flag that answers it, so scripts and agents never hang. Confirm destructive actions, with `--force` or `--yes` to skip the confirmation, and offer `--dry-run` where an action is hard to undo.
 - **Secrets** come from a file, standard input or the environment, never from a flag, since flags land in shell history and process listings.
@@ -87,7 +87,7 @@ Show one usage line per command, with its words, its flags and their value place
 Decide what each command prints and how it fails.
 
 - **Streams:** data goes to standard output, so it can be piped. Progress, warnings and errors go to standard error.
-- **For people and for programs:** the default output is for people, short and readable. `--json` prints a stable, documented shape on every command that prints data. Treat the JSON shape as part of the contract and the plain output as free to improve.
+- **Human and JSON output:** the default output is for people, short and readable. `--json` prints a stable, documented shape on every command that prints data. Treat the JSON shape as part of the contract and the plain output as free to improve.
 - **Terminals:** use colour, spinners and progress bars only when the stream is a terminal, and turn colour off for `NO_COLOR`, `TERM=dumb` and `--no-color`. Print something within about 100 ms, and show progress for anything that takes longer than a moment, so the command never looks hung.
 - **Errors:** one line that says what went wrong and what to do next, naming the command or flag that fixes it. Put the most important information last, where the eye lands. Print a debugging trace only on request.
 - **Exit codes:** 0 for success, a non-zero code for failure, and a distinct code for wrong usage. Document every code the CLI uses, and add a code only for a case a caller handles differently from failure, such as a timeout or "nothing found".
@@ -102,8 +102,8 @@ Design the help as the main interface for learning the CLI, for people and for a
 - **Three levels:** the top help (`tool --help`) fits one screen, a group's help (`tool <group> --help`, or the group alone) lists each of its commands with its full usage line, and a command's help (`tool <group> <verb> --help`) gives the usage, a description, every flag and examples. The layouts are in [conventions.md](references/conventions.md).
 - **Summaries:** one line per command, starting with a verb and saying what the command achieves, not how the code does it. Use the same summary everywhere it appears.
 - **Examples** lead the command help, because most readers copy one and adjust it.
-- **When the caller is wrong:** wrong usage prints that command's usage line and a pointer to its help, not the whole manual. A mistyped command suggests the closest match and leaves the caller to run it.
-- **Discovery:** the top help names where the full documentation lives. When agents are callers, give them a machine-readable listing of the commands (a `help --json` or a schema command), and point them to it from the top help once.
+- **Wrong usage:** wrong usage prints that command's usage line and a pointer to its help, not the whole manual. A mistyped command suggests the closest match and leaves the caller to run it.
+- **Discovery:** the top help names where the full documentation lives. When agents are callers, give them a machine-readable listing of the commands, such as `help --json` or a schema command, and point them to it from the top help once.
 - **Completions** for the common shells, generated from the same command definitions.
 
 Show the top help, one group's help and one command's help as mock-ups.
@@ -133,7 +133,14 @@ Show the likely changes as a "change → what you touch" table. A change that la
 
 ## Defaults first
 
-Start each choice from its default, because callers bring these expectations from other CLIs and every departure costs each of them a lookup: `noun verb` at two levels, the standard flag names, `--json` on every command that prints data, standard output for data and standard error for messages, exit 0 for success, 1 for failure and 2 for wrong usage, no prompts when not in a terminal, and help generated from one command table. Move off a default only for a named requirement, and say which.
+Start each choice from its default, because callers bring these expectations from other CLIs and every departure costs each of them a lookup. Move off a default only for a named requirement, and say which.
+
+- **Command shape:** `noun verb`, at two levels.
+- **Flags:** the standard names.
+- **Output:** `--json` on every command that prints data; data on standard output, messages on standard error.
+- **Exit codes:** 0 for success, 1 for failure, 2 for wrong usage.
+- **Prompts:** none when not in a terminal.
+- **Help:** generated from one command table.
 
 ## Review checklist
 

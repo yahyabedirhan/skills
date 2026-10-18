@@ -12,21 +12,21 @@ A pattern is a name for a structure that good design produces on its own. Make t
 
 ## Structural: how objects connect
 
-**Decorator.** Wrap an object in another with the same interface to add behaviour, stacking as needed (compression on encryption on a file source) instead of a subclass per combination. Use it when optional behaviours combine at runtime; a fixed, design-time variation is a subclass or a function.
+**Decorator.** Wrap an object in another with the same interface to add behaviour, stacking as needed, such as compression on encryption on a file source, instead of a subclass per combination. Use it when optional behaviours combine at runtime; a fixed, design-time variation is a subclass or a function.
 
-**Facade.** A coordinator that hides several parts behind a simple entry point. The orchestrator of most designs already is one (a `Game` coordinating board, players and state); call it a facade when the name helps explain the design, especially when it wraps a messy existing subsystem.
+**Facade.** A coordinator that hides several parts behind a simple entry point. The orchestrator of most designs already is one, such as a `Game` coordinating board, players and state; call it a facade when the name helps explain the design, especially when it wraps a messy existing subsystem.
 
 **Adapter.** Wrap a dependency whose interface doesn't match yours, so its vocabulary stops at one file. Useful at a third-party boundary; pointless when the interfaces already match.
 
 ## Behavioural: how objects interact
 
-**Strategy.** Replace an `if/else` on type with interchangeable implementations held by composition (a cart holding a `PaymentStrategy`). The most common pattern, and just polymorphism with a name. Factory decides which object to create; strategy decides which behaviour an existing object uses. If the choice is made once at startup and never changes, a plain function will do.
+**Strategy.** Replace an `if/else` on type with interchangeable implementations held by composition, such as a cart holding a `PaymentStrategy`. The most common pattern, and just polymorphism with a name. Factory decides which object to create; strategy decides which behaviour an existing object uses. If the choice is made once at startup and never changes, a plain function will do.
 
-**Observer.** Subscribers register with a subject and are notified when it changes, without the subject knowing what they do (a stock price feeding displays and alerts; an order feeding inventory, notifications and analytics). Use it when one event has several independent consequences; with one listener, call it directly.
+**Observer.** Subscribers register with a subject and are notified when it changes, without the subject knowing what they do: a stock price feeds displays and alerts, and an order feeds inventory, notifications and analytics. Use it when one event has several independent consequences; with one listener, call it directly.
 
-**State machine.** An object whose valid operations depend on its current state, with each state's behaviour and transitions made explicit (a vending machine moving from no coin, to coin inserted, to dispensing). Signals: a lifecycle in the requirements, or the same `if (state == …)` guard in many methods. When one is present it is usually the centre of the design, best shown as a state diagram; two states and one transition are just a boolean.
+**State machine.** An object whose valid operations depend on its current state, with each state's behaviour and transitions made explicit, such as a vending machine moving from no coin, to coin inserted, to dispensing. Signals: a lifecycle in the requirements, or the same `if (state == …)` guard in many methods. When one is present it is usually the centre of the design, best shown as a state diagram; two states and one transition are just a boolean.
 
-**Command.** An operation as a value (its validated input and a function that applies it), so operations can be listed, queued, logged or undone uniformly. Worth it once there are several operations handled the same way.
+**Command.** An operation as a value, made of its validated input and a function that applies it, so operations can be listed, queued, logged or undone uniformly. Worth it once there are several operations handled the same way.
 
 **Registry.** A list of definitions the core iterates over, so adding a variant is one new file plus one entry.
 
@@ -36,7 +36,7 @@ A pattern is a name for a structure that good design produces on its own. Make t
 |---|---|
 | Factory | Callers shouldn't care which concrete class is created |
 | Builder | Many optional fields or messy construction |
-| Singleton | One global instance is truly required (rare) |
+| Singleton | One global instance is truly required, which is rare |
 | Decorator | Optional behaviours layer at runtime |
 | Facade | Internal complexity hides behind one entry point |
 | Adapter | A dependency's interface doesn't fit yours |

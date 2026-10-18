@@ -31,7 +31,7 @@ Claude Code keeps transcripts as files with one JSON object per line, laid out a
   <session-id>/subagents/agent-<id>.meta.json its type, task description and spawn depth
 ```
 
-The current session's id is in the `CLAUDE_CODE_SESSION_ID` environment variable. Skill loads appear as `tool_use` blocks named `Skill`, with the skill in `input.skill`, and as `<command-name>/<name></command-name>` in user messages.
+The current session's id is in the `CLAUDE_CODE_SESSION_ID` environment variable. Skill loads appear as `tool_use` blocks named `Skill`, with the skill in the block's key `input` > `skill`, and as `<command-name>/<name></command-name>` in user messages.
 
 - **For another harness:** find where it stores its sessions and how a skill load shows there. Codex keeps them under `~/.codex/sessions/` and loads a skill by reading its `skills/<name>/SKILL.md`, so a read of that file is the load. A session that edits the skill reads that file too, so tell an edit's read apart from a load.
 

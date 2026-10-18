@@ -12,7 +12,7 @@ The workstation repo is the one source of everything personal about how the user
 - their personal permissions;
 - what every machine installs.
 
-It is the user's own repository, usually private, because it holds the personal detail that the public skills repo and the user's projects leave out. `/set-up-machine` reads its `setup/` folder on each machine, so a change made once reaches every machine. Without one, each machine's shared global instructions file holds the personal lines itself, and a personal permission has no home.
+`<workstation-repo>` is the user's own repository, usually private, because it holds the personal detail that the public skills repo and the user's projects leave out. `/set-up-machine` reads its `setup/` folder on each machine, so a change made once reaches every machine. Without one, each machine's shared global instructions file holds the personal lines itself, and a personal permission has no home.
 
 ## Its starting layout
 

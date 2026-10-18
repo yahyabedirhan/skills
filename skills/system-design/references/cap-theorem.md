@@ -12,13 +12,13 @@ A distributed system can guarantee at most two of:
 
 Network partitions happen, so partition tolerance is required, and the real choice is between consistency and availability during a partition. CAP's consistency is not ACID's consistency, which is about a transaction leaving the data valid.
 
-An example: users in the USA and Europe, with a server in each and replication between them. When the link breaks and a European user views an American user's profile, the system either returns an error (consistency) or shows the last name it has, possibly stale (availability). For a profile, stale is better than an error.
+An example: users in the USA and Europe, with a server in each and replication between them. When the link breaks and a European user views an American user's profile, the system either chooses consistency and returns an error, or chooses availability and shows the last name it has, possibly stale. For a profile, stale is better than an error.
 
 ## Choosing
 
 Ask: would it be a disaster if users briefly saw inconsistent data? Does every read need the latest write?
 
-- **Consistency**: ticket and seat booking (no double booking), inventory (no overselling the last item), financial systems (order books, balances).
+- **Consistency**: ticket and seat booking, so no seat is booked twice; inventory, so the last item is not oversold; financial systems, such as order books and balances.
 - **Availability**: social media, content platforms, review sites. Most systems are here, with eventual consistency: replicas converge within seconds or minutes.
 
 Real systems choose **per feature**: Ticketmaster is consistent for booking a seat and available for browsing events; a dating app is consistent for matches and available for viewing profiles.
@@ -33,7 +33,7 @@ Most distributed databases are configurable either way, so name the setting in t
 ## Levels of consistency
 
 - **Strong**: every read sees the latest write. The most expensive.
-- **Causal**: related events appear in the same order to everyone (a comment never before its post).
+- **Causal**: related events appear in the same order to everyone: a comment never appears before its post.
 - **Read-your-own-writes**: a user sees their own changes immediately; others may see older versions.
 - **Eventual**: replicas converge over time (DNS). The default of most distributed databases, and what choosing availability means.
 

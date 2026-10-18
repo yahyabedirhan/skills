@@ -19,12 +19,12 @@ ALL = (claude_code_cli, claude_code_desktop, claude_code_cloud, codex_cli, codex
 BY_ID = {}
 for _module in ALL:
     BY_ID.setdefault(_module.ID, _module)
-# {harness id: (environment, ...)}: an empty tuple for a harness not yet split.
+# {harness id: (environment, ...)}: an empty tuple for a harness without environments.
 ENVIRONMENTS = {h: tuple(m.ENV for m in ALL if m.ID == h and getattr(m, "ENV", None)) for h in BY_ID}
 
 
 def env_of(module):
-    """The environment name, or None for a harness not yet split into environments."""
+    """The environment name, or None for a harness without environments."""
     return getattr(module, "ENV", None)
 
 

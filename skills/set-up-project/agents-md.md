@@ -32,4 +32,4 @@ This project's tools for the roles skills name; each row overrides the global on
 
 ## Environment defaults
 
-Optional, and only for a role every contributor uses the same way (a worktree tool the project's scripts assume). A tool one person prefers belongs in their own global environment defaults. The roles are in `/set-up-machine`'s `references/global-instructions.md`.
+Optional, and only for a role every contributor uses the same way, such as a worktree tool the project's scripts assume. A tool one person prefers belongs in their own global environment defaults. `/set-up-machine`'s `references/global-instructions.md` > 'Roles' lists the roles.

@@ -1,6 +1,6 @@
 """The workstation repo: the source of every personal part of a machine's setup.
 
-The pointer, `~/.config/agents/source.md`, names the person's workstation repo and its clone,
+The pointer, `~/.config/agents/source.md`, names `<workstation-repo>` and its clone, `<path-to-workstation-repo>`,
 or says there is none. This module reads the repo's `setup/` folder through it:
 
 - `setup/instructions.md`: the personal parts of the shared global instructions file;
@@ -59,7 +59,7 @@ class Setup:
 
 
 def load(home: Path, table: list, harness_ids) -> Setup:
-    """The pointer and every setup/ file it leads to. Problems are recorded, never raised.
+    """The pointer and every `setup/` file it leads to. Problems are recorded, never raised.
     `harness_ids` maps each harness id to the environments it has."""
     setup = Setup()
     try:

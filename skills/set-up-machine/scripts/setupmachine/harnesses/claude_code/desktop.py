@@ -1,5 +1,5 @@
 """Claude Code in the Claude desktop app, a local session: it reads the same `~/.claude/` as the
-CLI, and keeps its permission mode and worktree settings in the app (`references/claude-code/desktop.md`).
+CLI, and keeps its permission mode and worktree settings in the app, as `references/claude-code/desktop.md` describes.
 """
 from __future__ import annotations
 

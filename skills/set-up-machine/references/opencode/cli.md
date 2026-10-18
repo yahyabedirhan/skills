@@ -1,120 +1,131 @@
 # opencode
 
-How to set up and audit opencode from the rule table. Docs: [rules](https://opencode.ai/docs/rules/), [permissions](https://opencode.ai/docs/permissions/), [config](https://opencode.ai/docs/config/), [plugins](https://opencode.ai/docs/plugins/). Background: the repo's `docs/research/harness-capabilities.md`, section 3.
+The CLI environment of opencode, set up from the rule table. This page says how it is detected, what each harness row means, which gaps stay and how the verifier checks it. Docs: [rules](https://opencode.ai/docs/rules/), [permissions](https://opencode.ai/docs/permissions/), [config](https://opencode.ai/docs/config/), [plugins](https://opencode.ai/docs/plugins/). Background: this repo's `docs/research/harness-capabilities.md` > '3. opencode'.
 
-## Found
+## The environment
 
-Found when `~/.config/opencode/` exists or `opencode` is on `PATH`.
+### Presence detection
 
-## Instructions
+Present when `~/.config/opencode/` exists or `opencode` is on `PATH`.
 
-### Global instructions
+## Harness rows
+
+### Instructions
+
+#### Global instructions
 
 - opencode reads the first that exists of `~/.config/opencode/AGENTS.md` and `~/.claude/CLAUDE.md`. It doesn't follow `@` imports; its own link below makes the order not matter.
 - `~/.config/opencode/AGENTS.md` becomes a **relative symlink**, `../agents/AGENTS.md`, to the shared file.
-- An existing `AGENTS.md` there (a file, or a link elsewhere) is kept and `extra`, with a `gap`: opencode reads it instead until its lines move into the shared file (../global-instructions.md, *Moving a harness's file*) and the user deletes it.
+- An existing `AGENTS.md` there, a file or a link elsewhere, is kept and `extra`, with a `gap`: opencode reads it instead until its lines move into the shared file, as `../global-instructions.md` > 'Moving a harness's file' describes, and the user deletes it.
 
-### Memory
+#### Memory
 
-No memory feature: a `none` line. Some models are prompted to keep a memory file in the repo (`.github/instructions/memory.instruction.md`); that file is the project's.
+No memory feature: a `none` line. Some models are prompted to keep a memory file in the repo, `.github/instructions/memory.instruction.md`; that file is the project's.
 
-## Guardrails
+### Guardrails
 
-### Permissions
+#### Permissions
 
-- **File:** the global folder loads `config.json`, `opencode.json` and `opencode.jsonc`, in that order; write the last that exists, else create `opencode.json`. Key `permission`: a tool name (a wildcard: `bash`, `read`, `edit`, `external_directory`, `playwright_*`) mapped to a level (`allow`, `ask`, `deny`) or to `{pattern: level}`. Keep every other key; opencode adds `$schema` itself.
-- **Comments:** a file holding `//` or `/* */` comments can't be rewritten without losing them. Leave it, and name the rules as a `gap` until the user moves the comments out (or into a `$comment` key). Trailing commas are fine to drop.
+- **File:** the global folder loads `config.json`, `opencode.json` and `opencode.jsonc`, in that order; write the last that exists, else create `opencode.json`. Key `permission`: a tool name or wildcard, such as `bash`, `read`, `edit`, `external_directory` or `playwright_*`, mapped to a level, `allow`, `ask` or `deny`, or to `{pattern: level}`. Keep every other key; opencode adds `$schema` itself.
+- **Comments:** a file holding `//` or `/* */` comments can't be rewritten without losing them. Leave it, and name the rules as a `gap` until the user moves the comments out, or into a `$comment` key. Trailing commas are fine to drop.
 - **Evaluation:** opencode's defaults first, then every rule in the order written; the **last match wins**. `*` matches anything, `/` included; `?` one character; a trailing ` *` also matches the command with nothing after it. So write allow entries first, then ask, then deny: where two overlap, the stricter sits later and wins.
-- **Tightening:** a looser user entry stays where it is, and the stricter one goes after it. The same pattern at a looser level moves to the end at the table's level. When a later tool-wide entry (`"*": "allow"`, or `"bash": "allow"` written as a string) would override the tool's rules, move the tool's whole object after it (a string level becomes `{"*": <level>}` first).
-- **Covered already:** work out which entry opencode would apply, by last match, to the texts the wanted entry matches (for `rm -rf *`: `rm -rf` and `rm -rf x`). At the table's level, `present` (maybe covered by a broader entry); at a stricter one, `stricter`, kept.
-- **Projects can loosen it:** a project's `opencode.json` merges over the global one; a pattern new to the project comes after the global rules and wins, and the same pattern replaces the level. So does an agent's own `permission`. Only managed config holds. Both are `gap`s; `/set-up-project`'s audit checks each project.
+- **Tightening:** a looser user entry stays where it is, and the stricter one goes after it. The same pattern at a looser level moves to the end at the table's level. When a later tool-wide entry, such as `"*": "allow"` or `"bash": "allow"` written as a string, would override the tool's rules, move the tool's whole object after it; a string level becomes `{"*": <level>}` first.
+- **Covered already:** work out which entry opencode would apply, by last match, to the texts the wanted entry matches, such as `rm -rf` and `rm -rf x` for `rm -rf *`. At the table's level, `present`, also when a broader entry covers it; at a stricter one, `stricter`, kept.
+- **Project override:** a project's `opencode.json` merges over the global one; a pattern new to the project comes after the global rules and wins, and the same pattern replaces the level. So does an agent's own `permission`. Only managed config holds. Both are `gap`s; `/set-up-project`'s audit checks each project.
 
-### Command rows
+#### Command rows
 
-- Each spelling (SKILL.md, *Spellings*) becomes one `bash` pattern ending in ` *`: `"rm -rf *": "deny"`, `"/bin/rm -rf *": "deny"`, `"git push --force *": "deny"`. The space keeps a word boundary: `git push --force *` doesn't match `git push --force-with-lease`.
+- Each spelling, as `../rule-table.md` > 'Spellings' lists them, becomes one `bash` pattern ending in ` *`: `"rm -rf *": "deny"`, `"/bin/rm -rf *": "deny"`, `"git push --force *": "deny"`. The space keeps a word boundary: `git push --force *` doesn't match `git push --force-with-lease`.
 - `arguments: "none"` becomes the exact command, with no ` *`: `"env": "deny"`, so `env FOO=1 cmd` still runs.
 - **No pattern, and a gap instead:** `arguments: "flags"` rows, `files` rows (`cat .env`) and `variables` rows (`echo $API_TOKEN`); patterns match text, not paths, "only flags" or a variable's name.
-- opencode checks each plain command of a compound (`a && rm -rf x`, pipes, `$(…)`) by its text, but never a declaration: `export -p`, `declare -p` and `typeset -p` (and `local`, `readonly`) don't meet their patterns (probed). A `gap` for those rows; the hook refuses them.
+- opencode checks each plain command of a compound (`a && rm -rf x`, pipes, `$(…)`) by its text, but never a declaration: `export -p`, `declare -p` and `typeset -p` (and `local`, `readonly`) don't meet their patterns. A `gap` for those rows; the hook refuses them.
 
-### File rows
+#### File rows
 
-- A `read` row becomes `read` patterns, a `write` row `edit` patterns (edit, write and patch tools), matched against the path relative to the project. `**` is `*` here, since `*` crosses `/`, and `**/.env` becomes two patterns, `.env` and `*/.env`, since `*/` alone misses the project's own folder.
+- A `read` row becomes `read` patterns, a `write` row `edit` patterns, which cover the edit, write and patch tools, matched against the path relative to the project. `**` is `*` here, since `*` crosses `/`, and `**/.env` becomes two patterns, `.env` and `*/.env`, since `*/` alone misses the project's own folder.
 - A `~/` path becomes an `external_directory` pattern (`"~/.ssh/*": "deny"`), which binds file tools and the file arguments of bash commands outside the project, reads and writes alike.
 - **Exceptions:** no negation, but the last match wins, so each `except` glob becomes an `allow` after the row's deny entries (`read: {".env.example": "allow", "*/.env.example": "allow"}`), as opencode's own defaults do for `.env.example`. Where a user entry refuses the exception (`"*.env*": "deny"`), leave it refused: `stricter`.
 
-### MCP-tool rows
+#### MCP-tool rows
 
 Tools are named `<server>_<tool>`, and that name is also the tool's `permission` key, wildcards allowed (`"gmail_*": "ask"`). opencode lists the tools only inside a session, so match each row's `server` regex against the servers in the global config's `mcp` key: no match is a `found` line saying so.
 
 - **With a tool listing from a session:** each tool a row matches becomes an exact key at the row's level, after the allow entries (`"gmail_send_message": "deny"`); a whole-tool `deny` also hides the tool from the model.
 - **Without one:** a matching row is a `gap`, and the hook refuses the matching tools of a deny row when they're called.
-- **`approver: "user"` rows:** `--auto` (also `--yolo` and `--dangerously-skip-permissions`) and the TUI's auto-approve toggle answer every `ask` for the user, and the plugin can't tell they're on. So the hook refuses these rows' calls in opencode, a `gap` line; a plain `opencode run` rejects an `ask` anyway.
+- **`approver: "user"` rows:** `--auto`, `--yolo`, `--dangerously-skip-permissions` and the TUI's auto-approve toggle answer every `ask` for the user, and the plugin can't tell they're on. So the hook refuses these rows' calls in opencode, a `gap` line; a plain `opencode run` rejects an `ask` anyway.
 
-### Personal permissions
+#### Personal permissions
 
-A personal permission (../workstation.md) becomes `permission` patterns the way a table row of its kind does above, each marked `personal`. An `allow` row's patterns get `allow`, written with the other allow entries first, so the table's ask and deny entries after them win and a personal `allow` never loosens a table row.
+A personal permission, as the section `../workstation.md` > `setup/permissions.json` defines it, becomes `permission` patterns the way a table row of its kind does above, each marked `personal`. An `allow` row's patterns get `allow`, written with the other allow entries first, so the table's ask and deny entries after them win and a personal `allow` never loosens a table row.
 
 - **Worked example,** an `allow` command row on `<program>` with subcommand `<word>`: `"bash": {"<program> <word> *": "allow", "/bin/<program> <word> *": "allow", "/usr/bin/<program> <word> *": "allow", …}`, before the deny patterns.
 - **Its tool exists** for a command row when one of its programs is on `PATH`, for a file row always, and for an MCP-tool row when its `server` regex matches a server in the `mcp` key; otherwise the row is `n/a` here. A matching MCP-tool row is still a `gap`, as above: an `allow` row then leaves the tools to opencode's own defaults.
 
-### What the agent sees
+#### What the agent sees
 
-A native refusal: `The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [...]`, with every bash pattern as JSON, not just the one that matched (about 150, which costs the agent tokens). An `ask` rule prompts in the TUI; `opencode run` auto-rejects it (`The user rejected permission to use this specific tool call.`). The hook runs first, and its refusal names each refused part, its rule, reason and instruction.
+A native refusal: `The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [...]`, with every bash pattern as JSON, not just the one that matched: about 150, which costs the agent tokens. An `ask` rule prompts in the TUI; `opencode run` auto-rejects it with `The user rejected permission to use this specific tool call.` The hook runs first, and its refusal names each refused part, its rule, reason and instruction.
 
-## Sandbox
+### Sandbox
 
 set-up-machine declares no sandbox setting for opencode, so the verifier's `sandbox` cell is `n/a`.
 
-## Plugins
+### Plugins
 
-A `gap`: set-up-machine doesn't deliver `plugins` entries (../workstation.md) to opencode yet. Its own docs name how it takes plugins and MCP servers; until a section here says how, an entry that lists `opencode` makes the verifier's `plugins` cell a `gap`.
+A `gap`: set-up-machine doesn't deliver `plugins` entries, which the section `../workstation.md` > `setup/installs.json` defines, to opencode, so an entry that lists `opencode` makes the verifier's `plugins` cell a `gap`.
 
-## Skills
+### Skills
 
-opencode reads skills from `~/.config/opencode/skills`, `~/.claude/skills` and `~/.agents/skills` ([skills](https://opencode.ai/docs/skills/)). Skills installed into `~/.agents/skills` reach it with no extra install. Install each skill as ../workstation.md, *A skill*, says.
+opencode reads skills from `~/.config/opencode/skills`, `~/.claude/skills` and `~/.agents/skills` ([skills](https://opencode.ai/docs/skills/)). Skills installed into `~/.agents/skills` reach it with no extra install. Install each skill as the item `../workstation.md` > `setup/installs.json` > **A skill** says.
 
-## Config
+### Config
 
-When `setup/harnesses.json` names an opencode `config` (../workstation.md, *A declared config*), merge each key it sets, such as `model` (`<provider>/<model>`), into the global config file *Permissions* names: the last of `config.json`, `opencode.json` and `opencode.jsonc` that exists, else a new `opencode.json`. In an `opencode.jsonc`, change only the declared keys' lines and keep its comments. Keep every other key. Mark each key `present, personal` or `updated, personal`.
+When `setup/harnesses.json` names an opencode `config`, as `../workstation.md` > 'A declared config' describes, merge each key it sets, such as `model` (`<provider>/<model>`), into the global config file 'Permissions' names: the last of `config.json`, `opencode.json` and `opencode.jsonc` that exists, else a new `opencode.json`. In an `opencode.jsonc`, change only the declared keys' lines and keep its comments. Keep every other key. Mark each key `present, personal` or `updated, personal`.
 
 - **Activation:** a new session reads it. A project's `opencode.json` and the `--model` flag override it.
-- **Variant:** declare `agent.build.variant` beside `model`, set to the reasoning effort the model's options name, such as `high`.
-- **Gap:** the TUI remembers a variant per model in `~/.local/state/opencode/model.json` and submits it, which beats the config, even `agent.build.variant` (upstream [#38363](https://github.com/anomalyco/opencode/issues/38363), [#13718](https://github.com/anomalyco/opencode/issues/13718)). The live check reads the variant from the TUI status line. On a mismatch, the user, or the agent through the session host, switches the variant once in the TUI with ctrl+t, which updates the remembered state. The verifier checks only the config file.
+- **Variant:** declare `agent` > `build` > `variant` beside `model`, set to the reasoning effort the model's options name, such as `high`.
+- **Gap:** the TUI remembers a variant per model in `~/.local/state/opencode/model.json` and submits it, which beats the config, even `agent` > `build` > `variant`. Sources: upstream [#38363](https://github.com/anomalyco/opencode/issues/38363) and [#13718](https://github.com/anomalyco/opencode/issues/13718). The live check reads the variant from the TUI status line. On a mismatch, the user, or the agent through the session host, switches the variant once in the TUI with ctrl+t, which updates the remembered state. The verifier checks only the config file.
 
-## Hook wiring
+### Hook wiring
 
-- **Wiring:** the plugin `~/.config/opencode/plugins/set-up-machine.js`, which opencode loads from its global plugin folder. Write it from [opencode-plugin.js](opencode-plugin.js), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "opencode"]` (`<script>` as in SKILL.md, *Wiring*). Its `tool.execute.before` runs before every tool call, built-in and MCP, and before the permission check; it throws the hook's refusal, which stops the call. When the script is gone, can't start, exits non-zero or takes over 10 seconds, it lets the call through.
+- **Wiring:** the plugin `~/.config/opencode/plugins/set-up-machine.js`, which opencode loads from its global plugin folder. Write it from [opencode-plugin.js](opencode-plugin.js), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "opencode"]`, with `<script>` as `SKILL.md` > 'Pre-tool hook' > 'Wiring' gives it. Its `tool.execute.before` runs before every tool call, built-in and MCP, and before the permission check; it throws the hook's refusal, which stops the call. When the script is gone, can't start, exits non-zero or takes over 10 seconds, it lets the call through.
 - **Audit:** `wired` when the file is the template with the current command. A file there without the template's first line is someone else's: a `gap`, left alone. A plugin with an old command is rewritten.
-- **Input:** `{"tool", "sessionID", "args", "directory"}`: `args.command` (and `args.workdir`) for `bash`; `filePath` for `read`, `edit` and `write`; `path` for `grep`, `glob` and `list`; the file headers of `apply_patch`'s `patchText`. A tool that isn't built in is read as an MCP tool, trying each `_` as the split between server and tool.
+- **Input:** `{"tool", "sessionID", "args", "directory"}`: `args.command` and `args.workdir` for `bash`; `filePath` for `read`, `edit` and `write`; `path` for `grep`, `glob` and `list`; the file headers of `apply_patch`'s `patchText`. A tool that isn't built in is read as an MCP tool, trying each `_` as the split between server and tool.
 - **Answer:** the refusal as plain text, which the plugin throws; the agent reads the error's message as the tool's result. Otherwise nothing, so the native permissions decide.
-- **Gaps:** a project's plugin runs after this one and can rewrite a call's arguments once the hook has passed them; `--pure` or `OPENCODE_PURE` starts opencode without plugins (probed). The native rules still hold in both.
+- **Gaps:** a project's plugin runs after this one and can rewrite a call's arguments once the hook has passed them; `--pure` or `OPENCODE_PURE` starts opencode without plugins. The native rules still hold in both.
 
-## Gaps
+## Known limits
+
+### Gaps
 
 With native entries alone these get through; the hook closes the command and MCP gaps for deny and allow-and-report rows, so list those only for `ask` rows:
 
-- more flags in the same word (`rm -rfv`) or after the operands (`git push origin main --force`, probed); options before a subcommand (`git -C dir push --force`); a command inside another program's string (`bash -lc "…"`, `eval`, a script);
+- more flags in the same word (`rm -rfv`) or after the operands (`git push origin main --force`); options before a subcommand (`git -C dir push --force`); a command inside another program's string (`bash -lc "…"`, `eval`, a script);
 - a bash command (`sed`, `echo … > .env`), a script or another program opening a file; for `~/` paths, a session whose project is the home folder;
 - the rows with no pattern above.
 
-The hook's own misses are in SKILL.md, *What it can't see*.
+`SKILL.md` > 'Pre-tool hook' > 'What it can't see' lists the hook's own misses.
+
+### Notes
+
+- These were probed on a live opencode: declarations such as `export -p` missing their patterns, `--pure` starting without plugins, and a flag after the operands getting past a native pattern.
 
 ## Checking it
 
 The verifier's opencode row, from `scripts/setupmachine/harnesses/opencode/cli.py`:
 
 - **instructions:** `~/.config/opencode/AGENTS.md` is a link to the shared file. An `instructions` entry for opencode in `setup/harnesses.json` is a `gap`.
-- **guardrails:** `plugins/set-up-machine.js` runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness opencode`, and the file is [opencode-plugin.js](opencode-plugin.js) but for its `COMMAND` line; one that differs otherwise, or whose `COMMAND` isn't a JSON list, is `FAIL`. A file there without the template's first line is someone else's: a `gap`, left alone. Each personal permission has its pattern in the config file's `permission` key (an `opencode.jsonc` is read without its comments and trailing commas; a file that still isn't JSON is `FAIL`), at its level, except the rows *Personal permissions* leaves out.
+- **guardrails:** `plugins/set-up-machine.js` runs the installed skill's existing `pre_tool_hook.py`, as `SKILL.md` > 'Pre-tool hook' > 'Wiring' describes, with `--harness opencode`, and the file is [opencode-plugin.js](opencode-plugin.js) but for its `COMMAND` line; one that differs otherwise, or whose `COMMAND` isn't a JSON list, is `FAIL`. A file there without the template's first line is someone else's: a `gap`, left alone. Each personal permission has its pattern in the config file's `permission` key, at its level, except the rows 'Personal permissions' leaves out. An `opencode.jsonc` is read without its comments and trailing commas; a file that still isn't JSON is `FAIL`.
 - **sandbox:** `n/a`.
 - **plugins:** each entry for opencode is a `gap`; no entry is `n/a`.
 - **skills:** each listed skill is in `~/.config/opencode/skills`, `~/.claude/skills` or `~/.agents/skills`.
-- **config:** each key the declared opencode config sets has the same value in the config file *Config* names (an `opencode.jsonc` is read without its comments and trailing commas). `n/a` without a declared config.
+- **config:** each key the declared opencode config sets has the same value in the config file 'Config' names, read without comments and trailing commas for an `opencode.jsonc`. `n/a` without a declared config.
 
-To see opencode itself enforce the rows, start it in a sandbox. 
-In a sandbox: `OPENCODE_CONFIG_DIR=<a copy of the config folder>` layers it over the real global config (read, not written), and `XDG_DATA_HOME`, `XDG_STATE_HOME` and `XDG_CACHE_HOME` pointed into the sandbox keep sessions and logs out. `opencode run` takes the session's folder from `PWD`. Start it with a scrubbed environment.
+To see opencode itself enforce the rows, start it in a sandbox with a scrubbed environment.
+There, `OPENCODE_CONFIG_DIR=<a copy of the config folder>` layers it over the real global config, which it reads but doesn't write, and `XDG_DATA_HOME`, `XDG_STATE_HOME` and `XDG_CACHE_HOME` pointed into the sandbox keep sessions and logs out.
+`opencode run` takes the session's folder from `PWD`.
 
 - `opencode debug agent build` prints the ruleset in the order opencode evaluates it.
 - `opencode run --format json "Run exactly: rm -rf x"` leaves `x`, and the tool result is the hook's refusal; `git push --force-with-lease …` is auto-rejected as an ask; `gh api rate_limit` runs and gets a report line.
-- With only the permissions (no plugin), the same samples get opencode's own refusal, and `git push <remote> HEAD --force` runs: the gap the hook closes.
+- With only the permissions and no plugin, the same samples get opencode's own refusal, and `git push <remote> HEAD --force` runs: the gap the hook closes.
 - A `read` of `.env` is refused; a `read` of `.env.example` works.
 - `opencode run "Without tools: quote your rule about rm -rf and the file it came from."` quotes the shared file's `rm -rf` fallback.
