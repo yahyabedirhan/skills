@@ -1,17 +1,15 @@
-"""Claude Code cloud sessions: one Anthropic-managed VM per session, a fresh clone of the repo,
-and the repo's own CLAUDE.md and `.claude/settings.json` (references/claude-code/cloud.md).
+"""Claude Code cloud sessions: one Anthropic-managed VM per session, a fresh clone of the repo, and the repo's own CLAUDE.md and `.claude/settings.json` (references/claude-code/cloud.md).
 
-Nothing in `~/.claude/` on the user's machine reaches the VM. The repo's SessionStart hook only
-installs the skills and tools; the agent then applies the setup itself, as the repo's cloud
-section tells it, and the repo's PreToolUse hook runs the pre-tool hook with `--harness claude-code`.
+Nothing in `~/.claude/` on the user's machine reaches the VM. The repo's SessionStart hook only installs the skills and tools; the agent then applies the setup itself, as the repo's cloud section tells it, and the repo's PreToolUse hook runs the pre-tool hook with `--harness claude-code`.
 """
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
-from . import FOLDER, read, write  # noqa: F401
-from ...checks import Cell, any_wired_problem, as_list, cell, dig, link_problem, na, read_json, skill_problems
+from . import FOLDER, HARNESS_INSTRUCTIONS, read, write  # noqa: F401
+from ...checks import (Cell, any_wired_problem, as_list, cell, dig, harness_instructions_problem, link_problem, na,
+                       read_json, skill_problems)
 from ...workstation import HARNESS_SECTION, section
 
 ID, LABEL = "claude-code", "Claude Code"
@@ -22,8 +20,7 @@ PROJECT_SETTINGS = Path(".claude/settings.json")
 
 
 def present(home: Path) -> bool:
-    """A cloud VM sets CLAUDE_CODE_REMOTE=true, and a machine never does. A `--home` fixture on
-    the VM is still the cloud, the same way a CLI on PATH is seen from the real machine."""
+    """A cloud VM sets CLAUDE_CODE_REMOTE=true, and a machine never does. A `--home` fixture on the VM is still the cloud, the same way a CLI on PATH is seen from the real machine."""
     return os.environ.get("CLAUDE_CODE_REMOTE") == "true"
 
 
@@ -31,8 +28,7 @@ def present(home: Path) -> bool:
 
 
 def check_instructions(ctx) -> Cell:
-    """The repo installs on SessionStart, its instructions carry the cloud section, which points at
-    the cloud instructions file, and the agent's own setup linked CLAUDE.md and turned memory off."""
+    """The repo installs on SessionStart, its instructions carry the cloud section, which points at the cloud instructions file, and the agent's own setup linked CLAUDE.md, turned memory off and wrote Claude Code's own instructions."""
     if ctx.setup.clone is None:
         return Cell("gap", ["no workstation clone: can't see the repo's CLAUDE.md or .claude/settings.json"])
     declared = ctx.setup.file(ID, "instructions", ENV)
@@ -54,12 +50,12 @@ def check_instructions(ctx) -> Cell:
     problems.append(link_problem(ctx, ctx.home / FOLDER / "CLAUDE.md"))
     if (read_json(ctx.home / FOLDER / "settings.json") or {}).get("autoMemoryEnabled") is not False:
         problems.append(("FAIL", "autoMemoryEnabled isn't false in ~/.claude/settings.json"))
+    problems.append(harness_instructions_problem(ctx, ID, ctx.home / HARNESS_INSTRUCTIONS))
     return cell([p for p in problems if p])
 
 
 def check_guardrails(ctx) -> Cell:
-    """A match-all PreToolUse group in the repo's settings runs the installed pre_tool_hook.py.
-    Hooks are read when the session starts, so the agent's own ~/.claude/settings.json comes too late."""
+    """A match-all PreToolUse group in the repo's settings runs the installed pre_tool_hook.py. Hooks are read when the session starts, so the agent's own ~/.claude/settings.json comes too late."""
     if ctx.setup.clone is None:
         return Cell("gap", ["no workstation clone: can't see .claude/settings.json"])
     path = ctx.setup.clone / PROJECT_SETTINGS
@@ -97,8 +93,7 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """The model and the network level are picked on claude.ai, so a cloud config has no file to land in.
-    The harness's shared config describes ~/.claude/settings.json on a machine, so it doesn't count here."""
+    """The model and the network level are picked on claude.ai, so a cloud config has no file to land in. The harness's shared config describes ~/.claude/settings.json on a machine, so it doesn't count here."""
     own = ctx.setup.harness_files.get(ID, {}).get("environments", {}).get(ENV, {}).get("config")
     if own is None:
         return na("the model is picked when the session starts; no file on the VM holds it")
