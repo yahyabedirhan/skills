@@ -8,9 +8,11 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 ## Instructions
 
-The Build only installs: the repo's environment file runs an install that puts the skills and tools on the VM. It writes no instructions and no harness files except the hook file, as *Guardrails* describes, and it runs no audit. The agent applies the setup itself at session start, as on any machine: this skill writes the setup, and scripts only enforce and check.
-
-The agent learns this at start from Cursor's documented channel for cloud-only instructions, a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). That section tells the agent, before other work, to follow this skill for harness `cursor`, environment `cloud`, as a first-time setup or a reconcile, to run `verify.py --harness cursor --env cloud`, and to stop and ask when a step needs more access. It points at the `instructions` file `setup/harnesses.json` names for the cloud environment, `setup/harnesses.json` > `harnesses` > `cursor` > `environments` > `cloud` > `instructions`, whose `## Instructions` lines the agent follows for the session. This skill does not use a `.cursor/CLOUD.md` file: Cursor's docs don't name it, and a cloud agent doesn't load it.
+- **Build:** the repo's environment file runs an install that puts the skills and tools on the VM. It writes no instructions and no harness files except the hook file, as *Guardrails* describes, and it runs no audit.
+- **Agent setup:** the agent applies the setup itself at session start, as on any machine. This skill writes the setup; scripts only enforce and check.
+- **Entry point:** a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions", Cursor's documented channel for cloud-only instructions ([setup](https://cursor.com/docs/cloud-agent/setup)). This skill doesn't use a `.cursor/CLOUD.md` file: Cursor's docs don't name it, and a cloud agent doesn't load it.
+- **Cloud section:** before other work, follow this skill for harness `cursor`, environment `cloud`, as a first-time setup or a reconcile; run `verify.py --harness cursor --env cloud`; stop and ask when a step needs more access.
+- **Cloud instructions file:** the file the key `setup/harnesses.json` > `harnesses` > `cursor` > `environments` > `cloud` > `instructions` names. The agent follows its `## Instructions` lines for the session.
 
 `~/.config/agents/AGENTS.md` is the shared file, written by the agent as on any machine, and the `setup` line checks it. Do not append the cloud-only lines to the shared file.
 
@@ -18,13 +20,10 @@ The agent learns this at start from Cursor's documented channel for cloud-only i
 
 ## Guardrails
 
-A cloud agent runs command hooks from one file: `/agent/.cursor/hooks.json`. Its exec daemon runs from `/agent`, the first workspace folder, and loads project hooks from there only, and only at session startup. There is no file watcher; a later edit loads only through the daemon's skill reload. In a multi-repo environment, none of `<repo>/.cursor/hooks.json`, `~/.cursor/hooks.json`, `/agent/repos/.cursor/hooks.json` or `/etc/cursor/hooks.json` runs. Cursor's [hooks](https://cursor.com/docs/hooks) page agrees that user-level hooks don't reach a cloud agent.
-
-So the Build writes the file, the one exception to "the Build only installs": the hook is the enforcement tool, not setup, and the agent's own setup at session start comes after the daemon has read it. `/agent` is root-owned; the install writes with `sudo -n`, which works on the VM. A repo's own `.cursor/hooks.json` stays, for single-repo environments and the CLI.
-
-It runs `beforeShellExecution`, `beforeReadFile` and `preToolUse`. It does not run `beforeMCPExecution`. Commands auto-run: there is no ask prompt, and the hook's refusal is the stop.
-
-The command is the same one Cursor's CLI uses, `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'`, with `<script>` the installed `pre_tool_hook.py`. `--harness cursor` is the harness id; every Cursor environment reads the same payload. The `echo '{}'` matters: an empty answer is invalid JSON, which blocks. When the script is missing the command fails open.
+- **Hook file:** a cloud agent runs command hooks from one file, `/agent/.cursor/hooks.json`. Its exec daemon runs from `/agent`, the first workspace folder, and loads project hooks from there only, and only at session startup. There is no file watcher; a later edit loads only through the daemon's skill reload. In a multi-repo environment, none of `<repo>/.cursor/hooks.json`, `~/.cursor/hooks.json`, `/agent/repos/.cursor/hooks.json` or `/etc/cursor/hooks.json` runs. Cursor's [hooks](https://cursor.com/docs/hooks) page agrees that user-level hooks don't reach a cloud agent.
+- **Writer:** the Build writes the file, the one exception to "the Build only installs": the hook is the enforcement tool, not setup, and the agent's own setup at session start comes after the daemon has read it. `/agent` is root-owned; the install writes with `sudo -n`, which works on the VM. A repo's own `.cursor/hooks.json` stays, for single-repo environments and the CLI.
+- **Events:** `beforeShellExecution`, `beforeReadFile` and `preToolUse`. `beforeMCPExecution` doesn't run. Commands auto-run: there is no ask prompt, and the hook's refusal is the stop.
+- **Command:** the same one Cursor's CLI uses, `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'`, with `<script>` the installed `pre_tool_hook.py`. `--harness cursor` is the harness id; every Cursor environment reads the same payload. The `echo '{}'` matters: an empty answer is invalid JSON, which blocks. When the script is missing the command fails open.
 
 - **Audit:** `FAIL` when `/agent/.cursor/hooks.json` is missing. `ok` for an event whose command names an existing `pre_tool_hook.py` and `--harness cursor`. `$HOME` and `~/` in the path are expanded. `FAIL` when the command is missing, names no script, or the script is not a file. `beforeMCPExecution` is a `gap`.
 
@@ -54,7 +53,12 @@ The wiring is `/agent/.cursor/hooks.json`, which the Build writes, as *Guardrail
 
 ## Gaps
 
-Network mode, dashboard MCP servers, and whether a skill installed before the process started is offered as a slash command, such as one installed during the Build on a cold start. `beforeMCPExecution` does not run. A cold start is a new VM, which this check cannot start. Whether a file under `/agent` written during the Build survives into the Build snapshot has not been observed.
+- **Network mode:** set in the dashboard; nothing on the VM shows it.
+- **MCP servers:** connected in the dashboard, per user.
+- **Slash commands:** whether a skill installed before the process started is offered as a slash command, such as one installed during the Build on a cold start.
+- **MCP hook:** `beforeMCPExecution` doesn't run.
+- **Cold start:** a cold start is a new VM, which this check can't start.
+- **Build snapshot:** whether a file under `/agent` written during the Build survives into the Build snapshot is unknown.
 
 ## Checking it
 

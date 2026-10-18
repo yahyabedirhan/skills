@@ -27,7 +27,13 @@ The lock is `~/.local/state/agents/grok-bot-instructions-lock.json`:
 
 The box is shared, so one lock holds user memory and an entry per agent. Each agent applies its own entry: it writes its agent-scope facts and profile, then adds or rewrites only its entry. Facts may be tailored to the agent's job, as long as the entry holds the exact text written. The applied state page has one agent section per entry.
 
-The **applied state page** is `harnesses/grok-bot/applied.md` in `<path-to-workstation-repo>`, when it exists: the lock's commit and date, each exact fact by scope, the profile and the Auto-review rules status. Its history is its git log. It names the commit its instructions came from, which is always earlier than the commit that holds the page. When the sources are unchanged, move the lock to a later commit, such as a merge, without rewriting the page; don't open a pull request only to match the hashes.
+The **applied state page** records what the lock holds, for the user to read:
+
+- **Location:** `harnesses/grok-bot/applied.md` in `<path-to-workstation-repo>`, when it exists.
+- **Contents:** the lock's commit and date, each exact fact by scope, the profile and the Auto-review rules status.
+- **History:** its git log.
+- **Source commit:** the commit its instructions came from, always earlier than the commit that holds the page.
+- **Unchanged sources:** move the lock to a later commit, such as a merge, without rewriting the page; don't open a pull request only to match the hashes.
 
 You may merge or reword lines into facts. The lock and the applied state page always hold the exact text written, since a later forget or rewrite finds the fact by it.
 

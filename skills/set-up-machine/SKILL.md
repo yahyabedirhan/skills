@@ -44,7 +44,11 @@ Set up every selected harness and environment from its sources, as [Harnesses](#
 
 ## Steps
 
-1. **Inspect.** Find each selected harness and tool, compare its installed version with the latest source, and read its current documentation. Preserve its installation channel. Read each harness reference, then the non-secret configuration fields it needs. Leave credentials, authentication stores and runtime state unread. Read the shared file and the pointer too, and when the pointer names a workstation repo, read `references/workstation.md` and the repository's `setup/instructions.md`, `setup/permissions.json`, `setup/installs.json` and `setup/harnesses.json` in `<path-to-workstation-repo>`, then each file `setup/harnesses.json` points at. Inspect each harness's optional `config` as its reference directs. For Codex, use one resolved config home throughout setup and verification; for Pi, one resolved agent folder.
+1. **Inspect.**
+   - **Harnesses and tools:** find each selected one, compare its installed version with the latest source, and read its current documentation. Preserve its installation channel.
+   - **Harness references:** read each one, then the non-secret configuration fields it needs. Leave credentials, authentication stores and runtime state unread. Inspect each harness's optional `config` as its reference directs.
+   - **Shared file and pointer:** read both. When the pointer names a workstation repo, read `references/workstation.md`, then `setup/instructions.md`, `setup/permissions.json`, `setup/installs.json` and `setup/harnesses.json` in `<path-to-workstation-repo>`, then each file `setup/harnesses.json` points at.
+   - **Codex and Pi:** use one resolved Codex config home, and one resolved Pi agent folder, throughout setup and verification.
    - **When the pointer is missing:** read `references/workstation.md`, then ask the user once for `<workstation-repo>` and `<path-to-workstation-repo>`, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
    - **When the pointer records no workstation repo:** set up the machine as `references/workstation.md` says for a run without one, or, when the user names one now, as it says for rewriting the pointer.
    - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
@@ -164,7 +168,11 @@ A harness with environments has `references/<harness>/<env>.md` and `scripts/set
 ## Scripts
 
 - [scripts/pre_tool_hook.py](scripts/pre_tool_hook.py): the pre-tool hook every harness calls before each tool call.
-- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing. `--home <folder>` checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`. `--grok-bot-rules` prints the rule table and personal permissions as Grok Bot's Auto-review rules, as references/grok-bot/desktop.md > *Guardrails* describes. `--harness <harness> [--env <env>]` keeps one harness's rows, or one environment's, such as `--harness cursor --env cloud`. `--codex-trust-hash '<command>'` prints the `trusted_hash` Codex needs for a hook command, as references/codex/index.md > *Hook wiring* describes.
+- [scripts/verify.py](scripts/verify.py): the check above. It writes nothing.
+  - `--home <folder>`: checks a copy of a home folder, where a harness is found by its folder only, not by a CLI on `PATH`.
+  - `--grok-bot-rules`: prints the rule table and personal permissions as Grok Bot's Auto-review rules, as references/grok-bot/desktop.md > *Guardrails* describes.
+  - `--harness <harness> [--env <env>]`: keeps one harness's rows, or one environment's, such as `--harness cursor --env cloud`.
+  - `--codex-trust-hash '<command>'`: prints the `trusted_hash` Codex needs for a hook command, as references/codex/index.md > *Hook wiring* describes.
 - `scripts/setupmachine/`: the modules both scripts use. `harnesses/__init__.py` lists every environment in `ALL`. A harness is a package, `harnesses/<harness>/`, with one module per environment and the shared code in its `__init__.py`.
 - [references/opencode/opencode-plugin.js](references/opencode/opencode-plugin.js): the opencode plugin that calls the hook.
 - [references/pi/pi-extension.ts](references/pi/pi-extension.ts): the Pi extension that calls the hook and asks the user for ask rows.

@@ -139,7 +139,16 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 
 - **The only layer:** Pi has no native rules underneath, so the extension fails closed: while `python3` or the script is missing, or the hook fails, Pi refuses every tool call until `/set-up-machine` repairs it. `pi --no-extensions` starts a session without the hook in the meantime. The containment Pi offers beyond the hook is the operating system's: a container, a virtual machine or a separate user, as Pi's `docs/security.md` and `docs/containerization.md` say. Name this once in every audit.
 - **Started without extensions:** `pi --no-extensions` (`-ne`) skips the extension. Explicit `-e <path>` extensions still load.
-- **Handlers after the hook can change the call:** a `tool_call` handler can change `event.input`, and the first handler that blocks wins. Pi runs the handlers in load order: `-e` extensions first, then a trusted project's extensions (its `.pi/settings.json` entries, then `.pi/extensions/`), then the global settings' entries, then `<agent-dir>/extensions/`, then the extensions from `packages`, then built-in ones. So an extension from `packages`, or a built-in one, runs after the hook and could change a call the hook already passed. Pi offers no way to run last or to check the final input before the tool runs. A project extension runs before the hook: the hook sees what it changed.
+- **Handlers after the hook can change the call:** a `tool_call` handler can change `event.input`, and the first handler that blocks wins. Pi runs the handlers in this load order:
+  1. `-e` extensions.
+  2. A trusted project's `.pi/settings.json` entries.
+  3. That project's `.pi/extensions/`.
+  4. The global settings' entries.
+  5. `<agent-dir>/extensions/`, where the hook is.
+  6. The extensions from `packages`.
+  7. Built-in extensions.
+
+  So an extension from `packages`, or a built-in one, runs after the hook and could change a call the hook already passed. Pi offers no way to run last or to check the final input before the tool runs. A project extension runs before the hook: the hook sees what it changed.
 - **Child sessions without extensions:** an extension that starts child sessions in the same process can start them with extensions off, and the hook doesn't run there. The `pi-subagents` extension does this for foreground children; its setting `subagents.defaultSubagentOnlyExtensions`, listing the hook extension's path, loads it there. Check each such extension. A child without a UI gets ask rows refused.
 - **The user's own commands:** `!` commands (`user_bash`) aren't tool calls, so the hook doesn't see them, as in Claude Code.
 - SKILL.md > *Pre-tool hook* > *What it can't see* lists the hook's own misses.

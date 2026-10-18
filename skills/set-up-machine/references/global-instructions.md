@@ -12,7 +12,12 @@ The file has these parts, in this order. This skill writes the heading, the rule
 2. **The rule line:** `Working agreement, glossary, environment defaults, global rules and personal workflow. Project and task instructions belong in the project or a skill.`
 3. **`## Working agreement`**, optional: how this person works with agents, as *Working agreement* below says.
 4. **`## Glossary`**, optional: the words this person and their agents share, as *Glossary* below says.
-5. **`## Environment defaults`**, with the line "What this person uses for each role. A project's own environment defaults override a row. When a row is `none`, do what its last column says.", then a table, `| Role | Tool | What it is | When none |`, one row per role below. The Tool column comes from the workstation repo, except the `workstation-repo` and `path-to-workstation-repo` rows, which the pointer fills, or is the user's when there is none; this skill writes the other two from the roles table below, so every skill that names a role finds its meaning and its fallback here, in context. Optional `### <tool-name> glossary` subsections follow the table, such as `### Herdr glossary`, as *Tool glossaries* below says.
+5. **`## Environment defaults`**:
+   - **Line:** "What this person uses for each role. A project's own environment defaults override a row. When a row is `none`, do what its last column says."
+   - **Table:** `| Role | Tool | What it is | When none |`, one row per role below.
+   - **Tool column:** from the workstation repo, except the `workstation-repo` and `path-to-workstation-repo` rows, which the pointer fills; the user's own when there is no workstation repo.
+   - **What it is and When none columns:** this skill writes them from the roles table below, so every skill that names a role finds its meaning and its fallback here, in context.
+   - **Tool glossaries:** optional `### <tool-name> glossary` subsections after the table, such as `### Herdr glossary`, as *Tool glossaries* below says.
 6. **The generated block**, rewritten to match this template on every run:
 
    ```markdown

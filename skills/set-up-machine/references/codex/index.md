@@ -95,7 +95,16 @@ When the personal source pointer names a repository, load the optional Codex `co
 
 ### Installed support
 
-Check `codex --version`, current help and the [official configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) for each declared key and value. Use the installed CLI's configuration schema or a synthetic configuration check with one invalid-value negative control per declared key, without authentication or secrets. Run `codex features list` with a temporary `CODEX_HOME` for each sandbox and approval key. Check one declared value and one invalid control. The valid value must succeed. The invalid control must fail on that key. For model and reasoning choices, inspect the current `model/list` response from `codex app-server`. Require the exact model and reasoning level in that catalog. Some releases silently ignore an invalid `model_reasoning_effort` in `features list`. Use the catalog and installed protocol schema for that key. A successful parse alone is insufficient: Codex ignores unknown keys and some conflicts. Report unsupported keys, values or an unavailable validation mechanism as gaps and leave those preferences unchanged.
+1. Check `codex --version`, current help and the [official configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) for each declared key and value.
+2. Validate each declared key with the installed CLI's configuration schema, or with a synthetic configuration check that has one invalid-value negative control per declared key. Use no authentication or secrets.
+3. For each sandbox and approval key, run `codex features list` with a temporary `CODEX_HOME`, once with the declared value and once with an invalid control.
+   - Result: the declared value succeeds, and the invalid control fails on that key.
+4. For model and reasoning choices, read the current `model/list` response from `codex app-server`.
+   - Result: the catalog holds the exact model and reasoning level.
+   - NOTE: some releases silently ignore an invalid `model_reasoning_effort` in `features list`, so check that key against the catalog and the installed protocol schema only.
+5. Report an unsupported key or value, or an unavailable validation mechanism, as a gap, and leave those preferences unchanged.
+
+A successful parse alone is not a validation: Codex ignores unknown keys and some conflicts.
 
 The declared config takes these values:
 
@@ -119,7 +128,17 @@ Preserve unrelated keys, comments, profiles, hooks, rules and TOML sections. Kee
 
 ### Overrides and activation
 
-Report persisted defaults separately from effective settings. The [official precedence order](https://learn.chatgpt.com/docs/config-file/config-basic#configuration-precedence) is CLI flags and `--config`, trusted project config from the nearest project outward, the selected profile, user config, cloud defaults, system config and built-in defaults. The [managed configuration guide](https://learn.chatgpt.com/docs/enterprise/managed-configuration#admin-enforced-requirements-requirementstoml) describes enforced requirements that constrain the result separately. Identify observed overrides without claiming every layer was verified; a file audit can't see cloud settings, active CLI arguments, existing session state or MDM requirements.
+Report persisted defaults separately from effective settings. The [official precedence order](https://learn.chatgpt.com/docs/config-file/config-basic#configuration-precedence), highest first:
+
+1. CLI flags and `--config`.
+2. Trusted project config, from the nearest project outward.
+3. The selected profile.
+4. User config.
+5. Cloud defaults.
+6. System config.
+7. Built-in defaults.
+
+The [managed configuration guide](https://learn.chatgpt.com/docs/enterprise/managed-configuration#admin-enforced-requirements-requirementstoml) describes enforced requirements that constrain the result separately. Identify observed overrides without claiming every layer was verified; a file audit can't see cloud settings, active CLI arguments, existing session state or MDM requirements.
 
 Read profile and trusted-project configuration only when needed to check declared defaults, using non-secret fields and reporting inaccessible layers as unverified. Preserve profile files. The [advanced configuration guide](https://learn.chatgpt.com/docs/config-file/config-advanced) places profiles in separate `<name>.config.toml` files under the config home; legacy inline `[profiles]` and top-level `profile` are unsupported from 0.134.0 and must be reported rather than migrated.
 
