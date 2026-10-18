@@ -1,6 +1,6 @@
 """ALL: the one list of harness environments set-up-machine knows, in the order the verifier prints them.
 
-Each harness is a package. It holds one module per environment and shared code in __init__.py.
+Each harness is a package. It holds one module per environment and shared code in `__init__.py`.
 Each environment exposes ID, LABEL, ENV, present(home), read(payload), write(denials, asks), and
 one check per setup area plus check_config. Add environments to ALL to expose them in --env.
 """

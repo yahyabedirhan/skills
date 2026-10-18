@@ -1,5 +1,5 @@
-"""Cursor cloud agents: one VM per run, the hook file at /agent, and the repo AGENTS.md cloud section
-(references/cursor/cloud.md).
+"""Cursor cloud agents: one VM per run, the hook file at `/agent`, and the repo `AGENTS.md` cloud section
+(`references/cursor/cloud.md`).
 
 The hook payload is Cursor's, so read and write are Cursor's. The project hook
 calls the script with `--harness cursor`.
@@ -20,14 +20,14 @@ ENV = "cloud"
 SOCKET = Path("/run/cursor/api.sock")
 ENV_FILE = Path(".cursor/environment.json")
 AGENTS = Path("AGENTS.md")
-# The section Cursor documents for cloud-only instructions in the repo AGENTS.md.
+# The section Cursor documents for cloud-only instructions in the repo `AGENTS.md`.
 CLOUD_SECTION = "## Cursor Cloud specific instructions"
-# The daemon runs from /agent and loads project hooks only from this file, at startup.
+# The daemon runs from `/agent` and loads project hooks only from this file, at startup.
 HOOKS = Path("/agent/.cursor/hooks.json")
 # A cloud agent runs these. beforeMCPExecution is in the file for the CLI and does not run here.
 RAN = ("beforeShellExecution", "beforeReadFile", "preToolUse")
 NOT_RAN = "beforeMCPExecution"
-# The keys a declared config may set (references/cursor/cloud.md, *Config*).
+# The keys a declared config may set, as `references/cursor/cloud.md` > 'Config' describes.
 KEYS = ("secrets",)
 _HARNESS = re.compile(r"--harness(?:\s+|=)cursor(?:\s|$)")
 
@@ -50,7 +50,7 @@ def write(denials: list, asks=()) -> str:
 
 
 def check_instructions(ctx) -> Cell:
-    """The clone has an environment file with an install command, and the repo AGENTS.md has
+    """The clone has an environment file with an install command, and the repo `AGENTS.md` has
     Cursor's cloud section, which links the cloud instructions file the agent applies itself."""
     if ctx.setup.clone is None:
         return Cell("gap", ["no workstation clone: can't see .cursor/environment.json or AGENTS.md"])
@@ -81,7 +81,7 @@ def check_instructions(ctx) -> Cell:
 
 def check_guardrails(ctx) -> Cell:
     """The events a cloud agent runs, in the one file its daemon loads, resolve to an existing
-    pre_tool_hook.py. beforeMCPExecution does not run here."""
+    `pre_tool_hook.py`. beforeMCPExecution does not run here."""
     path = HOOKS
     if not path.is_file():
         return Cell("FAIL", [f"no {path}: the daemon loads hooks only from it, at startup; the Build writes it"])
@@ -137,7 +137,7 @@ def check_config(ctx) -> Cell:
 
 
 def _resolves(ctx, path: Path, commands: list):
-    """None when one command runs an existing pre_tool_hook.py for Cursor's payload."""
+    """None when one command runs an existing `pre_tool_hook.py` for Cursor's payload."""
     if not commands or not isinstance(commands[0], str):
         return ("FAIL", f"{ctx.show(path)} has no command")
     command = commands[0]
@@ -150,7 +150,7 @@ def _resolves(ctx, path: Path, commands: list):
 
 
 def _script(command: str):
-    """The pre_tool_hook.py path a command names, with $HOME and ~/ expanded."""
+    """The `pre_tool_hook.py` path a command names, with $HOME and ~/ expanded."""
     try:
         words = shlex.split(command)
     except ValueError:

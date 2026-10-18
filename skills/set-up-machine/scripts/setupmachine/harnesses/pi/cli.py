@@ -1,8 +1,8 @@
-"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area (references/pi/cli.md).
+"""Pi, the `pi` coding agent: its hook payload, and the check of each setup area (`references/pi/cli.md`).
 
 Every path is under Pi's agent folder: `PI_CODING_AGENT_DIR`, else `~/.pi/agent` (`agent_dir`).
 Pi has no permission system, so the hook, run through an extension, is its only guardrail.
-Pi has no sandbox either, so that column is n/a; the declared Pi settings are the config column.
+Pi has no sandbox either, so that column is `n/a`; the declared Pi settings are the config column.
 """
 from __future__ import annotations
 
@@ -67,7 +67,7 @@ def write(denials: list, asks=()) -> str:
 
 
 def check_instructions(ctx) -> Cell:
-    """AGENTS.md links to the shared file, and no override file wins over it. Pi has no memory feature."""
+    """`AGENTS.md` links to the shared file, and no override file wins over it. Pi has no memory feature."""
     problems = [link_problem(ctx, ctx.pi_dir / "AGENTS.md")]
     if (ctx.pi_dir / "AGENTS.override.md").exists():
         problems.append(("gap", "AGENTS.override.md in Pi's agent folder is read instead of AGENTS.md"))
@@ -89,7 +89,7 @@ def check_sandbox(ctx) -> Cell:
 
 
 def check_plugins(ctx) -> Cell:
-    """A bundle is in settings.json `packages`; an MCP server is in mcp.json, with Pi's MCP client on."""
+    """A bundle is in `settings.json` `packages`; an MCP server is in `mcp.json`, with Pi's MCP client on."""
     entries = ctx.setup.plugins(ID)
     if not entries:
         return na("installs.json lists no plugin for Pi")
@@ -112,8 +112,8 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """Each key the declared Pi config sets has its value in settings.json. A `packages` key is a gap:
-    Pi extensions come from installs.json plugins, so it is never compared."""
+    """Each key the declared Pi config sets has its value in `settings.json`. A `packages` key is a gap:
+    Pi extensions come from `installs.json` plugins, so it is never compared."""
     source = ctx.setup.file(ID, "config", ENV)
     if source is None:
         return na("setup/harnesses.json names no Pi config")

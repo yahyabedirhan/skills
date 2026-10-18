@@ -1,6 +1,6 @@
-"""Codex: its hook payload, and the check of each setup area (references/codex/index.md).
+"""Codex: its hook payload, and the check of each setup area (`references/codex/index.md`).
 
-Every path is under the Codex config home: `CODEX_HOME`, else `~/.codex` (verify.py resolves it
+Every path is under the Codex config home: `CODEX_HOME`, else `~/.codex` (`verify.py` resolves it
 once). Its `config.toml` holds memory, hook trust, the declared config and plugins. TOML checks need
 Python 3.11's tomllib; on an older Python they are a gap.
 """
@@ -70,7 +70,7 @@ def trust_hash(command: str, matcher: str = "*", timeout: int = 10) -> str:
 
 
 def check_instructions(ctx, env=None) -> Cell:
-    """AGENTS.md links to the shared file, no override file wins over it, and memories are off."""
+    """`AGENTS.md` links to the shared file, no override file wins over it, and memories are off."""
     folder = ctx.codex_home
     problems = [link_problem(ctx, folder / "AGENTS.md")]
     override = folder / "AGENTS.override.md"
@@ -114,12 +114,12 @@ def check_guardrails(ctx) -> Cell:
 
 
 def check_sandbox(ctx, env=None) -> Cell:
-    """The sandbox and approval keys the declared Codex config sets have the same value in config.toml."""
+    """The sandbox and approval keys the declared Codex config sets have the same value in `config.toml`."""
     return _declared_cell(ctx, sandbox=True, env=env)
 
 
 def check_plugins(ctx) -> Cell:
-    """Each bundle is enabled in config.toml and has a cached manifest; each MCP server is configured."""
+    """Each bundle is enabled in `config.toml` and has a cached manifest; each MCP server is configured."""
     entries = ctx.setup.plugins(ID)
     if not entries:
         return na("installs.json lists no plugin for Codex")
@@ -146,13 +146,13 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx, env=None) -> Cell:
-    """Every other key the declared Codex config sets, such as `model`, has the same value in config.toml."""
+    """Every other key the declared Codex config sets, such as `model`, has the same value in `config.toml`."""
     return _declared_cell(ctx, sandbox=False, env=env)
 
 
 def _declared_cell(ctx, sandbox: bool, env=None) -> Cell:
     """One of the declared Codex config's two cells: its SANDBOX_KEYS (sandbox), or the rest (config).
-    Each key is checked in one cell only, so one wrong value is one FAIL. n/a when the cell has no key."""
+    Each key is checked in one cell only, so one wrong value is one FAIL. `n/a` when the cell has no key."""
     source = ctx.setup.file(ID, "config", env)
     if source is None:
         return na("setup/harnesses.json names no Codex config")
@@ -174,7 +174,7 @@ def _toml(ctx, path: Path) -> tuple:
 
 
 def _trusted_hash(config: Path, key: str):
-    """The trusted_hash under [hooks.state."<key>"] in config.toml, read line by line (no TOML parser needed)."""
+    """The trusted_hash under [hooks.state."<key>"] in `config.toml`, read line by line (no TOML parser needed)."""
     try:
         lines = config.read_text().split("\n")
     except OSError:

@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """set-up-machine's pre-tool hook. A harness runs it before each tool call, with the call on stdin.
 
-usage: pre_tool_hook.py [--harness claude-code|codex|cursor|grok-bot|opencode|pi] [--config FILE] [--rules FILE]
+usage: `pre_tool_hook.py` [--harness claude-code|codex|cursor|grok-bot|opencode|pi] [--config FILE] [--rules FILE]
 
 The steps:
 
 1. Read the payload with the harness module's `read`, into one tool call.
-2. Load the rule table (rules.json) and the personal permissions from the workstation repo.
+2. Load the rule table (`rules.json`) and the personal permissions from the workstation repo.
 3. Decide the call with hook.decide.
 4. A denied call: print the harness's refusal, naming each refused part, its rule and instruction.
 5. Otherwise, write a report line for each allow-and-report row it hits, and print the harness's
    answer, which leaves the call to the harness's own permissions (or, in Pi, asks the user).
 
 It exits 1 when it can't read the call or the rule table. Each harness's wiring then lets the call
-through to its native rules, except Pi's, which has none and refuses it (references/pi/cli.md).
+through to its native rules, except Pi's, which has none and refuses it (`references/pi/cli.md`).
 Python 3.9+, standard library only.
 """
 import argparse
@@ -42,7 +42,7 @@ def main() -> int:
     except (ValueError, OSError) as exc:
         print(f"set-up-machine hook: {exc}", file=sys.stderr)
         return 1
-    # A broken personal file leaves the rule table's rows in force; verify.py reports the file.
+    # A broken personal file leaves the rule table's rows in force; `verify.py` reports the file.
     try:
         table += workstation.personal_rows(Path.home(), table)
     except Exception as exc:

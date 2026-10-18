@@ -73,7 +73,7 @@ def local(ts):
 
 
 def time_window(args):
-    """--since/--from/--to -> (lower, upper) database timestamps; either may be None."""
+    """`--since/--from/--to` -> (lower, upper) database timestamps; either may be None."""
     lower = upper = None
     if getattr(args, "since", None):
         lower = db_time(dt.datetime.now(dt.timezone.utc) - args.since)
@@ -290,7 +290,7 @@ def cmd_count(args):
               f"{r['example'].replace('|', '/')} |")
 
 
-# Capitalised runs (Jack Miller, Claude Code), tokens with inner dots or digits (AGENTS.md, GPT-5),
+# Capitalised runs (Jack Miller, Claude Code), tokens with inner dots or digits (`AGENTS.md`, GPT-5),
 # and anything in backticks. Plain lowercase words are left to reading the history.
 TERM = re.compile(r"`([^`]+)`|\b([A-Z][\w'.&/-]*(?:\s+(?:&\s+)?[A-Z][\w'.&/-]*)*)|\b([a-z][\w-]*\.[a-z]\w*|\w*\d\w*[a-zA-Z]\w*)\b")
 SENTENCE_START = re.compile(r"(^|[.!?:;]\s+|\n\s*|<li>|\(|\"\s*)$")

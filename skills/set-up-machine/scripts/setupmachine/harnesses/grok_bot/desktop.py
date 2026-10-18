@@ -1,9 +1,9 @@
 """Grok Bot, the agent app with one persistent Linux box: its hook payload, and the check of each
-setup area (references/grok-bot/desktop.md).
+setup area (`references/grok-bot/desktop.md`).
 
 The app owns most of what other harnesses keep in files: approvals, Auto-review, the model, the
 connectors and memory. So only skills are checked fully. Each skill is a folder in the shared
-skill library, `~/agent-data/workflows/<skill>/`, recorded in a lock with the git tree hash of its
+skill library, `~`/agent`-data/workflows/<skill>/`, recorded in a lock with the git tree hash of its
 source folder, so a copy that drifted from its source fails.
 """
 from __future__ import annotations
@@ -20,9 +20,9 @@ from ...hook import ToolCall, refusal
 ID, LABEL = "grok-bot", "Grok Bot"
 ENV = "desktop"
 FOLDER = Path("agent-data/workflows")
-# Like ~/.agents/.skill-lock.json: {"skills": {name: {"source", "skillPath", "skillFolderHash"}}}.
+# Like `~/.agents/.skill-lock.json`: {"skills": {name: {"source", "skillPath", "skillFolderHash"}}}.
 LOCK = Path(".local/state/agents/grok-bot-skill-lock.json")
-# {"sha", "date", "sources": {"setup/instructions.md": [fact]}, "agents": {name: {"sha", "date", "facts", "profile"}}}:
+# {"sha", "date", "sources": {"`setup/instructions.md`": [fact]}, "agents": {name: {"sha", "date", "facts", "profile"}}}:
 # what user memory and each agent's memory hold, and from which commit. The box is shared, so one lock holds every agent.
 INSTRUCTIONS_LOCK = Path(".local/state/agents/grok-bot-instructions-lock.json")
 
@@ -85,8 +85,8 @@ def check_instructions(ctx) -> Cell:
 
 
 def sources(ctx) -> list:
-    """The files memory facts come from: setup/instructions.md for user memory, and Grok Bot's own
-    instructions from setup/harnesses.json for agent memory."""
+    """The files memory facts come from: `setup/instructions.md` for user memory, and Grok Bot's own
+    instructions from `setup/harnesses.json` for agent memory."""
     files = [ctx.setup.clone / "setup/instructions.md", ctx.setup.file(ID, "instructions", ENV)]
     return [f for f in files if f is not None and f.is_file()]
 
@@ -101,7 +101,7 @@ def check_sandbox(ctx) -> Cell:
 
 
 def check_plugins(ctx) -> Cell:
-    """A connector is added in the app, so each one installs.json or the declared config names is a
+    """A connector is added in the app, so each one `installs.json` or the declared config names is a
     gap the user confirms there."""
     names = [e["name"] for e in ctx.setup.plugins(ID)] + [n for n in _declared(ctx).get("connectors", [])
                                                           if isinstance(n, str)]
@@ -159,7 +159,7 @@ def check_config(ctx) -> Cell:
     return cell(problems)
 
 
-# The keys a declared Grok Bot config may set (references/grok-bot/desktop.md, *Config*).
+# The keys a declared Grok Bot config may set (`references/grok-bot/desktop.md`, *Config*).
 KEYS = ("secrets", "connectors", "routines")
 
 

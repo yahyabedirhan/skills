@@ -1,4 +1,4 @@
-"""opencode: its hook payload, and the check of each setup area (references/opencode/cli.md).
+"""opencode: its hook payload, and the check of each setup area (`references/opencode/cli.md`).
 
 Its global folder is `~/.config/opencode`. The hook runs through a plugin there, and the
 permissions and the declared config's keys are in its config file. set-up-machine delivers
@@ -64,7 +64,7 @@ def write(denials: list, asks=()) -> str:
 
 
 def check_instructions(ctx) -> Cell:
-    """AGENTS.md links to the shared file. opencode has no memory feature."""
+    """`AGENTS.md` links to the shared file. opencode has no memory feature."""
     problems = [link_problem(ctx, ctx.home / FOLDER / "AGENTS.md")]
     if ctx.setup.file(ID, "instructions", ENV):
         problems.append(("gap", "setup/harnesses.json names instructions for opencode, which has no place for them"))
@@ -112,7 +112,7 @@ def _mcp_names(tool: str) -> tuple:
 
 
 def _config_path(home: Path) -> Path:
-    """The last of the global config files that exists; opencode.json when none does."""
+    """The last of the global config files that exists; `opencode.json` when none does."""
     found = [home / FOLDER / n for n in ("config.json", "opencode.json", "opencode.jsonc") if (home / FOLDER / n).is_file()]
     return found[-1] if found else home / FOLDER / "opencode.json"
 

@@ -94,7 +94,7 @@ The plugins setup area, from `plugins` in `setup/installs.json` (../workstation.
   - A matching declaration proves configuration only. Use `present` for the installation only after comparing its installed code with the latest source. Keep object entries and their resource filters.
   - `added` when no entry names the extension: append the source.
   - `updated` when an entry names the same extension with a different source: replace that entry with the source.
-  - Keep every other entry and key, and write the file as *Config* says: back it up first, write a symlink at its target, and stop on invalid JSON.
+  - Keep every other entry and key, and write the file as 'Config' says: back it up first, write a symlink at its target, and stop on invalid JSON.
   - **Update and activation:** use the installed Pi's documented package update command for selected packages even when their declarations match. Pi 1.1.0 uses `pi update --extensions`; `pi update` updates the managed harness itself. Startup and `pi list` do not prove freshness. Reload or restart after checking installed versions against current upstream metadata.
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `<agent-dir>/mcp.json`, keeping every other server and key. `present` when it matches, `added` when it's missing, `updated` when it differs. Back it up like `settings.json`. Pi takes server names of letters, digits, `_` and `-`.
   - A running session reads the change after `/reload`.
@@ -151,7 +151,7 @@ The verifier's Pi row, from `scripts/setupmachine/harnesses/pi/cli.py`, reads th
 - **instructions:** `<agent-dir>/AGENTS.md` is a link to the shared file. An `AGENTS.override.md` is a `gap`, and so is an `instructions` entry for Pi in `setup/harnesses.json`.
 - **guardrails:** `<agent-dir>/extensions/set-up-machine.ts` runs the installed skill's existing `pre_tool_hook.py` (SKILL.md, *Wiring*) with `--harness pi`, and the file is [pi-extension.ts](pi-extension.ts) but for its `COMMAND` line; one that differs otherwise, or whose `COMMAND` isn't a JSON list, is `FAIL`. No extension is `FAIL`, since nothing else enforces the rule table in Pi. A file there without the template's first line is someone else's: a `gap`, left alone. Pi has no native rules, so personal permissions need no entry. The extension fails closed: name in the report that a missing `python3` or script makes Pi refuse every tool call.
 - **sandbox:** `n/a`: Pi has no sandbox.
-- **plugins:** as *Plugins* says.
+- **plugins:** as 'Plugins' says.
 - **skills:** each listed skill is in `~/.agents/skills` or `<agent-dir>/skills`.
 - **config:** each key the Pi `config` declares holds the same value in `settings.json`. A `packages` key there is a `gap`, which asks the user to move it into `plugins`. `n/a` without a Pi `config`.
 
