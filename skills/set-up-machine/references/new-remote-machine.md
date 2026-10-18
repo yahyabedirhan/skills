@@ -54,7 +54,7 @@ Allow only SSH in, on IPv4 and IPv6: `ufw allow OpenSSH`, then `ufw enable`, in 
 
 Check that unattended security upgrades are on, since the machine faces the internet.
 
-- Result: the `unattended-upgrades` service is enabled.
+- Result: unattended security upgrades are enabled, such as the `unattended-upgrades` service on Debian and Ubuntu.
 
 ### 8. Swap
 
@@ -83,7 +83,7 @@ When Docker is installed, check the dedicated user isn't in the `docker` group w
 
 Once the steps in `SKILL.md` have written the harness settings, install the session host's own integration, which writes its own hooks, such as `herdr integration install claude` and `herdr integration install codex`, plus its skill. Skip what `setup/installs.json` in `<workstation-repo>` lists, since the steps installed it.
 
-- Result: the session host shows a session's state, such as working or blocked, for each harness.
+- Result: the session host's integration install reports success for each harness.
 
 ### 2. Git identity and credentials
 
@@ -95,7 +95,7 @@ Check `git config --global user.name` and `user.email` are set. The user signs i
 
 On Debian and Ubuntu, `~/.bashrc` returns early when the shell isn't interactive, so a command sent as `ssh <host> '<command>'` doesn't see what it adds, such as nvm's `node`. Run such a command through a login shell, `bash -lc '<command>'`, which reads `~/.profile` and with it `~/.local/bin`, or give the tool's full path, which nvm's tools need either way.
 
-- Result: `ssh <host> "bash -lc 'command -v claude'"` prints a path.
+- Result: `ssh <host> "bash -lc 'command -v <tool>'"` prints the tool's path.
 
 ### 4. A headless browser
 

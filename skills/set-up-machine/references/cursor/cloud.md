@@ -10,7 +10,7 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 - **Build:** the repo's environment file runs an install that puts the skills and tools on the VM. It writes no instructions and no harness files except the hook file, as *Guardrails* describes, and it runs no audit.
 - **Agent setup:** the agent applies the setup itself at session start, as on any machine. This skill writes the setup; scripts only enforce and check.
-- **Entry point:** a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions", Cursor's documented channel for cloud-only instructions ([setup](https://cursor.com/docs/cloud-agent/setup)). This skill doesn't use a `.cursor/CLOUD.md` file: Cursor's docs don't name it, and a cloud agent doesn't load it.
+- **Entry point:** a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions", Cursor's documented channel for cloud-only instructions ([setup](https://cursor.com/docs/cloud-agent/setup)). This skill doesn't use a `.cursor/CLOUD.md` file: Cursor's docs don't name it, and a test saw no cloud agent load it.
 - **Cloud section:** tells the agent, before other work, to follow this skill for harness `cursor`, environment `cloud`, as a first-time setup or a reconcile; to run `verify.py --harness cursor --env cloud`; and to stop and ask when a step needs more access.
 - **Cloud instructions file:** the file the key `setup/harnesses.json` > `harnesses` > `cursor` > `environments` > `cloud` > `instructions` names. The agent follows its `## Instructions` lines for the session.
 
@@ -54,7 +54,7 @@ The wiring is `/agent/.cursor/hooks.json`, which the Build writes, as *Guardrail
 ## Gaps
 
 - **Network mode:** set in the dashboard; nothing on the VM shows it.
-- **MCP servers:** connected in the dashboard, per user.
+- **MCP servers:** connected in the dashboard; nothing on the VM shows them.
 - **Slash commands:** whether a skill installed before the process started is offered as a slash command, such as one installed during the Build on a cold start.
 - **MCP hook:** `beforeMCPExecution` doesn't run.
 - **Cold start:** a new VM, which this check can't start.

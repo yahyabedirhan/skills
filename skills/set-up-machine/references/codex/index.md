@@ -104,7 +104,7 @@ When the personal source pointer names a repository, load the optional Codex `co
    - NOTE: some releases silently ignore an invalid `model_reasoning_effort` in `features list`, so check that key against the catalog and the installed protocol schema only.
 5. Report an unsupported key or value, or an unavailable validation mechanism, as a gap, and leave those preferences unchanged.
 
-A successful parse alone is not a validation: Codex ignores unknown keys and some conflicts.
+A successful parse alone is not a validation: Codex can ignore unknown keys and some conflicts.
 
 The declared config takes these values:
 
