@@ -235,7 +235,7 @@ The `beforeShellExecution` hook from #64 stays the guard.
 
 ---
 
-## 7. Open points
+## 7. Open questions
 
 - **Claude Code probes (1.6).** To run them: in a throwaway folder with the fake `.env` and a settings file holding 6.1's `autoMode` block (and one holding `{}`), for each command in section 5, run this, then read the `tool_result` for each Bash call:
 
