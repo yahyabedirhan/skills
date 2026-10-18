@@ -1,14 +1,18 @@
 # Cursor CLI
 
-The `cursor-agent` CLI: what only it has. The rules, hooks, plugins and skills it shares with the desktop app are in [index.md](index.md). Docs: [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
+The CLI environment of Cursor, the `cursor-agent` CLI. This page says how it is found, what its guardrails, sandbox and config rows mean and how the verifier checks it, all of which only the CLI has. The rules, hooks, plugins and skills it shares with the desktop app are in [index.md](index.md). Docs: [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
 
-## Found
+## The environment
+
+### Found
 
 Found when `~/.cursor/cli-config.json` exists or `cursor-agent` is on `PATH`.
 
-## Guardrails
+## Harness rows
 
-### Permissions
+### Guardrails
+
+#### Permissions
 
 - **Files:** `~/.cursor/cli-config.json`, key `permissions` with the lists `deny` and `allow`; add `"version": 1` to a new file. The CLI rewrites the rest of the file itself; keep every other key. It also unions in the `allow` and `deny` lists of `~/.claude/settings.json`, and **skips that file unless it has both lists**, so `../claude-code/index.md` keeps an `allow` there.
 - **Matching:** a glob knows only `*`, which matches anything, `/` and spaces included; every other character is literal: it has no `?`, classes or `**` of its own. `Shell(<prefix>)` matches the prefix alone and followed by a space and anything; `Shell(<prefix>:)` the prefix alone; `Shell(<cmd>:<args>)` a one-word command with arguments matching the glob. Deny wins over allow.
@@ -22,7 +26,7 @@ Found when `~/.cursor/cli-config.json` exists or `cursor-agent` is on `PATH`.
 - **Gap:** a project's `.cursor/cli.json` replaces these lists, so `"deny": []` there empties them. A project can only add to the Claude settings lists, and the hook still refuses the deny rows.
 - **The IDE** reads neither file and has no user-level deny list: its hard blocks are hooks.
 
-### Personal permissions
+#### Personal permissions
 
 A personal permission, as the section `../workstation.md` > `setup/permissions.json` defines it, becomes CLI entries the way a table row of its kind does above, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does, and the hook refuses an `ask` row's calls, as it does a table row's.
 
@@ -31,7 +35,7 @@ A personal permission, as the section `../workstation.md` > `setup/permissions.j
 - **It can't loosen a table row:** deny wins over allow.
 - **The IDE** has no allow list: an `allow` row is a `gap` there, left to the IDE's own approval settings.
 
-## Sandbox
+### Sandbox
 
 Auto-review with the sandbox on is the mode this skill sets for anyone who has Cursor. Allowlisted calls run. Other shell commands run in the sandbox when they can. A call that cannot use the sandbox goes to the classifier. The deny list still refuses: Auto-review does not replace it.
 
@@ -40,7 +44,7 @@ Auto-review with the sandbox on is the mode this skill sets for anyone who has C
 - **Linux:** the sandbox needs kernel 6.2 or newer with Landlock, and unprivileged user namespaces. Where the CLI runs without the desktop app, as on a remote machine, the user installs the AppArmor package the run-modes doc names; it needs root. When the sandbox cannot be created, Cursor asks before each command: a `gap`.
 - **Steering:** leave `~/.cursor/permissions.json` `autoRun` to the user. `block_instructions` steer the classifier in plain English. The rule table and the hook are the enforcement, and a second prose list of the same calls would drift from them.
 
-## Config
+### Config
 
 When `setup/harnesses.json` names a Cursor `config`, as `../workstation.md` > 'A declared config' describes, merge each key it sets, such as `hasChangedDefaultModel`, `model` and `selectedModel`, into `~/.cursor/cli-config.json`, the file that holds the CLI's permissions and run mode too. Write each declared key whole, keep every other key, and add `"version": 1` to a new file. Mark each key `present, personal` or `updated, personal`.
 

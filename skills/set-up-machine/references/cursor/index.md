@@ -1,6 +1,6 @@
 # Cursor
 
-How to set up and audit Cursor from the rule table. This page holds what every Cursor environment on a machine shares: the desktop app and the `cursor-agent` CLI both read `~/.cursor/`. Docs: [rules](https://cursor.com/help/customization/rules.md), [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [hooks](https://cursor.com/docs/hooks.md). Background: the repo's `docs/research/harness-capabilities.md`, section 4, and probes of `cursor-agent` 2026.09.18.
+Cursor, set up from the rule table. This page says how its environments are found, what each harness row means and how the verifier checks them. It holds what every Cursor environment on a machine shares: the desktop app and the `cursor-agent` CLI both read `~/.cursor/`. Docs: [rules](https://cursor.com/help/customization/rules.md), [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [hooks](https://cursor.com/docs/hooks.md). Background: the repo's `docs/research/harness-capabilities.md`, section 4, and probes of `cursor-agent` 2026.09.18.
 
 ## Environments
 
@@ -12,13 +12,15 @@ Each environment has its own page and its own verifier row, `Cursor / <env>`. `v
 
 The code is `scripts/setupmachine/harnesses/cursor/`: `__init__.py` holds the hook payload and the checks on this page, and each environment is a module.
 
-## Found
+### Found
 
 Found when `~/.cursor/` holds a file or folder the IDE or CLI writes, such as `cli-config.json`, `argv.json`, `hooks.json`, `mcp.json`, `rules/` or `extensions/`, or `cursor-agent` or `cursor` is on `PATH`. A bare `~/.cursor/` isn't Cursor: another app, such as Grok Bot, can make one.
 
-## Instructions
+## Harness rows
 
-### Global instructions
+### Instructions
+
+#### Global instructions
 
 - Both read **user rule files**, `~/.cursor/rules/*.mdc`: the IDE in every project, the CLI by walking up from its working folder, so only inside the home folder. An `.mdc` file reaches every chat only with `alwaysApply: true` frontmatter, and `@file` in a rule is a context reference, not an include.
 - So `~/.cursor/rules/global-instructions.mdc` is a **copy** of the shared file:
@@ -50,19 +52,19 @@ Found when `~/.cursor/` holds a file or folder the IDE or CLI writes, such as `c
 - Any other `.mdc` there is `extra`: its lines belong in the shared file, or in Cursor's instructions file when only Cursor needs them.
 - **Gaps:** a CLI session whose working folder is outside the home folder gets no global instructions. Account User Rules, under Customize > Rules, live on the Cursor account, out of reach and invisible to the audit.
 
-### Memory
+#### Memory
 
 No memory feature: a `none` line.
 
-## Guardrails
+### Guardrails
 
 The hook, below, is the guardrail every local environment shares. The CLI's permission lists are on `cli.md`; the desktop app has none, as `desktop.md` describes.
 
-### What the agent sees
+#### What the agent sees
 
 A native CLI deny: `Permission denied: Command blocked by permissions configuration` or `Write permission denied:`, naming no rule; the copied global instructions supply general rejection guidance and the `rm -rf` fallback. A hook deny: `Rejected: Command execution was blocked by a hook: Refused by the pre-tool hook, …`. The other events say "File read" or "MCP tool execution" in its place.
 
-## Plugins
+### Plugins
 
 The plugins setup area, from `plugins` in `setup/installs.json`, as the section `../workstation.md` > `setup/installs.json` defines it.
 
@@ -70,11 +72,11 @@ The plugins setup area, from `plugins` in `setup/installs.json`, as the section 
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `~/.cursor/mcp.json`, keeping every other key ([MCP](https://cursor.com/docs/context/mcp)). `present` when it matches, `added` when it's missing, `updated` when it differs. A global server needs no approval; one in a project's `.cursor/mcp.json` waits for `cursor-agent mcp enable`.
 - **Sign-in:** for the CLI, per project folder: the user runs `cursor-agent mcp login <name>` in the folder, then starts `cursor-agent` there, trusts the workspace and approves its MCP servers, and quits. `cursor-agent mcp list` then shows the server `ready`; before that it shows `requires_authentication` or `not loaded (needs approval)`. A global server in `~/.cursor/mcp.json` still needs that approval. For the desktop app's agent, the user connects each server in the app's MCP settings; that sign-in doesn't reach the CLI. An agent never signs in. On a headless machine the callback goes to `localhost:8787` there, which the user finishes with `curl` or an SSH tunnel.
 
-## Skills
+### Skills
 
 Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills](https://cursor.com/docs/skills.md)). Skills installed into `~/.agents/skills` reach it with no extra install. Cursor doesn't copy `~/.agents/skills` to Cloud Agents or remote SSH sessions. A cloud agent is a separate environment, as `cloud.md` describes: its own install puts skills on that VM. Install each skill as the item `../workstation.md` > `setup/installs.json` > **A skill** says.
 
-## Hook wiring
+### Hook wiring
 
 - **Wiring:** `~/.cursor/hooks.json`, read by the IDE and the CLI, which a project can't turn off. One handler on four events, since each call reaches exactly one of them and nothing is reported twice. Keep the user's handlers:
 
@@ -92,7 +94,9 @@ Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills
 - **Answer:** always JSON. A deny is `{"permission": "deny", "user_message": …, "agent_message": …}`, both the refusal; the CLI shows the agent `user_message`. Otherwise `{}`, which leaves the call to Cursor's permissions. The hook isn't `failClosed`: a crash or timeout lets the call through, and in the IDE nothing native is left underneath: a `gap`.
 - **Claude Code's hook runs here too,** as `../claude-code/index.md` > 'Hook wiring' describes: it refuses what it recognises and leaves the report to this one.
 
-## Gaps
+## Known limits
+
+### Gaps
 
 The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses, as `SKILL.md` > 'What it can't see' describes.
 

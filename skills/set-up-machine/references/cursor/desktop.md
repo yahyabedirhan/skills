@@ -1,18 +1,22 @@
 # Cursor desktop
 
-The desktop app's agent: what differs from the CLI. The rules, hooks, plugins and skills it shares with the CLI are in [index.md](index.md).
+The desktop environment of Cursor, the desktop app's agent. This page says how it is found, what differs from the CLI in its harness rows and how the verifier checks it. The rules, hooks, plugins and skills it shares with the CLI are in [index.md](index.md).
 
-## Found
+## The environment
+
+### Found
 
 Found when `~/.cursor/argv.json` or `~/.cursor/extensions/` exists, or `cursor` is on `PATH`.
 
-## Guardrails
+## Harness rows
+
+### Guardrails
 
 - The app reads neither `cli-config.json` nor Claude Code's lists, and has no user-level deny list: its hard blocks are the hooks, as `index.md` > 'Hook wiring' describes.
 - A personal `allow` row is a `gap` here, left to the app's own approval settings.
 - The hook isn't `failClosed`: a crash or timeout lets the call through, and in the app nothing native is left underneath, a `gap`.
 
-## Sandbox and config
+### Sandbox and config
 
 The app keeps its run mode and its model choice in its own settings, not in a file. Both cells are `n/a`. The declared Cursor config is the CLI's, as `cli.md` > 'Config' describes.
 
