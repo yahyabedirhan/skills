@@ -49,7 +49,7 @@ def read(payload: dict) -> ToolCall:
 
 
 def write(denials: list, asks=()) -> str:
-    """Always one JSON line: `{"block": …}`, `{"ask": …}` (the question the extension asks), or `{}`."""
+    """Always one JSON line: `{"block": …}`, `{"ask": …}` with the question the extension asks, or `{}`."""
     if denials:
         return json.dumps({"block": refusal(denials)}) + "\n"
     if asks:

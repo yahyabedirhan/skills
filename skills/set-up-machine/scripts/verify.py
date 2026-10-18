@@ -10,7 +10,7 @@ It reads the machine and writes nothing. The steps:
 2. Print two global lines:
    - setup: the pointer and setup/ files are readable, and the shared global instructions file (~/.config/agents/AGENTS.md) carries what setup/instructions.md generates;
    - rules: every sample of every rule-table row and personal permission gets its row's answer from the hook's decision.
-3. Print one table: a row per harness environment found (its folder exists, or its CLI is on PATH; a --home copy counts only its folders), a column per setup area (instructions, guardrails, sandbox, plugins, skills) and a last one, config, for the keys setup/harnesses.json declares, such as a default model. Each cell is ok, FAIL, gap or n/a.
+3. Print one table: a row per harness environment found, where its folder exists or its CLI is on PATH, and a --home copy counts only its folders; a column per setup area, instructions, guardrails, sandbox, plugins and skills; and a last one, config, for the keys setup/harnesses.json declares, such as a default model. Each cell is ok, FAIL, gap or n/a.
 4. Print one detail line per FAIL and gap cell.
 5. Exit 1 when any line or cell is FAIL.
 

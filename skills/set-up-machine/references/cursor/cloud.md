@@ -10,7 +10,7 @@ Found when `/run/cursor/api.sock` is a socket. That is the VM, so a `--home` fix
 
 The Build only installs: the repo's environment file runs an install that puts the skills and tools on the VM. It writes no instructions and no harness files except the hook file (*Guardrails*), and it runs no audit. The agent applies the setup itself at session start, as on any machine: this skill writes the setup, and scripts only enforce and check.
 
-The agent learns this at start from Cursor's documented channel for cloud-only instructions, a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). That section tells the agent, before other work, to follow this skill for harness `cursor`, environment `cloud` (first-time setup, or a reconcile), to run `verify.py --harness cursor --env cloud`, and to stop and ask when a step needs more access. It points at the `instructions` file `setup/harnesses.json` names for the cloud environment (`harnesses.cursor.environments.cloud`), whose `## Instructions` lines the agent follows for the session. A `.cursor/CLOUD.md` file, which a Cursor staff answer on the forum mentions, was not seen loading, so this skill does not use it.
+The agent learns this at start from Cursor's documented channel for cloud-only instructions, a section of the repo `AGENTS.md` titled "Cursor Cloud specific instructions" ([setup](https://cursor.com/docs/cloud-agent/setup)). That section tells the agent, before other work, to follow this skill for harness `cursor`, environment `cloud`, as a first-time setup or a reconcile, to run `verify.py --harness cursor --env cloud`, and to stop and ask when a step needs more access. It points at the `instructions` file `setup/harnesses.json` names for the cloud environment (`harnesses.cursor.environments.cloud`), whose `## Instructions` lines the agent follows for the session. A `.cursor/CLOUD.md` file, which a Cursor staff answer on the forum mentions, was not seen loading, so this skill does not use it.
 
 `~/.config/agents/AGENTS.md` is the shared file, written by the agent as on any machine, and the `setup` line checks it. Do not append the cloud-only lines to the shared file.
 
@@ -30,7 +30,7 @@ The command is the same one Cursor's CLI uses, `[ -f <script> ] && python3 <scri
 
 ## Sandbox
 
-`gap`: commands run on the VM, with no workspace sandbox. Network mode (Default, Default with an allowlist, or Allowlist only) is set in the dashboard. Nothing on the VM shows which mode is on.
+`gap`: commands run on the VM, with no workspace sandbox. The network mode, Default, Default with an allowlist, or Allowlist only, is set in the dashboard. Nothing on the VM shows which mode is on.
 
 ## Plugins
 

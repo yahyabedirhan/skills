@@ -98,7 +98,7 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """Each key the declared opencode config sets, such as `model`, has its value in the config file opencode reads last (an opencode.jsonc read without its comments)."""
+    """Each key the declared opencode config sets, such as `model`, has its value in the config file opencode reads last; an opencode.jsonc is read without its comments."""
     return json_config_cell(ctx, ID, LABEL, _config_path(ctx.home), read=_read_config, env=ENV)
 
 

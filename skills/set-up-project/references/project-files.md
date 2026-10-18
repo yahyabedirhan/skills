@@ -18,7 +18,7 @@ Each deny and ask row of set-up-machine's `rules.json` carries `samples.covers`:
 - **Permissions can't be loosened.** A user deny or ask wins over any project allow.
 - **Auto mode:** a project allow over a deny command row is `overlaps`: the user's deny and the pre-tool hook still refuse the command. `autoMode` is read only from user settings, so a project's is a `gap` that does nothing.
 - **Switches that weaken:** `"disableAllHooks": true` turns every hook off, the pre-tool hook included; `"autoMemoryEnabled": true` turns memory back on; `"disableAutoMode"` turns auto mode off. Each is `weakens`.
-- **Read by the Cursor CLI too:** it unions the `allow` and `deny` lists of the project's `.claude/settings.json` (not `settings.local.json`) with its own, and has no ask level. So an allow there that covers an ask row (`Bash(git push *)` over `git push --force-with-lease`) is `weakens`: the Cursor CLI runs it without a prompt.
+- **Read by the Cursor CLI too:** it unions the `allow` and `deny` lists of the project's `.claude/settings.json`, but not `settings.local.json`, with its own, and has no ask level. So an allow there that covers an ask row (`Bash(git push *)` over `git push --force-with-lease`) is `weakens`: the Cursor CLI runs it without a prompt.
 
 ## Cursor CLI: `.cursor/cli.json`, from the git root down
 
@@ -31,7 +31,7 @@ Each deny and ask row of set-up-machine's `rules.json` carries `samples.covers`:
 
 - **Permissions can be loosened.** A project's config merges over the global one: a pattern already in the global config changes level in place, and a new one goes after the global rules, where the last match wins. So the audit merges the project's `permission` over the global config and asks, per sample, which level opencode would apply; a looser one than the global config gives is `weakens`, naming the entry that wins. A tool set to one level (`"read": "allow"`) replaces the tool's whole global object.
 - **Agents:** an `agent.<name>.permission` in the project config is merged after, and checked the same way.
-- **Plugins:** a project plugin (`plugin` in the config, or a file in `.opencode/plugin/` or `.opencode/plugins/`) runs after the global pre-tool hook and can rewrite a call's arguments once the hook has passed them. The audit can't read what it does, so it's a `gap`: read it.
+- **Plugins:** a project plugin, from `plugin` in the config or a file in `.opencode/plugin/` or `.opencode/plugins/`, runs after the global pre-tool hook and can rewrite a call's arguments once the hook has passed them. The audit can't read what it does, so it's a `gap`: read it.
 
 ## Codex: `.codex/config.toml`
 
@@ -40,8 +40,8 @@ Each deny and ask row of set-up-machine's `rules.json` carries `samples.covers`:
 
 ## Not audited
 
-Named so nothing here reads as checked: opencode agents defined in `.opencode/agent/*.md` and config files below the project root; Cursor IDE's `.cursor/permissions.json` (`allow_instructions` only steer its classifier) and `.cursor/hooks.json` (hooks only add); Claude Code's `env` key in project settings; Codex's approval, sandbox and auto-review settings, which the rule table doesn't set.
+Named so nothing here reads as checked: opencode agents defined in `.opencode/agent/*.md` and config files below the project root; Cursor IDE's `.cursor/permissions.json`, whose `allow_instructions` only steer its classifier, and `.cursor/hooks.json`, since hooks only add; Claude Code's `env` key in project settings; Codex's approval, sandbox and auto-review settings, which the rule table doesn't set.
 
 ## Fixing a line
 
-A project harness file is the project's: change it only with the user's approval. For `weakens`, remove the entry or narrow it to the project's own commands (`Bash(npm test *)` rather than `Bash(npm *)`, never a pattern that reaches a rail's command). For a rail the project wants (a deny, or a stricter level), add it through `/set-up-machine`'s rule table when every project needs it, else keep it as an `extra`.
+A project harness file is the project's: change it only with the user's approval. For `weakens`, remove the entry or narrow it to the project's own commands, such as `Bash(npm test *)` rather than `Bash(npm *)`, never a pattern that reaches a rail's command. For a rail the project wants, a deny or a stricter level, add it through `/set-up-machine`'s rule table when every project needs it, else keep it as an `extra`.

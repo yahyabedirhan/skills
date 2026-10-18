@@ -1,6 +1,6 @@
 ---
 name: set-up-machine
-description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules (deny, ask, allow-and-report) each one enforces, the pre-tool hook, memory kept off, each harness's declared config such as its default model, the plugins each harness gets, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
+description: Set up or audit a machine's coding-agent harnesses from one rule table and the user's workstation repo - the shared global instructions every harness reads, the global rules each one enforces, deny, ask and allow-and-report, the pre-tool hook, memory kept off, each harness's declared config such as its default model, the plugins each harness gets, and the skills and tools the workstation repo lists to install. Use for a new machine or VPS, to audit this machine's agent setup, or when another skill says to check the machine.
 ---
 
 # Set up machine
@@ -54,18 +54,18 @@ Set up every selected harness and environment ([Harnesses](#harnesses)) from its
 
    Work out what each harness should hold, from `rules.json`, the personal permissions, the shared file's shape and the harness's reference, and compare it with what the machine holds. Write the whole diff: per harness and file, the exact entries or a unified diff, each line marked:
 
-   - `added`, `tightened` (a stricter entry added where it wins), `removed`, `updated` (an installed harness, skill, plugin or tool behind its latest source);
-   - `present`, `wired` (the hook), `found` (the MCP tools a row matched);
-   - `stricter` (the machine is stricter than the table: kept), `extra` (neither the table's nor a personal permission's: kept), `ignored` (an installed skill `setup/installs.json` leaves out on purpose: kept, never installed or removed), `gap` (what the harness can't express), `none` (no such feature);
-   - `personal` beside the mark of every entry a personal permission produced (`added, personal`; `present, personal`), so the user can tell those entries from the table's and never reads them as `extra`;
-   - `n/a` (not applicable) for a personal permission whose tool this harness lacks, with why: nothing is written for it there.
+   - `added`; `tightened`, a stricter entry added where it wins; `removed`; `updated`, an installed harness, skill, plugin or tool behind its latest source;
+   - `present`; `wired` for the hook; `found` for the MCP tools a row matched;
+   - `stricter`: the machine is stricter than the table, kept; `extra`: neither the table's nor a personal permission's, kept; `ignored`: an installed skill `setup/installs.json` leaves out on purpose, kept, never installed or removed; `gap`: what the harness can't express; `none`: no such feature;
+   - `personal` beside the mark of every entry a personal permission produced, such as `added, personal` or `present, personal`, so the user can tell those entries from the table's and never reads them as `extra`;
+   - `n/a`, not applicable, for a personal permission whose tool this harness lacks, with why: nothing is written for it there.
 
    Use `removed` only for memory files, a harness's own global file whose every line is already in the shared file (it becomes a link), and this skill's own wiring that points at an old script. An entry a dropped row, the table's or a personal one, left behind is `extra`, for the user to remove.
    - **When the workstation repo has `setup/installs.json`:** the diff holds a line per entry that applies to this machine, and an `n/a` line, with why, per entry that doesn't. The file is the whole list: install nothing it leaves out. `references/workstation.md` gives the format, the checks and the commands.
    - **Without the file, with a `<skills-repo>` value:** the diff installs that repo's skills globally: `npx --yes skills add <owner>/<repo> -g -a codex -a claude-code -y`, leaving out `-a claude-code` when `~/.claude/skills` is a link to `~/.agents/skills`. Compare the installed skill hashes with the source's latest default branch, as `references/workstation.md` describes. Presence in the lock file alone does not prove freshness. With no value, it's a `none` line.
 3. **Ask once** for one approval of the whole diff. A change after that needs a new approval.
    - **When the diff holds only `added` and `updated` installs from `setup/installs.json`:** write it without asking, since the user approved that list by writing it.
-4. **Back up** every file the diff changes or removes. Before writing any file, copy each one into `~/.config/agents/backups/<UTC time as YYYYmmddTHHMMSSZ>/`, at its path relative to the home folder (`.claude/settings.json`). Copy a symlink as a link.
+4. **Back up** every file the diff changes or removes. Before writing any file, copy each one into `~/.config/agents/backups/<UTC time as YYYYmmddTHHMMSSZ>/`, at its path relative to the home folder, such as `.claude/settings.json`. Copy a symlink as a link.
 5. **Write** exactly the approved diff. Run any install command first, such as a skill the diff installs. If one fails, stop subsequent writes and report what changed before the failure. Check configuration and guardrail compatibility after upgrades; report failures rather than making an old snapshot the desired state. In JSON and TOML files, change only the keys the diff names and keep the rest. Write through a symlink to its target.
 6. **Verify** with `python3 <skill-folder>/scripts/verify.py`, where `<skill-folder>` is this skill's installed folder. It needs Python 3.9+ and the standard library only, and it writes nothing. The run passes when [What verify must show](#what-verify-must-show) holds. Then inspect again until the diff changes nothing: no pending `added`, `updated`, `tightened` or `removed` line. Report the backup folder, what's wired, the gaps, and the stricter and extra entries.
 
@@ -91,7 +91,7 @@ FAIL  Cursor instructions: ~/.cursor/rules/global-instructions.mdc is stale; gen
 
 - **`setup`:** the pointer and every `setup/` file are readable, and the shared file carries what `setup/instructions.md` generates. `n/a` when the pointer says there is no workstation repo.
 - **`rules`:** every sample of every rule-table row and personal permission gets its row's answer from the hook.
-- **A row per harness present.** Each cell is `ok`, `FAIL`, `gap` (the harness can't do it, or the check can't see it) or `n/a` (the area doesn't apply). The columns:
+- **A row per harness present.** Each cell is `ok`, `FAIL`, `gap` when the harness can't do it or the check can't see it, or `n/a` when the area doesn't apply. The columns:
   - `instructions`: the harness reads the shared file, its own instructions from `setup/harnesses.json` when named, and memory is off;
   - `guardrails`: the hook is wired to an installed script, and each personal permission has its native entry where the harness has native rules;
   - `sandbox`: the harness's sandbox and approval settings: Cursor's run mode, and the sandbox and approval keys of the declared Codex config;
@@ -107,20 +107,20 @@ The run passes when no line or cell is `FAIL`; the verifier then exits 0. Report
 
 ## Pre-tool hook
 
-`scripts/pre_tool_hook.py` (Python 3.9+, standard library only) is the hook every harness runs before each tool call. It reads `rules.json`, and the personal permissions through the pointer, and checks the call:
+`scripts/pre_tool_hook.py` is the hook every harness runs before each tool call. It needs Python 3.9+ and the standard library only. It reads `rules.json`, and the personal permissions through the pointer, and checks the call:
 
 - **deny** rows: it reads a command the way the shell runs it, and checks file tools, redirects and MCP tools too. It refuses the call, naming each refused part with its rule's reason and instruction.
 - **allow-and-report** rows: it writes one JSON line per call to `<report-folder>/<date>.jsonl`, readable by the user alone; the harness's permissions decide.
-- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt (their references say why). Cursor has no ask list at all, so there the hook refuses every ask row, `approver` or not. Pi has no ask list either, but its extension can ask: with a UI, the hook names the ask rows and the extension asks the user in Pi's dialog; without one, the hook refuses every ask row (references/pi/cli.md).
+- **ask** rows: the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead where the call shows that no one will ask the user: Claude Code in `auto`, `dontAsk` or `bypassPermissions` mode, Codex with approval policy `never`, and every call under Cursor and opencode, which can't promise a prompt, as their references explain. Cursor has no ask list at all, so there the hook refuses every ask row, `approver` or not. Pi has no ask list either, but its extension can ask: with a UI, the hook names the ask rows and the extension asks the user in Pi's dialog; without one, the hook refuses every ask row (references/pi/cli.md).
 - **allow** rows: it says nothing; the harness's native allow entries let the call run without a prompt.
 
 A malformed personal file leaves the table's rows in force: the hook skips the personal permissions and `verify.py` reports the file.
 
 ### Wiring
 
-Each harness reference shows its wiring with `<script>` in place of the script's path. Replace it with the absolute path of `scripts/pre_tool_hook.py` in the installed skill (under `~/.agents/skills` or `~/.claude/skills`), never in a checkout or worktree, which can be deleted. If there is no installed copy, name the gap. `verify.py` fails wiring whose script is elsewhere.
+Each harness reference shows its wiring with `<script>` in place of the script's path. Replace it with the absolute path of `scripts/pre_tool_hook.py` in the installed skill, under `~/.agents/skills` or `~/.claude/skills`, never in a checkout or worktree, which can be deleted. If there is no installed copy, name the gap. `verify.py` fails wiring whose script is elsewhere.
 
-The wiring fails open (`[ -f <script> ] && … || true`, or the form a harness reference gives): if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call. Pi is the exception: it has no native entries underneath, so its extension fails closed and refuses each call the hook can't check (references/pi/cli.md).
+The wiring fails open, as `[ -f <script> ] && … || true` or the form a harness reference gives: if the script is gone, each call goes on under the native entries. Without it, `python3` would exit 2 on the missing script, which blocks every call. Pi is the exception: it has no native entries underneath, so its extension fails closed and refuses each call the hook can't check (references/pi/cli.md).
 
 `<report-folder>` is `~/.local/state/agents/reports`, or `report_dir` in `~/.config/agents/hook.json`.
 

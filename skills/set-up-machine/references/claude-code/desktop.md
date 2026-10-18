@@ -8,10 +8,10 @@ Found when the app's own Claude Code folder exists: `~/Library/Application Suppo
 
 ## What differs from the CLI
 
-- **Permission mode:** the app's mode selector (Manual, Accept edits, Plan, Auto, Bypass permissions) is remembered per folder and wins over `permissions.defaultMode`. A session in Auto or Bypass permissions is unattended, so the hook refuses `approver: "user"` rows there as it does in the CLI (index.md, *Auto mode*).
-- **Worktrees:** location, branch prefix and auto-archive are app settings (Settings > Claude Code), not keys this skill writes.
+- **Permission mode:** the app's mode selector, with Manual, Accept edits, Plan, Auto and Bypass permissions, is remembered per folder and wins over `permissions.defaultMode`. A session in Auto or Bypass permissions is unattended, so the hook refuses `approver: "user"` rows there as it does in the CLI (index.md, *Auto mode*).
+- **Worktrees:** location, branch prefix and auto-archive are app settings, in Settings > Claude Code, not keys this skill writes.
 - **Plugins:** installed plugins show under **+** > **Plugins** in a local session. They are not available in WSL.
-- **Instructions:** the desktop page doesn't name `~/.claude/CLAUDE.md`. It loads as user instructions in every session ([memory](https://code.claude.com/docs/en/memory)); a probe in the app (`/context` lists it under memory files) is the check.
+- **Instructions:** the desktop page doesn't name `~/.claude/CLAUDE.md`. It loads as user instructions in every session ([memory](https://code.claude.com/docs/en/memory)); a probe in the app is the check: `/context` lists it under memory files.
 
 ## Sandbox and config
 

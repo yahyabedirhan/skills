@@ -19,7 +19,7 @@ Where Pi keeps its user-level files: `settings.json`, the context file, `extensi
 `<agent-dir>/settings.json` for the user, and `.pi/settings.json` for a project, which loads only once the project is trusted. Defaults, resource paths and the `packages` list live here.
 
 **Context file**:
-An `AGENTS.md` (or `CLAUDE.md`) Pi adds to the prompt, from the agent folder and from each folder up from the working one.
+An `AGENTS.md` or `CLAUDE.md` Pi adds to the prompt, from the agent folder and from each folder up from the working one.
 
 **Extension**:
 A TypeScript module that adds executable behavior to Pi: tools, commands, shortcuts, event handlers such as `tool_call`, model providers, session state or terminal UI. It runs inside Pi with Pi's operating-system permissions. Pi loads extensions from `<agent-dir>/extensions/`, from a trusted project's `.pi/extensions/`, and from packages. This skill's pre-tool hook is one, `<agent-dir>/extensions/set-up-machine.ts`.
@@ -55,7 +55,7 @@ No memory feature: a `none` line. Pi keeps sessions in `sessions/`, which it rel
 
 ### Permissions
 
-Pi has no permission system. It asks for no approval before a tool call (`docs/security.md`), and has no deny, ask or allow list. The pre-tool hook, wired through an extension, is the only enforcement: it refuses deny rows, asks the user for ask rows in a Pi dialog, and reports allow-and-report rows. Write no native entry for any row.
+Pi has no permission system. It asks for no approval before a tool call, as its `docs/security.md` says, and has no deny, ask or allow list. The pre-tool hook, wired through an extension, is the only enforcement: it refuses deny rows, asks the user for ask rows in a Pi dialog, and reports allow-and-report rows. Write no native entry for any row.
 
 ### Command rows
 
@@ -63,7 +63,7 @@ No native entry. The hook checks the `command` of the `bash` and `powershell` to
 
 ### File rows
 
-No native entry. The hook checks the `path` of `read`, `edit`, `write` and `ls`, and the search glob of `grep` (`glob`) and `find` (`pattern`).
+No native entry. The hook checks the `path` of `read`, `edit`, `write` and `ls`, and the search glob of `grep`, its `glob`, and of `find`, its `pattern`.
 
 ### MCP-tool rows
 
@@ -129,15 +129,15 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - **Wiring:** the extension `<agent-dir>/extensions/set-up-machine.ts`, which Pi loads from its global extension folder. Write it from [pi-extension.ts](pi-extension.ts), with `__HOOK_COMMAND__` replaced by the JSON array `["python3", "<script>", "--harness", "pi"]` (`<script>` as in SKILL.md, *Wiring*). Its `tool_call` handler runs before every tool call, built-in, extension and MCP. Calls that `codemode` scripts make with `tools.<name>(…)` reach it one by one, as nested calls.
 - **Fails closed:** Pi has no native rules underneath, so a call the hook can't check is refused. When the script is gone, `python3` can't start, the hook exits non-zero, prints anything but a JSON object or takes over 10 seconds, the extension blocks the call. The agent reads that the guardrail is unavailable and that the user should run `/set-up-machine`. The hook exits non-zero on a call it can't read, a rule table it can't load, and a report line it can't write. The extension catches its own errors and turns them into the same refusal.
 - **Audit:** `wired` when the file is the template with the current command. A file there without the template's first line is someone else's: a `gap`, left alone. An extension with an old command is rewritten.
-- **Input:** `{"toolName", "input", "cwd", "sessionId", "hasUI"}`. `input` holds the tool's arguments: `command` for `bash` and `powershell`; `path` for the file tools; `pattern`, `path` and `glob` for `grep`; `pattern` (a glob) and `path` for `find`. The outer `codemode` call carries its script in `input.code`, which the hook doesn't read as a command.
+- **Input:** `{"toolName", "input", "cwd", "sessionId", "hasUI"}`. `input` holds the tool's arguments: `command` for `bash` and `powershell`; `path` for the file tools; `pattern`, `path` and `glob` for `grep`; `pattern`, a glob, and `path` for `find`. The outer `codemode` call carries its script in `input.code`, which the hook doesn't read as a command.
 - **Answer:** always one JSON line. `{"block": "<refusal>"}` becomes `{ block: true, reason }`, and Pi gives the agent the reason as the tool's result. `{"ask": "<question>"}` names each ask row's part, reason and instruction. `{}` lets the call run.
-- **Asking:** with a UI (`ctx.hasUI`, true in the TUI and in RPC mode), the extension shows a notice, then a `ctx.ui.select` dialog with the question and two answers, No first. Pi's `ctx.ui.confirm` is the same dialog with Yes first, so `select` puts the cursor on the safe answer: Enter refuses, and so does Escape. Yes runs the call. No blocks it, and the agent reads that the user declined. Print and JSON mode have no UI, so the hook refuses every ask row there, `approver: "user"` or not.
-- **Session host:** while a dialog waits, Pi reports `blocked` to the terminal itself (OSC 7501). A session host's own Pi integration can report a state of its own instead. Herdr's (version 9) reported `working`, so the user got no notice. It listens for a `herdr:blocked` event on Pi's event bus, so the extension emits that event around the dialog, and Herdr then shows the pane as `blocked`. Without that integration nothing listens, and the event does nothing.
+- **Asking:** with a UI, where `ctx.hasUI` is true in the TUI and in RPC mode, the extension shows a notice, then a `ctx.ui.select` dialog with the question and two answers, No first. Pi's `ctx.ui.confirm` is the same dialog with Yes first, so `select` puts the cursor on the safe answer: Enter refuses, and so does Escape. Yes runs the call. No blocks it, and the agent reads that the user declined. Print and JSON mode have no UI, so the hook refuses every ask row there, `approver: "user"` or not.
+- **Session host:** while a dialog waits, Pi reports `blocked` to the terminal itself through OSC 7501. A session host's own Pi integration can report a state of its own instead. Herdr's (version 9) reported `working`, so the user got no notice. It listens for a `herdr:blocked` event on Pi's event bus, so the extension emits that event around the dialog, and Herdr then shows the pane as `blocked`. Without that integration nothing listens, and the event does nothing.
 - Other extensions in `<agent-dir>/extensions/`, such as a session host's integration, are the user's: leave them.
 
 ## Gaps
 
-- **The only layer:** Pi has no native rules underneath, so the extension fails closed: while `python3` or the script is missing, or the hook fails, Pi refuses every tool call until `/set-up-machine` repairs it. `pi --no-extensions` starts a session without the hook in the meantime. The containment Pi offers beyond the hook is the operating system's: a container, a virtual machine or a separate user (`docs/security.md`, `docs/containerization.md`). Name this once in every audit.
+- **The only layer:** Pi has no native rules underneath, so the extension fails closed: while `python3` or the script is missing, or the hook fails, Pi refuses every tool call until `/set-up-machine` repairs it. `pi --no-extensions` starts a session without the hook in the meantime. The containment Pi offers beyond the hook is the operating system's: a container, a virtual machine or a separate user, as Pi's `docs/security.md` and `docs/containerization.md` say. Name this once in every audit.
 - **Started without extensions:** `pi --no-extensions` (`-ne`) skips the extension. Explicit `-e <path>` extensions still load.
 - **Handlers after the hook can change the call:** a `tool_call` handler can change `event.input`, and the first handler that blocks wins. Pi 1.1.0 runs the handlers in load order: `-e` extensions first, then a trusted project's extensions (its `.pi/settings.json` entries, then `.pi/extensions/`), then the global settings' entries, then `<agent-dir>/extensions/`, then the extensions from `packages`, then built-in ones. So an extension from `packages`, or a built-in one, runs after the hook and could change a call the hook already passed. Pi offers no way to run last or to check the final input before the tool runs. A project extension runs before the hook: the hook sees what it changed.
 - **Child sessions without extensions:** an extension that starts child sessions in the same process can start them with extensions off, and the hook doesn't run there. The `pi-subagents` extension (0.77.0) does this for foreground children; its setting `subagents.defaultSubagentOnlyExtensions`, listing the hook extension's path, loads it there. Check each such extension. A child without a UI gets ask rows refused.

@@ -1,13 +1,13 @@
 """The pre-tool hook's decision: what the rule rows say about one tool call.
 
-pre_tool_hook.py reads a harness's payload into a `ToolCall` (each harness module knows its own payload), then calls `decide` here. `decide` returns a `Verdict`:
+pre_tool_hook.py reads a harness's payload into a `ToolCall` with that harness's module, which knows its payload, then calls `decide` here. `decide` returns a `Verdict`:
 
 - **deny:** any part of the call a deny row covers refuses the whole call. The answer names each refused part with its rule's reason and instruction (`refusal`).
 - **allow-and-report:** a call such a row covers gets one line in the report folder (`write_report`). The hook says nothing else, so the harness's own permissions decide.
-- **ask:** the verdict names the ask rows a call hits, and the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead when the call shows that no one will ask the user, such as Claude Code in bypassPermissions mode. A harness with no ask list (Cursor, Pi) gets every ask row refused when unattended.
+- **ask:** the verdict names the ask rows a call hits, and the harness's native ask entries do the asking. A row with `approver: "user"` is refused instead when the call shows that no one will ask the user, such as Claude Code in bypassPermissions mode. A harness with no ask list, such as Cursor or Pi, gets every ask row refused when unattended.
 - **allow**, a personal permission's level: named in the verdict, and the hook says nothing.
 
-The steps of `decide`: split a shell command into the simple commands the shell runs (commands.py), collect the files the call reads or writes, match every row against the commands, files and MCP tool name, then sort the hits by level.
+The steps of `decide`: split a shell command into the simple commands the shell runs, with commands.py, collect the files the call reads or writes, match every row against the commands, files and MCP tool name, then sort the hits by level.
 
 The report folder is `report_dir` in `~/.config/agents/hook.json`, or `~/.local/state/agents/reports` by default.
 """

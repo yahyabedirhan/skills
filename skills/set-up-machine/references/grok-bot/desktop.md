@@ -8,7 +8,7 @@ Found when `~/agent-data/workflows/` exists: the shared skill library on the box
 
 ## Instructions
 
-> **Grok Bot differs here.** Other harnesses read instructions from files the setup writes. Grok Bot reads none: the agent applies instructions into its own memory with its memory tool. The verifier can't read memory, so it compares a lock (the source commit and the exact facts written) with the current sources. Follow the steps below instead of the shared file's link or copy.
+> **Grok Bot differs here.** Other harnesses read instructions from files the setup writes. Grok Bot reads none: the agent applies instructions into its own memory with its memory tool. The verifier can't read memory, so it compares a lock, the source commit and the exact facts written, with the current sources. Follow the steps below instead of the shared file's link or copy.
 
 | Source | Scope | Who reads it |
 |---|---|---|
@@ -76,14 +76,14 @@ Grok Bot has no permission lists and no hook. The app decides each call:
 
 ## Plugins
 
-Connectors (MCP servers) are installed in the app, per account, each with optional custom instructions. List the expected ones in the declared config's `connectors`, or as `setup/installs.json` plugins that name `grok-bot`. For each one, give the user the step to add it and sign in, and put any instruction for that connector in its custom instructions, not in memory. List the connectors the agent can see, for the report.
+Connectors, the app's MCP servers, are installed in the app, per account, each with optional custom instructions. List the expected ones in the declared config's `connectors`, or as `setup/installs.json` plugins that name `grok-bot`. For each one, give the user the step to add it and sign in, and put any instruction for that connector in its custom instructions, not in memory. List the connectors the agent can see, for the report.
 
 ## Skills
 
 The library, `~/agent-data/workflows/<skill>/SKILL.md`, is shared by every agent. `npx skills` doesn't know it, so copy each skill folder from its source:
 
 1. Clone or update each `setup/installs.json` skills source at its latest default branch, in a scratch folder.
-2. For each skill that applies (every skill folder in a whole-source entry, the named ones otherwise): back up the library first, then replace `~/agent-data/workflows/<skill>/` with the files git tracks in that folder (`git archive HEAD <path> | tar -x --strip-components=<depth>`). Mark it `added`, `updated` or `present`.
+2. For each skill that applies, every skill folder in a whole-source entry and the named ones otherwise, back up the library first, then replace `~/agent-data/workflows/<skill>/` with the files git tracks in that folder: `git archive HEAD <path> | tar -x --strip-components=<depth>`. Mark it `added`, `updated` or `present`.
 3. Record it in `~/.local/state/agents/grok-bot-skill-lock.json`, in the shape of `~/.agents/.skill-lock.json`: `{"skills": {"<skill>": {"source": "<owner>/<repo>", "skillPath": "<path>/SKILL.md", "skillFolderHash": "<git rev-parse HEAD:<path>>"}}}`.
 
 A library folder no entry provides is `extra`, or `ignored` when `ignore` names it: keep it. A skill the user made in the app is one of these.

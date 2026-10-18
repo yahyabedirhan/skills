@@ -4,7 +4,7 @@ How to set up and audit the `claude` CLI, in a terminal or an IDE extension: the
 
 ## Found
 
-Found when `~/.claude/` exists or `claude` is on `PATH`, except on a cloud VM (`CLAUDE_CODE_REMOTE=true`), which is the cloud row (cloud.md).
+Found when `~/.claude/` exists or `claude` is on `PATH`, except on a cloud VM, where `CLAUDE_CODE_REMOTE` is `true`: that is the cloud row, as cloud.md describes.
 
 ## Sandbox
 
@@ -29,5 +29,5 @@ To see Claude Code itself enforce the rows, in a throwaway folder with `--settin
 - `claude -p "Run exactly: rm -fr x" --allowedTools Bash` leaves `x` and quotes the hook's refusal; allowing `Bash` proves a rule refused it. With a settings file holding only `hooks`, `bash -lc "rm -rf x"` is refused too, which proves the hook.
 - `gh api rate_limit` runs, and its line appears in the report folder.
 - Writes to `.env` and `secrets/k` with `--allowedTools Write` leave them unchanged, and the session starts with no warning about a `Write(...)` rule; a Read of `sub/.env.example` works.
-- For environment rows, use fake `.env` files and a fake variable, and start the session with a scrubbed environment (`HOME`, `PATH`, `USER` and the fake variable), since a sample that gets through prints whatever the shell holds.
+- For environment rows, use fake `.env` files and a fake variable, and start the session with a scrubbed environment that holds only `HOME`, `PATH`, `USER` and the fake variable, since a sample that gets through prints whatever the shell holds.
 - Against the real login, `claude -p "Without tools: quote your rule about rm -rf and the file it came from."` quotes the `rm -rf` fallback from the shared file.
