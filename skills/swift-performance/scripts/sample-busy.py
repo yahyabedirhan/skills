@@ -7,10 +7,9 @@ Usage:
   sample-busy.py <path> --frames <binary> [--top N] # and the heaviest frames
                                                     # of <binary> on the main thread
 
-Busy is every main-thread sample not waiting in the run loop for its next
-event (`__CFRunLoopServiceMachPort`), so it fits apps with a run loop.
-`--frames` counts each frame once per stack it appears in, at its largest
-count, so callers and callees both show and the top is the hottest path.
+Busy is every main-thread sample not waiting in the run loop for its next event (`__CFRunLoopServiceMachPort`), so it fits apps with a run loop.
+
+`--frames` counts each frame once per stack it appears in, at its largest count, so callers and callees both show and the top is the hottest path.
 """
 import argparse
 import re
