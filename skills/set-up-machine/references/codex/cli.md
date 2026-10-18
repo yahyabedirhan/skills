@@ -1,6 +1,9 @@
 # Codex CLI
 
-The CLI environment of Codex: terminal and IDE sessions. This page says how it is detected, what its sandbox and config rows mean and how the verifier checks it. The rest is in [index.md](index.md). Preserve the existing installation channel.
+The CLI environment of Codex: terminal and IDE sessions.
+This page says how it is detected, what its sandbox and config rows mean and how the verifier checks it.
+The rest is in [index.md](index.md).
+Preserve the existing installation channel.
 
 ## The environment
 
