@@ -60,11 +60,11 @@ Show them as short numbered lists.
 Turn the jobs into a command tree.
 
 - **Nouns** are the objects the jobs act on, in the words the project already uses in its glossary, its UI and its docs. A noun with commands of its own becomes a group; information about a noun is an option or an output field, not a group.
-- **Hierarchy:** draw the nouns as a containment tree (account › project › environment), and let the groups follow it. Use `noun verb` order, since it is the more common order and it groups related commands in the help.
+- **Hierarchy:** draw the nouns as a containment tree, such as account › project › environment, and let the groups follow it. Use `noun verb` order, since it is the more common order and it groups related commands in the help.
 - **Verbs** come from one closed vocabulary, one meaning each, used the same way on every noun that supports it. Pick one word from each synonym pair, such as `create` or `new` and `get` or `show`, and use it everywhere. Keep printing and displaying apart: a verb that prints data always prints, and a window or a picker gets its own verb. The default vocabulary is in [conventions.md](references/conventions.md).
 - **Depth:** at most two levels, `tool <noun> <verb>`. A compound action gets a hyphenated verb (`send-text`) instead of a third level.
 - **Top level:** only the few commands callers run every session, plus `help`. Everything else lives in a group, because a long flat list hides the commands that matter.
-- **Targets:** one rule for how a command names the object it acts on: a required word (`tool project get <id>`), a named option (`--project <id>`), or a current default (a configured context, a working directory) that an option overrides. Apply the same rule to every command.
+- **Targets:** one rule for how a command names the object it acts on: a required word (`tool project get <id>`), a named option (`--project <id>`), or a current default, such as a configured context or the working directory, that an option overrides. Apply the same rule to every command.
 
 Show the model as the command tree with one line per group, the verb table, and the targeting rule.
 
@@ -74,7 +74,7 @@ Spell every command's arguments, flags and other inputs.
 
 - **Words and flags:** a word is required input with a natural order, such as the file to copy. Everything else is a named flag, because flags can be added later without breaking callers and read clearly in scripts. When a command needs two inputs of different kinds, take the second as a flag, so a caller can't swap them by mistake.
 - **Flag names:** long names in kebab case for every flag, a short letter only for the most common few, and the standard names for standard meanings (`--help`, `--version`, `--json`, `--quiet`, `--force`, `--dry-run`). The same flag means the same thing on every command.
-- **Global flags** that every command takes (output format, verbosity, the target context) are parsed in one place.
+- **Global flags** that every command takes, such as the output format, verbosity and the target context, are parsed in one place.
 - **Other sources:** standard input when the argument is `-`, environment variables, configuration files. Apply one precedence order, from flags down to built-in defaults.
 - **Interaction:** prompt only when standard input is a terminal, and give every prompt a flag that answers it, so scripts and agents never hang. Confirm destructive actions, with `--force` or `--yes` to skip the confirmation, and offer `--dry-run` where an action is hard to undo.
 - **Secrets** come from a file, standard input or the environment, never from a flag, since flags land in shell history and process listings.
@@ -103,7 +103,7 @@ Design the help as the main interface for learning the CLI, for people and for a
 - **Summaries:** one line per command, starting with a verb and saying what the command achieves, not how the code does it. Use the same summary everywhere it appears.
 - **Examples** lead the command help, because most readers copy one and adjust it.
 - **When the caller is wrong:** wrong usage prints that command's usage line and a pointer to its help, not the whole manual. A mistyped command suggests the closest match and leaves the caller to run it.
-- **Discovery:** the top help names where the full documentation lives. When agents are callers, give them a machine-readable listing of the commands (a `help --json` or a schema command), and point them to it from the top help once.
+- **Discovery:** the top help names where the full documentation lives. When agents are callers, give them a machine-readable listing of the commands, such as `help --json` or a schema command, and point them to it from the top help once.
 - **Completions** for the common shells, generated from the same command definitions.
 
 Show the top help, one group's help and one command's help as mock-ups.

@@ -25,7 +25,7 @@ List, search or read mail, through either tool, only when the user asks for an e
 ## Drafts
 
 - **When the user asks for a draft without naming Gmail or Spark,** such as "draft a mail to the landlord": write the text in chat. Read mail for it only when the request points at mail it needs, such as the email being answered, and ask before any other lookup.
-- **When the user asks for the draft in Gmail or in Spark,** in any wording ("save it as a Gmail draft", "put it in my Spark drafts"): save it there, with that tool only. Naming a tool allows that draft, not other changes to mail.
+- **When the user asks for the draft in Gmail or in Spark,** in any wording, such as "save it as a Gmail draft" or "put it in my Spark drafts": save it there, with that tool only. Naming a tool allows that draft, not other changes to mail.
 - **When the named tool can't do it,** such as `spark draft` refused because Spark's access level is read-only: say so, and keep the draft in chat. Don't switch to the other tool unasked.
 
 Every create, update or delete of a saved draft needs the user's own approval in the harness, even after they asked for the draft: a saved draft is a change in their mailbox, and one mistaken call can overwrite a draft they were writing. `/set-up-machine`'s ask rows `mail-draft-write` and `mail-cli-draft` make each of these calls ask.

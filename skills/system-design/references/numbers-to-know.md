@@ -28,9 +28,9 @@ What these imply:
 
 - **Premature sharding**: 10M businesses at 1 KB each is 10 GB; ten times that for reviews is 100 GB, which one database holds easily. 100k contests times 100k users at 40 bytes is 400 GB: one large cache.
 - **Overestimating latency**: an indexed row lookup takes under a millisecond to a few milliseconds. Cache expensive queries, not simple lookups.
-- **A queue for modest writes**: a well-tuned PostgreSQL takes 20k+ simple writes per second (the ~10k TPS trigger above is for typical transactional writes). At 5k writes per second, batch writes, trim indexes and pool connections first. A queue earns its place for guaranteed delivery past a failing consumer, decoupling, event sourcing, or spikes beyond what the database takes.
+- **A queue for modest writes**: a well-tuned PostgreSQL takes 20k+ simple writes per second. The ~10k TPS trigger above is for typical transactional writes. At 5k writes per second, batch writes, trim indexes and pool connections first. A queue earns its place for guaranteed delivery past a failing consumer, decoupling, event sourcing, or spikes beyond what the database takes.
 
-For cost, reason in orders of magnitude (a hundred machines where one will do), not exact prices.
+For cost, reason in orders of magnitude, such as a hundred machines where one will do, not exact prices.
 
 ---
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read Wispr Flow's dictation history and read or change its dictionary.
 
-Wispr Flow (macOS) keeps its data in a local SQLite database. This script is the only thing that touches it: every read opens it read-only, and every write backs up the dictionary first and records a batch id that `dict undo` reverts.
+Wispr Flow, a macOS app, keeps its data in a local SQLite database. This script is the only thing that touches it: every read opens it read-only, and every write backs up the dictionary first and records a batch id that `dict undo` reverts.
 
 Run `wispr.py <command> --help` for each command's options.
 """

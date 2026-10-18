@@ -5,7 +5,7 @@ description: Design, explain or redesign code at the level of modules, classes, 
 
 # Low-level design
 
-A low-level design decides which modules exist, what state and rules each one owns, how they call each other, and where each file sits. A good one lets a newcomer find what they came for (where the program starts, how to add an endpoint, where the shared logic lives, what a change touches) without reading everything. Produce and present it through the **delivery framework** in every session, whether you are designing, explaining or redesigning, so the user always finds the same things in the same places. The user chooses what the session is for; the framework sets how you lay out the answer. Stop once the user agrees to the design, since building it is done later, from tickets.
+A low-level design decides which modules exist, what state and rules each one owns, how they call each other, and where each file sits. A good one lets a newcomer find what they came for without reading everything: where the program starts, how to add an endpoint, where the shared logic lives and what a change touches. Produce and present it through the **delivery framework** in every session, whether you are designing, explaining or redesigning, so the user always finds the same things in the same places. The user chooses what the session is for; the framework sets how you lay out the answer. Stop once the user agrees to the design, since building it is done later, from tickets.
 
 The recurring failure is structure added before it is needed: factories with one product, interfaces with one implementation, a file per function. Start from the simplest design that meets the requirements, and add a class, an interface or a pattern only for a named reason, such as a second implementation today or the same edit repeated across several files. Before designing a module, check whether a dependency the project already has provides it, and build only the difference.
 
@@ -46,7 +46,7 @@ Turn the request or spec into something to design against, working down four the
 - **Capabilities**: the operations the system must support.
 - **Rules and completion**: what defines success and failure, and when the system stops or changes state.
 - **Error handling**: how it responds to invalid input and illegal actions.
-- **Scope**: what is in (core logic, business rules), and what is explicitly out (UI, storage, concurrency, whatever the user excludes). The exclusions keep the design from growing features nobody asked for.
+- **Scope**: what is in, such as core logic and business rules, and what is explicitly out, such as UI, storage, concurrency or whatever else the user excludes. The exclusions keep the design from growing features nobody asked for.
 
 Show them as a short numbered list. A mapping from requirement to module fits as a small table once the modules exist.
 
@@ -65,13 +65,13 @@ Turn each entity into a class or module, top-down from the orchestrator, and der
 - **State**: what it must remember to enforce the requirements it owns.
 - **Behaviour**: what callers must be able to ask or tell it, each operation with what it returns and rejects, in a small API where each method matches a real action or question.
 
-Keep each rule with the module that owns its state (**tell, don't ask**): lifecycle rules ("can this run now?") belong to the orchestrator, data rules ("is this cell taken?") to the module holding the data, so when something breaks you know which module to open. Place the modules in folders following [layout.md](references/layout.md).
+Keep each rule with the module that owns its state, which is **tell, don't ask**: lifecycle rules, such as "can this run now?", belong to the orchestrator, and data rules, such as "is this cell taken?", to the module holding the data, so when something breaks you know which module to open. Place the modules in folders following [layout.md](references/layout.md).
 
 Show the folder tree with one comment per line saying what each file or folder owns.
 
 ### Implementation
 
-Sketch the methods that carry the logic, not every method: the happy path first (the steps, the calls into other modules, the state changed), then the edge cases (invalid input, illegal operations, calls in the wrong state). Write pseudocode unless the project needs real code.
+Sketch the methods that carry the logic, not every method: the happy path first, with its steps, its calls into other modules and the state it changes, then the edge cases: invalid input, illegal operations and calls in the wrong state. Write pseudocode unless the project needs real code.
 
 Then verify: trace one concrete scenario step by step, with the state after each step, plus one rejection, and fix what the trace reveals, such as a state never set or a rule checked too late.
 

@@ -2,7 +2,7 @@ import Darwin
 import Foundation
 import os
 
-/// Watches the main thread from a background queue, on macOS 13 and later: its share of the CPU (the kernel's own accounting of the thread, as `sample` sees it) and how late a block posted to it every 8 ms ran (a stall: frames not drawn).
+/// Watches the main thread from a background queue, on macOS 13 and later: its share of the CPU, from the kernel's own accounting of the thread as `sample` sees it, and how late a block posted to it every 8 ms ran, where a late block is a stall and frames go undrawn.
 ///
 /// Call `MainThreadMeter.shared.start()` once on the main thread, then `read()` from one thread at any interval, for example twice a second from a timer, to get what happened since the last reading. `beginEpisode()` and `endEpisode()` time one action, such as a tab switch, apart from the readings.
 public final class MainThreadMeter: @unchecked Sendable {

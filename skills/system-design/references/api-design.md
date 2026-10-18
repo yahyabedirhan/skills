@@ -1,11 +1,11 @@
 # API design
 
-The contract between the system and its callers. Aim for a reasonable API, not a perfect one: design the user-facing endpoints, then move on to the harder parts. Give internal APIs one line in the high-level design ("services talk over gRPC").
+The contract between the system and its callers. Aim for a reasonable API, not a perfect one: design the user-facing endpoints, then move on to the harder parts. Give internal APIs one line in the high-level design, such as "services talk over gRPC".
 
 ## Choosing the protocol
 
 - **REST**: resources identified by URLs, manipulated with HTTP methods. The default; it fits most web and mobile APIs.
-- **GraphQL**: one endpoint where clients ask for exactly the data they need. Choose it when clients with different needs (a mobile app and a dashboard) would otherwise force many endpoints or over-fetching. Costs: the N+1 problem (one query for a list, one per item, solved with batching), field-level authorization, harder caching.
+- **GraphQL**: one endpoint where clients ask for exactly the data they need. Choose it when clients with different needs, such as a mobile app and a dashboard, would otherwise force many endpoints or over-fetching. Costs: the N+1 problem, one query for a list and one per item, which batching solves; field-level authorization; and harder caching.
 - **RPC (gRPC)**: action-oriented calls with binary serialization and generated, typed clients. Choose it for internal service-to-service calls where performance or cross-language types matter, or when an action doesn't fit a resource (`checkPermission(user, resource)`).
 
 Real-time updates use SSE or WebSockets, which are persistent connections rather than traditional APIs ([networking-essentials.md](networking-essentials.md)).
@@ -20,15 +20,15 @@ Resources are the core entities, as plural nouns: things in the system, not acti
 
 Nest a resource under its parent (`/events/{id}/tickets`) when the parent is always required; use a query parameter when it's one optional filter among many.
 
-**Methods and idempotency** (repeating the request leaves the server in the same state): GET reads and is idempotent; POST creates and isn't; PUT replaces and is; PATCH updates part and is idempotent only when written as "set", not "append"; DELETE is idempotent even though the second call returns 404. Idempotency matters because clients retry after network failures.
+**Methods and idempotency**: an idempotent request leaves the server in the same state when repeated. GET reads and is idempotent; POST creates and isn't; PUT replaces and is; PATCH updates part and is idempotent only when written as "set", not "append"; DELETE is idempotent even though the second call returns 404. Idempotency matters because clients retry after network failures.
 
-Use the common status codes; the distinction that matters is 4xx (the client's fault) against 5xx (the server's).
+Use the common status codes; the distinction that matters is 4xx for the client's fault against 5xx for the server's.
 
 ## Principles a design is judged by
 
 1. Resources, not actions.
 2. Consistent names, parameters and response shapes on every endpoint.
-3. Least surprise: HTTP used the way everyone uses it (GET never changes data; 200 never wraps an error).
+3. Least surprise: HTTP used the way everyone uses it: GET never changes data, and 200 never wraps an error.
 4. Stateless: each request carries everything the server needs, so any server can handle it.
 5. Retries are safe.
 6. Anything that can grow is paginated, with a capped page size.
@@ -36,7 +36,7 @@ Use the common status codes; the distinction that matters is 4xx (the client's f
 8. Changes don't break existing clients: adding fields is safe; renaming or removing them needs a version.
 9. Errors are actionable: the right status class plus a machine-readable code.
 
-Cite them as the reason behind a decision ("an idempotency key here, so a retry can't double-book").
+Cite them as the reason behind a decision, such as "an idempotency key here, so a retry can't double-book".
 
 ## Patterns
 
@@ -48,7 +48,7 @@ Cite them as the reason behind a decision ("an idempotency key here, so a retry 
 
 ## Security
 
-- **Authentication** establishes who the caller is; **authorization** whether they may act on this specific resource (John cancels his own bookings, not everyone's). The current user comes from the token, never from the request body.
+- **Authentication** establishes who the caller is; **authorization** whether they may act on this specific resource: John cancels his own bookings, not everyone's. The current user comes from the token, never from the request body.
 - **JWTs** for user sessions: signed tokens carrying the user and an expiry, verifiable by any service without a lookup. A session stored in a database is the alternative.
 - **API keys** for server-to-server calls and third-party developers, not for end users.
 - **RBAC**: roles get permissions and users get roles; mention which roles reach which endpoints only where it matters.

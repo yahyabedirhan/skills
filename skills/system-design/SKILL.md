@@ -59,7 +59,7 @@ Show requirements as short lists: functional, non-functional, and out of scope w
 
 ### Core entities
 
-The things the API exchanges and the stores persist, as a short first draft with clear names (for Twitter: User, Tweet, Follow). Ask who the actors are and whether they overlap, and which resources each functional requirement needs. Leave fields for the high-level design, where a request shows which ones matter.
+The things the API exchanges and the stores persist, as a short first draft with clear names, such as User, Tweet and Follow for Twitter. Ask who the actors are and whether they overlap, and which resources each functional requirement needs. Leave fields for the high-level design, where a request shows which ones matter.
 
 ### API
 
@@ -69,11 +69,11 @@ Show entities and endpoints as short lists or tables.
 
 ### Data flow
 
-For a data-processing system, a numbered list of steps from input to output (a web crawler: fetch seed URLs, parse HTML, extract URLs, store data, repeat).
+For a data-processing system, a numbered list of steps from input to output. For a web crawler: fetch seed URLs, parse HTML, extract URLs, store data, repeat.
 
 ### High-level design
 
-Lay out the components (clients, load balancers, services, databases, caches, queues) and how they interact, endpoint by endpoint, until the design satisfies the whole API. Include only what the functional requirements need.
+Lay out the components, such as clients, load balancers, services, databases, caches and queues, and how they interact, endpoint by endpoint, until the design satisfies the whole API. Include only what the functional requirements need.
 
 - Say how data flows through the system for each request, from the API call to the response, and what state changes where.
 - When a request reaches a store, write the fields that matter beside it: the ones the design depends on, not the obvious ones ([data-modeling.md](references/data-modeling.md), [database-indexing.md](references/database-indexing.md)).
@@ -93,7 +93,7 @@ Show the options side by side, each with its gain and cost, and a redesign or re
 
 Start each choice from its default, because the most common failure in system design is complexity added before it is needed: PostgreSQL as the store, REST for the API, TCP and HTTP polling for transport and real-time, no cache and then Redis cache-aside, one bigger database with replicas and then hash sharding, and synchronous work. Move off a default only for a named requirement, with numbers when the case is about scale. Typical over-design: a queue at 5k writes per second, sharding at 100 GB, a WebSocket where polling would do, a cache in front of an indexed lookup.
 
-When the design adopts a specific technology (Kafka, DynamoDB, Elasticsearch), research it in its documentation before relying on its details: its limits, its guarantees, and how it fails.
+When the design adopts a specific technology, such as Kafka, DynamoDB or Elasticsearch, research it in its documentation before relying on its details: its limits, its guarantees, and how it fails.
 
 ## Working with the user
 

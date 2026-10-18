@@ -4,7 +4,7 @@ Recurring problems in system design and their usual shapes. Recognizing a patter
 
 ## Real-time updates
 
-Pushing changes to users as they happen: chat, notifications, live dashboards. Start with HTTP polling; move to SSE (server to client) or WebSockets (both ways) when polling stops meeting the need ([networking-essentials.md](networking-essentials.md)). On the server, pub/sub decouples whoever publishes an update from the servers holding client connections (WhatsApp); stateful servers arranged by consistent hashing suit heavier per-session processing (Google Docs).
+Pushing changes to users as they happen: chat, notifications, live dashboards. Start with HTTP polling; move to SSE for server-to-client traffic or WebSockets for both ways when polling stops meeting the need ([networking-essentials.md](networking-essentials.md)). On the server, pub/sub decouples whoever publishes an update from the servers holding client connections, as WhatsApp does; stateful servers arranged by consistent hashing suit heavier per-session processing, as Google Docs does.
 
 ## Long-running tasks
 
@@ -12,15 +12,15 @@ Work that takes more than a few seconds: video encoding, reports, bulk operation
 
 ## Dealing with contention
 
-Many users after the same resource at once: the last concert ticket, an auction item. Within one database: transactions, pessimistic locking, or optimistic concurrency control (a version check on write). Across databases: distributed locks, two-phase commit, or serializing through a queue. Keep contended data in one database as long as possible: databases are built to handle contention, and once the data is split across stores, you have to handle it yourself.
+Many users after the same resource at once: the last concert ticket, an auction item. Within one database: transactions, pessimistic locking, or optimistic concurrency control, which checks a version on write. Across databases: distributed locks, two-phase commit, or serializing through a queue. Keep contended data in one database as long as possible: databases are built to handle contention, and once the data is split across stores, you have to handle it yourself.
 
 ## Scaling reads
 
-Reads usually grow far faster than writes (read-to-write ratios of 10:1 to 100:1 and beyond). Scale them in this order: optimize inside the database (indexes, denormalization), then read replicas, then caching layers (Redis, CDNs) ([caching.md](caching.md)). Watch cache invalidation, replica lag, and hot keys.
+Reads usually grow far faster than writes, with read-to-write ratios of 10:1 to 100:1 and beyond. Scale them in this order: optimize inside the database with indexes and denormalization, then read replicas, then caching layers (Redis, CDNs) ([caching.md](caching.md)). Watch cache invalidation, replica lag, and hot keys.
 
 ## Scaling writes
 
-Sharding across servers ([sharding.md](sharding.md)); vertical partitioning (different kinds of data in different stores); queues to absorb bursts; load shedding to drop low-priority writes under overload; batching to cut per-write overhead. The partition key must spread load evenly and keep related data together.
+Sharding across servers ([sharding.md](sharding.md)); vertical partitioning, which puts different kinds of data in different stores; queues to absorb bursts; load shedding to drop low-priority writes under overload; batching to cut per-write overhead. The partition key must spread load evenly and keep related data together.
 
 ## Handling large blobs
 
