@@ -86,7 +86,7 @@ The library, `~/agent-data/workflows/<skill>/SKILL.md`, is shared by every agent
 2. For each skill that applies (every skill folder in a whole-source entry, the named ones otherwise): back up the library first, then replace `~/agent-data/workflows/<skill>/` with the files git tracks in that folder (`git archive HEAD <path> | tar -x --strip-components=<depth>`). Mark it `added`, `updated` or `present`.
 3. Record it in `~/.local/state/agents/grok-bot-skill-lock.json`, in the shape of `~/.agents/.skill-lock.json`: `{"skills": {"<skill>": {"source": "<owner>/<repo>", "skillPath": "<path>/SKILL.md", "skillFolderHash": "<git rev-parse HEAD:<path>>"}}}`.
 
-A library folder no entry provides is `extra`, or `ignored` when `ignore` names it: keep it. It may be a skill the user made in the app.
+A library folder no entry provides is `extra`, or `ignored` when `ignore` names it: keep it. A skill the user made in the app is one of these.
 
 ## Config
 

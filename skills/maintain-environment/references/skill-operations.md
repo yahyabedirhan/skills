@@ -79,7 +79,7 @@ After any change to a skill, including creating or forking one, have a fresh sub
 
 ## Auditing usage
 
-When the user asks which skills they use, count invocations in local transcripts. Report per skill the count per agent and the last use, list installed skills with no use as zero, and give the date each transcript window starts, since older transcripts may be gone.
+When the user asks which skills they use, count invocations in local transcripts. Report per skill the count per agent and the last use, list installed skills with no use as zero, and give the date each transcript window starts, since a harness can delete older transcripts.
 
 - **Claude Code**: `~/.claude/projects/`. Count `Skill` tool calls by `input.skill`, and `<command-name>/<name></command-name>` in user messages.
 - **Codex**: `~/.codex/sessions/`. Codex loads a skill by reading its `SKILL.md`, so count sessions that read it, and say that editing sessions inflate the count.
