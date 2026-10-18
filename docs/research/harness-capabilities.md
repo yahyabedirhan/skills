@@ -407,11 +407,3 @@ A gap is a rule the harness's native permissions can't enforce as meant. The bas
 | Codex pre-tool hook | Yes: `PreToolUse` in `hooks.json` or `[hooks]`, deny by JSON or exit 2, hooks trusted per hash (2.7). |
 | opencode pre-tool hook | Plugin `tool.execute.before`; it blocks by throwing and can rewrite arguments (3.7). |
 | Can a project turn off a global hook | Claude Code: yes, all hooks (`disableAllHooks`). Codex: yes, all hooks (`features` > `hooks = false`, trusted project). opencode: no config switch, but a project plugin can undo the global one's effect. Cursor: no. Each has a managed layer that holds (1.5, 2.5, 3.5, 4.5). |
-
-## 8. Corrections to the first pass
-
-- Codex resolves absolute program paths in the harness (`/bin/rm -rf` matches `rm` rules); the first pass read only the `check` CLI's default. (2.4)
-- Codex skips a project's `AGENTS.md` too when the project is explicitly untrusted. (2.2)
-- In opencode, a project's `"*": "allow"` doesn't override global rules listed after `"*"`; new project keys do. (3.5)
-- The Cursor CLI reads and unions Claude Code's permission lists and hooks, and accepts `Bash(...)` tokens. (4.3, 4.7)
-- The Cursor CLI reads project `cli.json` files from the git root down, not from every ancestor. (4.5)

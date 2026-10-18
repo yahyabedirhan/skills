@@ -2,7 +2,7 @@
 
 > Moved from a private notes repo on 2026-09-26. Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo. The VPS host, user, label and machine ID, and the private repos' names, are redacted.
 
-Facts for issues [#13](https://github.com/yahyabedirhan/skills/issues/13), [#15](https://github.com/yahyabedirhan/skills/issues/15) and [#16](https://github.com/yahyabedirhan/skills/issues/16): how an agent on the Mac reaches Herdr, git and tools on the VPS, what the reverse direction looks like, and what can be checked before handing work from one machine to the other. Researched on 2026-09-25 against Herdr 0.9.0 on both machines. How a handover prompt gets into an agent tab is covered elsewhere.
+Facts for issues [#13](https://github.com/yahyabedirhan/skills/issues/13), [#15](https://github.com/yahyabedirhan/skills/issues/15) and [#16](https://github.com/yahyabedirhan/skills/issues/16): how an agent on the Mac reaches Herdr, git and tools on the VPS, what the reverse direction looks like, and what can be checked before handing work from one machine to the other. Researched on 2026-09-25 against Herdr 0.9.0 on both machines. [agent-skill-invocation.md > *Delivery through Herdr*](agent-skill-invocation.md#delivery-through-herdr) covers how a handover prompt gets into an agent tab.
 
 Sources are cited inline. `[mac]` and `[vps]` mark command output captured on that machine on 2026-09-25; `ssh vps` stands for `ssh <vps-user>@<vps-host>`, as *Finding the host* describes. Herdr docs are cited at the `v0.9.0` tag unless marked 0.9.1, under `https://raw.githubusercontent.com/herdrdev/herdr/<tag>/docs/next/website/src/content/docs/`.
 

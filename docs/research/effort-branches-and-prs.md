@@ -107,7 +107,7 @@ git fetch origin
 git log --oneline @{u}..          # must print nothing (all commits pushed)
 ```
 
-`--porcelain` is the stable, script-friendly format. [doc: [git-status --porcelain](https://git-scm.com/docs/git-status#_porcelain_format_version_1)] Ignored files do not appear, so anything under an ignored `tmp/` is not "unfinished" to git, and treehouse `destroy` removes it without warning. [doc: skills repo `init-effort-with-herdr/treehouse.md`; tested for porcelain]
+`--porcelain` is the stable, script-friendly format. [doc: [git-status --porcelain](https://git-scm.com/docs/git-status#_porcelain_format_version_1)] Ignored files do not appear, so anything under an ignored `tmp/` is not "unfinished" to git, and treehouse `destroy` removes it without warning. [doc: `skills/treehouse/SKILL.md`; tested for porcelain]
 
 ## 6. gh commands reference
 

@@ -39,7 +39,7 @@ The tool therefore reports "Terminal notification sent" truthfully: it wrote the
 
 ### Direct macOS routes
 
-- `osascript -e 'display notification "<msg>" with title "Claude Code" sound name "Glass"'` is the command the Claude Code hooks guide itself uses on macOS ([hooks-guide](https://code.claude.com/docs/en/hooks-guide#get-notified-when-claude-needs-input)). It posts as Script Editor; if Script Editor lacks notification permission it fails silently. Tested working by the user on 2026-09-24 (issue [#9](https://github.com/yahyabedirhan/skills/issues/9)). Needs no escape passthrough, so Herdr cannot block it. Mac only: it does nothing on the VPS (`docs/vps.md`).
+- `osascript -e 'display notification "<msg>" with title "Claude Code" sound name "Glass"'` is the command the Claude Code hooks guide itself uses on macOS ([hooks-guide](https://code.claude.com/docs/en/hooks-guide#get-notified-when-claude-needs-input)). It posts as Script Editor; if Script Editor lacks notification permission it fails silently. Tested working by the user on 2026-09-24 (issue [#9](https://github.com/yahyabedirhan/skills/issues/9)). Needs no escape passthrough, so Herdr cannot block it. Mac only: it does nothing on the VPS, as [herdr-vps.md > *Notifications*](herdr-vps.md#notifications) says.
 - `terminal-notifier` is not installed here, and no primary Apple source covers it. Not needed while `osascript` works.
 
 ### Recommendation

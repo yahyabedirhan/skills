@@ -212,7 +212,7 @@ The maintainer decides. Issue #98 found no secrets in the environment on 2026-10
    ```
 
    - **Why explicit paths:** `./` in user settings means `~/.claude`, so whether the project-relative Read rules carry over is a **Gap** that check 1 settles. `~/**/.env` is the docs' own example.
-   - **What it adds:** an interpreter or script that opens `.env`, `secrets/`, `~/.ssh` or `~/.aws` is refused by the OS, which closes the gap the decision of 2026-09-30 left open.
+   - **What it adds:** an interpreter or script that opens `.env`, `secrets/`, `~/.ssh` or `~/.aws` is refused by the OS, which closes the gap that ../decisions/set-up-machine.md > *2026-09-30: the auto-mode guard is optional and stays off (#81)* left open.
    - **Costs:**
      - `.env.example` falls under `~/**/.env.*`. **Gap:** an `allowRead` for it is more specific, and whether it re-opens the file is not tested.
      - Git over SSH, `herdr`, `osascript`, `gh`, `docker` and `watchman` need `excludedCommands`, `allowUnixSockets` entries or the user, as listed in 2.1. Each exclusion is a hole, and a project can add more.
@@ -222,7 +222,7 @@ The maintainer decides. Issue #98 found no secrets in the environment on 2026-10
    - **Variant:** `permissions` > `blockReadsOutsideWorkingDirectories` set to `true` instead of the home-folder entries. It fences the whole home folder for both the file tools and sandboxed commands, at the cost of every read outside the project. Whether skills under `~/.agents/skills` stay readable is check 9.
    - **Not recommended alone:** `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`. It strips only recognised credentials, and it turns sandbox auto-allow off.
    - On a VPS, `remote-machine.md` already proposes the sandbox. Linux adds the PID-namespace protection of section 3.
-3. **Codex: only after #90, and only if the maintainer moves off `sandbox_mode`.** A profile extending `:workspace` with `"~/.ssh" = "deny"`, `"~/.aws" = "deny"` and `:workspace_roots` `"**/.env" = "deny"`, `"**/.env.*" = "deny"`, `"**/secrets" = "deny"` works [probe]. But it can't coexist with the declared `sandbox_mode`, and the decision of 2026-10-01 says to preserve and report rather than migrate. Rule-allowed commands stay outside it.
+3. **Codex: only after #90, and only if the maintainer moves off `sandbox_mode`.** A profile extending `:workspace` with `"~/.ssh" = "deny"`, `"~/.aws" = "deny"` and `:workspace_roots` `"**/.env" = "deny"`, `"**/.env.*" = "deny"`, `"**/secrets" = "deny"` works [probe]. But it can't coexist with the declared `sandbox_mode`, and ../decisions/set-up-machine.md > *2026-10-01: only declared and supported Codex defaults change (#119)* says to preserve and report rather than migrate. Rule-allowed commands stay outside it.
 4. **opencode:** nothing for files. The optional `shell.env` plugin that blanks secret-named variables stays the opencode adapter's decision ([auto-mode-semantic-guard 6.3](auto-mode-semantic-guard.md#63-opencode-nothing-to-configure)).
 5. **Cursor:** keep the sandbox on (the default with Auto-review). `~/.ssh` can't be denied. Reads of project secrets rely on `.cursorignore` (check 6).
 
