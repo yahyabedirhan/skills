@@ -4,7 +4,7 @@ How to set up and audit the `claude` CLI, in a terminal or an IDE extension: the
 
 ## Found
 
-Found when `~/.claude/` exists or `claude` is on `PATH`, except on a cloud VM, where `CLAUDE_CODE_REMOTE` is `true`: that is the cloud row, as cloud.md describes.
+Found when `~/.claude/` exists or `claude` is on `PATH`, except on a cloud VM with `CLAUDE_CODE_REMOTE=true`, which is the cloud row, as cloud.md describes.
 
 ## Sandbox
 

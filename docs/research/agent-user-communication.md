@@ -34,7 +34,7 @@ The tool therefore reports "Terminal notification sent" truthfully: it wrote the
 ### What Herdr offers instead
 
 - `herdr notification show <TITLE> [--body TEXT] [--sound none|done|request]` shows a notification through the `config.toml` > `ui` > `toast` setting (`herdr notification show --help`, local).
-- `ui` > `toast` > `delivery` is `off`, `herdr` (in-app toast), `terminal` (outer terminal, works over SSH) or `system` (the OS notification service); toasts are suppressed for the active tab ([Herdr configuration](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.1/docs/next/website/src/content/docs/configuration.mdx)). With the default `delivery = "off"`, Herdr shows nothing.
+- `[ui.toast] delivery` is `off`, `herdr` (in-app toast), `terminal` (outer terminal, works over SSH) or `system` (the OS notification service); toasts are suppressed for the active tab ([Herdr configuration](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.1/docs/next/website/src/content/docs/configuration.mdx)). With the default `delivery = "off"`, Herdr shows nothing.
 - Herdr already tracks agent state: `blocked` means "Herdr recognized an approval or question UI"; `done` means finished and unseen (`herdr --skill`, local). With delivery on, Herdr notifies on these state changes in background workspaces without the model doing anything ([Herdr configuration](https://raw.githubusercontent.com/herdrdev/herdr/v0.9.1/docs/next/website/src/content/docs/configuration.mdx); exact triggers **unverified**).
 
 ### Direct macOS routes

@@ -322,7 +322,7 @@ Main sources:
 | `/bin/rm -rf` | no | yes | no | no |
 | `bash -c "rm -rf x"` | only by a `bash -c` rule | yes if plain; no with `$()`, redirects | only by a `bash -c*` rule | no (checked) |
 | Project loosens a global deny | no | no (rules); yes (sandbox, approvals) | yes | yes for `cli-config.json`; no for Claude-settings denies |
-| Project turns hooks off | yes (`disableAllHooks`) | yes (`features` > `hooks = false`, trusted) | yes in effect (a later plugin rewrites args) | no |
+| Project turns hooks off | yes (`disableAllHooks`) | yes (`features.hooks = false`, trusted) | yes in effect (a later plugin rewrites args) | no |
 | Pre-tool hook | `PreToolUse` | `PreToolUse` | plugin `tool.execute.before` (throw) | `preToolUse`, `beforeShellExecution`, … |
 | Memory | auto memory, on by default | local memories, off by default | none | none (removed in 2.1) |
 | Turn memory off | `autoMemoryEnabled: false` or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` | `[features] memories = false` | — | — |
@@ -409,4 +409,4 @@ A gap is a rule the harness's native permissions can't enforce as meant. The bas
 | Codex, opencode, Cursor memory | Codex: local memories, off by default, `[features] memories = false` (2.8). opencode: none (3.8). Cursor: removed in 2.1 (4.8). |
 | Codex pre-tool hook | Yes: `PreToolUse` in `hooks.json` or `[hooks]`, deny by JSON or exit 2, hooks trusted per hash (2.7). |
 | opencode pre-tool hook | Plugin `tool.execute.before`; it blocks by throwing and can rewrite arguments (3.7). |
-| Can a project turn off a global hook | Claude Code: yes, all hooks (`disableAllHooks`). Codex: yes, all hooks (`features` > `hooks = false`, trusted project). opencode: no config switch, but a project plugin can undo the global one's effect. Cursor: no. Each has a managed layer that holds (1.5, 2.5, 3.5, 4.5). |
+| Can a project turn off a global hook | Claude Code: yes, all hooks (`disableAllHooks`). Codex: yes, all hooks (`features.hooks = false`, trusted project). opencode: no config switch, but a project plugin can undo the global one's effect. Cursor: no. Each has a managed layer that holds (1.5, 2.5, 3.5, 4.5). |

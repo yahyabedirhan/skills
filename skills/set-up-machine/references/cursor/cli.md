@@ -52,7 +52,7 @@ When `setup/harnesses.json` names a Cursor `config`, as ../workstation.md > *A d
 The verifier's `Cursor / cli` row (`--harness cursor --env cli`), from `scripts/setupmachine/harnesses/cursor/cli.py`. Its declared config is the file `setup/harnesses.json` > `harnesses` > `cursor` > `environments` > `cli` > `config` names. The instructions, plugins and skills cells are the shared ones, as index.md > *Checking it* describes.
 
 - **guardrails:** the shared hook check, and each personal deny or allow row has its entry in `cli-config.json` or in Claude Code's lists, which the CLI unions.
-- **sandbox:** `cli-config.json` has `approvalMode` `auto-review`, and `cli-config.json` > `sandbox` > `mode` is `enabled`.
+- **sandbox:** `cli-config.json` has `approvalMode` `auto-review` and `sandbox.mode` `enabled`.
 - **config:** each key the declared Cursor config sets has the same value in `cli-config.json`; a nested object, such as `selectedModel`, must match as a whole. `n/a` without a declared config.
 
 To see Cursor itself enforce the rows, run `cursor-agent -p --trust --force` in a throwaway folder, with `CURSOR_CONFIG_DIR` at a trial `.cursor` and `CURSOR_DATA_DIR` at a scratch folder. `CURSOR_CONFIG_DIR` moves only `cli-config.json`: `hooks.json`, `mcp.json` and `~/.claude/settings.json` are always read from the real home, so a trial puts them in the folder: `.cursor/hooks.json`, `.cursor/mcp.json`, and `.claude/settings.json` at the folder's git root.
