@@ -39,6 +39,13 @@ On a machine the variable is unset, so the user-level hook (index.md, *Hook wiri
 - **Personal permissions:** a `gap`. The repo's settings hold no personal lists, so the hook alone refuses them.
 - **Audit:** `ok` when a match-all group runs an existing installed `pre_tool_hook.py` with `--harness claude-code` (`$HOME` and `~/` are expanded) and `disableAllHooks` isn't `true`.
 
+## Environment setup
+
+A cloud environment can set every session up instead, whatever repo it works on. Its setup script runs as root before Claude Code launches, and the environment caches the disk it leaves as a snapshot. The user's workstation repo may render that script: the setup sources inline, then a script that writes the same files the agent writes above, plus `~/.claude/rules/cloud-instructions.md` from the cloud `instructions` file, and a match-all `PreToolUse` hook in `~/.claude/settings.json`. Claude Code reads that file at launch, so the user-level hook guards the session from its first call. The script leaves `~/.local/share/agents/environment-setup.json` when it is done.
+
+- **Setting up again:** when that marker exists, the workstation repo's cloud instructions name the command that applies the setup again. Run it instead of writing the files by hand, and say that new instructions and hooks load in the next session.
+- **Audit:** with the marker, the instructions cell checks the `~/.claude/CLAUDE.md` link, memory off, `harness-instructions.md` and `cloud-instructions.md` against their sources, and not the repo's hook or cloud section. The guardrails cell checks the match-all group in `~/.claude/settings.json`.
+
 ## Sandbox
 
 `gap`: commands run on the VM. The network level (None, Trusted, Full or Custom) is set on the cloud environment, and nothing on the VM shows it. GitHub goes through a proxy that keeps the credentials off the VM: `gh` is installed, `gh api` works, and GraphQL is blocked, so `gh pr` and `gh issue` fail.
@@ -59,8 +66,8 @@ The model is picked when the session starts, and environment variables and netwo
 
 The verifier's `Claude Code / cloud` row (`verify.py --harness claude-code --env cloud`), from `scripts/setupmachine/harnesses/claude_code/cloud.py`:
 
-- **instructions:** the repo's `SessionStart` hook, the repo's cloud section naming the cloud instructions file, that file's `## Instructions` section, the `~/.claude/CLAUDE.md` link, `~/.claude/rules/harness-instructions.md` and memory off.
-- **guardrails:** the repo's match-all `PreToolUse` group runs the installed hook with `--harness claude-code`. Personal permissions are a `gap`.
+- **instructions:** the repo's `SessionStart` hook, the repo's cloud section naming the cloud instructions file, that file's `## Instructions` section, the `~/.claude/CLAUDE.md` link, `~/.claude/rules/harness-instructions.md` and memory off. With the environment's marker: the link, memory off and both rule files (*Environment setup*).
+- **guardrails:** the repo's match-all `PreToolUse` group runs the installed hook with `--harness claude-code`, or the one in `~/.claude/settings.json` with the environment's marker. Personal permissions are a `gap`.
 - **sandbox:** `gap`.
 - **plugins:** `gap`, or `n/a` when `installs.json` lists none for Claude Code.
 - **skills:** each listed skill in `~/.claude/skills` or the repo's `.claude/skills`.

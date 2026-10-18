@@ -1,6 +1,8 @@
 """Claude Code cloud sessions: one Anthropic-managed VM per session, a fresh clone of the repo, and the repo's own CLAUDE.md and `.claude/settings.json` (references/claude-code/cloud.md).
 
 Nothing in `~/.claude/` on the user's machine reaches the VM. The repo's SessionStart hook only installs the skills and tools; the agent then applies the setup itself, as the repo's cloud section tells it, and the repo's PreToolUse hook runs the pre-tool hook with `--harness claude-code`.
+
+A cloud environment can set the session up instead, script-first: its setup script writes the user-level files before Claude Code launches and leaves `~/.local/share/agents/environment-setup.json`. Then the checks read those files, whatever repo the session works on (references/claude-code/cloud.md, *Environment setup*).
 """
 from __future__ import annotations
 
@@ -17,6 +19,9 @@ ENV = "cloud"
 # The section of the repo's CLAUDE.md, or the AGENTS.md it reads, that the agent follows at start.
 CLOUD_SECTION = "## Claude Code cloud specific instructions"
 PROJECT_SETTINGS = Path(".claude/settings.json")
+# Left by a cloud environment's setup script once it set the session up (references/claude-code/cloud.md).
+ENVIRONMENT_MARKER = Path(".local/share/agents/environment-setup.json")
+CLOUD_RULES = FOLDER / "rules/cloud-instructions.md"
 
 
 def present(home: Path) -> bool:
@@ -27,8 +32,15 @@ def present(home: Path) -> bool:
 # --- the checks ----------------------------------------------------------------------------
 
 
+def environment_setup(home: Path) -> bool:
+    """Whether a cloud environment's setup script set this session up."""
+    return (home / ENVIRONMENT_MARKER).is_file()
+
+
 def check_instructions(ctx) -> Cell:
     """The repo installs on SessionStart, its instructions carry the cloud section, which points at the cloud instructions file, and the agent's own setup linked CLAUDE.md, turned memory off and wrote Claude Code's own instructions."""
+    if environment_setup(ctx.home):
+        return _environment_instructions(ctx)
     if ctx.setup.clone is None:
         return Cell("gap", ["no workstation clone: can't see the repo's CLAUDE.md or .claude/settings.json"])
     declared = ctx.setup.file(ID, "instructions", ENV)
@@ -55,10 +67,13 @@ def check_instructions(ctx) -> Cell:
 
 
 def check_guardrails(ctx) -> Cell:
-    """A match-all PreToolUse group in the repo's settings runs the installed pre_tool_hook.py. Hooks are read when the session starts, so the agent's own ~/.claude/settings.json comes too late."""
-    if ctx.setup.clone is None:
+    """A match-all PreToolUse group runs the installed pre_tool_hook.py: in ~/.claude/settings.json when the environment set the session up before launch, else in the repo's settings, since the agent's own ~/.claude/settings.json comes too late."""
+    if environment_setup(ctx.home):
+        path = ctx.home / FOLDER / "settings.json"
+    elif ctx.setup.clone is None:
         return Cell("gap", ["no workstation clone: can't see .claude/settings.json"])
-    path = ctx.setup.clone / PROJECT_SETTINGS
+    else:
+        path = ctx.setup.clone / PROJECT_SETTINGS
     settings = read_json(path)
     if settings is None:
         return Cell("FAIL", [f"no {ctx.show(path)}, or it isn't valid JSON"])
@@ -68,8 +83,7 @@ def check_guardrails(ctx) -> Cell:
     problems = [any_wired_problem(ctx, path, commands, ID)]
     if settings.get("disableAllHooks") is True:
         problems.append(("FAIL", f"{ctx.show(path)} sets disableAllHooks, so the hook never runs"))
-    problems.append(("gap", "personal permissions have no native entries here: the repo's settings hold none, "
-                            "so the hook alone refuses them"))
+    problems.append(("gap", "personal permissions have no native entries here, so the hook alone refuses them"))
     return cell([p for p in problems if p])
 
 
@@ -98,6 +112,16 @@ def check_config(ctx) -> Cell:
     if own is None:
         return na("the model is picked when the session starts; no file on the VM holds it")
     return Cell("gap", [f"{ctx.show(own)}: a cloud session has no settings file for its keys"])
+
+
+def _environment_instructions(ctx) -> Cell:
+    """The environment's setup script linked CLAUDE.md, turned memory off and wrote Claude Code's own rules and the cloud rules, each matching its source."""
+    problems = [link_problem(ctx, ctx.home / FOLDER / "CLAUDE.md")]
+    if (read_json(ctx.home / FOLDER / "settings.json") or {}).get("autoMemoryEnabled") is not False:
+        problems.append(("FAIL", "autoMemoryEnabled isn't false in ~/.claude/settings.json"))
+    problems.append(harness_instructions_problem(ctx, ID, ctx.home / HARNESS_INSTRUCTIONS))
+    problems.append(harness_instructions_problem(ctx, ID, ctx.home / CLOUD_RULES, env=ENV))
+    return cell([p for p in problems if p])
 
 
 def _commands(settings: dict, event: str) -> list:
