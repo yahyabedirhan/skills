@@ -15,7 +15,7 @@ Continue another session's work as a **silent reader**: read its transcript, the
 ## 1. Find the session
 
 - **When the user gives a session id:** use it.
-- **When the user gives a place,** such as "top pane" or "left tab": start from this session's own place, find the target with the session host's read-only commands, and read the session id of the agent there.
+- **When the user gives a place,** such as "top pane" or "left tab": start from this session's own place, find the target with `<session-host>`'s read-only commands, and read the session id of the agent there.
   - **When the place is a scope,** such as "another workspace": list the agent sessions in it, leave out this session and the shell panes, and pick by title, working directory and status. Ask the user only when more than one still fits.
   - **When the host reports no session id:** take the newest transcript of that pane's harness whose working directory matches the pane's.
 
