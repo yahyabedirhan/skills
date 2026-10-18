@@ -1,6 +1,6 @@
 # Decisions: swift-performance
 
-The decisions behind the `swift-performance` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+The decisions behind the `swift-performance` skill. This file is for maintaining it and is never installed. Read it before changing the skill. Entries follow the shape in [index.md](index.md).
 
 ## Maintaining
 

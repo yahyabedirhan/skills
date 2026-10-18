@@ -1,6 +1,6 @@
 # Decisions: skill-recap
 
-The decisions behind the `skill-recap` skill, and the repo's tracker setup that serves it. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+The decisions behind the `skill-recap` skill, and the repo's tracker setup that serves it. This file is for maintaining it and is never installed. Read it before changing the skill. Entries follow the shape in [index.md](index.md).
 
 ## 2026-09-28: its own skill, separate from maintain-skills
 
