@@ -1,16 +1,20 @@
 # Claude Code CLI
 
-How to set up and audit the `claude` CLI, in a terminal or an IDE extension: the VS Code and JetBrains extensions read the same settings files ([settings](https://code.claude.com/docs/en/settings)). The instructions, guardrails, plugins, skills and hook wiring are in `index.md`; this page holds what only the CLI row has.
+The CLI environment of Claude Code, in a terminal or an IDE extension. This page says how it is found, what its sandbox and config rows mean and how the verifier checks it. The VS Code and JetBrains extensions read the same settings files ([settings](https://code.claude.com/docs/en/settings)). The instructions, guardrails, plugins, skills and hook wiring are in `index.md`; this page holds what only the CLI row has.
 
-## Found
+## The environment
+
+### Found
 
 Found when `~/.claude/` exists or `claude` is on `PATH`, except on a cloud VM with `CLAUDE_CODE_REMOTE=true`, which is the cloud row, as `cloud.md` describes.
 
-## Sandbox
+## Harness rows
+
+### Sandbox
 
 set-up-machine declares no sandbox or approval setting for Claude Code, so the verifier's `sandbox` cell is `n/a`.
 
-## Config
+### Config
 
 When `setup/harnesses.json` names a Claude Code `config` for this environment, or for the harness, as `../workstation.md` > 'A declared config' describes, merge each key it sets, such as `model` and `effortLevel`, into `~/.claude/settings.json`, as that file's other keys are written: back it up, write through a symlink at its target, and keep every key the declared file doesn't name, including the hooks and permission lists this skill writes. Mark each key `present, personal` or `updated, personal`. The desktop app reads the same file, so this one merge serves both local environments.
 

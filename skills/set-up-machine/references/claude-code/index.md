@@ -1,6 +1,6 @@
 # Claude Code
 
-How to set up and audit Claude Code from the rule table. This page holds what both local environments share: the CLI and the desktop app's local sessions read the same `~/.claude/`. Docs: [permissions](https://code.claude.com/docs/en/permissions), [hooks](https://code.claude.com/docs/en/hooks), [settings](https://code.claude.com/docs/en/settings), [memory](https://code.claude.com/docs/en/memory). Background: the repo's `docs/research/harness-capabilities.md` and `docs/research/auto-mode-semantic-guard.md`.
+Claude Code, set up from the rule table. This page says how its environments are found, what each harness row means and how the verifier checks them. It holds what both local environments share: the CLI and the desktop app's local sessions read the same `~/.claude/`. Docs: [permissions](https://code.claude.com/docs/en/permissions), [hooks](https://code.claude.com/docs/en/hooks), [settings](https://code.claude.com/docs/en/settings), [memory](https://code.claude.com/docs/en/memory). Background: the repo's `docs/research/harness-capabilities.md` and `docs/research/auto-mode-semantic-guard.md`.
 
 ## Environments
 
@@ -12,13 +12,15 @@ Each environment has its own page and its own verifier row, `Claude Code / <env>
 
 The code is `scripts/setupmachine/harnesses/claude_code/`: `__init__.py` holds the hook payload and the checks on this page, and each environment is a module.
 
-## Found
+### Found
 
 Each environment page says when its row is found. Every setting below lives in one file, `~/.claude/settings.json`, except the instructions. Keep every key you don't change; a file that isn't valid JSON stops the run until the user fixes it.
 
-## Instructions
+## Harness rows
 
-### Global instructions
+### Instructions
+
+#### Global instructions
 
 - Claude Code reads `~/.claude/CLAUDE.md` in every session, and follows a symlink; it has no global `AGENTS.md`.
 - `~/.claude/CLAUDE.md` becomes a **symlink to the shared file**, `~/.config/agents/AGENTS.md`, so the shared file is the one source and Claude Code reads it as written. It's `present` once it's that link.
@@ -34,14 +36,14 @@ Each environment page says when its row is found. Every setting below lives in o
 
   `<path>` is the path `setup/harnesses.json` gives, such as `harnesses/claude-code/instructions.md`. Refresh it whenever the source changes, and remove it when the source is gone. One without that comment is someone else's: a `gap`, left alone. Any other file in `~/.claude/rules/` is `extra`: its lines belong in the shared file, or in Claude Code's instructions file when only Claude Code needs them.
 
-### Memory
+#### Memory
 
 - Auto memory is on by default and writes `~/.claude/projects/<project>/memory/`. Set `"autoMemoryEnabled": false`, back up every file under `~/.claude/projects/*/memory/`, and list each as `removed`.
 - **Gap:** a project's `.claude/settings.json` can set `autoMemoryEnabled: true` and win. `/set-up-project`'s audit checks for that. `CLAUDE_CODE_DISABLE_AUTO_MEMORY` outranks the key for one session.
 
-## Guardrails
+### Guardrails
 
-### Permissions
+#### Permissions
 
 - `permissions` holds the lists `deny`, `ask` and `allow`. A `deny` row goes to `deny`, `ask` to `ask`, `allow-and-report` to `allow`, and the hook does the reporting.
 - **Evaluation:** deny, then ask, then allow; the first match wins. So to tighten, add the stricter entry and leave the looser one in place: the looser one stops taking effect, and it's the user's to remove, not yours. An entry already stricter than the table is `stricter`, and kept.
@@ -49,7 +51,7 @@ Each environment page says when its row is found. Every setting below lives in o
 - **Covered already:** an entry on the machine that matches everything the wanted one does counts as `present`. `Bash(gh repo delete*)` covers `Bash(gh repo delete *)`; `mcp__<server>` or a matching glob covers that server's tools. An old `Bash(<words>:*)` with a space in `<words>` doesn't count: Claude Code reads it like the ` *` form, but the Cursor CLI matches it only against the bare command. Add the ` *` entry beside it, and list the old one as `extra`.
 - **Projects can't loosen it:** a user deny holds against any project `allow`.
 
-### Command rows
+#### Command rows
 
 `Bash(<prefix> *)` matches the command text as written, so a row becomes one entry per spelling, as `../rule-table.md` > 'Spellings' describes: `Bash(git push --force *)`, `Bash(chmod -R 777 *)`. Rows with `any_operand` get one entry per operand word after the subcommand and flags. `Bash(git push --delete origin main *)` covers only that remote, so name the gap.
 - **Worked example,** `rm-recursive-force`, with flags `[r, R, recursive]` and `[f, force]`: `Bash(rm -rf *)`, `Bash(rm -Rf *)`, `Bash(rm -fr *)`, `Bash(rm -fR *)`, `Bash(rm -r -f *)`, `Bash(rm -r --force *)`, `Bash(rm -R -f *)`, … `Bash(rm --force --recursive *)`, then the same under `/bin/rm` and `/usr/bin/rm`.
@@ -62,7 +64,7 @@ Each environment page says when its row is found. Every setting below lives in o
   - `files` (`cat .env`): Bash rules match text, not paths. Claude Code's own Read rules refuse `cat`, `head`, `tail` and `grep` on a denied file; the hook refuses the rest (`less`, `source`, `.`).
 - Deny and ask rules apply to each part of `a && b`, `a; b`, pipes and subshells, and past `timeout`, `nice` and `nohup`.
 
-### File rows
+#### File rows
 
 - A `read` row becomes `Read(<path>)`, a `write` row `Edit(<path>)`. Project paths get `./` (`./**/.env`), `~/` paths stay as they are, and an absolute path gets a second `/` (`Read(//proc/**/environ)`), because Claude Code reads `/path` as relative to the settings file. A path with no `/` after the `./` matches at any depth, as in `.gitignore`: `Read(./.env.*)` refuses `sub/.env.local` too. A `Read` deny also blocks edits.
 - **Only `Edit(...)`, never `Write(...)`.** Claude Code never checks a `Write(...)` deny, and warns at startup for each one: "Use Edit(**/.env) instead (Edit rules cover all file-editing tools)". The Cursor CLI gets its `Write(...)` entries in its own `cli-config.json`, as `../cursor/cli.md` > 'Guardrails' describes. An existing `Write(...)` entry, such as `Write(**/.env)` from an older run, is this skill's own outdated wiring: `removed`.
@@ -73,7 +75,7 @@ Each environment page says when its row is found. Every setting below lives in o
 
   A name that leaves the literals through any other character, and a glob exception such as `**/.env*.md`, stay refused natively; the hook leaves them open. An entry on the machine that refuses an exception, such as `Read(./.env.*)` refusing `.env.example`, is `extra`, with a note that the user removes it to open the exception.
 
-### MCP-tool rows
+#### MCP-tool rows
 
 - Tools are named `mcp__<server>__<tool>`; a claude.ai connector shows as `mcp__claude_ai_<Name>__<tool>` in the CLI.
 - **List the tools:** in an empty folder, run `claude -p "List nothing." --output-format stream-json --verbose --tools "" --no-session-persistence --max-turns 1` and read the `tools` of the first event with `"type": "system", "subtype": "init"`; stop it there, before it calls the model. When the CLI isn't logged in or isn't installed, there is no output, and that is a `gap`: keep the MCP entries already there.
@@ -81,7 +83,7 @@ Each environment page says when its row is found. Every setting below lives in o
 - **Ask rows:** an answer of "Yes, don't ask again" writes an `allow` entry into the project's `.claude/settings.local.json`, and the user-level `ask` entry still wins over it, since ask is evaluated before allow.
 - **`approver: "user"` rows:** the [auto mode docs](https://code.claude.com/docs/en/auto-mode-config) say an ask rule is checked before the classifier and still prompts, and `dontAsk` denies every call that would prompt; the docs don't say what `bypassPermissions` does with an ask rule, or what a non-interactive `claude -p` run does. The hook reads `permission_mode` and refuses the row's calls in `auto`, `dontAsk` and `bypassPermissions`: a `gap` line for auto mode, to drop once a probe shows its ask entries reach the user, and one for `claude -p`.
 
-### Personal permissions
+#### Personal permissions
 
 A personal permission, as the section `../workstation.md` > `setup/permissions.json` defines it, becomes entries the way a table row of its kind does above, in the same lists, each marked `personal`; an `allow` row goes to `allow`, as an `allow-and-report` row does.
 
@@ -91,15 +93,15 @@ A personal permission, as the section `../workstation.md` > `setup/permissions.j
 - **The Cursor CLI** unions this file's `allow` and `deny` lists, so a personal entry written here reaches it too.
 - The verifier's `guardrails` cell fails when a personal permission has no entry here. It skips a row whose tool Claude Code lacks, an MCP-tool row, and the kinds under **No entry, and a gap instead**.
 
-### Auto mode
+#### Auto mode
 
 Leave auto mode's classifier as Claude Code ships it: write no `autoMode` rules. Probes in `docs/research/auto-mode-semantic-guard.md` found that a custom `hard_deny` rule for environment reads caught nothing the pre-tool hook doesn't refuse, and missed a script that prints `.env`. An `autoMode` block already in the file is the user's: list it as `extra`.
 
-### What the agent sees
+#### What the agent sees
 
 A native refusal says `Permission to use Bash with command <command> has been denied.` or `File is in a directory that is denied by your permission settings.`, naming no rule; the shared file supplies general rejection guidance and the `rm -rf` fallback. The hook runs first; its refusal names each refused part, its rule, reason and instruction.
 
-## Plugins
+### Plugins
 
 The plugins setup area, from `plugins` in `setup/installs.json`, as the section `../workstation.md` > `setup/installs.json` defines it.
 
@@ -108,11 +110,11 @@ The plugins setup area, from `plugins` in `setup/installs.json`, as the section 
 - **A standalone MCP server:** a `gap`. Claude Code keeps user-scope servers in `~/.claude.json`, beside data that can hold tokens, so `verify.py` doesn't read it. Prefer a bundle.
 - **An enabled bundle the list leaves out** is `extra`: kept, for the user to add or turn off. Cursor imports every enabled bundle too, as `../cursor/index.md` > 'Plugins' describes.
 
-## Skills
+### Skills
 
 Claude Code reads skills from `~/.claude/skills`. When that folder is a link to `~/.agents/skills`, every skill installed there reaches Claude Code: install without `-a claude-code`, since the CLI would link the folder into itself. Otherwise add `-a claude-code` to each install command. Install each skill as the item `../workstation.md` > `setup/installs.json` > **A skill** says.
 
-## Hook wiring
+### Hook wiring
 
 - **Wiring:** one match-all group in `hooks.PreToolUse`:
 
@@ -130,7 +132,9 @@ Claude Code reads skills from `~/.claude/skills`. When that folder is a link to 
 - **Hooks off:** `"disableAllHooks": true` in this file turns every hook off, so the hook never runs: `verify.py` fails guardrails. Name it and leave the change to the user.
 - **Gap:** a project's settings can set `"disableAllHooks": true` too.
 
-## Gaps
+## Known limits
+
+### Gaps
 
 The native entries alone let these through. The hook closes them for deny and allow-and-report rows, so name them in the diff only under each `ask` row they apply to:
 
