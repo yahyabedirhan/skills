@@ -356,7 +356,7 @@ A gap is a rule the harness's native permissions can't enforce as meant. The bas
 - **`bash -c`/`sh -c`:** only those exact prefixes; `bash -lc`, `zsh -c` and absolute-path shells need their own rules or aren't matchable. (1.4)
 - **Reads by other programs:** the Read rules bind the file tools and recognised Bash file commands, not a script's own reads, unless the sandbox is on. (1.6)
 - **Writes:** `Write(...)` rules are ignored; they must be written as `Edit(...)`. Expressible, but the current three rules do nothing. (1.6)
-- **Mail tools:** expressible, but only by the name the session exposes (`mcp__claude_ai_<server>__<tool>` for connectors in the CLI); a rule naming the server another way matches nothing. A glob such as `mcp__*__send_message` should cover every naming, since deny rules take tool-name globs; **to confirm** by adding it through `--settings` in a throwaway session and checking the tool is gone from `/permissions`. (1.6)
+- **Mail tools:** expressible, but only by the name the session exposes (`mcp__claude_ai_<server>__<tool>` for connectors in the CLI); a rule naming the server another way matches nothing. Deny rules take tool-name globs, so by the docs a glob such as `mcp__*__send_message` matches every naming. **To confirm** by adding it through `--settings` in a throwaway session and checking the tool is gone from `/permissions`. (1.6)
 - **Hook cover:** `PreToolUse` closes the command gaps, but a project's `disableAllHooks: true` turns it off, unless it's installed as a managed hook. (1.5)
 
 ### Codex

@@ -211,10 +211,10 @@ The maintainer decides. Issue #98 found no secrets in the environment on 2026-10
    }
    ```
 
-   - **Why explicit paths:** `./` in user settings means `~/.claude`, so the project-relative Read rules may not carry over (check 1). `~/**/.env` is the docs' own example.
+   - **Why explicit paths:** `./` in user settings means `~/.claude`, so whether the project-relative Read rules carry over is a **Gap** that check 1 settles. `~/**/.env` is the docs' own example.
    - **What it adds:** an interpreter or script that opens `.env`, `secrets/`, `~/.ssh` or `~/.aws` is refused by the OS, which closes the gap the decision of 2026-09-30 left open.
    - **Costs:**
-     - `.env.example` falls under `~/**/.env.*`. An `allowRead` for it is more specific, so it should re-open it, but that's unconfirmed.
+     - `.env.example` falls under `~/**/.env.*`. **Gap:** an `allowRead` for it is more specific, and whether it re-opens the file is not tested.
      - Git over SSH, `herdr`, `osascript`, `gh`, `docker` and `watchman` need `excludedCommands`, `allowUnixSockets` entries or the user, as listed in 2.1. Each exclusion is a hole, and a project can add more.
      - On Linux each wildcard is expanded at start-up.
      - With `allowUnsandboxedCommands: false`, a blocked command can't be retried, so the user runs it.

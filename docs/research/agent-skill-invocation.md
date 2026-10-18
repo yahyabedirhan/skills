@@ -51,7 +51,7 @@ Arguments: `$ARGUMENTS` is the full argument string "as typed"; `$0`, `$1` split
 | Pasted, four lines (or over 800 characters) | **No**; collapsed to `[Pasted text #1 +3 lines]`, sent as `<pasted_content>` | Tested; threshold from <https://code.claude.com/docs/en/terminal-config#paste-large-content> |
 | Typed `/skill ` followed by a pasted multi-line block | Yes; the paste becomes the arguments | Tested |
 | Leading whitespace before `/` (`-p` mode) | No; sent to the model as text | Tested |
-| Leading whitespace, interactive | Probably no | Unverified |
+| Leading whitespace, interactive | Unknown | **Gap**: tested only in `-p`; see *Open questions* |
 
 How the model reads a collapsed paste (docs, "How Claude treats pasted text", and the prompt text in the 2.1.282 binary):
 
