@@ -4,7 +4,9 @@ The shared global instructions file: its shape, its roles, and what belongs in i
 
 `~/.config/agents/AGENTS.md` is the one global instructions file every harness on the machine reads. Keep it short and ordered from general to specific: how the user works with agents, the words they share, which tool fills each role, guidance for permission rejections, then the personal workflow. Anything a teammate would need goes in the project's `AGENTS.md` or a skill. `/maintain-environment` lists those places and the team test.
 
-## Its shape
+## The file
+
+### Its shape
 
 The file has these parts, in this order. This skill writes the heading, the rule line, the roles' What it is and When none columns, and the generated block. The personal parts, listed below the parts, are the user's.
 
@@ -42,7 +44,7 @@ The personal parts are the working agreement, the glossary, the Tool column, the
 
 If the start marker is there without its end marker, stop the run and ask the user to restore the end marker, since without it you can't tell where the block ends.
 
-## Roles
+### Roles
 
 The one definition of each role.
 
@@ -59,19 +61,19 @@ The one definition of each role.
 
 A value is a tool name or the exact command. This skill fills the Tool column of `workstation-repo` and `path-to-workstation-repo` from the pointer, `~/.config/agents/source.md`, as `references/workstation.md` says. A project's `AGENTS.md` may hold its own environment defaults, whose rows override these.
 
-## Working agreement
+### Working agreement
 
 How this person and their agents work together: how they split the work, what each side owns, and how they review and decide. A line belongs here when it holds for every task and every tool. Keep it to a few lines; a rule for one kind of work goes in the personal workflow or a skill.
 
-## Glossary
+### Glossary
 
 The core words this person and their agents share, such as the names for a piece of work or a session, one short definition each. Write every definition so it holds in any harness and any session host; how a word maps onto one tool goes in that tool's glossary. Keep here only the core words every session needs. With a workstation repo, they come from `setup/instructions.md`, which this skill copies here as it is; the repository may keep a full glossary elsewhere.
 
-## Tool glossaries
+### Tool glossaries
 
 A `### <tool-name> glossary` subsection maps the shared words onto one tool that fills a role, such as which `herdr` object a session is. Name it after the tool, and add one only for a tool in the Tool column. When the user changes that tool, rewrite or remove its subsection along with the row. Leave the shared glossary as it is, since its words hold in every tool.
 
-## Personal workflow
+### Personal workflow
 
 A line belongs here only when it's about this person, not the work, and holds for one kind of work: how they like reports, what they approve before a merge, what stays out of public repositories. A line that holds for every task and every tool goes in the working agreement. It passes the team test when a teammate with no global instructions loses nothing they need. The test holds for the working agreement and the glossaries too: a term a project's code or docs use goes in that project's glossary. Move a line that fails it to the first place below that fits:
 
@@ -80,7 +82,9 @@ A line belongs here only when it's about this person, not the work, and holds fo
 - it's how to use one tool → that tool's skill;
 - a skill or a rule-table row already carries it → drop it.
 
-## Moving a harness's file
+## Around the file
+
+### Moving a harness's file
 
 When a harness still keeps its own global file, such as a `~/.claude/CLAUDE.md` that isn't a link or an old `~/.codex/AGENTS.md`, move it line by line before the harness's file becomes a link:
 
@@ -88,6 +92,6 @@ When a harness still keeps its own global file, such as a `~/.claude/CLAUDE.md` 
 2. Write each role's value and the other lines into their sections of `<path-to-workstation-repo>/setup/instructions.md`, except the two rows the pointer fills, or into the shared file when there is none; make each skill edit at its source, as `/maintain-environment` says.
 3. Leave the harness's file holding only its link to the shared file.
 
-## Memory
+### Memory
 
 Memory stays off in every harness: a memory is invisible to the other harnesses and lives outside any repository, so write what a memory would hold into the shared file, a project's `AGENTS.md` or a skill instead. Each harness reference says how to turn its memory off and where its memory files are; every file is `removed` in the diff and backed up first. Put any memory worth keeping into the same diff, as lines for one of those places, so the user approves both together.
