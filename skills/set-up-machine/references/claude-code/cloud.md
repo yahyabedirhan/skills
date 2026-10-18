@@ -41,14 +41,14 @@ The agent applies the setup itself at session start, as on any machine:
 
 ## Guardrails
 
-Hooks are read when the session starts, so the agent's own `~/.claude/settings.json` comes too late for this session. The guardrail is a match-all `PreToolUse` group in the repo's `.claude/settings.json`, behind the same variable:
+In a repo setup, hooks are read when the session starts, so the agent's own `~/.claude/settings.json` comes too late for this session. The guardrail is a match-all `PreToolUse` group in the repo's `.claude/settings.json`, behind the same variable:
 
 ```json
 {"matcher": "*", "hooks": [{"type": "command", "timeout": 10,
   "command": "[ \"$CLAUDE_CODE_REMOTE\" = true ] && [ -f \"$HOME/.claude/skills/set-up-machine/scripts/pre_tool_hook.py\" ] && python3 \"$HOME/.claude/skills/set-up-machine/scripts/pre_tool_hook.py\" --harness claude-code || true"}]}
 ```
 
-On a machine the variable is unset, so the user-level hook stays the only one, as index.md > *Hook wiring* describes. On the VM, do not add the user-level hook too: two hooks would report each allow-and-report call twice. The command fails open until the install has put the script there.
+On a machine the variable is unset, so the user-level hook stays the only one, as index.md > *Hook wiring* describes. On the VM in a repo setup, the repo hook is the only one: a user-level hook beside it would report each allow-and-report call twice. An environment setup writes the user-level hook instead, as *Environment setup* describes. The command fails open until the install has put the script there.
 
 - **Ask rows:** a cloud session has the same permission modes, chosen per session. A permission prompt can stall a cloud session even in auto mode; the hook still refuses `approver: "user"` rows in `auto`, `dontAsk` and `bypassPermissions`.
 - **Personal permissions:** a `gap`. The repo's settings hold no personal lists, so the hook alone refuses them.
