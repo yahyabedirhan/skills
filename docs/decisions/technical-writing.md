@@ -1,6 +1,6 @@
 # Decisions: technical writing
 
-How everything under `docs/` is written: research files and their HTML guides in `docs/research/`, the decision records in `docs/decisions/`, and the agent docs in `docs/agents/`. Read it before writing or changing any file there. A decision record also follows the shape in [index.md](index.md), and so do the entries below. Skills follow `skill-writing.md` instead.
+How everything under `docs/` is written: research files and their HTML guides in `docs/research/`, the decision records in `docs/decisions/`, and the agent docs in `docs/agents/`. A decision record also follows the shape in [index.md](index.md), and so do the entries below. Skills follow `skill-writing.md` instead.
 
 ## 2026-10-03: a light version of ASD-STE100
 
@@ -33,3 +33,14 @@ How everything under `docs/` is written: research files and their HTML guides in
 - **Options:** None considered.
 - **Choice and why:** A topic with more than one file lives in `docs/research/<topic>/`. Its synthesis is `README.md`, and its HTML guide is `guide.html`. Each other file is named by its subject, without the topic prefix (`docs/research/cloud-agents/vps.md`). The folder groups the files, and GitHub shows the `README.md` when the folder opens.
 - **Consequences:** None.
+
+## 2026-10-18: three writing rules for every page
+
+- **Status:** accepted
+- **Context:** A cleanup of the repo found the same mistakes in many files: lines joined into long paragraphs, labels that only made sense in the conversation that coined them, and section titles that named a task or a chat phrase instead of a part.
+- **Options:** A formatter such as Prettier. Rejected: it breaks a sentence at a column and joins lines that were split on purpose. A rule for each convention found. Rejected: more rules give an agent more to over-apply.
+- **Choice and why:** Three rules for every document in the repo.
+  - **Write for a reader who was not in the conversation.** A file says what a thing is, not what it was called in chat. Describe what a label names, or define it where it first appears.
+  - **Break lines at sentences.** Put one sentence on each line, and keep a paragraph as consecutive lines. Sentences stay easy to scan and to compare in a diff.
+  - **Name each section with a noun phrase.** Use one name for one part across pages, such as `Verification`, `Limitations`, `Notes` and `Steps`. Keep every heading that another file points to, and fix the pointers when you change one.
+- **Consequences:** Each rule applies to new and changed pages. Dated decision entries stay as written. A pointer to a decision file lives in `AGENTS.md`, since a sentence inside the file cannot make an agent open it. The maintainer's own writing preferences stay in the maintainer's workstation repo.
