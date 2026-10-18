@@ -4,7 +4,7 @@ How to audit a Claude Code cloud session: one Anthropic-managed Ubuntu VM per se
 
 ## Found
 
-Found when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and a machine never does. A `--home` fixture on the VM is still found. On the VM the CLI row is not found, even though `claude` is on `PATH`.
+Found when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and the local machine or a remote machine never does. A `--home` fixture on the VM is still found. On the VM the CLI row is not found, even though `claude` is on `PATH`.
 
 ## What reaches the VM
 

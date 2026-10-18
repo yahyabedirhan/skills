@@ -37,7 +37,7 @@ Auto-review with the sandbox on is the mode this skill sets for anyone who has C
 
 - **Files:** the same `~/.cursor/cli-config.json`. Set `"approvalMode": "auto-review"` and `"sandbox": {"mode": "enabled"}`. Keep every other key, including `sandbox` > `networkAccess` when it is already set. Add `"version": 1` to a new file. Docs: [run modes](https://cursor.com/docs/agent/security/run-modes), [CLI configuration](https://cursor.com/docs/cli/reference/configuration).
 - **Audit:** the verifier's `sandbox` cell, as 'Checking it' describes.
-- **Linux:** the sandbox needs kernel 6.2 or newer with Landlock, and unprivileged user namespaces. On a remote machine or the standalone CLI, the user installs the AppArmor package the run-modes doc names; it needs root. When the sandbox cannot be created, Cursor asks before each command: a `gap`.
+- **Linux:** the sandbox needs kernel 6.2 or newer with Landlock, and unprivileged user namespaces. Where the CLI runs without the desktop app, as on a remote machine, the user installs the AppArmor package the run-modes doc names; it needs root. When the sandbox cannot be created, Cursor asks before each command: a `gap`.
 - **Steering:** leave `~/.cursor/permissions.json` `autoRun` to the user. `block_instructions` steer the classifier in plain English. The rule table and the hook are the enforcement, and a second prose list of the same calls would drift from them.
 
 ## Config
