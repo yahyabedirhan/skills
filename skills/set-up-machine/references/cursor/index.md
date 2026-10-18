@@ -86,7 +86,7 @@ Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills
     "preToolUse": [{"command": "<command>", "timeout": 10, "matcher": "^(Write|Delete|Grep)$"}]}}
   ```
 
-  with `<command>` = `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'` `<script>` is as SKILL.md > *Wiring* gives it. The `echo '{}'` matters: Cursor reads an empty answer as invalid JSON, which blocks. `preToolUse` names an MCP tool `MCP:<tool>` without its server, so MCP goes through `beforeMCPExecution`.
+  with `<command>` = `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'`, where `<script>` is the path SKILL.md > *Wiring* gives. The `echo '{}'` matters: Cursor reads an empty answer as invalid JSON, which blocks. `preToolUse` names an MCP tool `MCP:<tool>` without its server, so MCP goes through `beforeMCPExecution`.
 - **Audit:** `wired` when all four events run exactly that command; `verify.py` checks it. A handler running `pre_tool_hook.py` from another path is old wiring: `removed`.
 - **Input:** `beforeShellExecution` has `command` and `cwd`, which is often empty, so the hook falls back to `workspace_roots[0]`; `beforeMCPExecution` has `mcp_server_name` and `tool_name`; `beforeReadFile` has `file_path`; `preToolUse` has `tool_name` and `tool_input.file_path`, or `path` and `glob`. The session is `conversation_id`.
 - **Answer:** always JSON. A deny is `{"permission": "deny", "user_message": …, "agent_message": …}`, both the refusal; the CLI shows the agent `user_message`. Otherwise `{}`, which leaves the call to Cursor's permissions. The hook isn't `failClosed`: a crash or timeout lets the call through, and in the IDE nothing native is left underneath: a `gap`.
@@ -101,7 +101,7 @@ The rows with no entry above, the ask rows, the exceptions the CLI refuses, the 
 The shared cells of the verifier's `Cursor / cli` and `Cursor / desktop` rows, from `scripts/setupmachine/harnesses/cursor/__init__.py`:
 
 - **instructions:** `~/.cursor/rules/global-instructions.mdc` is the header above the shared file, byte for byte. When `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` matches its source too. A missing or stale copy is `FAIL`, and so is a generated `harness-instructions.mdc` whose source is gone. A file without the generated comment is a `gap`, left alone.
-- **guardrails:** all four events in `~/.cursor/hooks.json` run the installed skill's existing `pre_tool_hook.py`, as SKILL.md > *Wiring* describes, with `--harness cursor`.
+- **guardrails:** all four events in `~/.cursor/hooks.json` run the installed skill's existing `pre_tool_hook.py` with `--harness cursor`, wired as SKILL.md > *Wiring* describes.
 - **sandbox:** `cli-config.json` has `approvalMode` `auto-review` and `sandbox.mode` `enabled`.
 - **plugins:** each bundle is installed and enabled in Claude Code. Each standalone server is in `~/.cursor/mcp.json`, equal to its entry.
 

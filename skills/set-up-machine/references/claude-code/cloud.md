@@ -1,6 +1,6 @@
 # Claude Code cloud
 
-How to audit a Claude Code cloud session: one Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo, started from claude.ai/code, the Claude app, the desktop app's **Cloud** choice or `claude --cloud`. Docs: [cloud environments](https://code.claude.com/docs/en/cloud-environments), [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), [hooks](https://code.claude.com/docs/en/hooks). The CLI and the desktop app are the other environments of this harness, as index.md describes.
+How to audit a Claude Code cloud session: one Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo, started from claude.ai/code, the Claude app, the desktop app's **Cloud** choice or `claude --cloud`. Docs: [cloud environments](https://code.claude.com/docs/en/cloud-environments), [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), [hooks](https://code.claude.com/docs/en/hooks). The CLI and the desktop app are the other environments of this harness, as index.md describes. A cloud session is set up from its repo, as *Install*, *Instructions* and *Guardrails* describe, or by its cloud environment, as *Environment setup* describes.
 
 ## Found
 
@@ -19,7 +19,9 @@ Found when `CLAUDE_CODE_REMOTE` is `true`, which a cloud VM sets and a machine n
 
 ## Install
 
-- **Trigger:** the repo's `.claude/settings.json` runs it on `SessionStart`, matcher `startup|resume`, behind `CLAUDE_CODE_REMOTE`, so a machine skips it.
+The install puts the skills and tools on the VM. The agent's own setup comes after it.
+
+- **Trigger:** the repo's `.claude/settings.json` runs the install on `SessionStart`, matcher `startup|resume`, behind `CLAUDE_CODE_REMOTE`, so a machine skips it.
 - **Installs:** the skills `setup/installs.json` lists, into `~/.agents/skills` with `-a claude-code`, so each is also in `~/.claude/skills`, and the tools the repo needs, such as gitleaks.
 - **Out of scope:** writing instructions or harness files, and running an audit. This skill writes the setup; scripts only enforce and check.
 
@@ -31,8 +33,8 @@ Found when `CLAUDE_CODE_REMOTE` is `true`, which a cloud VM sets and a machine n
 The agent applies the setup itself at session start, as on any machine:
 
 - **Entry point:** the repo `CLAUDE.md`, or the `AGENTS.md` it links to or imports, has a section titled "Claude Code cloud specific instructions".
-- **Cloud section:** before other work, follow this skill for harness `claude-code`, environment `cloud`; run `verify.py --harness claude-code --env cloud`; stop and ask when a step needs more access.
-- **Cloud instructions file:** the file the key `setup/harnesses.json` > `harnesses` > `claude-code` > `environments` > `cloud` > `instructions` names. The agent follows its `## Instructions` lines for the session.
+- **Cloud section:** it tells the agent, before other work, to follow this skill for harness `claude-code`, environment `cloud`, to run `verify.py --harness claude-code --env cloud`, and to stop and ask when a step needs more access.
+- **Cloud instructions file:** the section points at the file named by the key `setup/harnesses.json` > `harnesses` > `claude-code` > `environments` > `cloud` > `instructions`. The agent follows that file's `## Instructions` lines for the session.
 
 - **Written files:** the shared file `~/.config/agents/AGENTS.md`, `~/.claude/CLAUDE.md` as a link to it, `~/.claude/rules/harness-instructions.md` from the harness's `instructions` file, and `"autoMemoryEnabled": false` in `~/.claude/settings.json`, as index.md > *Instructions* describes. The session started before these existed, so the agent reads the shared file itself for this session; a resumed process on the same VM loads the link. Do not append the cloud-only lines to the shared file.
 - **Audit:** `ok` when the repo's settings have a `SessionStart` hook, the cloud instructions file has an `## Instructions` section, the repo's cloud section names that file's path, `~/.claude/CLAUDE.md` links to the shared file, the harness instructions file matches its source and memory is off. `FAIL` when cloud instructions are declared and one is missing. `gap` with no clone to read, or when the repo declares no cloud instructions.
@@ -50,7 +52,7 @@ On a machine the variable is unset, so the user-level hook stays the only one, a
 
 - **Ask rows:** a cloud session has the same permission modes, chosen per session. A permission prompt can stall a cloud session even in auto mode; the hook still refuses `approver: "user"` rows in `auto`, `dontAsk` and `bypassPermissions`.
 - **Personal permissions:** a `gap`. The repo's settings hold no personal lists, so the hook alone refuses them.
-- **Audit:** `ok` when a match-all group runs an existing installed `pre_tool_hook.py` with `--harness claude-code`, with `$HOME` and `~/` expanded, and `disableAllHooks` isn't `true`.
+- **Audit:** `ok` when a match-all group runs an existing installed `pre_tool_hook.py` with `--harness claude-code`, and `disableAllHooks` isn't `true`. The audit reads `$HOME` and `~/` in the command as the home folder.
 
 ## Environment setup
 
@@ -69,7 +71,7 @@ A cloud session is set up in one of two ways, and `~/.local/share/agents/environ
 
 ## Sandbox
 
-`gap`: commands run on the VM. The network level, None, Trusted, Full or Custom, is set on the cloud environment, and nothing on the VM shows it. GitHub goes through a proxy that keeps the credentials off the VM: `gh` is installed, `gh api` works, and GraphQL is blocked, so `gh pr` and `gh issue` fail.
+`gap`: commands run on the VM. The network level is set on the cloud environment, to None, Trusted, Full or Custom, and nothing on the VM shows it. GitHub goes through a proxy that keeps the credentials off the VM: `gh` is installed, `gh api` works, and GraphQL is blocked, so `gh pr` and `gh issue` fail.
 
 ## Plugins
 
