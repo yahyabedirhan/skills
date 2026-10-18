@@ -2,7 +2,7 @@
 
 Nothing in `~/.claude/` on the user's machine reaches the VM. The repo's SessionStart hook only installs the skills and tools; the agent then applies the setup itself, as the repo's cloud section tells it, and the repo's PreToolUse hook runs the pre-tool hook with `--harness claude-code`.
 
-When `~/.local/share/agents/environment-setup.json` exists, the cloud environment's setup script, which `<workstation-repo>` renders, set the session up instead: it wrote the user-level files before Claude Code launched, and the checks read those files (references/claude-code/cloud.md, *Environment setup*).
+When `~/.local/share/agents/environment-setup.json` exists, the cloud environment's setup script, which `<workstation-repo>` renders, set the session up instead: it wrote the user-level files before Claude Code launched, and the checks read those files. The *Environment setup* section of references/claude-code/cloud.md describes this setup.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ ENV = "cloud"
 # The section of the repo's CLAUDE.md, or the AGENTS.md it reads, that the agent follows at start.
 CLOUD_SECTION = "## Claude Code cloud specific instructions"
 PROJECT_SETTINGS = Path(".claude/settings.json")
-# Left by a cloud environment's setup script once it set the session up (references/claude-code/cloud.md).
+# Left by a cloud environment's setup script once it set the session up. references/claude-code/cloud.md describes it.
 ENVIRONMENT_MARKER = Path(".local/share/agents/environment-setup.json")
 CLOUD_RULES = FOLDER / "rules/cloud-instructions.md"
 
