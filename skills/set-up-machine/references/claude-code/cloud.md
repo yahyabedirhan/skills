@@ -32,7 +32,7 @@ The install puts the skills and tools on the VM. The agent's own setup comes aft
 
 The agent applies the setup itself at session start, as on any machine:
 
-- **Entry point:** the repo `CLAUDE.md`, or the `AGENTS.md` it links to or imports, has a section titled "Claude Code cloud specific instructions".
+- **Entry point:** the repo `CLAUDE.md`, or the `AGENTS.md` it links to or imports, has a section titled 'Claude Code cloud specific instructions'.
 - **Cloud section:** it tells the agent, before other work, to follow this skill for harness `claude-code`, environment `cloud`, to run `verify.py --harness claude-code --env cloud`, and to stop and ask when a step needs more access.
 - **Cloud instructions file:** the section points at the file named by the key `setup/harnesses.json` > `harnesses` > `claude-code` > `environments` > `cloud` > `instructions`. The agent follows that file's `## Instructions` lines for the session.
 
