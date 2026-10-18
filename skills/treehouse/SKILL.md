@@ -30,4 +30,8 @@ A leased worktree starts on a detached HEAD unless `get` makes its branch. `get 
 - `return` keeps ignored files, even with `--force`, and the next effort that leases the worktree finds them, such as an old `.scratch/` or build output. Copy out what's worth keeping before returning. Use ordinary guarded return for settlement; `--force` discards changes without confirmation and does not make an occupied worktree safe.
 - `destroy` removes everything in the worktree, ignored files included, without warning. Copy out anything worth keeping first.
 - `destroy --include-in-use` terminates processes and `--include-unlanded` permits discarding work. Settlement preserves those targets; these flags do not establish permission to terminate a session or service.
-- These facts were checked against `treehouse` v3.1.0 help and [kunchenguid/treehouse at c099281010efda0bf82bbaf8d882528fcbed6acc](https://github.com/kunchenguid/treehouse/tree/c099281010efda0bf82bbaf8d882528fcbed6acc), including its isolated release and process fixtures. Check them again after an update. Lease guards do not make the separate occupancy check atomic; if safe ownership through execution cannot be established, preserve the target.
+- Lease guards do not make the separate occupancy check atomic; if safe ownership through execution cannot be established, preserve the target.
+
+## Notes
+
+The facts on this page were checked against `treehouse` v3.1.0 help and [kunchenguid/treehouse at c099281010efda0bf82bbaf8d882528fcbed6acc](https://github.com/kunchenguid/treehouse/tree/c099281010efda0bf82bbaf8d882528fcbed6acc), including its isolated release and process fixtures. Check them again after an update.
