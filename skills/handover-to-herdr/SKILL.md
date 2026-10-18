@@ -21,7 +21,7 @@ When `/settle-session` calls this skill, read `settle-commands.md` instead of th
 
 1. Check that `herdr status` reaches a server and inspect the installed commands' help. Check whether caller context exists with `test -n "$HERDR_PANE_ID"`; when it does, resolve it with `herdr pane current --current` and read the returned pane, terminal, tab and workspace IDs. Inherited IDs can survive a pane move while its live IDs change. From outside a pane, skip caller resolution: without caller context that command can resolve another client's focus.
    - **If no server answers:** say so and hand back to the calling skill, which then works as if there were no session host.
-2. Open a tab in the workspace whose checkout is the worktree, or open the worktree as a new workspace from the repository's own workspace. Check before and after each change:
+2. Open a tab in the workspace whose checkout is the worktree, or open the worktree as a new workspace from the repository's own workspace. Check each target before and after you change it:
    - **Workspace inventory:** `herdr workspace list` shows each workspace's `worktree`, with its `checkout_path`, `repo_root` and `is_linked_worktree`. Verify the worktree's canonical path and repository with Git.
    - **Pre-mutation check:** immediately before each mutation, refresh the caller when present, inspect the target workspace, tab and pane hierarchy, and compare it with the intended repository and path.
    - **Existing pane:** inspect `herdr pane get <pane_id>` and `herdr pane process-info --pane <pane_id>` for the actual foreground location and occupants; workspace checkout metadata and pane `cwd` alone do not establish process location.

@@ -58,7 +58,7 @@ Give commands that mean different things names that look different, unlike `upda
 
 ## Configuration precedence
 
-From highest to lowest: flags, environment variables, the project's configuration file, the user's configuration file under `$XDG_CONFIG_HOME`, which defaults to `~/.config`, or the platform's equivalent, then the system's configuration file, built-in defaults. When a command shows the configuration, show which source each value came from.
+From highest to lowest: flags; environment variables; the project's configuration file; the user's configuration file, under `$XDG_CONFIG_HOME`, which defaults to `~/.config`, or the platform's equivalent; the system's configuration file; built-in defaults. When a command shows the configuration, show which source each value came from.
 
 ## Help layouts
 

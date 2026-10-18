@@ -33,7 +33,7 @@ HTTP being stateless is what lets servers scale by adding more of them: keep as 
 
 Vertical scaling with a bigger machine goes far with modern hardware ([numbers-to-know.md](numbers-to-know.md)); horizontal scaling with more machines needs a way to spread requests.
 
-- **Client-side**: the client reads a server list from a registry and picks a server itself; no extra hop. Fits a few clients you control, such as internal services, where gRPC and Redis Cluster clients pick servers this way, or many clients that tolerate slow updates, such as DNS, which rotates IPs within its TTL.
+- **Client-side**: the client reads a server list from a registry and picks a server itself; no extra hop. Fits a few clients you control, such as internal services; gRPC and Redis Cluster clients work this way. It also fits many clients that tolerate slow updates, such as DNS, which rotates IPs within its TTL.
 - **Dedicated load balancer**: an extra hop, but instant updates to the server list and finer control.
   - **L4** routes connections without reading them; one TCP connection stays with one server. Use it for WebSockets and other persistent connections.
   - **L7** reads each HTTP request and can route on its path, headers or cookies. Use it for HTTP traffic.

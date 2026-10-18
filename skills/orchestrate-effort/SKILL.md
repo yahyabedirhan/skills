@@ -32,7 +32,7 @@ Build one effort from its spec and tickets, as its orchestrator, following `/orc
 
    Write how to verify into every brief that checks a UI, the final review's and any walk-through's included, and follow it in your own real-app checks:
    - **Tool:** verify with a headless browser the agent runs itself, such as the project's own Playwright tests or `npx playwright` against the real dev server, saving screenshots to files. Real clicks there count as the real app.
-   - **User's Chrome:** the Claude in Chrome extension only when the user asks for it in the current task, because it takes over the browser they are working in. The harness advertises the extension, so a brief that names no tool ends up using it.
+   - **User's Chrome:** use it through the Claude in Chrome extension only when the user asks for it in the current task, because it takes over the browser they are working in. The harness advertises the extension, so a brief that names no tool ends up using it.
    - **User's screen and clipboard:** stay off them. Don't open Finder windows or files with `open`, don't script apps through System Events, which needs an Accessibility permission the user won't grant, and don't use `pbcopy` or `pbpaste`; read what the page writes to the clipboard inside the page instead.
    - **When the real app is a shared resource:** have the delegate verify what it can in its worktree, and run the real-app check yourself once per batch at integration.
 5. **Integrate each batch of reports.**
