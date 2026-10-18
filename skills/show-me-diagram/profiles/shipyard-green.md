@@ -38,3 +38,5 @@ Every green is a shade of the icon's `#7a8a48`.
 | `node-name` | Inter | 600 |
 | `sublabel` | JetBrains Mono | 400 |
 | `callout` | Inter | 400 |
+
+Use JetBrains Mono for all technical text.

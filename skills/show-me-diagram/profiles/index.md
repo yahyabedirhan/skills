@@ -34,6 +34,7 @@ Only what differs from upstream: density, stroke width, corner radius, spacing, 
 ## Typography
 | Role | Family | Weight |   # title, node-name, sublabel (mono), callout (notes)
 Google Fonts families, so the font link can load them.
+Use <sublabel family> for all technical text.
 ```
 
 To add a profile, copy this shape and add a row to the table above.

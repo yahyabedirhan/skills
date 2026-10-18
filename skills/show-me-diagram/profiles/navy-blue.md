@@ -36,3 +36,5 @@ Upstream density. Strokes 1.2 for emphasis. Gold only on the 1 or 2 focal nodes.
 | `node-name` | Inter | 600 |
 | `sublabel` | JetBrains Mono | 400 |
 | `callout` | Inter | 400 |
+
+Use JetBrains Mono for all technical text.

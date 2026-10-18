@@ -38,3 +38,5 @@ The accent is the red `#d9533f`, darkened to clear 4.5:1 as text on the paper.
 | `node-name` | Inter | 600 |
 | `sublabel` | IBM Plex Mono | 400 |
 | `callout` | Inter | 400 |
+
+Use IBM Plex Mono for all technical text.
