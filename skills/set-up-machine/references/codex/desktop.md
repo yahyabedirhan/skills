@@ -35,7 +35,7 @@ Preserve app preferences, project trust and current chats.
 A running chat can retain its selected model and permissions after persisted defaults change.
 Verify effective settings in a fresh desktop chat.
 
-## Checking it
+## Verification
 
 Run `python3 <skill-folder>/scripts/verify.py --harness codex --env desktop`.
 All six columns check this environment, including config when the standalone CLI is absent.

@@ -38,13 +38,13 @@ verify.py ──▶ global checks (pointer, shared file, rule samples)
 
 ```text
 skills/set-up-machine/
-├── SKILL.md                    # sources, outputs, the steps, what verify must show
+├── SKILL.md                    # sources, outputs, the steps, verification
 ├── rules.json                  # the rule table, with samples per row
 ├── references/
 │   ├── <harness>/              # one folder per harness
 │   │   ├── index.md            #   what its environments share, when it has more than one
 │   │   └── <env>.md            #   one per environment, same headings: Presence detection, Instructions, Guardrails,
-│   │                           #   Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Checking it
+│   │                           #   Sandbox, Plugins, Skills, Config, Hook wiring, Gaps, Verification
 │   ├── workstation.md          # the format of every setup/ file, and the run without one
 │   ├── global-instructions.md  # the shared file's shape
 │   ├── rule-table.md           # a row's fields, match kinds, spellings

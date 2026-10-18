@@ -20,11 +20,11 @@ When `setup/harnesses.json` names a Claude Code `config` for this environment, o
 
 - **Activation:** a new session reads it. `/model` in a running session, the `--model` flag, the `ANTHROPIC_MODEL` environment variable and a project's `.claude/settings.json` override it: name an override you find as a `gap`.
 
-## Checking it
+## Verification
 
 The verifier's `Claude Code / cli` row (`verify.py --harness claude-code --env cli`), from `scripts/setupmachine/harnesses/claude_code/cli.py`:
 
-- **instructions, guardrails, plugins, skills:** the shared checks, as `index.md` > 'Checking it' describes.
+- **instructions, guardrails, plugins, skills:** the shared checks, as `index.md` > 'Verification' describes.
 - **sandbox:** `n/a`.
 - **config:** each key the declared Claude Code config sets has the same value in `~/.claude/settings.json`. `n/a` without a declared config.
 

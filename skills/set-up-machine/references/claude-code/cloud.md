@@ -103,7 +103,7 @@ Each listed skill in `~/.claude/skills` or the repo's `.claude/skills`. Skills e
 
 The model is picked when the session starts, and environment variables and network secrets are set on the environment. A cloud `config` in `setup/harnesses.json` has no file to land in: each key is a `gap`. The harness's shared config describes `~/.claude/settings.json` on a machine and doesn't apply here.
 
-## Verifier checks
+## Verification
 
 The verifier's `Claude Code / cloud` row (`verify.py --harness claude-code --env cloud`), from `scripts/setupmachine/harnesses/claude_code/cloud.py`:
 

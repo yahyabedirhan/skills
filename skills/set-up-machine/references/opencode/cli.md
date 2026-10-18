@@ -109,7 +109,7 @@ With native entries alone these get through; the hook closes the command and MCP
 
 - These were probed on a live opencode: declarations such as `export -p` missing their patterns, `--pure` starting without plugins, and a flag after the operands getting past a native pattern.
 
-## Checking it
+## Verification
 
 The verifier's opencode row, from `scripts/setupmachine/harnesses/opencode/cli.py`:
 

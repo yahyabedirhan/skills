@@ -21,10 +21,10 @@ Present when the app's own Claude Code folder exists: `~/Library/Application Sup
 
 Nothing to write: the app has no sandbox setting of its own, and the declared config is `~/.claude/settings.json`, which the CLI row merges and checks, as `cli.md` > 'Config' describes.
 
-## Checking it
+## Verification
 
 The verifier's `Claude Code / desktop` row (`verify.py --harness claude-code --env desktop`), from `scripts/setupmachine/harnesses/claude_code/desktop.py`:
 
-- **instructions, guardrails, plugins, skills:** the shared checks, as `index.md` > 'Checking it' describes. They read the same files as the CLI row.
+- **instructions, guardrails, plugins, skills:** the shared checks, as `index.md` > 'Verification' describes. They read the same files as the CLI row.
 - **sandbox:** `n/a`.
 - **config:** `n/a`: the CLI row checks the same file.

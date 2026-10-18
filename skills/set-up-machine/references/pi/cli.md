@@ -164,7 +164,7 @@ The optional Pi `config` that `setup/harnesses.json` in `<workstation-repo>` nam
 - This page was checked against Pi 1.1.0 and its `dist/` source, including the `pi update --extensions` command and the handler load order.
 - The `pi-subagents` behaviour was checked on version 0.77.0, and Herdr's `working` state on Herdr version 9.
 
-## Checking it
+## Verification
 
 The verifier's Pi row, from `scripts/setupmachine/harnesses/pi/cli.py`, reads the resolved agent folder:
 

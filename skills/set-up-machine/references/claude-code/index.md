@@ -144,7 +144,7 @@ The native entries alone let these through. The hook closes them for deny and al
 
 The hook's own misses are in `SKILL.md` > 'Pre-tool hook' > 'What it can't see'.
 
-## Checking it
+## Verification
 
 The checks both local rows run, from `scripts/setupmachine/harnesses/claude_code/__init__.py`. Each environment page lists its own row:
 
@@ -153,4 +153,4 @@ The checks both local rows run, from `scripts/setupmachine/harnesses/claude_code
 - **plugins:** each bundle is in `installed_plugins.json` and enabled in `enabledPlugins`. A standalone MCP server is a `gap`.
 - **skills:** each listed skill is in `~/.claude/skills`.
 
-The verifier doesn't report an enabled bundle the list leaves out: find those in the diff. How to see Claude Code itself enforce the rows is in `cli.md` > 'Checking it'.
+The verifier doesn't report an enabled bundle the list leaves out: find those in the diff. How to see Claude Code itself enforce the rows is in `cli.md` > 'Verification'.

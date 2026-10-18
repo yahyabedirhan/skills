@@ -70,7 +70,7 @@ The wiring is `/agent/.cursor/hooks.json`, which the Build writes, as 'Guardrail
 
 - The hook files a multi-repo cloud agent runs were tested on 2026-10-15.
 
-## Checking it
+## Verification
 
 The verifier's `Cursor / cloud` row (`verify.py --harness cursor --env cloud`), from `scripts/setupmachine/harnesses/cursor/cloud.py`:
 

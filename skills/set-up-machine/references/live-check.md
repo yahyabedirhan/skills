@@ -35,7 +35,7 @@ Check that each marker exists with `test -s <probe folder>/.env` only. Never rea
 Open a place for the check in `<session-host>`, apart from the user's work, with one session per harness, each in its own probe folder. Start each harness with no model flag, so it runs on the default model the machine setup wrote.
 
 - **When `<session-host>` is `herdr`:** create one workspace named `live-check` with the probe root as its folder, one tab per harness, and run `herdr agent start <harness>-check --kind <kind> --pane <the tab's pane>` from that harness's probe folder. The kinds are `claude`, `codex`, `cursor`, `opencode` and `pi`. Wait for each agent to be idle before prompting it.
-- **Grok Bot:** no session host starts it, so its live check is a `gap`, as `grok-bot/desktop.md` > 'Checking it' says.
+- **Grok Bot:** no session host starts it, so its live check is a `gap`, as `grok-bot/desktop.md` > 'Verification' says.
 
 Start each harness so it doesn't stop to ask before a tool, when that is how the user runs it. Then only a guardrail can stop a command. Start Claude Code with `--allowedTools Bash Read`.
 

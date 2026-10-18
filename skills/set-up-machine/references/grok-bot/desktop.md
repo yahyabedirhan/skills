@@ -116,7 +116,7 @@ There is no model to set: the app picks it. When `setup/harnesses.json` names a 
 
 Memory and Auto-review rules can't be read from the box; connectors and routines are seen only through the app; no session host starts a Grok Bot session for the live check.
 
-## Checking it
+## Verification
 
 The verifier's Grok Bot row, from `scripts/setupmachine/harnesses/grok_bot/desktop.py`:
 

@@ -226,7 +226,7 @@ Rules alone let through flags after the operands (`git push origin main --force`
 - The keys and values under 'Installed support' were checked against Codex CLI 0.159.3 on 2026-10-01.
 - The `o_auth` login state and the portable bundle support under 'Codex MCP' were checked on Codex 0.162.1.
 
-## Checking it
+## Verification
 
 The verifier's Codex local rows, from `scripts/setupmachine/harnesses/codex/__init__.py`, reads the resolved Codex config home:
 

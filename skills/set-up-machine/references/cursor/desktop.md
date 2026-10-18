@@ -20,9 +20,9 @@ Present when `~/.cursor/argv.json` or `~/.cursor/extensions/` exists, or `cursor
 
 The app keeps its run mode and its model choice in its own settings, not in a file. Both cells are `n/a`. The declared Cursor config is the CLI's, as `cli.md` > 'Config' describes.
 
-## Checking it
+## Verification
 
-The verifier's `Cursor / desktop` row (`--harness cursor --env desktop`), from `scripts/setupmachine/harnesses/cursor/desktop.py`. The instructions, plugins and skills cells are the shared ones, as `index.md` > 'Checking it' describes.
+The verifier's `Cursor / desktop` row (`--harness cursor --env desktop`), from `scripts/setupmachine/harnesses/cursor/desktop.py`. The instructions, plugins and skills cells are the shared ones, as `index.md` > 'Verification' describes.
 
 - **guardrails:** the shared hook check only.
 - **sandbox:** `n/a`.

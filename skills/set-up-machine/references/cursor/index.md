@@ -34,7 +34,7 @@ Present when `~/.cursor/` holds a file or folder the IDE or CLI writes, such as 
   <the shared file, as it will be after this run>
   ```
 
-  Refresh it whenever the shared file changes. A `../global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The verifier checks it, as 'Checking it' describes.
+  Refresh it whenever the shared file changes. A `../global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The verifier checks it, as 'Verification' describes.
 - **Harness instructions:** when `<workstation-repo>`'s `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` holds what only Cursor needs. The section `../workstation.md` > `setup/harnesses.json` describes that entry. Write the file exactly like this:
 
   ```markdown
@@ -100,7 +100,7 @@ Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills
 
 The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses, as `SKILL.md` > 'What it can't see' describes.
 
-## Checking it
+## Verification
 
 The shared cells of the verifier's `Cursor / cli` and `Cursor / desktop` rows, from `scripts/setupmachine/harnesses/cursor/__init__.py`:
 
