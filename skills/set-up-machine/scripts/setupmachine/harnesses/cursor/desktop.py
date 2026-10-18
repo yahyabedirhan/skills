@@ -1,5 +1,5 @@
 """Cursor's desktop app, the IDE agent: it reads the same rules, hooks, MCP servers and skills as
-the CLI, but no permission lists and no run mode from a file (references/cursor/desktop.md).
+the CLI, but no permission lists and no run mode from a file (`references/cursor/desktop.md`).
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from ...checks import Cell, na, on_path
 
 ID, LABEL = "cursor", "Cursor"
 ENV = "desktop"
-# What the desktop app writes. cli-config.json is the CLI's.
+# What the desktop app writes. `cli-config.json` is the CLI's.
 MARKS = ("argv.json", "extensions")
 
 

@@ -1,6 +1,6 @@
 """The pre-tool hook's decision: what the rule rows say about one tool call.
 
-pre_tool_hook.py reads a harness's payload into a `ToolCall` (each harness module
+`pre_tool_hook.py` reads a harness's payload into a `ToolCall` (each harness module
 knows its own payload), then calls `decide` here. `decide` returns a `Verdict`:
 
 - **deny:** any part of the call a deny row covers refuses the whole call. The answer
@@ -14,7 +14,7 @@ knows its own payload), then calls `decide` here. `decide` returns a `Verdict`:
 - **allow**, a personal permission's level: named in the verdict, and the hook says nothing.
 
 The steps of `decide`: split a shell command into the simple commands the shell runs
-(commands.py), collect the files the call reads or writes, match every row against the
+(`commands.py`), collect the files the call reads or writes, match every row against the
 commands, files and MCP tool name, then sort the hits by level.
 
 The report folder is `report_dir` in `~/.config/agents/hook.json`, or

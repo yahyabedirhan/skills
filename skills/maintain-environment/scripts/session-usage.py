@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Token usage of a Claude Code session transcript, split into phases.
 
-usage: session-usage.py <transcript.jsonl> [--split HH:MM:SS ...]
+usage: `session-usage.py` <transcript.jsonl> [--split HH:MM:SS ...]
 
 Prints the user-message timestamps (to choose split points), then per phase:
 model calls, output tokens, cache reads, cache writes, uncached input.

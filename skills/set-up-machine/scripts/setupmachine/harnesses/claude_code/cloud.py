@@ -1,8 +1,8 @@
-"""Claude Code cloud sessions: one Anthropic-managed VM per session, a fresh clone of the repo, and the repo's own CLAUDE.md and `.claude/settings.json`, as references/claude-code/cloud.md describes.
+"""Claude Code cloud sessions: one Anthropic-managed VM per session, a fresh clone of the repo, and the repo's own `CLAUDE.md` and `.claude/settings.json`, as `references/claude-code/cloud.md` describes.
 
 Nothing in `~/.claude/` on the user's machine reaches the VM. The repo's SessionStart hook only installs the skills and tools; the agent then applies the setup itself, as the repo's cloud section tells it, and the repo's PreToolUse hook runs the pre-tool hook with `--harness claude-code`.
 
-When `~/.local/share/agents/environment-setup.json` exists, the cloud environment's setup script, which `<workstation-repo>` renders, set the session up instead: it wrote the user-level files before Claude Code launched, and the checks read those files. references/claude-code/cloud.md > *Environment setup* describes this setup.
+When `~/.local/share/agents/environment-setup.json` exists, the cloud environment's setup script, which `<workstation-repo>` renders, set the session up instead: it wrote the user-level files before Claude Code launched, and the checks read those files. `references/claude-code/cloud.md` > 'Environment setup' describes this setup.
 """
 from __future__ import annotations
 
@@ -16,10 +16,10 @@ from ...workstation import HARNESS_SECTION, section
 
 ID, LABEL = "claude-code", "Claude Code"
 ENV = "cloud"
-# The section of the repo's CLAUDE.md, or the AGENTS.md it reads, that the agent follows at start.
+# The section of the repo's `CLAUDE.md`, or the `AGENTS.md` it reads, that the agent follows at start.
 CLOUD_SECTION = "## Claude Code cloud specific instructions"
 PROJECT_SETTINGS = Path(".claude/settings.json")
-# Left by a cloud environment's setup script once it set the session up, as references/claude-code/cloud.md > *Environment setup* describes.
+# Left by a cloud environment's setup script once it set the session up, as `references/claude-code/cloud.md` > 'Environment setup' describes.
 ENVIRONMENT_MARKER = Path(".local/share/agents/environment-setup.json")
 CLOUD_RULES = FOLDER / "rules/cloud-instructions.md"
 
@@ -38,7 +38,7 @@ def environment_setup(home: Path) -> bool:
 
 
 def check_instructions(ctx) -> Cell:
-    """The repo installs on SessionStart, its instructions carry the cloud section, which points at the cloud instructions file, and the agent's own setup linked CLAUDE.md, turned memory off and wrote Claude Code's own instructions."""
+    """The repo installs on SessionStart, its instructions carry the cloud section, which points at the cloud instructions file, and the agent's own setup linked `CLAUDE.md`, turned memory off and wrote Claude Code's own instructions."""
     if environment_setup(ctx.home):
         return _environment_instructions(ctx)
     if ctx.setup.clone is None:
@@ -67,7 +67,7 @@ def check_instructions(ctx) -> Cell:
 
 
 def check_guardrails(ctx) -> Cell:
-    """A match-all PreToolUse group runs the installed pre_tool_hook.py: in ~/.claude/settings.json when the environment set the session up before launch, else in the repo's settings, since the agent's own ~/.claude/settings.json comes too late."""
+    """A match-all PreToolUse group runs the installed `pre_tool_hook.py`: in `~/.claude/settings.json` when the environment set the session up before launch, else in the repo's settings, since the agent's own `~/.claude/settings.json` comes too late."""
     if environment_setup(ctx.home):
         path = ctx.home / FOLDER / "settings.json"
     elif ctx.setup.clone is None:
@@ -99,7 +99,7 @@ def check_plugins(ctx) -> Cell:
 
 
 def check_skills(ctx) -> Cell:
-    """Each listed skill is in ~/.claude/skills or the repo's .claude/skills."""
+    """Each listed skill is in `~/.claude/skills` or the repo's .claude/skills."""
     folders = [ctx.home / FOLDER / "skills"]
     if ctx.setup.clone is not None:
         folders.append(ctx.setup.clone / FOLDER / "skills")
@@ -107,7 +107,7 @@ def check_skills(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """The model and the network level are picked on claude.ai, so a cloud config has no file to land in. The harness's shared config describes ~/.claude/settings.json on a machine, so it doesn't count here."""
+    """The model and the network level are picked on claude.ai, so a cloud config has no file to land in. The harness's shared config describes `~/.claude/settings.json` on a machine, so it doesn't count here."""
     own = ctx.setup.harness_files.get(ID, {}).get("environments", {}).get(ENV, {}).get("config")
     if own is None:
         return na("the model is picked when the session starts; no file on the VM holds it")
@@ -115,7 +115,7 @@ def check_config(ctx) -> Cell:
 
 
 def _environment_instructions(ctx) -> Cell:
-    """The environment's setup script linked CLAUDE.md, turned memory off and wrote Claude Code's own rules and the cloud rules, each matching its source."""
+    """The environment's setup script linked `CLAUDE.md`, turned memory off and wrote Claude Code's own rules and the cloud rules, each matching its source."""
     problems = [link_problem(ctx, ctx.home / FOLDER / "CLAUDE.md")]
     if (read_json(ctx.home / FOLDER / "settings.json") or {}).get("autoMemoryEnabled") is not False:
         problems.append(("FAIL", "autoMemoryEnabled isn't false in ~/.claude/settings.json"))
@@ -130,7 +130,7 @@ def _commands(settings: dict, event: str) -> list:
 
 
 def _cloud_section(clone: Path):
-    """The cloud section of the repo's CLAUDE.md, or of the AGENTS.md it links to or imports."""
+    """The cloud section of the repo's `CLAUDE.md`, or of the `AGENTS.md` it links to or imports."""
     claude = clone / "CLAUDE.md"
     texts = [claude.read_text()] if claude.is_file() else []
     agents = clone / "AGENTS.md"

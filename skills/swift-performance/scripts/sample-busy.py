@@ -3,8 +3,8 @@
 
 Usage:
   sample <pid> <seconds> -mayDie -file <path>       # record, once per state
-  sample-busy.py <path> [<path> ...]                # busy share of each file
-  sample-busy.py <path> --frames <binary> [--top N] # and the heaviest frames
+  `sample-busy.py` <path> [<path> ...]                # busy share of each file
+  `sample-busy.py` <path> --frames <binary> [--top N] # and the heaviest frames
                                                     # of <binary> on the main thread
 
 Busy is every main-thread sample not waiting in the run loop for its next

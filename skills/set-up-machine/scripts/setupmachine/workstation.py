@@ -10,7 +10,7 @@ or says there is none. This module reads the repo's `setup/` folder through it:
 
 The steps: read the pointer, read each file that exists, and record a problem that names
 the file for each one that is missing or malformed. The verifier prints those problems as
-FAIL lines. The hook uses only `personal_rows`. references/workstation.md is the format.
+FAIL lines. The hook uses only `personal_rows`. `references/workstation.md` is the format.
 """
 from __future__ import annotations
 
@@ -41,18 +41,18 @@ class Setup:
     clone_text: str = ""  # the clone path as the pointer writes it, such as `~/code/setup`
     problems: list = field(default_factory=list)  # one sentence per missing or malformed file
     rows: list = field(default_factory=list)  # personal permissions, as rule-table Rules
-    installs: dict = field(default_factory=dict)  # installs.json, or {} without it
+    installs: dict = field(default_factory=dict)  # `installs.json`, or {} without it
     # {harness: {"instructions" | "config": Path, "environments": {env: {"instructions" | "config": Path}}}}
     harness_files: dict = field(default_factory=dict)
 
     def plugins(self, harness: str) -> list:
-        """The installs.json plugin entries for this harness that apply to this machine's OS."""
+        """The `installs.json` plugin entries for this harness that apply to this machine's OS."""
         here = "darwin" if sys.platform == "darwin" else "linux"
         return [e for e in self.installs.get("plugins", [])
                 if harness in e["harnesses"] and (not e.get("os") or any(OSES.get(o) == here for o in e["os"]))]
 
     def file(self, harness: str, kind: str, env: str | None = None) -> Path | None:
-        """The environment's own file when harnesses.json names one, else the harness's shared one."""
+        """The environment's own file when `harnesses.json` names one, else the harness's shared one."""
         entry = self.harness_files.get(harness, {})
         own = entry.get("environments", {}).get(env, {}).get(kind) if env else None
         return own or entry.get(kind)
@@ -99,7 +99,7 @@ def read_pointer(home: Path) -> tuple:
 
 
 def personal_rows(home: Path, table: list) -> list:
-    """The personal permissions from setup/permissions.json; [] without a pointer, repo or file.
+    """The personal permissions from `setup/permissions.json`; [] without a pointer, repo or file.
 
     A malformed row, or an id the rule table already uses, raises RuleTableError.
     """
@@ -122,7 +122,7 @@ def personal_rows(home: Path, table: list) -> list:
 
 
 def shared_file_problems(setup: Setup, home: Path) -> list:
-    """How the shared file differs from what setup/instructions.md generates; [] when it matches.
+    """How the shared file differs from what `setup/instructions.md` generates; [] when it matches.
 
     Compared: the Tool column of the Environment defaults table (with the two roles the
     pointer fills), the tool glossaries after it, and the Working agreement, Glossary and
@@ -217,7 +217,7 @@ def _plain(cell: str) -> str:
     return cell[1:-1].strip() if len(cell) >= 2 and cell[0] == cell[-1] == "`" else cell
 
 
-# --- installs.json and harnesses.json ---------------------------------------------------
+# --- `installs.json` and `harnesses.json` ---------------------------------------------------
 
 
 def _json(path: Path, problems: list):
@@ -236,7 +236,7 @@ def _json(path: Path, problems: list):
 
 
 def _installs(path: Path, harness_ids: set, problems: list) -> dict:
-    """installs.json, with each plugin entry checked for the fields the verifier reads."""
+    """`installs.json`, with each plugin entry checked for the fields the verifier reads."""
     data = _json(path, problems)
     if not data:
         return {}
@@ -264,7 +264,7 @@ def _installs(path: Path, harness_ids: set, problems: list) -> dict:
 
 
 def _harness_files(clone: Path, harness_ids: dict, problems: list) -> dict:
-    """{harness: {kind: path, "environments": {env: {kind: path}}}} from harnesses.json. A harness's
+    """{harness: {kind: path, "environments": {env: {kind: path}}}} from `harnesses.json`. A harness's
     `environments` key holds what only one of its environments has; each path must be a file inside the repo."""
     path = clone / "setup/harnesses.json"
     data = _json(path, problems)

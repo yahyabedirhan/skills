@@ -31,7 +31,7 @@ REFERENCES = Path(__file__).resolve().parents[2] / "references"
 # The line of a generated hook file that names the hook command; the template holds a placeholder there.
 COMMAND_LINE = re.compile(r"^const COMMAND = (.*);$", re.M)
 LOCK = Path(".agents/.skill-lock.json")
-# Where an installed skill lives; the hook is wired to its copy there, as SKILL.md > *Wiring* describes.
+# Where an installed skill lives; the hook is wired to its copy there, as `SKILL.md` > 'Wiring' describes.
 INSTALLED_SKILLS = (".agents/skills", ".claude/skills")
 # Which native list a personal permission's entries go to, by the row's level.
 LISTS = {"deny": "deny", "ask": "ask", "allow-and-report": "allow", "allow": "allow"}
@@ -133,7 +133,7 @@ def generated_problem(ctx: Context, path: Path, want: str):
 
 
 def harness_instructions_problem(ctx: Context, harness: str, path: Path, front: str = "", env: str | None = None):
-    """The file holding what only `harness` needs matches the `## Instructions` section of the file setup/harnesses.json names for it, or for its environment `env` alone when given, under a marker naming that source; None when it does. With no source declared, a generated file left at `path` has outlived it."""
+    """The file holding what only `harness` needs matches the `## Instructions` section of the file `setup/harnesses.json` names for it, or for its environment `env` alone when given, under a marker naming that source; None when it does. With no source declared, a generated file left at `path` has outlived it."""
     source = ctx.setup.file(harness, "instructions") if env is None else (
         ctx.setup.harness_files.get(harness, {}).get("environments", {}).get(env, {}).get("instructions"))
     if source is None:
@@ -215,7 +215,7 @@ def declared_problems(ctx: Context, source: Path, declared, target: Path, actual
 
 
 def json_config_cell(ctx: Context, harness: str, label: str, target: Path, read=read_json, env=None) -> Cell:
-    """The config cell of a harness whose declared config is JSON: each declared key holds its value in `target`, read with `read`. n/a when setup/harnesses.json names no config for it."""
+    """The config cell of a harness whose declared config is JSON: each declared key holds its value in `target`, read with `read`. `n/a` when `setup/harnesses.json` names no config for it."""
     source = ctx.setup.file(harness, "config", env)
     if source is None:
         return na(f"setup/harnesses.json names no {label} config")
@@ -223,7 +223,7 @@ def json_config_cell(ctx: Context, harness: str, label: str, target: Path, read=
 
 
 def skill_problems(ctx: Context, folders: list) -> list:
-    """A problem per installs.json skills entry whose skills this harness can't see in its folders.
+    """A problem per `installs.json` skills entry whose skills this harness can't see in its folders.
 
     An entry naming skills wants each name. An entry without names wants every skill `~/.agents/.skill-lock.json` records from that source, and at least one.
     """

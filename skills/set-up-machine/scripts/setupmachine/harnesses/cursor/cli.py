@@ -1,6 +1,6 @@
 """Cursor's `cursor-agent` CLI: the checks only the CLI has, its permission lists, run mode and
-declared config in `~/.cursor/cli-config.json` (references/cursor/cli.md). The shared checks and
-the hook payload are in this package's __init__.py.
+declared config in `~/.cursor/cli-config.json` (`references/cursor/cli.md`). The shared checks and
+the hook payload are in this package's `__init__.py`.
 """
 from __future__ import annotations
 
@@ -35,5 +35,5 @@ def check_sandbox(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """Each key the declared Cursor config sets, such as `selectedModel`, has its value in cli-config.json."""
+    """Each key the declared Cursor config sets, such as `selectedModel`, has its value in `cli-config.json`."""
     return json_config_cell(ctx, ID, LABEL, ctx.home / FOLDER / "cli-config.json", env=ENV)

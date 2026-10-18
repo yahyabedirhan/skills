@@ -32,8 +32,8 @@ Found when `~/.cursor/` holds a file or folder the IDE or CLI writes, such as `c
   <the shared file, as it will be after this run>
   ```
 
-  Refresh it whenever the shared file changes. A `../global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The verifier checks it, as *Checking it* describes.
-- **Harness instructions:** when `<workstation-repo>`'s `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` holds what only Cursor needs. The section ../workstation.md > `setup/harnesses.json` describes that entry. Write the file exactly like this:
+  Refresh it whenever the shared file changes. A `../global-instructions.mdc` without that comment is someone else's: a `gap`, left alone. The verifier checks it, as 'Checking it' describes.
+- **Harness instructions:** when `<workstation-repo>`'s `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` holds what only Cursor needs. The section `../workstation.md` > `setup/harnesses.json` describes that entry. Write the file exactly like this:
 
   ```markdown
   ---
@@ -64,15 +64,15 @@ A native CLI deny: `Permission denied: Command blocked by permissions configurat
 
 ## Plugins
 
-The plugins setup area, from `plugins` in `setup/installs.json`, as the section ../workstation.md > `setup/installs.json` defines it.
+The plugins setup area, from `plugins` in `setup/installs.json`, as the section `../workstation.md` > `setup/installs.json` defines it.
 
-- **A bundle:** Cursor's CLI imports Claude Code's installed and enabled plugins, as the item cli.md > *Guardrails* > *Claude Code plugins Cursor imports* describes, and has no install command of its own. So a bundle reaches Cursor only through Claude Code: Installed and enabled in Claude Code proves readiness only, whether or not the entry lists `claude-code`; otherwise report a `FAIL` naming the Claude Code install. Inherit Claude Code's separate freshness checks and selected marketplace and plugin updates, as ../claude-code/index.md > *Plugins* describes. Mark it `present` only when those checks pass. Report an inherited unresolved freshness check as `gap`; do not reinstall or update unrelated bundles. Its MCP servers show up as `plugin-<plugin>-<server>`, from the plugin folder's `mcp.json` or `.mcp.json`. The CLI can't sign in an imported server that uses OAuth: `cursor-agent mcp login` knows only servers in an `mcp.json`, and the desktop app keeps its own sign-ins apart from the CLI's, as checked with `cursor-agent` 2026.10.01. When the CLI needs such a server, give Cursor a standalone entry for it instead of the bundle.
+- **A bundle:** Cursor's CLI imports Claude Code's installed and enabled plugins, as the item `cli.md` > 'Guardrails' > 'Claude Code plugins Cursor imports' describes, and has no install command of its own. So a bundle reaches Cursor only through Claude Code: Installed and enabled in Claude Code proves readiness only, whether or not the entry lists `claude-code`; otherwise report a `FAIL` naming the Claude Code install. Inherit Claude Code's separate freshness checks and selected marketplace and plugin updates, as `../claude-code/index.md` > 'Plugins' describes. Mark it `present` only when those checks pass. Report an inherited unresolved freshness check as `gap`; do not reinstall or update unrelated bundles. Its MCP servers show up as `plugin-<plugin>-<server>`, from the plugin folder's `mcp.json` or `.mcp.json`. The CLI can't sign in an imported server that uses OAuth: `cursor-agent mcp login` knows only servers in an `mcp.json`, and the desktop app keeps its own sign-ins apart from the CLI's, as checked with `cursor-agent` 2026.10.01. When the CLI needs such a server, give Cursor a standalone entry for it instead of the bundle.
 - **A standalone MCP server:** the entry's `server` under its `name` in `mcpServers` of `~/.cursor/mcp.json`, keeping every other key ([MCP](https://cursor.com/docs/context/mcp)). `present` when it matches, `added` when it's missing, `updated` when it differs. A global server needs no approval; one in a project's `.cursor/mcp.json` waits for `cursor-agent mcp enable`.
 - **Sign-in:** for the CLI, per project folder: the user runs `cursor-agent mcp login <name>` in the folder, then starts `cursor-agent` there, trusts the workspace and approves its MCP servers, and quits. `cursor-agent mcp list` then shows the server `ready`; before that it shows `requires_authentication` or `not loaded (needs approval)`. A global server in `~/.cursor/mcp.json` still needs that approval. For the desktop app's agent, the user connects each server in the app's MCP settings; that sign-in doesn't reach the CLI. An agent never signs in. On a headless machine the callback goes to `localhost:8787` there, which the user finishes with `curl` or an SSH tunnel.
 
 ## Skills
 
-Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills](https://cursor.com/docs/skills.md)). Skills installed into `~/.agents/skills` reach it with no extra install. Cursor doesn't copy `~/.agents/skills` to Cloud Agents or remote SSH sessions. A cloud agent is a separate environment, as cloud.md describes: its own install puts skills on that VM. Install each skill as the item ../workstation.md > `setup/installs.json` > *A skill* says.
+Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills](https://cursor.com/docs/skills.md)). Skills installed into `~/.agents/skills` reach it with no extra install. Cursor doesn't copy `~/.agents/skills` to Cloud Agents or remote SSH sessions. A cloud agent is a separate environment, as cloud.md describes: its own install puts skills on that VM. Install each skill as the item `../workstation.md` > `setup/installs.json` > 'A skill' says.
 
 ## Hook wiring
 
@@ -86,22 +86,22 @@ Cursor reads user skills from `~/.agents/skills` and `~/.cursor/skills` ([skills
     "preToolUse": [{"command": "<command>", "timeout": 10, "matcher": "^(Write|Delete|Grep)$"}]}}
   ```
 
-  with `<command>` = `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'`, where `<script>` is the path SKILL.md > *Wiring* gives. The `echo '{}'` matters: Cursor reads an empty answer as invalid JSON, which blocks. `preToolUse` names an MCP tool `MCP:<tool>` without its server, so MCP goes through `beforeMCPExecution`.
+  with `<command>` = `[ -f <script> ] && python3 <script> --harness cursor || echo '{}'`, where `<script>` is the path `SKILL.md` > 'Wiring' gives. The `echo '{}'` matters: Cursor reads an empty answer as invalid JSON, which blocks. `preToolUse` names an MCP tool `MCP:<tool>` without its server, so MCP goes through `beforeMCPExecution`.
 - **Audit:** `wired` when all four events run exactly that command; `verify.py` checks it. A handler running `pre_tool_hook.py` from another path is old wiring: `removed`.
 - **Input:** `beforeShellExecution` has `command` and `cwd`, which is often empty, so the hook falls back to `workspace_roots[0]`; `beforeMCPExecution` has `mcp_server_name` and `tool_name`; `beforeReadFile` has `file_path`; `preToolUse` has `tool_name` and `tool_input.file_path`, or `path` and `glob`. The session is `conversation_id`.
 - **Answer:** always JSON. A deny is `{"permission": "deny", "user_message": …, "agent_message": …}`, both the refusal; the CLI shows the agent `user_message`. Otherwise `{}`, which leaves the call to Cursor's permissions. The hook isn't `failClosed`: a crash or timeout lets the call through, and in the IDE nothing native is left underneath: a `gap`.
-- **Claude Code's hook runs here too,** as ../claude-code/index.md > *Hook wiring* describes: it refuses what it recognises and leaves the report to this one.
+- **Claude Code's hook runs here too,** as `../claude-code/index.md` > 'Hook wiring' describes: it refuses what it recognises and leaves the report to this one.
 
 ## Gaps
 
-The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses, as SKILL.md > *What it can't see* describes.
+The rows with no entry above, the ask rows, the exceptions the CLI refuses, the project override, and the hook's own misses, as `SKILL.md` > 'What it can't see' describes.
 
 ## Checking it
 
 The shared cells of the verifier's `Cursor / cli` and `Cursor / desktop` rows, from `scripts/setupmachine/harnesses/cursor/__init__.py`:
 
 - **instructions:** `~/.cursor/rules/global-instructions.mdc` is the header above the shared file, byte for byte. When `setup/harnesses.json` names Cursor's `instructions`, `~/.cursor/rules/harness-instructions.mdc` matches its source too. A missing or stale copy is `FAIL`, and so is a generated `harness-instructions.mdc` whose source is gone. A file without the generated comment is a `gap`, left alone.
-- **guardrails:** all four events in `~/.cursor/hooks.json` run the installed skill's existing `pre_tool_hook.py` with `--harness cursor`, wired as SKILL.md > *Wiring* describes.
+- **guardrails:** all four events in `~/.cursor/hooks.json` run the installed skill's existing `pre_tool_hook.py` with `--harness cursor`, wired as `SKILL.md` > 'Wiring' describes.
 - **sandbox:** `cli-config.json` has `approvalMode` `auto-review` and `sandbox.mode` `enabled`.
 - **plugins:** each bundle is installed and enabled in Claude Code. Each standalone server is in `~/.cursor/mcp.json`, equal to its entry.
 

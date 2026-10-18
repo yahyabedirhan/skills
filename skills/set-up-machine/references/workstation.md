@@ -110,14 +110,14 @@ The file `setup/harnesses.json` points at with a harness's `instructions`. It ho
 ```
 
 - **Copying:** everything under `## Instructions`, up to the next `## ` heading, is copied as it is into the harness's own instructions file. Other text is notes and stays in the repository. A file with no `## Instructions` section, or an empty one, is a `FAIL`.
-- **Where it goes:** Cursor's is `~/.cursor/rules/harness-instructions.mdc`, and Claude Code's is `~/.claude/rules/harness-instructions.md` on every environment, the cloud too. Each harness's index.md > *Global instructions* describes its file. Each header names the path `setup/harnesses.json` gives. A Cursor cloud agent reads its lines from the file itself at session start, through the repo `AGENTS.md` cloud section, and the verifier checks that section points at it, as cursor/cloud.md > *Instructions* describes. A Claude Code cloud session does the same, through the repo `CLAUDE.md` cloud section, as claude-code/cloud.md > *Instructions* describes. Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line. Grok Bot's lines go into its memory, as grok-bot/desktop.md describes.
+- **Where it goes:** Cursor's is `~/.cursor/rules/harness-instructions.mdc`, and Claude Code's is `~/.claude/rules/harness-instructions.md` on every environment, the cloud too. Each harness's `index.md` > 'Global instructions' describes its file. Each header names the path `setup/harnesses.json` gives. A Cursor cloud agent reads its lines from the file itself at session start, through the repo `AGENTS.md` cloud section, and the verifier checks that section points at it, as `cursor/cloud.md` > 'Instructions' describes. A Claude Code cloud session does the same, through the repo `CLAUDE.md` cloud section, as `claude-code/cloud.md` > 'Instructions' describes. Codex, opencode and Pi read the shared file through a link, so they have no place for it yet: an `instructions` entry for one of them is a `gap` line. Grok Bot's lines go into its memory, as grok-bot/desktop.md describes.
 - Never put a rule every harness needs here; it belongs in `setup/instructions.md`. Check every line against the team test in `global-instructions.md`.
 
 `verify.py` checks this file in the harness's `instructions` cell: `ok` when the generated file matches its source; `FAIL` when it is missing or differs, or when a generated file outlived its source; `gap` for a harness with no place yet, or a file of the same name the skill didn't write. A malformed `setup/harnesses.json`, or one that points at a missing file, fails the `setup` line. A generated file whose header names another path, such as one from before the source moved, differs, and the diff rewrites it.
 
 ### `setup/permissions.json`
 
-The person's own permission rows, such as allowing a tool they added, or refusing a command only they want refused. It has the rule table's format, `{"version": 1, "rules": [<row>, …]}`, and each row the fields and `match` kinds of a rule-table row, as SKILL.md > *Rule table* describes, with one more level:
+The person's own permission rows, such as allowing a tool they added, or refusing a command only they want refused. It has the rule table's format, `{"version": 1, "rules": [<row>, …]}`, and each row the fields and `match` kinds of a rule-table row, as `SKILL.md` > 'Rule table' describes, with one more level:
 
 - **`allow`:** the harness runs a call the row covers without a prompt, and the hook says nothing. On Codex the command also runs outside the sandbox, unreported, since Codex's only decision that skips the prompt is `allow`, as codex/index.md describes. Only a personal permission takes it; the rule table refuses it, since a generic rule never loosens a harness. Its `instruction` says how to go ahead, and its `covers` samples are calls it must allow.
 - **`deny`, `ask` and `allow-and-report`** work as in the rule table: the hook refuses a deny row's calls and reports an allow-and-report row's, and the harnesses' native entries ask.
@@ -168,7 +168,7 @@ The file `setup/harnesses.json` points at with `pi`'s `config`, such as `harness
 - A file that isn't a JSON object is a `FAIL`, and nothing from it is written.
 - Read `pi/cli.md` for the merge into `<agent-dir>/settings.json`, the backup and activation. Mark each declared key `personal` in the diff. Keep chosen values out of public reports, issues, pull requests and fixtures.
 
-`verify.py` checks each declared key in Pi's `config` cell, as *A declared config* says; a `packages` key there is a `gap`.
+`verify.py` checks each declared key in Pi's `config` cell, as 'A declared config' says; a `packages` key there is a `gap`.
 
 ### `setup/installs.json`
 

@@ -1,6 +1,6 @@
 """Claude Code's CLI, in a terminal or an IDE extension: the checks only the CLI row has, its
-sandbox and its declared config in `~/.claude/settings.json` (references/claude-code/cli.md). The
-shared checks and the hook payload are in this package's __init__.py.
+sandbox and its declared config in `~/.claude/settings.json` (`references/claude-code/cli.md`). The
+shared checks and the hook payload are in this package's `__init__.py`.
 """
 from __future__ import annotations
 
@@ -25,5 +25,5 @@ def check_sandbox(ctx) -> Cell:
 
 
 def check_config(ctx) -> Cell:
-    """Each key the declared config sets, such as `model`, has its value in ~/.claude/settings.json."""
+    """Each key the declared config sets, such as `model`, has its value in `~/.claude/settings.json`."""
     return _config(ctx, ENV)
