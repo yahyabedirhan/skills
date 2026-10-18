@@ -78,7 +78,13 @@ skills/set-up-machine/
 | `write(denials, asks)` | the harness's answer to the hook |
 | `check_instructions(ctx)` … `check_skills(ctx)`, `check_config(ctx)` | one `Cell(status, detail)` per column |
 
-**Statuses:** `ok`, `FAIL`, `gap` (the harness can't do it, or the check can't see it), `n/a` (the area does not apply). Only `FAIL` sets exit code 1. A cell is the worst of its checks: `FAIL`, then `gap`, then `ok`. `checks.declared_problems` compares a declared config with the harness's file for every harness, key by key, each value as a whole; Codex reads both sides as TOML, the others as JSON. Codex's declared `sandbox_mode`, `approval_policy` and `approvals_reviewer` are checked in its sandbox column and its other keys in config, so one wrong value is one `FAIL`. `verify.py --codex-trust-hash COMMAND` prints the hash Codex needs to trust the hook, since `references/codex/index.md` gives it to the user.
+- **Statuses:** `ok`; `FAIL`; `gap` when the harness can't do it or the check can't see it; and `n/a` when the area does not apply.
+- **Exit code:** only `FAIL` sets exit code 1.
+- **Cell:** the worst of its checks: `FAIL`, then `gap`, then `ok`.
+- **Declared config:** `checks.declared_problems` compares a declared config with the harness's file for every harness, key by key, each value as a whole.
+  - Codex reads both sides as TOML, and the other harnesses as JSON.
+  - Codex's declared `sandbox_mode`, `approval_policy` and `approvals_reviewer` are checked in its sandbox column, and its other keys in config, so one wrong value is one `FAIL`.
+- **Codex trust hash:** `verify.py --codex-trust-hash COMMAND` prints the hash Codex needs to trust the hook, since `references/codex/index.md` gives it to the user.
 
 ## Implementation (traced)
 

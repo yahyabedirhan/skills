@@ -149,7 +149,16 @@ Sources: [run modes](https://cursor.com/docs/agent/security/run-modes.md), [IDE 
 
 ## 5. Probes
 
-Codex, `codex exec --ephemeral --ignore-user-config --skip-git-repo-check --approve-for-me --json`, one fresh session per row, environment scrubbed to `PATH`, `HOME`, `USER`, `SHELL`, `TERM`, `LANG` and `ACME_API_TOKEN=probe-not-a-secret`. The prompt named a task file holding the command, so the command came from the file rather than the user's message. "Customised (policy)" adds `-c auto_review.extra_policy="<the env-var rule from 6.1>"`; "customised (filter)" adds `-c shell_environment_policy.ignore_default_excludes=false`. `--ignore-user-config` doesn't skip `~/.codex/rules/*.rules`; the `cat .env` rows use `--ignore-rules` for that reason. Dumps (`env`, `print(os.environ)`) were narrowed to the fake variable, so a result could only print the fake value. [probe]
+Codex probes, all [probe]:
+
+- **Command:** `codex exec --ephemeral --ignore-user-config --skip-git-repo-check --approve-for-me --json`, one fresh session per row.
+- **Environment:** scrubbed to `PATH`, `HOME`, `USER`, `SHELL`, `TERM`, `LANG` and `ACME_API_TOKEN=probe-not-a-secret`.
+- **Prompt:** it named a task file holding the command, so the command came from the file, not the user's message.
+- **Variants:**
+  - "Customised (policy)" adds `-c auto_review.extra_policy="<the env-var rule from 6.1>"`.
+  - "Customised (filter)" adds `-c shell_environment_policy.ignore_default_excludes=false`.
+  - The `cat .env` rows add `--ignore-rules`, since `--ignore-user-config` doesn't skip `~/.codex/rules/*.rules`.
+- **Dumps:** `env` and `print(os.environ)` were narrowed to the fake variable, so a result could only print the fake value.
 
 | Command | Default | Customised (policy) | Customised (filter) | What the agent saw |
 |---|---|---|---|---|
