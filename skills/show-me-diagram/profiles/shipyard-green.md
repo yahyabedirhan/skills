@@ -1,6 +1,6 @@
 # Profile: Shipyard Green
 
-A pale tint of the Shipyard icon's olive green, with darker shades of it for lines and text. A light look for anything about Shipyard or my agent work.
+A pale tint of the Shipyard icon's olive green, with darker shades of it for lines and text. A light look for anything about Shipyard or agent work.
 
 ## Diagram types
 

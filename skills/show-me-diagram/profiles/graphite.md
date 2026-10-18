@@ -1,6 +1,6 @@
 # Profile: Graphite
 
-The look of the Swift Lab, Shipyard and skills logos: folded white paper on a dark granite tile. Use it for anything shown beside those apps, or for a crafted dark diagram on a website.
+The look of the Shipyard and skills logos: folded white paper on a dark granite tile. Use it for anything shown beside those apps, or for a crafted dark diagram on a website.
 
 ## Diagram types
 
@@ -19,7 +19,7 @@ Only the focal elements fold, so the folds stay a signal, like the accent they r
 - **Frame:** draw a double rim inside the tile's edge, as the logos do. The outer rim is 1px white at 32% opacity at the top, fading to 8% at the bottom. The inner rim sits 8px inside it, at 14% fading to 3%. Keep the corners concentric: radius 12 for the tile, 10 for the outer rim and 2 for the inner rim.
 - **Nodes:** crisp paper. Give step nodes corner radius 2 and type tags radius 0. Keep the upstream pill for start and end nodes, since the shape tells them apart. Fill ordinary nodes with `paper-2` and outline them in `line`. The fill matches the top of the tile, so the outline carries the edge.
 - **Focal nodes:** fold them. Fill the node with `accent` (white), with no outline. Set its name and sublabel in `paper`, and its secondary text, such as a description or a phase label, in `fold-muted`. Cut the top-right corner as a 14px dog-ear: a right triangle in `shade`, with the cut edge at 45°.
-- **Focal arrows:** end them with a folded arrowhead, at least 14 × 12: a triangle split along its axis, one half in `shade` and the other in `accent`, as in the Swift Lab icon. A smaller head hides the split.
+- **Focal arrows:** end them with a folded arrowhead, at least 14 × 12: a triangle split along its axis, one half in `shade` and the other in `accent`, as in the logos. A smaller head hides the split.
 - **Callouts:** upright, not italic.
 
 ## Palette

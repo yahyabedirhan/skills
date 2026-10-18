@@ -42,7 +42,7 @@ Entries the app learned from the user's edits have `source: user_edits`, and `ob
 
 When the user says a word came out wrong ("I said skill, it wrote SQL"), fix it in the same turn:
 
-1. `count` both forms with no window, which covers the full history, to see whether the wrong form is also a word the user means. SQL was: several dictations meant it.
+1. `count` both forms with no window, which covers the full history, to see whether the wrong form is also a word the user means, as SQL is for a user who works with databases.
 2. Choose the fix:
    - **If the intended word is missing:** add it as a word with `--restart`.
    - **If the word is there and the wrong form still turns up since it was added:** propose a rule instead.
@@ -51,7 +51,7 @@ When the user says a word came out wrong ("I said skill, it wrote SQL"), fix it 
 
 ## Finding transcription mistakes
 
-Look for the words speech recognition gets wrong most, and more so with a non-native accent: names of people, companies, products, tools, and CLI commands.
+Look for the words speech recognition gets wrong most: names of people, companies, products, tools, and CLI commands.
 
 1. **Read** the dictionary, the `terms` table and the `--diff` history for the window, the last 24 hours by default. Then read every dictation in the window, raw and formatted: `terms` and `--diff` miss mishearings that came out as ordinary words the formatter left unchanged ("verb tree", "two PR").
    - **When the user names a window:** use that window instead.
@@ -80,12 +80,12 @@ Look for the words speech recognition gets wrong most, and more so with a non-na
    ```
 
    Leave out anything already in the dictionary.
-   - **When an entry is still being misheard after it was added:** it moves to **Rules to add** ("`CLI` is a word since 09-28, heard as Sila twice since").
+   - **When an entry is still being misheard after it was added:** it moves to **Rules to add** ("`CLI` is a word, yet heard as Sila twice since it was added").
    - **When a section is empty:** drop it.
 6. **Write** only after the user approves the list. Put the approved entries in a JSON file:
 
    ```json
-   [{"phrase": "Teamtailor"}, {"phrase": "work tree", "replacement": "worktree"}, {"phrase": "my site", "replacement": "https://example.com", "snippet": true}]
+   [{"phrase": "Figma"}, {"phrase": "work tree", "replacement": "worktree"}, {"phrase": "my site", "replacement": "https://example.com", "snippet": true}]
    ```
 
    Dry-run it with `dict add --file <file> --dry-run`, tell the user Wispr Flow will close for a few seconds, write it with `dict add --file <file> --restart`, and give the user the batch id.

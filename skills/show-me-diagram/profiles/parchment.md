@@ -1,6 +1,6 @@
 # Profile: Parchment
 
-Warm parchment paper, dark ink and a red accent, after the paper in Explainer Studio's paper-blueprint look. For a story or a process.
+Warm parchment paper, dark ink and a red accent, in a paper-blueprint look. For a story or a process.
 
 ## Diagram types
 
@@ -28,7 +28,7 @@ Upstream defaults. Red only on the 1 or 2 focal nodes.
 | `accent-tint` | `rgba(217,83,63,0.12)` |
 | `link` | `#2f5d8a` |
 
-The accent is Explainer Studio's red `#d9533f`, darkened to clear 4.5:1 as text on the paper.
+The accent is the red `#d9533f`, darkened to clear 4.5:1 as text on the paper.
 
 ## Typography
 
