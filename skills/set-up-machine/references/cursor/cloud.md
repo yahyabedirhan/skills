@@ -54,7 +54,7 @@ The wiring is `/agent/.cursor/hooks.json`, which the Build writes, as *Guardrail
 
 ## Gaps
 
-Network mode, dashboard MCP servers, and whether a skill installed before the process started is offered as a slash command. `beforeMCPExecution` does not run. A cold start is a new VM, which this check cannot start. Whether a file under `/agent` written during the Build survives into the Build snapshot has not been observed.
+Network mode, dashboard MCP servers, and whether a skill installed before the process started is offered as a slash command, such as one installed during the Build on a cold start. `beforeMCPExecution` does not run. A cold start is a new VM, which this check cannot start. Whether a file under `/agent` written during the Build survives into the Build snapshot has not been observed.
 
 ## Checking it
 
@@ -67,4 +67,4 @@ The verifier's `Cursor / cloud` row (`verify.py --harness cursor --env cloud`), 
 - **skills:** each listed skill is in `~/.cursor/skills`, `~/.agents/skills`, or the repo's `.cursor/skills` or `.agents/skills`.
 - **config:** each `secrets` name is set in the real home, by name only. An empty list is `ok`. An unknown key is a `gap`. `n/a` without a declared config.
 
-On a cloud VM, after the install and the agent's own setup: `rm -rf x` is refused by the hook, and `git status` is allowed. A skill added after the process started is readable as a file and is not a slash command in that process. Whether a skill installed during the Build is a slash command on a cold start has not been observed.
+On a cloud VM, after the install and the agent's own setup: `rm -rf x` is refused by the hook, and `git status` is allowed. A skill added after the process started is readable as a file and is not a slash command in that process.

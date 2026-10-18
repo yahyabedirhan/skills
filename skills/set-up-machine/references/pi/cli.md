@@ -103,7 +103,7 @@ The plugins setup area, from `plugins` in `setup/installs.json`, as ../workstati
 - **Gaps:**
   - A trusted project's `.pi/settings.json` `packages` and `.pi/mcp.json` servers replace a global entry of the same extension or name in that project.
   - An extension that registers `/mcp`, such as `pi-mcp-adapter`, replaces the built-in MCP client, and Pi then ignores `mcp.json`. The verifier doesn't detect this.
-  - The structured list does not yet take local package paths. For independent directory packages, retain a clone on each machine, update it to latest default-branch code without discarding local work, and install each package directory by its resolved absolute path. Record the commit deployed as history only. Report the missing structured verification support; never replace independent packages with an overlapping root bundle.
+  - The structured list doesn't take local package paths. For independent directory packages, retain a clone on each machine, update it to latest default-branch code without discarding local work, and install each package directory by its resolved absolute path. Record the commit deployed as history only. Report the missing structured verification support; never replace independent packages with an overlapping root bundle.
 
 ## Skills
 

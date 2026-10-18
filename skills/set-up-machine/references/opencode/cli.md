@@ -67,7 +67,7 @@ set-up-machine declares no sandbox setting for opencode, so the verifier's `sand
 
 ## Plugins
 
-A `gap`: set-up-machine doesn't deliver `plugins` entries, which ../workstation.md > the section `setup/installs.json` defines, to opencode yet. Its own docs name how it takes plugins and MCP servers; until a section here says how, an entry that lists `opencode` makes the verifier's `plugins` cell a `gap`.
+A `gap`: set-up-machine doesn't deliver `plugins` entries, which ../workstation.md > the section `setup/installs.json` defines, to opencode, so an entry that lists `opencode` makes the verifier's `plugins` cell a `gap`.
 
 ## Skills
 

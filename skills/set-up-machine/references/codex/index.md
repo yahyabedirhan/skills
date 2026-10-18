@@ -107,7 +107,7 @@ The inspected CLI was 0.159.3 on 2026-10-01. That snapshot supported:
 | `model` | a model the installed CLI offers |
 | `model_reasoning_effort` | a level the installed CLI accepts for that model |
 
-Treat the snapshot as evidence to recheck, not a permanent version gate. Explicit `untrusted` is unsupported and `on-failure` deprecated in this version. Codex also supports granular approval policies, but this initial private source accepts scalar policies only. Report a granular source as unsupported; preserve an existing granular target policy and report the need for review.
+Treat the snapshot as evidence to recheck, not a permanent version gate. Explicit `untrusted` is unsupported and `on-failure` deprecated in this version. Codex also supports granular approval policies, but the declared config accepts scalar policies only. Report a granular source as unsupported; preserve an existing granular target policy and report the need for review.
 
 ### Propose and apply
 
