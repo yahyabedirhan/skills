@@ -22,7 +22,7 @@ Each environment page says when its row is found. Every setting below lives in o
 
 - Claude Code reads `~/.claude/CLAUDE.md` in every session, and follows a symlink; it has no global `AGENTS.md`.
 - `~/.claude/CLAUDE.md` becomes a **symlink to the shared file**, `~/.config/agents/AGENTS.md`, so the shared file is the one source and Claude Code reads it as written. It's `present` once it's that link.
-- Link it only once nothing in the old file would be lost: every other line is `extra` until it moves into the shared file, as ../global-instructions.md > *Moving a harness's file* describes. The old file is `removed`, and backed up. A file holding only `@~/.config/agents/AGENTS.md`, this skill's earlier form, is `removed` and becomes the link.
+- Link it only once nothing in the old file would be lost: every other line is `extra` until it moves into the shared file, as ../global-instructions.md > *Moving a harness's file* describes. The old file is backed up and `removed`. A file holding only `@~/.config/agents/AGENTS.md`, this skill's earlier form, is `removed` and becomes the link.
 
 - **Harness instructions:** when `<workstation-repo>`'s `setup/harnesses.json` names Claude Code's `instructions`, `~/.claude/rules/harness-instructions.md` holds what only Claude Code needs. The section ../workstation.md > `setup/harnesses.json` describes that entry. Claude Code loads every user-level rule file in `~/.claude/rules/` in every project, before project rules; one without `paths` frontmatter applies to every file ([memory](https://code.claude.com/docs/en/memory#user-level-rules)). Write it exactly like this:
 
@@ -36,8 +36,8 @@ Each environment page says when its row is found. Every setting below lives in o
 
 ### Memory
 
-- Auto memory is on by default and writes `~/.claude/projects/<project>/memory/`. Set `"autoMemoryEnabled": false`, and list every file under `~/.claude/projects/*/memory/` as `removed`, backed up first.
-- **Gap:** a project's `.claude/settings.json` can set `autoMemoryEnabled: true` and win, and `/set-up-project`'s audit checks it; `CLAUDE_CODE_DISABLE_AUTO_MEMORY` outranks the key for one session.
+- Auto memory is on by default and writes `~/.claude/projects/<project>/memory/`. Set `"autoMemoryEnabled": false`, back up every file under `~/.claude/projects/*/memory/`, and list each as `removed`.
+- **Gap:** a project's `.claude/settings.json` can set `autoMemoryEnabled: true` and win. `/set-up-project`'s audit checks for that. `CLAUDE_CODE_DISABLE_AUTO_MEMORY` outranks the key for one session.
 
 ## Guardrails
 
@@ -66,9 +66,9 @@ Each environment page says when its row is found. Every setting below lives in o
 
 - A `read` row becomes `Read(<path>)`, a `write` row `Edit(<path>)`. Project paths get `./` (`./**/.env`), `~/` paths stay as they are, and an absolute path gets a second `/` (`Read(//proc/**/environ)`), because Claude Code reads `/path` as relative to the settings file. A path with no `/` after the `./` matches at any depth, as in `.gitignore`: `Read(./.env.*)` refuses `sub/.env.local` too. A `Read` deny also blocks edits.
 - **Only `Edit(...)`, never `Write(...)`.** Claude Code never checks a `Write(...)` deny, and warns at startup for each one: "Use Edit(**/.env) instead (Edit rules cover all file-editing tools)". The Cursor CLI gets its `Write(...)` entries in its own `cli-config.json`, as ../cursor/cli.md > *Guardrails* describes. An existing `Write(...)` entry, such as `Write(**/.env)` from an older run, is this skill's own outdated wiring: `removed`.
-- **No negation.** Globs have positive character classes only, so `[!e]` lists `!` and `e`. They are matched case-insensitively on macOS. So an `except` of literal names becomes the globs around them. For `**/.env.*` minus `.env.example`, `.env.sample` and `.env.template`:
+- **No negation.** Globs have positive character classes only: `[!e]` matches `!` or `e`. On macOS they match without case. An `except` of literal names therefore becomes the globs around them. For `**/.env.*` minus `.env.example`, `.env.sample` and `.env.template`:
   - each name the literals start with but none of them is: `.env.`, `.env.e`, `.env.ex`, … `.env.exampl`, `.env.s`, … `.env.templat`;
-  - after each of those, a class of every letter in both cases, every digit, `_` and `.` except the literals' next letters, then `*`: `.env.[0-9A-DF-RU-Za-df-ru-z_.]*`, without `e`, `s` and `t`, and `.env.exa[0-9A-LN-Za-ln-z_.]*`, without `m`;
+  - after each of those, a class of every letter in both cases, every digit, `_` and `.` except the literals' next letters, then `*`: `.env.[0-9A-DF-RU-Za-df-ru-z_.]*`, which leaves out `e`, `s` and `t`, and `.env.exa[0-9A-LN-Za-ln-z_.]*`, which leaves out `m`;
   - each literal followed by more: `.env.example?*`.
 
   A name that leaves the literals through any other character, and a glob exception such as `**/.env*.md`, stay refused natively; the hook leaves them open. An entry on the machine that refuses an exception, such as `Read(./.env.*)` refusing `.env.example`, is `extra`, with a note that the user removes it to open the exception.
@@ -76,7 +76,7 @@ Each environment page says when its row is found. Every setting below lives in o
 ### MCP-tool rows
 
 - Tools are named `mcp__<server>__<tool>`; a claude.ai connector shows as `mcp__claude_ai_<Name>__<tool>` in the CLI.
-- **List the tools:** in an empty folder, run `claude -p "List nothing." --output-format stream-json --verbose --tools "" --no-session-persistence --max-turns 1` and read the `tools` of the first event with `"type": "system", "subtype": "init"`; stop it there, before it calls the model. No output, from a CLI that isn't logged in or isn't installed, is a `gap`: keep the MCP entries already there.
+- **List the tools:** in an empty folder, run `claude -p "List nothing." --output-format stream-json --verbose --tools "" --no-session-persistence --max-turns 1` and read the `tools` of the first event with `"type": "system", "subtype": "init"`; stop it there, before it calls the model. When the CLI isn't logged in or isn't installed, there is no output, and that is a `gap`: keep the MCP entries already there.
 - Each row's `server` and `tool` regexes pick the names, ignoring case; each match is an exact entry in the row's list, and a `found` line names them. A denied MCP tool is removed from the session.
 - **Ask rows:** an answer of "Yes, don't ask again" writes an `allow` entry into the project's `.claude/settings.local.json`, and the user-level `ask` entry still wins over it, since ask is evaluated before allow.
 - **`approver: "user"` rows:** the [auto mode docs](https://code.claude.com/docs/en/auto-mode-config) say an ask rule is checked before the classifier and still prompts, and `dontAsk` denies every call that would prompt; the docs don't say what `bypassPermissions` does with an ask rule, or what a non-interactive `claude -p` run does. The hook reads `permission_mode` and refuses the row's calls in `auto`, `dontAsk` and `bypassPermissions`: a `gap` line for auto mode, to drop once a probe shows its ask entries reach the user, and one for `claude -p`.
@@ -145,7 +145,7 @@ The hook's own misses are in SKILL.md, *What it can't see*.
 The checks both local rows run, from `scripts/setupmachine/harnesses/claude_code/__init__.py`. Each environment page lists its own row:
 
 - **instructions:** `~/.claude/CLAUDE.md` is a link to the shared file, `autoMemoryEnabled` is `false`, and `~/.claude/rules/harness-instructions.md` matches the `instructions` file `setup/harnesses.json` names for Claude Code, as *Global instructions* describes. The generated file is a `FAIL` when it is missing, stale, or outlived its source.
-- **guardrails:** a match-all `PreToolUse` group runs the installed skill's existing `pre_tool_hook.py`, as SKILL.md > *Wiring* describes, with `--harness claude-code`. `disableAllHooks` isn't `true`, and each personal permission has its entry, as *Personal permissions* describes.
+- **guardrails:** a match-all `PreToolUse` group runs the installed skill's existing `pre_tool_hook.py` with `--harness claude-code`, wired as SKILL.md > *Wiring* describes. `disableAllHooks` isn't `true`, and each personal permission has its entry, as *Personal permissions* describes.
 - **plugins:** each bundle is in `installed_plugins.json` and enabled in `enabledPlugins`. A standalone MCP server is a `gap`.
 - **skills:** each listed skill is in `~/.claude/skills`.
 
