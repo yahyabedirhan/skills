@@ -25,7 +25,7 @@ description: Lease, list, return and destroy git worktrees with `treehouse`'s pr
 | Need | Command | Notes |
 |---|---|---|
 | A durable worktree for an effort | `treehouse get --lease --json --lease-holder <effort> -b <branch>` | Returns the path and lease identity. |
-| See the pool | `treehouse status --json` | Reports leases and the processes `return` would terminate. |
+| See the pool | `treehouse status --json` | Reports leases and the processes `return` would terminate; it leaves out the caller and processes whose location it can't read. |
 | Give an empty worktree back | `treehouse return <path> --if-lease-id <id> --if-lease-holder <holder>` | Guards the lease; terminates the worktree's processes. |
 | Preview removal for good | `treehouse destroy <exact-path>` | Dry run; `--yes` removes. |
 
