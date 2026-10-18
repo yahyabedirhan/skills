@@ -11,7 +11,7 @@ To design inside one service's codebase, at the level of its modules, classes an
 
 To design a command-line interface's commands, flags, output and help, use `/cli-design`.
 
-## Flow
+## Steps
 
 1. **Read what the session is for** from the request and its context, and restate it in one line before starting, so a misreading costs one reply.
    - **Invoked inside a project with no instructions:** explain that project's current design.

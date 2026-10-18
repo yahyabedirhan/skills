@@ -84,7 +84,7 @@ Spark reads Spark Desktop's local copy of the mail. The Gmail connector is Googl
 | A category: priority, personal, invitation, notification, newsletter | Spark's own; no Gmail tool changes it. |
 | Today, Last week, a month | Each email's date. |
 
-## Flow
+## Steps
 
 When setting either tool up, checking the deny and ask rules, or when a call fails on sign-in or permission, follow `setup.md`.
 

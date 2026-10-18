@@ -13,7 +13,7 @@ The recurring failure is **drift**: each command added on its own terms, until t
 
 To design the code behind the commands, at the level of its modules, classes and folders, use `/low-level-design`. For a networked API, use `/system-design`.
 
-## Flow
+## Steps
 
 1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing a new CLI or new commands, explaining or auditing an existing one, redesigning it, or deciding one question.
    - **Invoked inside a project with a CLI and no instructions:** explain and audit that CLI.

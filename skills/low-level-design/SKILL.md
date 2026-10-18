@@ -11,7 +11,7 @@ The recurring failure is structure added before it is needed: factories with one
 
 To design a system at the level of services, data stores, APIs and scale, use `/system-design`. To design a command-line interface's commands, flags, output and help, use `/cli-design`.
 
-## The flow
+## Steps
 
 1. **Restate the session's purpose in one line**, read from the request and its context, so a misreading costs one reply: designing something new, explaining existing code, redesigning it, deciding one thing, or a mix.
    - **Invoked with no instructions inside a project:** write down that project's current design.
