@@ -4,15 +4,15 @@ The cloud environment of Claude Code. This page says what a cloud session is, ho
 
 ## The environment
 
-### What a session is
+### Cloud VM runtime
 
 One Anthropic-managed Ubuntu VM per session, with a fresh clone of the repo. It starts from claude.ai/code, the Claude app, the desktop app's **Cloud** choice or `claude --cloud`. Docs: [cloud environments](https://code.claude.com/docs/en/cloud-environments), [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), [hooks](https://code.claude.com/docs/en/hooks).
 
-### Finding it
+### Cloud session detection
 
 Found when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and a machine never does. A `--home` fixture on the VM is still found. On the VM the CLI row is not found, even though `claude` is on `PATH`.
 
-### What reaches the VM
+### Files reaching the VM
 
 - **Repo:**
   - `CLAUDE.md`, `.mcp.json`, `.claude/rules/`, `.claude/skills/`, `.claude/agents/` and `.claude/commands/`.
@@ -23,7 +23,7 @@ Found when `CLAUDE_CODE_REMOTE=true`, which a cloud VM sets and a machine never 
 - **claude.ai account:** its enabled skills and connectors.
 - **Cloud environment:** what its setup script leaves on disk, its environment variables, and its network secrets through the proxy.
 
-## Setting up a session
+## Setup routes
 
 A cloud session is set up in one of two ways, and `~/.local/share/agents/environment-setup.json` tells them apart:
 
@@ -103,7 +103,7 @@ Each listed skill in `~/.claude/skills` or the repo's `.claude/skills`. Skills e
 
 The model is picked when the session starts, and environment variables and network secrets are set on the environment. A cloud `config` in `setup/harnesses.json` has no file to land in: each key is a `gap`. The harness's shared config describes `~/.claude/settings.json` on a machine and doesn't apply here.
 
-## Checking it
+## Verifier checks
 
 The verifier's `Claude Code / cloud` row (`verify.py --harness claude-code --env cloud`), from `scripts/setupmachine/harnesses/claude_code/cloud.py`:
 
