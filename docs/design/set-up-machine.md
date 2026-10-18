@@ -3,7 +3,7 @@
 How `set-up-machine` is built. A newcomer needs three facts first:
 
 - The **agent** sets up a machine. It reads the workstation repo's `setup/` and one reference per harness, proposes one diff, and writes it. No script writes a harness file.
-- Two scripts exist. The **hook** (`scripts/pre_tool_hook.py`) runs before every tool call and refuses what the rule table denies. The **verifier** (`scripts/verify.py`) reads the machine and prints one table: a harness environment on each row, a setup area in each of five columns, and the declared config in a sixth.
+- Three scripts exist. The **cloud bootstrap** (`scripts/cloud_bootstrap.py`) leaves a cloud session the steps to set itself up, and sets nothing up itself. The **hook** (`scripts/pre_tool_hook.py`) runs before every tool call and refuses what the rule table denies. The **verifier** (`scripts/verify.py`) reads the machine and prints one table: a harness environment on each row, a setup area in each of five columns, and the declared config in a sixth.
 - `scripts/setupmachine/harnesses/__init__.py` holds `ALL`, the one list of harness environments. Everything about one harness sits in `harnesses/<harness>/` and `references/<harness>/`: one module and one page per environment, and the shared code and page beside them.
 
 ## Requirements
@@ -51,6 +51,7 @@ skills/set-up-machine/
 │   ├── remote-machine.md, new-remote-machine.md
 │   # opencode/opencode-plugin.js, pi/pi-extension.ts: the hook's wiring files for those harnesses
 └── scripts/
+    ├── cloud_bootstrap.py      # cloud setup script: leaves the agent the bootstrap steps and one allow rule
     ├── pre_tool_hook.py        # entry: payload in → decide → the harness's answer out
     ├── verify.py               # entry: global checks, the table, the exit code
     └── setupmachine/
