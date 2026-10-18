@@ -77,7 +77,7 @@ The cloud environment's setup script, which `<workstation-repo>` renders, sets t
   - the same files the agent writes in 'Instructions';
   - `~/.claude/rules/cloud-instructions.md`, from the cloud `instructions` file;
   - a match-all `PreToolUse` hook in `~/.claude/settings.json`;
-  - that marker file, last.
+  - `~/.local/share/agents/environment-setup.json`, the marker that tells the two routes apart, last.
 
 - **Gap:** the docs say a cloud session doesn't read `~/.claude/settings.json` and runs hooks only from the repo and server-managed settings ([settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions)). A script-written `~/.claude/CLAUDE.md` is documented to load. Whether the script-written hook fires is not tested.
 - **Re-setup:** when that marker exists, `<workstation-repo>`'s cloud instructions name the command that applies the setup again. Run it instead of writing the files by hand. It changes only the current VM, so read the new instructions and rule files for the rest of the session; new sessions start from the environment's snapshot.

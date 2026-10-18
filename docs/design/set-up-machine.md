@@ -72,7 +72,7 @@ skills/set-up-machine/
 | Name | What it is |
 |---|---|
 | `ID`, `LABEL` | `"cursor"`, `"Cursor"`: the harness, the same for each of its environments; the key in `setup/harnesses.json` and `installs.json`, and the hook's `--harness` |
-| `ENV` | `"cloud"`: the environment, what `--env` selects; the row reads `Cursor / cloud`. A module not yet split has no `ENV` |
+| `ENV` | `"cloud"`: the environment, what `--env` selects; the row reads `Cursor / cloud`. Every environment module defines `ENV` |
 | `present(home)` | its folder exists, or its CLI is on `PATH` |
 | `read(payload)` | the hook payload as one `ToolCall` |
 | `write(denials, asks)` | the harness's answer to the hook |
@@ -130,7 +130,7 @@ pre_tool_hook.py --harness cursor
 
 - **One package per harness, one module per environment.** Cursor runs as a CLI, a desktop app and a cloud agent; each reads different files, so each is graded on its own row. What they share, such as the hook payload, sits once in the package's `__init__.py`. A harness with one environment is a package too, so a second environment is one new module. An id names a harness only, never an environment: the environment is its own dimension, in `ENV`, in `--env` and in `setup/harnesses.json`'s `environments`.
 
-- **`config` is a verifier column beside the five setup areas, not a sixth setup area.** A default model or reasoning effort is a personal choice, not part of setting a harness up: it is neither instructions, guardrails, sandbox, plugins nor skills. Before, Pi's declared settings sat in its sandbox column and Codex allowed only sandbox keys, so a declared model had nowhere to go. Now every harness can declare a config, the sandbox column holds sandbox state only, and the last column checks the declared keys, `n/a` without a declared config.
+- **`config` is a verifier column beside the five setup areas, not a sixth setup area.** A default model or reasoning effort is a personal choice, not part of setting a harness up: it is neither instructions, guardrails, sandbox, plugins nor skills. Pi's declared settings do not belong in the sandbox column, and Codex would otherwise allow only sandbox keys, so a declared model would have nowhere to go. Every harness can declare a config, the sandbox column holds sandbox state only, and the last column checks the declared keys, `n/a` without a declared config.
 
 ## Extensibility
 
