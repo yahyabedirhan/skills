@@ -24,7 +24,8 @@ python3 <skill-dir>/scripts/wispr.py <command> --help
 | `count TERM...` | Dictations containing each term, whole word, any case, with hits since its dictionary entry was added. `--field formatted` counts only what was pasted. |
 | `dict list` / `add` / `remove` / `undo` / `backup` | The dictionary. Every write backs up first; `add` prints a batch id that `undo` reverts. `--restart` quits Wispr Flow before the write and relaunches it after, which is how the app loads a change. `add --snippet` makes a trigger phrase that expands to `--replace`. |
 
-Backups go to `~/.local/state/wispr-flow/backups/`; the newest 30 are kept. Change that with `--backup-dir` and `--keep-backups` or the `WISPR_FLOW_*` variables. Put the two options before the command, since the script rejects them after it.
+- **Backup location:** `~/.local/state/wispr-flow/backups/`, where the newest 30 are kept.
+- **Overrides:** `--backup-dir` and `--keep-backups`, or the `WISPR_FLOW_*` variables. Put the two options before the command, since the script rejects them after it.
 
 Entries the app learned from the user's edits have `source: user_edits`, and `observedSource` holds what it had heard.
 

@@ -133,7 +133,14 @@ Show the likely changes as a "change → what you touch" table. A change that la
 
 ## Defaults first
 
-Start each choice from its default, because callers bring these expectations from other CLIs and every departure costs each of them a lookup: `noun verb` at two levels, the standard flag names, `--json` on every command that prints data, standard output for data and standard error for messages, exit 0 for success, 1 for failure and 2 for wrong usage, no prompts when not in a terminal, and help generated from one command table. Move off a default only for a named requirement, and say which.
+Start each choice from its default, because callers bring these expectations from other CLIs and every departure costs each of them a lookup. Move off a default only for a named requirement, and say which.
+
+- **Command shape:** `noun verb`, at two levels.
+- **Flags:** the standard names.
+- **Output:** `--json` on every command that prints data; data on standard output, messages on standard error.
+- **Exit codes:** 0 for success, 1 for failure, 2 for wrong usage.
+- **Prompts:** none when not in a terminal.
+- **Help:** generated from one command table.
 
 ## Review checklist
 

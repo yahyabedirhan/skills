@@ -9,17 +9,25 @@ description: Lease, list, return and destroy git worktrees with `treehouse`'s pr
 
 1. Check the installed version and help for the operation. For a new effort, use `get --lease --json --lease-holder <effort> -b <branch>` and save the returned `path`, `lease_id` and `lease_holder`. Resolve the path physically and verify its repository and branch before using it. Use the returned identity for later release; a holder label alone can be reused.
 2. Before releasing a worktree, verify its exact canonical path, repository, branch and current lease against that recorded acquisition. Confirm the worktree is clean, preserve any needed ignored files, and prove the branch merged using the invoking workflow's merge proofs. If the original acquisition has no recorded identity, verify ownership before recording the current lease; a current pool listing alone does not authorize adopting someone else's lease.
-3. Check occupants immediately before release, using `treehouse status --json` together with live caller, pane and OS process inspection. Verify actual current directories for agents, idle sessions, shells, services and their children, including descendants of the worktree path. Workspace checkout metadata, titles and conversation context do not prove process location. Resolve symlinks and compare path components, so a similarly prefixed sibling does not match. Independently check the caller and its ancestors: Treehouse filters them from its reported process list. A service or session known to use the worktree also counts as an occupant even if its current directory is elsewhere.
+3. Check occupants immediately before release:
+   - **Sources:** `treehouse status --json`, together with live caller, pane and OS process inspection.
+   - **Scope:** verify the actual current directories of agents, idle sessions, shells, services and their children, including descendants of the worktree path. Resolve symlinks and compare path components, so a similarly prefixed sibling does not match.
+   - **Not proof:** workspace checkout metadata, titles and conversation context do not prove process location.
+   - **Caller:** check the caller and its ancestors independently, since Treehouse filters them from its reported process list.
+   - **Known users:** a service or session known to use the worktree counts as an occupant even if its current directory is elsewhere.
    - **When occupied or uncertain:** Preserve the lease and branch, and report the occupants or missing evidence. This includes the calling session, a missing lease ID, unreadable relevant process locations, recovered or damaged entries, and changed identities. `status` silently omits processes whose directories it cannot read; an empty process list alone is not proof that the worktree is empty. Keep topology open and do not schedule delayed cleanup or terminate occupants to make settlement possible.
 4. From outside the target worktree, return only the verified empty target with `treehouse return <exact-path> --if-lease-id <recorded-id> --if-lease-holder <recorded-holder>`. Recheck identity and occupancy after any intervening work. The flags atomically guard the lease before detach, process termination and reset; they do not guard occupancy or terminal topology. Use a single explicit target, since `return --all` can reclaim occupied slots.
-5. Check the command's exit status and inspect the resulting pool and Git state. Delete its branch only after confirmed successful release and the invoking workflow's merge proofs bound to the verified branch tip, and after verifying no worktree still checks out that branch. Recheck the tip before deletion and repeat the merge proofs if it changed. A failed, interrupted or uncertain return may have changed state: preserve the branch, inspect live state before any retry, and use the original lease identity again only if it still matches. An already available or reassigned slot is not a reason to retry return.
+5. After the return:
+   - **Result:** check the command's exit status and inspect the resulting pool and Git state.
+   - **Branch deletion:** delete the branch only after a confirmed successful release, the invoking workflow's merge proofs bound to the verified branch tip, and verifying that no worktree still checks out that branch. Recheck the tip before deletion, and repeat the merge proofs if it changed.
+   - **Failed, interrupted or uncertain return:** it can have changed state, so preserve the branch, inspect live state before any retry, and use the original lease identity again only if it still matches. An already available or reassigned slot is not a reason to retry the return.
 
 | Need | Command | Notes |
 |---|---|---|
-| A durable worktree for an effort | `treehouse get --lease --json --lease-holder <effort> -b <branch>` | Returns the path and lease identity. A leased worktree is never handed out again or pruned until returned. |
-| See the pool | `treehouse status --json` | Reports leases and processes it would terminate; independently verify caller and relevant unreadable process locations. |
-| Give an empty worktree back | `treehouse return <path> --if-lease-id <id> --if-lease-holder <holder>` | Terminates processes with a current directory in the worktree, excluding the return process and its ancestors. An external shell can therefore terminate the calling agent. Dirty cleanup declined or unanswered exits 3 and preserves the lease; other failures can occur after detach or termination. |
-| Preview removal for good | `treehouse destroy <exact-path>` | Dry run. `--yes` executes removal; `--include-leased` permits a named leased target. Destroy has no lease-identity guard: preserve a leased target unless exclusive ownership can be established through execution. Reapply the release checks before removal. |
+| A durable worktree for an effort | `treehouse get --lease --json --lease-holder <effort> -b <branch>` | Returns the path and lease identity. |
+| See the pool | `treehouse status --json` | Reports leases and the processes `return` would terminate. |
+| Give an empty worktree back | `treehouse return <path> --if-lease-id <id> --if-lease-holder <holder>` | Guards the lease; terminates the worktree's processes. |
+| Preview removal for good | `treehouse destroy <exact-path>` | Dry run; `--yes` removes. |
 
 ## A worktree on a new branch
 
@@ -27,6 +35,10 @@ A leased worktree starts on a detached HEAD unless `get` makes its branch. `get 
 
 ## Gotchas
 
+- A leased worktree is never handed out again or pruned until it is returned.
+- `status` lists neither the caller and its ancestors nor processes whose directories it cannot read, so verify those locations yourself.
+- `return` terminates processes with a current directory in the worktree, except the return process and its ancestors, so a return run from an external shell can terminate the calling agent. A declined or unanswered dirty cleanup exits 3 and preserves the lease; other failures can happen after detach or termination.
+- `destroy --yes` executes the removal, and `--include-leased` permits a named leased target. `destroy` has no lease-identity guard: preserve a leased target unless exclusive ownership can be established through execution, and reapply the release checks before removal.
 - `return` keeps ignored files, even with `--force`, and the next effort that leases the worktree finds them, such as an old `.scratch/` or build output. Copy out what's worth keeping before returning. Use ordinary guarded return for settlement; `--force` discards changes without confirmation and does not make an occupied worktree safe.
 - `destroy` removes everything in the worktree, ignored files included, without warning. Copy out anything worth keeping first.
 - `destroy --include-in-use` terminates processes and `--include-unlanded` permits discarding work. Settlement preserves those targets; these flags do not establish permission to terminate a session or service.

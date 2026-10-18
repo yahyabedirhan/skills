@@ -91,7 +91,15 @@ Show the options side by side, each with its gain and cost, and a redesign or re
 
 ## Defaults first
 
-Start each choice from its default, because the most common failure in system design is complexity added before it is needed: PostgreSQL as the store, REST for the API, TCP and HTTP polling for transport and real-time, no cache and then Redis cache-aside, one bigger database with replicas and then hash sharding, and synchronous work. Move off a default only for a named requirement, with numbers when the case is about scale. Typical over-design: a queue at 5k writes per second, sharding at 100 GB, a WebSocket where polling would do, a cache in front of an indexed lookup.
+Start each choice from its default, because the most common failure in system design is complexity added before it is needed. Move off a default only for a named requirement, with numbers when the case is about scale.
+
+- **Store:** PostgreSQL.
+- **API:** REST.
+- **Transport and real-time:** TCP and HTTP polling.
+- **Cache:** none, then Redis cache-aside.
+- **Scale:** one bigger database with replicas, then hash sharding.
+- **Async work:** none; work stays synchronous.
+- **Typical over-design:** a queue at 5k writes per second, sharding at 100 GB, a WebSocket where polling would do, a cache in front of an indexed lookup.
 
 When the design adopts a specific technology, such as Kafka, DynamoDB or Elasticsearch, research it in its documentation before relying on its details: its limits, its guarantees, and how it fails.
 

@@ -30,7 +30,11 @@ List, search or read mail, through either tool, only when the user asks for an e
 
 Every create, update or delete of a saved draft needs the user's own approval in the harness, even after they asked for the draft: a saved draft is a change in their mailbox, and one mistaken call can overwrite a draft they were writing. `/set-up-machine`'s ask rows `mail-draft-write` and `mail-cli-draft` make each of these calls ask.
 
-- **When the harness won't ask the user themselves,** keep the draft in chat and say why. That covers Claude Code's `bypassPermissions`, `dontAsk` and `auto` modes and a non-interactive run, Codex with an automatic reviewer, Cursor and opencode in a mode that runs tools without asking, and any harness where the call doesn't ask. An automatic reviewer's approval is not the user's.
+- **When the harness won't ask the user themselves,** keep the draft in chat and say why. An automatic reviewer's approval is not the user's. These harnesses don't ask:
+  - **Claude Code:** the `bypassPermissions`, `dontAsk` and `auto` modes, and a non-interactive run.
+  - **Codex:** a run with an automatic reviewer.
+  - **Cursor and opencode:** a mode that runs tools without asking.
+  - **Other harnesses:** any where the call doesn't ask.
 
 ## Safety
 
