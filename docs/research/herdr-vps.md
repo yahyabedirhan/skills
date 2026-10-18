@@ -53,7 +53,7 @@ Notes for writes:
 
 - `<name>` must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents on that server (herdr skill).
 - A prompt or path passed through `ssh vps '…'` goes through the remote shell. Quote it for the remote side, for example with `printf %q` locally, or pipe a script over stdin. The 0.9.1 `--machine` path avoids this.
-- `claude` is found in a login shell on the VPS, and Herdr panes start interactive shells, but whether `agent start --kind claude` finds it is a **Gap**: not tested, see *Open questions*.
+- `claude` is found in a login shell on the VPS, and Herdr panes start interactive shells. Whether `agent start --kind claude` finds it is a **Gap**: not tested, see *Open questions*.
 
 ## VPS to Mac
 

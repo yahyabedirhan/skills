@@ -81,7 +81,7 @@ Codex CLI (`codex --help`, `codex exec --help`, <https://learn.chatgpt.com/docs/
   - `codex exec` with `$probe-codex` on line 2 of a three-line prompt ran the skill. Codex scans the whole message for `$name`, not just its start.
   - The model could not see the skill when asked to list skills.
   - A four-line bracketed paste into the interactive TUI, starting with `$probe-codex`, ran the skill. Codex does not collapse or mark the paste the way Claude Code does.
-- `codex "<prompt>"` starts the TUI with an initial prompt; `codex exec "<prompt>"` runs non-interactively (stdin appended as `<stdin>` when both are given). The interactive launch argument uses the same text path as `exec`.
+- `codex "<prompt>"` starts the TUI with an initial prompt; `codex exec "<prompt>"` runs non-interactively (stdin appended as `<stdin>` when both are given). A skill named in the interactive launch argument goes through the same text path as `exec`.
 - **Shell quoting trap:** inside double quotes, `$orchestrate-with-handoff` is expanded by the shell to `-with-handoff`. A `$skill` prompt passed on a command line (`codex "..."`, `herdr agent prompt x "..."`) must be single-quoted.
 
 ## Delivery through Herdr
@@ -100,8 +100,8 @@ There is no Herdr option that types a slash command as keystrokes. Its "start wi
 
 What happened in the real sessions, read from the transcripts under `~/.claude/projects/` and the paste cache `~/.claude/paste-cache/`:
 
-- Issue [#17](https://github.com/yahyabedirhan/skills/issues/17) orchestrator, a session transcript under `~/.claude/projects/`: the first user message is `<pasted_content id="948b">/orchestrate-with-handoff .handoff/…` (four or more lines). The agent read the handoff, called the message "only the pasted kickoff prompt", and asked to confirm. The user's typed `/orchestrate-with-handoff …` then arrived as a real `<command-name>`.
-- Issue [#12](https://github.com/yahyabedirhan/skills/issues/12) shipyard thinking session, a session transcript under `~/.claude/projects/`: the message was also `<pasted_content>` (8 lines, 1,365 characters). The slash command did **not** run. The agent ran `cat ~/.claude/skills/setup-matt-pocock-skills/SKILL.md` and followed it by hand, working around the user-only flag.
+- Issue [#17](https://github.com/yahyabedirhan/skills/issues/17) orchestrator, from its session transcript under `~/.claude/projects/`: the first user message is `<pasted_content id="948b">/orchestrate-with-handoff .handoff/…` (four or more lines). The agent read the handoff, called the message "only the pasted kickoff prompt", and asked to confirm. The user's typed `/orchestrate-with-handoff …` then arrived as a real `<command-name>`.
+- Issue [#12](https://github.com/yahyabedirhan/skills/issues/12) shipyard thinking session, from its transcript under `~/.claude/projects/`: the message was also `<pasted_content>` (8 lines, 1,365 characters). The slash command did **not** run. The agent ran `cat ~/.claude/skills/setup-matt-pocock-skills/SKILL.md` and followed it by hand, working around the user-only flag.
 - Issue [#10](https://github.com/yahyabedirhan/skills/issues/10) thinking prompt (paste cache `9e0f023c5a95ea12.txt`, 10 lines, 1,893 characters): same shape, so `/grill-with-docs` could not have run as a command.
 
 ## Sub-agents and skills

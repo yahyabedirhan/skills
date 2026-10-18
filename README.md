@@ -132,7 +132,9 @@ SETTLE     settle-effort                                 after you approve: merg
              settle-session                              leaves nothing hanging, frees what merged
 ```
 
-- **Companions:** `show-me`, these skills from [mattpocock/skills](https://github.com/mattpocock/skills): `grilling`, `prototype`, `tdd` and `code-review`, and `set-up-project` and `set-up-machine` from [Agent setup](#agent-setup) to set each project up.
+Install the family together with its companions, and leave out the upstream skills it replaces:
+
+- **Companions:** `show-me`; `grilling`, `prototype`, `tdd` and `code-review` from [mattpocock/skills](https://github.com/mattpocock/skills); and `set-up-project` and `set-up-machine` from [Agent setup](#agent-setup) to set each project up.
 - **Replaced upstream skills:** leave out that repo's `handoff`, `implement`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills`, which the forks here replace, and its `implement-spec` and `pr`, which `orchestrate-effort` and `to-pr` replace.
 - **Lifecycle and records:** the full path is in [the effort lifecycle](skills/orchestrating/SKILL.md#effort-lifecycle). Where each record goes, such as the spec, tickets, handoff and notes, is in the [folder standard](skills/orchestrating/folder-standard.md).
 
