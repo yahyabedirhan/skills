@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How wispr-flow-dictionary works</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter+Tight:wght@400;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.diagram-container{overflow-x:auto}
+svg{display:block;min-width:960px}
+</style>
+</head>
+<body>
+<div class="diagram-container">
+<svg viewBox="0 0 960 384" width="960" height="384" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="wispr-flow-dictionary-title wispr-flow-dictionary-desc">
+<title id="wispr-flow-dictionary-title">How wispr-flow-dictionary works</title>
+<desc id="wispr-flow-dictionary-desc">It finds misheard terms, fixes them with words, rules or snippets behind a backup, and checks whether each fix held.</desc>
+<defs>
+<linearGradient id="wispr-flow-dictionary-tile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#222529"/><stop offset="1" stop-color="#131417"/></linearGradient>
+<linearGradient id="wispr-flow-dictionary-rim1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.32"/><stop offset="1" stop-color="#fff" stop-opacity="0.08"/></linearGradient><linearGradient id="wispr-flow-dictionary-rim2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.14"/><stop offset="1" stop-color="#fff" stop-opacity="0.03"/></linearGradient>
+<marker id="wispr-flow-dictionary-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#8b9097"/></marker>
+</defs>
+<rect x="0" y="0" width="960" height="384" rx="12" fill="url(#wispr-flow-dictionary-tile)"/>
+<rect x="2.5" y="2.5" width="955" height="379" rx="10" fill="none" stroke="url(#wispr-flow-dictionary-rim1)" stroke-width="1"/>
+<rect x="10.5" y="10.5" width="939" height="363" rx="2" fill="none" stroke="url(#wispr-flow-dictionary-rim2)" stroke-width="1"/>
+<text x="40" y="52" font-family="Space Grotesk" font-weight="600" font-size="20" letter-spacing="-0.2" fill="#e4e6e9">How wispr-flow-dictionary works</text>
+
+<rect x="40.5" y="76.5" width="879" height="75" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="108" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">FIND</text><text x="170" y="109" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">terms, formatter swaps and counts</text><text x="170" y="132" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">over any window (30m, 3h, 2d)</text><rect x="40.5" y="164.5" width="879" height="91" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="196" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">FIX</text><text x="170" y="197" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">a plain word first</text><text x="170" y="220" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">a rule only when a mistake returns; snippets for text you repeat</text><text x="170" y="238" font-family="IBM Plex Mono" font-size="12" fill="#e4e6e9">every write backs up first, can be undone, and can relaunch the app</text><rect x="40.5" y="268.5" width="879" height="75" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="300" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">CHECK</text><text x="170" y="301" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">counts the misheard form</text><text x="170" y="324" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">since its word was added, to see whether a fix held</text>
+</svg>
+</div>
+</body>
+</html>

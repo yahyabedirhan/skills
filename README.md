@@ -132,21 +132,10 @@ This section explains how the skills in each family work together.
 An **effort**, such as a feature, a new app or a refactor, goes from an idea to a merged pull request in one worktree on one branch.
 A thinking session decides what to build, and a fresh orchestrator builds it, so the builder starts from conclusions instead of debate.
 
-```text
-START      init-effort                                   worktree and branch (or a new repo), decided once
-             the session host, this session, or paste    starts the thinking session
-THINKING   grilling, to-spec, to-tickets                 leaves a spec, tickets and a handoff
-HANDOVER   handover                                      ready, prompt, mechanism, started
-             handoff                                     writes the handoff in the repo
-             the session host, this session, or paste    starts a fresh orchestrator
-BUILD      orchestrate-with-handoff → orchestrate-effort
-             orchestrating                               the orchestrator's discipline
-             implement                                   each ticket, built by a sub-agent
-             show-me                                     shows the plan
-             to-pr                                       last step: opens the pull request
-SETTLE     settle-effort                                 after you approve: merge, follow up, carry over
-             settle-session                              leaves nothing hanging, frees what merged
-```
+![The effort workflow in five stages: start with init-effort, thinking with grilling, to-spec and to-tickets, handover with handover and handoff, build with orchestrate-effort and its sub-skills, and settle with settle-effort and settle-session.](docs/diagrams/effort-workflow.png)
+
+The diagram shows the five stages of an effort and the skill that runs each one.
+The build stage is highlighted, because that is where the fresh orchestrator takes over.
 
 Install the family together with its [companions](GLOSSARY.md#skills-and-families), and leave out the upstream skills it replaces:
 
@@ -160,17 +149,10 @@ Where each record goes, such as the spec, tickets, handoff and notes, is in the 
 Each skill runs a design session through a delivery framework, whether you are designing something new, explaining existing work, redesigning it, or deciding one question.
 It starts simple and adds only what a requirement proves necessary.
 
-```text
-low-level-design   code: modules, classes, files, folders
-  requirements → entities and relationships → class design → implementation → extensibility
-system-design      systems: services, data stores, APIs, scale
-  requirements → core entities → API → data flow → high-level design → deep dives
-cli-design         command-line interfaces: commands, flags, output, help
-  requirements → command model → inputs → output and errors → help → implementation → evolution
-swift-performance  Swift apps: what runs, how often, at what volume
-  build:     workload → hot paths → budgets → work bounding → reuse → concurrency → measurement
-  diagnosis: symptom → reproduction → measurement → isolation → root cause → verification
-```
+![The four design skills, low-level-design, system-design, cli-design and swift-performance, each with its subject and its stages in order.](docs/diagrams/design-frameworks.png)
+
+The diagram shows each design skill's subject and the stages it works through in order.
+`swift-performance` has two orders, one for building and one for diagnosing.
 
 The documents in each skill's `references/` hold the principles, patterns and concepts, loaded only when a step needs them.
 
@@ -179,62 +161,34 @@ The documents in each skill's `references/` hold the principles, patterns and co
 These skills shape how an agent shows its thinking, so a reader takes it in quickly.
 [`show-me`](skills/show-me/SKILL.md) picks the smallest view that makes the point, in plain text that reads the same in a terminal, an editor, or on GitHub, [`show-me-artifact`](skills/show-me-artifact/SKILL.md) publishes a larger report the same way as a private Claude artifact, and [`show-me-diagram`](skills/show-me-diagram/SKILL.md) draws one designed diagram through `diagram-design`.
 
-```text
-show-me            explains the current topic
-  pseudocode · call tree · file tree · diff block · one focused HTML page
-show-me-artifact   a report or decision set to read later, as a hosted page
-  status first · progress · item tree · tables · decision cards → republished to the same URL
-show-me-diagram    one designed diagram, through diagram-design
-  type picked to fit · profiles shipped with it · opened in a browser
-i-am-afk           you're away: work on alone, keep your part for the end
-i-am-back          you're back: show-me what happened, what's done and what needs you
-```
+![The communication skills: show-me, show-me-artifact and show-me-diagram with the views each one uses, then i-am-afk and i-am-back.](docs/diagrams/communication-style.png)
+
+The diagram shows what each communication skill is for and the views it draws from.
 
 ### Agent setup
 
 These skills keep what your agents run with, such as permissions, instructions and skills, in order across every harness and machine.
 [`set-up-machine`](skills/set-up-machine/SKILL.md) sets up and audits each machine's harnesses from one rule table, [`set-up-project`](skills/set-up-project/SKILL.md) each project on top of it, [`maintain-environment`](skills/maintain-environment/SKILL.md) decides where a change belongs and carries it from its source to every harness and install, and [`skill-recap`](skills/skill-recap/SKILL.md) looks back over a session for what its skills should change.
 
-```text
-where       permission · global instruction · project AGENTS.md · skill · skill reference (no memory)
-carry       rerun set-up-machine or set-up-project where the change applies
-source      your skills repo, or someone else's
-  ↓ npx skills add / update / remove
-installs    global (~/.agents/skills) or one project (.agents/skills)
-operations  install, update, move, remove, fork, publish
-audits      which skills you use, a fresh prompt audit, a run's cost
-recap       /skill-recap: how a session used its skills → findings → /to-tickets
-```
+![Agent setup as rows: where a change belongs, what carries it, the skills source, the installs that npx skills writes, and the operations, audits and recap.](docs/diagrams/agent-setup.png)
+
+The diagram shows where a change to your agents belongs and how a skill gets from its source repo to an install.
+The skills source is highlighted, because every install comes from it through `npx skills`.
 
 [`set-up-machine`](skills/set-up-machine/SKILL.md) does the same for the rules and instructions every harness runs with.
 The rule table and the shared global instructions file are declared once; each harness gets its native entries from them:
 
-```text
-rules.json                      each global rule once: level, reason, instruction, samples
-  ↓ inspect + references        the agent reads each harness's files and its reference
-  ↓ one diff, one approval      added, tightened, gaps, extra rules; each file backed up, then written
-  ↓ verify.py                   the samples against the hook and Codex's checker; every hook wired
-~/.config/agents/AGENTS.md      the shared global instructions: working agreement, glossary, environment defaults, rule lines, personal workflow
-~/.config/agents/source.md      the pointer to your workstation repo, where your environment defaults, workflow and personal permissions come from
-pre_tool_hook.py                runs before every tool call; reads a command as the shell runs it
-Claude Code   ~/.claude/        settings.json: deny and ask entries, the hook, auto memory off; CLAUDE.md imports the shared file
-Codex         ~/.codex/         rules/set-up-machine.rules, hooks.json, AGENTS.md → shared file, memories off in config.toml
-opencode      ~/.config/opencode/  opencode.json permissions, plugins/set-up-machine.js runs the hook, AGENTS.md → shared file
-Cursor        ~/.cursor/        cli-config.json permissions, hooks.json, rules/global-instructions.mdc copies the shared file
-Pi            ~/.pi/agent/      extensions/set-up-machine.ts runs the hook and asks for ask rows, AGENTS.md → shared file, declared settings.json defaults
-~/.agents/skills                your skills repo (the skills-repo environment default), installed globally
-run again                       the audit: a diff that changes nothing
-```
+![set-up-machine's flow from rules.json through inspection, one approved diff and verify.py, then the shared files, each harness's native files, the global skills, and a rerun as the audit.](docs/diagrams/set-up-machine.png)
+
+The diagram shows each global rule going from `rules.json` into every harness's own files after one approved diff.
+Running it again is the audit, which should find nothing to change.
 
 [`set-up-project`](skills/set-up-project/SKILL.md) does it for one project, on top of the machine.
 Global rules are the safety rails; a project's own harness files only add allows:
 
-```text
-verify.py                       set-up-machine's check first; a machine that fails is set up before the project
-  explore, ask, one approval    tracker, triage labels, domain docs, optional environment defaults
-  write                         AGENTS.md, CLAUDE.md as @AGENTS.md, .gitignore, docs/agents/
-audit                           any project harness file that weakens a global rule
-```
+![set-up-project's flow: set-up-machine's check, then explore, ask and approve once, then write the project files, plus an audit for project files that weaken a global rule.](docs/diagrams/set-up-project.png)
+
+The diagram shows set-up-project checking the machine first and writing the project's files after one approval.
 
 ### Daily workflows
 
@@ -246,12 +200,9 @@ It archives freely and makes any other change only when you ask.
 A draft you ask for is written in chat; one saved in Gmail or Spark needs you to name the tool and approve each write in the harness.
 Permission rules deny sending, trash and spam.
 
-```text
-read     Spark CLI, for an email task you asked for: inbox by category, threads, pins, contacts
-act      Gmail connector: mark done (archive), labels, pins (stars), saved drafts on approval
-how      which tool for which job; what to do and when stays with you
-setup    setup.md: both tools, the deny and ask rules, and checks
-```
+![The email skill as rows: Spark CLI reads, the Gmail connector acts, the skill decides which tool does which job, and setup.md sets both up.](docs/diagrams/email.png)
+
+The diagram shows which tool reads mail, which one acts on it, and where the setup lives.
 
 [`calendar`](skills/calendar/SKILL.md) reads events and free time whenever a task needs them, with Spark first and the Google Calendar connector when Spark Desktop is closed.
 It never changes the calendar: permission rules deny every connector write and `spark event`.
@@ -259,12 +210,9 @@ It never changes the calendar: permission rules deny every connector write and `
 [`wispr-flow-dictionary`](skills/wispr-flow-dictionary/SKILL.md) keeps [Wispr Flow](https://wisprflow.ai)'s dictionary accurate for technical vocabulary, where dictation mishears product names, company names and commands.
 It reads Wispr Flow's local database and writes only its `Dictionary` table, after a backup.
 
-```text
-find    terms, formatter swaps and counts over any window (30m, 3h, 2d)
-fix     a plain word first; a rule only when a mistake returns; snippets for text you repeat
-        every write backs up first, can be undone, and can relaunch the app
-check   counts the misheard form since its word was added, to see whether a fix held
-```
+![wispr-flow-dictionary as rows: find misheard terms, fix them with a word, a rule or a snippet behind a backup, and check whether each fix held.](docs/diagrams/wispr-flow-dictionary.png)
+
+The diagram shows the skill's three jobs: finding misheard terms, fixing them and checking that each fix held.
 
 ## Adding a skill
 
