@@ -54,7 +54,7 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 2. Find the upstream commit the copy starts from.
 3. Copy the folder into `<path-to-skills-repo>` on a branch, with the upstream licence beside it as `LICENSE.<upstream>`. Rename the skill once its behaviour diverges, so both can be installed.
 4. Make only the intended change, so a diff against upstream shows just that.
-5. In the README row, name the upstream repo and the commit, and add one sentence on what changed that links the fork's entry in `docs/forks.md`.
+5. In the README row, name the upstream repo and the commit, and add one sentence on what changed that links the fork's entry in `FORKS.md`.
    That entry names the licence, links the `LICENSE.<upstream>` file and lists every change the fork makes.
 6. Ship it, then replace the upstream install with the fork in the same scope.
 
@@ -62,10 +62,10 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 
 1. Fetch upstream's default branch and look at its newest release branch. Find the skill's current path, since upstream may have moved, renamed or split it since the fork.
 2. Diff upstream from the fork's Origin commit to its latest version, and list each change.
-3. Diff the fork against upstream at its Origin commit, and list the fork's own changes. Add any that the fork's entry in `docs/forks.md` misses.
+3. Diff the fork against upstream at its Origin commit, and list the fork's own changes. Add any that the fork's entry in `FORKS.md` misses.
 4. Rebuild the fork from upstream's latest version, then re-apply the fork's changes. Where an upstream change conflicts with one of the fork's, keep the fork's, unless upstream now does the same thing better.
 5. Keep the fork's choice of who can invoke it: `disable-model-invocation` in `SKILL.md` and `allow_implicit_invocation` in `agents/openai.yaml`. Letting agents load a skill is often why it was forked, and upstream can turn that off again in a later commit.
-6. Move the Origin commit to the new one in the README row and in `docs/forks.md`, and update the fork's list of changes there. Keep the `LICENSE.<upstream>` file.
+6. Move the Origin commit to the new one in the README row and in `FORKS.md`, and update the fork's list of changes there. Keep the `LICENSE.<upstream>` file.
 7. Ship it. The pull request lists each upstream change taken or left out, with the reason for each one left out.
 
 ## Release to the skills repo

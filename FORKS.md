@@ -9,7 +9,7 @@ Each license file stays in its skill's folder.
 ## handoff
 
 Fork of `handoff` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/productivity/handoff).
-License: MIT, see [`skills/handoff/LICENSE.mattpocock`](../skills/handoff/LICENSE.mattpocock).
+License: MIT, see [`skills/handoff/LICENSE.mattpocock`](skills/handoff/LICENSE.mattpocock).
 
 Changes:
 
@@ -19,7 +19,7 @@ Changes:
 ## implement
 
 Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/implement).
-License: MIT, see [`skills/implement/LICENSE.mattpocock`](../skills/implement/LICENSE.mattpocock).
+License: MIT, see [`skills/implement/LICENSE.mattpocock`](skills/implement/LICENSE.mattpocock).
 
 Changes:
 
@@ -34,7 +34,7 @@ Changes:
 ## to-spec
 
 Fork of `to-spec` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/to-spec).
-License: MIT, see [`skills/to-spec/LICENSE.mattpocock`](../skills/to-spec/LICENSE.mattpocock).
+License: MIT, see [`skills/to-spec/LICENSE.mattpocock`](skills/to-spec/LICENSE.mattpocock).
 
 Changes:
 
@@ -45,7 +45,7 @@ Changes:
 ## to-tickets
 
 Fork of `to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/to-tickets).
-License: MIT, see [`skills/to-tickets/LICENSE.mattpocock`](../skills/to-tickets/LICENSE.mattpocock).
+License: MIT, see [`skills/to-tickets/LICENSE.mattpocock`](skills/to-tickets/LICENSE.mattpocock).
 
 Changes:
 
@@ -57,7 +57,7 @@ Changes:
 ## to-pr
 
 Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr).
-License: MIT, see [`skills/to-pr/LICENSE.humanlayer`](../skills/to-pr/LICENSE.humanlayer).
+License: MIT, see [`skills/to-pr/LICENSE.humanlayer`](skills/to-pr/LICENSE.humanlayer).
 
 Changes:
 
@@ -72,7 +72,7 @@ Changes:
 ## show-me
 
 Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`ca7c808`](https://github.com/humanlayer/skills/tree/ca7c808/plugins/show-me/skills/show-me).
-License: MIT, see [`skills/show-me/LICENSE.humanlayer`](../skills/show-me/LICENSE.humanlayer).
+License: MIT, see [`skills/show-me/LICENSE.humanlayer`](skills/show-me/LICENSE.humanlayer).
 
 Changes:
 
@@ -82,7 +82,7 @@ Changes:
 ## set-up-project
 
 Fork of `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/setup-matt-pocock-skills).
-License: MIT, see [`skills/set-up-project/LICENSE.mattpocock`](../skills/set-up-project/LICENSE.mattpocock).
+License: MIT, see [`skills/set-up-project/LICENSE.mattpocock`](skills/set-up-project/LICENSE.mattpocock).
 
 Changes:
 
