@@ -94,6 +94,7 @@ Changes:
 - A local tracker keeps issues in `.efforts/<effort>/` instead of `.scratch/`, and says how a ticket is picked up and marked done when the project has no spec or triage labels.
 - The GitHub template adds effort labels and names issues by title.
 - It proposes a `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md` to its `GLOSSARY` name.
+- For a project that releases, it writes a release page, `docs/agents/releasing.md`, from its seed and any shared release rules.
 - It audits each harness's project files against set-up-machine's rule table.
 
 ## Credited sources
