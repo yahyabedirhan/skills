@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The design frameworks</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter+Tight:wght@400;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.diagram-container{overflow-x:auto}
+svg{display:block;min-width:960px}
+</style>
+</head>
+<body>
+<div class="diagram-container">
+<svg viewBox="0 0 960 540" width="960" height="540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="design-frameworks-title design-frameworks-desc">
+<title id="design-frameworks-title">The design frameworks</title>
+<desc id="design-frameworks-desc">Four design skills, each with its subject and the order of stages it designs in.</desc>
+<defs>
+<linearGradient id="design-frameworks-tile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#222529"/><stop offset="1" stop-color="#131417"/></linearGradient>
+<linearGradient id="design-frameworks-rim1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.32"/><stop offset="1" stop-color="#fff" stop-opacity="0.08"/></linearGradient><linearGradient id="design-frameworks-rim2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.14"/><stop offset="1" stop-color="#fff" stop-opacity="0.03"/></linearGradient>
+<marker id="design-frameworks-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#8b9097"/></marker>
+</defs>
+<rect x="0" y="0" width="960" height="540" rx="12" fill="url(#design-frameworks-tile)"/>
+<rect x="2.5" y="2.5" width="955" height="535" rx="10" fill="none" stroke="url(#design-frameworks-rim1)" stroke-width="1"/>
+<rect x="10.5" y="10.5" width="939" height="519" rx="2" fill="none" stroke="url(#design-frameworks-rim2)" stroke-width="1"/>
+<text x="40" y="52" font-family="Space Grotesk" font-weight="600" font-size="20" letter-spacing="-0.2" fill="#e4e6e9">The design frameworks</text>
+
+<rect x="40.5" y="76.5" width="879" height="91" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="109" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">low-level-design</text><text x="60" y="132" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">code: modules, classes, files, folders</text><text x="60" y="150" font-family="IBM Plex Mono" font-size="12" fill="#e4e6e9">requirements → entities and relationships → class design → implementation → extensibility</text><rect x="40.5" y="180.5" width="879" height="91" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="213" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">system-design</text><text x="60" y="236" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">systems: services, data stores, APIs, scale</text><text x="60" y="254" font-family="IBM Plex Mono" font-size="12" fill="#e4e6e9">requirements → core entities → API → data flow → high-level design → deep dives</text><rect x="40.5" y="284.5" width="879" height="91" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="317" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">cli-design</text><text x="60" y="340" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">command-line interfaces: commands, flags, output, help</text><text x="60" y="358" font-family="IBM Plex Mono" font-size="12" fill="#e4e6e9">requirements → command model → inputs → output and errors → help → implementation → evolution</text><rect x="40.5" y="388.5" width="879" height="111" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="421" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">swift-performance</text><text x="60" y="444" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">Swift apps: what runs, how often, at what volume</text><text x="60" y="462" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">build:</text><text x="144" y="462" font-family="IBM Plex Mono" font-size="12" fill="#e4e6e9">workload → hot paths → budgets → work bounding → reuse → concurrency → measurement</text><text x="60" y="480" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">diagnosis:</text><text x="144" y="480" font-family="IBM Plex Mono" font-size="12" fill="#e4e6e9">symptom → reproduction → measurement → isolation → root cause → verification</text>
+</svg>
+</div>
+</body>
+</html>

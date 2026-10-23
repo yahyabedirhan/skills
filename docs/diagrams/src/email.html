@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the email skill works</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter+Tight:wght@400;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.diagram-container{overflow-x:auto}
+svg{display:block;min-width:960px}
+</style>
+</head>
+<body>
+<div class="diagram-container">
+<svg viewBox="0 0 960 456" width="960" height="456" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="email-title email-desc">
+<title id="email-title">How the email skill works</title>
+<desc id="email-desc">Spark CLI reads mail, the Gmail connector acts on it, the skill says which tool does which job, and setup.md sets both up.</desc>
+<defs>
+<linearGradient id="email-tile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#222529"/><stop offset="1" stop-color="#131417"/></linearGradient>
+<linearGradient id="email-rim1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.32"/><stop offset="1" stop-color="#fff" stop-opacity="0.08"/></linearGradient><linearGradient id="email-rim2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.14"/><stop offset="1" stop-color="#fff" stop-opacity="0.03"/></linearGradient>
+<marker id="email-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#8b9097"/></marker>
+</defs>
+<rect x="0" y="0" width="960" height="456" rx="12" fill="url(#email-tile)"/>
+<rect x="2.5" y="2.5" width="955" height="451" rx="10" fill="none" stroke="url(#email-rim1)" stroke-width="1"/>
+<rect x="10.5" y="10.5" width="939" height="435" rx="2" fill="none" stroke="url(#email-rim2)" stroke-width="1"/>
+<text x="40" y="52" font-family="Space Grotesk" font-weight="600" font-size="20" letter-spacing="-0.2" fill="#e4e6e9">How the email skill works</text>
+
+<rect x="40.5" y="76.5" width="879" height="75" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="108" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">READ</text><text x="170" y="109" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">Spark CLI</text><text x="170" y="132" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">for an email task you asked for: inbox by category, threads, pins, contacts</text><rect x="40.5" y="164.5" width="879" height="75" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="196" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">ACT</text><text x="170" y="197" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">Gmail connector</text><text x="170" y="220" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">mark done (archive), labels, pins (stars), saved drafts on approval</text><rect x="40.5" y="252.5" width="879" height="75" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="284" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">HOW</text><text x="170" y="285" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">which tool for which job</text><text x="170" y="308" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">what to do and when stays with you</text><rect x="40.5" y="340.5" width="879" height="75" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="372" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">SETUP</text><text x="170" y="373" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">setup.md</text><text x="170" y="396" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">both tools, the deny and ask rules, and checks</text>
+</svg>
+</div>
+</body>
+</html>

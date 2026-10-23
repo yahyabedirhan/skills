@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where a change to your agents goes</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter+Tight:wght@400;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.diagram-container{overflow-x:auto}
+svg{display:block;min-width:960px}
+</style>
+</head>
+<body>
+<div class="diagram-container">
+<svg viewBox="0 0 960 624" width="960" height="624" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="agent-setup-title agent-setup-desc">
+<title id="agent-setup-title">Where a change to your agents goes</title>
+<desc id="agent-setup-desc">Where a change belongs, what carries it, where skills come from and install, and the operations, audits and recap.</desc>
+<defs>
+<linearGradient id="agent-setup-tile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#222529"/><stop offset="1" stop-color="#131417"/></linearGradient>
+<linearGradient id="agent-setup-rim1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.32"/><stop offset="1" stop-color="#fff" stop-opacity="0.08"/></linearGradient><linearGradient id="agent-setup-rim2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.14"/><stop offset="1" stop-color="#fff" stop-opacity="0.03"/></linearGradient>
+<marker id="agent-setup-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#8b9097"/></marker>
+</defs>
+<rect x="0" y="0" width="960" height="624" rx="12" fill="url(#agent-setup-tile)"/>
+<rect x="2.5" y="2.5" width="955" height="619" rx="10" fill="none" stroke="url(#agent-setup-rim1)" stroke-width="1"/>
+<rect x="10.5" y="10.5" width="939" height="603" rx="2" fill="none" stroke="url(#agent-setup-rim2)" stroke-width="1"/>
+<text x="40" y="52" font-family="Space Grotesk" font-weight="600" font-size="20" letter-spacing="-0.2" fill="#e4e6e9">Where a change to your agents goes</text>
+<line x1="100.5" y1="268" x2="100.5" y2="302" stroke="#8b9097" stroke-width="1.25" marker-end="url(#agent-setup-arrow)"/><text x="114.5" y="290.0" font-family="Inter Tight" font-size="12" fill="#8b9097">npx skills add / update / remove</text>
+<rect x="40.5" y="76.5" width="879" height="55" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="108" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">WHERE</text><text x="170" y="109" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">permission · global instruction · project AGENTS.md · skill · skill reference (no memory)</text><rect x="40.5" y="144.5" width="879" height="55" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="176" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">CARRY</text><text x="170" y="177" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">rerun set-up-machine or set-up-project where the change applies</text><path d="M42.5 212.5 H905.5 L919.5 226.5 V265.5 Q919.5 267.5 917.5 267.5 H42.5 Q40.5 267.5 40.5 265.5 V214.5 Q40.5 212.5 42.5 212.5 Z" fill="#ffffff"/><path d="M905.5 212.5 V226.5 H919.5 Z" fill="#b9bec4"/><text x="60" y="244" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#4f545b">SOURCE</text><text x="170" y="245" font-family="Inter Tight" font-weight="600" font-size="15" fill="#131417">your skills repo, or someone else&#x27;s</text><rect x="40.5" y="304.5" width="879" height="55" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="336" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">INSTALLS</text><text x="170" y="337" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">global (~/.agents/skills) or one project (.agents/skills)</text><rect x="40.5" y="372.5" width="879" height="55" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="404" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">OPERATIONS</text><text x="170" y="405" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">install, update, move, remove, fork, publish</text><rect x="40.5" y="440.5" width="879" height="55" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="472" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">AUDITS</text><text x="170" y="473" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">which skills you use, a fresh prompt audit, a run&#x27;s cost</text><rect x="40.5" y="508.5" width="879" height="75" rx="2" fill="#222529" stroke="rgba(255,255,255,0.16)" stroke-width="1"/><text x="60" y="540" font-family="IBM Plex Mono" font-size="10" letter-spacing="1.6" fill="#8b9097">RECAP</text><text x="170" y="541" font-family="Inter Tight" font-weight="600" font-size="15" fill="#e4e6e9">/skill-recap</text><text x="170" y="564" font-family="IBM Plex Mono" font-size="12" fill="#8b9097">how a session used its skills → findings → /to-tickets</text>
+</svg>
+</div>
+</body>
+</html>
