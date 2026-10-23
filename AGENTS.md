@@ -11,8 +11,12 @@ There are no triage labels: label a new issue `enhancement` or `bug`, whichever 
 
 ### Domain docs
 
-This repo is single-context, with one `GLOSSARY.md` at the root when terms get settled, and the decision records in `docs/decisions/`.
+This repo is single-context, with one `GLOSSARY.md` at the root and the decision records in `docs/decisions/`.
 See `docs/agents/domain.md`.
+
+### Glossary
+
+Before maintaining the repo, read `GLOSSARY.md`, which defines the words this repo uses for its skills, forks and their origins.
 
 ### Writing skills
 

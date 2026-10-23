@@ -4,10 +4,10 @@
 
 [![skills.sh](https://skills.sh/b/yahyabedirhan/skills)](https://skills.sh/yahyabedirhan/skills)
 
-This repo holds the agent skills the maintainer uses across projects: skills written here, and forks of other people's skills with the maintainer's changes.
+This repo holds the agent skills the maintainer uses across projects: skills written here, and [forks](GLOSSARY.md#forks) of other people's skills with the maintainer's changes.
 They work with Claude Code, Codex, and any agent the [`skills` CLI](https://github.com/vercel-labs/skills) supports.
 
-They come in five families.
+They come in five [families](GLOSSARY.md#skills-and-families).
 Each family's skills are listed under [Skills](#skills) and explained under [How the skills work](#how-the-skills-work):
 
 - **[Effort workflow](#effort-workflow)**: take a feature from an idea to a merged pull request.
@@ -61,7 +61,7 @@ To switch to the plugin, first remove the copy with `npx skills remove <skill-na
 ## Skills
 
 This section lists every skill in the repo by family, with what it does and where it comes from.
-The Origin column names where each skill comes from.
+The [Origin column](GLOSSARY.md#forks) names where each skill comes from.
 [`yahyabedirhan`](https://www.skills.sh/?q=yahyabedirhan) marks a skill written in this repo.
 A fork names the upstream commit it was copied from, so a later upstream change can be diffed against it.
 Each fork's full list of changes is in [FORKS.md](FORKS.md).
@@ -148,7 +148,7 @@ SETTLE     settle-effort                                 after you approve: merg
              settle-session                              leaves nothing hanging, frees what merged
 ```
 
-Install the family together with its companions, and leave out the upstream skills it replaces:
+Install the family together with its [companions](GLOSSARY.md#skills-and-families), and leave out the upstream skills it replaces:
 
 - **Companions:** [`show-me`](skills/show-me/SKILL.md); [`grilling`](https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling), [`prototype`](https://github.com/mattpocock/skills/tree/main/skills/engineering/prototype), [`tdd`](https://github.com/mattpocock/skills/tree/main/skills/engineering/tdd) and [`code-review`](https://github.com/mattpocock/skills/tree/main/skills/engineering/code-review) from [mattpocock/skills](https://github.com/mattpocock/skills); and [`set-up-project`](skills/set-up-project/SKILL.md) and [`set-up-machine`](skills/set-up-machine/SKILL.md) from [Agent setup](#agent-setup) to set each project up.
 - **Replaced upstream skills:** leave out that repo's [`handoff`](https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff), [`implement`](https://github.com/mattpocock/skills/tree/main/skills/engineering/implement), [`to-spec`](https://github.com/mattpocock/skills/tree/main/skills/engineering/to-spec), [`to-tickets`](https://github.com/mattpocock/skills/tree/main/skills/engineering/to-tickets) and [`setup-matt-pocock-skills`](https://github.com/mattpocock/skills/tree/main/skills/engineering/setup-matt-pocock-skills), which the forks here replace, and its [`implement-spec`](https://github.com/mattpocock/skills/tree/main/skills/engineering/implement-spec) and [`pr`](https://github.com/mattpocock/skills/tree/main/skills/engineering/pr), which [`orchestrate-effort`](skills/orchestrate-effort/SKILL.md) and [`to-pr`](skills/to-pr/SKILL.md) replace.

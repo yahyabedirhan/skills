@@ -2,7 +2,7 @@
 
 This page lists every skill here that started as a copy of someone else's skill, with the upstream commit it was copied from and everything the fork changes.
 Read it before you upgrade a fork, and update it in the same pull request as a fork's change.
-The README's Origin column keeps the upstream link and the commit pin, and links each fork's entry here.
+The README's [Origin column](GLOSSARY.md#forks) keeps the upstream link and the commit pin, and links each fork's entry here.
 This page also holds each fork's license, and the license of each source the README credits without forking it.
 Each license file stays in its skill's folder.
 
