@@ -57,7 +57,7 @@ set-up-project
 
 | Change | What you touch |
 |---|---|
-| A new issue tracker | one seed template and one option in Section A |
+| A new issue tracker | one seed template and one option in `SKILL.md` > 'Section A: issue tracker' |
 | A new harness | its project files in `references/project-files.md` and in the audit list |
 | A new standard file for every project | a draft line in step 4 |
 | A new shared release rule | the user's `setup/releasing.md`; the seed only when every user would want it |
