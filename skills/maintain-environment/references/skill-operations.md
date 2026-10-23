@@ -54,8 +54,8 @@ ln -s ../../.agents/skills/<name> .claude/skills/<name>
 2. Find the upstream commit the copy starts from.
 3. Copy the folder into `<path-to-skills-repo>` on a branch, with the upstream licence beside it as `LICENSE.<upstream>`. Rename the skill once its behaviour diverges, so both can be installed.
 4. Make only the intended change, so a diff against upstream shows just that.
-5. In the README row, name the upstream repo, the commit, the licence file and a one-line summary of what changed, linked to the fork's entry in `docs/forks.md`.
-   That entry lists every change the fork makes.
+5. In the README row, name the upstream repo and the commit, and add one sentence on what changed that links the fork's entry in `docs/forks.md`.
+   That entry names the licence, links the `LICENSE.<upstream>` file and lists every change the fork makes.
 6. Ship it, then replace the upstream install with the fork in the same scope.
 
 **Upgrade a fork.** Treat it like a dependency upgrade: upstream's latest version is the base, and the fork's own changes go back on top.

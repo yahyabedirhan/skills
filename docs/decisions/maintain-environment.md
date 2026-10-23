@@ -386,5 +386,5 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 - **Status:** accepted
 - **Context:** The README's skills table carried each fork's full list of changes in its Origin column, which made the rows hard to read. The fork steps in `references/skill-operations.md` read that column when a fork is upgraded.
 - **Options:** Drop the lists from the README and rely on git history, or move them to one page in `docs/`.
-- **Choice and why:** Move them to `docs/forks.md`, one entry per fork with its upstream, commit, licence file and every change. The README row keeps the upstream link, the commit pin and the licence file, with a one-line summary that links the entry. An upgrade still has one written list to check against.
+- **Choice and why:** Move them to `docs/forks.md`, one entry per fork with its upstream, commit, licence and licence file, and every change. The README row keeps only the upstream link and the commit pin, with one sentence on what changed that links the entry. The licences of sources the README credits without forking also live there, and the README's License section points to the page. An upgrade still has one written list to check against.
 - **Consequences:** A fork change updates its entry in `docs/forks.md` in the same pull request.

@@ -2,12 +2,14 @@
 
 This page lists every skill here that started as a copy of someone else's skill, with the upstream commit it was copied from and everything the fork changes.
 Read it before you upgrade a fork, and update it in the same pull request as a fork's change.
-The README's Origin column keeps the upstream link, the commit and the licence file, and links each fork's entry here.
+The README's Origin column keeps the upstream link and the commit pin, and links each fork's entry here.
+This page also holds each fork's license, and the license of each source the README credits without forking it.
+Each license file stays in its skill's folder.
 
 ## handoff
 
 Fork of `handoff` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/productivity/handoff).
-MIT, see `skills/handoff/LICENSE.mattpocock`.
+License: MIT, see [`skills/handoff/LICENSE.mattpocock`](../skills/handoff/LICENSE.mattpocock).
 
 Changes:
 
@@ -17,7 +19,7 @@ Changes:
 ## implement
 
 Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/implement).
-MIT, see `skills/implement/LICENSE.mattpocock`.
+License: MIT, see [`skills/implement/LICENSE.mattpocock`](../skills/implement/LICENSE.mattpocock).
 
 Changes:
 
@@ -32,7 +34,7 @@ Changes:
 ## to-spec
 
 Fork of `to-spec` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/to-spec).
-MIT, see `skills/to-spec/LICENSE.mattpocock`.
+License: MIT, see [`skills/to-spec/LICENSE.mattpocock`](../skills/to-spec/LICENSE.mattpocock).
 
 Changes:
 
@@ -43,7 +45,7 @@ Changes:
 ## to-tickets
 
 Fork of `to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/to-tickets).
-MIT, see `skills/to-tickets/LICENSE.mattpocock`.
+License: MIT, see [`skills/to-tickets/LICENSE.mattpocock`](../skills/to-tickets/LICENSE.mattpocock).
 
 Changes:
 
@@ -55,7 +57,7 @@ Changes:
 ## to-pr
 
 Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr).
-MIT, see `skills/to-pr/LICENSE.humanlayer`.
+License: MIT, see [`skills/to-pr/LICENSE.humanlayer`](../skills/to-pr/LICENSE.humanlayer).
 
 Changes:
 
@@ -70,7 +72,7 @@ Changes:
 ## show-me
 
 Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`ca7c808`](https://github.com/humanlayer/skills/tree/ca7c808/plugins/show-me/skills/show-me).
-MIT, see `skills/show-me/LICENSE.humanlayer`.
+License: MIT, see [`skills/show-me/LICENSE.humanlayer`](../skills/show-me/LICENSE.humanlayer).
 
 Changes:
 
@@ -80,7 +82,7 @@ Changes:
 ## set-up-project
 
 Fork of `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/setup-matt-pocock-skills).
-MIT, see `skills/set-up-project/LICENSE.mattpocock`.
+License: MIT, see [`skills/set-up-project/LICENSE.mattpocock`](../skills/set-up-project/LICENSE.mattpocock).
 
 Changes:
 
@@ -93,3 +95,13 @@ Changes:
 - The GitHub template adds effort labels and names issues by title.
 - It proposes a `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md` to its `GLOSSARY` name.
 - It audits each harness's project files against set-up-machine's rule table.
+
+## Credited sources
+
+These skills are not forks, but they credit someone else's work.
+
+### email
+
+The daily workflows adapt the read-only recipes in [readdle/spark-cli-skills](https://github.com/readdle/spark-cli-skills) at [`507d26e`](https://github.com/readdle/spark-cli-skills/tree/507d26e/skills).
+No text is copied.
+License: MIT.
