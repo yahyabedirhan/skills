@@ -234,6 +234,21 @@
       }
     },
     {
+      "id": "rclone-delete",
+      "level": "ask",
+      "summary": "`rclone sync`, `bisync`, `move`, `delete`, `purge` and the other rclone commands that delete files",
+      "match": {
+        "program": "rclone",
+        "subcommands": [["sync"], ["bisync"], ["move"], ["moveto"], ["delete"], ["deletefile"], ["purge"], ["dedupe"], ["cleanup"]]
+      },
+      "reason": "They delete files: `sync` and `bisync` remove what one side lacks, `move` removes the source, and the rest remove files outright, so a wrong path or direction wipes a backup.",
+      "instruction": "Use `rclone copy` or `copyto`, which only add and update files; if deleting is the point, run it with `--dry-run` first, say in one line what goes and why, run it as its own command, and let the user approve it; where no one will be asked, stop and give the user the exact command.",
+      "samples": {
+        "covers": ["rclone sync data r2:bucket/data", "rclone bisync data r2:bucket/data", "rclone move data r2:bucket", "rclone delete r2:bucket/old", "rclone deletefile r2:bucket/a.txt", "rclone purge r2:bucket"],
+        "leaves": ["rclone copy data r2:bucket/data", "rclone copyto a.txt r2:bucket/a.txt", "rclone check data r2:bucket/data", "rclone lsf r2:bucket"]
+      }
+    },
+    {
       "id": "git-clean-force",
       "level": "ask",
       "summary": "`git clean -f` and its variants (`-fd`, `-fdx`)",
