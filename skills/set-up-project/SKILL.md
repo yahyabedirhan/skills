@@ -47,7 +47,7 @@ Summarise what's present and what's missing. Then take the sections in order. On
 Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it.
 Skip Section B when `triage` isn't installed, Section C when there's no monorepo and no old `CONTEXT.md` or `CONTEXT-MAP.md`, Section D when the project names no tool for a role, and Section E when the project has never released and has no release signals.
 
-#### Section A: issue tracker
+**Section A: Issue tracker.**
 
 > Explainer: The "issue tracker" is where issues live for this repo. Skills like `to-tickets`, `triage`, and `to-spec` read from and write to it. They need to know whether to call `gh issue create`, write a markdown file under `.efforts/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
 
@@ -61,9 +61,7 @@ Otherwise, or when the user prefers another tracker, offer:
 
 Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
 
-#### Section B: triage label vocabulary
-
-Skip this section entirely when exploration found that the `triage` skill isn't installed, since an uninstalled skill needs no labels.
+**Section B: Triage label vocabulary.** Skip this section entirely when exploration found that the `triage` skill isn't installed, since an uninstalled skill needs no labels.
 
 If it is installed, ask exactly one question:
 
@@ -71,9 +69,7 @@ If it is installed, ask exactly one question:
 
 The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names such as `bug:triage` for `needs-triage`, collect the overrides so `triage` applies existing labels instead of creating duplicates.
 
-#### Section C: domain docs
-
-Default to **single-context**, which is one `GLOSSARY.md` and one `docs/adr/` at the repo root.
+**Section C: Domain docs.** Default to **single-context**, which is one `GLOSSARY.md` and one `docs/adr/` at the repo root.
 This fits almost every repo, so write it without asking.
 
 Offer **multi-context**, a root `GLOSSARY-MAP.md` that points to one `GLOSSARY.md` per context, only when exploration found monorepo signals. Then confirm which layout they want.
@@ -82,17 +78,9 @@ When exploration found an old `CONTEXT.md` or `CONTEXT-MAP.md`, propose renaming
 
 When exploration found a `docs/assets/` folder, propose moving each topic with `git mv`, as `../orchestrating/folder-standard.md` > 'Migration from older layouts' says: images the project ships or shows to `assets/images/<topic>/`, screenshots to `assets/screenshots/<topic>/`, and each relative link to them updated.
 
-#### Section D: project environment defaults
+**Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md) > 'Environment defaults' says what may go there.
 
-Recommend **none**.
-Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md) > 'Environment defaults' says what may go there.
-
-#### Section E: release lifecycle
-
-Recommend writing `docs/agents/releasing.md` from [releasing.md](releasing.md), with the user's shared release rules applied over it, and filled with what exploration found: the version files, the changelog, how tags and GitHub releases are made, and the registry steps.
-Where the project does something the shared rules don't say, keep the project's way and name it.
-Where the two disagree, show both and ask which one this project follows.
-When the release steps already live in another doc, propose moving them into `docs/agents/releasing.md` and leaving a pointer behind.
+**Section E: Release lifecycle.** Recommend writing `docs/agents/releasing.md` from [releasing.md](releasing.md), with the user's shared release rules applied over it, and filled with what exploration found: the version files, the changelog, how tags and GitHub releases are made, and the registry steps. Where the project does something the shared rules don't say, keep the project's way and name it. Where the two disagree, show both and ask which one this project follows. When the release steps already live in another doc, propose moving them into `docs/agents/releasing.md` and leaving a pointer behind.
 
 ### 4. Confirm and write
 
