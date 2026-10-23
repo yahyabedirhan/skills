@@ -36,16 +36,16 @@ Then install a plugin by name:
 
 | Plugin | Skills | Install |
 |---|---|---|
-| effort-workflow | The [effort workflow](#effort-workflow) family; installs `show-me` with it | `claude plugin install effort-workflow@yahyabedirhan-skills` |
-| show-me | show-me | `claude plugin install show-me@yahyabedirhan-skills` |
-| low-level-design | low-level-design | `claude plugin install low-level-design@yahyabedirhan-skills` |
-| system-design | system-design | `claude plugin install system-design@yahyabedirhan-skills` |
-| cli-design | cli-design | `claude plugin install cli-design@yahyabedirhan-skills` |
-| swift-performance | swift-performance | `claude plugin install swift-performance@yahyabedirhan-skills` |
-| email | email | `claude plugin install email@yahyabedirhan-skills` |
-| wispr-flow-dictionary | wispr-flow-dictionary | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
+| `effort-workflow` | The [effort workflow](#effort-workflow) family; installs [`show-me`](skills/show-me/SKILL.md) with it | `claude plugin install effort-workflow@yahyabedirhan-skills` |
+| `show-me` | [show-me](skills/show-me/SKILL.md) | `claude plugin install show-me@yahyabedirhan-skills` |
+| `low-level-design` | [low-level-design](skills/low-level-design/SKILL.md) | `claude plugin install low-level-design@yahyabedirhan-skills` |
+| `system-design` | [system-design](skills/system-design/SKILL.md) | `claude plugin install system-design@yahyabedirhan-skills` |
+| `cli-design` | [cli-design](skills/cli-design/SKILL.md) | `claude plugin install cli-design@yahyabedirhan-skills` |
+| `swift-performance` | [swift-performance](skills/swift-performance/SKILL.md) | `claude plugin install swift-performance@yahyabedirhan-skills` |
+| `email` | [email](skills/email/SKILL.md) | `claude plugin install email@yahyabedirhan-skills` |
+| `wispr-flow-dictionary` | [wispr-flow-dictionary](skills/wispr-flow-dictionary/SKILL.md) | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
 
-A plugin's skills run as `/<plugin>:<skill>` or by their bare name, such as `/to-pr`. The [Agent setup](#agent-setup) skills aren't plugins: `set-up-machine` wires a hook to its installed path, which a plugin update would move.
+A plugin's skills run as `/<plugin>:<skill>` or by their bare name, such as `/to-pr`. The [Agent setup](#agent-setup) skills aren't plugins: [`set-up-machine`](skills/set-up-machine/SKILL.md) wires a hook to its installed path, which a plugin update would move.
 
 Install a skill one way or the other, not both. Claude Code loads it twice, and the bare name runs the `npx skills` copy, so plugin updates go unseen. To switch to the plugin, first remove the copy with `npx skills remove <skill-name>`, and add `-g` for a global install.
 
@@ -63,10 +63,10 @@ Each fork's full list of changes is in [docs/forks.md](docs/forks.md).
 | [orchestrate-effort](skills/orchestrate-effort/SKILL.md) | Builds an effort from its spec and tickets through sub-agents and opens the pull request. | Original. |
 | [handoff](skills/handoff/SKILL.md) | Writes a handoff document in the handoff folder for another session to pick up, and never commits it. | Fork of `handoff` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/productivity/handoff). Adapted so agents can load it and it saves to the repository's handoff folder, with every change listed in [docs/forks.md](docs/forks.md#handoff). |
 | [handover](skills/handover/SKILL.md) | Hands work over to a new session outside this one. It gets the work and its handoff ready, starts the session with a one-line prompt and confirms it started. | Original. |
-| [handover-to-herdr](skills/handover-to-herdr/SKILL.md) | Starts a new agent session in a labelled `herdr` tab, sends it its starting prompt and confirms it's working. The handover and init-effort skills start sessions through it. | Original. |
+| [handover-to-herdr](skills/handover-to-herdr/SKILL.md) | Starts a new agent session in a labelled `herdr` tab, sends it its starting prompt and confirms it's working. The [handover](skills/handover/SKILL.md) and [init-effort](skills/init-effort/SKILL.md) skills start sessions through it. | Original. |
 | [treehouse](skills/treehouse/SKILL.md) | Leases, lists, returns and destroys worktrees from `treehouse`'s pre-warmed pool, for the skills that make or free worktrees when `treehouse` is your worktree tool. | Original. |
-| [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | Picks up an effort from a handoff and runs orchestrate-effort. | Original. |
-| [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with tdd and code-review. | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/implement). Adapted so an orchestrator's sub-agents can run it, with every change listed in [docs/forks.md](docs/forks.md#implement). |
+| [orchestrate-with-handoff](skills/orchestrate-with-handoff/SKILL.md) | Picks up an effort from a handoff and runs [orchestrate-effort](skills/orchestrate-effort/SKILL.md). | Original. |
+| [implement](skills/implement/SKILL.md) | Builds work from a spec or tickets with [tdd](https://github.com/mattpocock/skills/tree/main/skills/engineering/tdd) and [code-review](https://github.com/mattpocock/skills/tree/main/skills/engineering/code-review). | Fork of `implement` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/implement). Adapted so an orchestrator's sub-agents can run it, with every change listed in [docs/forks.md](docs/forks.md#implement). |
 | [to-spec](skills/to-spec/SKILL.md) | Turns the current conversation into a spec and publishes it to the project's tracker. | Fork of `to-spec` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/to-spec). Adapted to this repo's setup flow and local tracker, with every change listed in [docs/forks.md](docs/forks.md#to-spec). |
 | [to-tickets](skills/to-tickets/SKILL.md) | Breaks a plan, spec or conversation into tracer-bullet tickets, each naming what blocks it, and publishes them to the project's tracker. | Fork of `to-tickets` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/to-tickets). Adapted to this repo's setup flow and local tracker, with every change listed in [docs/forks.md](docs/forks.md#to-tickets). |
 | [to-pr](skills/to-pr/SKILL.md) | Opens a pull request or rewrites its description, with a one-sentence why, notes for reviewers and a visual change outline. | Fork of `visual-pr` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`4e39d8f`](https://github.com/humanlayer/skills/tree/4e39d8fe020f/plugins/visual-pr/skills/visual-pr). Adapted to plain-text outlines and this repo's folder standard, with every change listed in [docs/forks.md](docs/forks.md#to-pr). |
@@ -88,19 +88,19 @@ Each fork's full list of changes is in [docs/forks.md](docs/forks.md).
 | Skill | What it does | Origin |
 |---|---|---|
 | [show-me](skills/show-me/SKILL.md) | Explains the current topic visually with pseudocode, call trees, file trees, `diff` blocks or one focused HTML file. | Fork of `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) at [`ca7c808`](https://github.com/humanlayer/skills/tree/ca7c808/plugins/show-me/skills/show-me). Adapted to plain-text views that agents can still load, with every change listed in [docs/forks.md](docs/forks.md#show-me). |
-| [show-me-artifact](skills/show-me-artifact/SKILL.md) | Publishes a visual report or a set of decisions as a private Claude artifact, a hosted page you read later or on another device. Outside Claude it falls back to show-me's local HTML file. | Original. Builds on show-me, which it loads for the principles. |
+| [show-me-artifact](skills/show-me-artifact/SKILL.md) | Publishes a visual report or a set of decisions as a private Claude artifact, a hosted page you read later or on another device. Outside Claude it falls back to [show-me](skills/show-me/SKILL.md)'s local HTML file. | Original. Builds on [show-me](skills/show-me/SKILL.md), which it loads for the principles. |
 | [show-me-diagram](skills/show-me-diagram/SKILL.md) | Explains the current topic, a status or a concept as one designed diagram, drawn through the [diagram-design](https://github.com/cathrynlavery/diagram-design) skill in a profile it ships. | Original. Builds on [diagram-design](https://github.com/cathrynlavery/diagram-design), which it loads for the build. |
 | [i-am-afk](skills/i-am-afk/SKILL.md) | Tells the agents you're away, so they keep working alone and prepare the costly choices as a plan for your return. You start it with `/i-am-afk`. | Original. |
-| [i-am-back](skills/i-am-back/SKILL.md) | Tells the agents you're back, so they report through show-me what is done, what they decided and what waits for you. You start it with `/i-am-back`. | Original. Builds on show-me. |
+| [i-am-back](skills/i-am-back/SKILL.md) | Tells the agents you're back, so they report through [show-me](skills/show-me/SKILL.md) what is done, what they decided and what waits for you. You start it with `/i-am-back`. | Original. Builds on [show-me](skills/show-me/SKILL.md). |
 
 ### Agent setup
 
 | Skill | What it does | Origin |
 |---|---|---|
 | [maintain-environment](skills/maintain-environment/SKILL.md) | The starting point for a change to what your agents run with: it decides where the change belongs, routes it to its source and says what carries it to every harness and install. It also starts your workstation repo and runs skill operations with `npx skills`. | Original. |
-| [retire-machine](skills/retire-machine/SKILL.md) | Retires a machine you no longer use, such as an old VPS: it saves what you keep, disconnects the machine from your accounts and other machines, and hands you the provider's delete step. It is the reverse of set-up-machine. | Original. |
+| [retire-machine](skills/retire-machine/SKILL.md) | Retires a machine you no longer use, such as an old VPS: it saves what you keep, disconnects the machine from your accounts and other machines, and hands you the provider's delete step. It is the reverse of [set-up-machine](skills/set-up-machine/SKILL.md). | Original. |
 | [set-up-machine](skills/set-up-machine/SKILL.md) | Sets up and audits a machine's agent harnesses from one rule table, with one shared global instructions file, the global rules each harness enforces and a pre-tool hook. It covers Claude Code, Codex, opencode, Cursor, Pi and Grok Bot. | Original. |
-| [set-up-project](skills/set-up-project/SKILL.md) | Sets up and audits a project for your agents once the machine passes set-up-machine's check: `AGENTS.md` as the one rules file, the issue tracker, triage labels, domain docs and the folder standard's `.gitignore`. Its audit flags any project harness file that weakens a global rule. | Fork of `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/setup-matt-pocock-skills). Adapted to this repo's setup flow, with every change listed in [docs/forks.md](docs/forks.md#set-up-project). |
+| [set-up-project](skills/set-up-project/SKILL.md) | Sets up and audits a project for your agents once the machine passes [set-up-machine](skills/set-up-machine/SKILL.md)'s check: `AGENTS.md` as the one rules file, the issue tracker, triage labels, domain docs and the folder standard's `.gitignore`. Its audit flags any project harness file that weakens a global rule. | Fork of `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) at [`d81f3a1`](https://github.com/mattpocock/skills/tree/d81f3a183412/skills/engineering/setup-matt-pocock-skills). Adapted to this repo's setup flow, with every change listed in [docs/forks.md](docs/forks.md#set-up-project). |
 | [skill-recap](skills/skill-recap/SKILL.md) | Recaps how a session and its sub-agents used their skills, or a scope you name, and ends with findings you can file with [to-tickets](skills/to-tickets/SKILL.md). You start it with `/skill-recap`, or `$skill-recap` in Codex. | Original. |
 
 ### Daily workflows
@@ -135,8 +135,8 @@ SETTLE     settle-effort                                 after you approve: merg
 
 Install the family together with its companions, and leave out the upstream skills it replaces:
 
-- **Companions:** `show-me`; `grilling`, `prototype`, `tdd` and `code-review` from [mattpocock/skills](https://github.com/mattpocock/skills); and `set-up-project` and `set-up-machine` from [Agent setup](#agent-setup) to set each project up.
-- **Replaced upstream skills:** leave out that repo's `handoff`, `implement`, `to-spec`, `to-tickets` and `setup-matt-pocock-skills`, which the forks here replace, and its `implement-spec` and `pr`, which `orchestrate-effort` and `to-pr` replace.
+- **Companions:** [`show-me`](skills/show-me/SKILL.md); [`grilling`](https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling), [`prototype`](https://github.com/mattpocock/skills/tree/main/skills/engineering/prototype), [`tdd`](https://github.com/mattpocock/skills/tree/main/skills/engineering/tdd) and [`code-review`](https://github.com/mattpocock/skills/tree/main/skills/engineering/code-review) from [mattpocock/skills](https://github.com/mattpocock/skills); and [`set-up-project`](skills/set-up-project/SKILL.md) and [`set-up-machine`](skills/set-up-machine/SKILL.md) from [Agent setup](#agent-setup) to set each project up.
+- **Replaced upstream skills:** leave out that repo's [`handoff`](https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff), [`implement`](https://github.com/mattpocock/skills/tree/main/skills/engineering/implement), [`to-spec`](https://github.com/mattpocock/skills/tree/main/skills/engineering/to-spec), [`to-tickets`](https://github.com/mattpocock/skills/tree/main/skills/engineering/to-tickets) and [`setup-matt-pocock-skills`](https://github.com/mattpocock/skills/tree/main/skills/engineering/setup-matt-pocock-skills), which the forks here replace, and its [`implement-spec`](https://github.com/mattpocock/skills/tree/main/skills/engineering/implement-spec) and [`pr`](https://github.com/mattpocock/skills/tree/main/skills/engineering/pr), which [`orchestrate-effort`](skills/orchestrate-effort/SKILL.md) and [`to-pr`](skills/to-pr/SKILL.md) replace.
 - **Lifecycle and records:** the full path is in [the effort lifecycle](skills/orchestrating/SKILL.md#effort-lifecycle). Where each record goes, such as the spec, tickets, handoff and notes, is in the [folder standard](skills/orchestrating/folder-standard.md).
 
 ### Design frameworks
@@ -159,7 +159,7 @@ The documents in each skill's `references/` hold the principles, patterns and co
 
 ### Communication style
 
-How an agent shows its thinking so a reader takes it in quickly. `show-me` picks the smallest view that makes the point, in plain text that reads the same in a terminal, an editor, or on GitHub, `show-me-artifact` publishes a larger report the same way as a private Claude artifact, and `show-me-diagram` draws one designed diagram through `diagram-design`.
+How an agent shows its thinking so a reader takes it in quickly. [`show-me`](skills/show-me/SKILL.md) picks the smallest view that makes the point, in plain text that reads the same in a terminal, an editor, or on GitHub, [`show-me-artifact`](skills/show-me-artifact/SKILL.md) publishes a larger report the same way as a private Claude artifact, and [`show-me-diagram`](skills/show-me-diagram/SKILL.md) draws one designed diagram through `diagram-design`.
 
 ```text
 show-me            explains the current topic
@@ -174,7 +174,7 @@ i-am-back          you're back: show-me what happened, what's done and what need
 
 ### Agent setup
 
-What your agents run with, such as permissions, instructions and skills, kept in order across every harness and machine. `set-up-machine` sets up and audits each machine's harnesses from one rule table, `set-up-project` each project on top of it, `maintain-environment` decides where a change belongs and carries it from its source to every harness and install, and `skill-recap` looks back over a session for what its skills should change.
+What your agents run with, such as permissions, instructions and skills, kept in order across every harness and machine. [`set-up-machine`](skills/set-up-machine/SKILL.md) sets up and audits each machine's harnesses from one rule table, [`set-up-project`](skills/set-up-project/SKILL.md) each project on top of it, [`maintain-environment`](skills/maintain-environment/SKILL.md) decides where a change belongs and carries it from its source to every harness and install, and [`skill-recap`](skills/skill-recap/SKILL.md) looks back over a session for what its skills should change.
 
 ```text
 where       permission · global instruction · project AGENTS.md · skill · skill reference (no memory)
@@ -187,7 +187,7 @@ audits      which skills you use, a fresh prompt audit, a run's cost
 recap       /skill-recap: how a session used its skills → findings → /to-tickets
 ```
 
-`set-up-machine` does the same for the rules and instructions every harness runs with. The rule table and the shared global instructions file are declared once; each harness gets its native entries from them:
+[`set-up-machine`](skills/set-up-machine/SKILL.md) does the same for the rules and instructions every harness runs with. The rule table and the shared global instructions file are declared once; each harness gets its native entries from them:
 
 ```text
 rules.json                      each global rule once: level, reason, instruction, samples
@@ -206,7 +206,7 @@ Pi            ~/.pi/agent/      extensions/set-up-machine.ts runs the hook and a
 run again                       the audit: a diff that changes nothing
 ```
 
-`set-up-project` does it for one project, on top of the machine. Global rules are the safety rails; a project's own harness files only add allows:
+[`set-up-project`](skills/set-up-project/SKILL.md) does it for one project, on top of the machine. Global rules are the safety rails; a project's own harness files only add allows:
 
 ```text
 verify.py                       set-up-machine's check first; a machine that fails is set up before the project
@@ -219,7 +219,7 @@ audit                           any project harness file that weakens a global r
 
 Everyday tasks outside the code that an agent can take over safely. Each skill changes only what you approve, with sending, deleting and other risky actions left to you.
 
-`email` reads mail only for an email task you asked for, fast with the Spark CLI, and makes every change through the Gmail connector. It archives freely and makes any other change only when you ask. A draft you ask for is written in chat; one saved in Gmail or Spark needs you to name the tool and approve each write in the harness. Permission rules deny sending, trash and spam.
+[`email`](skills/email/SKILL.md) reads mail only for an email task you asked for, fast with the Spark CLI, and makes every change through the Gmail connector. It archives freely and makes any other change only when you ask. A draft you ask for is written in chat; one saved in Gmail or Spark needs you to name the tool and approve each write in the harness. Permission rules deny sending, trash and spam.
 
 ```text
 read     Spark CLI, for an email task you asked for: inbox by category, threads, pins, contacts
@@ -228,9 +228,9 @@ how      which tool for which job; what to do and when stays with you
 setup    setup.md: both tools, the deny and ask rules, and checks
 ```
 
-`calendar` reads events and free time whenever a task needs them, with Spark first and the Google Calendar connector when Spark Desktop is closed. It never changes the calendar: permission rules deny every connector write and `spark event`.
+[`calendar`](skills/calendar/SKILL.md) reads events and free time whenever a task needs them, with Spark first and the Google Calendar connector when Spark Desktop is closed. It never changes the calendar: permission rules deny every connector write and `spark event`.
 
-`wispr-flow-dictionary` keeps [Wispr Flow](https://wisprflow.ai)'s dictionary accurate for technical vocabulary, where dictation mishears product names, company names and commands. It reads Wispr Flow's local database and writes only its `Dictionary` table, after a backup.
+[`wispr-flow-dictionary`](skills/wispr-flow-dictionary/SKILL.md) keeps [Wispr Flow](https://wisprflow.ai)'s dictionary accurate for technical vocabulary, where dictation mishears product names, company names and commands. It reads Wispr Flow's local database and writes only its `Dictionary` table, after a backup.
 
 ```text
 find    terms, formatter swaps and counts over any window (30m, 3h, 2d)
@@ -241,7 +241,7 @@ check   counts the misheard form since its word was added, to see whether a fix 
 
 ## Adding a skill
 
-Add its row to its family's table under [Skills](#skills), and fold it into that family's section under [How the skills work](#how-the-skills-work). Prefer an existing family; start a new one only when a skill fits none. A new family gets its own subsection and table under Skills, a line in the list at the top, and a section under [How the skills work](#how-the-skills-work), in the same shape as the others: two sentences and one outline.
+Add its row to its family's table under [Skills](#skills), and fold it into that family's section under [How the skills work](#how-the-skills-work). Link every skill name you mention outside a code block: a skill here to its `SKILL.md`, and someone else's to its source. Put a name with no source to link in backticks, such as `close-effort`. Prefer an existing family; start a new one only when a skill fits none. A new family gets its own subsection and table under Skills, a line in the list at the top, and a section under [How the skills work](#how-the-skills-work), in the same shape as the others: two sentences and one outline.
 
 ## Decision records
 
