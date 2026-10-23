@@ -11,7 +11,7 @@ Scaffold and audit the per-repo configuration the skills assume:
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
-- **Release lifecycle**: how the project ships a version, in `docs/agents/releasing.md`, so everyone who releases it follows the same steps. It starts from the user's shared release rules when their workstation repo has them.
+- **Release lifecycle**: `docs/agents/releasing.md` explains how the project releases a version, so everyone who releases it follows the same steps. It starts from the user's shared release rules when their workstation repo has them.
 - **Folder standard**: the `.gitignore` lines of [orchestrating/folder-standard.md](../orchestrating/folder-standard.md)
 - **Allow-only project permissions**: the global rules are the machine's safety rails, and a project's own harness files only add convenience. The **audit** flags every project file that weakens a global rule.
 
@@ -36,8 +36,8 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `docs/assets/`: the folder standard's old image folder
 - Is the `triage` skill installed? It is when a `triage` skill folder sits beside this one, or `triage` is in your available skills. This decides whether Section B runs at all.
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
-- Release signals: `CHANGELOG.md`, the files that hold a version, the tags and GitHub releases (`gh release list`), what publishes to a registry (a `package.json` without `"private": true`, a Homebrew cask, a release workflow), and any release steps already in `AGENTS.md` or another doc. This decides whether Section E runs.
-- The user's shared release rules: when the pointer `~/.config/agents/source.md` names a workstation repo, read `<path-to-workstation-repo>/setup/releasing.md` if it exists. When there is no pointer or no file, the seed template alone is the start.
+- How the project releases today: look for a `CHANGELOG.md`, the files that hold a version, the tags and the GitHub releases that `gh release list` shows, anything that publishes to a registry, and release steps already written in `AGENTS.md` or another doc. A `package.json` without `"private": true`, a Homebrew cask and a release workflow each publish to a registry. These signals decide whether Section E runs.
+- The user's shared release rules: when the pointer `~/.config/agents/source.md` names a workstation repo, read `<path-to-workstation-repo>/setup/releasing.md` if it exists. Without the pointer or the file, the seed template alone is the starting point.
 - A tool the project's own docs require for a role skills name, such as a worktree tool in a `docs/worktrees.md` or a session host its scripts assume. This decides whether Section D runs.
 
 ### 3. Present findings and ask
