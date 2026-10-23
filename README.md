@@ -78,10 +78,10 @@ Each fork's full list of changes is in [docs/forks.md](docs/forks.md).
 
 | Skill | What it does | Origin |
 |---|---|---|
-| [low-level-design](skills/low-level-design/SKILL.md) | Designs, explains or redesigns code at the level of modules, classes, files and folders, with reference documents for the principles and patterns. | Original. Distils Hello Interview's low-level design lessons, cited at the end of each document. |
+| [low-level-design](skills/low-level-design/SKILL.md) | Designs, explains or redesigns code at the level of modules, classes, files and folders, with reference documents for the principles and patterns. | Original. Distils Hello Interview's low-level design lessons, cited at the end of each reference document that uses them. |
 | [system-design](skills/system-design/SKILL.md) | Designs, explains or redesigns a system at the level of services, data stores, APIs and scale, with reference documents for the core concepts. | Original. Distils Hello Interview's system design lessons, cited at the end of each document. |
 | [cli-design](skills/cli-design/SKILL.md) | Designs, explains, audits or redesigns a command-line interface for the people, scripts and agents that call it, with a reference document for the shared conventions. | Original. Distils the [Command Line Interface Guidelines](https://clig.dev/) and the POSIX Utility Conventions, cited at the end of each document. |
-| [swift-performance](skills/swift-performance/SKILL.md) | Keeps a Swift app fast on macOS. A build mode keeps the common SwiftUI and AppKit mistakes out of the code, and a diagnosis mode finds the cause of slowness. | Original. Distils a diagnosis of a SwiftUI menu bar app's tabs layout. |
+| [swift-performance](skills/swift-performance/SKILL.md) | Keeps a Swift app fast on macOS. A build mode keeps the common SwiftUI and AppKit mistakes out of the code, and a diagnosis mode finds the cause of slowness. | Original. Written from tracing a SwiftUI menu bar app's slow tab layout, keeping only the lessons that hold for nearly every macOS Swift app. |
 
 ### Communication style
 
