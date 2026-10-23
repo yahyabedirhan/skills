@@ -1,6 +1,8 @@
 # Decisions: calendar
 
-The decisions behind the `calendar` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`calendar`](../../skills/calendar/SKILL.md) skill.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## 2026-10-01: Spark first, the Google Calendar connector as fallback
 

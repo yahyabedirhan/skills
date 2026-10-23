@@ -1,6 +1,8 @@
 # Decisions: to-pr
 
-The decisions behind the `to-pr` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`to-pr`](../../skills/to-pr/SKILL.md) skill.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## 2026-09-28: review links go in the chat report, not the description
 

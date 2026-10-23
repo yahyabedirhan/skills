@@ -1,18 +1,20 @@
 # Domain Docs
 
-How the engineering skills should consume this repo's domain documentation when exploring the codebase.
+This page says how the engineering skills read this repo's domain docs when they explore the codebase.
 
 ## Before exploring, read these
 
 - **`GLOSSARY.md`** at the repo root, or
-- **`GLOSSARY-MAP.md`** at the repo root if it exists: it points at one `GLOSSARY.md` per context. Read each one relevant to the topic.
-- **`docs/decisions/`**: read the decision records that touch the area you're about to work in. In multi-context repos, also check `src/<context>/docs/decisions/` for context-scoped decisions.
+- **`GLOSSARY-MAP.md`** at the repo root if it exists: it points at one `GLOSSARY.md` per context.
+Read each one relevant to the topic.
+- **`docs/decisions/`**: read the decision records that touch the area you're about to work in.
+In multi-context repos, also check `src/<context>/docs/decisions/` for context-scoped decisions.
 
 If any of these files don't exist, **proceed silently** and work from the code, and don't suggest creating them: the `/domain-modeling` skill creates them lazily, when terms or decisions actually get resolved.
 
 ## File structure
 
-Single-context repo (most repos):
+A single-context repo, which most repos are:
 
 ```
 /
@@ -23,7 +25,7 @@ Single-context repo (most repos):
 └── src/
 ```
 
-Multi-context repo (presence of `GLOSSARY-MAP.md` at the root):
+A multi-context repo, which has a `GLOSSARY-MAP.md` at the root:
 
 ```
 /
@@ -48,4 +50,4 @@ If the concept you need isn't in the glossary yet, that's a signal: either you'r
 
 If your output contradicts an existing decision record, surface it explicitly rather than silently overriding:
 
-> _Contradicts `docs/decisions/effort-workflow.md` (a dated entry), but worth reopening because…_
+> _Contradicts a dated entry in `docs/decisions/effort-workflow.md`, but worth reopening because…_

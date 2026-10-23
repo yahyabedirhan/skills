@@ -1,8 +1,11 @@
 # Design: maintain-environment
 
-How `maintain-environment` is built. A newcomer needs two facts first:
+This page explains how [`maintain-environment`](../../skills/maintain-environment/SKILL.md) is built, for whoever changes it.
+A newcomer needs two facts first:
 
-- It is the **starting point** for any change to what agents run with. It decides which source the change belongs in, then hands over to that source's own guide. It repeats nothing the source already says.
+- It is the **starting point** for any change to what agents run with.
+It decides which source the change belongs in, then hands over to that source's own guide.
+It repeats nothing the source already says.
 - It owns only what no other place owns: the layer choice, the team test, personal against public, and operations on skills.
 
 ## Requirements

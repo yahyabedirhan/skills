@@ -1,6 +1,8 @@
 # Decisions: show-me-diagram
 
-The decisions behind the `show-me-diagram` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`show-me-diagram`](../../skills/show-me-diagram/SKILL.md) skill.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## 2026-10-12: a pointer to diagram-design, sibling to show-me
 

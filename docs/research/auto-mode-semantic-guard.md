@@ -1,6 +1,10 @@
 # Can auto mode block what rules can't?
 
-Facts for [Can auto mode block what rules can't? (#65)](https://github.com/yahyabedirhan/skills/issues/65), under [Spec: every harness and project is set up and audited from the skills (#49)](https://github.com/yahyabedirhan/skills/issues/49). The case under test is the rule from [Agents never read environment variables (#64)](https://github.com/yahyabedirhan/skills/issues/64): an agent that runs `echo $TOKEN`, or reads a secret by a route no pattern names, gets past every deny list. This page asks whether each harness's auto mode, a model that judges actions, can carry that rule. It builds on [What each harness can and can't do](harness-capabilities.md). Researched 2026-09-29.
+This page collects the facts for [Can auto mode block what rules can't? (#65)](https://github.com/yahyabedirhan/skills/issues/65), under [Spec: every harness and project is set up and audited from the skills (#49)](https://github.com/yahyabedirhan/skills/issues/49).
+The case under test is the rule from [Agents never read environment variables (#64)](https://github.com/yahyabedirhan/skills/issues/64): an agent that runs `echo $TOKEN`, or reads a secret by a route no pattern names, gets past every deny list.
+This page asks whether each harness's auto mode, a model that judges actions, can carry that rule.
+It builds on [What each harness can and can't do](harness-capabilities.md).
+Researched 2026-09-29.
 
 Versions checked: Claude Code 2.1.284, codex-cli 0.157.1, opencode 1.18.33, cursor-agent 2026.09.18-9a7762b.
 
@@ -9,7 +13,8 @@ Evidence tags:
 - **[doc]** the harness's official documentation, linked per section.
 - **[src]** official source: `openai/codex` at commit `0462dcc`, `anomalyco/opencode` branch `dev` at commit `7945de2`.
 - **[bin]** the installed release, read-only: `claude auto-mode defaults`, `--help` output, the `cursor-agent` JavaScript bundle.
-- **[probe]** a real session run for this research, in a throwaway folder with a fake variable `ACME_API_TOKEN=probe-not-a-secret` and a fake `.env` holding the same value, the environment scrubbed with `env -i` so no real variable reached the agent. Section 5 has the table.
+- **[probe]** a real session run for this research, in a throwaway folder with a fake variable `ACME_API_TOKEN=probe-not-a-secret` and a fake `.env` holding the same value, the environment scrubbed with `env -i` so no real variable reached the agent.
+Section 5 has the table.
 - **[session]** what a Claude Code session in auto mode showed while doing this research.
 - **To confirm** says what is still open and the exact check that would settle it.
 

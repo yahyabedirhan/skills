@@ -1,6 +1,8 @@
 # Decisions: maintain-environment
 
-The decisions behind the `maintain-environment` skill, named `maintain-skills` until 2026-09-29. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`maintain-environment`](../../skills/maintain-environment/SKILL.md) skill, named `maintain-skills` until 2026-09-29.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## 2026-09-28: every new skill gets a prompt audit from a fresh sub-agent
 
@@ -380,3 +382,11 @@ The decisions behind the `maintain-environment` skill, named `maintain-skills` u
 
 ### References
 - [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-23: each fork's full list of changes lives in FORKS.md
+
+- **Status:** accepted
+- **Context:** The README's skills table carried each fork's full list of changes in its Origin column, which made the rows hard to read. The fork steps in `references/skill-operations.md` read that column when a fork is upgraded.
+- **Options:** Drop the lists from the README and rely on git history, or move them to one page in `docs/`.
+- **Choice and why:** Move them to `FORKS.md`, one entry per fork with its upstream, commit, licence and licence file, and every change. The README row keeps only the upstream link and the commit pin, with one sentence on what changed that links the entry. The licences of sources the README credits without forking also live there, and the README's License section points to the page. An upgrade still has one written list to check against.
+- **Consequences:** A fork change updates its entry in `FORKS.md` in the same pull request.

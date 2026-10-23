@@ -1,6 +1,8 @@
 # Decisions: email
 
-The decisions behind the `email` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`email`](../../skills/email/SKILL.md) skill.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## 2026-09-28: Spark reads, Gmail acts
 

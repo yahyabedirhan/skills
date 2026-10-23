@@ -1,10 +1,13 @@
 # Effort branches and pull requests
 
-> Moved from a private notes repo on 2026-09-26. Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo. The VPS host, user and machine ID are redacted.
+This page describes how an effort's branch and pull request are started, continued, stacked and delivered with git, GitHub, `gh` and treehouse, as input for skill-improvement issues [#3](https://github.com/yahyabedirhan/skills/issues/3), [#6](https://github.com/yahyabedirhan/skills/issues/6), [#14](https://github.com/yahyabedirhan/skills/issues/14) and [#15](https://github.com/yahyabedirhan/skills/issues/15).
+Researched 2026-09-25.
 
-How an effort's branch and pull request are started, continued, stacked and delivered with git, GitHub, `gh` and treehouse, as input for skill-improvement issues [#3](https://github.com/yahyabedirhan/skills/issues/3), [#6](https://github.com/yahyabedirhan/skills/issues/6), [#14](https://github.com/yahyabedirhan/skills/issues/14) and [#15](https://github.com/yahyabedirhan/skills/issues/15). Researched 2026-09-25.
+> Moved from a private notes repo on 2026-09-26.
+> Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo.
+> The VPS host, user and machine ID are redacted.
 
-Legend: **[doc]** stated by the cited primary source; **[tested]** reproduced in a throwaway repo under `tmp/effort-branches/lab/` (no remote); **[observed]** read from two of the maintainer's repos, one public and one private, with read-only commands; **[unverified]** inferred, not tested.
+Legend: **[doc]** stated by the cited primary source; **[tested]** reproduced in a throwaway repo under `tmp/effort-branches/lab/`, which has no remote; **[observed]** read from two of the maintainer's repos, one public and one private, with read-only commands; **[unverified]** inferred, not tested.
 
 ## 1. Treehouse worktrees
 

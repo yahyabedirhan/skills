@@ -1,6 +1,8 @@
 # Decisions: low-level-design
 
-The decisions behind the `low-level-design` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`low-level-design`](../../skills/low-level-design/SKILL.md) skill.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## Maintaining
 
