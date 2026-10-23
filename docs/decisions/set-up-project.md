@@ -152,5 +152,16 @@ The decisions behind the `set-up-project` skill. This file is for maintaining it
 - **Choice and why:** A pass is exit code 0 from set-up-machine's verifier; otherwise run set-up-machine first.
 - **Consequences:** set-up-machine can change what it prints without an edit here.
 
+## 2026-10-23: each project's release lifecycle lives in its own docs/agents/releasing.md
+
+- **Status:** accepted
+- **Context:** Versions fell behind across a user's projects: one reached its registry with no tag and no GitHub release. The release steps lived outside each project, so its team couldn't see them.
+- **Options:** None considered.
+- **Choice and why:** Releases work the way issue tracking does. set-up-project writes `docs/agents/releasing.md` from a seed template, so each project's team sees how it releases. The parts every project of the user shares live once, in `setup/releasing.md` of the workstation repo the pointer names, and the skill starts each project's page from them. The audit reports a project that releases without a page, and a page that disagrees with the shared rules.
+- **Consequences:**
+  - A project gets its page on its next set-up-project run.
+  - set-up-project reads the workstation repo for the first time, and only that one file. Without a pointer or the file, the seed template alone is the start.
+  - settle-effort follows the page after merging a version bump.
+
 ### References
 - [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.

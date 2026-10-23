@@ -21,6 +21,7 @@ Approving the pull request is the user's last step. Everything after it is yours
    - **When the pull request is already merged:** skip the merge, and still check the default branch's CI and, after a squash or a rebase, the pinned commits.
 3. **Read the pull request's description and the handoff** for what the delivery left open: follow-ups, checks it skipped and decisions for the user.
 4. **Run every follow-up and skipped check from step 3,** such as installing what changed or trying what could only be tried after the merge, and note each result for the report.
+   - **When the merge carried a version bump:** follow the project's `docs/agents/releasing.md` from the step after the merge through its check, and note each part's version for the report. Hand each step the page gives the user, such as a publish that needs their code, to the user, and wait for it before the check. When the project has no release page, tell the user and offer `/set-up-project`, which writes one.
 5. **Carry unfinished work over** as tickets in the next effort, labelled for it and linked back to where each came from. `gh issue create --label` fails when the label doesn't exist yet, so create a missing `effort:` label first with `gh label create`. Then close the spec and every ticket the merge finished, by hand for any a "closes" keyword missed.
    - **When it isn't clear which effort is next:** ask the user.
    - **For QA tickets:** leave them open for the user, with a comment on how to reach the build.

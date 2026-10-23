@@ -28,6 +28,10 @@ This project's tools for the roles skills name; each row overrides the global on
 ### Domain docs
 
 [one-line summary of layout: "single-context" or "multi-context"]. See `docs/agents/domain.md`.
+
+### Releases
+
+[one-line summary: where the version lives and where it publishes]. Before a release, and after merging a version bump, follow `docs/agents/releasing.md`.
 ```
 
 ## Environment defaults
