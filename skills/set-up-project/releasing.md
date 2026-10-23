@@ -1,64 +1,40 @@
 # Releasing
 
-This page explains how this project releases a new version, from choosing the version number to checking that the release is complete.
-Everyone who releases the project reads it, people and agents alike.
-Read it before you start a release, and again after you merge a pull request that changes the version, because the release is not finished until every step below is done.
-The `/set-up-project` skill wrote this page.
-It started from the release rules that the maintainer shares across all of their projects, when such rules exist, and added what this project does in its own way.
-When this page and the shared rules disagree, follow this page, and the next `/set-up-project` run brings the two back in line.
+This page explains how <project> releases a new version.
+Read it before you start a release, and after you merge a pull request that changes the version, because a release is finished only when every step below is done.
+The [`/set-up-project`](https://github.com/yahyabedirhan/skills/tree/main/skills/set-up-project) skill wrote it from the maintainer's shared release rules.
 
-_`/set-up-project` fills in each part below from what the project does today, removes each section that does not apply, and removes every note in italics like this one._
+_`/set-up-project` fills in each part below from what the project does today, keeps each step to a line or two, and removes every note in italics like this one._
+_Leave the version rule, the changelog format and the tag and notes formatting to the shared release rules, and write here only what this project does differently._
 
-## Version files
+## What a release ships
 
-A release sets the new version in each of these files:
+This section names the parts that must all show the new version.
 
-- `<file>` holds the version in `<the field or line>`.
+- _The version files, such as `package.json` or a `VERSION` file, and the packages that share one version._
+- A tag, `v<version>`, and a GitHub release for it.
+- A section in `CHANGELOG.md`.
+- _The registry each package goes to, linked._
 
-_`/set-up-project` writes one line for each file that a release changes, such as `package.json`, a `VERSION` file or a constant in the source code._
+_When the project publishes to GitHub only, `/set-up-project` writes that in one sentence after the list._
 
 ## Release order
 
-Every release runs these steps in this order, so that a registry never receives a version that has no tag and no GitHub release.
+This section lists the steps of every release, in order, so that a registry never gets a version without a tag and a GitHub release.
 
-0. Start by catching up.
-   Read what each part of the project says the newest version is:
-
-   ```sh
-   head -20 CHANGELOG.md | grep -m1 '^## [0-9]'
-   git fetch --tags origin && git describe --tags --abbrev=0 origin/<default-branch>
-   gh release view --json tagName -q .tagName
-   <the registry's read, such as npm view <package> version>
-   ```
-
-   When one part is behind the others, finish that version first, from the first step it is missing, before you start a new version.
-1. Open one pull request that sets the new version and the changelog.
-   Choose the version from the commits since the last tag, set it in every version file, and rename `## Unreleased` to `## <version> (<YYYY-MM-DD>)`.
-2. Merge the pull request once the maintainer approves it.
-3. Tag the merged commit as `v<version>`, and make a GitHub release for that tag with the changelog section as its notes.
-   _When a workflow does this, such as a `release.yml` that runs on a pushed tag, `/set-up-project` names the workflow here instead._
-4. Publish the version to the project's registry, and name who runs each command.
-   _`/set-up-project` writes how this project publishes, or removes this step when the project publishes only to GitHub._
-5. Check the release by running the reads from step 0 again.
-   Each read names the new version.
-
-A version is complete when every part names it.
-A release ends at step 5, not at the merge or the publish.
-
-## Version rule
-
-- Before version 1.0, a new feature or a breaking change raises the middle number and resets the last number to zero.
-  Any other change raises the last number.
-- From version 1.0, a breaking change raises the first number.
-- A published version is never changed or reused.
-  When a published version has a mistake, release a new patch version that fixes it.
-
-## Changelog
-
-- The changelog is `CHANGELOG.md` at the root of the repository, with the newest version first, written for the people who use the project.
-- Each pull request that makes a change users can see adds its line under `## Unreleased` at the top of the changelog.
+0. Check that the changelog, the version files, the latest tag and the latest GitHub release all name the same version, and finish any version that is behind first.
+1. Open one pull request that sets the version in _the version files_ and renames `## Unreleased` in `CHANGELOG.md` to `## <version> (<YYYY-MM-DD>)`.
+   Before 1.0, a feature or a breaking change raises the middle number, and anything else raises the last number.
+2. Merge it once the maintainer approves.
+3. Tag the merged commit as `v<version>` and make its GitHub release, with the changelog section as the notes.
+   _When a workflow does this, name the workflow instead._
+4. _Publish to the registry, in the order the packages depend on each other, as 'Roles in a release' below says. Remove this step when the project publishes to GitHub only, and renumber the check._
+5. Check again that every part names the new version.
 
 ## Roles in a release
 
-- The agent runs these steps: _`/set-up-project` lists them, such as choosing the version, writing the changelog, opening the pull request, tagging, making the GitHub release and running the checks._
-- The maintainer runs these steps: _`/set-up-project` lists them, such as approving the merge, or a publish that needs the maintainer's two-factor code._
+This section names who does each step.
+
+- The agent picks the version, writes the changelog, opens the release pull request, makes the tag and the GitHub release, and runs the checks.
+- The maintainer approves the version and the merge.
+  _Add any step that needs the maintainer's credentials, such as a publish with their two-factor code._

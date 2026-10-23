@@ -38,7 +38,7 @@ skills/set-up-project/
 ├── agents-md.md                # the AGENTS.md seed
 ├── issue-tracker-*.md          # seed per tracker
 ├── triage-labels.md, domain.md # seeds
-├── releasing.md                # the release page seed
+├── releasing.md                # the release page seed: what ships, the release order, the roles
 └── references/
     └── project-files.md        # what each harness lets a project file do to a global rule
 ```
