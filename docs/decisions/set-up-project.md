@@ -176,5 +176,5 @@ The spec is "Spec: every harness and project is set up and audited from the skil
 - **Options:** None considered.
 - **Choice and why:** The maintainer decided that release pages stay short. The seed holds three sections: what a release ships, the release order in a line or two per step, and the roles. Everything the shared release rules already say stays there, and the page holds only what the project does.
 - **Consequences:**
-  - A new release page starts short, and the next set-up-project run can trim an existing one.
+  - A new release page starts short. An existing long page stays until someone trims it, because the audit checks a page against the shared rules, not its length.
   - Without shared release rules, the seed's one-line version rule in step 1 is the only version rule a page gets.
