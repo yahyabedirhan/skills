@@ -168,3 +168,13 @@ The spec is "Spec: every harness and project is set up and audited from the skil
 
 ### References
 - [Spec: Give each environment skill one job and a readable verifier (#213)](https://github.com/yahyabedirhan/skills/issues/213): the redesign these entries come from.
+
+## 2026-10-23: release pages stay short
+
+- **Status:** accepted
+- **Context:** The first release pages restated the shared release rules, and added commands, formatting details and plans for registries a project didn't use. The maintainer found them too comprehensive, and trimmed two of them by hand.
+- **Options:** None considered.
+- **Choice and why:** The maintainer decided that release pages stay short. The seed holds three sections: what a release ships, the release order in a line or two per step, and the roles. Everything the shared release rules already say stays there, and the page holds only what the project does.
+- **Consequences:**
+  - A new release page starts short, and the next set-up-project run can trim an existing one.
+  - Without shared release rules, the seed's one-line version rule in step 1 is the only version rule a page gets.

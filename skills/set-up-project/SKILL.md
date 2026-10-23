@@ -89,7 +89,9 @@ Ask only when exploration found a tool the project requires for a role: then pro
 
 #### Section E: release lifecycle
 
-Recommend writing `docs/agents/releasing.md` from [releasing.md](releasing.md), with the user's shared release rules applied over it, and filled with what exploration found: the version files, the changelog, how tags and GitHub releases are made, and the registry steps.
+Recommend writing `docs/agents/releasing.md` from [releasing.md](releasing.md), with the user's shared release rules applied over it, and filled with what exploration found: what a release ships, the release order and who runs each step.
+Keep the page short, with each step in a line or two.
+Leave out what the shared rules already say, such as the version rule, the changelog format and the tag and notes formatting, and leave out commands, install instructions and plans for a registry the project doesn't use yet.
 Where the project does something the shared rules don't say, keep the project's way and name it.
 Where the two disagree, show both and ask which one this project follows.
 When the release steps already live in another doc, propose moving them into `docs/agents/releasing.md` and leaving a pointer behind.
