@@ -1301,3 +1301,11 @@ The decisions behind the effort skills: `init-effort`, `orchestrating`, `orchest
 - **Options:** None considered.
 - **Choice and why:** `/settle-effort` merges a stacked pull request after its base pull request. It retargets the stacked pull request to the default branch before the base branch is deleted.
 - **Consequences:** None.
+
+## 2026-10-23: settle-effort follows the project's release page after a version bump
+
+- **Status:** accepted
+- **Context:** A version bump merged inside a feature pull request, and the release stopped there: the version reached its registry with no tag and no GitHub release.
+- **Options:** None considered.
+- **Choice and why:** When the merge carried a version bump, `/settle-effort` follows the project's `docs/agents/releasing.md` from the step after the merge through its check. It hands the user each step the page gives them, and offers `/set-up-project` when the project has no page.
+- **Consequences:** The settle report names each part's version.
