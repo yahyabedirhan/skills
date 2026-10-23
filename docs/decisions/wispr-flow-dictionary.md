@@ -93,16 +93,16 @@ The decisions behind the `wispr-flow-dictionary` skill, named `wispr-flow` until
 ## 2026-09-28: fixes reported mid-task are applied in the same turn
 
 - **Status:** accepted
-- **Context:** The user reports mistakes while working. The idea comes from glebis `wispr-fix`, which queues them instead.
-- **Options:** A queue, as in `wispr-fix`: with `--restart`, a queue isn't needed.
+- **Context:** The user reports mistakes while working.
+- **Options:** A queue that holds reported mistakes for later: with `--restart`, a queue isn't needed.
 - **Choice and why:** Apply the fix in the same turn, after a whole-history count shows whether the wrong form is also meant literally.
 - **Consequences:** None.
 
 ## 2026-09-28: writes can quit and relaunch the app
 
 - **Status:** accepted
-- **Context:** glebis's skills refuse to write while the app runs. Writing live worked here, but the app loads changes only on launch.
-- **Options:** Refuse to write while the app runs, as glebis does.
+- **Context:** Writing while the app runs works, but the app loads changes only on launch.
+- **Options:** Refuse to write while the app runs.
 - **Choice and why:** `--restart` quits and relaunches the app in the same command, which saves the user a step.
 - **Consequences:** The app bundle nests a helper app with the same executable name. Quitting targets the main bundle id `com.electron.wispr-flow`, and the running check skips paths under `Resources/`.
 
@@ -117,7 +117,7 @@ The decisions behind the `wispr-flow-dictionary` skill, named `wispr-flow` until
 ## 2026-09-28: snippet candidates
 
 - **Status:** accepted
-- **Context:** Some repeated text is better as a snippet. The idea comes from glebis `wispr-analytics` `propose`.
+- **Context:** Some repeated text is better as a snippet.
 - **Options:** None considered.
 - **Choice and why:** Snippet candidates are links, emails, and sentences of 8 or more words repeated in 2 or more dictations.
 - **Consequences:** None.
