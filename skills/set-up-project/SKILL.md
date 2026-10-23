@@ -1,6 +1,6 @@
 ---
 name: set-up-project
-description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, `AGENTS.md` as the one rules file with `CLAUDE.md` pointing at it, the issue tracker, triage labels and domain docs, the folder standard's `.gitignore`, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
+description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, `AGENTS.md` as the one rules file with `CLAUDE.md` pointing at it, the issue tracker, triage labels, domain docs and release lifecycle, the folder standard's `.gitignore`, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
 ---
 
 # Set up project
@@ -11,6 +11,7 @@ Scaffold and audit the per-repo configuration the skills assume:
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
+- **Release lifecycle**: how the project ships a version, in `docs/agents/releasing.md`, so everyone who releases it follows the same steps. It starts from the user's shared release rules when their workstation repo has them.
 - **Folder standard**: the `.gitignore` lines of [orchestrating/folder-standard.md](../orchestrating/folder-standard.md)
 - **Allow-only project permissions**: the global rules are the machine's safety rails, and a project's own harness files only add convenience. The **audit** flags every project file that weakens a global rule.
 
@@ -35,13 +36,15 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `docs/assets/`: the folder standard's old image folder
 - Is the `triage` skill installed? It is when a `triage` skill folder sits beside this one, or `triage` is in your available skills. This decides whether Section B runs at all.
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
+- Release signals: `CHANGELOG.md`, the files that hold a version, the tags and GitHub releases (`gh release list`), what publishes to a registry (a `package.json` without `"private": true`, a Homebrew cask, a release workflow), and any release steps already in `AGENTS.md` or another doc. This decides whether Section E runs.
+- The user's shared release rules: when the pointer `~/.config/agents/source.md` names a workstation repo, read `<path-to-workstation-repo>/setup/releasing.md` if it exists. When there is no pointer or no file, the seed template alone is the start.
 - A tool the project's own docs require for a role skills name, such as a worktree tool in a `docs/worktrees.md` or a session host its scripts assume. This decides whether Section D runs.
 
 ### 3. Present findings and ask
 
 Summarise what's present and what's missing. Then take the sections in order. One section, one answer, then the next.
 
-Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed, Section C when there's no monorepo and no old `CONTEXT.md` or `CONTEXT-MAP.md`, Section D when the project names no tool for a role).
+Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed, Section C when there's no monorepo and no old `CONTEXT.md` or `CONTEXT-MAP.md`, Section D when the project names no tool for a role, Section E when the project has never released and has no release signals).
 
 **Section A: Issue tracker.**
 
@@ -74,6 +77,8 @@ When exploration found a `docs/assets/` folder, propose moving each topic with `
 
 **Section D: Project environment defaults.** Recommend **none**. Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md) > 'Environment defaults' says what may go there.
 
+**Section E: Release lifecycle.** Recommend writing `docs/agents/releasing.md` from [releasing.md](releasing.md), with the user's shared release rules applied over it, and filled with what exploration found: the version files, the changelog, how tags and GitHub releases are made, and the registry steps. Where the project does something the shared rules don't say, keep the project's way and name it. Where the two disagree, show both and ask which one this project follows. When the release steps already live in another doc, propose moving them into `docs/agents/releasing.md` and leaving a pointer behind.
+
 ### 4. Confirm and write
 
 Show the user a draft of:
@@ -81,13 +86,13 @@ Show the user a draft of:
 - `AGENTS.md`: new from [agents-md.md](agents-md.md), or the existing one with the `## Agent skills` block and any `## Environment defaults` rows added, and each line of an existing `CLAUDE.md` moved into it
 - `CLAUDE.md`: the single line `@AGENTS.md`, or an existing symlink to `AGENTS.md` left as it is. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both forms give it the same text.
 - `.gitignore`: `.scratch/` and `.claude/worktrees/`, each only where it's missing
-- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
+- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, `docs/agents/triage-labels.md` (only when `triage` is installed) and `docs/agents/releasing.md` (only when Section E ran)
 - Each rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, and the edits to the files that name them, when Section C proposed them
 - Each move out of `docs/assets/`, and the links it updates, when proposed
 
 Let them edit, then take one approval for all of it. Then write:
 
-1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran.
+1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran, and the `### Releases` sub-block only when Section E ran.
 2. Leave a `CLAUDE.md` that holds `@AGENTS.md` or is a symlink to `AGENTS.md` as it is, and add the missing `.gitignore` lines.
 3. Write the docs files using the seed templates in this skill folder as a starting point:
    - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
@@ -95,6 +100,7 @@ Let them edit, then take one approval for all of it. Then write:
    - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
    - [triage-labels.md](./triage-labels.md): label mapping (only if `triage` is installed)
    - [domain.md](./domain.md): domain doc consumer rules + layout
+   - [releasing.md](./releasing.md): the release lifecycle (only when Section E ran)
 
    For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
@@ -112,10 +118,10 @@ Read every harness file the project holds, from the root down, against **set-up-
 - `overlaps`: an allow that covers a rule's command while the rule still holds. Propose narrowing it.
 - `extra`, a project deny or ask, and `gap`, what you can't judge: name each.
 
-Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes.
+Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes. Report a project with release signals and no `docs/agents/releasing.md`, and a `docs/agents/releasing.md` that disagrees with the user's shared release rules, and propose the update Section E writes.
 
 The audit passes with no `weakens`. Done when it passes, or the user has chosen to keep a `weakens` entry: then it stays failed, and the report names that entry.
 
 ### 6. Done
 
-Tell the user the setup is complete, what the audit found, and which skills will now read from these files. Mention they can edit `AGENTS.md` and `docs/agents/*.md` directly later; re-running this skill audits the project again, and switches issue trackers when they want to. Leave the commit to the user or the skill that called this one.
+Tell the user the setup is complete, what the audit found, and which skills will now read from these files. Mention they can edit `AGENTS.md` and `docs/agents/*.md` directly later; re-running this skill audits the project again, updates the release page when the shared release rules change, and switches issue trackers when they want to. Leave the commit to the user or the skill that called this one.
