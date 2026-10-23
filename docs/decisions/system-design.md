@@ -1,6 +1,8 @@
 # Decisions: system-design
 
-The decisions behind the `system-design` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`system-design`](../../skills/system-design/SKILL.md) skill.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## Maintaining
 

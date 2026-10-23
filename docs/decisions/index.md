@@ -1,6 +1,8 @@
 # Decisions
 
-Why each skill is the way it is: one file per skill or topic, with dated entries. These files are for maintaining the skills and are never installed. A design in [../design/](../design/index.md) says how a skill is built now, and a decision says why.
+This folder records why each skill is the way it is, in one file per skill or topic, with dated entries.
+These files are for maintaining the skills and are never installed.
+A design in [../design/](../design/index.md) says how a skill is built now, and a decision says why.
 
 ## The shape of a file
 

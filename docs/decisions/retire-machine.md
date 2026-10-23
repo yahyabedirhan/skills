@@ -1,6 +1,8 @@
 # Decisions: retire-machine
 
-The decisions behind the `retire-machine` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`retire-machine`](../../skills/retire-machine/SKILL.md) skill.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## 2026-10-09: a skill of its own, not a mode of /set-up-machine
 

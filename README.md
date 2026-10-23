@@ -4,9 +4,11 @@
 
 [![skills.sh](https://skills.sh/b/yahyabedirhan/skills)](https://skills.sh/yahyabedirhan/skills)
 
-Agent skills the maintainer uses across projects: original skills, and forks of other people's skills with the maintainer's changes. They work with Claude Code, Codex, and any agent the [`skills` CLI](https://github.com/vercel-labs/skills) supports.
+This repo holds the agent skills the maintainer uses across projects: skills written here, and forks of other people's skills with the maintainer's changes.
+They work with Claude Code, Codex, and any agent the [`skills` CLI](https://github.com/vercel-labs/skills) supports.
 
-They come in five families. Each family's skills are listed under [Skills](#skills) and explained under [How the skills work](#how-the-skills-work):
+They come in five families.
+Each family's skills are listed under [Skills](#skills) and explained under [How the skills work](#how-the-skills-work):
 
 - **[Effort workflow](#effort-workflow)**: take a feature from an idea to a merged pull request.
 - **[Design frameworks](#design-frameworks)**: design or explain code, systems and command-line interfaces step by step.
@@ -16,17 +18,21 @@ They come in five families. Each family's skills are listed under [Skills](#skil
 
 ## Install
 
+This section shows how to install the skills, with the `skills` CLI or as Claude Code plugins.
 Install any skill by its name from [Skills](#skills):
 
 ```bash
 npx skills add yahyabedirhan/skills -s <skill-name>
 ```
 
-For example `-s to-pr`, `-s system-design`, or `-s wispr-flow-dictionary`. Leave out `-s` to pick from a list, and add `-g` to install for your user rather than the current project. Skills in the same family name each other, so install a family together.
+For example `-s to-pr`, `-s system-design`, or `-s wispr-flow-dictionary`.
+Leave out `-s` to pick from a list, and add `-g` to install for your user rather than the current project.
+Skills in the same family name each other, so install a family together.
 
 ### Claude Code plugins
 
-Some skills are also Claude Code plugins, from this repo's marketplace. Add the marketplace once:
+Some skills are also Claude Code plugins, from this repo's marketplace.
+Add the marketplace once:
 
 ```bash
 claude plugin marketplace add yahyabedirhan/skills
@@ -45,13 +51,19 @@ Then install a plugin by name:
 | `email` | [email](skills/email/SKILL.md) | `claude plugin install email@yahyabedirhan-skills` |
 | `wispr-flow-dictionary` | [wispr-flow-dictionary](skills/wispr-flow-dictionary/SKILL.md) | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
 
-A plugin's skills run as `/<plugin>:<skill>` or by their bare name, such as `/to-pr`. The [Agent setup](#agent-setup) skills aren't plugins: [`set-up-machine`](skills/set-up-machine/SKILL.md) wires a hook to its installed path, which a plugin update would move.
+A plugin's skills run as `/<plugin>:<skill>` or by their bare name, such as `/to-pr`.
+The [Agent setup](#agent-setup) skills aren't plugins: [`set-up-machine`](skills/set-up-machine/SKILL.md) wires a hook to its installed path, which a plugin update would move.
 
-Install a skill one way or the other, not both. Claude Code loads it twice, and the bare name runs the `npx skills` copy, so plugin updates go unseen. To switch to the plugin, first remove the copy with `npx skills remove <skill-name>`, and add `-g` for a global install.
+Install a skill one way or the other, not both.
+Claude Code loads it twice, and the bare name runs the `npx skills` copy, so plugin updates go unseen.
+To switch to the plugin, first remove the copy with `npx skills remove <skill-name>`, and add `-g` for a global install.
 
 ## Skills
 
-The Origin column names where each skill comes from. [`yahyabedirhan`](https://www.skills.sh/?q=yahyabedirhan) marks a skill written in this repo. A fork names the upstream commit it was copied from, so a later upstream change can be diffed against it.
+This section lists every skill in the repo by family, with what it does and where it comes from.
+The Origin column names where each skill comes from.
+[`yahyabedirhan`](https://www.skills.sh/?q=yahyabedirhan) marks a skill written in this repo.
+A fork names the upstream commit it was copied from, so a later upstream change can be diffed against it.
 Each fork's full list of changes is in [FORKS.md](FORKS.md).
 
 ### Effort workflow
@@ -113,9 +125,12 @@ Each fork's full list of changes is in [FORKS.md](FORKS.md).
 
 ## How the skills work
 
+This section explains how the skills in each family work together.
+
 ### Effort workflow
 
-An **effort**, such as a feature, a new app or a refactor, goes from an idea to a merged pull request in one worktree on one branch. A thinking session decides what to build, and a fresh orchestrator builds it, so the builder starts from conclusions instead of debate.
+An **effort**, such as a feature, a new app or a refactor, goes from an idea to a merged pull request in one worktree on one branch.
+A thinking session decides what to build, and a fresh orchestrator builds it, so the builder starts from conclusions instead of debate.
 
 ```text
 START      init-effort                                   worktree and branch (or a new repo), decided once
@@ -137,11 +152,13 @@ Install the family together with its companions, and leave out the upstream skil
 
 - **Companions:** [`show-me`](skills/show-me/SKILL.md); [`grilling`](https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling), [`prototype`](https://github.com/mattpocock/skills/tree/main/skills/engineering/prototype), [`tdd`](https://github.com/mattpocock/skills/tree/main/skills/engineering/tdd) and [`code-review`](https://github.com/mattpocock/skills/tree/main/skills/engineering/code-review) from [mattpocock/skills](https://github.com/mattpocock/skills); and [`set-up-project`](skills/set-up-project/SKILL.md) and [`set-up-machine`](skills/set-up-machine/SKILL.md) from [Agent setup](#agent-setup) to set each project up.
 - **Replaced upstream skills:** leave out that repo's [`handoff`](https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff), [`implement`](https://github.com/mattpocock/skills/tree/main/skills/engineering/implement), [`to-spec`](https://github.com/mattpocock/skills/tree/main/skills/engineering/to-spec), [`to-tickets`](https://github.com/mattpocock/skills/tree/main/skills/engineering/to-tickets) and [`setup-matt-pocock-skills`](https://github.com/mattpocock/skills/tree/main/skills/engineering/setup-matt-pocock-skills), which the forks here replace, and its [`implement-spec`](https://github.com/mattpocock/skills/tree/main/skills/engineering/implement-spec) and [`pr`](https://github.com/mattpocock/skills/tree/main/skills/engineering/pr), which [`orchestrate-effort`](skills/orchestrate-effort/SKILL.md) and [`to-pr`](skills/to-pr/SKILL.md) replace.
-- **Lifecycle and records:** the full path is in [the effort lifecycle](skills/orchestrating/SKILL.md#effort-lifecycle). Where each record goes, such as the spec, tickets, handoff and notes, is in the [folder standard](skills/orchestrating/folder-standard.md).
+- **Lifecycle and records:** the full path is in [the effort lifecycle](skills/orchestrating/SKILL.md#effort-lifecycle).
+Where each record goes, such as the spec, tickets, handoff and notes, is in the [folder standard](skills/orchestrating/folder-standard.md).
 
 ### Design frameworks
 
-Each skill runs a design session through a delivery framework, whether you are designing something new, explaining existing work, redesigning it, or deciding one question. It starts simple and adds only what a requirement proves necessary.
+Each skill runs a design session through a delivery framework, whether you are designing something new, explaining existing work, redesigning it, or deciding one question.
+It starts simple and adds only what a requirement proves necessary.
 
 ```text
 low-level-design   code: modules, classes, files, folders
@@ -159,7 +176,8 @@ The documents in each skill's `references/` hold the principles, patterns and co
 
 ### Communication style
 
-How an agent shows its thinking so a reader takes it in quickly. [`show-me`](skills/show-me/SKILL.md) picks the smallest view that makes the point, in plain text that reads the same in a terminal, an editor, or on GitHub, [`show-me-artifact`](skills/show-me-artifact/SKILL.md) publishes a larger report the same way as a private Claude artifact, and [`show-me-diagram`](skills/show-me-diagram/SKILL.md) draws one designed diagram through `diagram-design`.
+These skills shape how an agent shows its thinking, so a reader takes it in quickly.
+[`show-me`](skills/show-me/SKILL.md) picks the smallest view that makes the point, in plain text that reads the same in a terminal, an editor, or on GitHub, [`show-me-artifact`](skills/show-me-artifact/SKILL.md) publishes a larger report the same way as a private Claude artifact, and [`show-me-diagram`](skills/show-me-diagram/SKILL.md) draws one designed diagram through `diagram-design`.
 
 ```text
 show-me            explains the current topic
@@ -174,7 +192,8 @@ i-am-back          you're back: show-me what happened, what's done and what need
 
 ### Agent setup
 
-What your agents run with, such as permissions, instructions and skills, kept in order across every harness and machine. [`set-up-machine`](skills/set-up-machine/SKILL.md) sets up and audits each machine's harnesses from one rule table, [`set-up-project`](skills/set-up-project/SKILL.md) each project on top of it, [`maintain-environment`](skills/maintain-environment/SKILL.md) decides where a change belongs and carries it from its source to every harness and install, and [`skill-recap`](skills/skill-recap/SKILL.md) looks back over a session for what its skills should change.
+These skills keep what your agents run with, such as permissions, instructions and skills, in order across every harness and machine.
+[`set-up-machine`](skills/set-up-machine/SKILL.md) sets up and audits each machine's harnesses from one rule table, [`set-up-project`](skills/set-up-project/SKILL.md) each project on top of it, [`maintain-environment`](skills/maintain-environment/SKILL.md) decides where a change belongs and carries it from its source to every harness and install, and [`skill-recap`](skills/skill-recap/SKILL.md) looks back over a session for what its skills should change.
 
 ```text
 where       permission · global instruction · project AGENTS.md · skill · skill reference (no memory)
@@ -187,7 +206,8 @@ audits      which skills you use, a fresh prompt audit, a run's cost
 recap       /skill-recap: how a session used its skills → findings → /to-tickets
 ```
 
-[`set-up-machine`](skills/set-up-machine/SKILL.md) does the same for the rules and instructions every harness runs with. The rule table and the shared global instructions file are declared once; each harness gets its native entries from them:
+[`set-up-machine`](skills/set-up-machine/SKILL.md) does the same for the rules and instructions every harness runs with.
+The rule table and the shared global instructions file are declared once; each harness gets its native entries from them:
 
 ```text
 rules.json                      each global rule once: level, reason, instruction, samples
@@ -206,7 +226,8 @@ Pi            ~/.pi/agent/      extensions/set-up-machine.ts runs the hook and a
 run again                       the audit: a diff that changes nothing
 ```
 
-[`set-up-project`](skills/set-up-project/SKILL.md) does it for one project, on top of the machine. Global rules are the safety rails; a project's own harness files only add allows:
+[`set-up-project`](skills/set-up-project/SKILL.md) does it for one project, on top of the machine.
+Global rules are the safety rails; a project's own harness files only add allows:
 
 ```text
 verify.py                       set-up-machine's check first; a machine that fails is set up before the project
@@ -217,9 +238,13 @@ audit                           any project harness file that weakens a global r
 
 ### Daily workflows
 
-Everyday tasks outside the code that an agent can take over safely. Each skill changes only what you approve, with sending, deleting and other risky actions left to you.
+These skills take over everyday tasks outside the code that an agent can do safely.
+Each skill changes only what you approve, with sending, deleting and other risky actions left to you.
 
-[`email`](skills/email/SKILL.md) reads mail only for an email task you asked for, fast with the Spark CLI, and makes every change through the Gmail connector. It archives freely and makes any other change only when you ask. A draft you ask for is written in chat; one saved in Gmail or Spark needs you to name the tool and approve each write in the harness. Permission rules deny sending, trash and spam.
+[`email`](skills/email/SKILL.md) reads mail only for an email task you asked for, fast with the Spark CLI, and makes every change through the Gmail connector.
+It archives freely and makes any other change only when you ask.
+A draft you ask for is written in chat; one saved in Gmail or Spark needs you to name the tool and approve each write in the harness.
+Permission rules deny sending, trash and spam.
 
 ```text
 read     Spark CLI, for an email task you asked for: inbox by category, threads, pins, contacts
@@ -228,9 +253,11 @@ how      which tool for which job; what to do and when stays with you
 setup    setup.md: both tools, the deny and ask rules, and checks
 ```
 
-[`calendar`](skills/calendar/SKILL.md) reads events and free time whenever a task needs them, with Spark first and the Google Calendar connector when Spark Desktop is closed. It never changes the calendar: permission rules deny every connector write and `spark event`.
+[`calendar`](skills/calendar/SKILL.md) reads events and free time whenever a task needs them, with Spark first and the Google Calendar connector when Spark Desktop is closed.
+It never changes the calendar: permission rules deny every connector write and `spark event`.
 
-[`wispr-flow-dictionary`](skills/wispr-flow-dictionary/SKILL.md) keeps [Wispr Flow](https://wisprflow.ai)'s dictionary accurate for technical vocabulary, where dictation mishears product names, company names and commands. It reads Wispr Flow's local database and writes only its `Dictionary` table, after a backup.
+[`wispr-flow-dictionary`](skills/wispr-flow-dictionary/SKILL.md) keeps [Wispr Flow](https://wisprflow.ai)'s dictionary accurate for technical vocabulary, where dictation mishears product names, company names and commands.
+It reads Wispr Flow's local database and writes only its `Dictionary` table, after a backup.
 
 ```text
 find    terms, formatter swaps and counts over any window (30m, 3h, 2d)
@@ -241,16 +268,27 @@ check   counts the misheard form since its word was added, to see whether a fix 
 
 ## Adding a skill
 
-Add its row to its family's table under [Skills](#skills), and fold it into that family's section under [How the skills work](#how-the-skills-work). Link every skill name you mention outside a code block: a skill here to its `SKILL.md`, and someone else's to its source. Put a name with no source to link in backticks, such as `close-effort`. Prefer an existing family; start a new one only when a skill fits none. A new family gets its own subsection and table under Skills, a line in the list at the top, and a section under [How the skills work](#how-the-skills-work), in the same shape as the others: two sentences and one outline.
+This section says where a new skill goes in this README.
+Add its row to its family's table under [Skills](#skills), and fold it into that family's section under [How the skills work](#how-the-skills-work).
+Link every skill name you mention outside a code block: a skill here to its `SKILL.md`, and someone else's to its source.
+Put a name with no source to link in backticks, such as `close-effort`.
+Prefer an existing family; start a new one only when a skill fits none.
+A new family gets its own subsection and table under Skills, a line in the list at the top, and a section under [How the skills work](#how-the-skills-work), in the same shape as the others: two sentences and one outline.
 
 ## Decision records
 
-`docs/decisions/` records why a skill or workflow is shaped the way it is, one dated entry per decision. Read it before changing the skills it covers. It is not installed. `docs/decisions/skill-writing.md` holds the rules for writing any skill here.
+`docs/decisions/` records why a skill or workflow is shaped the way it is, one dated entry per decision.
+Read it before changing the skills it covers.
+It is not installed.
+`docs/decisions/skill-writing.md` holds the rules for writing any skill here.
 
 ## Research
 
-`docs/research/` holds the fact-finding behind open issues: how the harnesses, `herdr`, git and GitHub actually behave, with sources and test notes. Each issue links the notes it relies on. It is not installed.
+`docs/research/` holds the fact-finding behind open issues: how the harnesses, `herdr`, git and GitHub actually behave, with sources and test notes.
+Each issue links the notes it relies on.
+It is not installed.
 
 ## License
 
-MIT, see [`LICENSE`](LICENSE). Third-party licenses are listed in [FORKS.md](FORKS.md).
+MIT, see [`LICENSE`](LICENSE).
+Third-party licenses are listed in [FORKS.md](FORKS.md).

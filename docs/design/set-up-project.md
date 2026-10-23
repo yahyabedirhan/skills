@@ -1,8 +1,10 @@
 # Design: set-up-project
 
-How `set-up-project` is built. A newcomer needs two facts first:
+This page explains how [`set-up-project`](../../skills/set-up-project/SKILL.md) is built, for whoever changes it.
+A newcomer needs two facts first:
 
-- The **agent** sets up one project's agent files: `AGENTS.md`, `CLAUDE.md`, the issue tracker, triage labels, domain docs and the `.gitignore` lines. It explores, presents, takes one approval, then writes.
+- The **agent** sets up one project's agent files: `AGENTS.md`, `CLAUDE.md`, the issue tracker, triage labels, domain docs and the `.gitignore` lines.
+It explores, presents, takes one approval, then writes.
 - Running it again is the **audit**: it reads the project's harness files against set-up-machine's rule table and flags each entry that weakens a global rule.
 
 ## Requirements

@@ -1,6 +1,10 @@
 # Keeping secrets out of agents' reach, beyond rules and hooks
 
-Facts for [Security: Research keeping secrets out of agents' reach beyond rules and hooks (#98)](https://github.com/yahyabedirhan/skills/issues/98), under [Spec: every harness and project is set up and audited from the skills (#49)](https://github.com/yahyabedirhan/skills/issues/49). The rule table and the pre-tool hook refuse the common reads (`cat .env`, `printenv`, `echo $TOKEN`), but nothing pattern-based stops an interpreter (`python3 -c`, `node -e`) or a script that opens `.env`. This page asks what does: keeping the secret out of the environment, an OS sandbox that refuses the read by path, and a way for a project's dev server to get its key without the agent seeing it. It builds on [What each harness can and can't do](harness-capabilities.md) and [Can auto mode block what rules can't?](auto-mode-semantic-guard.md), and leaves the Codex shell snapshot to [#90](https://github.com/yahyabedirhan/skills/issues/90). Researched 2026-10-01; every source below was read that day.
+This page collects the facts for [Security: Research keeping secrets out of agents' reach beyond rules and hooks (#98)](https://github.com/yahyabedirhan/skills/issues/98), under [Spec: every harness and project is set up and audited from the skills (#49)](https://github.com/yahyabedirhan/skills/issues/49).
+The rule table and the pre-tool hook refuse the common reads, such as `cat .env`, `printenv` and `echo $TOKEN`, but nothing pattern-based stops an interpreter, such as `python3 -c` or `node -e`, or a script that opens `.env`.
+This page asks what does: keeping the secret out of the environment, an OS sandbox that refuses the read by path, and a way for a project's dev server to get its key without the agent seeing it.
+It builds on [What each harness can and can't do](harness-capabilities.md) and [Can auto mode block what rules can't?](auto-mode-semantic-guard.md), and leaves the Codex shell snapshot to [#90](https://github.com/yahyabedirhan/skills/issues/90).
+Researched 2026-10-01; every source below was read that day.
 
 Versions checked: Claude Code 2.1.286, codex-cli 0.159.3, opencode 1.18.34, cursor-agent 2026.09.28-64d2043, macOS 26.5.1. 1Password CLI, direnv, dotenvx and envchain aren't installed here, so they're described from their docs only.
 
@@ -8,8 +12,10 @@ Evidence tags:
 
 - **[doc]** official documentation, linked per section.
 - **[src]** official source: `anthropic-experimental/sandbox-runtime` at commit `117eb92`, `openai/codex` at commit `2685e3a`, `anomalyco/opencode` branch `dev` at commit `aa481b8`.
-- **[man]** a man page installed on this Mac (`ps(1)`, `security(1)`), or the Linux man-pages project.
-- **[probe]** a command run for this research in a scratch folder, using fake files and a fake variable `ACME_API_TOKEN=probe-not-a-secret`. Each process was started with `env -i`, so no real variable could reach it. Section 5 has the details.
+- **[man]** a man page installed on this Mac, such as `ps(1)` and `security(1)`, or the Linux man-pages project.
+- **[probe]** a command run for this research in a scratch folder, using fake files and a fake variable `ACME_API_TOKEN=probe-not-a-secret`.
+Each process was started with `env -i`, so no real variable could reach it.
+Section 5 has the details.
 - **To confirm** says what is still open and the exact check that would settle it.
 
 ## Short answer

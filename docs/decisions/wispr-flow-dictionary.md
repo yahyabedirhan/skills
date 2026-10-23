@@ -1,6 +1,8 @@
 # Decisions: wispr-flow-dictionary
 
-The decisions behind the `wispr-flow-dictionary` skill, named `wispr-flow` until 2026-09-28. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`wispr-flow-dictionary`](../../skills/wispr-flow-dictionary/SKILL.md) skill, named `wispr-flow` until 2026-09-28.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## 2026-09-28: write to Wispr Flow's SQLite database directly
 

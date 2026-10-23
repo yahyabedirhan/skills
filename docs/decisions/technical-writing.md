@@ -1,6 +1,8 @@
 # Decisions: technical writing
 
-How everything under `docs/` is written: research files and their HTML guides in `docs/research/`, the decision records in `docs/decisions/`, and the agent docs in `docs/agents/`. A decision record also follows the shape in [index.md](index.md), and so do the entries below. Skills follow `skill-writing.md` instead.
+This page records how everything under `docs/` is written: research files and their HTML guides in `docs/research/`, the decision records in `docs/decisions/`, and the agent docs in `docs/agents/`.
+A decision record also follows the shape in [index.md](index.md), and so do the entries below.
+Skills follow `skill-writing.md` instead.
 
 ## 2026-10-03: a light version of ASD-STE100
 

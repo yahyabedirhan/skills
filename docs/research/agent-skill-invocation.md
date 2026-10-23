@@ -1,10 +1,12 @@
 # How agents start skills, and the harness behaviours around it
 
-> Moved from a private notes repo on 2026-09-26. Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo. The VPS host, user and machine ID are redacted.
+This page explains why a slash command sent through Herdr, a user-only skill, a sub-agent's skill, or a bundled shell command behaved the way it did in issues [#3](https://github.com/yahyabedirhan/skills/issues/3), [#10](https://github.com/yahyabedirhan/skills/issues/10), [#11](https://github.com/yahyabedirhan/skills/issues/11), [#12](https://github.com/yahyabedirhan/skills/issues/12), [#17](https://github.com/yahyabedirhan/skills/issues/17) and [#19](https://github.com/yahyabedirhan/skills/issues/19), and what to change.
 
-Purpose: explain why a slash command sent through Herdr, a user-only skill, a sub-agent's skill, or a bundled shell command behaved the way it did in issues [#3](https://github.com/yahyabedirhan/skills/issues/3), [#10](https://github.com/yahyabedirhan/skills/issues/10), [#11](https://github.com/yahyabedirhan/skills/issues/11), [#12](https://github.com/yahyabedirhan/skills/issues/12), [#17](https://github.com/yahyabedirhan/skills/issues/17) and [#19](https://github.com/yahyabedirhan/skills/issues/19), and what to change.
+> Moved from a private notes repo on 2026-09-26.
+> Paths under `tmp/`, `~/.claude/` and that repo point at the user's machine and are not in this repo.
+> The VPS host, user and machine ID are redacted.
 
-Researched 2026-09-25 against Claude Code 2.1.282, Codex CLI 0.156.1 and Herdr 0.9.0 on this Mac. "Tested" means a local experiment reproduced it (files under `tmp/agent-skill-invocation/`, gitignored). "Unverified" means only the docs or the binary say so.
+Researched 2026-09-25 against Claude Code 2.1.282, Codex CLI 0.156.1 and Herdr 0.9.0 on this Mac. "Tested" means a local experiment reproduced it, with its files under the gitignored `tmp/agent-skill-invocation/`. "Unverified" means only the docs or the binary say so.
 
 ## Summary
 

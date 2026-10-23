@@ -1,6 +1,8 @@
 # Decisions: i-am-afk and i-am-back
 
-The decisions behind the `i-am-afk` and `i-am-back` skills. This file is for maintaining them and is never installed. Entries follow the shape in [index.md](index.md).
+This page records the decisions behind the [`i-am-afk`](../../skills/i-am-afk/SKILL.md) and [`i-am-back`](../../skills/i-am-back/SKILL.md) skills.
+It is for maintaining the skills and is never installed.
+Entries follow the shape in [index.md](index.md).
 
 ## 2026-10-10: two skills, one pair
 

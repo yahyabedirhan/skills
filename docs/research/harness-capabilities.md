@@ -1,6 +1,8 @@
 # What each harness can and can't do: Claude Code, Codex, opencode, Cursor
 
-Facts for [Settle what each harness can and can't do (#50)](https://github.com/yahyabedirhan/skills/issues/50), under [Spec: every harness and project is set up and audited from the skills (#49)](https://github.com/yahyabedirhan/skills/issues/49). The harness adapters in set-up-machine and set-up-project are built on this page. Researched 2026-09-29.
+This page collects the facts for [Settle what each harness can and can't do (#50)](https://github.com/yahyabedirhan/skills/issues/50), under [Spec: every harness and project is set up and audited from the skills (#49)](https://github.com/yahyabedirhan/skills/issues/49).
+The harness adapters in set-up-machine and set-up-project are built on this page.
+Researched 2026-09-29.
 
 Whether each harness's auto mode can act as a semantic guard for rules patterns can't express is on a sibling page, [Can auto mode block what rules can't?](auto-mode-semantic-guard.md).
 
@@ -10,16 +12,20 @@ Evidence tags:
 
 - **[doc]** the harness's official documentation, linked per section.
 - **[src]** the harness's official source: `openai/codex` at commit `0462dcc`, `anomalyco/opencode`, formerly `sst/opencode`, branch `dev` at commit `7945de2`.
-- **[bin]** the installed release, read-only: the Claude Code binary, or the `cursor-agent` JavaScript bundle (`index.js` and its chunks).
+- **[bin]** the installed release, read-only: the Claude Code binary, or the `cursor-agent` JavaScript bundle, `index.js` and its chunks.
 - **[check]** a read-only command run for this research against a throwaway config in a scratch folder, never a real one: `codex execpolicy check`, `codex features list`, `codex debug prompt-input`, `opencode debug config` and `opencode debug agent`, and a copy of Cursor's matcher functions run under the bundled Node.
-- **[probe]** a real session run against a throwaway config in a scratch folder, with fake data, by the harness's adapter ticket (opencode: `opencode run --format json`, the tool result read from its JSON events).
+- **[probe]** a real session run against a throwaway config in a scratch folder, with fake data, by the harness's adapter ticket.
+For opencode it is `opencode run --format json`, with the tool result read from its JSON events.
 - **To confirm** says what is still open and the exact check that would settle it.
 
 Main sources:
 
 - Claude Code: [permissions](https://code.claude.com/docs/en/permissions), [memory](https://code.claude.com/docs/en/memory), [hooks](https://code.claude.com/docs/en/hooks), [settings](https://code.claude.com/docs/en/settings), [settings reference](https://code.claude.com/docs/en/settings-reference), [environment variables](https://code.claude.com/docs/en/env-vars), [errors](https://code.claude.com/docs/en/errors).
-- Codex: [rules](https://learn.chatgpt.com/docs/agent-configuration/rules), [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [config reference](https://learn.chatgpt.com/docs/config-file/config-reference), [permissions](https://learn.chatgpt.com/docs/permissions), [hooks](https://learn.chatgpt.com/docs/hooks), [memories](https://learn.chatgpt.com/docs/customization/memories), [managed configuration](https://learn.chatgpt.com/docs/enterprise/managed-configuration). `developers.openai.com/codex/...` redirects to these. Source: `codex-rs/execpolicy/README.md`, `codex-rs/core/src/exec_policy.rs`, `codex-rs/core/src/agents_md.rs`, `codex-rs/shell-command/src/bash.rs`, `codex-rs/shell-command/src/command_safety/is_dangerous_command.rs`.
-- opencode: [rules](https://opencode.ai/docs/rules/), [permissions](https://opencode.ai/docs/permissions/), [config](https://opencode.ai/docs/config/), [plugins](https://opencode.ai/docs/plugins/), [MCP servers](https://opencode.ai/docs/mcp-servers/). Source: `packages/opencode/src/permission/index.ts`, `packages/opencode/src/util/wildcard.ts`, `packages/opencode/src/tool/shell.ts`, `packages/opencode/src/tool/read.ts`, `packages/opencode/src/tool/external-directory.ts`, `packages/opencode/src/session/instruction.ts`, `packages/opencode/src/session/tools.ts`, `packages/opencode/src/plugin/index.ts`, `packages/opencode/src/config/config.ts`, `packages/core/src/v1/permission.ts`.
+- Codex: [rules](https://learn.chatgpt.com/docs/agent-configuration/rules), [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [config reference](https://learn.chatgpt.com/docs/config-file/config-reference), [permissions](https://learn.chatgpt.com/docs/permissions), [hooks](https://learn.chatgpt.com/docs/hooks), [memories](https://learn.chatgpt.com/docs/customization/memories), [managed configuration](https://learn.chatgpt.com/docs/enterprise/managed-configuration).
+`developers.openai.com/codex/...` redirects to these.
+Source: `codex-rs/execpolicy/README.md`, `codex-rs/core/src/exec_policy.rs`, `codex-rs/core/src/agents_md.rs`, `codex-rs/shell-command/src/bash.rs`, `codex-rs/shell-command/src/command_safety/is_dangerous_command.rs`.
+- opencode: [rules](https://opencode.ai/docs/rules/), [permissions](https://opencode.ai/docs/permissions/), [config](https://opencode.ai/docs/config/), [plugins](https://opencode.ai/docs/plugins/), [MCP servers](https://opencode.ai/docs/mcp-servers/).
+Source: `packages/opencode/src/permission/index.ts`, `packages/opencode/src/util/wildcard.ts`, `packages/opencode/src/tool/shell.ts`, `packages/opencode/src/tool/read.ts`, `packages/opencode/src/tool/external-directory.ts`, `packages/opencode/src/session/instruction.ts`, `packages/opencode/src/session/tools.ts`, `packages/opencode/src/plugin/index.ts`, `packages/opencode/src/config/config.ts`, `packages/core/src/v1/permission.ts`.
 - Cursor: [CLI usage](https://cursor.com/docs/cli/using.md), [CLI permissions](https://cursor.com/docs/cli/reference/permissions.md), [CLI configuration](https://cursor.com/docs/cli/reference/configuration.md), [rules](https://cursor.com/docs/rules.md), [rules help](https://cursor.com/help/customization/rules.md), [hooks](https://cursor.com/docs/hooks.md), [third-party hooks](https://cursor.com/docs/reference/third-party-hooks.md), [run modes](https://cursor.com/docs/agent/security/run-modes.md), [IDE permissions](https://cursor.com/docs/reference/permissions.md), [sandbox](https://cursor.com/docs/reference/sandbox.md), [ignore files](https://cursor.com/help/customization/ignore-files.md).
 
 ---

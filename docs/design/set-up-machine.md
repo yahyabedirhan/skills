@@ -1,10 +1,17 @@
 # Design: set-up-machine
 
-How `set-up-machine` is built. A newcomer needs three facts first:
+This page explains how [`set-up-machine`](../../skills/set-up-machine/SKILL.md) is built, for whoever changes it.
+A newcomer needs three facts first:
 
-- The **agent** sets up a machine. It reads the workstation repo's `setup/` and one reference per harness, proposes one diff, and writes it. No script writes a harness file.
-- Three scripts exist. The **cloud bootstrap** (`scripts/cloud_bootstrap.py`) leaves a cloud session the steps to set itself up, and sets nothing up itself. The **hook** (`scripts/pre_tool_hook.py`) runs before every tool call and refuses what the rule table denies. The **verifier** (`scripts/verify.py`) reads the machine and prints one table: a harness environment on each row, a setup area in each of five columns, and the declared config in a sixth.
-- `scripts/setupmachine/harnesses/__init__.py` holds `ALL`, the one list of harness environments. Everything about one harness sits in `harnesses/<harness>/` and `references/<harness>/`: one module and one page per environment, and the shared code and page beside them.
+- The **agent** sets up a machine.
+It reads the workstation repo's `setup/` and one reference per harness, proposes one diff, and writes it.
+No script writes a harness file.
+- Three scripts exist.
+The **cloud bootstrap**, `scripts/cloud_bootstrap.py`, leaves a cloud session the steps to set itself up, and sets nothing up itself.
+The **hook**, `scripts/pre_tool_hook.py`, runs before every tool call and refuses what the rule table denies.
+The **verifier**, `scripts/verify.py`, reads the machine and prints one table: a harness environment on each row, a setup area in each of five columns, and the declared config in a sixth.
+- `scripts/setupmachine/harnesses/__init__.py` holds `ALL`, the one list of harness environments.
+Everything about one harness sits in `harnesses/<harness>/` and `references/<harness>/`: one module and one page per environment, and the shared code and page beside them.
 
 ## Requirements
 

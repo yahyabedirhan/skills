@@ -1,6 +1,9 @@
 # Decisions: set-up-machine
 
-The decisions behind the `set-up-machine` skill. This file is for maintaining it and is never installed. Entries follow the shape in [index.md](index.md). The spec is "Spec: every harness and project is set up and audited from the skills" (#49).
+This page records the decisions behind the [`set-up-machine`](../../skills/set-up-machine/SKILL.md) skill.
+It is for maintaining the skill and is never installed.
+Entries follow the shape in [index.md](index.md).
+The spec is "Spec: every harness and project is set up and audited from the skills", issue #49.
 
 ## 2026-10-12: Grok Bot is a harness, and a bare ~/.cursor is not Cursor
 

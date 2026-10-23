@@ -1,6 +1,9 @@
 # Decisions: effort workflow
 
-The decisions behind the effort skills: `init-effort`, `orchestrating`, `orchestrate-effort`, `orchestrate-with-handoff`, `handover`, `handover-to-herdr`, `settle-effort`, `settle-session`, and the `implement`, `handoff`, `to-spec` and `to-tickets` forks they rely on. This file is for maintaining those skills and is never installed. Entries follow the shape in [index.md](index.md). Older entries keep the skill names of their time, such as `close-effort` and `init-effort-with-herdr`.
+This page records the decisions behind the effort skills: [`init-effort`](../../skills/init-effort/SKILL.md), [`orchestrating`](../../skills/orchestrating/SKILL.md), [`orchestrate-effort`](../../skills/orchestrate-effort/SKILL.md), [`orchestrate-with-handoff`](../../skills/orchestrate-with-handoff/SKILL.md), [`handover`](../../skills/handover/SKILL.md), [`handover-to-herdr`](../../skills/handover-to-herdr/SKILL.md), [`settle-effort`](../../skills/settle-effort/SKILL.md), [`settle-session`](../../skills/settle-session/SKILL.md), and the [`implement`](../../skills/implement/SKILL.md), [`handoff`](../../skills/handoff/SKILL.md), [`to-spec`](../../skills/to-spec/SKILL.md) and [`to-tickets`](../../skills/to-tickets/SKILL.md) forks they rely on.
+It is for maintaining those skills and is never installed.
+Entries follow the shape in [index.md](index.md).
+Older entries keep the skill names of their time, such as `close-effort` and `init-effort-with-herdr`.
 
 ## 2026-09-24: the family mirrors grilling
 
