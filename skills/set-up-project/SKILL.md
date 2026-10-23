@@ -8,7 +8,7 @@ description: Set up or audit a project for coding agents - the machine checked f
 Scaffold and audit the per-repo configuration the skills assume:
 
 - **Rules file**: `AGENTS.md`, which every harness reads. `CLAUDE.md` is either the single line `@AGENTS.md` or a symlink to `AGENTS.md`. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both of those forms give it the same text.
-- **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
+- **Issue tracker**: where issues live. GitHub is the default, and local markdown also works out of the box.
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
 - **Release lifecycle**: `docs/agents/releasing.md` explains how the project releases a version, so everyone who releases it follows the same steps. It starts from the user's shared release rules when their workstation repo has them.
@@ -44,32 +44,35 @@ Look at the current repo to understand its starting state. Read whatever exists;
 
 Summarise what's present and what's missing. Then take the sections in order. One section, one answer, then the next.
 
-Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed, Section C when there's no monorepo and no old `CONTEXT.md` or `CONTEXT-MAP.md`, Section D when the project names no tool for a role, Section E when the project has never released and has no release signals).
+Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it.
+Skip Section B when `triage` isn't installed, Section C when there's no monorepo and no old `CONTEXT.md` or `CONTEXT-MAP.md`, Section D when the project names no tool for a role, and Section E when the project has never released and has no release signals.
 
 **Section A: Issue tracker.**
 
 > Explainer: The "issue tracker" is where issues live for this repo. Skills like `to-tickets`, `triage`, and `to-spec` read from and write to it. They need to know whether to call `gh issue create`, write a markdown file under `.efforts/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
 
-Default posture: these skills were designed for GitHub. If a `git remote` points at GitHub, propose that. If a `git remote` points at GitLab (`gitlab.com` or a self-hosted host), propose GitLab. Otherwise (or if the user prefers), offer:
+Default posture: these skills were designed for GitHub. If a `git remote` points at GitHub, propose that. If a `git remote` points at GitLab, on `gitlab.com` or a self-hosted host, propose GitLab.
+Otherwise, or when the user prefers another tracker, offer:
 
-- **GitHub**: issues live in the repo's GitHub Issues (uses the `gh` CLI)
-- **GitLab**: issues live in the repo's GitLab Issues (uses the [`glab`](https://gitlab.com/gitlab-org/cli) CLI)
-- **Local markdown**: issues live as files under `.efforts/<effort>/` in this repo (good for solo projects or repos without a remote)
-- **Other** (Jira, Linear, etc.): ask the user to describe the workflow in one paragraph; the skill will record it as freeform prose
+- **GitHub**: issues live in the repo's GitHub Issues, through the `gh` CLI.
+- **GitLab**: issues live in the repo's GitLab Issues, through the [`glab`](https://gitlab.com/gitlab-org/cli) CLI.
+- **Local markdown**: issues live as files under `.efforts/<effort>/` in this repo, which suits solo projects and repos without a remote.
+- **Other**, such as Jira or Linear: ask the user to describe the workflow in one paragraph, and record it as freeform prose.
 
 Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
 
-**Section B: Triage label vocabulary.** Skip this section entirely if the `triage` skill isn't installed (exploration told you), since an uninstalled skill needs no labels.
+**Section B: Triage label vocabulary.** Skip this section entirely when exploration found that the `triage` skill isn't installed, since an uninstalled skill needs no labels.
 
 If it is installed, ask exactly one question:
 
-> Do you want to keep the default triage labels? (recommended: **yes**)
+> Do you want to keep the default triage labels? The recommended answer is **yes**.
 
-The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`), collect the overrides so `triage` applies existing labels instead of creating duplicates.
+The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names such as `bug:triage` for `needs-triage`, collect the overrides so `triage` applies existing labels instead of creating duplicates.
 
-**Section C: Domain docs.** Default to **single-context** (one `GLOSSARY.md` + `docs/adr/` at the repo root). This fits almost every repo; write it without asking.
+**Section C: Domain docs.** Default to **single-context**, which is one `GLOSSARY.md` and one `docs/adr/` at the repo root.
+This fits almost every repo, so write it without asking.
 
-Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSSARY.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
+Offer **multi-context**, a root `GLOSSARY-MAP.md` that points to one `GLOSSARY.md` per context, only when exploration found monorepo signals. Then confirm which layout they want.
 
 When exploration found an old `CONTEXT.md` or `CONTEXT-MAP.md`, propose renaming each with `git mv`, so its history follows it: `git mv CONTEXT.md GLOSSARY.md`, `git mv CONTEXT-MAP.md GLOSSARY-MAP.md`, and the same for each per-context `CONTEXT.md`. Where the new name already exists, `git mv` refuses: propose merging the old file into the new one instead, and ask which wins where they disagree. Also propose updating the map's links and any other file that names the old files; the drafts of `AGENTS.md` and `docs/agents/domain.md` already use the new names.
 
@@ -86,7 +89,7 @@ Show the user a draft of:
 - `AGENTS.md`: new from [agents-md.md](agents-md.md), or the existing one with the `## Agent skills` block and any `## Environment defaults` rows added, and each line of an existing `CLAUDE.md` moved into it
 - `CLAUDE.md`: the single line `@AGENTS.md`, or an existing symlink to `AGENTS.md` left as it is. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both forms give it the same text.
 - `.gitignore`: `.scratch/` and `.claude/worktrees/`, each only where it's missing
-- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, `docs/agents/triage-labels.md` (only when `triage` is installed) and `docs/agents/releasing.md` (only when Section E ran)
+- The contents of `docs/agents/issue-tracker.md` and `docs/agents/domain.md`, of `docs/agents/triage-labels.md` when `triage` is installed, and of `docs/agents/releasing.md` when Section E ran
 - Each rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, and the edits to the files that name them, when Section C proposed them
 - Each move out of `docs/assets/`, and the links it updates, when proposed
 
@@ -98,9 +101,9 @@ Let them edit, then take one approval for all of it. Then write:
    - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
    - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md): GitLab issue tracker
    - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
-   - [triage-labels.md](./triage-labels.md): label mapping (only if `triage` is installed)
+   - [triage-labels.md](./triage-labels.md): label mapping, written only when `triage` is installed
    - [domain.md](./domain.md): domain doc consumer rules + layout
-   - [releasing.md](./releasing.md): the release lifecycle (only when Section E ran)
+   - [releasing.md](./releasing.md): the release lifecycle, written only when Section E ran
 
    For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
@@ -112,7 +115,7 @@ Done when every approved change is made.
 
 ### 5. Audit
 
-Read every harness file the project holds, from the root down, against **set-up-machine**'s `rules.json`, whether or not that harness is set up on this machine: `.claude/settings.json` and `settings.local.json`, `.cursor/cli.json`, `opencode.json(c)` and `.opencode/`, `.codex/config.toml`. [references/project-files.md](references/project-files.md) says what each harness lets a project file do to a global rule, and how to judge an entry. Report each finding as:
+Read every harness file the project holds, from the root down, against **set-up-machine**'s `rules.json`, whether or not that harness is set up on this machine: `.claude/settings.json` and `settings.local.json`, `.cursor/cli.json`, `opencode.json` or `opencode.jsonc` and `.opencode/`, `.codex/config.toml`. [references/project-files.md](references/project-files.md) says what each harness lets a project file do to a global rule, and how to judge an entry. Report each finding as:
 
 - `weakens`: a global rule no longer holds as the machine sets it, in some harness. Explain which and why, and propose the fix: remove the entry, or narrow it to the project's own commands. The file is the project's, so change it only on the user's approval.
 - `overlaps`: an allow that covers a rule's command while the rule still holds. Propose narrowing it.
