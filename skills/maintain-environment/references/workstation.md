@@ -10,7 +10,8 @@ The workstation repo is the one source of everything personal about how the user
 - which tool fills each role;
 - their personal workflow;
 - their personal permissions;
-- what every machine installs.
+- what every machine installs;
+- the release rules every one of their projects shares, when they have them.
 
 `<workstation-repo>` is the user's own repository, usually private, because it holds the personal detail that the public skills repo and the user's projects leave out. `/set-up-machine` reads its `setup/` folder on each machine, so a change made once reaches every machine. Without one, each machine's shared global instructions file holds the personal lines itself, and a personal permission has no home.
 
@@ -25,7 +26,7 @@ setup/permissions.json    {"version": 1, "rules": []}
 setup/installs.json       {"skills": [{"source": "<skills-repo>"}]}
 ```
 
-- **`setup/`** is what `/set-up-machine` reads, and the only part a skill relies on.
+- **`setup/`** is what `/set-up-machine` reads, and the only part a skill relies on. `/set-up-project` also reads `setup/releasing.md` when it exists.
 - **`AGENTS.md`** names each other document, such as the user's principles or a full glossary, and says when to read it. The names and paths of those documents are the user's to choose.
 - **`DESIGN.md`** starts short: the layout above, and that a new file copies the shape of its siblings. It grows as the user adds kinds of files.
 
