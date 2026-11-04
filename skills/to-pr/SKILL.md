@@ -35,6 +35,7 @@ Create or update the pull request for the current task with a concise descriptio
      - A shallow file tree showing changed responsibilities.
      - React component tree changes, including important hooks, state, and package boundaries.
      - Call-tree, call-stack, control-flow, or data-flow changes.
+     - Before and after images, when the change alters what a person sees.
    - Prefer `diff` blocks when showing changes to an existing shape. Show the complete target shape when most of it is new or diff notation would obscure ownership or order.
    - Keep each view focused on what a reviewer needs. Omit categories that did not change.
    - End with **Things to be aware of**, the last section, for what lies outside "what changed": decisions you made alone, surprises, what's not in the PR, and follow-ups, each marked as a ticket, a todo for the maintainer, or nothing needed. Keep its four lines, writing `None.` after an empty one, so the reader knows it was considered. **Special things to note** stays about the change itself.
@@ -44,6 +45,8 @@ Create or update the pull request for the current task with a concise descriptio
 5. Save and publish the description:
    - Save it to `.scratch/pr-{number}/description.md`: `.scratch/` is gitignored, and GitHub holds the published description, so saving or rewriting it leaves nothing to commit.
    - Update the PR with `gh pr edit {number} --body-file {output-path}`.
+   - When the description references local images, keep them in `.scratch/pr-{number}/` and add one `--attach {image-path}` per image, with the same path as in the description. This needs `gh` 2.99.0 or later: `gh` uploads each image to GitHub and rewrites its link.
+   - Confirm with `gh pr view {number} --json body` that each image link contains `user-attachments`.
    - Confirm the update succeeded.
 
 6. Report completion:
