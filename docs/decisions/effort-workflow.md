@@ -1312,3 +1312,28 @@ Older entries keep the skill names of their time, such as `close-effort` and `in
 - **Options:** None considered.
 - **Choice and why:** When the merge carried a version bump, `/settle-effort` follows the project's `docs/agents/releasing.md` from the step after the merge through its check. It hands the user each step the page gives them, and offers `/set-up-project` when the project has no page.
 - **Consequences:** The settle report names each part's version.
+
+## 2026-11-14: an effort runs as a series of waves
+
+- **Status:** accepted
+- **Context:** `/to-tickets` told agents to work the frontier: any ticket whose blockers were all done. The maintainer could not see from the spec which tickets run together, and "frontier" also names a different idea in `/wayfinder` and `/grilling`.
+- **Options:**
+  - Keep the frontier: a ticket starts the moment its own blockers are done, which is faster but harder to follow.
+  - A `wave:N` label on each ticket: one more label to keep in step with the blocking edges.
+- **Choice and why:** `/to-tickets` derives waves from the blocking edges and writes a Waves list into the spec. Wave 1 holds the tickets with no blockers. Each later wave starts when every ticket of the earlier waves is done. `/orchestrate-effort` builds one wave at a time, with a wave's tickets in parallel. The spec shows the whole order at a glance, like a waterfall.
+- **Consequences:**
+  - A ticket can wait for an unrelated ticket of its wave to finish.
+  - "Wave" is in the glossary. `/wayfinder` and `/grilling` keep "frontier" for their own meaning.
+
+## 2026-11-14: in roadmap mode, Linear holds the status and the maintainer's checks
+
+- **Status:** accepted
+- **Context:** In roadmap mode, Notion holds the history, Linear the roadmap and GitHub only the agents' specs and tickets, as `set-up-project.md` records. The effort skills put QA tickets and the effort's status on GitHub, which the maintainer no longer reads there.
+- **Options:** Keep QA tickets on GitHub: the maintainer would have to watch two places.
+- **Choice and why:** Every effort skill checks for `docs/agents/roadmap.md`, and without it behaves exactly as before. With it:
+  - `/to-spec` starts from a Linear issue, and the spec, each ticket and the pull request link that issue in the description, never in the title.
+  - `/orchestrate-effort` moves the Linear issue to In Progress, comments on it at the start and at delivery, and makes each check only the maintainer can do a Linear issue assigned to them, never a GitHub QA ticket.
+  - `/settle-effort` moves the Linear issue along the project's status flow, and moves unfinished work to the next release milestone.
+- **Consequences:**
+  - The project's `docs/agents/roadmap.md` holds the team, the status names and the rules, so the skills name no workspace.
+  - GitHub-only mode keeps the "Ready for you to try" QA flow and the `Refs #n` rule.
