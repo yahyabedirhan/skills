@@ -67,19 +67,12 @@ A project is in this mode when it has no `docs/agents/roadmap.md`.
 **Roadmap mode**:
 The way a project plans in three layers: the notes hold its history and thinking, the roadmap holds what to build and its status, and GitHub issues hold only the agent specs and tickets.
 The project's `docs/agents/roadmap.md` binds the roadmap and the notes to their tools, such as Linear and Notion.
-A project is in this mode when `docs/agents/roadmap.md` exists, and every skill that tracks work reads that file first.
-A project moves to it only when the maintainer asks, in one `/set-up-project` run.
-
-**Roadmap issue**:
-In roadmap mode, the issue on the roadmap that a change belongs to, which its GitHub spec, tickets and pull request link.
+A project is in this mode when `docs/agents/roadmap.md` exists.
 
 **Release group**:
-A set of changes that ship together as one version: they are tested on beta, then shipped to production.
-In roadmap mode, the roadmap holds each group, and unfinished work moves to the next group.
-Only a hotfix ships alone.
+A set of changes that ship together as one version, tested on beta and then shipped to production.
 
 **Wave**:
 A set of an effort's tickets that do not block each other, so agents build them in parallel.
-A wave starts when every ticket of the earlier waves is done, so an effort runs as a series of waves.
-`/to-tickets` derives the waves from the blocking edges, and `/orchestrate-effort` builds one wave at a time.
+An effort runs as a series of waves: a wave starts when every ticket of the earlier waves is done.
 _Avoid_: frontier, for this meaning. `/wayfinder` and `/grilling` keep "frontier" for their own, different meaning.
