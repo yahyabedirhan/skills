@@ -71,6 +71,7 @@ Changes:
 - The final report has review links for each changed file.
 - A last section, 'Things to be aware of', holds decisions made alone, surprises, what's left out and follow-ups.
 - It writes "Refs", not "Closes", for a ticket waiting for the maintainer's QA.
+- In roadmap mode, it links the Linear issue in the header line, never in the title.
 
 ## show-me
 
