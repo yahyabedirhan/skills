@@ -57,3 +57,25 @@ The `skills-lock.json` file that the `skills` CLI writes for an install, naming 
 
 **Marketplace**:
 This repo's Claude Code plugin list, in `.claude-plugin/marketplace.json`, from which some skills install as plugins.
+
+### Project modes and planning
+
+**GitHub-only mode**:
+The default way a project tracks work: its issue tracker holds every spec, ticket and QA ticket, and the maintainer works on it too.
+A project is in this mode when it has no `docs/agents/roadmap.md`.
+
+**Roadmap mode**:
+The way a project plans in three layers: Notion holds its history and thinking, Linear holds the roadmap and its status, and GitHub issues hold only the agent specs and tickets.
+A project is in this mode when `docs/agents/roadmap.md` exists, and every skill that tracks work reads that file first.
+A project moves to it only when the maintainer asks, in one `/set-up-project` run.
+
+**Release group**:
+A set of changes that ship together as one version: they are tested on beta, then shipped to production.
+In roadmap mode, a Linear milestone named `Release <version>` holds the group's issues, and unfinished work moves to the next milestone.
+Only a hotfix ships alone.
+
+**Wave**:
+A set of an effort's tickets that do not block each other, so agents build them in parallel.
+A wave starts when every ticket of the earlier waves is done, so an effort runs as a series of waves.
+`/to-tickets` derives the waves from the blocking edges, and `/orchestrate-effort` builds one wave at a time.
+_Avoid_: frontier, for this meaning. `/wayfinder` and `/grilling` keep "frontier" for their own, different meaning.
