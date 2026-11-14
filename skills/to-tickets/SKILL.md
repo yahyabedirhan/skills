@@ -36,6 +36,8 @@ Break the work into **tracer bullet** tickets.
 
 Give each ticket its **blocking edges**: the other tickets that must complete before it can start. A ticket with no blockers can start immediately.
 
+Group the tickets into **waves** from the blocking edges. Wave 1 holds every ticket with no blockers. Each later wave holds the tickets whose blockers are all in earlier waves. Agents build a wave's tickets in parallel, and a wave starts when every ticket of the earlier waves is done.
+
 Refer to a ticket by its title, never by its number alone: `#12 Add login` or `03: Add login`, not `#12`. This holds in the breakdown, in "Blocked by", and in anything you tell the user.
 
 **Wide refactors are the exception to vertical slicing.** A **wide refactor** is one mechanical change (rename a column, retype a shared symbol) whose **blast radius** fans across the whole codebase, so a single edit breaks thousands of call sites at once and no vertical slice can land green. Don't force it into a tracer bullet; sequence it as **expand–contract**. First expand: add the new form beside the old so nothing breaks. Then migrate the call sites over in batches sized by blast radius (per package, per directory), each batch its own ticket blocked by the expand, keeping CI green batch to batch because the old form still exists. Finally contract: delete the old form once no caller remains, in a ticket blocked by every migrate batch. When even the batches can't stay green alone, keep the sequence but let them share an integration branch that all block a final integrate-and-verify ticket; green is promised only there.
@@ -46,6 +48,7 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 
 - **Title**: short descriptive name, prefixed as `docs/agents/issue-tracker.md` > 'Title prefixes' says
 - **Blocked by**: which other tickets (if any) must complete first
+- **Wave**: the wave it falls in
 - **What it delivers**: the end-to-end behaviour this ticket makes work
 
 Ask the user:
@@ -61,11 +64,20 @@ Iterate until the user approves the breakdown.
 Publish the approved tickets. **How** depends on the tracker **set-up-project** configured; the tickets are the same either way, only the shape of the blocking edges changes:
 
 - **Local files** → write one file per ticket under `.efforts/<effort>/issues/<NN>-<slug>.md`, beside the effort's `spec.md` (`<effort>` is the effort's name, or a short slug for the feature when there is no effort), numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the tickets it depends on, each by number and title. Use the per-ticket file template below: one ticket per file, never a single combined file.
-- **A real issue tracker (GitHub, Linear, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking / sub-issue relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
+- **A hosted issue tracker (GitHub, GitLab, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking / sub-issue relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
 
-Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
+- **In roadmap mode,** when `docs/agents/roadmap.md` exists → publish to GitHub only, since Linear holds the roadmap and not the tickets. Start each ticket's description with a `Linear:` line that links the Linear issue the spec links, never in the title.
 
-Do NOT close or modify any parent issue.
+Then add a **Waves** list to the spec, at the end of the spec issue's body or of `spec.md`, so the orchestrator builds one wave at a time:
+
+```markdown
+## Waves
+
+1. Wave 1, built in parallel: <ticket title>, <ticket title>
+2. Wave 2, starts when wave 1 is done: <ticket title>
+```
+
+Do NOT close any parent issue, and change the spec only to add its Waves list.
 
 <local-ticket-template>
 

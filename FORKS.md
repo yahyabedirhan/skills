@@ -53,6 +53,8 @@ Changes:
 - With no tracker configured, it runs set-up-project instead of telling you to run `setup-matt-pocock-skills`.
 - A local tracker keeps the tickets in `.efforts/<effort>/issues/` instead of `.scratch/`.
 - Tickets are named by title, never by a number alone.
+- It groups the tickets into waves from the blocking edges, and adds a Waves list to the spec.
+- In roadmap mode, it publishes tickets to GitHub only, each linking the spec's Linear issue in its description.
 
 ## to-pr
 
