@@ -6,7 +6,7 @@ argument-hint: "Path to the effort folder, or to the spec and tickets"
 
 # Orchestrate Effort
 
-Build one effort from its spec and tickets, as its orchestrator, following `/orchestrating`. Work in the current checkout: the effort's worktree and branch were chosen when it started. Treat the design as settled: where the spec, the handoff or a ticket leaves a question open, decide it yourself within that design rather than redesigning. Run tickets in parallel by default, and have them verified in the real app wherever the machine allows it.
+Build one effort from its spec and tickets, as its orchestrator, following `/orchestrating`. Work in the current checkout: the effort's worktree and branch were chosen when it started. Treat the design as settled: where the spec, the handoff or a ticket leaves a question open, decide it yourself within that design rather than redesigning. Build one wave at a time, with the tickets of a wave in parallel, and have them verified in the real app wherever the machine allows it.
 
 ## Parameters
 
@@ -18,11 +18,14 @@ Build one effort from its spec and tickets, as its orchestrator, following `/orc
 1. **Read the effort.** The argument points at the effort folder or at the spec and tickets. Read the spec, the handoff and every ticket in full, for each ticket's blockers, its acceptance criteria and any input only the user can give.
    - **With no argument:** ask for one.
    - **With no tickets:** tell the user so and stop: the tickets come from `/to-tickets`, in a session they run or ask for.
+   - **When the spec has no Waves list:** derive the waves from the blocking edges. Wave 1 holds the tickets with no blockers, and each later wave the tickets whose blockers are all in earlier waves.
+   - **In roadmap mode,** when `docs/agents/roadmap.md` exists: read it, and find the Linear issue the spec links.
 2. **Start from a clean worktree.** Commit whatever is uncommitted in its own commit and push, so no delegate finds files it may not touch and has to work around them.
-3. **Show the plan** with `/show-me`, as a tree: blockers first, which tickets run in parallel, which use an input from the user, and each ticket's review depth. Go on without waiting for a reply: the plan informs the user and asks them nothing.
+3. **Show the plan** with `/show-me`, as a tree: the waves in order, which tickets run in parallel, which use an input from the user, and each ticket's review depth. Go on without waiting for a reply: the plan informs the user and asks them nothing.
    - Serialise only the step that uses a shared resource, such as an installed app, a single real UI, a port or a database, not the whole ticket. Overlapping files are no reason to serialise: conflicts are cheap to resolve at integration.
    - Give a large or risky ticket its own `/code-review`. A small, low-risk ticket gets none, because the one review of the whole branch at delivery covers it.
-4. **Delegate each unblocked ticket** to a sub-agent with `/implement`, in its own git worktree, where it makes one commit and doesn't push. The brief gives:
+   - **In roadmap mode:** move the Linear issue to In Progress, and comment on it with the spec's link and the plan, as `docs/agents/roadmap.md` says.
+4. **Delegate each ticket of the current wave** to a sub-agent with `/implement`, in its own git worktree, where it makes one commit and doesn't push. The brief gives:
    - the paths to the ticket, the spec and the handoff;
    - the ticket's review depth;
    - the shared resources it leaves to you;
@@ -48,11 +51,13 @@ Build one effort from its spec and tickets, as its orchestrator, following `/orc
    - **When a permission check refuses a removal:** leave that worktree or branch for `/settle-effort`.
 6. **Hand usable tickets to the user for QA,** only in a project whose instructions opt in to it and say how a build reaches the user. Read `user-qa.md` before the first one. The merge doesn't wait for QA.
    - **When the spec says "QA: blocking":** the pull request waits until the user closes each QA ticket; say so in the pull request.
+   - **In roadmap mode:** create no QA ticket on GitHub. Make each check only the maintainer can do a Linear issue, as `user-qa.md` > 'Roadmap mode' says.
 
-   Repeat steps 4 to 6 until every ticket is committed and pushed, with its criteria ticked or noted, or deferred by the user.
+   Repeat steps 4 to 6 for each wave. Start a wave only when every ticket of the earlier waves is committed and pushed, with its criteria ticked or noted, or deferred by the user.
 7. **Deliver.** Delegate the final review to a sub-agent: the full checks and `/code-review` over the whole branch against its base. Delegate the fixes for what it finds the same way, then commit them. Open the pull request with `/to-pr`, and put in its description your running list of decisions and the surprises and skipped checks delegates reported. Besides the diff, the description is the only report the user reads, so whatever you learned and leave out of it stays behind in this session. Leave the worktree clean: commit and push any effort work `git status` still shows, or leave a file out on purpose.
+   - **In roadmap mode:** link the pull request in the Linear issue's description, and comment on the Linear issue with the pull request, screenshots and a status diagram.
 8. **Report** the pull request, each ticket's commit, anything deferred, the tickets waiting for the user's QA and whether the merge waits for them, and the `git status` result: clean, or each file left out with its reason. Besides any QA, the user's only step is to review and approve the pull request. List what you will do once told, as your own steps: merge the pull request, run the effort's post-merge follow-ups such as installs or updates, try what can only be tried after the merge and report the result, and settle the effort with `/settle-effort`.
 
 ## References
 
-- [user-qa.md](user-qa.md): handing a ticket to the user for QA, and what its "Ready for you to try" comment holds.
+- [user-qa.md](user-qa.md): handing a ticket to the user for QA, what its "Ready for you to try" comment holds, and the Linear issue that replaces it in roadmap mode.

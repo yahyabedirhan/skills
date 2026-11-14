@@ -12,3 +12,15 @@ The ticket stays open and assigned to the user. On a local tracker, its status s
 - what to do when done: close the ticket if it's good, or comment with the step number and what they saw.
 
 Commits and the pull request say "Refs #n" for the ticket, never "Closes #n", so the merge doesn't close it before the user has tried it.
+
+## Roadmap mode
+
+In roadmap mode, when `docs/agents/roadmap.md` exists, GitHub holds no QA ticket, and the GitHub ticket closes once its criteria are ticked.
+Make each check only the maintainer can do a Linear issue, as `docs/agents/roadmap.md` > 'Maintainer-only steps' says:
+
+- assigned to the maintainer, with the `QA` type label;
+- in the release milestone it blocks, and marked as blocking the Linear issue it gates;
+- with the build and how to reach it, numbered try-this steps with known risks marked, and screenshots;
+- with what to do when done: move it to Done if it's good, or comment with the step number and what they saw.
+
+Commits and the pull request need no "Refs" line for it, since the check lives in Linear.
