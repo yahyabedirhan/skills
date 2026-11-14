@@ -25,7 +25,8 @@ It explores, presents, takes one approval, then writes.
 - **Seed templates**: the files beside `SKILL.md` that the agent copies into `docs/agents/`.
 - **Project harness files**: `.claude/settings*.json`, `.cursor/cli.json`, `opencode.json`, `.codex/config.toml`.
 - **Rule table**: read from the installed set-up-machine skill.
-- **Roadmap page**: `docs/agents/roadmap.md`, from the `roadmap-linear.md` seed. It names the Linear team, project, `Repo` label, release milestones, status flow, maintainer-only steps and the Notion database.
+- **Roadmap page**: `docs/agents/roadmap.md`, from the `roadmap-linear.md` seed. It names the Linear team, project, `Repo` label, release milestones, status flow and maintainer-only steps.
+- **Notes page**: `docs/agents/notes.md`, from the `notes-notion.md` seed. It names the Notion database and its `Kind` values.
 - **Mode sections**: sections in the other seeds marked for one mode only. The agent keeps the sections of the project's mode and removes the others.
 - **Shared release rules**: `setup/releasing.md` in the user's workstation repo, found through the pointer; optional.
 
@@ -47,6 +48,7 @@ skills/set-up-project/
 ├── triage-labels.md, domain.md # seeds
 ├── releasing.md                # the release page seed: what ships, the release order, the roles, release groups
 ├── roadmap-linear.md           # the roadmap page seed, written only in roadmap mode
+├── notes-notion.md             # the notes page seed, written only in roadmap mode
 └── references/
     ├── project-files.md        # what each harness lets a project file do to a global rule
     └── roadmap-mode.md         # the docs/agents set, the move from GitHub-only mode, and the roadmap audit
@@ -70,7 +72,7 @@ set-up-project
 | Change | What you touch |
 |---|---|
 | A new issue tracker | one seed template and one option in `SKILL.md` > 'Section A: issue tracker' |
-| A new planning tool for roadmap mode | a new `roadmap-<tool>.md` seed, and its files in `references/roadmap-mode.md` |
+| A new planning tool for roadmap mode | a new `roadmap-<tool>.md` or `notes-<tool>.md` seed, and its files in `references/roadmap-mode.md` |
 | A new harness | its project files in `references/project-files.md` and in the audit list |
 | A new standard file for every project | a draft line in step 4 |
 | A new shared release rule | the user's `setup/releasing.md`; the seed only when every user would want it |

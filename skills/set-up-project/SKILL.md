@@ -127,6 +127,7 @@ Let them edit, then take one approval for all of it. Then write:
    - [domain.md](./domain.md): domain doc consumer rules + layout
    - [releasing.md](./releasing.md): the release lifecycle, written only when Section E ran
    - [roadmap-linear.md](./roadmap-linear.md): Linear roadmap, written to `docs/agents/roadmap.md` only in roadmap mode
+   - [notes-notion.md](./notes-notion.md): Notion notes, written to `docs/agents/notes.md` only in roadmap mode
 
    Each seed marks the sections that belong to one mode. Keep the sections of the project's mode, and remove the others.
 

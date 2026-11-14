@@ -1,13 +1,13 @@
 # Roadmap
 
-This page says how <project> plans its work across Notion, Linear and GitHub.
+This page says how <project> keeps its roadmap in Linear, above the agent specs and tickets on GitHub.
 Its presence puts the project in roadmap mode: read it before you plan, start, deliver or settle work here.
 The skills speak of the roadmap in shared terms, and this page maps each one to Linear:
 
 - **The roadmap:** the Linear project below.
 - **Roadmap issue:** the Linear issue that a change belongs to.
 - **Release group:** a release milestone, and its **release note** the milestone's description.
-- **The notes:** the Notion database below.
+
 The [`/set-up-project`](https://github.com/yahyabedirhan/skills/tree/main/skills/set-up-project) skill wrote it.
 
 _`/set-up-project` fills in each `<slot>`, removes each line that does not apply, and removes every note in italics like this one._
@@ -16,12 +16,12 @@ _`/set-up-project` fills in each `<slot>`, removes each line that does not apply
 
 | Layer | What it holds | Who reads it |
 |---|---|---|
-| Notion | History and thinking: notes, brainstorms, journey pages, the wiki and handoffs. A page may be out of date. | The maintainer, and agents that need the history |
+| The notes | History and thinking, as `docs/agents/notes.md` says. | The maintainer, and agents that need the history |
 | Linear | The roadmap: what to build and the high-level how, the release groups, the status, screenshots and diagrams. | The maintainer |
 | GitHub issues | Agent specs and tickets that are ready to build, planned in waves. | Agents |
 | Codebase docs | How the project works today. | Everyone |
 
-- Move work from Notion to Linear, or from Linear to GitHub, only when the maintainer says so.
+- Move work from the notes to Linear, or from Linear to GitHub, only when the maintainer says so.
 - Give every change that affects released content a Linear issue: a feature, a bugfix or a chore, also work that an agent finds.
 - Size a Linear issue to about one pull request. A Linear issue and the GitHub issues for it do not map one to one.
 - Make every change in Linear yourself, so the maintainer only reads and decides there.
@@ -80,15 +80,3 @@ Details for agents go here.
 - Link the GitHub spec and the pull request in the Linear issue's description the same way.
 - Comment on the Linear issue when its spec is published, with the spec's link.
 - Comment on it when the effort starts, with the plan, and again at delivery, with the pull request, screenshots and a status diagram.
-
-## Notion
-
-- **Database:** `<Notion database>`. Give every page one `Kind`:
-  - **Note:** the maintainer's own words, kept close to verbatim.
-  - **Brainstorm:** a grilling or brainstorm session.
-  - **Journey:** the story of how something was built, a source for later posts.
-  - **Wiki:** internal docs for the project.
-  - **Handoff:** a note for a future agent.
-- Keep `Labels` for topics.
-- Fill `Kind` on each page you make or change, and keep the database's agent guide current when it has one.
-- Trust the codebase docs over a Notion page when the two disagree.
