@@ -41,6 +41,7 @@ Changes:
 - Agents can load it, so a thinking session runs it itself.
 - With no tracker configured, it runs set-up-project instead of telling you to run `setup-matt-pocock-skills`.
 - A local tracker keeps the spec in `.efforts/<effort>/` instead of `.scratch/`.
+- In roadmap mode, a Linear issue starts the spec: the spec links it in its description, and the Linear issue links the spec back.
 
 ## to-tickets
 

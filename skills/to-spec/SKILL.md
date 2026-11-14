@@ -19,7 +19,15 @@ Check with the user that these seams match their expectations.
 
 On a local-files tracker, write the spec to `.efforts/<effort>/spec.md`, where `<effort>` is the effort's name (or a short slug for the feature when there is no effort). Its tickets go beside it, in `.efforts/<effort>/issues/`.
 
+In roadmap mode, when `docs/agents/roadmap.md` exists, a Linear issue starts the spec. Read that file first.
+
+- Find the Linear issue the conversation is about. When it names none, ask the user which one, and create one only when they say so.
+- Publish the spec to GitHub. Start its description with a `Linear:` line that links the Linear issue, and keep the link out of the title.
+- Link the spec in the Linear issue's description, and comment on the Linear issue with the spec's link.
+
 <spec-template>
+
+Linear: <link to the Linear issue, only in roadmap mode>
 
 ## Problem Statement
 
