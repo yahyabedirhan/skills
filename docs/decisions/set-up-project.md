@@ -178,3 +178,16 @@ The spec is "Spec: every harness and project is set up and audited from the skil
 - **Consequences:**
   - A new release page starts short. An existing long page stays until someone trims it, because the audit checks a page against the shared rules, not its length.
   - Without shared release rules, the seed's one-line version rule in step 1 is the only version rule a page gets.
+
+## 2026-11-14: a project mode, with roadmap mode marked by docs/agents/roadmap.md
+
+- **Status:** accepted
+- **Context:** The maintainer wanted three planning layers: Notion for history and thinking, Linear for the product roadmap, and GitHub issues for agent work only. The skills assumed one tracker that the maintainer also works in. Linear appeared only as an "Other" tracker in freeform prose.
+- **Options:**
+  - Linear as the issue tracker, in place of GitHub: the effort skills depend on GitHub issues, labels and blocking links.
+  - A mode flag inside `docs/agents/issue-tracker.md`: every skill would have to parse the file to find the mode.
+- **Choice and why:** Add a project mode. GitHub-only mode is today's way and stays the default. Roadmap mode keeps GitHub as the agents' tracker and adds Linear and Notion above it. The file `docs/agents/roadmap.md` marks the mode, since a skill can check that a file exists without reading it. In roadmap mode, set-up-project writes and audits the whole `docs/agents/` set together: the roadmap page, the issue tracker without a `QA` prefix, only the labels agents use, the release groups and the pointer block in `AGENTS.md`. The roadmap-only parts are marked sections in the existing seeds, so the two modes share one seed per file and stay in step.
+- **Consequences:**
+  - A project moves only when the maintainer asks, in one run. The audit never switches a project on its own.
+  - `references/roadmap-mode.md` holds the roadmap-mode steps, since only some runs need them.
+  - The Linear and Notion setup itself, such as labels, milestones and the `Kind` property, stays outside this skill.

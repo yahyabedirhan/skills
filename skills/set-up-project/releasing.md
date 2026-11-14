@@ -38,3 +38,18 @@ This section names who does each step.
 - The agent picks the version, writes the changelog, opens the release pull request, makes the tag and the GitHub release, and runs the checks.
 - The maintainer approves the version and the merge.
   _Add any step that needs the maintainer's credentials, such as a publish with their two-factor code._
+
+## Release groups
+
+_For `/set-up-project`: keep this section only in roadmap mode, and fill in the beta and production names._
+
+A release group is a set of changes that ship together as one version.
+Its Linear milestone, `Release <version>`, holds the group's issues.
+
+1. Merge each change of the group to _the beta branch or environment_, and test the group there.
+2. Before the release ships, move each unfinished issue to the next release milestone.
+3. Ship the group to _production_, in the release order above.
+4. Rewrite the milestone's description as the release note: the date, the pull requests and what shipped, in plain sentences.
+   A Notion Journey page tells the longer story when it is worth it.
+
+A hotfix ships alone, as its own version, without waiting for the group.

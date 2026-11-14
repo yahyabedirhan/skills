@@ -17,6 +17,10 @@ This project's tools for the roles skills name; each row overrides the global on
 
 ## Agent skills
 
+### Roadmap
+
+[Only in roadmap mode.] Notion holds the history, Linear the roadmap and its status, and GitHub the agent specs and tickets. Before you plan, start, deliver or settle work, read `docs/agents/roadmap.md`.
+
 ### Issue tracker
 
 [one-line summary of where issues are tracked]. See `docs/agents/issue-tracker.md`.
@@ -37,3 +41,7 @@ This project's tools for the roles skills name; each row overrides the global on
 ## Environment defaults
 
 Optional, and only for a role every contributor uses the same way, such as a worktree tool the project's scripts assume. A tool one person prefers belongs in their own global environment defaults. `/set-up-machine`'s `references/global-instructions.md` > 'Roles' lists the roles.
+
+## Roadmap mode
+
+In roadmap mode, the `## Agent skills` block names every file of the `docs/agents/` set: the `### Roadmap` sub-block for `docs/agents/roadmap.md`, and the issue tracker, triage labels, domain docs and releases sub-blocks, whether or not `triage` is installed. In GitHub-only mode, leave the `### Roadmap` sub-block out.

@@ -15,11 +15,23 @@ Issues and specs for this repo live as GitHub issues in `<owner>/<repo>`, so the
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
 
+## Roadmap mode
+
+_For `/set-up-project`: keep this section only in roadmap mode, when `docs/agents/roadmap.md` exists, and remove it otherwise._
+
+GitHub issues hold only agent work: specs and tickets that are ready to build without more research.
+`docs/agents/roadmap.md` says where the rest of the planning lives.
+
+- Plan each effort's tickets in waves, as `/to-tickets` writes them into the spec.
+- Create no QA ticket and no issue for a human step. A step only the maintainer can do is a Linear issue, as `docs/agents/roadmap.md` > 'Maintainer-only steps' says.
+- Link the Linear issue in the description of each spec, ticket and pull request, never in the title.
+- Use only the labels `docs/agents/triage-labels.md` names, since triage happens in Linear.
+
 ## Title prefixes
 
 Start every issue title with one prefix, then `: ` and a capitalized title with no trailing period, for example `QA: Verify the panel on a VPS`. When more than one prefix fits, use the first one in this order:
 
-1. `QA`: manual work for the maintainer.
+1. `QA`: manual work for the maintainer. _(For `/set-up-project`: remove this line in roadmap mode, and renumber the list.)_
 2. `VPS`: work on a remote machine.
 3. A harness: `Claude` (claude.ai, cloud sessions and managed agents), `Codex`, `OpenCode`, `Cursor` or `Pi`. Claude Code is the default harness, so it gets no prefix.
 4. A semantic prefix from the list below: one area of this project.

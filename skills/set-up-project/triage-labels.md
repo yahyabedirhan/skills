@@ -13,3 +13,17 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
 
 Edit the right-hand column to match whatever vocabulary you actually use.
+
+## Roadmap mode
+
+_For `/set-up-project`: in roadmap mode, write this section in place of everything above it, whether or not `triage` is installed. Remove it otherwise._
+
+Triage happens in Linear, so GitHub issues carry only the labels agents use:
+
+| Label | Meaning |
+| ----- | ------- |
+| `ready-for-agent` | A spec or ticket that is fully specified and ready for an agent |
+| `wontfix` | Will not be actioned |
+| `effort:<name>` | Part of the effort `<name>` |
+
+The roles `needs-triage`, `needs-info` and `ready-for-human` have no GitHub label here. Do that work in Linear, as `docs/agents/roadmap.md` says.

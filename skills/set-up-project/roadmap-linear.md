@@ -1,0 +1,85 @@
+# Roadmap
+
+This page says how <project> plans its work across Notion, Linear and GitHub.
+Its presence puts the project in roadmap mode: read it before you plan, start, deliver or settle work here.
+The [`/set-up-project`](https://github.com/yahyabedirhan/skills/tree/main/skills/set-up-project) skill wrote it.
+
+_`/set-up-project` fills in each `<slot>`, removes each line that does not apply, and removes every note in italics like this one._
+
+## Planning layers
+
+| Layer | What it holds | Who reads it |
+|---|---|---|
+| Notion | History and thinking: notes, brainstorms, journey pages, the wiki and handoffs. A page may be out of date. | The maintainer, and agents that need the history |
+| Linear | The roadmap: what to build and the high-level how, the release groups, the status, screenshots and diagrams. | The maintainer |
+| GitHub issues | Agent specs and tickets that are ready to build, planned in waves. | Agents |
+| Codebase docs | How the project works today. | Everyone |
+
+- Move work from Notion to Linear, or from Linear to GitHub, only when the maintainer says so.
+- Give every change that affects released content a Linear issue: a feature, a bugfix or a chore, also work that an agent finds.
+- Size a Linear issue to about one pull request. A Linear issue and the GitHub issues for it do not map one to one.
+- Make every change in Linear yourself, so the maintainer only reads and decides there.
+
+## Linear
+
+- **Team:** `<team>`. Reach it through the Linear MCP server, `mcp__linear__*`.
+- **Project:** `<project>`.
+- **Repo label:** give every issue the label `<repo>` from the team's `Repo` label group.
+- **Release milestones:** a milestone named `Release <version>` holds each release group, as `docs/agents/releasing.md` says.
+  _For a project that holds several repos, name each milestone `<repo> <version>`, and only for a repo that publishes versions._
+  _When the project publishes no versions, remove this line._
+
+## Status flow
+
+1. **Todo:** the maintainer decided the work, and no effort builds it yet.
+2. **In Progress:** the orchestrator moves the issue here when the effort starts.
+3. **`<beta label>`:** add this label when the pull request merges to beta, and keep the status.
+4. **Done:** move the issue here when the release that holds it reaches production.
+
+_When the project ships on each merge, with no beta, remove step 3: the issue goes to Done when the merge and its follow-ups are done._
+
+## Maintainer-only steps
+
+A step that only the maintainer can do, such as a manual check, a login, a payment or a decision, is a Linear issue, never a GitHub issue.
+
+- Assign it to the maintainer.
+- Give it the type label `QA` for a check, or `Decision` for a decision.
+- Put it in the milestone it blocks, and mark it as blocking the issue it gates.
+- Give it numbered try-this steps and screenshots, and say what to do when done.
+
+## Linear issues
+
+Write each Linear issue for the maintainer:
+
+- Keep sentences short, in the active voice.
+- Use one word for one thing, every time.
+- Number the steps.
+- Use no WARNING, CAUTION or NOTE blocks.
+- Put agent detail, such as file lists, plans and logs, in a collapsed section at the end:
+
+```text
++++ Agent notes
+
+Details for agents go here.
+
++++
+```
+
+## Links between layers
+
+- Link the Linear issue in the description of each GitHub spec, ticket and pull request, as a header line or a `Linear:` line, never in the title.
+- Link the GitHub spec and the pull request in the Linear issue's description the same way.
+- Comment on the Linear issue when the effort starts, with the spec and the plan.
+- Comment on it again at delivery, with the pull request, screenshots and a status diagram.
+
+## Notion
+
+- **Database:** `<Notion database>`. Give every page one `Kind`:
+  - **Note:** the maintainer's own words, kept close to verbatim.
+  - **Brainstorm:** a grilling or brainstorm session.
+  - **Journey:** the story of how something was built, a source for later posts.
+  - **Wiki:** internal docs for the project.
+  - **Handoff:** a note for a future agent.
+- Keep `Labels` for topics.
+- Fill `Kind` on each page you make or change, and keep the database's agent guide current when it has one.
+- Trust the codebase docs over a Notion page when the two disagree.
