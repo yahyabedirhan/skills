@@ -1,13 +1,13 @@
 # Roadmap mode
 
-How `/set-up-project` sets up, moves and audits a project in roadmap mode: Notion holds the project's history, Linear its roadmap and status, and GitHub issues only the agent specs and tickets.
+How `/set-up-project` sets up, moves and audits a project in roadmap mode: the notes hold the project's history, the roadmap what to build and its status, and GitHub issues only the agent specs and tickets.
 
 ## The docs/agents set
 
 Write and audit these files together, since each one names the others:
 
-- `docs/agents/roadmap.md` from [../roadmap-linear.md](../roadmap-linear.md).
-  Look up the Linear team, the project, the `Repo` label, the release milestones and the beta label through the Linear MCP server, and the Notion database through Notion.
+- `docs/agents/roadmap.md` from the seed for the roadmap tool, `roadmap-<tool>.md`: today only [../roadmap-linear.md](../roadmap-linear.md).
+  Look up each `<slot>` the seed names through the roadmap tool and the notes tool.
   Ask the maintainer only for what you cannot find.
 - `docs/agents/issue-tracker.md` from [../issue-tracker-github.md](../issue-tracker-github.md), with its 'Roadmap mode' section kept and the `QA` prefix removed.
 - `docs/agents/triage-labels.md` from the 'Roadmap mode' section of [../triage-labels.md](../triage-labels.md), whether or not `triage` is installed.
@@ -22,8 +22,8 @@ Move a project only when the maintainer asks, in one run:
 
 1. Draft the set above, and take the one approval step 4 takes.
 2. List the open GitHub issues that no longer belong there: QA tickets, and issues labelled `needs-triage`, `needs-info` or `ready-for-human`.
-   Propose a Linear issue for each, as `docs/agents/roadmap.md` says, and a comment that closes the GitHub issue with a link to it.
-3. List the open specs and tickets, and ask which Linear issue each one serves. Add that link to each description.
+   Propose a roadmap issue for each, as `docs/agents/roadmap.md` says, and a comment that closes the GitHub issue with a link to it.
+3. List the open specs and tickets, and ask which roadmap issue each one serves. Add that link to each description.
 4. List the GitHub labels the project no longer uses, and propose to delete each one.
 
 Make the changes from steps 2 to 4 only on the maintainer's approval, since they change the project's issues.

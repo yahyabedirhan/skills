@@ -18,7 +18,7 @@ Edit the right-hand column to match whatever vocabulary you actually use.
 
 _For `/set-up-project`: in roadmap mode, write this section in place of everything above it, whether or not `triage` is installed. Remove it otherwise._
 
-Triage happens on the roadmap, so GitHub issues carry only the labels agents use:
+Triage happens on the roadmap, so issues carry only the labels agents use:
 
 | Label | Meaning |
 | ----- | ------- |
@@ -26,4 +26,4 @@ Triage happens on the roadmap, so GitHub issues carry only the labels agents use
 | `wontfix` | Will not be actioned |
 | `effort:<name>` | Part of the effort `<name>` |
 
-The roles `needs-triage`, `needs-info` and `ready-for-human` have no GitHub label here. Do that work on the roadmap, as `docs/agents/roadmap.md` says.
+The roles `needs-triage`, `needs-info` and `ready-for-human` have no label here. Do that work on the roadmap, as `docs/agents/roadmap.md` says.

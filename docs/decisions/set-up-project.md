@@ -191,3 +191,4 @@ The spec is "Spec: every harness and project is set up and audited from the skil
   - A project moves only when the maintainer asks, in one run. The audit never switches a project on its own.
   - `references/roadmap-mode.md` holds the roadmap-mode steps, since only some runs need them.
   - The Linear and Notion setup itself, such as labels, milestones and the `Kind` property, stays outside this skill.
+  - The effort skills and the tool-neutral seeds name roles: the roadmap, the roadmap issue, the release group and the notes. The roadmap seed, `roadmap-<tool>.md`, binds them to one tool, as `issue-tracker-<tool>.md` does for the issue tracker. Today only `roadmap-linear.md` exists.

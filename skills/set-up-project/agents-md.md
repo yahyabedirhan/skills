@@ -19,7 +19,7 @@ This project's tools for the roles skills name; each row overrides the global on
 
 ### Roadmap
 
-[Only in roadmap mode.] GitHub holds only the agent specs and tickets, and the roadmap holds the rest of the planning. Before you plan, start, deliver or settle work, read `docs/agents/roadmap.md`.
+[Only in roadmap mode.] The issue tracker holds only the agent specs and tickets, and the roadmap and the notes hold the rest of the planning. Before you plan, start, deliver or settle work, read `docs/agents/roadmap.md`.
 
 ### Issue tracker
 

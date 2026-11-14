@@ -65,13 +65,13 @@ The default way a project tracks work: its issue tracker holds every spec, ticke
 A project is in this mode when it has no `docs/agents/roadmap.md`.
 
 **Roadmap mode**:
-The way a project plans in three layers: Notion holds its history and thinking, Linear holds the roadmap and its status, and GitHub issues hold only the agent specs and tickets.
+The way a project plans in three layers: the notes hold its history and thinking, the roadmap holds what to build and its status, and GitHub issues hold only the agent specs and tickets.
+The project's `docs/agents/roadmap.md` binds the roadmap and the notes to their tools, such as Linear and Notion.
 A project is in this mode when `docs/agents/roadmap.md` exists, and every skill that tracks work reads that file first.
 A project moves to it only when the maintainer asks, in one `/set-up-project` run.
 
 **Roadmap issue**:
 In roadmap mode, the issue on the roadmap that a change belongs to, which its GitHub spec, tickets and pull request link.
-The project's `docs/agents/roadmap.md` maps it, and the other roadmap terms, to Linear.
 
 **Release group**:
 A set of changes that ship together as one version: they are tested on beta, then shipped to production.

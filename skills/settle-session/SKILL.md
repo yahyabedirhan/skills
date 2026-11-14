@@ -6,7 +6,7 @@ argument-hint: "Other branches and worktrees to consider for cleanup (optional)"
 
 # Settle Session
 
-A settled session saves its work and everything another agent needs in the issue tracker or the project's files. In roadmap mode, when `docs/agents/roadmap.md` exists, the agent detail goes to GitHub and the status to the roadmap issue. Leave the calling session available and its occupied worktree leased, even when its branch has merged.
+A settled session saves its work and everything another agent needs in the issue tracker or the project's files. In roadmap mode, when `docs/agents/roadmap.md` exists, the agent detail goes to the issue tracker and the status to the roadmap issue. Leave the calling session available and its occupied worktree leased, even when its branch has merged.
 
 Do every step yourself. Leave all terminal workspaces, tabs and panes open. An explicit request to close named topology can authorize that separate cleanup; settlement never implies closing linked or grouped topology.
 

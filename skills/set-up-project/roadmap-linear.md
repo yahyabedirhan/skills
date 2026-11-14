@@ -6,7 +6,8 @@ The skills speak of the roadmap in shared terms, and this page maps each one to 
 
 - **The roadmap:** the Linear project below.
 - **Roadmap issue:** the Linear issue that a change belongs to.
-- **Release group:** a release milestone.
+- **Release group:** a release milestone, and its **release note** the milestone's description.
+- **The notes:** the Notion database below.
 The [`/set-up-project`](https://github.com/yahyabedirhan/skills/tree/main/skills/set-up-project) skill wrote it.
 
 _`/set-up-project` fills in each `<slot>`, removes each line that does not apply, and removes every note in italics like this one._
