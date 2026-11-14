@@ -12,7 +12,7 @@ It explores, presents, takes one approval, then writes.
 1. **Machine first.** The machine passes set-up-machine's verifier (exit 0) before the project is set up.
 2. **One rules file.** `AGENTS.md` is the rules file. `CLAUDE.md` is `@AGENTS.md` or a link to it.
 3. **Skill configuration.** `docs/agents/` holds the issue tracker, the triage labels when `triage` is installed, the domain docs, and the release page when the project releases.
-4. **Project mode.** A project is in GitHub-only mode or in roadmap mode. `docs/agents/roadmap.md` marks roadmap mode, and every skill that tracks work checks for it. Without it, every skill behaves as before. In roadmap mode, the agent writes and audits the whole `docs/agents/` set together. The agent switches a project only when the maintainer asks.
+4. **Project mode.** A project is in GitHub-only mode or in roadmap mode. `docs/agents/roadmap.md` marks roadmap mode, and every skill that tracks work checks for it. Without it, every skill runs in GitHub-only mode. In roadmap mode, the agent writes and audits the whole `docs/agents/` set together. The agent switches a project only when the maintainer asks.
 5. **Allow-only.** A project's harness files only add allows. The audit fails on `weakens`.
 6. **Out of scope:**
    - the machine's own setup, which set-up-machine does;

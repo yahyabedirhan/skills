@@ -61,7 +61,7 @@ Write each Linear issue for the maintainer:
 - Keep sentences short, in the active voice.
 - Use one word for one thing, every time.
 - Number the steps.
-- Use no WARNING, CAUTION or NOTE blocks.
+- Put a warning in the step it belongs to, as a plain sentence. WARNING, CAUTION and NOTE blocks belong to GitHub issues, which use the full rules.
 - Put agent detail, such as file lists, plans and logs, in a collapsed section at the end:
 
 ```text
