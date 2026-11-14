@@ -54,6 +54,9 @@ The one definition of each role.
 | `worktree-tool` | the tool that makes and frees worktrees | Use `git worktree add/remove` beside the checkout. New branches have no upstream until their first push. |
 | `agent` | the command and flags that start a new agent session | This session's harness. |
 | `notification-method` | how a notification reaches this person: a command, or the harness's own tool | The harness's notification tool, else a line in the chat. |
+| `notes` | where this person's notes, brainstorms and project history live | Keep notes in the repository's docs, or ask the user. |
+| `roadmap` | where this person reads the decided work and its release groups | GitHub-only mode: the issue tracker holds all work. |
+| `issue-tracker` | where agents keep specs and tickets | The tracker the project's `docs/agents/issue-tracker.md` names. |
 | `skills-repo` | this person's own skills repo, as `<owner>/<repo>` | Ask the user. |
 | `path-to-skills-repo` | where that repo is cloned | Ask the user. |
 | `workstation-repo` | this person's own repo for their personal agent setup, usually private, as `<owner>/<repo>` | Keep personal lines in this file. Offer `/maintain-environment` to start a workstation repo when a change needs one. |
