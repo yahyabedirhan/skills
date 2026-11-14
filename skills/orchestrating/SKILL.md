@@ -60,7 +60,7 @@ handover     hand over to an orchestrator
 ```
 
 The starting prompt names these skills and the agent loads each one itself: the user types no slash command. Run it in one unbroken context window, so the spec and tickets build on the same reasoning. [folder-standard.md](folder-standard.md) says where the spec and tickets land.
-In roadmap mode, when `docs/agents/roadmap.md` exists, a Linear issue starts the thinking, and the spec and tickets link it from GitHub.
+In roadmap mode, when `docs/agents/roadmap.md` exists, a roadmap issue starts the thinking, and the spec and tickets link it.
 
 ### Handover
 
@@ -68,7 +68,7 @@ The session that hands over finishes its own work cleanly, through `/handover`. 
 
 ### Build
 
-`/orchestrate-with-handoff` picks up the handoff and runs `/orchestrate-effort`, which delegates the tickets to sub-agents one wave at a time, a wave's tickets in parallel, each building its ticket with `/implement` in its own worktree, integrates each ticket as its own commit, and opens the pull request with `/to-pr` after one branch review. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking". In roadmap mode, that check is a Linear issue assigned to the user, and the orchestrator keeps the effort's Linear issue up to date, as `docs/agents/roadmap.md` says.
+`/orchestrate-with-handoff` picks up the handoff and runs `/orchestrate-effort`, which delegates the tickets to sub-agents one wave at a time, a wave's tickets in parallel, each building its ticket with `/implement` in its own worktree, integrates each ticket as its own commit, and opens the pull request with `/to-pr` after one branch review. In a project that opts in to QA, a ticket the user can try stays open and goes to them with try-this steps; the merge waits for it only when the spec says "QA: blocking". In roadmap mode, that check goes to the roadmap, and the orchestrator keeps the effort's roadmap issue current, as `docs/agents/roadmap.md` says.
 
 ### Settle
 

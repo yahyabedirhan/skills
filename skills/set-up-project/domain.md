@@ -15,9 +15,9 @@ If any of these files don't exist, **proceed silently**. Don't flag their absenc
 _For `/set-up-project`: keep this section only in roadmap mode, and remove it otherwise._
 
 The codebase docs say how the project works today, and agents keep them current.
-The project's Notion database holds the history: notes, brainstorms, journey pages, the wiki and handoffs.
-A Notion page may be out of date. When it disagrees with the codebase docs, trust the codebase docs.
-Read Notion only when you need the history behind a decision, as `docs/agents/roadmap.md` > 'Notion' says.
+The project's history, such as notes, brainstorms, journey pages, the wiki and handoffs, lives where `docs/agents/roadmap.md` says.
+A history page may be out of date. When it disagrees with the codebase docs, trust the codebase docs.
+Read the history only when you need the reason behind a decision.
 
 ## File structure
 

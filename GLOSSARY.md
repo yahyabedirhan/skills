@@ -69,9 +69,13 @@ The way a project plans in three layers: Notion holds its history and thinking, 
 A project is in this mode when `docs/agents/roadmap.md` exists, and every skill that tracks work reads that file first.
 A project moves to it only when the maintainer asks, in one `/set-up-project` run.
 
+**Roadmap issue**:
+In roadmap mode, the issue on the roadmap that a change belongs to, which its GitHub spec, tickets and pull request link.
+The project's `docs/agents/roadmap.md` maps it, and the other roadmap terms, to Linear.
+
 **Release group**:
 A set of changes that ship together as one version: they are tested on beta, then shipped to production.
-In roadmap mode, a Linear milestone named `Release <version>` holds the group's issues, and unfinished work moves to the next milestone.
+In roadmap mode, the roadmap holds each group, and unfinished work moves to the next group.
 Only a hotfix ships alone.
 
 **Wave**:

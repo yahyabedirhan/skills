@@ -1,8 +1,6 @@
 # Roadmap mode
 
-How `/set-up-project` sets up, moves and audits a project in roadmap mode.
-In roadmap mode, Notion holds the project's history, Linear holds its roadmap and status, and GitHub issues hold only the agent specs and tickets.
-The file `docs/agents/roadmap.md` marks the mode: every skill that tracks work checks for it.
+How `/set-up-project` sets up, moves and audits a project in roadmap mode: Notion holds the project's history, Linear its roadmap and status, and GitHub issues only the agent specs and tickets.
 
 ## The docs/agents set
 
@@ -18,8 +16,6 @@ Write and audit these files together, since each one names the others:
 - `docs/agents/domain.md` from [../domain.md](../domain.md), with its 'History and current state' section kept.
 - The `## Agent skills` block in `AGENTS.md`, with the `### Roadmap` sub-block and a pointer to each file above, as [../agents-md.md](../agents-md.md) > 'Roadmap mode' says.
 
-Roadmap mode uses GitHub as its issue tracker, so Section A asks no tracker question.
-
 ## Moving a project from GitHub-only mode
 
 Move a project only when the maintainer asks, in one run:
@@ -34,9 +30,7 @@ Make the changes from steps 2 to 4 only on the maintainer's approval, since they
 
 ## Audit
 
-The audit never moves a project into or out of roadmap mode.
-A project without `docs/agents/roadmap.md` is in GitHub-only mode, and the audit checks it as before.
-In roadmap mode, report each of these:
+The audit keeps the project in roadmap mode. Report each of these:
 
 - A file of the set that is missing.
 - A slot in `docs/agents/roadmap.md` that is still a `<slot>` or an italic note.

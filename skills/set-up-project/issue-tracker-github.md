@@ -17,15 +17,15 @@ Infer the repo from `git remote -v`; `gh` does this automatically when run insid
 
 ## Roadmap mode
 
-_For `/set-up-project`: keep this section only in roadmap mode, when `docs/agents/roadmap.md` exists, and remove it otherwise._
+_For `/set-up-project`: keep this section only in roadmap mode, and remove it otherwise._
 
 GitHub issues hold only agent work: specs and tickets that are ready to build without more research.
 `docs/agents/roadmap.md` says where the rest of the planning lives.
 
 - Plan each effort's tickets in waves, as `/to-tickets` writes them into the spec.
-- Create no QA ticket and no issue for a human step. A step only the maintainer can do is a Linear issue, as `docs/agents/roadmap.md` > 'Maintainer-only steps' says.
-- Link the Linear issue in the description of each spec, ticket and pull request, never in the title.
-- Use only the labels `docs/agents/triage-labels.md` names, since triage happens in Linear.
+- Send each step only the maintainer can do to the roadmap, as `docs/agents/roadmap.md` > 'Maintainer-only steps' says.
+- Link the roadmap issue in each spec, ticket and pull request, as `docs/agents/roadmap.md` > 'Links between layers' says.
+- Use only the labels `docs/agents/triage-labels.md` names, since triage happens on the roadmap.
 
 ## Title prefixes
 

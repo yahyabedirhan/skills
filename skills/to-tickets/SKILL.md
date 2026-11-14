@@ -36,7 +36,7 @@ Break the work into **tracer bullet** tickets.
 
 Give each ticket its **blocking edges**: the other tickets that must complete before it can start. A ticket with no blockers can start immediately.
 
-Group the tickets into **waves** from the blocking edges. Wave 1 holds every ticket with no blockers. Each later wave holds the tickets whose blockers are all in earlier waves. Agents build a wave's tickets in parallel, and a wave starts when every ticket of the earlier waves is done.
+Group the tickets into **waves** from the blocking edges: wave 1 holds every ticket with no blockers, and each later wave the tickets whose blockers are all in earlier waves.
 
 Refer to a ticket by its title, never by its number alone: `#12 Add login` or `03: Add login`, not `#12`. This holds in the breakdown, in "Blocked by", and in anything you tell the user.
 
@@ -64,9 +64,8 @@ Iterate until the user approves the breakdown.
 Publish the approved tickets. **How** depends on the tracker **set-up-project** configured; the tickets are the same either way, only the shape of the blocking edges changes:
 
 - **Local files** → write one file per ticket under `.efforts/<effort>/issues/<NN>-<slug>.md`, beside the effort's `spec.md` (`<effort>` is the effort's name, or a short slug for the feature when there is no effort), numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the tickets it depends on, each by number and title. Use the per-ticket file template below: one ticket per file, never a single combined file.
-- **A hosted issue tracker (GitHub, GitLab, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking / sub-issue relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
-
-- **In roadmap mode,** when `docs/agents/roadmap.md` exists → publish to GitHub only, since Linear holds the roadmap and not the tickets. Start each ticket's description with a `Linear:` line that links the Linear issue the spec links, never in the title.
+- **A real issue tracker (GitHub, Linear, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking / sub-issue relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
+  - **In roadmap mode,** when `docs/agents/roadmap.md` exists: link each ticket to the spec's roadmap issue, as that page's 'Links between layers' says.
 
 Then add a **Waves** list to the spec, at the end of the spec issue's body or of `spec.md`, so the orchestrator builds one wave at a time:
 
@@ -77,7 +76,7 @@ Then add a **Waves** list to the spec, at the end of the spec issue's body or of
 2. Wave 2, starts when wave 1 is done: <ticket title>
 ```
 
-Do NOT close any parent issue, and change the spec only to add its Waves list.
+Leave any parent issue open, and change the spec only to add its Waves list.
 
 <local-ticket-template>
 

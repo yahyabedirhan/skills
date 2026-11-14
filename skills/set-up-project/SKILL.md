@@ -32,7 +32,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` or `## Environment defaults` section in either?
 - `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root, and any `CONTEXT.md` or `CONTEXT-MAP.md` in the repo: the domain docs' old names, which the skills no longer read
 - `docs/adr/` and any `src/*/docs/adr/` directories
-- `docs/agents/`: does this skill's prior output already exist? A `docs/agents/roadmap.md` means the project is in roadmap mode.
+- `docs/agents/`: does this skill's prior output already exist?
 - `.efforts/`: a sign that a local-markdown issue tracker is already in use
 - `docs/assets/`: the folder standard's old image folder
 - Is the `triage` skill installed? It is when a `triage` skill folder sits beside this one, or `triage` is in your available skills. This decides whether Section B runs at all.
@@ -51,9 +51,8 @@ Skip Section B when `triage` isn't installed, Section C when there's no monorepo
 #### Section A: issue tracker
 
 Settle the project mode first.
-Keep the mode the project has: roadmap mode when `docs/agents/roadmap.md` exists, and GitHub-only mode otherwise.
+Keep the mode the project has, because the mode decides where every skill puts its work.
 Ask which mode only for a new project, with GitHub-only mode as the recommended answer, or when the maintainer asks to move the project.
-Never switch an existing project on your own, because the mode decides where every skill puts its work.
 
 **In roadmap mode:** read [references/roadmap-mode.md](references/roadmap-mode.md) now. The tracker is GitHub, so skip the rest of this section and Section B, and write the whole `docs/agents/` set that the reference lists.
 
@@ -65,7 +64,7 @@ Otherwise, or when the user prefers another tracker, offer:
 - **GitHub**: issues live in the repo's GitHub Issues, through the `gh` CLI.
 - **GitLab**: issues live in the repo's GitLab Issues, through the [`glab`](https://gitlab.com/gitlab-org/cli) CLI.
 - **Local markdown**: issues live as files under `.efforts/<effort>/` in this repo, which suits solo projects and repos without a remote.
-- **Other**, such as Jira: ask the user to describe the workflow in one paragraph, and record it as freeform prose. Linear as the roadmap above GitHub is roadmap mode, not this option.
+- **Other**, such as Jira or Linear: ask the user to describe the workflow in one paragraph, and record it as freeform prose. Linear as a roadmap above GitHub is roadmap mode instead.
 
 Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
 
@@ -118,7 +117,7 @@ Show the user a draft of:
 
 Let them edit, then take one approval for all of it. Then write:
 
-1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran, or in roadmap mode, the `### Releases` sub-block only when Section E ran, and the `### Roadmap` sub-block only in roadmap mode.
+1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran, and the `### Releases` sub-block only when Section E ran. In roadmap mode, write the sub-blocks [agents-md.md](./agents-md.md) > 'Roadmap mode' lists.
 2. Leave a `CLAUDE.md` that holds `@AGENTS.md` or is a symlink to `AGENTS.md` as it is, and add the missing `.gitignore` lines.
 3. Write the docs files using the seed templates in this skill folder as a starting point:
    - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
@@ -148,7 +147,7 @@ Read every harness file the project holds, from the root down, against **set-up-
 - `extra`, a project deny or ask, and `gap`, what you can't judge: name each.
 
 Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes. Report a project with release signals and no `docs/agents/releasing.md`, and a `docs/agents/releasing.md` that disagrees with the user's shared release rules, and propose the update Section E writes.
-In roadmap mode, also audit the `docs/agents/` set as [references/roadmap-mode.md](references/roadmap-mode.md) > 'Audit' says. Never propose roadmap mode for a project in GitHub-only mode.
+In roadmap mode, also audit the `docs/agents/` set as [references/roadmap-mode.md](references/roadmap-mode.md) > 'Audit' says. Audit a project in GitHub-only mode in that mode, and leave a move to the maintainer.
 
 The audit passes with no `weakens`. Done when it passes, or the user has chosen to keep a `weakens` entry: then it stays failed, and the report names that entry.
 

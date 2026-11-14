@@ -2,6 +2,11 @@
 
 This page says how <project> plans its work across Notion, Linear and GitHub.
 Its presence puts the project in roadmap mode: read it before you plan, start, deliver or settle work here.
+The skills speak of the roadmap in shared terms, and this page maps each one to Linear:
+
+- **The roadmap:** the Linear project below.
+- **Roadmap issue:** the Linear issue that a change belongs to.
+- **Release group:** a release milestone.
 The [`/set-up-project`](https://github.com/yahyabedirhan/skills/tree/main/skills/set-up-project) skill wrote it.
 
 _`/set-up-project` fills in each `<slot>`, removes each line that does not apply, and removes every note in italics like this one._
@@ -26,6 +31,7 @@ _`/set-up-project` fills in each `<slot>`, removes each line that does not apply
 - **Project:** `<project>`.
 - **Repo label:** give every issue the label `<repo>` from the team's `Repo` label group.
 - **Release milestones:** a milestone named `Release <version>` holds each release group, as `docs/agents/releasing.md` says.
+  When the release ships, rewrite the milestone's description as its release note.
   _For a project that holds several repos, name each milestone `<repo> <version>`, and only for a repo that publishes versions._
   _When the project publishes no versions, remove this line._
 
@@ -40,12 +46,13 @@ _When the project ships on each merge, with no beta, remove step 3: the issue go
 
 ## Maintainer-only steps
 
-A step that only the maintainer can do, such as a manual check, a login, a payment or a decision, is a Linear issue, never a GitHub issue.
+A step that only the maintainer can do, such as a manual check, a login, a payment or a decision, goes to Linear as its own issue.
 
 - Assign it to the maintainer.
 - Give it the type label `QA` for a check, or `Decision` for a decision.
 - Put it in the milestone it blocks, and mark it as blocking the issue it gates.
-- Give it numbered try-this steps and screenshots, and say what to do when done.
+- Give it the build and how to reach it, numbered try-this steps with known risks marked, and screenshots.
+- Say what to do when done: move it to Done if it is good, or comment with the step number and what they saw.
 
 ## Linear issues
 
@@ -67,10 +74,11 @@ Details for agents go here.
 
 ## Links between layers
 
-- Link the Linear issue in the description of each GitHub spec, ticket and pull request, as a header line or a `Linear:` line, never in the title.
+- Start a spec from the Linear issue the conversation is about. When the conversation names none, ask the maintainer which one, and create one only when they say so.
+- Start the description of each GitHub spec, ticket and pull request with a `Linear:` line that links its Linear issue. Keep the title free of the link.
 - Link the GitHub spec and the pull request in the Linear issue's description the same way.
-- Comment on the Linear issue when the effort starts, with the spec and the plan.
-- Comment on it again at delivery, with the pull request, screenshots and a status diagram.
+- Comment on the Linear issue when its spec is published, with the spec's link.
+- Comment on it when the effort starts, with the plan, and again at delivery, with the pull request, screenshots and a status diagram.
 
 ## Notion
 

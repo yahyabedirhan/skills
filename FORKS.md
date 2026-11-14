@@ -41,7 +41,7 @@ Changes:
 - Agents can load it, so a thinking session runs it itself.
 - With no tracker configured, it runs set-up-project instead of telling you to run `setup-matt-pocock-skills`.
 - A local tracker keeps the spec in `.efforts/<effort>/` instead of `.scratch/`.
-- In roadmap mode, a Linear issue starts the spec: the spec links it in its description, and the Linear issue links the spec back.
+- In roadmap mode, a roadmap issue starts the spec, and the two link each other.
 
 ## to-tickets
 
@@ -55,7 +55,7 @@ Changes:
 - A local tracker keeps the tickets in `.efforts/<effort>/issues/` instead of `.scratch/`.
 - Tickets are named by title, never by a number alone.
 - It groups the tickets into waves from the blocking edges, and adds a Waves list to the spec.
-- In roadmap mode, it publishes tickets to GitHub only, each linking the spec's Linear issue in its description.
+- In roadmap mode, each ticket links the spec's roadmap issue.
 
 ## to-pr
 
@@ -71,7 +71,7 @@ Changes:
 - The final report has review links for each changed file.
 - A last section, 'Things to be aware of', holds decisions made alone, surprises, what's left out and follow-ups.
 - It writes "Refs", not "Closes", for a ticket waiting for the maintainer's QA.
-- In roadmap mode, it links the Linear issue in the header line, never in the title.
+- In roadmap mode, it puts the roadmap issue's link line in the header.
 
 ## show-me
 

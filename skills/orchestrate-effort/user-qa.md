@@ -15,12 +15,5 @@ Commits and the pull request say "Refs #n" for the ticket, never "Closes #n", so
 
 ## Roadmap mode
 
-In roadmap mode, when `docs/agents/roadmap.md` exists, GitHub holds no QA ticket, and the GitHub ticket closes once its criteria are ticked.
-Make each check only the maintainer can do a Linear issue, as `docs/agents/roadmap.md` > 'Maintainer-only steps' says:
-
-- assigned to the maintainer, with the `QA` type label;
-- in the release milestone it blocks, and marked as blocking the Linear issue it gates;
-- with the build and how to reach it, numbered try-this steps with known risks marked, and screenshots;
-- with what to do when done: move it to Done if it's good, or comment with the step number and what they saw.
-
-Commits and the pull request need no "Refs" line for it, since the check lives in Linear.
+In roadmap mode, when `docs/agents/roadmap.md` exists, each check only the maintainer can do goes to the roadmap, as that page's 'Maintainer-only steps' says.
+The GitHub ticket closes once its criteria are ticked, so commits and the pull request say "Closes #n" for it.
