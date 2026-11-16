@@ -64,7 +64,7 @@ Otherwise, or when the user prefers another tracker, offer:
 - **GitHub**: issues live in the repo's GitHub Issues, through the `gh` CLI.
 - **GitLab**: issues live in the repo's GitLab Issues, through the [`glab`](https://gitlab.com/gitlab-org/cli) CLI.
 - **Local markdown**: issues live as files under `.efforts/<effort>/` in this repo, which suits solo projects and repos without a remote.
-- **Other**, such as Jira or Linear: ask the user to describe the workflow in one paragraph, and record it as freeform prose. Linear as a roadmap above GitHub is roadmap mode instead.
+- **Other**, such as Jira or Linear: ask the user to describe the workflow in one paragraph, and record it as freeform prose. A roadmap above GitHub is roadmap mode instead.
 
 Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
 
@@ -126,7 +126,7 @@ Let them edit, then take one approval for all of it. Then write:
    - [triage-labels.md](./triage-labels.md): label mapping, written only when `triage` is installed, or in roadmap mode
    - [domain.md](./domain.md): domain doc consumer rules + layout
    - [releasing.md](./releasing.md): the release lifecycle, written only when Section E ran
-   - [roadmap-linear.md](./roadmap-linear.md): Linear roadmap, written to `docs/agents/roadmap.md` only in roadmap mode
+   - [roadmap-github-projects.md](./roadmap-github-projects.md): GitHub Projects roadmap, written to `docs/agents/roadmap.md` only in roadmap mode
    - [notes-notion.md](./notes-notion.md): Notion notes, written to `docs/agents/notes.md` only in roadmap mode
 
    Each seed marks the sections that belong to one mode. Keep the sections of the project's mode, and remove the others.

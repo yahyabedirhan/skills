@@ -6,7 +6,7 @@ How `/set-up-project` sets up, moves and audits a project in roadmap mode: the n
 
 Write and audit these files together, since each one names the others:
 
-- `docs/agents/roadmap.md` from the seed for the roadmap tool, `roadmap-<tool>.md`: today only [../roadmap-linear.md](../roadmap-linear.md).
+- `docs/agents/roadmap.md` from the seed for the roadmap tool, `roadmap-<tool>.md`: today only [../roadmap-github-projects.md](../roadmap-github-projects.md).
   Look up each `<slot>` the seed names through the roadmap tool.
   Ask the maintainer only for what you cannot find.
 - `docs/agents/notes.md` from the seed for the notes tool, `notes-<tool>.md`: today only [../notes-notion.md](../notes-notion.md).

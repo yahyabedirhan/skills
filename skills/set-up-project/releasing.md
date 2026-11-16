@@ -48,7 +48,7 @@ A release group is a set of changes that ship together as one version, held on t
 1. Merge each change of the group to _the beta branch or environment_, and test the group there.
 2. Before the release ships, move each unfinished roadmap issue to the next release group.
 3. Ship the group to _production_, in the release order above.
-4. Write the group's release note on the roadmap: the date, the pull requests and what shipped, in plain sentences.
+4. Write the group's release note where `docs/agents/roadmap.md` says: the date, the pull requests and what shipped, in plain sentences.
    A journey page tells the longer story when it is worth it.
 
 A hotfix ships alone, as its own version, without waiting for the group.
