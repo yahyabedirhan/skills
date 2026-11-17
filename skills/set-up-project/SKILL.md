@@ -9,7 +9,7 @@ Scaffold and audit the per-repo configuration the skills assume:
 
 - **Rules file**: `AGENTS.md`, which every harness reads. `CLAUDE.md` is either the single line `@AGENTS.md` or a symlink to `AGENTS.md`. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both of those forms give it the same text.
 - **Issue tracker**: where issues live. GitHub is the default, and local markdown also works out of the box.
-- **Project mode**: **GitHub-only mode** keeps all tracking in the issue tracker. **Roadmap mode** plans in a roadmap and notes above GitHub, which keeps only agent specs and tickets. The file `docs/agents/roadmap.md` marks roadmap mode, and every skill that tracks work checks for it.
+- **Project mode**: **GitHub-only mode** keeps all tracking in the issue tracker. **Roadmap mode** plans in a roadmap and notes above the agent specs and tickets. The file `docs/agents/roadmap.md` marks roadmap mode, and every skill that tracks work checks for it.
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
 - **Release lifecycle**: `docs/agents/releasing.md` explains how the project releases a version, so everyone who releases it follows the same steps. It starts from the user's shared release rules when their workstation repo has them.
@@ -126,7 +126,7 @@ Let them edit, then take one approval for all of it. Then write:
    - [triage-labels.md](./triage-labels.md): label mapping, written only when `triage` is installed, or in roadmap mode
    - [domain.md](./domain.md): domain doc consumer rules + layout
    - [releasing.md](./releasing.md): the release lifecycle, written only when Section E ran
-   - [roadmap-github-projects.md](./roadmap-github-projects.md): GitHub Projects roadmap, written to `docs/agents/roadmap.md` only in roadmap mode
+   - [roadmap-github.md](./roadmap-github.md): GitHub roadmap, written to `docs/agents/roadmap.md` only in roadmap mode
    - [notes-notion.md](./notes-notion.md): Notion notes, written to `docs/agents/notes.md` only in roadmap mode
 
    Each seed marks the sections that belong to one mode. Keep the sections of the project's mode, and remove the others.

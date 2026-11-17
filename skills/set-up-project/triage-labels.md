@@ -18,12 +18,18 @@ Edit the right-hand column to match whatever vocabulary you actually use.
 
 _For `/set-up-project`: in roadmap mode, write this section in place of everything above it, whether or not `triage` is installed. Remove it otherwise._
 
-Triage happens on the roadmap, so issues carry only the labels agents use:
+Triage happens on the roadmap, so issues carry only these labels:
 
 | Label | Meaning |
 | ----- | ------- |
+| `roadmap` | A roadmap issue, for the maintainer |
+| `spec` | An effort's spec, for agents |
+| `ticket` | One ticket of a spec, for agents |
+| `deferred` | A roadmap issue that matters but waits on purpose, with no milestone |
+| `area:<name>` | The part of the product the issue touches. _Remove this row when the product has no areas._ |
 | `ready-for-agent` | A spec or ticket that is fully specified and ready for an agent |
 | `wontfix` | Will not be actioned |
 | `effort:<name>` | Part of the effort `<name>` |
 
-The roles `needs-triage`, `needs-info` and `ready-for-human` have no label here. Do that work on the roadmap, as `docs/agents/roadmap.md` says.
+Each issue carries exactly one of `roadmap`, `spec` and `ticket`.
+Triage, open questions and the maintainer's own work have no label here. Do that work on the roadmap, as `docs/agents/roadmap.md` says.

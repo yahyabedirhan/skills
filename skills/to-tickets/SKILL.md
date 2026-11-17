@@ -65,7 +65,7 @@ Publish the approved tickets. **How** depends on the tracker **set-up-project** 
 
 - **Local files** → write one file per ticket under `.efforts/<effort>/issues/<NN>-<slug>.md`, beside the effort's `spec.md` (`<effort>` is the effort's name, or a short slug for the feature when there is no effort), numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the tickets it depends on, each by number and title. Use the per-ticket file template below: one ticket per file, never a single combined file.
 - **A real issue tracker (GitHub, Linear, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking / sub-issue relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
-  - **In roadmap mode,** when `docs/agents/roadmap.md` exists: link each ticket to the spec's roadmap issue, as that page's 'Links between layers' says.
+  - **In roadmap mode,** when `docs/agents/roadmap.md` exists: label each ticket `ticket`, hang it under the spec, and link the spec's roadmap issue, as that page's 'Links between layers' says.
 
 Then add a **Waves** list to the spec, at the end of the spec issue's body or of `spec.md`, so the orchestrator builds one wave at a time:
 

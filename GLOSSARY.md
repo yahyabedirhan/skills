@@ -65,8 +65,8 @@ The default way a project tracks work: its issue tracker holds every spec, ticke
 A project is in this mode when it has no `docs/agents/roadmap.md`.
 
 **Roadmap mode**:
-The way a project plans in three layers: the notes hold its history and thinking, the roadmap holds what to build and its status, and GitHub issues hold only the agent specs and tickets.
-The project's `docs/agents/roadmap.md` and `docs/agents/notes.md` bind the roadmap and the notes to their tools, such as GitHub Projects and Notion.
+The way a project plans in three layers: the notes hold its history and thinking, the roadmap holds what to build and its status, and the specs and tickets hold the agents' work.
+The project's `docs/agents/roadmap.md` and `docs/agents/notes.md` bind the roadmap and the notes to their tools, such as GitHub and Notion.
 A project is in this mode when `docs/agents/roadmap.md` exists.
 
 **Release group**:

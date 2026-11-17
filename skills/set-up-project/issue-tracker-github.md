@@ -19,8 +19,8 @@ Infer the repo from `git remote -v`; `gh` does this automatically when run insid
 
 _For `/set-up-project`: keep this section only in roadmap mode, and remove it otherwise._
 
-GitHub issues hold only agent work: specs and tickets that are ready to build without more research.
-`docs/agents/roadmap.md` says where the rest of the planning lives.
+Agents build only specs and tickets: issues labelled `spec` and `ticket`, ready to build without more research.
+`docs/agents/roadmap.md` says where the rest of the planning lives, and how an issue labelled `roadmap` is kept.
 
 - Plan each effort's tickets in waves, as `/to-tickets` writes them into the spec.
 - Send each step only the maintainer can do to the roadmap, as `docs/agents/roadmap.md` > 'Maintainer-only steps' says.

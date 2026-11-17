@@ -100,7 +100,7 @@ Changes:
 - It proposes a `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md` to its `GLOSSARY` name.
 - For a project that releases, it writes a short release page, `docs/agents/releasing.md`, from its seed and any shared release rules. The page holds only what the project does, and leaves the rest to the shared rules.
 - It audits each harness's project files against set-up-machine's rule table.
-- It has a project mode: GitHub-only mode, as upstream, or roadmap mode, with Notion and a GitHub project above GitHub issues. `docs/agents/roadmap.md` marks roadmap mode, and the seeds mark the sections that belong to one mode.
+- It has a project mode: GitHub-only mode, as upstream, or roadmap mode, with Notion and a roadmap of GitHub issues on a GitHub project above the agents' specs and tickets. `docs/agents/roadmap.md` marks roadmap mode, and the seeds mark the sections that belong to one mode.
 
 ## Credited sources
 
