@@ -163,3 +163,6 @@ Details for agents go here.
   Batch field changes in `gh api graphql` calls with aliased `updateProjectV2ItemFieldValue` mutations.
   About 10 mutations a request, with a request every few seconds, stays under the limit.
 - The API cannot set a view's grouping or sorting.
+- Linking a spec or ticket as a sub-issue can add it to the parent's project by itself.
+  After you link sub-issues, remove each project item without the `roadmap` label with `deleteProjectV2Item`. The issue stays.
+  Until then, the `label:roadmap` view filters hide it.
