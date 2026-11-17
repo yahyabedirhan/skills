@@ -131,5 +131,7 @@ A draft item takes no comments, so record progress in its body, in a `## Progres
 - Assigning a draft item sends no notification.
 - GitHub's built-in project workflows, such as "set Done when a pull request merges", act only on issues and pull requests. They skip draft items, so agents set every status.
 - The API cannot create views.
-- GitHub allows about 80 content changes a minute and 500 an hour, and each field value is one change. Batch the changes: set an item's fields in one `gh api graphql` call with several aliased mutations, rather than one call per field.
+- GitHub allows about 80 content changes a minute and 500 an hour, and each field value is one change.
+  Keep the fields few, and set only the fields that change.
+  Batch an item's field changes in one `gh api graphql` call with aliased `updateProjectV2ItemFieldValue` mutations: it saves requests, but each field value still counts.
 - A new draft item gets no `Status` by itself. The agent sets it, unless the maintainer turns on the project's "Item added to project" workflow in the web UI.
