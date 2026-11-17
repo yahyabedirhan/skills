@@ -1328,10 +1328,10 @@ Older entries keep the skill names of their time, such as `close-effort` and `in
 ## 2026-11-14: in roadmap mode, the roadmap holds the status and the maintainer's checks
 
 - **Status:** accepted
-- **Context:** In roadmap mode, Notion holds the history, a GitHub project the roadmap and GitHub issues only the agents' specs and tickets, as `set-up-project.md` records. Linear held the roadmap at first, and was dropped for its 250-issue free cap and its lock-in. The effort skills put QA tickets and the effort's status on GitHub, which the maintainer no longer reads there.
+- **Context:** In roadmap mode, Notion holds the history, issues labelled `roadmap` the roadmap, and issues labelled `spec` and `ticket` the agents' work, as `set-up-project.md` records. Linear held the roadmap at first, and was dropped for its 250-issue free cap and its lock-in. The effort skills put QA tickets and the effort's status on GitHub, which the maintainer no longer reads there.
 - **Options:** Keep QA tickets on GitHub: the maintainer would have to watch two places.
 - **Choice and why:** Every effort skill checks for `docs/agents/roadmap.md`, and without it behaves exactly as before. With it:
-  - `/to-spec` starts from a roadmap issue, and the spec, each ticket and the pull request link that issue in the description, never in the title.
+  - `/to-spec` starts from a roadmap issue, and the spec, each ticket and the pull request link that issue in the description, never in the title. The spec hangs under its roadmap issue, and each ticket under its spec.
   - `/orchestrate-effort` sets the roadmap issue to In Progress, records the start and the delivery on it, and makes each check only the maintainer can do a roadmap issue assigned to them, never a GitHub QA ticket.
   - `/settle-effort` moves the roadmap issue along the project's status flow, and moves unfinished work to the next release group.
 - **Consequences:**
