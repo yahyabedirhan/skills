@@ -10,6 +10,15 @@ How the engineering skills should consume this repo's domain documentation when 
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
 
+## History and current state
+
+_For `/set-up-project`: keep this section only in roadmap mode, and remove it otherwise._
+
+The codebase docs say how the project works today, and agents keep them current.
+The project's history, such as notes, brainstorms, journey pages, the wiki and handoffs, lives in the notes, as `docs/agents/notes.md` says.
+A history page may be out of date. When it disagrees with the codebase docs, trust the codebase docs.
+Read the history only when you need the reason behind a decision.
+
 ## File structure
 
 Single-context repo (most repos):

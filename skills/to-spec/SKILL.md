@@ -19,7 +19,11 @@ Check with the user that these seams match their expectations.
 
 On a local-files tracker, write the spec to `.efforts/<effort>/spec.md`, where `<effort>` is the effort's name (or a short slug for the feature when there is no effort). Its tickets go beside it, in `.efforts/<effort>/issues/`.
 
+In roadmap mode, when `docs/agents/roadmap.md` exists, read it first: the spec starts from a roadmap issue, takes the `spec` label, and links and hangs under that issue as that page's 'Links between layers' says.
+
 <spec-template>
+
+<the roadmap issue's link line, only in roadmap mode>
 
 ## Problem Statement
 

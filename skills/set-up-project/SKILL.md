@@ -1,6 +1,6 @@
 ---
 name: set-up-project
-description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, `AGENTS.md` as the one rules file with `CLAUDE.md` pointing at it, the issue tracker, triage labels, domain docs and release lifecycle, the folder standard's `.gitignore`, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
+description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, `AGENTS.md` as the one rules file with `CLAUDE.md` pointing at it, the issue tracker and project mode, triage labels, domain docs and release lifecycle, the folder standard's `.gitignore`, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, to move a project to roadmap mode, or when a skill finds no issue tracker configured.
 ---
 
 # Set up project
@@ -9,6 +9,7 @@ Scaffold and audit the per-repo configuration the skills assume:
 
 - **Rules file**: `AGENTS.md`, which every harness reads. `CLAUDE.md` is either the single line `@AGENTS.md` or a symlink to `AGENTS.md`. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both of those forms give it the same text.
 - **Issue tracker**: where issues live. GitHub is the default, and local markdown also works out of the box.
+- **Project mode**: **GitHub-only mode** keeps all tracking in the issue tracker. **Roadmap mode** plans in a roadmap and notes above the agent specs and tickets. The file `docs/agents/roadmap.md` marks roadmap mode, and every skill that tracks work checks for it.
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
 - **Release lifecycle**: `docs/agents/releasing.md` explains how the project releases a version, so everyone who releases it follows the same steps. It starts from the user's shared release rules when their workstation repo has them.
@@ -49,6 +50,12 @@ Skip Section B when `triage` isn't installed, Section C when there's no monorepo
 
 #### Section A: issue tracker
 
+Settle the project mode first.
+Keep the mode the project has, because the mode decides where every skill puts its work.
+Ask which mode only for a new project, with GitHub-only mode as the recommended answer, or when the maintainer asks to move the project.
+
+**In roadmap mode:** read [references/roadmap-mode.md](references/roadmap-mode.md) now. The tracker is GitHub, so skip the rest of this section and Section B, and write the whole `docs/agents/` set that the reference lists.
+
 > Explainer: The "issue tracker" is where issues live for this repo. Skills like `to-tickets`, `triage`, and `to-spec` read from and write to it. They need to know whether to call `gh issue create`, write a markdown file under `.efforts/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
 
 Default posture: these skills were designed for GitHub. If a `git remote` points at GitHub, propose that. If a `git remote` points at GitLab, on `gitlab.com` or a self-hosted host, propose GitLab.
@@ -57,7 +64,7 @@ Otherwise, or when the user prefers another tracker, offer:
 - **GitHub**: issues live in the repo's GitHub Issues, through the `gh` CLI.
 - **GitLab**: issues live in the repo's GitLab Issues, through the [`glab`](https://gitlab.com/gitlab-org/cli) CLI.
 - **Local markdown**: issues live as files under `.efforts/<effort>/` in this repo, which suits solo projects and repos without a remote.
-- **Other**, such as Jira or Linear: ask the user to describe the workflow in one paragraph, and record it as freeform prose.
+- **Other**, such as Jira or Linear: ask the user to describe the workflow in one paragraph, and record it as freeform prose. A roadmap above GitHub is roadmap mode instead.
 
 Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
 
@@ -106,18 +113,23 @@ Show the user a draft of:
 - The contents of `docs/agents/issue-tracker.md` and `docs/agents/domain.md`, of `docs/agents/triage-labels.md` when `triage` is installed, and of `docs/agents/releasing.md` when Section E ran
 - Each rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, and the edits to the files that name them, when Section C proposed them
 - Each move out of `docs/assets/`, and the links it updates, when proposed
+- In roadmap mode, the whole `docs/agents/` set, and the issue and label changes of a move, as [references/roadmap-mode.md](references/roadmap-mode.md) lists
 
 Let them edit, then take one approval for all of it. Then write:
 
-1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran, and the `### Releases` sub-block only when Section E ran.
+1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran, and the `### Releases` sub-block only when Section E ran. In roadmap mode, write the sub-blocks [agents-md.md](./agents-md.md) > 'Roadmap mode' lists.
 2. Leave a `CLAUDE.md` that holds `@AGENTS.md` or is a symlink to `AGENTS.md` as it is, and add the missing `.gitignore` lines.
 3. Write the docs files using the seed templates in this skill folder as a starting point:
    - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
    - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md): GitLab issue tracker
    - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
-   - [triage-labels.md](./triage-labels.md): label mapping, written only when `triage` is installed
+   - [triage-labels.md](./triage-labels.md): label mapping, written only when `triage` is installed, or in roadmap mode
    - [domain.md](./domain.md): domain doc consumer rules + layout
    - [releasing.md](./releasing.md): the release lifecycle, written only when Section E ran
+   - [roadmap-github.md](./roadmap-github.md): GitHub roadmap, written to `docs/agents/roadmap.md` only in roadmap mode
+   - [notes-notion.md](./notes-notion.md): Notion notes, written to `docs/agents/notes.md` only in roadmap mode
+
+   Each seed marks the sections that belong to one mode. Keep the sections of the project's mode, and remove the others.
 
    For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
@@ -136,9 +148,10 @@ Read every harness file the project holds, from the root down, against **set-up-
 - `extra`, a project deny or ask, and `gap`, what you can't judge: name each.
 
 Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes. Report a project with release signals and no `docs/agents/releasing.md`, and a `docs/agents/releasing.md` that disagrees with the user's shared release rules, and propose the update Section E writes.
+In roadmap mode, also audit the `docs/agents/` set as [references/roadmap-mode.md](references/roadmap-mode.md) > 'Audit' says. Audit a project in GitHub-only mode in that mode, and leave a move to the maintainer.
 
 The audit passes with no `weakens`. Done when it passes, or the user has chosen to keep a `weakens` entry: then it stays failed, and the report names that entry.
 
 ### 6. Done
 
-Tell the user the setup is complete, what the audit found, and which skills will now read from these files. Mention they can edit `AGENTS.md` and `docs/agents/*.md` directly later; re-running this skill audits the project again, updates the release page when the shared release rules change, and switches issue trackers when they want to. Leave the commit to the user or the skill that called this one.
+Tell the user the setup is complete, what the audit found, and which skills will now read from these files. Mention they can edit `AGENTS.md` and `docs/agents/*.md` directly later; re-running this skill audits the project again, updates the release page when the shared release rules change, and switches issue trackers or moves the project to roadmap mode when they ask. Leave the commit to the user or the skill that called this one.

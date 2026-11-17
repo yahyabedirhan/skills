@@ -57,3 +57,22 @@ The `skills-lock.json` file that the `skills` CLI writes for an install, naming 
 
 **Marketplace**:
 This repo's Claude Code plugin list, in `.claude-plugin/marketplace.json`, from which some skills install as plugins.
+
+### Project modes and planning
+
+**GitHub-only mode**:
+The default way a project tracks work: its issue tracker holds every spec, ticket and QA ticket, and the maintainer works on it too.
+A project is in this mode when it has no `docs/agents/roadmap.md`.
+
+**Roadmap mode**:
+The way a project plans in three layers: the notes hold its history and thinking, the roadmap holds what to build and its status, and the specs and tickets hold the agents' work.
+The project's `docs/agents/roadmap.md` and `docs/agents/notes.md` bind the roadmap and the notes to their tools, such as GitHub and Notion.
+A project is in this mode when `docs/agents/roadmap.md` exists.
+
+**Release group**:
+A set of changes that ship together as one version, tested on beta and then shipped to production.
+
+**Wave**:
+A set of an effort's tickets that do not block each other, so agents build them in parallel.
+An effort runs as a series of waves: a wave starts when every ticket of the earlier waves is done.
+_Avoid_: frontier, for this meaning. `/wayfinder` and `/grilling` keep "frontier" for their own, different meaning.

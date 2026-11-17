@@ -41,6 +41,7 @@ Changes:
 - Agents can load it, so a thinking session runs it itself.
 - With no tracker configured, it runs set-up-project instead of telling you to run `setup-matt-pocock-skills`.
 - A local tracker keeps the spec in `.efforts/<effort>/` instead of `.scratch/`.
+- In roadmap mode, a roadmap issue starts the spec, and the two link each other.
 
 ## to-tickets
 
@@ -53,6 +54,8 @@ Changes:
 - With no tracker configured, it runs set-up-project instead of telling you to run `setup-matt-pocock-skills`.
 - A local tracker keeps the tickets in `.efforts/<effort>/issues/` instead of `.scratch/`.
 - Tickets are named by title, never by a number alone.
+- It groups the tickets into waves from the blocking edges, and adds a Waves list to the spec.
+- In roadmap mode, each ticket links the spec's roadmap issue.
 
 ## to-pr
 
@@ -68,6 +71,7 @@ Changes:
 - The final report has review links for each changed file.
 - A last section, 'Things to be aware of', holds decisions made alone, surprises, what's left out and follow-ups.
 - It writes "Refs", not "Closes", for a ticket waiting for the maintainer's QA.
+- In roadmap mode, it puts the roadmap issue's link line in the header.
 
 ## show-me
 
@@ -96,6 +100,7 @@ Changes:
 - It proposes a `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md` to its `GLOSSARY` name.
 - For a project that releases, it writes a short release page, `docs/agents/releasing.md`, from its seed and any shared release rules. The page holds only what the project does, and leaves the rest to the shared rules.
 - It audits each harness's project files against set-up-machine's rule table.
+- It has a project mode: GitHub-only mode, as upstream, or roadmap mode, with Notion and a roadmap of GitHub issues on a GitHub project above the agents' specs and tickets. `docs/agents/roadmap.md` marks roadmap mode, and the seeds mark the sections that belong to one mode.
 
 ## Credited sources
 

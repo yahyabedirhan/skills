@@ -12,3 +12,8 @@ The ticket stays open and assigned to the user. On a local tracker, its status s
 - what to do when done: close the ticket if it's good, or comment with the step number and what they saw.
 
 Commits and the pull request say "Refs #n" for the ticket, never "Closes #n", so the merge doesn't close it before the user has tried it.
+
+## Roadmap mode
+
+In roadmap mode, when `docs/agents/roadmap.md` exists, each check only the maintainer can do goes to the roadmap, as that page's 'Maintainer-only steps' says.
+The ticket closes once its criteria are ticked, so commits and the pull request say "Closes #n" for it.
