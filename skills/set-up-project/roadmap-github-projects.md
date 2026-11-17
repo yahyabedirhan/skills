@@ -33,8 +33,6 @@ _`/set-up-project` fills in each `<slot>`, removes each line that does not apply
 - **Repositories:** the project is linked to each repository of the product, with `gh project link <number> --owner <owner> --repo <owner>/<repo>`, so it shows in each repository's Projects tab.
 - **Access:** use `gh project` and `gh api graphql`. The token needs the `project` scope.
   When a call fails for a missing scope, ask the maintainer to run `gh auth refresh -s project`.
-- **Views:** the API cannot create views, so a new view is a maintainer step.
-  _List the views the maintainer keeps, such as a board by `Status` or a table by `Release`._
 
 Fill these fields on every roadmap issue:
 
@@ -43,12 +41,14 @@ Fill these fields on every roadmap issue:
 | `Status` | built in | A step of the 'Status flow' below. |
 | `Release` | single select | The release group, or `Unplanned` when it has none yet. |
 | `Work type` | single select | `Bug`, `Feature`, `Improvement`, `Chore`, `Decision` or `QA`. |
+| `Priority` | single select | `Urgent`, `High`, `Medium` or `Low`, as the maintainer decides. |
 | `Lands in` | single select | The main repository of the change. Name any other repository in the body. |
+| `Area` | single select | The part of the product that the change touches: <areas>. |
 
 _When the product has only one repository, remove the `Lands in` row._
+_When the product has no areas, remove the `Area` row, and replace it with this line: "Write the part of the product that the change touches as an `Area:` line in the body."_
 
 Keep the fields to these, since each field value costs one change against GitHub's limit, as 'Limits' says.
-Write the part of the product that the change touches as an `Area:` line in the body.
 
 The commands:
 
@@ -58,11 +58,33 @@ The commands:
   A new draft item gets no `Status`, so set it to Todo and fill the other fields at once.
 - **Set a field:** `gh project item-edit --project-id <project id> --id <item id> --field-id <field id> --single-select-option-id <option id>`.
 - **Edit the title or body:** `gh project item-edit --id <draft issue id> --title "<title>" --body "<body>"`. The draft issue id starts with `DI_`.
+- **Find an item's link id:** query the project's `items { nodes { id databaseId } }` with `gh api graphql`. The link uses the numeric `databaseId`.
+
+## Views
+
+Create and change the views yourself, through `gh api graphql`:
+
+1. Create the view with `createProjectV2View`.
+2. Set its `name`, `layout` (`BOARD_LAYOUT` or `TABLE_LAYOUT`), `filter` and `configuration.visibleFieldIds` with `updateProjectV2View`.
+
+The API sets no grouping or sorting, so each view is a filter:
+
+| View | Layout | Filter |
+|---|---|---|
+| All | table | none |
+| Board | board, with a column for each `Status` | `-status:Canceled` |
+| `<release group>` | board | `release:"<release group>" -status:Canceled` |
+| Urgent & high | table | `priority:Urgent,High -status:Done,Canceled` |
+| Backlog | table | `status:Todo` |
+| Shipped | table | `status:Done` |
+
+Grouping or sorting in the web UI is optional, for the maintainer.
 
 ## Release groups
 
 - Give each release group a `Release` option named `Release <version>`.
   _For a product that spans several repos, name each option `<repo> <version>`, and only for a repo that publishes versions._
+- Add the release group's board view when the group starts, and delete it when the group ships.
 - Move unfinished work to the next release group: set its `Release` to the next option.
 - Write the release note in the repository's GitHub release, with `gh release create` or `gh release edit --notes`.
 
@@ -112,7 +134,7 @@ Details for agents go here.
 
 ## Links between layers
 
-Link a roadmap issue as `<project URL>?pane=issue&itemId=<item id>`.
+Link a roadmap issue as `<project URL>?pane=issue&itemId=<databaseId>`, with the item's `databaseId` from 'GitHub project'.
 
 - Start a spec from the roadmap issue the conversation is about. When the conversation names none, ask the maintainer which one, and create one only when they say so.
 - Start the description of each GitHub spec, ticket and pull request with a `Roadmap:` line that links its roadmap issue. Keep the title free of the link.
@@ -130,8 +152,9 @@ A draft item takes no comments, so record progress in its body, in a `## Progres
 - A draft item has no labels, no milestone and no repository.
 - Assigning a draft item sends no notification.
 - GitHub's built-in project workflows, such as "set Done when a pull request merges", act only on issues and pull requests. They skip draft items, so agents set every status.
-- The API cannot create views.
+- The API cannot set a view's grouping or sorting.
 - GitHub allows about 80 content changes a minute and 500 an hour, and each field value is one change.
   Keep the fields few, and set only the fields that change.
-  Batch an item's field changes in one `gh api graphql` call with aliased `updateProjectV2ItemFieldValue` mutations: it saves requests, but each field value still counts.
+  Batch the field changes in `gh api graphql` calls with aliased `updateProjectV2ItemFieldValue` mutations: it saves requests, but each field value still counts.
+  About 10 mutations a request, with a request every few seconds, stays under the limit.
 - A new draft item gets no `Status` by itself. The agent sets it, unless the maintainer turns on the project's "Item added to project" workflow in the web UI.
