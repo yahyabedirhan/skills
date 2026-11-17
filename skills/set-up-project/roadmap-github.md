@@ -122,7 +122,7 @@ A step that only the maintainer can do, such as a manual check, a login, a payme
 
 - Assign it to `<maintainer>`.
 - Give it the same milestone as the work it gates.
-- Start its body with a `Blocks:` line that names the roadmap issue it gates, as `<owner>/<repo>#<n>`.
+- Mark the roadmap issue it gates as blocked by it, with GitHub's issue dependencies: `--blocked-by` in `gh issue`, or the issue dependencies API.
 - Give it the build and how to reach it, numbered try-this steps with known risks marked, and screenshots.
 - Say what to do when done: close it if it is good, or comment with the step number and what they saw.
 
