@@ -3,7 +3,7 @@
 This page explains how [`set-up-project`](../../skills/set-up-project/SKILL.md) is built, for whoever changes it.
 A newcomer needs two facts first:
 
-- The **agent** sets up one project's agent files: `AGENTS.md`, `CLAUDE.md`, the issue tracker, triage labels, domain docs, the release page and the `.gitignore` lines.
+- The **agent** sets up one project's agent files: `AGENTS.md`, `CLAUDE.md`, the issue tracker, triage labels, domain docs, the release page, the merge approval line and the `.gitignore` lines.
 It explores, presents, takes one approval, then writes.
 - Running it again is the **audit**: it reads the project's harness files against set-up-machine's rule table and flags each entry that weakens a global rule.
 
@@ -49,10 +49,10 @@ skills/set-up-project/
 set-up-project
   1 check     verify.py exits 0, or run set-up-machine first
   2 explore   remote, AGENTS.md, CLAUDE.md, glossary, docs/agents/, triage, monorepo signals, release signals, shared release rules
-  3 ask       sections A to E, one answer each
+  3 ask       sections A to F, one answer each; F, merge approval, always runs
   4 write     one approval for the drafts, then the files
   5 audit     each project harness file against each row's samples → weakens | overlaps | extra | gap
-            and the release page against the shared release rules
+            and the release page against the shared release rules, and the merges line against the release page
 ```
 
 ## Extensibility
