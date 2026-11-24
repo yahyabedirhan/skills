@@ -1,18 +1,19 @@
 ---
 name: settle-effort
-description: Settle an effort once its pull request is approved - merge it, run the post-merge follow-ups, carry unfinished work into next-effort tickets, close the spec and tickets, then settle the session. Use when the user says to settle the effort, or when another skill says to.
+description: Settle an effort once its pull request may merge - merge it, run the post-merge follow-ups, carry unfinished work into next-effort tickets, close the spec and tickets, then settle the session. Use when the user says to settle the effort, or when another skill says to.
 argument-hint: "The pull request (optional: defaults to the current branch's)"
 ---
 
 # Settle Effort
 
-Approving the pull request is the user's last step. Everything after it is yours.
+When the pull request's base waits for the user's approval, as the project-level instructions say, that approval is the user's last step; otherwise the user has none. Everything after it is yours.
 
 ## Steps
 
 1. **Find the effort:** the pull request, its branch, spec, tickets and handoff, and every worktree and branch the build left behind, delegates' leftovers included.
    - **From a checkout that isn't on the effort's branch:** list pull requests by head branch with `gh pr list --head` and `--state all`, since without `--state all` a merged pull request doesn't show.
 2. **Merge** the pull request once its checks pass, and check that the default branch's CI passes after the merge. Merge with `gh pr merge` and the project's usual method, and leave out `--delete-branch`: it deletes branches before they are proven merged, and switches the current checkout to the default branch.
+   - **When the base waits for the user's approval:** merge only after the user approved this pull request in chat. Until then, ask, naming the pull request and its base, and stop the settle there.
    - **When the pull request is stacked,** with another pull request's branch as its base: merge it after its base pull request, and retarget it to the default branch with `gh pr edit --base` before the base branch is deleted, since deleting the base branch closes it for good.
    - **When the session has the session-status tool:** before merging, raise its open `before_settling` and `blocked` decisions as the item `/settle-session` > 'Steps' > **Nothing undecided** says, since an answer can change the merge.
    - **When the spec says "QA: blocking":** merge only once every QA ticket is closed. Until then, tell the user which ones are still open and stop the settle there; it resumes once they're closed.

@@ -95,6 +95,7 @@ Changes:
 - The GitHub template adds effort labels and names issues by title.
 - It proposes a `git mv` of an old `CONTEXT.md` or `CONTEXT-MAP.md` to its `GLOSSARY` name.
 - For a project that releases, it writes a short release page, `docs/agents/releasing.md`, from its seed and any shared release rules. The page holds only what the project does, and leaves the rest to the shared rules.
+- It writes a `### Merges` line that names the branches whose merges wait for the maintainer, and audits for it.
 - It audits each harness's project files against set-up-machine's rule table.
 
 ## Credited sources

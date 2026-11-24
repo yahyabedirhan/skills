@@ -1,6 +1,6 @@
 # AGENTS.md template
 
-The project's one rules file. Every harness reads it. Claude Code reads it through `CLAUDE.md`, which is either the line `@AGENTS.md` or a symlink to this file. It holds everything a teammate or contributor needs to work on the project, and nothing personal: this person's own workflow stays in their global instructions. Keep only the sections that apply.
+The project-level instructions: the project's one rules file. Every harness reads it. Claude Code reads it through `CLAUDE.md`, which is either the line `@AGENTS.md` or a symlink to this file. It holds everything a teammate or contributor needs to work on the project, and nothing personal: this person's own workflow stays in their global-level instructions. Keep only the sections that apply.
 
 ```markdown
 # Agent instructions
@@ -16,6 +16,10 @@ This project's tools for the roles skills name; each row overrides the global on
 | worktree-tool | [the tool, and where the project documents it] |
 
 ## Agent skills
+
+### Merges
+
+[The branches whose merges wait for the maintainer's approval, such as "Merging into `main` waits for the maintainer's approval." with the project's default branch, or "No branch waits for the maintainer's approval."]
 
 ### Issue tracker
 

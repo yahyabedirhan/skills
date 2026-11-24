@@ -23,7 +23,7 @@ START      decide the worktree once; everything after follows it
 THINKING   decide what to build; leave a spec, tickets, and a handoff
 HANDOVER   the session commits everything and starts a fresh orchestrator
 BUILD      orchestrate the tickets through delegates; open the pull request
-SETTLE     the user approves; the agent merges, follows up, and cleans up
+SETTLE     the agent merges, asking the user first when the base waits; it follows up and cleans up
 ```
 
 `<session-host>` decides which of two paths an effort takes. When `<session-host>` is `herdr`, take the host path: `/handover-to-herdr` automates every step between phases. Otherwise take the plain path, which runs anywhere: this session carries on, or the user pastes each starting prompt.
@@ -71,7 +71,7 @@ The session that hands over finishes its own work cleanly, through `/handover`. 
 
 ### Settle
 
-The user reviews and approves the pull request: that is their only step. The agent then merges it and settles the effort with `/settle-effort`, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. Workspaces and agent sessions stay open for the user to close.
+When the pull request's base waits for the user's approval, as the project-level instructions say, approving it is the user's only step; a pull request into a branch that doesn't wait has none. The agent merges it and settles the effort with `/settle-effort`, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. Workspaces and agent sessions stay open for the user to close.
 
 ### Why two sessions
 
