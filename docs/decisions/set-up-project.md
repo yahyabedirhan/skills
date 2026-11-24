@@ -186,6 +186,6 @@ The spec is "Spec: every harness and project is set up and audited from the skil
 - **Options:** One global rule. The project's own line, written by the project setup.
 - **Choice and why:** A `### Merges` sub-block in the project-level instructions names the branches whose merges wait for the maintainer's approval, or says that none do. Section E always runs, before the release lifecycle, since it decides whether the release page has a release branch, and since a project without the line gets whatever default the user's own instructions set. The skill holds no rule about which projects wait: it asks, leads with the project's current line or the user's own rules, and writes the answer.
 - **Consequences:**
-  - The audit reports a project without the line, and a release branch whose line doesn't make `main` wait.
+  - The audit reports a project without the line, and a release branch whose line doesn't make the default branch wait.
   - The release page template gains an optional 'Branches' section, and its merge step asks the maintainer in chat.
   - The skill names `AGENTS.md` "the project-level instructions" instead of "the rules file".

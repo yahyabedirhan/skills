@@ -147,7 +147,7 @@ Read every harness file the project holds, from the root down, against **set-up-
 - `overlaps`: an allow that covers a rule's command while the rule still holds. Propose narrowing it.
 - `extra`, a project deny or ask, and `gap`, what you can't judge: name each.
 
-Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes. Report project-level instructions with no `### Merges` sub-block, and propose the line Section E writes. Report a release page with a release branch whose `### Merges` line doesn't make `main` wait. Report a project with release signals and no `docs/agents/releasing.md`, and a `docs/agents/releasing.md` that disagrees with the user's shared release rules, and propose the update Section F writes.
+Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes. Report project-level instructions with no `### Merges` sub-block, and propose the line Section E writes. Report a release page with a release branch whose `### Merges` line doesn't make the default branch wait. Report a project with release signals and no `docs/agents/releasing.md`, and a `docs/agents/releasing.md` that disagrees with the user's shared release rules, and propose the update Section F writes.
 
 The audit passes with no `weakens`. Done when it passes, or the user has chosen to keep a `weakens` entry: then it stays failed, and the report names that entry.
 

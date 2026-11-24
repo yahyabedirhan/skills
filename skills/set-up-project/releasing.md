@@ -20,11 +20,11 @@ _When the project publishes to GitHub only, `/set-up-project` writes that in one
 
 ## Branches
 
-This section says where a version's work collects before it reaches `main`.
+This section says where a version's work collects before it reaches the default branch.
 
-- The release branch, `release/<version>`, opens from `main` when work on the version starts.
+- The release branch, `release/<version>`, opens from the default branch when work on the version starts.
 - The version's pull requests target the release branch, and agents merge them there.
-- The release pull request takes the release branch into `main`, and that merge waits for the maintainer's approval.
+- The release pull request takes the release branch into the default branch, and that merge waits for the maintainer's approval.
 
 _`/set-up-project` keeps this section only when the maintainer chose a release branch in its Section E._
 
@@ -34,7 +34,7 @@ This section lists the steps of every release, in order, so that a registry neve
 
 0. Check that the changelog, the version files, the latest tag and the latest GitHub release all name the same version, and finish any version that is behind first.
 1. Open one release pull request that sets the version in _the version files_ and renames `## Unreleased` in `CHANGELOG.md` to `## <version> (<YYYY-MM-DD>)`.
-   _With a release branch, make these changes on it, and open the release pull request from it into `main`._
+   _With a release branch, make these changes on it, and open the release pull request from it into the default branch._
    Before 1.0, a feature or a breaking change raises the middle number, and anything else raises the last number.
 2. Ask the maintainer in chat, naming the release pull request, and merge it after they approve.
 3. Tag the merged commit as `v<version>` and make its GitHub release, with the changelog section as the notes.

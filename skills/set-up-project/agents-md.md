@@ -19,7 +19,7 @@ This project's tools for the roles skills name; each row overrides the global on
 
 ### Merges
 
-[The branches whose merges wait for the maintainer's approval, such as "Merging into `main` waits for the maintainer's approval.", or "No branch waits for the maintainer's approval."]
+[The branches whose merges wait for the maintainer's approval, such as "Merging into `main` waits for the maintainer's approval." with the project's default branch, or "No branch waits for the maintainer's approval."]
 
 ### Issue tracker
 
