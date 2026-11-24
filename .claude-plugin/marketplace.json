@@ -130,6 +130,26 @@
       "category": "development"
     },
     {
+      "name": "3d-model-design",
+      "source": "./skills/3d-model-design",
+      "description": "Design, build, improve or assess a 3D model from reference images or models through a step-by-step delivery framework, with measured scoring against solved reference cameras, and references for the 3D vocabulary, tools, construction, materials and WebGL delivery.",
+      "author": {
+        "name": "Yahya Bedirhan Pak",
+        "url": "https://github.com/yahyabedirhan"
+      },
+      "homepage": "https://github.com/yahyabedirhan/skills/tree/main/skills/3d-model-design",
+      "repository": "https://github.com/yahyabedirhan/skills",
+      "license": "MIT",
+      "keywords": [
+        "3d",
+        "blender",
+        "three.js",
+        "modeling",
+        "webgl"
+      ],
+      "category": "development"
+    },
+    {
       "name": "swift-performance",
       "source": "./skills/swift-performance",
       "description": "Keep a Swift app fast on macOS: a build mode that keeps common performance mistakes out of SwiftUI and AppKit code, and a diagnosis mode that finds the cause of slowness, with a main-thread meter and a sample reader.",

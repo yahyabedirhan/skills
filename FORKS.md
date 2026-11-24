@@ -107,3 +107,13 @@ These skills are not forks, but they credit someone else's work.
 The daily workflows adapt the read-only recipes in [readdle/spark-cli-skills](https://github.com/readdle/spark-cli-skills) at [`507d26e`](https://github.com/readdle/spark-cli-skills/tree/507d26e/skills).
 No text is copied.
 License: MIT.
+
+### 3d-model-design
+
+The verification habit of reading every rendered image, and the audit of a figure from several angles, follow [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy) at [`1482e84`](https://github.com/wheresryan22/anatomy/tree/1482e8469b0a9e0d8cc18ea2740a01423d29ae80).
+No text is copied.
+License: MIT.
+
+Driving a live Blender through `blender-mcp` and starting from free HDRIs and textures follow [kevinbadi/blender-skills](https://github.com/kevinbadi/blender-skills) at [`b2f0f81`](https://github.com/kevinbadi/blender-skills/tree/b2f0f816d320b56ae86d52597a35284e0e6cc929).
+No text is copied.
+License: not stated in the repository.

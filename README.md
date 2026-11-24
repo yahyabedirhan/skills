@@ -11,7 +11,7 @@ They come in five [families](GLOSSARY.md#skills-and-families).
 Each family's skills are listed under [Skills](#skills) and explained under [How the skills work](#how-the-skills-work):
 
 - **[Effort workflow](#effort-workflow)**: take a feature from an idea to a merged pull request.
-- **[Design frameworks](#design-frameworks)**: design or explain code, systems and command-line interfaces step by step.
+- **[Design frameworks](#design-frameworks)**: design or explain code, systems, command-line interfaces and 3D models step by step.
 - **[Communication style](#communication-style)**: how an agent explains and reports its work.
 - **[Agent setup](#agent-setup)**: install, maintain and audit what your agents run with.
 - **[Daily workflows](#daily-workflows)**: everyday tasks outside the code, such as email and dictation.
@@ -47,6 +47,7 @@ Then install a plugin by name:
 | `low-level-design` | [low-level-design](skills/low-level-design/SKILL.md) | `claude plugin install low-level-design@yahyabedirhan-skills` |
 | `system-design` | [system-design](skills/system-design/SKILL.md) | `claude plugin install system-design@yahyabedirhan-skills` |
 | `cli-design` | [cli-design](skills/cli-design/SKILL.md) | `claude plugin install cli-design@yahyabedirhan-skills` |
+| `3d-model-design` | [3d-model-design](skills/3d-model-design/SKILL.md) | `claude plugin install 3d-model-design@yahyabedirhan-skills` |
 | `swift-performance` | [swift-performance](skills/swift-performance/SKILL.md) | `claude plugin install swift-performance@yahyabedirhan-skills` |
 | `email` | [email](skills/email/SKILL.md) | `claude plugin install email@yahyabedirhan-skills` |
 | `wispr-flow-dictionary` | [wispr-flow-dictionary](skills/wispr-flow-dictionary/SKILL.md) | `claude plugin install wispr-flow-dictionary@yahyabedirhan-skills` |
@@ -93,6 +94,7 @@ Each fork's full list of changes is in [FORKS.md](FORKS.md).
 | [low-level-design](skills/low-level-design/SKILL.md) | Designs, explains or redesigns code at the level of modules, classes, files and folders, with reference documents for the principles and patterns. Adapts [Hello Interview's low-level design lessons](https://www.hellointerview.com/learn/low-level-design/in-a-hurry/introduction), cited at the end of each reference document that uses them. | [`yahyabedirhan`](https://www.skills.sh/?q=yahyabedirhan) |
 | [system-design](skills/system-design/SKILL.md) | Designs, explains or redesigns a system at the level of services, data stores, APIs and scale, with reference documents for the core concepts. Adapts [Hello Interview's system design lessons](https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction), cited at the end of each document. | [`yahyabedirhan`](https://www.skills.sh/?q=yahyabedirhan) |
 | [cli-design](skills/cli-design/SKILL.md) | Designs, explains, audits or redesigns a command-line interface for the people, scripts and agents that call it, with a reference document for the shared conventions. Adapts the [Command Line Interface Guidelines](https://clig.dev/) and the POSIX Utility Conventions, cited at the end of each document. | [`yahyabedirhan`](https://www.skills.sh/?q=yahyabedirhan) |
+| [3d-model-design](skills/3d-model-design/SKILL.md) | Designs, builds, improves or assesses a 3D model of a real thing from reference images or reference models, as an experienced 3D artist: it solves each reference's camera, scores the model against the references with measured shape, material and line scores, and builds it part by part in Blender for WebGL and 3D Studio. Written from building a realistic station wagon; credits ideas from [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy) and [kevinbadi/blender-skills](https://github.com/kevinbadi/blender-skills). | [`yahyabedirhan`](https://www.skills.sh/?q=yahyabedirhan) |
 | [swift-performance](skills/swift-performance/SKILL.md) | Keeps a Swift app fast on macOS. A build mode keeps the common SwiftUI and AppKit mistakes out of the code, and a diagnosis mode finds the cause of slowness. Written from tracing a SwiftUI menu bar app's slow tab layout, keeping only the lessons that hold for nearly every macOS Swift app. | [`yahyabedirhan`](https://www.skills.sh/?q=yahyabedirhan) |
 
 ### Communication style
