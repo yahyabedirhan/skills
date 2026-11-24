@@ -230,7 +230,7 @@ def skill_problems(ctx: Context, folders: list) -> list:
     lock = (read_json(ctx.home / LOCK) or {}).get("skills")
     lock = {n: rec for n, rec in lock.items() if isinstance(rec, dict)} if isinstance(lock, dict) else {}
     problems = []
-    for entry in ctx.setup.installs.get("skills", []):
+    for entry in ctx.setup.entries("skills"):
         source = entry["source"]
         names = entry.get("skills") or sorted(n for n, rec in lock.items() if rec.get("source") == source)
         if not names:

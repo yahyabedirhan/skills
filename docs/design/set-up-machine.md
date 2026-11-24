@@ -100,7 +100,8 @@ skills/set-up-machine/
 
 ```text
 agent
-  Inspect   read setup/ through the pointer, each references/<h>.md for each harness found
+  Inspect   read setup/ through the pointer, each references/<h>.md for each harness found;
+            ask once per optional install group this machine hasn't answered (machine.json)
   Diff      per harness: shared file link or copy, own instructions, rule entries, hook wiring,
             memory off, declared config keys, plugins, skills and commands from installs.json
   Approve   one approval (installs-only diffs need none)
