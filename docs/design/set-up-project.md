@@ -49,7 +49,7 @@ skills/set-up-project/
 set-up-project
   1 check     verify.py exits 0, or run set-up-machine first
   2 explore   remote, AGENTS.md, CLAUDE.md, glossary, docs/agents/, triage, monorepo signals, release signals, shared release rules
-  3 ask       sections A to F, one answer each; F, merge approval, always runs
+  3 ask       sections A to F, one answer each; E, merge approval, always runs and comes before F, the release lifecycle
   4 write     one approval for the drafts, then the files
   5 audit     each project harness file against each row's samples → weakens | overlaps | extra | gap
             and the release page against the shared release rules, and the merges line against the release page

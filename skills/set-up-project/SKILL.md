@@ -37,7 +37,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `docs/assets/`: the folder standard's old image folder
 - Is the `triage` skill installed? It is when a `triage` skill folder sits beside this one, or `triage` is in your available skills. This decides whether Section B runs at all.
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
-- How the project releases today: look for a `CHANGELOG.md`, the files that hold a version, the tags and the GitHub releases that `gh release list` shows, anything that publishes to a registry, and release steps already written in `AGENTS.md` or another doc. A `package.json` without `"private": true`, a Homebrew cask and a release workflow each publish to a registry. These signals decide whether Section E runs.
+- How the project releases today: look for a `CHANGELOG.md`, the files that hold a version, the tags and the GitHub releases that `gh release list` shows, anything that publishes to a registry, and release steps already written in `AGENTS.md` or another doc. A `package.json` without `"private": true`, a Homebrew cask and a release workflow each publish to a registry. These signals decide whether Section F runs.
 - The user's shared release rules: when the pointer `~/.config/agents/source.md` names a workstation repo, read `<path-to-workstation-repo>/setup/releasing.md` if it exists. Without the pointer or the file, the seed template alone is the starting point.
 - Merge approval today: a line in `AGENTS.md` that names the branches whose merges wait, and any `release/*` branches.
 - A tool the project's own docs require for a role skills name, such as a worktree tool in a `docs/worktrees.md` or a session host its scripts assume. This decides whether Section D runs.
@@ -47,7 +47,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 Summarise what's present and what's missing. Then take the sections in order. One section, one answer, then the next.
 
 Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it.
-Skip Section B when `triage` isn't installed, Section C when there's no monorepo and no old `CONTEXT.md` or `CONTEXT-MAP.md`, Section D when the project names no tool for a role, and Section E when the project has never released and has no release signals.
+Skip Section B when `triage` isn't installed, Section C when there's no monorepo and no old `CONTEXT.md` or `CONTEXT-MAP.md`, Section D when the project names no tool for a role, and Section F when the project has never released and has no release signals.
 
 #### Section A: issue tracker
 
@@ -89,16 +89,7 @@ When exploration found a `docs/assets/` folder, propose moving each topic with `
 Recommend **none**.
 Ask only when exploration found a tool the project requires for a role: then propose an `## Environment defaults` row for it, which overrides the user's global row for this project. [agents-md.md](agents-md.md) > 'Environment defaults' says what may go there.
 
-#### Section E: release lifecycle
-
-Recommend writing `docs/agents/releasing.md` from [releasing.md](releasing.md), with the user's shared release rules applied over it, and filled with what exploration found: what a release ships, the release order and who runs each step.
-Keep the page short, with each step in a line or two.
-Leave out what the shared rules already say, such as the version rule, the changelog format and the tag and notes formatting, and leave out commands, install instructions and plans for a registry the project doesn't use yet.
-Where the project does something the shared rules don't say, keep the project's way and name it.
-Where the two disagree, show both and ask which one this project follows.
-When the release steps already live in another doc, propose moving them into `docs/agents/releasing.md` and leaving a pointer behind.
-
-#### Section F: merge approval
+#### Section E: merge approval
 
 > Explainer: This line names the branches whose merges wait for the maintainer to approve in chat. Merges into every other branch don't wait.
 
@@ -108,6 +99,16 @@ This section always runs, since a project without the line gets whatever default
 - An exploration project, whose versions are its own bookkeeping: no branch waits.
 - Any other project: `main` waits.
 
+#### Section F: release lifecycle
+
+Build on Section E's answer: when it made `main` wait and set up a release branch, keep the template's 'Branches' section, and otherwise remove it.
+Recommend writing `docs/agents/releasing.md` from [releasing.md](releasing.md), with the user's shared release rules applied over it, and filled with what exploration found: what a release ships, the release order and who runs each step.
+Keep the page short, with each step in a line or two.
+Leave out what the shared rules already say, such as the version rule, the changelog format and the tag and notes formatting, and leave out commands, install instructions and plans for a registry the project doesn't use yet.
+Where the project does something the shared rules don't say, keep the project's way and name it.
+Where the two disagree, show both and ask which one this project follows.
+When the release steps already live in another doc, propose moving them into `docs/agents/releasing.md` and leaving a pointer behind.
+
 ### 4. Confirm and write
 
 Show the user a draft of:
@@ -115,13 +116,13 @@ Show the user a draft of:
 - `AGENTS.md`: new from [agents-md.md](agents-md.md), or the existing one with the `## Agent skills` block and any `## Environment defaults` rows added, and each line of an existing `CLAUDE.md` moved into it
 - `CLAUDE.md`: the single line `@AGENTS.md`, or an existing symlink to `AGENTS.md` left as it is. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both forms give it the same text.
 - `.gitignore`: `.scratch/` and `.claude/worktrees/`, each only where it's missing
-- The contents of `docs/agents/issue-tracker.md` and `docs/agents/domain.md`, of `docs/agents/triage-labels.md` when `triage` is installed, and of `docs/agents/releasing.md` when Section E ran
+- The contents of `docs/agents/issue-tracker.md` and `docs/agents/domain.md`, of `docs/agents/triage-labels.md` when `triage` is installed, and of `docs/agents/releasing.md` when Section F ran
 - Each rename or merge of an old `CONTEXT.md` or `CONTEXT-MAP.md`, and the edits to the files that name them, when Section C proposed them
 - Each move out of `docs/assets/`, and the links it updates, when proposed
 
 Let them edit, then take one approval for all of it. Then write:
 
-1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran, the `### Releases` sub-block only when Section E ran, and the `### Merges` sub-block always.
+1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran, the `### Releases` sub-block only when Section F ran, and the `### Merges` sub-block always.
 2. Leave a `CLAUDE.md` that holds `@AGENTS.md` or is a symlink to `AGENTS.md` as it is, and add the missing `.gitignore` lines.
 3. Write the docs files using the seed templates in this skill folder as a starting point:
    - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
@@ -129,7 +130,7 @@ Let them edit, then take one approval for all of it. Then write:
    - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
    - [triage-labels.md](./triage-labels.md): label mapping, written only when `triage` is installed
    - [domain.md](./domain.md): domain doc consumer rules + layout
-   - [releasing.md](./releasing.md): the release lifecycle, written only when Section E ran
+   - [releasing.md](./releasing.md): the release lifecycle, written only when Section F ran
 
    For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
@@ -147,7 +148,7 @@ Read every harness file the project holds, from the root down, against **set-up-
 - `overlaps`: an allow that covers a rule's command while the rule still holds. Propose narrowing it.
 - `extra`, a project deny or ask, and `gap`, what you can't judge: name each.
 
-Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes. Report project-level instructions with no `### Merges` sub-block, and propose the line Section F writes. Report a release page with a release branch whose `### Merges` line doesn't make `main` wait. Report a project with release signals and no `docs/agents/releasing.md`, and a `docs/agents/releasing.md` that disagrees with the user's shared release rules, and propose the update Section E writes.
+Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes. Report project-level instructions with no `### Merges` sub-block, and propose the line Section E writes. Report a release page with a release branch whose `### Merges` line doesn't make `main` wait. Report a project with release signals and no `docs/agents/releasing.md`, and a `docs/agents/releasing.md` that disagrees with the user's shared release rules, and propose the update Section F writes.
 
 The audit passes with no `weakens`. Done when it passes, or the user has chosen to keep a `weakens` entry: then it stays failed, and the report names that entry.
 
