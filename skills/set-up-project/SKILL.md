@@ -94,13 +94,13 @@ Ask only when exploration found a tool the project requires for a role: then pro
 > Explainer: This line names the branches whose merges wait for the maintainer to approve in chat. Merges into every other branch don't wait.
 
 This section always runs, since a project without the line gets whatever default the user's global-level instructions set.
-Ask two things: which branches wait for the maintainer's approval before a merge, and whether the project collects each version's pull requests in a release branch, `release/<version>`.
+Ask two things: which branches wait for the maintainer's approval before a merge, and whether the project collects each version's pull requests in a release branch, as [releasing.md](releasing.md) > 'Branches' describes.
 Lead with the project's current answer when its `AGENTS.md` already has a `### Merges` line, else with what the user's shared release rules say, else with the default in the user's global-level instructions.
 Write the answer as the `### Merges` line, in the maintainer's words.
 
 #### Section F: release lifecycle
 
-Build on Section E's answer: when it made `main` wait and set up a release branch, keep the template's 'Branches' section, and otherwise remove it.
+Build on Section E's answer: keep the template's 'Branches' section when the maintainer chose a release branch, and remove it otherwise.
 Recommend writing `docs/agents/releasing.md` from [releasing.md](releasing.md), with the user's shared release rules applied over it, and filled with what exploration found: what a release ships, the release order and who runs each step.
 Keep the page short, with each step in a line or two.
 Leave out what the shared rules already say, such as the version rule, the changelog format and the tag and notes formatting, and leave out commands, install instructions and plans for a registry the project doesn't use yet.

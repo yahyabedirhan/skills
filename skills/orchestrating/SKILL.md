@@ -71,7 +71,7 @@ The session that hands over finishes its own work cleanly, through `/handover`. 
 
 ### Settle
 
-When the pull request's base waits for the user's approval, as the project-level instructions say, approving it is the user's only step; a pull request into a branch that doesn't wait, such as a release branch, has none. The agent merges it and settles the effort with `/settle-effort`, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. Workspaces and agent sessions stay open for the user to close.
+When the pull request's base waits for the user's approval, as the project-level instructions say, approving it is the user's only step; a pull request into a branch that doesn't wait has none. The agent merges it and settles the effort with `/settle-effort`, whether it is the orchestrator that delivered or any session told the pull request merged or to merge it. Workspaces and agent sessions stay open for the user to close.
 
 ### Why two sessions
 

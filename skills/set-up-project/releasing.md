@@ -20,9 +20,13 @@ _When the project publishes to GitHub only, `/set-up-project` writes that in one
 
 ## Branches
 
-_Keep this section only when the project uses a release branch._
-The next version's pull requests target `release/<version>`, and agents merge them there.
-The release pull request takes `release/<version>` into `main`, and that merge waits for the maintainer's approval.
+This section says where a version's work collects before it reaches `main`.
+
+- The release branch, `release/<version>`, opens from `main` when work on the version starts.
+- The version's pull requests target the release branch, and agents merge them there.
+- The release pull request takes the release branch into `main`, and that merge waits for the maintainer's approval.
+
+_`/set-up-project` keeps this section only when the maintainer chose a release branch in its Section E._
 
 ## Release order
 
