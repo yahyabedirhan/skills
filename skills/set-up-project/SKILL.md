@@ -93,11 +93,10 @@ Ask only when exploration found a tool the project requires for a role: then pro
 
 > Explainer: This line names the branches whose merges wait for the maintainer to approve in chat. Merges into every other branch don't wait.
 
-This section always runs, since a project without the line gets whatever default the user's global-level instructions set. Recommend from what exploration found:
-
-- A project with users, which releases versions: `main` waits, and each version's pull requests collect in a release branch, `release/<version>`, that one release pull request takes into `main`.
-- An exploration project, whose versions are its own bookkeeping: no branch waits.
-- Any other project: `main` waits.
+This section always runs, since a project without the line gets whatever default the user's global-level instructions set.
+Ask two things: which branches wait for the maintainer's approval before a merge, and whether the project collects each version's pull requests in a release branch, `release/<version>`.
+Lead with the project's current answer when its `AGENTS.md` already has a `### Merges` line, else with what the user's shared release rules say, else with the default in the user's global-level instructions.
+Write the answer as the `### Merges` line, in the maintainer's words.
 
 #### Section F: release lifecycle
 
