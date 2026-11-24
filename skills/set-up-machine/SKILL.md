@@ -13,7 +13,7 @@ Set up every selected harness and environment from its sources, as [Harnesses](#
 - **Workstation repo**, `<workstation-repo>`, found through the **pointer**, `~/.config/agents/source.md`, which names the repository and its clone. Each of these files is optional:
   - `setup/instructions.md`: the working agreement, the glossaries, which tool fills each role, and the personal workflow;
   - `setup/permissions.json`: the **personal permissions**, rows each harness carries beside the rule table's;
-  - `setup/installs.json`: the skills, plugins and commands every machine gets;
+  - `setup/installs.json`: the skills, plugins and commands every machine gets, and the groups they belong to, some of them optional;
   - `setup/harnesses.json`: where each harness's instructions and declared config are. Every harness can have a declared config, such as its default model.
 
 ## Outputs
@@ -23,6 +23,7 @@ Set up every selected harness and environment from its sources, as [Harnesses](#
 - Each harness's permission entries, from the rule table and the personal permissions.
 - The **pre-tool hook**, `scripts/pre_tool_hook.py`, run before every tool call.
 - The **pointer**, when it is missing or records none.
+- **This machine's answers** about optional install groups, `~/.config/agents/machine.json`, as `references/workstation.md` > `setup/installs.json` describes.
 - Each harness's **declared config**, from the `config` file `setup/harnesses.json` names for it: only the keys that file sets are merged into the harness's own config file, as `references/workstation.md` > 'Declared config' describes, and every other key stays the user's.
 - The skills and commands `setup/installs.json` lists for this machine, and its **plugins** in each harness it names: the plugins setup area, a plugin bundle or a standalone MCP server per entry.
 - Memory off in every harness.
@@ -49,6 +50,7 @@ Set up every selected harness and environment from its sources, as [Harnesses](#
    - **Harness references:** read each one, then the non-secret configuration fields it needs. Leave credentials, authentication stores and runtime state unread. Inspect each harness's optional `config` as its reference directs.
    - **Shared file and pointer:** read both. When the pointer names a workstation repo, read `references/workstation.md`, then `setup/instructions.md`, `setup/permissions.json`, `setup/installs.json` and `setup/harnesses.json` in `<path-to-workstation-repo>`, then each file `setup/harnesses.json` points at.
    - **Codex and Pi:** use one resolved Codex config home, and one resolved Pi agent folder, throughout setup and verification.
+   - **When `setup/installs.json` has an optional group this machine hasn't answered:** ask the user once per group, with its summary and entries, and record the answer in `~/.config/agents/machine.json` through the diff.
    - **When the pointer is missing:** read `references/workstation.md`, then ask the user once for `<workstation-repo>` and `<path-to-workstation-repo>`, or whether they have none. The diff writes the pointer, recording "none" too, so the next run doesn't ask.
    - **When the pointer records no workstation repo:** set up the machine as `references/workstation.md` says for a run without one, or, when the user names one now, as it says for rewriting the pointer.
    - **When the machine is remote or headless, such as a VPS:** read `references/remote-machine.md` first.
@@ -93,7 +95,7 @@ Cursor       FAIL          ok            ok            ok            ok         
 FAIL  Cursor instructions: ~/.cursor/rules/global-instructions.mdc is stale; generate it again
 ```
 
-- **`setup`:** the pointer and every `setup/` file are readable, and the shared file carries what `setup/instructions.md` generates. `n/a` when the pointer says there is no workstation repo.
+- **`setup`:** the pointer and every `setup/` file are readable, and the shared file carries what `setup/instructions.md` generates. `n/a` when the pointer says there is no workstation repo. `gap` when an optional install group has no answer on this machine yet.
 - **`rules`:** every sample of every rule-table row and personal permission gets its row's answer from the hook.
 - **A row per harness present.** Each cell is `ok`, `FAIL`, `gap` when the harness can't do it or the check can't see it, or `n/a` when the area doesn't apply. The columns:
   - `instructions`: the harness reads the shared file, its own instructions from `setup/harnesses.json` when named, and memory is off;

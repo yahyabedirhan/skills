@@ -5,8 +5,10 @@ or says there is none. This module reads the repo's `setup/` folder through it:
 
 - `setup/instructions.md`: the personal parts of the shared global instructions file;
 - `setup/permissions.json`: personal permissions, rows in the rule table's format;
-- `setup/installs.json`: the skills and plugins every machine gets;
+- `setup/installs.json`: the skills and plugins every machine gets, and its install groups;
 - `setup/harnesses.json`: where each harness's own instructions and declared config are.
+
+It also reads this machine's answers about optional install groups, `~/.config/agents/machine.json`.
 
 The steps: read the pointer, read each file that exists, and record a problem that names
 the file for each one that is missing or malformed. The verifier prints those problems as
@@ -24,6 +26,7 @@ from . import rules as rule_table
 
 POINTER = Path(".config/agents/source.md")
 SHARED = Path(".config/agents/AGENTS.md")
+MACHINE = Path(".config/agents/machine.json")  # this machine's answers: {"groups": {"<group>": true | false}}
 DEFAULTS, AGREEMENT, GLOSSARY, WORKFLOW = (
     "## Environment defaults", "## Working agreement", "## Glossary", "## Personal workflow")
 WORKFLOW_INTRO = ("Rules for how this person works that pass the team test. "
@@ -42,13 +45,29 @@ class Setup:
     problems: list = field(default_factory=list)  # one sentence per missing or malformed file
     rows: list = field(default_factory=list)  # personal permissions, as rule-table Rules
     installs: dict = field(default_factory=dict)  # `installs.json`, or {} without it
+    groups: dict = field(default_factory=dict)  # {group name: its `installs.json` definition}
+    answers: dict = field(default_factory=dict)  # {group name: true | false}, from `machine.json`
     # {harness: {"instructions" | "config": Path, "environments": {env: {"instructions" | "config": Path}}}}
     harness_files: dict = field(default_factory=dict)
 
+    def wanted(self, entry: dict) -> bool:
+        """Whether this machine takes an entry: one outside a group, or in a group that isn't optional, always;
+        one in an optional group only when this machine answered yes for that group."""
+        group = self.groups.get(entry.get("group"))
+        return not group or not group.get("optional") or self.answers.get(entry["group"]) is True
+
+    def unanswered(self) -> list:
+        """The optional groups this machine has no answer for yet, which machine setup asks about once."""
+        return sorted(n for n, g in self.groups.items() if g.get("optional") and n not in self.answers)
+
+    def entries(self, kind: str) -> list:
+        """The `installs.json` entries of one kind, such as `skills`, that this machine takes."""
+        return [e for e in self.installs.get(kind, []) if self.wanted(e)]
+
     def plugins(self, harness: str) -> list:
-        """The `installs.json` plugin entries for this harness that apply to this machine's OS."""
+        """The `installs.json` plugin entries for this harness that apply to this machine's OS and groups."""
         here = "darwin" if sys.platform == "darwin" else "linux"
-        return [e for e in self.installs.get("plugins", [])
+        return [e for e in self.entries("plugins")
                 if harness in e["harnesses"] and (not e.get("os") or any(OSES.get(o) == here for o in e["os"]))]
 
     def file(self, harness: str, kind: str, env: str | None = None) -> Path | None:
@@ -75,6 +94,8 @@ def load(home: Path, table: list, harness_ids) -> Setup:
     except ValueError as exc:
         setup.problems.append(str(exc))
     setup.installs = _installs(folder / "installs.json", set(harness_ids), setup.problems)
+    setup.groups = {g["name"]: g for g in setup.installs.get("groups", [])}
+    setup.answers = _answers(home / MACHINE, set(setup.groups), setup.problems)
     setup.harness_files = _harness_files(setup.clone, dict(harness_ids), setup.problems)
     return setup
 
@@ -260,7 +281,35 @@ def _installs(path: Path, harness_ids: set, problems: list) -> dict:
         if not isinstance(entry, dict) or not isinstance(entry.get("source"), str):
             problems.append(f"{path}: skills[{i}] needs a `source`, `<owner>/<repo>`")
             return {}
+    # A group is defined once, in `groups`, and an entry names it in `group`, so which groups exist,
+    # and which are optional, is read in one place.
+    names = set()
+    for i, group in enumerate(data.get("groups", [])):
+        ok = (isinstance(group, dict) and isinstance(group.get("name"), str) and isinstance(group.get("optional"), bool)
+              and isinstance(group.get("summary"), str) and set(group) <= {"name", "optional", "summary"})
+        if not ok or group["name"] in names:
+            problems.append(f"{path}: groups[{i}] needs a unique `name`, an `optional` true or false, and a `summary`")
+            return {}
+        names.add(group["name"])
+    for kind in ("skills", "plugins", "commands"):
+        for i, entry in enumerate(data.get(kind, [])):
+            if isinstance(entry, dict) and "group" in entry and entry["group"] not in names:
+                problems.append(f"{path}: {kind}[{i}] names the group {entry['group']!r}, which `groups` doesn't define")
+                return {}
     return data
+
+
+def _answers(path: Path, groups: set, problems: list) -> dict:
+    """This machine's answers about optional groups, from `machine.json`; {} when the file is missing.
+    An answer for a group `installs.json` no longer defines is kept, so a group that comes back isn't asked again."""
+    if not path.is_file():
+        return {}
+    data = _json(path, problems)
+    answers = data.get("groups", {}) if data else {}
+    if not isinstance(answers, dict) or not all(isinstance(v, bool) for v in answers.values()):
+        problems.append(f"{path}: `groups` must map each group name to true or false")
+        return {}
+    return answers
 
 
 def _harness_files(clone: Path, harness_ids: dict, problems: list) -> dict:

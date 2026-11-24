@@ -11,6 +11,7 @@ It reads the machine and writes nothing. The steps:
 2. Print two global lines:
    - setup: the pointer and `setup/` files are readable, and the shared global instructions
      file (`~/.config/agents/AGENTS.md`) carries what `setup/instructions.md` generates;
+     a gap when an optional install group has no answer in `~/.config/agents/machine.json`;
    - rules: every sample of every rule-table row and personal permission gets its row's
      answer from the hook's decision.
 3. Print one table: a row per harness environment found, where its folder exists or its CLI is on PATH, and a --home
@@ -103,6 +104,9 @@ def setup_line(ctx) -> tuple:
     problems = workstation.shared_file_problems(setup, ctx.home)
     if problems:
         return "FAIL", "; ".join(problems)
+    if setup.unanswered():
+        return "gap", (f"{setup.repository}: the shared file matches; this machine hasn't answered the optional groups "
+                       f"{', '.join(setup.unanswered())} in {workstation.MACHINE}: ask the user once")
     return "ok", f"{setup.repository}: the shared file matches setup/instructions.md"
 
 

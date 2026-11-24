@@ -180,9 +180,12 @@ What each machine installs beyond the harnesses' configuration: skills, plugins,
 
 ```json
 {
+  "groups": [
+    { "name": "<group>", "optional": true, "summary": "<what the group gives a machine>" }
+  ],
   "skills": [
     { "source": "<skills-repo>" },
-    { "source": "<owner>/<app-repo>", "skills": ["<skill>"] }
+    { "source": "<owner>/<app-repo>", "skills": ["<skill>"], "group": "<group>" }
   ],
   "ignore": ["<skill>"],
   "plugins": [
@@ -235,7 +238,11 @@ What each machine installs beyond the harnesses' configuration: skills, plugins,
   - Each harness reference's **Plugins** section says how it gets each kind, or names the gap.
 - **`commands`:** each entry has a `name`, a `check` (`<check-command>`) and an `install` (`<install-command>`). Run each as written, as a shell command in the home folder, never wrapped in `sh -c`, since the rule table's `shell-inline-command` row refuses that. Separate readiness from freshness. A presence-only `check` proves readiness, not latest. Compare the installed tool with its current upstream source before marking it `present`; include its documented update command in the diff when outdated.
 - **`target` and `os`:** optional arrays on any entry. `target` takes `local`, the machine the user sits at, and `remote`, a machine Inspect treats as remote or headless. `os` takes `macos` and `linux`. An entry applies when both match this machine; a field left out matches every machine. An entry that doesn't apply is an `n/a` line naming the field.
-- All four arrays are optional. Refuse the file, with a `gap` line and no installs from it, when it isn't valid JSON, an entry has an unknown key or misses a required one, or an `ignore` name is also one a `skills` entry installs, since a guessed entry could install the wrong thing.
+- **`groups`:** named sets of entries, each defined once with a `name`, `optional` (true or false) and a `summary` that says what the group gives a machine. Any entry may name one group in `group`. An entry outside a group, or in a group whose `optional` is false, applies to every machine its `target` and `os` match.
+  - An optional group installs only on a machine whose user said yes to it. Each machine keeps its own answers in `~/.config/agents/machine.json`, as `{"groups": {"<group>": true}}`.
+  - **When an optional group has no answer on this machine:** in Inspect, ask the user once per group, naming the group, its `summary` and its entries, and record the answer in `machine.json` with the diff, `added` too. Until then `verify.py` reports the group on its `setup` line as a `gap`.
+  - An entry of a group this machine said no to is an `n/a` line naming the group. Nothing installs, and nothing installed is removed: a group the user drops later leaves its installs for the user to remove.
+- All five arrays are optional. Refuse the file, with a `gap` line and no installs from it, when it isn't valid JSON, an entry has an unknown key or misses a required one, an entry names a group `groups` doesn't define, or an `ignore` name is also one a `skills` entry installs, since a guessed entry could install the wrong thing.
 
 Check each entry that applies, then put what's missing in the diff:
 

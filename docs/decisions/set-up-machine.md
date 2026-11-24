@@ -1819,3 +1819,14 @@ The spec is "Spec: every harness and project is set up and audited from the skil
   - Each session runs whatever `cloud_bootstrap.py` is on `main` when the environment rebuilds its snapshot, so a broken merge here breaks new sessions' setup until it is fixed.
   - The guard starts when the setup command has written the hook, not with the session's first command.
   - Whether a session loads the `~/.claude/CLAUDE.md` the bootstrap writes is checked in the first session after the line is pasted.
+
+## 2026-11-24: install groups, some optional, answered once per machine
+
+- **Status:** accepted
+- **Context:** Every `installs.json` entry installed on every machine its `target` and `os` matched. Some tools only some machines need, such as a secrets setup the user wants on a laptop and maybe not on a shared box, and the user wants to choose per machine.
+- **Options:** An `optional` field on each entry. Named groups, defined once, that entries point to.
+- **Choice and why:** Named groups. `installs.json` defines each group once, with a `name`, whether it is `optional` and a `summary`, and an entry names its group in `group`. Which groups exist, and which are optional, reads in one place, and the summary is the question the machine setup asks. A machine keeps its answers in `~/.config/agents/machine.json`, beside the pointer, so each machine has its own and the next run doesn't ask again.
+- **Consequences:**
+  - The verifier skips the entries of a group a machine said no to, and reports an unanswered optional group as a `gap` on its `setup` line.
+  - A group the user later says no to leaves what it installed, for the user to remove, since removing installs is outside this skill's diff.
+  - An entry that names an undefined group refuses the whole file, like any malformed entry.
