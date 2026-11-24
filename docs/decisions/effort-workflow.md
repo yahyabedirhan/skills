@@ -1312,3 +1312,11 @@ Older entries keep the skill names of their time, such as `close-effort` and `in
 - **Options:** None considered.
 - **Choice and why:** When the merge carried a version bump, `/settle-effort` follows the project's `docs/agents/releasing.md` from the step after the merge through its check. It hands the user each step the page gives them, and offers `/set-up-project` when the project has no page.
 - **Consequences:** The settle report names each part's version.
+
+## 2026-11-24: an effort's merge waits only when its base waits
+
+- **Status:** accepted
+- **Context:** Settle waited for the user to approve every effort pull request. With release branches, a version's pull requests collect in `release/<version>`, and only the release pull request reaches `main`.
+- **Options:** Keep the review of every effort pull request. Wait only where the project-level instructions say the base waits.
+- **Choice and why:** The agent merges an effort pull request into a branch that doesn't wait, and asks the user in chat, naming the pull request and its base, when it does. The user's review point moves to the release pull request.
+- **Consequences:** `/orchestrating` > 'Settle' and `/settle-effort` read the project-level instructions before the merge. `/settle-effort` now carries the merge guard that [2026-10-01: no merge guard in settle-effort](#2026-10-01-no-merge-guard-in-settle-effort) left to the global "ask before merging" rule, since that rule now leaves the decision to the project.

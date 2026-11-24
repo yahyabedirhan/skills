@@ -178,3 +178,14 @@ The spec is "Spec: every harness and project is set up and audited from the skil
 - **Consequences:**
   - A new release page starts short. An existing long page stays until someone trims it, because the audit checks a page against the shared rules, not its length.
   - Without shared release rules, the seed's one-line version rule in step 1 is the only version rule a page gets.
+
+## 2026-11-24: the project-level instructions name the merges that wait
+
+- **Status:** accepted
+- **Context:** Agents merged or waited by one global rule, and an exploration project needed no approval at all while a project with users needed it before a release reached `main`. A guardrail can't tell them apart, because `gh pr merge` doesn't show its base branch.
+- **Options:** One global rule. The project's own line, written by the project setup.
+- **Choice and why:** A `### Merges` sub-block in the project-level instructions names the branches whose merges wait for the maintainer's approval, or says that none do. Section F always runs, since a project without the line gets whatever default the user's own instructions set. A project with users gets `main` waiting and a release branch, so its release pull request is the one merge that waits.
+- **Consequences:**
+  - The audit reports a project without the line, and a release branch whose line doesn't make `main` wait.
+  - The release page template gains an optional 'Branches' section, and its merge step asks the maintainer in chat.
+  - The skill names `AGENTS.md` "the project-level instructions" instead of "the rules file".

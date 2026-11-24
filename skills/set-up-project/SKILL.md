@@ -1,17 +1,18 @@
 ---
 name: set-up-project
-description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, `AGENTS.md` as the one rules file with `CLAUDE.md` pointing at it, the issue tracker, triage labels, domain docs and release lifecycle, the folder standard's `.gitignore`, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
+description: Set up or audit a project for coding agents - the machine checked first with set-up-machine, `AGENTS.md` as the project-level instructions with `CLAUDE.md` pointing at it, the issue tracker, triage labels, domain docs, release lifecycle and merge approval, the folder standard's `.gitignore`, and project harness files kept allow-only. Use for a new or existing project, to audit a project's agent setup, or when a skill finds no issue tracker configured.
 ---
 
 # Set up project
 
 Scaffold and audit the per-repo configuration the skills assume:
 
-- **Rules file**: `AGENTS.md`, which every harness reads. `CLAUDE.md` is either the single line `@AGENTS.md` or a symlink to `AGENTS.md`. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both of those forms give it the same text.
+- **Project-level instructions**: `AGENTS.md`, which every harness reads. `CLAUDE.md` is either the single line `@AGENTS.md` or a symlink to `AGENTS.md`. Claude Code skips a project's `AGENTS.md` when a `CLAUDE.md` exists, and both of those forms give it the same text.
 - **Issue tracker**: where issues live. GitHub is the default, and local markdown also works out of the box.
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
 - **Release lifecycle**: `docs/agents/releasing.md` explains how the project releases a version, so everyone who releases it follows the same steps. It starts from the user's shared release rules when their workstation repo has them.
+- **Merge approval**: one line in the project-level instructions names the branches whose merges wait for the maintainer's approval, or says that none do.
 - **Folder standard**: the `.gitignore` lines of [orchestrating/folder-standard.md](../orchestrating/folder-standard.md)
 - **Allow-only project permissions**: the global rules are the machine's safety rails, and a project's own harness files only add convenience. The **audit** flags every project file that weakens a global rule.
 
@@ -38,6 +39,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
 - How the project releases today: look for a `CHANGELOG.md`, the files that hold a version, the tags and the GitHub releases that `gh release list` shows, anything that publishes to a registry, and release steps already written in `AGENTS.md` or another doc. A `package.json` without `"private": true`, a Homebrew cask and a release workflow each publish to a registry. These signals decide whether Section E runs.
 - The user's shared release rules: when the pointer `~/.config/agents/source.md` names a workstation repo, read `<path-to-workstation-repo>/setup/releasing.md` if it exists. Without the pointer or the file, the seed template alone is the starting point.
+- Merge approval today: a line in `AGENTS.md` that names the branches whose merges wait, and any `release/*` branches.
 - A tool the project's own docs require for a role skills name, such as a worktree tool in a `docs/worktrees.md` or a session host its scripts assume. This decides whether Section D runs.
 
 ### 3. Present findings and ask
@@ -96,6 +98,16 @@ Where the project does something the shared rules don't say, keep the project's 
 Where the two disagree, show both and ask which one this project follows.
 When the release steps already live in another doc, propose moving them into `docs/agents/releasing.md` and leaving a pointer behind.
 
+#### Section F: merge approval
+
+> Explainer: This line names the branches whose merges wait for the maintainer to approve in chat. Merges into every other branch don't wait.
+
+This section always runs, since a project without the line gets whatever default the user's global-level instructions set. Recommend from what exploration found:
+
+- A project with users, which releases versions: `main` waits, and each version's pull requests collect in a release branch, `release/<version>`, that one release pull request takes into `main`.
+- An exploration project, whose versions are its own bookkeeping: no branch waits.
+- Any other project: `main` waits.
+
 ### 4. Confirm and write
 
 Show the user a draft of:
@@ -109,7 +121,7 @@ Show the user a draft of:
 
 Let them edit, then take one approval for all of it. Then write:
 
-1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran, and the `### Releases` sub-block only when Section E ran.
+1. Edit `AGENTS.md`, never `CLAUDE.md`. If an `## Agent skills` block already exists, update its contents in place rather than appending a duplicate, and keep the user's edits around it. Include the `### Triage labels` sub-block only when `triage` is installed and Section B ran, the `### Releases` sub-block only when Section E ran, and the `### Merges` sub-block always.
 2. Leave a `CLAUDE.md` that holds `@AGENTS.md` or is a symlink to `AGENTS.md` as it is, and add the missing `.gitignore` lines.
 3. Write the docs files using the seed templates in this skill folder as a starting point:
    - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
@@ -135,7 +147,7 @@ Read every harness file the project holds, from the root down, against **set-up-
 - `overlaps`: an allow that covers a rule's command while the rule still holds. Propose narrowing it.
 - `extra`, a project deny or ask, and `gap`, what you can't judge: name each.
 
-Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes. Report a project with release signals and no `docs/agents/releasing.md`, and a `docs/agents/releasing.md` that disagrees with the user's shared release rules, and propose the update Section E writes.
+Also report each old `CONTEXT.md` or `CONTEXT-MAP.md` still in the repo, with the rename Section C proposes for it. Report a `docs/agents/issue-tracker.md` that has no `## Title prefixes` section, and propose the section step 3 writes. Report project-level instructions with no `### Merges` sub-block, and propose the line Section F writes. Report a release page with a release branch whose `### Merges` line doesn't make `main` wait. Report a project with release signals and no `docs/agents/releasing.md`, and a `docs/agents/releasing.md` that disagrees with the user's shared release rules, and propose the update Section E writes.
 
 The audit passes with no `weakens`. Done when it passes, or the user has chosen to keep a `weakens` entry: then it stays failed, and the report names that entry.
 
